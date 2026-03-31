@@ -376,6 +376,19 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border-radius: 0; }
+            .tabs { display: none; }
+            .content { max-height: none; overflow: visible; padding: 15px; }
+            .tab-content { display: block !important; }
+            .tab-content:not(.active) { display: none !important; }
+            .btn, button { display: none !important; }
+            .header { background: #a8d5e2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .total-box { background: #c9dff0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @keyframes fadeIn { from { opacity: 1; } to { opacity: 1; } }
+        }
     </style>
 </head>
 <body>
@@ -886,6 +899,37 @@
                 </div>
 
                 <div class="section">
+                    <h2>Bilan gestion de stock</h2>
+                    <div class="info-box">Valorisation des efforts et coûts liés au stockage sur l'ensemble des prestations enregistrées.</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Coût M.O. gestes stock</div>
+                            <div class="value" id="bilanCoutMOStock" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Coût espace stockage</div>
+                            <div class="value" id="bilanCoutEspace" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card" style="border-top-color: #c9b3d4;">
+                            <div class="label">Coût total stock</div>
+                            <div class="value" id="bilanCoutTotal" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card" style="border-top-color: #8bc98b;">
+                            <div class="label">CA attribuable stock</div>
+                            <div class="value" id="bilanCAStock" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card" style="border-top-color: #8bc98b;">
+                            <div class="label">Marge nette stock</div>
+                            <div class="value" id="bilanMargeStock" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Temps gestes stock</div>
+                            <div class="value" id="bilanTempsStock">0 h</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
                     <h2>Stats stock (mois)</h2>
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -899,6 +943,18 @@
                         <div class="stat-card">
                             <div class="label">Taux rotation</div>
                             <div class="value" id="statTauxRotation">0%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Valorisation stock</div>
+                            <div class="value" id="statValorisationStock" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Coût stockage (7j)</div>
+                            <div class="value" id="statCoutStockage" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Coût stockage (mois)</div>
+                            <div class="value" id="statCoutStockageMois" style="font-size: 1.3em;">0 CHF</div>
                         </div>
                     </div>
                 </div>
@@ -1594,13 +1650,59 @@
             const marge = ca - couts;
             const heuresCEA = prestationsSauvegardees.reduce((sum, p) => sum + p.heures * p.nbCEA, 0);
             const heuresMSP = prestationsSauvegardees.reduce((sum, p) => sum + p.heures * p.nbMSP, 0);
-            
+
             document.getElementById('statTotal').textContent = total;
             document.getElementById('statCA').textContent = ca.toFixed(2) + ' CHF';
             document.getElementById('statCouts').textContent = couts.toFixed(2) + ' CHF';
             document.getElementById('statMarge').textContent = marge.toFixed(2) + ' CHF';
             document.getElementById('statHeuresCEA').textContent = heuresCEA.toFixed(1) + ' h';
             document.getElementById('statHeuresMSP').textContent = heuresMSP.toFixed(1) + ' h';
+
+            updateBilanStock();
+        }
+
+        function updateBilanStock() {
+            const stockCategories = ['Stockage', 'Réception', 'Préparation', 'Expédition'];
+            let totalCoutEspace = 0;
+            let totalCoutMOStock = 0;
+            let totalCAStock = 0;
+            let totalTempsStockH = 0;
+
+            prestationsSauvegardees.forEach(p => {
+                totalCoutEspace += p.coutStockage || 0;
+
+                // Proportion du temps passé sur gestes liés au stock
+                let tempsTotal = 0;
+                let tempsStock = 0;
+                (p.gestes || []).forEach(g => {
+                    const cat = catalogueGestes.find(c => c.code === g.code);
+                    const t = (g.temps || 0) * (g.quantite || 1);
+                    tempsTotal += t;
+                    if (cat && stockCategories.includes(cat.categorie)) {
+                        tempsStock += t;
+                    }
+                });
+                totalTempsStockH += tempsStock / 3600;
+
+                const ratio = tempsTotal > 0 ? tempsStock / tempsTotal : 0;
+                const coutMOStock = ((p.coutMO || 0) + (p.coutEncadrement || 0)) * ratio;
+                totalCoutMOStock += coutMOStock;
+
+                // CA proraté au coût stock total / prix revient
+                const coutStockTotal = (p.coutStockage || 0) + coutMOStock;
+                const caStock = p.prixRevient > 0 ? p.prixVente * (coutStockTotal / p.prixRevient) : 0;
+                totalCAStock += caStock;
+            });
+
+            const totalCoutStock = totalCoutEspace + totalCoutMOStock;
+            const margeStock = totalCAStock - totalCoutStock;
+
+            document.getElementById('bilanCoutMOStock').textContent = totalCoutMOStock.toFixed(2) + ' CHF';
+            document.getElementById('bilanCoutEspace').textContent = totalCoutEspace.toFixed(2) + ' CHF';
+            document.getElementById('bilanCoutTotal').textContent = totalCoutStock.toFixed(2) + ' CHF';
+            document.getElementById('bilanCAStock').textContent = totalCAStock.toFixed(2) + ' CHF';
+            document.getElementById('bilanMargeStock').textContent = margeStock.toFixed(2) + ' CHF';
+            document.getElementById('bilanTempsStock').textContent = totalTempsStockH.toFixed(1) + ' h';
         }
 
         function addMouvement() {
@@ -1714,6 +1816,9 @@
             document.getElementById('statEntrees').textContent = entreesMois;
             document.getElementById('statSorties').textContent = sortiesMois;
             document.getElementById('statTauxRotation').textContent = tauxRotation + '%';
+            document.getElementById('statValorisationStock').textContent = totalValeur.toFixed(2) + ' CHF';
+            document.getElementById('statCoutStockage').textContent = coutStock7j.toFixed(2) + ' CHF';
+            document.getElementById('statCoutStockageMois').textContent = (totalQte * config.coutPalette * 30).toFixed(2) + ' CHF';
         }
 
         function renderMouvements() {
