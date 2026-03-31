@@ -376,6 +376,19 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border-radius: 0; }
+            .tabs { display: none; }
+            .content { max-height: none; overflow: visible; padding: 15px; }
+            .tab-content { display: block !important; }
+            .tab-content:not(.active) { display: none !important; }
+            .btn, button { display: none !important; }
+            .header { background: #a8d5e2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .total-box { background: #c9dff0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @keyframes fadeIn { from { opacity: 1; } to { opacity: 1; } }
+        }
     </style>
 </head>
 <body>
