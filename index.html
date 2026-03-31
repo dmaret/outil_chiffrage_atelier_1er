@@ -378,24 +378,81 @@
         }
 
         @media print {
+            body * { visibility: hidden; }
             body { background: white; padding: 0; }
-            .container { box-shadow: none; border-radius: 0; }
-            .tabs { display: none; }
-            .content { max-height: none; overflow: visible; padding: 15px; }
-            .tab-content { display: block !important; }
-            .tab-content:not(.active) { display: none !important; }
-            .btn, button { display: none !important; }
-            .header { background: #a8d5e2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .total-box { background: #c9dff0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            @keyframes fadeIn { from { opacity: 1; } to { opacity: 1; } }
+            #printZone, #printZone * { visibility: visible; }
+            #printZone { position: fixed; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
         }
+
+        /* Dark mode */
+        body.dark-mode { background: linear-gradient(135deg, #1a2535 0%, #2a1f35 100%); }
+        body.dark-mode .container { background: #1e2530; color: #cdd6e0; }
+        body.dark-mode .header { background: linear-gradient(135deg, #2a5a6e 0%, #4a3560 100%); color: #e0eef5; }
+        body.dark-mode .tabs { background: #151d28; border-bottom-color: #2a3a4a; }
+        body.dark-mode .tab { background: #151d28; color: #8aacbc; }
+        body.dark-mode .tab:hover { background: #1e2d3d; }
+        body.dark-mode .tab.active { background: #1e2530; color: #a8d5e2; border-bottom-color: #a8d5e2; }
+        body.dark-mode .section { background: #1a2535; border-left-color: #2a6a82; }
+        body.dark-mode .section h2 { color: #a8d5e2; }
+        body.dark-mode .section h3 { color: #8aacbc; }
+        body.dark-mode label { color: #cdd6e0; }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: #243040; border-color: #3a5060; color: #cdd6e0; }
+        body.dark-mode .stat-card { background: linear-gradient(135deg, #1a2535 0%, #1e2d3d 100%); }
+        body.dark-mode .stat-card .label { color: #8aacbc; }
+        body.dark-mode .stat-card .value { color: #a8d5e2; }
+        body.dark-mode table { background: #1a2535; }
+        body.dark-mode th { background: #2a6a82; color: #e0eef5; }
+        body.dark-mode td { border-bottom-color: #2a3a4a; color: #cdd6e0; }
+        body.dark-mode tr:hover { background: #1e2d3d; }
+        body.dark-mode .total-box { background: linear-gradient(135deg, #1e3a4f 0%, #2a2040 100%); }
+        body.dark-mode .info-box { background: linear-gradient(135deg, #1a2a35 0%, #251a35 100%); color: #8aacbc; }
+        body.dark-mode .cost-breakdown { background: #1a2535; border-color: #2a3a4a; }
+        body.dark-mode .cost-line { color: #8aacbc; border-bottom-color: #2a3a4a; }
+        body.dark-mode .prix-final { background: rgba(255,255,255,0.05); }
+        body.dark-mode .prix-final .label { color: #8aacbc; }
+        body.dark-mode .prix-final .value { color: #a8d5e2; }
+
+        /* PIN modal */
+        #pinModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; }
+        #pinModal.visible { display:flex; }
+        #pinModalBox { background:#fffef9; border-radius:16px; padding:40px; text-align:center; max-width:320px; width:90%; box-shadow:0 10px 40px rgba(0,0,0,0.3); }
+        #pinModalBox h2 { color:#6b8fa3; margin-bottom:16px; }
+        #pinInput { width:100%; padding:12px; border:2px solid #a8d5e2; border-radius:8px; font-size:1.4em; text-align:center; letter-spacing:6px; margin-bottom:16px; }
+        #pinError { color:#c0392b; font-size:0.85em; margin-bottom:10px; min-height:20px; }
+
+        /* Low margin alert */
+        #alerteMargeBasse { display:none; background:#f39c12; color:#fff; padding:10px 18px; border-radius:8px; margin-top:10px; font-weight:600; }
+
+        /* Stock min alert */
+        .stock-alerte { color:#e74c3c; font-weight:bold; }
+        .stock-alerte-badge { display:inline-block; background:#fde8e8; color:#c0392b; border:1px solid #e74c3c; border-radius:12px; padding:2px 8px; font-size:0.75em; margin-left:6px; }
+
+        /* Chart bars */
+        .chart-container { overflow-x:auto; margin-top:10px; }
+        .chart-bar-label { font-size:0.75em; fill:#5a7b8f; }
+        .chart-bar-value { font-size:0.7em; fill:#2d3e50; font-weight:bold; }
     </style>
 </head>
 <body>
+    <!-- PIN Modal -->
+    <div id="pinModal">
+        <div id="pinModalBox">
+            <h2>🔐 Accès protégé</h2>
+            <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Entrez votre code PIN pour continuer</p>
+            <input type="password" id="pinInput" placeholder="PIN" maxlength="8" onkeydown="if(event.key==='Enter') checkPin()">
+            <div id="pinError"></div>
+            <button class="btn btn-success" onclick="checkPin()" style="width:100%;margin-top:4px;">Confirmer</button>
+        </div>
+    </div>
+
+    <!-- Zone d'impression PDF -->
+    <div id="printZone" style="display:none;"></div>
+
     <div class="container">
-        <div class="header">
+        <div class="header" style="position:relative;">
             <h1>🏭 Outil Complet Atelier - La Pallanterie</h1>
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
+            <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
         </div>
 
         <div class="tabs">
@@ -406,6 +463,7 @@
             <button class="tab" onclick="switchTab('consommables')">🛒 Consommables</button>
             <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
             <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
+            <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
         </div>
 
         <div class="content">
@@ -539,6 +597,7 @@
                         <div class="label">💵 PRIX DE VENTE</div>
                         <div class="value"><span id="prixVente">0.00</span> CHF</div>
                     </div>
+                    <div id="alerteMargeBasse">⚠️ Attention : la marge est en dessous du seuil minimum configuré !</div>
                 </div>
 
                 <div style="margin-top: 25px; text-align: center;">
@@ -689,6 +748,15 @@
                     <h2>Valorisation FIFO</h2>
                     <div id="valorisationTable"></div>
                 </div>
+
+                <div class="section">
+                    <h2>Stocks minimums & alertes</h2>
+                    <div class="info-box">Définissez un stock minimum par référence. Une alerte rouge s'affiche si le stock passe en dessous.</div>
+                    <div id="stockMinTable"></div>
+                    <div style="margin-top:12px;">
+                        <button class="btn btn-success" onclick="exportStockCSV()">📥 Export CSV</button>
+                    </div>
+                </div>
             </div>
 
             <!-- ONGLET PARAMETRAGE -->
@@ -761,6 +829,14 @@
                                 <input type="number" id="margeDefaut" min="0" max="100" step="1" value="15" onchange="saveConfig()">
                                 <span class="unit">%</span>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Seuil marge minimum (%)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="seuilMargeMin" min="0" max="100" step="1" value="10" onchange="saveConfig(); calculateTotal()">
+                                <span class="unit">%</span>
+                            </div>
+                            <span class="help-text">Alerte orange si marge calculée en dessous de ce seuil</span>
                         </div>
                     </div>
                 </div>
@@ -866,6 +942,37 @@
                 </div>
             </div>
 
+            <!-- ONGLET CONFIG -->
+            <div id="config" class="tab-content">
+                <div class="section">
+                    <h2>Sauvegarde & Restauration</h2>
+                    <div class="info-box">Exportez toutes vos données (prestations, gestes, consommables, stock, config) en JSON, ou importez depuis une sauvegarde précédente.</div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
+                        <button class="btn btn-success" onclick="exportJSON()">📤 Exporter données (JSON)</button>
+                        <label class="btn btn-secondary" style="cursor:pointer;margin-top:8px;">
+                            📥 Importer données (JSON)
+                            <input type="file" accept=".json" style="display:none;" onchange="importJSON(this)">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Code PIN</h2>
+                    <div class="info-box">Si un PIN est défini, il sera demandé à chaque ouverture de l'application.</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nouveau PIN (4+ chiffres)</label>
+                            <input type="password" id="newPinInput" placeholder="Ex: 1234" maxlength="8" style="max-width:200px;">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+                        <button class="btn btn-success" onclick="setPin()">🔒 Définir PIN</button>
+                        <button class="btn btn-danger" onclick="removePin()">🔓 Supprimer PIN</button>
+                    </div>
+                    <div id="pinStatus" style="margin-top:10px;font-size:0.9em;color:#7a9db1;"></div>
+                </div>
+            </div>
+
             <!-- ONGLET STATS -->
             <div id="stats" class="tab-content">
                 <div class="section">
@@ -961,6 +1068,19 @@
                 </div>
 
                 <div class="section">
+                    <h2>Évolution CA & Coûts (6 derniers mois)</h2>
+                    <div class="chart-container">
+                        <svg id="caChart" width="100%" height="240" style="min-width:400px;"></svg>
+                    </div>
+                    <div id="caChartEmpty" style="text-align:center;color:#7a9db1;font-style:italic;margin-top:12px;">Aucune prestation enregistrée</div>
+                </div>
+
+                <div class="section">
+                    <h2>Top 5 prestations (marge CHF)</h2>
+                    <div id="top5Table"></div>
+                </div>
+
+                <div class="section">
                     <h2>Stats stock (mois)</h2>
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -1003,11 +1123,13 @@
             fraisGenerauxHoraire: 15,
             fraisGenerauxFixe: 50,
             margeDefaut: 15,
+            seuilMargeMin: 10,
             coutPalette: 2.5,
             coutRack: 1.2,
             surfaceRack: 0.8,
             capacitePalettes: 100
         };
+        let stockMins = {}; // {ref: minQte}
 
         // Bases de données
         let catalogueGestes = [
@@ -1071,8 +1193,9 @@
             const savedConsommables = localStorage.getItem('catalogueConsommables');
             const savedPrestations = localStorage.getItem('prestationsSauvegardees');
             const savedStock = localStorage.getItem('stockData');
-            
-            if (savedConfig) config = JSON.parse(savedConfig);
+            const savedStockMins = localStorage.getItem('stockMins');
+
+            if (savedConfig) { const c = JSON.parse(savedConfig); config = Object.assign(config, c); }
             if (savedCatalogue) catalogueGestes = JSON.parse(savedCatalogue);
             if (savedConsommables) catalogueConsommables = JSON.parse(savedConsommables);
             if (savedPrestations) prestationsSauvegardees = JSON.parse(savedPrestations);
@@ -1081,6 +1204,7 @@
                 mouvements = data.mouvements || [];
                 stockActuel = data.stockActuel || {};
             }
+            if (savedStockMins) stockMins = JSON.parse(savedStockMins);
             loadConfig();
         }
 
@@ -1090,6 +1214,7 @@
             localStorage.setItem('catalogueConsommables', JSON.stringify(catalogueConsommables));
             localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
             localStorage.setItem('stockData', JSON.stringify({mouvements, stockActuel}));
+            localStorage.setItem('stockMins', JSON.stringify(stockMins));
         }
 
         function loadConfig() {
@@ -1100,10 +1225,12 @@
             document.getElementById('fraisGenerauxHoraire').value = config.fraisGenerauxHoraire;
             document.getElementById('fraisGenerauxFixe').value = config.fraisGenerauxFixe;
             document.getElementById('margeDefaut').value = config.margeDefaut;
+            document.getElementById('seuilMargeMin').value = config.seuilMargeMin || 10;
             document.getElementById('coutPalette').value = config.coutPalette;
             document.getElementById('coutRack').value = config.coutRack;
             document.getElementById('surfaceRack').value = config.surfaceRack;
             document.getElementById('capacitePalettes').value = config.capacitePalettes;
+            updatePinStatus();
         }
 
         function saveConfig() {
@@ -1114,6 +1241,7 @@
             config.fraisGenerauxHoraire = parseFloat(document.getElementById('fraisGenerauxHoraire').value);
             config.fraisGenerauxFixe = parseFloat(document.getElementById('fraisGenerauxFixe').value);
             config.margeDefaut = parseFloat(document.getElementById('margeDefaut').value);
+            config.seuilMargeMin = parseFloat(document.getElementById('seuilMargeMin').value) || 0;
             saveToStorage();
             alert('✅ Configuration sauvegardée');
         }
@@ -1136,6 +1264,7 @@
                     fraisGenerauxHoraire: 15,
                     fraisGenerauxFixe: 50,
                     margeDefaut: 15,
+                    seuilMargeMin: 10,
                     coutPalette: 2.5,
                     coutRack: 1.2,
                     surfaceRack: 0.8,
@@ -1163,8 +1292,10 @@
                 updateStockStats();
                 renderMouvements();
                 renderValorisation();
+                renderStockMinTable();
             }
             else if (tabName === 'parametrage') loadConfig();
+            else if (tabName === 'config') { loadConfig(); updatePinStatus(); }
         }
 
         function addGesteLine() {
@@ -1404,6 +1535,18 @@
             document.getElementById('totalRevient').textContent = prixRevient.toFixed(2);
             document.getElementById('margeChf').textContent = margeChf.toFixed(2);
             document.getElementById('prixVente').textContent = prixVente.toFixed(2);
+
+            // Alerte marge basse
+            const seuilMin = config.seuilMargeMin || 0;
+            const alerteEl = document.getElementById('alerteMargeBasse');
+            if (alerteEl) {
+                if (margePourcent < seuilMin && prixRevient > 0) {
+                    alerteEl.style.display = 'block';
+                    alerteEl.textContent = `⚠️ Marge ${margePourcent}% en dessous du seuil minimum (${seuilMin}%) !`;
+                } else {
+                    alerteEl.style.display = 'none';
+                }
+            }
         }
 
         function calculateRatio() {
@@ -1633,10 +1776,15 @@
             let html = '';
             sorted.forEach(p => {
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
+                const margeChfVal = (p.prixVente - p.prixRevient).toFixed(2);
                 html += `<div style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap:wrap; gap:6px;">
                         <strong style="font-size: 1.1em; color: #6b8fa3;">${p.prestation}</strong>
-                        <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF">📄 PDF</button>
+                            <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
+                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                        </div>
                     </div>
                     <div style="font-size: 0.85em; color: #7a9db1; margin-bottom: 10px;">
                         📅 ${date} | 🏢 ${p.client} | 📋 ${p.reference} | 👥 ${p.nbCEA} CEA + ${p.nbMSP} MSP
@@ -1652,7 +1800,7 @@
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Marge</div>
-                            <div style="font-weight: bold; color: #6b8fa3;">${p.marge}%</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${p.marge}% (${margeChfVal} CHF)</div>
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Vente</div>
@@ -1661,7 +1809,7 @@
                     </div>
                 </div>`;
             });
-            
+
             container.innerHTML = html;
         }
 
@@ -1691,6 +1839,8 @@
 
             drawPieChart();
             updateBilanStock();
+            drawCAChart();
+            renderTop5();
         }
 
         function drawPieChart() {
@@ -1998,6 +2148,454 @@
                 renderValorisation();
             }
         }
+
+        // ============================================================
+        // FEATURE 1 : Export PDF d'une prestation
+        // ============================================================
+        function printPrestation(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const date = new Date(p.date).toLocaleDateString('fr-FR');
+            const margeChfVal = (p.prixVente - p.prixRevient).toFixed(2);
+
+            let gestesHtml = '';
+            (p.gestes || []).forEach(g => {
+                const tempsMin = (g.temps * g.quantite / 60).toFixed(1);
+                gestesHtml += `<tr><td>${g.code}</td><td>${g.description}</td><td>${g.quantite}</td><td>${g.temps}s</td><td>${tempsMin} min</td></tr>`;
+            });
+
+            const html = `
+                <div style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:30px;color:#2d3e50;">
+                    <div style="background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%);padding:25px;border-radius:12px;margin-bottom:25px;text-align:center;">
+                        <h1 style="margin:0;font-size:1.6em;color:#2d3e50;">🏭 Atelier La Pallanterie</h1>
+                        <p style="margin:5px 0 0;opacity:0.8;">Fiche de prestation</p>
+                    </div>
+
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+                        <tr><td style="padding:6px 10px;font-weight:bold;width:150px;">Client</td><td style="padding:6px 10px;">${p.client}</td>
+                            <td style="padding:6px 10px;font-weight:bold;width:150px;">Date</td><td style="padding:6px 10px;">${date}</td></tr>
+                        <tr><td style="padding:6px 10px;font-weight:bold;">Prestation</td><td style="padding:6px 10px;">${p.prestation}</td>
+                            <td style="padding:6px 10px;font-weight:bold;">Référence</td><td style="padding:6px 10px;">${p.reference}</td></tr>
+                        <tr><td style="padding:6px 10px;font-weight:bold;">Responsable</td><td style="padding:6px 10px;">${p.responsable || '-'}</td>
+                            <td style="padding:6px 10px;font-weight:bold;">Équipe</td><td style="padding:6px 10px;">${p.nbCEA} CEA + ${p.nbMSP} MSP</td></tr>
+                    </table>
+
+                    ${gestesHtml ? `<h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-top:20px;">Détail des gestes</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+                        <thead><tr style="background:#a8d5e2;"><th style="padding:8px;text-align:left;">Code</th><th style="padding:8px;text-align:left;">Description</th><th style="padding:8px;">Qté</th><th style="padding:8px;">Temps/u</th><th style="padding:8px;">Total</th></tr></thead>
+                        <tbody>${gestesHtml}</tbody>
+                    </table>` : ''}
+
+                    <h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-top:20px;">Décomposition des coûts</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+                        <tr><td style="padding:6px 10px;">Main d'œuvre CEA</td><td style="padding:6px 10px;text-align:right;">${(p.coutMO||0).toFixed(2)} CHF</td></tr>
+                        <tr><td style="padding:6px 10px;">Encadrement MSP</td><td style="padding:6px 10px;text-align:right;">${(p.coutEncadrement||0).toFixed(2)} CHF</td></tr>
+                        <tr><td style="padding:6px 10px;">Consommables</td><td style="padding:6px 10px;text-align:right;">${(p.coutConsommables||0).toFixed(2)} CHF</td></tr>
+                        <tr><td style="padding:6px 10px;">Stockage</td><td style="padding:6px 10px;text-align:right;">${(p.coutStockage||0).toFixed(2)} CHF</td></tr>
+                        <tr style="font-weight:bold;border-top:2px solid #a8d5e2;"><td style="padding:8px 10px;">Prix de revient</td><td style="padding:8px 10px;text-align:right;">${p.prixRevient.toFixed(2)} CHF</td></tr>
+                    </table>
+
+                    <div style="background:linear-gradient(135deg,#c9dff0 0%,#e0d4ed 100%);padding:20px;border-radius:10px;text-align:center;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
+                            <div><div style="font-size:0.8em;color:#5a7b8f;">Temps total</div><div style="font-size:1.4em;font-weight:bold;">${p.heures.toFixed(2)} h</div></div>
+                            <div><div style="font-size:0.8em;color:#5a7b8f;">Marge</div><div style="font-size:1.4em;font-weight:bold;">${p.marge}%</div></div>
+                            <div><div style="font-size:0.8em;color:#5a7b8f;">Marge CHF</div><div style="font-size:1.4em;font-weight:bold;">${margeChfVal} CHF</div></div>
+                        </div>
+                        <div style="font-size:0.9em;color:#5a7b8f;margin-bottom:5px;">PRIX DE VENTE</div>
+                        <div style="font-size:2.5em;font-weight:bold;color:#6b8fa3;">${p.prixVente.toFixed(2)} CHF</div>
+                    </div>
+                    <p style="text-align:center;font-size:0.75em;color:#aaa;margin-top:20px;">Généré le ${new Date().toLocaleDateString('fr-FR')} — Outil Atelier La Pallanterie</p>
+                </div>`;
+
+            const printZone = document.getElementById('printZone');
+            printZone.innerHTML = html;
+            printZone.style.display = 'block';
+            window.print();
+            printZone.style.display = 'none';
+            printZone.innerHTML = '';
+        }
+
+        // ============================================================
+        // FEATURE 2 : Duplication d'une prestation
+        // ============================================================
+        function duplicatePrestation(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+
+            // Switch to calculateur tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('.tab').classList.add('active'); // first tab
+            document.getElementById('calculateur').classList.add('active');
+
+            // Fill in the form fields
+            document.getElementById('client').value = p.client || '';
+            document.getElementById('prestation').value = p.prestation || '';
+            document.getElementById('reference').value = (p.reference || '') + ' (copie)';
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('nbCEA').value = p.nbCEA || 1;
+            document.getElementById('nbMSP').value = p.nbMSP || 0.5;
+            document.getElementById('responsable').value = p.responsable || '';
+            document.getElementById('margePercent').value = p.marge || config.margeDefaut;
+
+            // Clear and rebuild geste lines
+            document.getElementById('gestesContainer').innerHTML = '';
+            document.getElementById('consommablesContainer').innerHTML = '';
+            document.getElementById('stockageContainer').innerHTML = '';
+            gesteLines = [];
+            consommableLines = [];
+            stockageLines = [];
+
+            // Re-add geste lines from saved data
+            (p.gestes || []).forEach(g => {
+                const container = document.getElementById('gestesContainer');
+                const lineId = Date.now() + Math.random();
+                const line = document.createElement('div');
+                line.className = 'geste-line';
+                line.id = 'line-' + lineId;
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Geste</label>
+                        <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
+                            <option value="">Sélectionner...</option>
+                            ${catalogueGestes.map(cg =>
+                                `<option value="${cg.code}" ${cg.code === g.code ? 'selected' : ''}>[${cg.code}] ${cg.description}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Temps (sec)</label>
+                        <input type="number" id="temps-${lineId}" value="${g.temps}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="quantite-${lineId}" min="0" value="${g.quantite}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(line);
+                gesteLines.push(lineId);
+            });
+
+            if (gesteLines.length === 0) addGesteLine();
+            addConsommableLine();
+            addStockageLine();
+            calculateTotal();
+
+            alert('✅ Prestation dupliquée dans le calculateur. Modifiez et enregistrez.');
+        }
+
+        // ============================================================
+        // FEATURE 3 : Graphique CA par mois (6 derniers mois)
+        // ============================================================
+        function drawCAChart() {
+            const svg = document.getElementById('caChart');
+            const emptyEl = document.getElementById('caChartEmpty');
+            if (!svg) return;
+
+            if (prestationsSauvegardees.length === 0) {
+                svg.innerHTML = '';
+                if (emptyEl) emptyEl.style.display = 'block';
+                return;
+            }
+            if (emptyEl) emptyEl.style.display = 'none';
+
+            const now = new Date();
+            const months = [];
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push({ year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString('fr-FR', {month:'short', year:'2-digit'}) });
+            }
+
+            const caByMonth = months.map(m => {
+                return prestationsSauvegardees
+                    .filter(p => { const d = new Date(p.date); return d.getFullYear() === m.year && d.getMonth() === m.month; })
+                    .reduce((sum, p) => sum + p.prixVente, 0);
+            });
+            const coutsByMonth = months.map(m => {
+                return prestationsSauvegardees
+                    .filter(p => { const d = new Date(p.date); return d.getFullYear() === m.year && d.getMonth() === m.month; })
+                    .reduce((sum, p) => sum + p.prixRevient, 0);
+            });
+
+            const maxVal = Math.max(...caByMonth, ...coutsByMonth, 1);
+            const W = 560, H = 200, pad = 40, barW = 30;
+            const groupSpacing = (W - pad * 2) / 6;
+
+            let paths = '';
+            // Y axis
+            paths += `<line x1="${pad}" y1="10" x2="${pad}" y2="${H}" stroke="#d5e3ed" stroke-width="1"/>`;
+            paths += `<line x1="${pad}" y1="${H}" x2="${W-10}" y2="${H}" stroke="#d5e3ed" stroke-width="1"/>`;
+
+            months.forEach((m, i) => {
+                const x = pad + i * groupSpacing + groupSpacing / 2;
+                const caH = caByMonth[i] > 0 ? Math.round((caByMonth[i] / maxVal) * (H - 20)) : 0;
+                const coutH = coutsByMonth[i] > 0 ? Math.round((coutsByMonth[i] / maxVal) * (H - 20)) : 0;
+
+                // CA bar
+                paths += `<rect x="${x - barW - 4}" y="${H - caH}" width="${barW}" height="${caH}" fill="#a8d5e2" rx="3"/>`;
+                if (caByMonth[i] > 0) paths += `<text x="${x - barW/2 - 4}" y="${H - caH - 4}" text-anchor="middle" font-size="9" fill="#2d3e50">${caByMonth[i].toFixed(0)}</text>`;
+
+                // Coûts bar
+                paths += `<rect x="${x + 4}" y="${H - coutH}" width="${barW}" height="${coutH}" fill="#c9b3d4" rx="3"/>`;
+                if (coutsByMonth[i] > 0) paths += `<text x="${x + 4 + barW/2}" y="${H - coutH - 4}" text-anchor="middle" font-size="9" fill="#2d3e50">${coutsByMonth[i].toFixed(0)}</text>`;
+
+                // Month label
+                paths += `<text x="${x}" y="${H + 16}" text-anchor="middle" font-size="10" fill="#5a7b8f">${m.label}</text>`;
+            });
+
+            // Legend
+            paths += `<rect x="${pad}" y="${H+30}" width="12" height="12" fill="#a8d5e2" rx="2"/>`;
+            paths += `<text x="${pad+16}" y="${H+41}" font-size="10" fill="#5a7b8f">CA</text>`;
+            paths += `<rect x="${pad+60}" y="${H+30}" width="12" height="12" fill="#c9b3d4" rx="2"/>`;
+            paths += `<text x="${pad+76}" y="${H+41}" font-size="10" fill="#5a7b8f">Coûts</text>`;
+
+            svg.setAttribute('viewBox', `0 0 ${W} ${H+50}`);
+            svg.innerHTML = paths;
+        }
+
+        // ============================================================
+        // FEATURE 4 : Top 5 prestations par marge
+        // ============================================================
+        function renderTop5() {
+            const container = document.getElementById('top5Table');
+            if (!container) return;
+
+            if (prestationsSauvegardees.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucune prestation</div>';
+                return;
+            }
+
+            const sorted = [...prestationsSauvegardees]
+                .map(p => ({ ...p, margeChf: p.prixVente - p.prixRevient }))
+                .sort((a, b) => b.margeChf - a.margeChf)
+                .slice(0, 5);
+
+            let html = `<table><thead><tr>
+                <th>#</th><th>Prestation</th><th>Client</th><th>Date</th>
+                <th>CA (CHF)</th><th>Revient (CHF)</th><th>Marge CHF</th><th>Marge %</th>
+            </tr></thead><tbody>`;
+            sorted.forEach((p, i) => {
+                const date = new Date(p.date).toLocaleDateString('fr-FR');
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+                html += `<tr>
+                    <td>${medal}</td>
+                    <td><strong>${p.prestation}</strong></td>
+                    <td>${p.client}</td>
+                    <td>${date}</td>
+                    <td>${p.prixVente.toFixed(2)}</td>
+                    <td>${p.prixRevient.toFixed(2)}</td>
+                    <td style="color:#4a8966;font-weight:bold;">${p.margeChf.toFixed(2)}</td>
+                    <td>${p.marge}%</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // FEATURE 6 : Stock minimum & alertes
+        // ============================================================
+        function renderStockMinTable() {
+            const container = document.getElementById('stockMinTable');
+            if (!container) return;
+
+            const refs = Object.keys(stockActuel);
+            if (refs.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun stock enregistré</div>';
+                return;
+            }
+
+            let html = `<table><thead><tr>
+                <th>Référence</th><th>Stock actuel</th><th>Stock min</th><th>Statut</th><th>Action</th>
+            </tr></thead><tbody>`;
+
+            refs.forEach(ref => {
+                const current = stockActuel[ref].total;
+                const min = stockMins[ref] || 0;
+                const alerte = min > 0 && current < min;
+                const statutHtml = alerte
+                    ? `<span class="badge badge-danger">⚠️ Stock bas</span>`
+                    : `<span class="badge badge-success">OK</span>`;
+                html += `<tr ${alerte ? 'style="background:#fff5f5;"' : ''}>
+                    <td><strong ${alerte ? 'class="stock-alerte"' : ''}>${ref}${alerte ? ' <span class="stock-alerte-badge">!</span>' : ''}</strong></td>
+                    <td>${current.toFixed(0)}</td>
+                    <td><input type="number" min="0" step="1" value="${min}" style="width:80px;"
+                        onchange="updateStockMin('${ref}', this.value)"></td>
+                    <td>${statutHtml}</td>
+                    <td><button class="btn btn-small" onclick="saveStockMins()">💾</button></td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function updateStockMin(ref, value) {
+            stockMins[ref] = parseFloat(value) || 0;
+        }
+
+        function saveStockMins() {
+            saveToStorage();
+            renderStockMinTable();
+            alert('✅ Stocks minimums sauvegardés');
+        }
+
+        // ============================================================
+        // FEATURE 7 : Export CSV inventaire
+        // ============================================================
+        function exportStockCSV() {
+            const rows = [['Référence','Quantité','Lots','Valeur (CHF)','Prix moyen','Emplacement principal','Stock min','Alerte']];
+            Object.entries(stockActuel).forEach(([ref, data]) => {
+                const valeur = data.lots.reduce((s, l) => s + l.qte * l.prix, 0);
+                const prixMoy = data.total > 0 ? valeur / data.total : 0;
+                const emplacement = data.lots.length > 0 ? data.lots[0].emplacement : '';
+                const min = stockMins[ref] || 0;
+                const alerte = min > 0 && data.total < min ? 'OUI' : 'non';
+                rows.push([ref, data.total.toFixed(0), data.lots.length, valeur.toFixed(2), prixMoy.toFixed(2), emplacement, min, alerte]);
+            });
+
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventaire_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================================
+        // FEATURE 8 : Sauvegarde/restauration JSON
+        // ============================================================
+        function exportJSON() {
+            const data = {
+                version: 1,
+                exportDate: new Date().toISOString(),
+                config,
+                catalogueGestes,
+                catalogueConsommables,
+                prestationsSauvegardees,
+                mouvements,
+                stockActuel,
+                stockMins
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `atelier_backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importJSON(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!confirm('Importer ces données ? Cela remplacera toutes les données actuelles.')) return;
+
+                    if (data.config) config = Object.assign(config, data.config);
+                    if (data.catalogueGestes) catalogueGestes = data.catalogueGestes;
+                    if (data.catalogueConsommables) catalogueConsommables = data.catalogueConsommables;
+                    if (data.prestationsSauvegardees) prestationsSauvegardees = data.prestationsSauvegardees;
+                    if (data.mouvements) mouvements = data.mouvements;
+                    if (data.stockActuel) stockActuel = data.stockActuel;
+                    if (data.stockMins) stockMins = data.stockMins;
+
+                    saveToStorage();
+                    loadConfig();
+                    renderCatalogue();
+                    renderConsommablesTable();
+                    renderPrestations();
+                    updateStockStats();
+                    renderMouvements();
+                    renderValorisation();
+                    updateStats();
+                    alert('✅ Données importées avec succès !');
+                } catch(err) {
+                    alert('❌ Erreur lors de l\'importation : ' + err.message);
+                }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // ============================================================
+        // FEATURE 9 : Mode sombre
+        // ============================================================
+        function toggleDarkMode() {
+            const body = document.body;
+            const btn = document.getElementById('darkModeToggle');
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            btn.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('darkMode', isDark ? '1' : '0');
+        }
+
+        // Init dark mode from storage
+        if (localStorage.getItem('darkMode') === '1') {
+            document.body.classList.add('dark-mode');
+            const btn = document.getElementById('darkModeToggle');
+            if (btn) btn.textContent = '☀️';
+        }
+
+        // ============================================================
+        // FEATURE 10 : Code PIN
+        // ============================================================
+        function checkPin() {
+            const storedPin = localStorage.getItem('appPin');
+            const entered = document.getElementById('pinInput').value;
+            if (entered === storedPin) {
+                document.getElementById('pinModal').classList.remove('visible');
+                document.getElementById('pinInput').value = '';
+                document.getElementById('pinError').textContent = '';
+            } else {
+                document.getElementById('pinError').textContent = '❌ Code PIN incorrect';
+                document.getElementById('pinInput').value = '';
+                document.getElementById('pinInput').focus();
+            }
+        }
+
+        function setPin() {
+            const val = document.getElementById('newPinInput').value.trim();
+            if (val.length < 4) { alert('Le PIN doit faire au moins 4 caractères'); return; }
+            localStorage.setItem('appPin', val);
+            document.getElementById('newPinInput').value = '';
+            updatePinStatus();
+            alert('✅ PIN défini avec succès');
+        }
+
+        function removePin() {
+            if (confirm('Supprimer le code PIN ?')) {
+                localStorage.removeItem('appPin');
+                updatePinStatus();
+                alert('✅ PIN supprimé');
+            }
+        }
+
+        function updatePinStatus() {
+            const el = document.getElementById('pinStatus');
+            if (!el) return;
+            const pin = localStorage.getItem('appPin');
+            el.textContent = pin ? `🔒 PIN configuré (${pin.length} caractères)` : '🔓 Aucun PIN configuré';
+        }
+
+        // Show PIN modal on load if configured
+        (function initPin() {
+            const pin = localStorage.getItem('appPin');
+            if (pin) {
+                document.getElementById('pinModal').classList.add('visible');
+                setTimeout(() => document.getElementById('pinInput').focus(), 100);
+            }
+        })();
+
     </script>
 </body>
 </html>
