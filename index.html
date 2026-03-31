@@ -900,6 +900,28 @@
 
                 <div class="section">
                     <h2>Répartition des coûts</h2>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;color:#5a7b8f;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid #d5e3ed;user-select:none;">
+                            <input type="checkbox" id="pie-cea" checked onchange="drawPieChart()">
+                            <span style="width:12px;height:12px;border-radius:2px;background:#a8d5e2;display:inline-block;"></span> M.O. CEA
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;color:#5a7b8f;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid #d5e3ed;user-select:none;">
+                            <input type="checkbox" id="pie-msp" checked onchange="drawPieChart()">
+                            <span style="width:12px;height:12px;border-radius:2px;background:#c9b3d4;display:inline-block;"></span> Encadrement MSP
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;color:#5a7b8f;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid #d5e3ed;user-select:none;">
+                            <input type="checkbox" id="pie-consom" checked onchange="drawPieChart()">
+                            <span style="width:12px;height:12px;border-radius:2px;background:#f5c6a0;display:inline-block;"></span> Consommables
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;color:#5a7b8f;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid #d5e3ed;user-select:none;">
+                            <input type="checkbox" id="pie-stock" checked onchange="drawPieChart()">
+                            <span style="width:12px;height:12px;border-radius:2px;background:#a8e2c0;display:inline-block;"></span> Stockage
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;color:#5a7b8f;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid #d5e3ed;user-select:none;">
+                            <input type="checkbox" id="pie-frais" checked onchange="drawPieChart()">
+                            <span style="width:12px;height:12px;border-radius:2px;background:#e2c4a8;display:inline-block;"></span> Frais généraux
+                        </label>
+                    </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center; justify-content: center;">
                         <svg id="pieChart" width="220" height="220" viewBox="0 0 220 220"></svg>
                         <div id="pieLegend" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"></div>
@@ -1676,13 +1698,14 @@
             const legend = document.getElementById('pieLegend');
             const empty = document.getElementById('pieEmpty');
 
-            const slices = [
-                { label: 'M.O. CEA',        value: prestationsSauvegardees.reduce((s, p) => s + (p.coutMO || 0), 0),            color: '#a8d5e2' },
-                { label: 'Encadrement MSP',  value: prestationsSauvegardees.reduce((s, p) => s + (p.coutEncadrement || 0), 0),   color: '#c9b3d4' },
-                { label: 'Consommables',     value: prestationsSauvegardees.reduce((s, p) => s + (p.coutConsommables || 0), 0),  color: '#f5c6a0' },
-                { label: 'Stockage',         value: prestationsSauvegardees.reduce((s, p) => s + (p.coutStockage || 0), 0),      color: '#a8e2c0' },
-                { label: 'Frais généraux',   value: prestationsSauvegardees.reduce((s, p) => s + (p.prixRevient - (p.coutMO || 0) - (p.coutEncadrement || 0) - (p.coutConsommables || 0) - (p.coutStockage || 0)), 0), color: '#e2c4a8' },
-            ].filter(s => s.value > 0);
+            const allSlices = [
+                { id: 'pie-cea',    label: 'M.O. CEA',       value: prestationsSauvegardees.reduce((s, p) => s + (p.coutMO || 0), 0),            color: '#a8d5e2' },
+                { id: 'pie-msp',    label: 'Encadrement MSP', value: prestationsSauvegardees.reduce((s, p) => s + (p.coutEncadrement || 0), 0),   color: '#c9b3d4' },
+                { id: 'pie-consom', label: 'Consommables',    value: prestationsSauvegardees.reduce((s, p) => s + (p.coutConsommables || 0), 0),  color: '#f5c6a0' },
+                { id: 'pie-stock',  label: 'Stockage',        value: prestationsSauvegardees.reduce((s, p) => s + (p.coutStockage || 0), 0),      color: '#a8e2c0' },
+                { id: 'pie-frais',  label: 'Frais généraux',  value: prestationsSauvegardees.reduce((s, p) => s + (p.prixRevient - (p.coutMO || 0) - (p.coutEncadrement || 0) - (p.coutConsommables || 0) - (p.coutStockage || 0)), 0), color: '#e2c4a8' },
+            ];
+            const slices = allSlices.filter(s => s.value > 0 && document.getElementById(s.id)?.checked);
 
             const total = slices.reduce((s, sl) => s + sl.value, 0);
 
