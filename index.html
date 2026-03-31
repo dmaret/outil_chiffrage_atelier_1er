@@ -913,6 +913,18 @@
                             <div class="label">Taux rotation</div>
                             <div class="value" id="statTauxRotation">0%</div>
                         </div>
+                        <div class="stat-card">
+                            <div class="label">Valorisation stock</div>
+                            <div class="value" id="statValorisationStock" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Coût stockage (7j)</div>
+                            <div class="value" id="statCoutStockage" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Coût stockage (mois)</div>
+                            <div class="value" id="statCoutStockageMois" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1727,6 +1739,9 @@
             document.getElementById('statEntrees').textContent = entreesMois;
             document.getElementById('statSorties').textContent = sortiesMois;
             document.getElementById('statTauxRotation').textContent = tauxRotation + '%';
+            document.getElementById('statValorisationStock').textContent = totalValeur.toFixed(2) + ' CHF';
+            document.getElementById('statCoutStockage').textContent = coutStock7j.toFixed(2) + ' CHF';
+            document.getElementById('statCoutStockageMois').textContent = (totalQte * config.coutPalette * 30).toFixed(2) + ' CHF';
         }
 
         function renderMouvements() {
