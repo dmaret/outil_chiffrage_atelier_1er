@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outil Complet Atelier - La Pallanterie</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f4f8 0%, #f5e6f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #fffef9;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(150,150,180,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #a8d5e2 0%, #c9b3d4 100%);
+            color: #2d3e50;
+            padding: 35px;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 1.05em; }
+        
+        .tabs {
+            display: flex;
+            background: #f0f4f8;
+            border-bottom: 2px solid #d5e3ed;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 14px 18px;
+            text-align: center;
+            cursor: pointer;
+            background: #f0f4f8;
+            border: none;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #5a7b8f;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab:hover { background: #e3eef5; }
+        .tab.active {
+            background: #fffef9;
+            color: #6b8fa3;
+            border-bottom: 3px solid #a8d5e2;
+        }
+        
+        .content {
+            padding: 25px;
+            max-height: calc(100vh - 230px);
+            overflow-y: auto;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f5f9fc;
+            border-radius: 12px;
+            border-left: 4px solid #a8d5e2;
+        }
+        
+        .section h2 {
+            color: #6b8fa3;
+            margin-bottom: 18px;
+            font-size: 1.4em;
+        }
+        
+        .section h3 {
+            color: #7a9db1;
+            margin-bottom: 12px;
+            margin-top: 18px;
+            font-size: 1.1em;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 0.85em;
+        }
+        
+        input, select, textarea {
+            padding: 9px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95em;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #a8d5e2;
+        }
+        
+        .input-with-unit {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-with-unit input { flex: 1; }
+        
+        .unit {
+            color: #666;
+            font-weight: 600;
+            min-width: 50px;
+            font-size: 0.9em;
+        }
+        
+        .btn {
+            padding: 11px 22px;
+            background: #a8d5e2;
+            color: #2d3e50;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 8px;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #8fc4d6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(168, 213, 226, 0.4);
+        }
+        
+        .btn-secondary { background: #d4c5e0; }
+        .btn-secondary:hover { background: #c4b3d4; }
+        .btn-danger { background: #f5b8c0; }
+        .btn-danger:hover { background: #efa8b3; }
+        .btn-success { background: #b8e5d0; }
+        .btn-success:hover { background: #a3d9c2; }
+        .btn-small { padding: 5px 10px; font-size: 0.85em; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: #a8d5e2;
+            color: #2d3e50;
+            padding: 11px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        
+        td {
+            padding: 9px 11px;
+            border-bottom: 1px solid #e8f0f5;
+            font-size: 0.85em;
+        }
+        
+        tr:hover { background: #f7fcff; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #fff 0%, #f7fcff 100%);
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(168, 213, 226, 0.15);
+            text-align: center;
+            border-top: 4px solid #a8d5e2;
+        }
+        
+        .stat-card .label {
+            color: #7a9db1;
+            font-size: 0.8em;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .value {
+            font-size: 1.7em;
+            font-weight: bold;
+            color: #6b8fa3;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0e8f5 100%);
+            border-left: 4px solid #b8d4e8;
+            padding: 14px;
+            margin-bottom: 18px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #5a7b8f;
+        }
+        
+        .help-text {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        
+        .delete-btn {
+            padding: 7px 11px;
+            background: #f5b8c0;
+            color: #8b4a54;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85em;
+        }
+        
+        .delete-btn:hover { background: #efa8b3; }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        
+        .badge-success { background: #d4f0e3; color: #4a8966; }
+        .badge-warning { background: #fff4d6; color: #9d8050; }
+        .badge-danger { background: #ffd9de; color: #b5626e; }
+        .badge-info { background: #d9edf7; color: #5a8ba3; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+        
+        .geste-line, .consommable-line, .stock-line {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
+        }
+        
+        .geste-line { grid-template-columns: 2fr 1fr 1fr 80px; }
+        .consommable-line { grid-template-columns: 2fr 1fr 1fr 1fr 80px; }
+        .stock-line { grid-template-columns: 1.5fr 0.8fr 0.8fr 0.8fr 1fr 80px; }
+        
+        .total-box {
+            background: linear-gradient(135deg, #c9dff0 0%, #e0d4ed 100%);
+            color: #2d3e50;
+            padding: 22px;
+            border-radius: 12px;
+            margin-top: 18px;
+        }
+        
+        .total-box h3 {
+            font-size: 1.1em;
+            margin-bottom: 14px;
+            text-align: center;
+            color: #5a7b8f;
+        }
+        
+        .total-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+        }
+        
+        .total-item { text-align: center; }
+        .total-item .label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        .total-item .value {
+            font-size: 1.7em;
+            font-weight: bold;
+        }
+        
+        .prix-final {
+            background: rgba(255,255,255,0.5);
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 18px;
+            text-align: center;
+            border: 2px solid rgba(168, 213, 226, 0.3);
+        }
+        
+        .prix-final .label { 
+            font-size: 1.05em; 
+            margin-bottom: 8px;
+            color: #5a7b8f;
+        }
+        .prix-final .value { 
+            font-size: 2.8em; 
+            font-weight: bold;
+            color: #6b8fa3;
+        }
+        
+        .cost-breakdown {
+            background: #fffef9;
+            padding: 18px;
+            border-radius: 12px;
+            margin-top: 18px;
+            border: 1px solid #e8f0f5;
+        }
+        
+        .cost-breakdown h4 {
+            color: #6b8fa3;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8f0f5;
+            font-size: 1.1em;
+        }
+        
+        .cost-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px solid #f5f9fc;
+            font-size: 0.9em;
+            color: #5a7b8f;
+        }
+        
+        .cost-line.total {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #6b8fa3;
+            border-top: 2px solid #a8d5e2;
+            margin-top: 10px;
+            padding-top: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .geste-line, .consommable-line, .stock-line {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏭 Outil Complet Atelier - La Pallanterie</h1>
+            <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('calculateur')">💼 Calculateur</button>
+            <button class="tab" onclick="switchTab('stock')">📦 Gestion Stock</button>
+            <button class="tab" onclick="switchTab('parametrage')">⚙️ Paramétrage</button>
+            <button class="tab" onclick="switchTab('catalogue')">📚 Gestes</button>
+            <button class="tab" onclick="switchTab('consommables')">🛒 Consommables</button>
+            <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
+            <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
+        </div>
+
+        <div class="content">
+            <!-- ONGLET CALCULATEUR -->
+            <div id="calculateur" class="tab-content active">
+                <div class="section">
+                    <h2>Informations prestation</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Client</label>
+                            <input type="text" id="client" placeholder="Nom du client">
+                        </div>
+                        <div class="form-group">
+                            <label>Prestation</label>
+                            <input type="text" id="prestation" placeholder="Description">
+                        </div>
+                        <div class="form-group">
+                            <label>Référence</label>
+                            <input type="text" id="reference" placeholder="Référence">
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="date">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nb CEA</label>
+                            <input type="number" id="nbCEA" min="1" value="1" onchange="calculateTotal()">
+                        </div>
+                        <div class="form-group">
+                            <label>Nb MSP</label>
+                            <input type="number" id="nbMSP" min="0" step="0.1" value="0.5" onchange="calculateTotal()">
+                        </div>
+                        <div class="form-group">
+                            <label>Responsable</label>
+                            <input type="text" id="responsable" value="Davie Maret">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Gestes de production</h2>
+                    <div id="gestesContainer"></div>
+                    <button class="btn" onclick="addGesteLine()">+ Ajouter geste</button>
+                </div>
+
+                <div class="section">
+                    <h2>Consommables</h2>
+                    <div id="consommablesContainer"></div>
+                    <button class="btn" onclick="addConsommableLine()">+ Ajouter consommable</button>
+                </div>
+
+                <div class="section">
+                    <h2>Stockage</h2>
+                    <div id="stockageContainer"></div>
+                    <button class="btn" onclick="addStockageLine()">+ Période stockage</button>
+                </div>
+
+                <div class="section">
+                    <h2>Temps administratif</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mails (min)</label>
+                            <input type="number" id="tempsMailsMin" min="0" value="0" onchange="calculateTotal()">
+                        </div>
+                        <div class="form-group">
+                            <label>Impression (min)</label>
+                            <input type="number" id="tempsImpressionMin" min="0" value="0" onchange="calculateTotal()">
+                        </div>
+                        <div class="form-group">
+                            <label>Coordination (min)</label>
+                            <input type="number" id="tempsCoordMin" min="0" value="0" onchange="calculateTotal()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cost-breakdown">
+                    <h4>Décomposition des coûts</h4>
+                    <div class="cost-line">
+                        <span>Main d'œuvre CEA</span>
+                        <span id="coutMO">0.00 CHF</span>
+                    </div>
+                    <div class="cost-line">
+                        <span>Encadrement MSP</span>
+                        <span id="coutEncadrement">0.00 CHF</span>
+                    </div>
+                    <div class="cost-line">
+                        <span>Consommables</span>
+                        <span id="coutConsommables">0.00 CHF</span>
+                    </div>
+                    <div class="cost-line">
+                        <span>Stockage</span>
+                        <span id="coutStockage">0.00 CHF</span>
+                    </div>
+                    <div class="cost-line">
+                        <span>Frais généraux</span>
+                        <span id="coutFraisGeneraux">0.00 CHF</span>
+                    </div>
+                    <div class="cost-line total">
+                        <span>PRIX DE REVIENT</span>
+                        <span id="prixRevient">0.00 CHF</span>
+                    </div>
+                </div>
+
+                <div class="total-box">
+                    <h3>Valorisation financière</h3>
+                    <div class="total-grid">
+                        <div class="total-item">
+                            <div class="label">Temps total</div>
+                            <div class="value"><span id="totalHeures">0.00</span> h</div>
+                        </div>
+                        <div class="total-item">
+                            <div class="label">Prix revient</div>
+                            <div class="value"><span id="totalRevient">0.00</span> CHF</div>
+                        </div>
+                        <div class="total-item">
+                            <div class="label">Marge %</div>
+                            <div class="value">
+                                <input type="number" id="margePercent" min="0" max="100" value="15" 
+                                       onchange="calculateTotal()" 
+                                       style="width: 70px; text-align: center; background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; font-size: 0.9em; font-weight: bold; padding: 3px;">
+                            </div>
+                        </div>
+                        <div class="total-item">
+                            <div class="label">Marge CHF</div>
+                            <div class="value"><span id="margeChf">0.00</span></div>
+                        </div>
+                    </div>
+                    <div class="prix-final">
+                        <div class="label">💵 PRIX DE VENTE</div>
+                        <div class="value"><span id="prixVente">0.00</span> CHF</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 25px; text-align: center;">
+                    <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer</button>
+                    <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
+                    <button class="btn" onclick="window.print()">📄 Imprimer</button>
+                </div>
+            </div>
+
+            <!-- ONGLET GESTION STOCK -->
+            <div id="stock" class="tab-content">
+                <div class="info-box">
+                    <strong>Module Stock</strong> - Mouvements FIFO, valorisation, calcul ratio palette/rack, rotation et inventaires.
+                </div>
+
+                <div class="section">
+                    <h2>Configuration stockage</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Coût palette (CHF/j)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="coutPalette" step="0.1" value="2.5" onchange="saveStockConfig(); calculateRatio()">
+                                <span class="unit">CHF/j</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Coût rack (CHF/m²/j)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="coutRack" step="0.1" value="1.2" onchange="saveStockConfig(); calculateRatio()">
+                                <span class="unit">CHF/m²/j</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Surface rack (m²)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="surfaceRack" step="0.1" value="0.8" onchange="saveStockConfig(); calculateRatio()">
+                                <span class="unit">m²</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Capacité atelier</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="capacitePalettes" step="1" value="100" onchange="saveStockConfig()">
+                                <span class="unit">pal.</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Ratio palette vs rack</h3>
+                    <div style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 14px; border-radius: 8px; margin-top: 10px; border: 1px solid #e8f0f5;">
+                        <p><strong>Palette/jour:</strong> <span id="coutJourPalette">2.50</span> CHF</p>
+                        <p><strong>Rack/jour:</strong> <span id="coutJourRack">0.96</span> CHF</p>
+                        <p><strong>Ratio:</strong> Palette = <span id="ratioValue">2.60</span>× rack</p>
+                        <p style="margin-top: 8px; color: #7a9db1; font-size: 0.85em;">
+                            💡 <span id="recommandation">Rack recommandé pour séjours > 2j</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Mouvements stock (FIFO)</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="typeMouvement">
+                                <option value="entree">Entrée</option>
+                                <option value="sortie">Sortie</option>
+                                <option value="transfert">Transfert</option>
+                                <option value="inventaire">Inventaire</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Référence</label>
+                            <input type="text" id="refProduit" placeholder="Ex: COSM-001">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantité</label>
+                            <input type="number" id="qteMouvement" min="0" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Unité</label>
+                            <select id="uniteMouvement">
+                                <option value="palette">Palette</option>
+                                <option value="carton">Carton</option>
+                                <option value="piece">Pièce</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Emplacement</label>
+                            <select id="emplacementStock">
+                                <option value="palette">Zone palette</option>
+                                <option value="rack-A">Rack A</option>
+                                <option value="rack-B">Rack B</option>
+                                <option value="rack-C">Rack C</option>
+                                <option value="picking">Picking</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Prix unit. (CHF)</label>
+                            <input type="number" id="prixUnitaire" step="0.01" placeholder="Prix">
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="dateMouvement">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addMouvement()">➕ Enregistrer</button>
+                </div>
+
+                <div class="section">
+                    <h2>État du stock</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Stock actuel</div>
+                            <div class="value" id="stockActuel">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Valorisation</div>
+                            <div class="value" id="valorisationStock" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Occupation</div>
+                            <div class="value" id="tauxOccupation">0%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Rotation moy.</div>
+                            <div class="value" id="rotationMoyenne">0 j</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Coût 7j</div>
+                            <div class="value" id="coutStockage7j" style="font-size: 1.3em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Références</div>
+                            <div class="value" id="nbReferences">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Historique mouvements</h2>
+                    <div id="mouvementsTable"></div>
+                </div>
+
+                <div class="section">
+                    <h2>Valorisation FIFO</h2>
+                    <div id="valorisationTable"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET PARAMETRAGE -->
+            <div id="parametrage" class="tab-content">
+                <div class="info-box">
+                    Configuration des coûts et paramètres de calcul.
+                </div>
+
+                <div class="section">
+                    <h2>Coûts horaires</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Coût CEA (CHF/h)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="coutHoraireCEA" step="0.5" value="35" onchange="saveConfig(); calculateTotal()">
+                                <span class="unit">CHF/h</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Coût MSP (CHF/h)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="coutHoraireMSP" step="0.5" value="65" onchange="saveConfig(); calculateTotal()">
+                                <span class="unit">CHF/h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Frais généraux</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mode calcul</label>
+                            <select id="modeFraisGeneraux" onchange="saveConfig(); calculateTotal()">
+                                <option value="pourcentage">% main d'œuvre</option>
+                                <option value="horaire">Forfait horaire</option>
+                                <option value="fixe">Montant fixe</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Pourcentage (%)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="fraisGenerauxPourcent" step="1" value="25" onchange="saveConfig(); calculateTotal()">
+                                <span class="unit">%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Horaire (CHF/h)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="fraisGenerauxHoraire" step="0.5" value="15" onchange="saveConfig(); calculateTotal()">
+                                <span class="unit">CHF/h</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Fixe (CHF)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="fraisGenerauxFixe" step="10" value="50" onchange="saveConfig(); calculateTotal()">
+                                <span class="unit">CHF</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Marge par défaut</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Marge (%)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="margeDefaut" min="0" max="100" step="1" value="15" onchange="saveConfig()">
+                                <span class="unit">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="saveConfig()">💾 Sauvegarder</button>
+                    <button class="btn btn-secondary" onclick="resetConfig()">🔄 Réinitialiser</button>
+                </div>
+            </div>
+
+            <!-- ONGLET CATALOGUE GESTES -->
+            <div id="catalogue" class="tab-content">
+                <div class="section">
+                    <h2>Ajouter un nouveau geste</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Code geste</label>
+                            <input type="text" id="newCode" placeholder="Ex: REC-01">
+                        </div>
+                        <div class="form-group">
+                            <label>Catégorie</label>
+                            <select id="newCategorie">
+                                <option>Réception</option>
+                                <option>Contrôle</option>
+                                <option>Étiquetage</option>
+                                <option>Assemblage</option>
+                                <option>Stockage</option>
+                                <option>Préparation</option>
+                                <option>Expédition</option>
+                                <option>Administratif</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="newDescription" placeholder="Description du geste">
+                        </div>
+                        <div class="form-group">
+                            <label>Temps (secondes)</label>
+                            <input type="number" id="newTemps" min="1" placeholder="60">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Coefficient CEA</label>
+                            <input type="number" id="newCoef" min="0.1" step="0.1" value="1.0" placeholder="1.0">
+                        </div>
+                        <div class="form-group">
+                            <label>Notes / Commentaires</label>
+                            <input type="text" id="newNotes" placeholder="Ex: Avec transpalette, temps variable selon...">
+                            <span class="help-text">Description détaillée, remarques, conditions particulières</span>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addGeste()">➕ Ajouter au catalogue</button>
+                </div>
+
+                <div class="section">
+                    <h2>Catalogue gestes</h2>
+                    <input type="text" id="searchGeste" placeholder="🔍 Rechercher..." 
+                           onkeyup="filterCatalogue()" 
+                           style="width: 100%; padding: 10px; margin-bottom: 15px;">
+                    <div id="catalogueTable"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET CONSOMMABLES -->
+            <div id="consommables" class="tab-content">
+                <div class="section">
+                    <h2>Ajouter consommable</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nom</label>
+                            <input type="text" id="newConsomNom" placeholder="Ex: Étiquette A4">
+                        </div>
+                        <div class="form-group">
+                            <label>Unité</label>
+                            <select id="newConsomUnite">
+                                <option>pièce</option>
+                                <option>rouleau</option>
+                                <option>boîte</option>
+                                <option>paquet</option>
+                                <option>mètre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Prix (CHF)</label>
+                            <input type="number" id="newConsomPrix" step="0.01" placeholder="0.50">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addConsommable()">➕ Ajouter</button>
+                </div>
+
+                <div class="section">
+                    <h2>Liste consommables</h2>
+                    <div id="consommablesTable"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET PRESTATIONS -->
+            <div id="prestations" class="tab-content">
+                <div class="section">
+                    <h2>Prestations enregistrées</h2>
+                    <div id="prestationsList"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET STATS -->
+            <div id="stats" class="tab-content">
+                <div class="section">
+                    <h2>Vue d'ensemble</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Prestations</div>
+                            <div class="value" id="statTotal">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">CA prévisionnel</div>
+                            <div class="value" id="statCA" style="font-size: 1.4em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Coûts totaux</div>
+                            <div class="value" id="statCouts" style="font-size: 1.4em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Marge totale</div>
+                            <div class="value" id="statMarge" style="font-size: 1.4em;">0 CHF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Heures CEA</div>
+                            <div class="value" id="statHeuresCEA">0 h</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Heures MSP</div>
+                            <div class="value" id="statHeuresMSP">0 h</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Stats stock (mois)</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Entrées</div>
+                            <div class="value" id="statEntrees">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Sorties</div>
+                            <div class="value" id="statSorties">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Taux rotation</div>
+                            <div class="value" id="statTauxRotation">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        let config = {
+            coutHoraireCEA: 35,
+            coutHoraireMSP: 65,
+            modeFraisGeneraux: 'pourcentage',
+            fraisGenerauxPourcent: 25,
+            fraisGenerauxHoraire: 15,
+            fraisGenerauxFixe: 50,
+            margeDefaut: 15,
+            coutPalette: 2.5,
+            coutRack: 1.2,
+            surfaceRack: 0.8,
+            capacitePalettes: 100
+        };
+
+        // Bases de données
+        let catalogueGestes = [
+            {code: "REC-01", categorie: "Réception", description: "Décharger palette", temps: 180, coef: 1.2, notes: "Avec transpalette électrique"},
+            {code: "REC-02", categorie: "Réception", description: "Contrôle visuel", temps: 60, coef: 1.0, notes: "État général palette et emballages"},
+            {code: "REC-04", categorie: "Réception", description: "Ouvrir carton", temps: 20, coef: 1.0, notes: "Avec cutter sécurisé"},
+            {code: "REC-05", categorie: "Réception", description: "Compter articles", temps: 30, coef: 1.1, notes: "Par tranche de 10 unités"},
+            {code: "CTR-01", categorie: "Contrôle", description: "Contrôle visuel unitaire", temps: 10, coef: 1.0, notes: "Vérification état produit"},
+            {code: "ETI-01", categorie: "Étiquetage", description: "Imprimer étiquette", temps: 10, coef: 1.0, notes: "Imprimante thermique"},
+            {code: "ETI-02", categorie: "Étiquetage", description: "Coller étiquette", temps: 12, coef: 1.0, notes: "Position selon consignes client"},
+            {code: "ETI-03", categorie: "Étiquetage", description: "Retirer étiquette", temps: 25, coef: 1.2, notes: "Avec décapeur thermique si nécessaire"},
+            {code: "ASS-01", categorie: "Assemblage", description: "Kit 2 pièces", temps: 40, coef: 1.2, notes: "Assemblage simple, contrôle visuel final"},
+            {code: "ASS-02", categorie: "Assemblage", description: "Kit 3-5 pièces", temps: 90, coef: 1.3, notes: "Assemblage complexe selon fiche technique"},
+            {code: "ASS-03", categorie: "Assemblage", description: "Emballer film bulles", temps: 30, coef: 1.1, notes: "Protection renforcée produits fragiles"},
+            {code: "STO-01", categorie: "Stockage", description: "Déplacer palette", temps: 120, coef: 1.2, notes: "Vers zone stockage désignée"},
+            {code: "STO-02", categorie: "Stockage", description: "Ranger rayonnage", temps: 25, coef: 1.1, notes: "Respecter plan de rangement FIFO"},
+            {code: "STO-03", categorie: "Stockage", description: "Prélever stock", temps: 30, coef: 1.1, notes: "Vérifier référence et quantité"},
+            {code: "STO-04", categorie: "Stockage", description: "Inventaire", temps: 180, coef: 1.2, notes: "Comptage physique et saisie informatique"},
+            {code: "PRE-01", categorie: "Préparation", description: "Imprimer bon", temps: 30, coef: 1.0, notes: "Bon de préparation commande"},
+            {code: "PRE-02", categorie: "Préparation", description: "Picking", temps: 20, coef: 1.1, notes: "Prélèvement article selon bon"},
+            {code: "EXP-01", categorie: "Expédition", description: "Peser colis", temps: 15, coef: 1.0, notes: "Balance de précision"},
+            {code: "EXP-02", categorie: "Expédition", description: "Filmer palette", temps: 180, coef: 1.2, notes: "Film étirable machine ou manuel"},
+        ];
+
+        let catalogueConsommables = [
+            {nom: "Étiquette A4", unite: "pièce", prix: 0.15},
+            {nom: "Carton petit", unite: "pièce", prix: 1.20},
+            {nom: "Carton moyen", unite: "pièce", prix: 1.80},
+            {nom: "Carton grand", unite: "pièce", prix: 2.50},
+            {nom: "Film bulles", unite: "mètre", prix: 0.80},
+            {nom: "Scotch", unite: "rouleau", prix: 3.50},
+            {nom: "Sachet", unite: "pièce", prix: 0.05},
+            {nom: "Palette EUR", unite: "pièce", prix: 12.00},
+            {nom: "Film étirable", unite: "rouleau", prix: 18.00},
+        ];
+
+        let prestationsSauvegardees = [];
+        let mouvements = [];
+        let stockActuel = {};
+        let gesteLines = [];
+        let consommableLines = [];
+        let stockageLines = [];
+
+        // Chargement
+        loadFromStorage();
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('dateMouvement').valueAsDate = new Date();
+        document.getElementById('margePercent').value = config.margeDefaut;
+        renderCatalogue();
+        renderConsommablesTable();
+        calculateRatio();
+        updateStockStats();
+        updateStats();
+        addGesteLine();
+        addConsommableLine();
+        addStockageLine();
+
+        function loadFromStorage() {
+            const savedConfig = localStorage.getItem('configAtelier');
+            const savedCatalogue = localStorage.getItem('catalogueGestes');
+            const savedConsommables = localStorage.getItem('catalogueConsommables');
+            const savedPrestations = localStorage.getItem('prestationsSauvegardees');
+            const savedStock = localStorage.getItem('stockData');
+            
+            if (savedConfig) config = JSON.parse(savedConfig);
+            if (savedCatalogue) catalogueGestes = JSON.parse(savedCatalogue);
+            if (savedConsommables) catalogueConsommables = JSON.parse(savedConsommables);
+            if (savedPrestations) prestationsSauvegardees = JSON.parse(savedPrestations);
+            if (savedStock) {
+                const data = JSON.parse(savedStock);
+                mouvements = data.mouvements || [];
+                stockActuel = data.stockActuel || {};
+            }
+            loadConfig();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('configAtelier', JSON.stringify(config));
+            localStorage.setItem('catalogueGestes', JSON.stringify(catalogueGestes));
+            localStorage.setItem('catalogueConsommables', JSON.stringify(catalogueConsommables));
+            localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
+            localStorage.setItem('stockData', JSON.stringify({mouvements, stockActuel}));
+        }
+
+        function loadConfig() {
+            document.getElementById('coutHoraireCEA').value = config.coutHoraireCEA;
+            document.getElementById('coutHoraireMSP').value = config.coutHoraireMSP;
+            document.getElementById('modeFraisGeneraux').value = config.modeFraisGeneraux;
+            document.getElementById('fraisGenerauxPourcent').value = config.fraisGenerauxPourcent;
+            document.getElementById('fraisGenerauxHoraire').value = config.fraisGenerauxHoraire;
+            document.getElementById('fraisGenerauxFixe').value = config.fraisGenerauxFixe;
+            document.getElementById('margeDefaut').value = config.margeDefaut;
+            document.getElementById('coutPalette').value = config.coutPalette;
+            document.getElementById('coutRack').value = config.coutRack;
+            document.getElementById('surfaceRack').value = config.surfaceRack;
+            document.getElementById('capacitePalettes').value = config.capacitePalettes;
+        }
+
+        function saveConfig() {
+            config.coutHoraireCEA = parseFloat(document.getElementById('coutHoraireCEA').value);
+            config.coutHoraireMSP = parseFloat(document.getElementById('coutHoraireMSP').value);
+            config.modeFraisGeneraux = document.getElementById('modeFraisGeneraux').value;
+            config.fraisGenerauxPourcent = parseFloat(document.getElementById('fraisGenerauxPourcent').value);
+            config.fraisGenerauxHoraire = parseFloat(document.getElementById('fraisGenerauxHoraire').value);
+            config.fraisGenerauxFixe = parseFloat(document.getElementById('fraisGenerauxFixe').value);
+            config.margeDefaut = parseFloat(document.getElementById('margeDefaut').value);
+            saveToStorage();
+            alert('✅ Configuration sauvegardée');
+        }
+
+        function saveStockConfig() {
+            config.coutPalette = parseFloat(document.getElementById('coutPalette').value);
+            config.coutRack = parseFloat(document.getElementById('coutRack').value);
+            config.surfaceRack = parseFloat(document.getElementById('surfaceRack').value);
+            config.capacitePalettes = parseFloat(document.getElementById('capacitePalettes').value);
+            saveToStorage();
+        }
+
+        function resetConfig() {
+            if (confirm('Réinitialiser tous les paramètres?')) {
+                config = {
+                    coutHoraireCEA: 35,
+                    coutHoraireMSP: 65,
+                    modeFraisGeneraux: 'pourcentage',
+                    fraisGenerauxPourcent: 25,
+                    fraisGenerauxHoraire: 15,
+                    fraisGenerauxFixe: 50,
+                    margeDefaut: 15,
+                    coutPalette: 2.5,
+                    coutRack: 1.2,
+                    surfaceRack: 0.8,
+                    capacitePalettes: 100
+                };
+                loadConfig();
+                saveToStorage();
+                calculateTotal();
+                calculateRatio();
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            if (tabName === 'catalogue') renderCatalogue();
+            else if (tabName === 'consommables') renderConsommablesTable();
+            else if (tabName === 'prestations') renderPrestations();
+            else if (tabName === 'stats') updateStats();
+            else if (tabName === 'stock') {
+                updateStockStats();
+                renderMouvements();
+                renderValorisation();
+            }
+            else if (tabName === 'parametrage') loadConfig();
+        }
+
+        function addGesteLine() {
+            const container = document.getElementById('gestesContainer');
+            const lineId = Date.now() + Math.random();
+            
+            const line = document.createElement('div');
+            line.className = 'geste-line';
+            line.id = 'line-' + lineId;
+            
+            line.innerHTML = `
+                <div class="form-group">
+                    <label>Geste</label>
+                    <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
+                        <option value="">Sélectionner...</option>
+                        ${catalogueGestes.map(g => 
+                            `<option value="${g.code}">[${g.code}] ${g.description}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Temps (sec)</label>
+                    <input type="number" id="temps-${lineId}" readonly style="background: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                    <label>Quantité</label>
+                    <input type="number" id="quantite-${lineId}" min="0" value="1" onchange="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
+                </div>
+            `;
+            
+            container.appendChild(line);
+            gesteLines.push(lineId);
+        }
+
+        function removeGesteLine(lineId) {
+            document.getElementById('line-' + lineId)?.remove();
+            gesteLines = gesteLines.filter(id => id !== lineId);
+            calculateTotal();
+        }
+
+        function updateGesteDetails(selectEl, lineId) {
+            const code = selectEl.value;
+            const geste = catalogueGestes.find(g => g.code === code);
+            
+            if (geste) {
+                const tempsAjuste = Math.round(geste.temps * geste.coef);
+                document.getElementById('temps-' + lineId).value = tempsAjuste;
+            } else {
+                document.getElementById('temps-' + lineId).value = '';
+            }
+        }
+
+        function addConsommableLine() {
+            const container = document.getElementById('consommablesContainer');
+            const lineId = Date.now() + Math.random();
+            
+            const line = document.createElement('div');
+            line.className = 'consommable-line';
+            line.id = 'consom-' + lineId;
+            
+            line.innerHTML = `
+                <div class="form-group">
+                    <label>Consommable</label>
+                    <select onchange="updateConsommableDetails(this, ${lineId}); calculateTotal()">
+                        <option value="">Sélectionner...</option>
+                        ${catalogueConsommables.map((c, idx) => 
+                            `<option value="${idx}">${c.nom} (${c.prix} CHF)</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Prix (CHF)</label>
+                    <input type="number" id="prix-consom-${lineId}" readonly style="background: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                    <label>Quantité</label>
+                    <input type="number" id="qte-consom-${lineId}" min="0" value="1" onchange="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label>Total (CHF)</label>
+                    <input type="number" id="total-consom-${lineId}" readonly style="background: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="delete-btn" onclick="removeConsommableLine(${lineId})">🗑️</button>
+                </div>
+            `;
+            
+            container.appendChild(line);
+            consommableLines.push(lineId);
+        }
+
+        function removeConsommableLine(lineId) {
+            document.getElementById('consom-' + lineId)?.remove();
+            consommableLines = consommableLines.filter(id => id !== lineId);
+            calculateTotal();
+        }
+
+        function updateConsommableDetails(selectEl, lineId) {
+            const idx = selectEl.value;
+            if (idx !== '') {
+                const consom = catalogueConsommables[idx];
+                document.getElementById('prix-consom-' + lineId).value = consom.prix;
+            } else {
+                document.getElementById('prix-consom-' + lineId).value = '';
+            }
+            calculateTotal();
+        }
+
+        function addStockageLine() {
+            const container = document.getElementById('stockageContainer');
+            const lineId = Date.now() + Math.random();
+            
+            const line = document.createElement('div');
+            line.className = 'stock-line';
+            line.id = 'stock-' + lineId;
+            
+            line.innerHTML = `
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="type-stock-${lineId}" onchange="calculateTotal()">
+                        <option value="palette">Palette</option>
+                        <option value="m2">m²</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Quantité</label>
+                    <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="1" onchange="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label>Durée (j)</label>
+                    <input type="number" id="duree-stock-${lineId}" min="0" step="0.5" value="1" onchange="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label>Tarif/j</label>
+                    <input type="number" id="tarif-stock-${lineId}" readonly style="background: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                    <label>Total</label>
+                    <input type="number" id="total-stock-${lineId}" readonly style="background: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="delete-btn" onclick="removeStockageLine(${lineId})">🗑️</button>
+                </div>
+            `;
+            
+            container.appendChild(line);
+            stockageLines.push(lineId);
+            calculateTotal();
+        }
+
+        function removeStockageLine(lineId) {
+            document.getElementById('stock-' + lineId)?.remove();
+            stockageLines = stockageLines.filter(id => id !== lineId);
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let totalSecondes = 0;
+            
+            gesteLines.forEach(lineId => {
+                const temps = parseFloat(document.getElementById('temps-' + lineId)?.value || 0);
+                const quantite = parseFloat(document.getElementById('quantite-' + lineId)?.value || 0);
+                totalSecondes += temps * quantite;
+            });
+            
+            const mailsMin = parseFloat(document.getElementById('tempsMailsMin')?.value || 0);
+            const impressionMin = parseFloat(document.getElementById('tempsImpressionMin')?.value || 0);
+            const coordMin = parseFloat(document.getElementById('tempsCoordMin')?.value || 0);
+            
+            totalSecondes += (mailsMin + impressionMin + coordMin) * 60;
+            
+            const totalHeures = totalSecondes / 3600;
+            
+            const nbCEA = parseFloat(document.getElementById('nbCEA')?.value || 0);
+            const nbMSP = parseFloat(document.getElementById('nbMSP')?.value || 0);
+            
+            const coutMO = totalHeures * nbCEA * config.coutHoraireCEA;
+            const coutEncadrement = totalHeures * nbMSP * config.coutHoraireMSP;
+            
+            let coutConsommables = 0;
+            consommableLines.forEach(lineId => {
+                const prix = parseFloat(document.getElementById('prix-consom-' + lineId)?.value || 0);
+                const qte = parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 0);
+                const total = prix * qte;
+                if (document.getElementById('total-consom-' + lineId)) {
+                    document.getElementById('total-consom-' + lineId).value = total.toFixed(2);
+                }
+                coutConsommables += total;
+            });
+            
+            let coutStockage = 0;
+            stockageLines.forEach(lineId => {
+                const type = document.getElementById('type-stock-' + lineId)?.value;
+                const qte = parseFloat(document.getElementById('qte-stock-' + lineId)?.value || 0);
+                const duree = parseFloat(document.getElementById('duree-stock-' + lineId)?.value || 0);
+                
+                const tarif = type === 'palette' ? config.coutPalette : config.coutRack;
+                if (document.getElementById('tarif-stock-' + lineId)) {
+                    document.getElementById('tarif-stock-' + lineId).value = tarif.toFixed(2);
+                }
+                
+                const total = qte * duree * tarif;
+                if (document.getElementById('total-stock-' + lineId)) {
+                    document.getElementById('total-stock-' + lineId).value = total.toFixed(2);
+                }
+                coutStockage += total;
+            });
+            
+            let fraisGeneraux = 0;
+            if (config.modeFraisGeneraux === 'pourcentage') {
+                fraisGeneraux = (coutMO + coutEncadrement) * config.fraisGenerauxPourcent / 100;
+            } else if (config.modeFraisGeneraux === 'horaire') {
+                fraisGeneraux = totalHeures * config.fraisGenerauxHoraire;
+            } else {
+                fraisGeneraux = config.fraisGenerauxFixe;
+            }
+            
+            const prixRevient = coutMO + coutEncadrement + coutConsommables + coutStockage + fraisGeneraux;
+            
+            const margePourcent = parseFloat(document.getElementById('margePercent')?.value || 0);
+            const margeChf = prixRevient * margePourcent / 100;
+            const prixVente = prixRevient + margeChf;
+            
+            document.getElementById('totalHeures').textContent = totalHeures.toFixed(2);
+            document.getElementById('coutMO').textContent = coutMO.toFixed(2) + ' CHF';
+            document.getElementById('coutEncadrement').textContent = coutEncadrement.toFixed(2) + ' CHF';
+            document.getElementById('coutConsommables').textContent = coutConsommables.toFixed(2) + ' CHF';
+            document.getElementById('coutStockage').textContent = coutStockage.toFixed(2) + ' CHF';
+            document.getElementById('coutFraisGeneraux').textContent = fraisGeneraux.toFixed(2) + ' CHF';
+            document.getElementById('prixRevient').textContent = prixRevient.toFixed(2) + ' CHF';
+            document.getElementById('totalRevient').textContent = prixRevient.toFixed(2);
+            document.getElementById('margeChf').textContent = margeChf.toFixed(2);
+            document.getElementById('prixVente').textContent = prixVente.toFixed(2);
+        }
+
+        function calculateRatio() {
+            const coutPal = config.coutPalette;
+            const coutRackJour = config.coutRack * config.surfaceRack;
+            const ratio = coutPal / coutRackJour;
+            
+            document.getElementById('coutJourPalette').textContent = coutPal.toFixed(2);
+            document.getElementById('coutJourRack').textContent = coutRackJour.toFixed(2);
+            document.getElementById('ratioValue').textContent = ratio.toFixed(2);
+            
+            let reco = "";
+            if (ratio > 2) reco = "Rack recommandé pour séjours > 2 jours";
+            else if (ratio > 1.5) reco = "Rack recommandé pour séjours > 4 jours";
+            else reco = "Coûts équivalents";
+            document.getElementById('recommandation').textContent = reco;
+        }
+
+        function savePrestation() {
+            const client = document.getElementById('client').value;
+            const prestation = document.getElementById('prestation').value;
+            const reference = document.getElementById('reference').value;
+            
+            if (!client || !prestation || !reference) {
+                alert('Merci de remplir Client, Prestation et Référence');
+                return;
+            }
+            
+            const gestes = [];
+            gesteLines.forEach(lineId => {
+                const line = document.getElementById('line-' + lineId);
+                if (line) {
+                    const select = line.querySelector('select');
+                    const code = select?.value;
+                    if (code) {
+                        const temps = parseFloat(document.getElementById('temps-' + lineId).value || 0);
+                        const quantite = parseFloat(document.getElementById('quantite-' + lineId).value || 0);
+                        const geste = catalogueGestes.find(g => g.code === code);
+                        gestes.push({code, description: geste?.description || '', temps, quantite});
+                    }
+                }
+            });
+            
+            const prest = {
+                id: Date.now(),
+                date: document.getElementById('date').value,
+                client: client,
+                prestation: prestation,
+                reference: reference,
+                nbCEA: parseFloat(document.getElementById('nbCEA').value),
+                nbMSP: parseFloat(document.getElementById('nbMSP').value),
+                responsable: document.getElementById('responsable').value,
+                heures: parseFloat(document.getElementById('totalHeures').textContent),
+                prixRevient: parseFloat(document.getElementById('totalRevient').textContent),
+                marge: parseFloat(document.getElementById('margePercent').value),
+                prixVente: parseFloat(document.getElementById('prixVente').textContent),
+                gestes: gestes,
+                coutMO: parseFloat(document.getElementById('coutMO').textContent),
+                coutEncadrement: parseFloat(document.getElementById('coutEncadrement').textContent),
+                coutConsommables: parseFloat(document.getElementById('coutConsommables').textContent),
+                coutStockage: parseFloat(document.getElementById('coutStockage').textContent)
+            };
+            
+            prestationsSauvegardees.push(prest);
+            saveToStorage();
+            alert('✅ Prestation enregistrée');
+            resetCalculateur();
+        }
+
+        function resetCalculateur() {
+            document.getElementById('client').value = '';
+            document.getElementById('prestation').value = '';
+            document.getElementById('reference').value = '';
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('nbCEA').value = '1';
+            document.getElementById('nbMSP').value = '0.5';
+            document.getElementById('tempsMailsMin').value = '0';
+            document.getElementById('tempsImpressionMin').value = '0';
+            document.getElementById('tempsCoordMin').value = '0';
+            document.getElementById('margePercent').value = config.margeDefaut;
+            
+            document.getElementById('gestesContainer').innerHTML = '';
+            document.getElementById('consommablesContainer').innerHTML = '';
+            document.getElementById('stockageContainer').innerHTML = '';
+            gesteLines = [];
+            consommableLines = [];
+            stockageLines = [];
+            
+            addGesteLine();
+            addConsommableLine();
+            addStockageLine();
+            calculateTotal();
+        }
+
+        function renderCatalogue() {
+            const container = document.getElementById('catalogueTable');
+            
+            let html = `<table><thead><tr>
+                <th>Code</th><th>Catégorie</th><th>Description</th>
+                <th>Temps (sec)</th><th>Coef</th><th>Ajusté</th><th>Notes</th><th>Action</th>
+            </tr></thead><tbody id="catalogueBody">`;
+            
+            catalogueGestes.forEach(g => {
+                const tempsAjuste = Math.round(g.temps * g.coef);
+                const notes = g.notes || '';
+                html += `<tr>
+                    <td><strong>${g.code}</strong></td>
+                    <td>${g.categorie}</td>
+                    <td>${g.description}</td>
+                    <td>${g.temps}</td>
+                    <td>${g.coef}</td>
+                    <td><strong>${tempsAjuste}</strong></td>
+                    <td style="font-size: 0.8em; color: #7a9db1; font-style: italic;">${notes}</td>
+                    <td><button class="delete-btn btn-small" onclick="deleteGeste('${g.code}')">🗑️</button></td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function addGeste() {
+            const code = document.getElementById('newCode').value.trim();
+            const categorie = document.getElementById('newCategorie').value;
+            const description = document.getElementById('newDescription').value.trim();
+            const temps = parseFloat(document.getElementById('newTemps').value);
+            const coef = parseFloat(document.getElementById('newCoef').value);
+            const notes = document.getElementById('newNotes').value.trim();
+            
+            if (!code || !description || !temps) {
+                alert('Merci de remplir au minimum: Code, Description et Temps');
+                return;
+            }
+            
+            if (catalogueGestes.find(g => g.code === code)) {
+                alert('Ce code geste existe déjà. Utilise un autre code.');
+                return;
+            }
+            
+            catalogueGestes.push({
+                code: code,
+                categorie: categorie,
+                description: description,
+                temps: temps,
+                coef: coef,
+                notes: notes
+            });
+            
+            catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
+            
+            saveToStorage();
+            renderCatalogue();
+            
+            document.getElementById('newCode').value = '';
+            document.getElementById('newDescription').value = '';
+            document.getElementById('newTemps').value = '';
+            document.getElementById('newCoef').value = '1.0';
+            document.getElementById('newNotes').value = '';
+            
+            alert('✅ Geste ajouté au catalogue!');
+        }
+
+        function deleteGeste(code) {
+            if (confirm(`Supprimer le geste ${code}?`)) {
+                catalogueGestes = catalogueGestes.filter(g => g.code !== code);
+                saveToStorage();
+                renderCatalogue();
+            }
+        }
+
+        function filterCatalogue() {
+            const search = document.getElementById('searchGeste').value.toLowerCase();
+            const rows = document.querySelectorAll('#catalogueBody tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
+            });
+        }
+
+        function addConsommable() {
+            const nom = document.getElementById('newConsomNom').value.trim();
+            const unite = document.getElementById('newConsomUnite').value;
+            const prix = parseFloat(document.getElementById('newConsomPrix').value);
+            
+            if (!nom || !prix) {
+                alert('Merci de remplir Nom et Prix');
+                return;
+            }
+            
+            catalogueConsommables.push({nom, unite, prix});
+            saveToStorage();
+            renderConsommablesTable();
+            
+            document.getElementById('newConsomNom').value = '';
+            document.getElementById('newConsomPrix').value = '';
+            alert('✅ Consommable ajouté');
+        }
+
+        function renderConsommablesTable() {
+            const container = document.getElementById('consommablesTable');
+            
+            let html = `<table><thead><tr>
+                <th>Nom</th><th>Unité</th><th>Prix (CHF)</th>
+            </tr></thead><tbody>`;
+            
+            catalogueConsommables.forEach((c, idx) => {
+                html += `<tr>
+                    <td>${c.nom}</td>
+                    <td>${c.unite}</td>
+                    <td>${c.prix.toFixed(2)}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderPrestations() {
+            const container = document.getElementById('prestationsList');
+            
+            if (prestationsSauvegardees.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucune prestation</div>';
+                return;
+            }
+            
+            const sorted = [...prestationsSauvegardees].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            let html = '';
+            sorted.forEach(p => {
+                const date = new Date(p.date).toLocaleDateString('fr-FR');
+                html += `<div style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <strong style="font-size: 1.1em; color: #6b8fa3;">${p.prestation}</strong>
+                        <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                    </div>
+                    <div style="font-size: 0.85em; color: #7a9db1; margin-bottom: 10px;">
+                        📅 ${date} | 🏢 ${p.client} | 📋 ${p.reference} | 👥 ${p.nbCEA} CEA + ${p.nbMSP} MSP
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.75em; color: #7a9db1;">Temps</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${p.heures.toFixed(1)}h</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.75em; color: #7a9db1;">Revient</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${p.prixRevient.toFixed(2)} CHF</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.75em; color: #7a9db1;">Marge</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${p.marge}%</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.75em; color: #7a9db1;">Vente</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${p.prixVente.toFixed(2)} CHF</div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function deletePrestation(id) {
+            if (confirm('Supprimer cette prestation?')) {
+                prestationsSauvegardees = prestationsSauvegardees.filter(p => p.id !== id);
+                saveToStorage();
+                renderPrestations();
+                updateStats();
+            }
+        }
+
+        function updateStats() {
+            const total = prestationsSauvegardees.length;
+            const ca = prestationsSauvegardees.reduce((sum, p) => sum + p.prixVente, 0);
+            const couts = prestationsSauvegardees.reduce((sum, p) => sum + p.prixRevient, 0);
+            const marge = ca - couts;
+            const heuresCEA = prestationsSauvegardees.reduce((sum, p) => sum + p.heures * p.nbCEA, 0);
+            const heuresMSP = prestationsSauvegardees.reduce((sum, p) => sum + p.heures * p.nbMSP, 0);
+            
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statCA').textContent = ca.toFixed(2) + ' CHF';
+            document.getElementById('statCouts').textContent = couts.toFixed(2) + ' CHF';
+            document.getElementById('statMarge').textContent = marge.toFixed(2) + ' CHF';
+            document.getElementById('statHeuresCEA').textContent = heuresCEA.toFixed(1) + ' h';
+            document.getElementById('statHeuresMSP').textContent = heuresMSP.toFixed(1) + ' h';
+        }
+
+        function addMouvement() {
+            const type = document.getElementById('typeMouvement').value;
+            const ref = document.getElementById('refProduit').value.trim();
+            const qte = parseFloat(document.getElementById('qteMouvement').value);
+            const unite = document.getElementById('uniteMouvement').value;
+            const emplacement = document.getElementById('emplacementStock').value;
+            const prix = parseFloat(document.getElementById('prixUnitaire').value || 0);
+            const date = document.getElementById('dateMouvement').value;
+            
+            if (!ref || qte <= 0) {
+                alert('Merci de remplir Référence et Quantité');
+                return;
+            }
+            
+            const mouvement = {
+                id: Date.now(),
+                type: type,
+                date: date,
+                ref: ref,
+                qte: qte,
+                unite: unite,
+                emplacement: emplacement,
+                prix: prix
+            };
+            
+            mouvements.push(mouvement);
+            
+            if (type === 'entree') {
+                if (!stockActuel[ref]) {
+                    stockActuel[ref] = {lots: [], total: 0};
+                }
+                stockActuel[ref].lots.push({date: date, qte: qte, prix: prix, emplacement: emplacement});
+                stockActuel[ref].total += qte;
+            } else if (type === 'sortie') {
+                if (stockActuel[ref]) {
+                    let reste = qte;
+                    while (reste > 0 && stockActuel[ref].lots.length > 0) {
+                        const lot = stockActuel[ref].lots[0];
+                        if (lot.qte <= reste) {
+                            reste -= lot.qte;
+                            stockActuel[ref].lots.shift();
+                        } else {
+                            lot.qte -= reste;
+                            reste = 0;
+                        }
+                    }
+                    stockActuel[ref].total -= qte;
+                    if (stockActuel[ref].total <= 0) {
+                        delete stockActuel[ref];
+                    }
+                }
+            }
+            
+            saveToStorage();
+            updateStockStats();
+            renderMouvements();
+            renderValorisation();
+            
+            document.getElementById('refProduit').value = '';
+            document.getElementById('qteMouvement').value = '1';
+            document.getElementById('prixUnitaire').value = '';
+            
+            alert('✅ Mouvement enregistré');
+        }
+
+        function updateStockStats() {
+            let totalQte = 0;
+            let totalValeur = 0;
+            let nbRefs = Object.keys(stockActuel).length;
+            
+            Object.values(stockActuel).forEach(ref => {
+                totalQte += ref.total;
+                ref.lots.forEach(lot => {
+                    totalValeur += lot.qte * lot.prix;
+                });
+            });
+            
+            const occupation = (totalQte / config.capacitePalettes * 100).toFixed(1);
+            
+            let totalJours = 0;
+            let nbMouvements = 0;
+            mouvements.forEach((m, idx) => {
+                if (m.type === 'sortie' && idx > 0) {
+                    const entree = mouvements.slice(0, idx).reverse().find(mv => mv.type === 'entree' && mv.ref === m.ref);
+                    if (entree) {
+                        const jours = Math.floor((new Date(m.date) - new Date(entree.date)) / (1000*60*60*24));
+                        totalJours += jours;
+                        nbMouvements++;
+                    }
+                }
+            });
+            const rotationMoy = nbMouvements > 0 ? Math.round(totalJours / nbMouvements) : 0;
+            
+            const coutStock7j = totalQte * config.coutPalette * 7;
+            
+            document.getElementById('stockActuel').textContent = totalQte.toFixed(0);
+            document.getElementById('valorisationStock').textContent = totalValeur.toFixed(2) + ' CHF';
+            document.getElementById('tauxOccupation').textContent = occupation + '%';
+            document.getElementById('rotationMoyenne').textContent = rotationMoy + ' j';
+            document.getElementById('coutStockage7j').textContent = coutStock7j.toFixed(2) + ' CHF';
+            document.getElementById('nbReferences').textContent = nbRefs;
+            
+            const now = new Date();
+            const debutMois = new Date(now.getFullYear(), now.getMonth(), 1);
+            const entreesMois = mouvements.filter(m => m.type === 'entree' && new Date(m.date) >= debutMois).length;
+            const sortiesMois = mouvements.filter(m => m.type === 'sortie' && new Date(m.date) >= debutMois).length;
+            const tauxRotation = totalQte > 0 ? (sortiesMois / totalQte * 100).toFixed(1) : 0;
+            
+            document.getElementById('statEntrees').textContent = entreesMois;
+            document.getElementById('statSorties').textContent = sortiesMois;
+            document.getElementById('statTauxRotation').textContent = tauxRotation + '%';
+        }
+
+        function renderMouvements() {
+            const container = document.getElementById('mouvementsTable');
+            
+            if (mouvements.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun mouvement</div>';
+                return;
+            }
+            
+            const sorted = [...mouvements].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            let html = `<table><thead><tr>
+                <th>Date</th><th>Type</th><th>Réf</th><th>Qté</th>
+                <th>Lieu</th><th>Prix</th><th>Action</th>
+            </tr></thead><tbody>`;
+            
+            sorted.slice(0, 30).forEach(m => {
+                const badgeClass = m.type === 'entree' ? 'badge-success' : 
+                                 m.type === 'sortie' ? 'badge-danger' : 'badge-info';
+                html += `<tr>
+                    <td>${new Date(m.date).toLocaleDateString('fr-FR')}</td>
+                    <td><span class="badge ${badgeClass}">${m.type.toUpperCase()}</span></td>
+                    <td>${m.ref}</td>
+                    <td>${m.qte} ${m.unite}</td>
+                    <td>${m.emplacement}</td>
+                    <td>${m.prix.toFixed(2)}</td>
+                    <td><button class="delete-btn btn-small" onclick="deleteMouvement(${m.id})">🗑️</button></td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderValorisation() {
+            const container = document.getElementById('valorisationTable');
+            
+            if (Object.keys(stockActuel).length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun stock</div>';
+                return;
+            }
+            
+            let html = `<table><thead><tr>
+                <th>Référence</th><th>Qté</th><th>Lots</th>
+                <th>Valeur</th><th>Prix moy</th><th>+ ancien</th>
+            </tr></thead><tbody>`;
+            
+            Object.entries(stockActuel).forEach(([ref, data]) => {
+                const valeurTotale = data.lots.reduce((sum, lot) => sum + (lot.qte * lot.prix), 0);
+                const prixMoyen = data.total > 0 ? valeurTotale / data.total : 0;
+                const plusAncien = data.lots.length > 0 ? new Date(data.lots[0].date).toLocaleDateString('fr-FR') : '-';
+                
+                html += `<tr>
+                    <td><strong>${ref}</strong></td>
+                    <td>${data.total.toFixed(0)}</td>
+                    <td>${data.lots.length}</td>
+                    <td>${valeurTotale.toFixed(2)} CHF</td>
+                    <td>${prixMoyen.toFixed(2)}</td>
+                    <td>${plusAncien}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function deleteMouvement(id) {
+            if (confirm('Supprimer ce mouvement?')) {
+                mouvements = mouvements.filter(m => m.id !== id);
+                stockActuel = {};
+                mouvements.forEach(m => {
+                    if (m.type === 'entree') {
+                        if (!stockActuel[m.ref]) {
+                            stockActuel[m.ref] = {lots: [], total: 0};
+                        }
+                        stockActuel[m.ref].lots.push({date: m.date, qte: m.qte, prix: m.prix, emplacement: m.emplacement});
+                        stockActuel[m.ref].total += m.qte;
+                    }
+                });
+                saveToStorage();
+                updateStockStats();
+                renderMouvements();
+                renderValorisation();
+            }
+        }
+    </script>
+</body>
+</html>
