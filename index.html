@@ -899,6 +899,15 @@
                 </div>
 
                 <div class="section">
+                    <h2>Répartition des coûts</h2>
+                    <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center; justify-content: center;">
+                        <svg id="pieChart" width="220" height="220" viewBox="0 0 220 220"></svg>
+                        <div id="pieLegend" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"></div>
+                    </div>
+                    <p id="pieEmpty" style="text-align:center; color:#7a9db1; font-style:italic; margin-top:12px;">Aucune prestation enregistrée</p>
+                </div>
+
+                <div class="section">
                     <h2>Bilan gestion de stock</h2>
                     <div class="info-box">Valorisation des efforts et coûts liés au stockage sur l'ensemble des prestations enregistrées.</div>
                     <div class="stats-grid">
@@ -1658,7 +1667,68 @@
             document.getElementById('statHeuresCEA').textContent = heuresCEA.toFixed(1) + ' h';
             document.getElementById('statHeuresMSP').textContent = heuresMSP.toFixed(1) + ' h';
 
+            drawPieChart();
             updateBilanStock();
+        }
+
+        function drawPieChart() {
+            const svg = document.getElementById('pieChart');
+            const legend = document.getElementById('pieLegend');
+            const empty = document.getElementById('pieEmpty');
+
+            const slices = [
+                { label: 'M.O. CEA',        value: prestationsSauvegardees.reduce((s, p) => s + (p.coutMO || 0), 0),            color: '#a8d5e2' },
+                { label: 'Encadrement MSP',  value: prestationsSauvegardees.reduce((s, p) => s + (p.coutEncadrement || 0), 0),   color: '#c9b3d4' },
+                { label: 'Consommables',     value: prestationsSauvegardees.reduce((s, p) => s + (p.coutConsommables || 0), 0),  color: '#f5c6a0' },
+                { label: 'Stockage',         value: prestationsSauvegardees.reduce((s, p) => s + (p.coutStockage || 0), 0),      color: '#a8e2c0' },
+                { label: 'Frais généraux',   value: prestationsSauvegardees.reduce((s, p) => s + (p.prixRevient - (p.coutMO || 0) - (p.coutEncadrement || 0) - (p.coutConsommables || 0) - (p.coutStockage || 0)), 0), color: '#e2c4a8' },
+            ].filter(s => s.value > 0);
+
+            const total = slices.reduce((s, sl) => s + sl.value, 0);
+
+            if (total === 0) {
+                svg.innerHTML = '';
+                legend.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            const cx = 110, cy = 110, r = 90;
+            let startAngle = -Math.PI / 2;
+            let paths = '';
+
+            slices.forEach(sl => {
+                const angle = (sl.value / total) * 2 * Math.PI;
+                const endAngle = startAngle + angle;
+                const x1 = cx + r * Math.cos(startAngle);
+                const y1 = cy + r * Math.sin(startAngle);
+                const x2 = cx + r * Math.cos(endAngle);
+                const y2 = cy + r * Math.sin(endAngle);
+                const large = angle > Math.PI ? 1 : 0;
+
+                // Midpoint for label
+                const midAngle = startAngle + angle / 2;
+                const lx = cx + (r * 0.62) * Math.cos(midAngle);
+                const ly = cy + (r * 0.62) * Math.sin(midAngle);
+                const pct = Math.round(sl.value / total * 100);
+
+                paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${sl.color}" stroke="#fff" stroke-width="2"/>`;
+                if (pct >= 5) {
+                    paths += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="bold" fill="#2d3e50">${pct}%</text>`;
+                }
+                startAngle = endAngle;
+            });
+
+            svg.innerHTML = paths;
+
+            legend.innerHTML = slices.map(sl => {
+                const pct = (sl.value / total * 100).toFixed(1);
+                return `<div style="display:flex; align-items:center; gap:8px; font-size:0.88em; color:#5a7b8f;">
+                    <span style="width:14px; height:14px; border-radius:3px; background:${sl.color}; flex-shrink:0;"></span>
+                    <span><strong>${sl.label}</strong> — ${sl.value.toFixed(2)} CHF (${pct}%)</span>
+                </div>`;
+            }).join('');
         }
 
         function updateBilanStock() {
