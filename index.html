@@ -1055,6 +1055,24 @@
 
                 <div class="section">
                     <h2>Répartition des coûts</h2>
+
+                    <!-- Mode toggle -->
+                    <div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.9em;color:#5a7b8f;cursor:pointer;">
+                            <input type="radio" name="pieMode" value="all" checked onchange="updatePieMode()"> Toutes les prestations
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.9em;color:#5a7b8f;cursor:pointer;">
+                            <input type="radio" name="pieMode" value="selection" onchange="updatePieMode()"> Sélection / Comparaison
+                        </label>
+                    </div>
+
+                    <!-- Sélecteur de prestations (mode sélection) -->
+                    <div id="piePrestationSelector" style="display:none;margin-bottom:14px;max-height:180px;overflow-y:auto;border:1px solid #d5e3ed;border-radius:10px;padding:10px;background:#f7fbfd;">
+                        <div style="font-size:0.8em;color:#7a9db1;margin-bottom:8px;">Coche 1 prestation pour l'analyser, 2 pour comparer, 3+ pour combiner.</div>
+                        <div id="piePrestationList"></div>
+                    </div>
+
+                    <!-- Filtres de tranches -->
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
                         <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;color:#5a7b8f;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid #d5e3ed;user-select:none;">
                             <input type="checkbox" id="pie-cea" checked onchange="drawPieChart()">
@@ -1077,11 +1095,8 @@
                             <span style="width:12px;height:12px;border-radius:2px;background:#e2c4a8;display:inline-block;"></span> Frais généraux
                         </label>
                     </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center; justify-content: center;">
-                        <svg id="pieChart" width="220" height="220" viewBox="0 0 220 220"></svg>
-                        <div id="pieLegend" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"></div>
-                    </div>
-                    <p id="pieEmpty" style="text-align:center; color:#7a9db1; font-style:italic; margin-top:12px;">Aucune prestation enregistrée</p>
+                    <div id="pieChartsContainer" style="display:flex;flex-wrap:wrap;gap:30px;align-items:flex-start;justify-content:center;"></div>
+                    <p id="pieEmpty" style="text-align:center; color:#7a9db1; font-style:italic; margin-top:12px;display:none;">Aucune prestation enregistrée</p>
                 </div>
 
                 <div class="section">
@@ -1900,71 +1915,158 @@
             document.getElementById('statHeuresCEA').textContent = heuresCEA.toFixed(1) + ' h';
             document.getElementById('statHeuresMSP').textContent = heuresMSP.toFixed(1) + ' h';
 
+            const mode = document.querySelector('input[name="pieMode"]:checked')?.value;
+            if (mode === 'selection') renderPieSelector();
             drawPieChart();
             updateBilanStock();
             drawCAChart();
             renderTop5();
         }
 
-        function drawPieChart() {
-            const svg = document.getElementById('pieChart');
-            const legend = document.getElementById('pieLegend');
-            const empty = document.getElementById('pieEmpty');
-
-            const allSlices = [
-                { id: 'pie-cea',    label: 'M.O. CEA',       value: prestationsSauvegardees.reduce((s, p) => s + (p.coutMO || 0), 0),            color: '#a8d5e2' },
-                { id: 'pie-msp',    label: 'Encadrement MSP', value: prestationsSauvegardees.reduce((s, p) => s + (p.coutEncadrement || 0), 0),   color: '#c9b3d4' },
-                { id: 'pie-consom', label: 'Consommables',    value: prestationsSauvegardees.reduce((s, p) => s + (p.coutConsommables || 0), 0),  color: '#f5c6a0' },
-                { id: 'pie-stock',  label: 'Stockage',        value: prestationsSauvegardees.reduce((s, p) => s + (p.coutStockage || 0), 0),      color: '#a8e2c0' },
-                { id: 'pie-frais',  label: 'Frais généraux',  value: prestationsSauvegardees.reduce((s, p) => s + (p.prixRevient - (p.coutMO || 0) - (p.coutEncadrement || 0) - (p.coutConsommables || 0) - (p.coutStockage || 0)), 0), color: '#e2c4a8' },
+        function buildSlices(prestations) {
+            const defs = [
+                { id: 'pie-cea',    label: 'M.O. CEA',       fn: p => p.coutMO || 0,            color: '#a8d5e2' },
+                { id: 'pie-msp',    label: 'Encadrement MSP', fn: p => p.coutEncadrement || 0,   color: '#c9b3d4' },
+                { id: 'pie-consom', label: 'Consommables',    fn: p => p.coutConsommables || 0,  color: '#f5c6a0' },
+                { id: 'pie-stock',  label: 'Stockage',        fn: p => p.coutStockage || 0,      color: '#a8e2c0' },
+                { id: 'pie-frais',  label: 'Frais généraux',  fn: p => p.prixRevient - (p.coutMO||0) - (p.coutEncadrement||0) - (p.coutConsommables||0) - (p.coutStockage||0), color: '#e2c4a8' },
             ];
-            const slices = allSlices.filter(s => s.value > 0 && document.getElementById(s.id)?.checked);
+            return defs
+                .filter(d => document.getElementById(d.id)?.checked)
+                .map(d => ({ ...d, value: prestations.reduce((s, p) => s + d.fn(p), 0) }))
+                .filter(d => d.value > 0);
+        }
 
+        function renderOnePie(container, slices, title) {
             const total = slices.reduce((s, sl) => s + sl.value, 0);
+            if (total === 0) return;
+            const cx = 110, cy = 110, r = 90;
+            let startAngle = -Math.PI / 2, paths = '';
+            slices.forEach(sl => {
+                const angle = (sl.value / total) * 2 * Math.PI;
+                const endAngle = startAngle + angle;
+                const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+                const x2 = cx + r * Math.cos(endAngle),   y2 = cy + r * Math.sin(endAngle);
+                const large = angle > Math.PI ? 1 : 0;
+                const mid = startAngle + angle / 2;
+                const lx = cx + r * 0.62 * Math.cos(mid), ly = cy + r * 0.62 * Math.sin(mid);
+                const pct = Math.round(sl.value / total * 100);
+                paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${sl.color}" stroke="#fff" stroke-width="2"/>`;
+                if (pct >= 5) paths += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="bold" fill="#2d3e50">${pct}%</text>`;
+                startAngle = endAngle;
+            });
+            const legendHtml = slices.map(sl => {
+                const pct = (sl.value / total * 100).toFixed(1);
+                return `<div style="display:flex;align-items:center;gap:6px;font-size:0.82em;color:#5a7b8f;">
+                    <span style="width:12px;height:12px;border-radius:2px;background:${sl.color};flex-shrink:0;"></span>
+                    <span><strong>${sl.label}</strong> — ${sl.value.toFixed(2)} CHF (${pct}%)</span>
+                </div>`;
+            }).join('');
+            const titleHtml = title ? `<div style="text-align:center;font-size:0.85em;font-weight:bold;color:#6b8fa3;margin-bottom:6px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${title}">${title}</div>` : '';
+            container.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;">
+                ${titleHtml}
+                <svg width="220" height="220" viewBox="0 0 220 220">${paths}</svg>
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;max-width:220px;">${legendHtml}</div>
+                <div style="margin-top:8px;font-size:0.85em;color:#6b8fa3;font-weight:bold;">Total : ${total.toFixed(2)} CHF</div>
+            </div>`;
+        }
 
-            if (total === 0) {
-                svg.innerHTML = '';
-                legend.innerHTML = '';
+        function updatePieMode() {
+            const mode = document.querySelector('input[name="pieMode"]:checked')?.value;
+            const selector = document.getElementById('piePrestationSelector');
+            selector.style.display = mode === 'selection' ? 'block' : 'none';
+            if (mode === 'selection') renderPieSelector();
+            drawPieChart();
+        }
+
+        function renderPieSelector() {
+            const list = document.getElementById('piePrestationList');
+            if (prestationsSauvegardees.length === 0) {
+                list.innerHTML = '<div style="color:#7a9db1;font-size:0.85em;">Aucune prestation enregistrée.</div>';
+                return;
+            }
+            list.innerHTML = prestationsSauvegardees.map(p => {
+                const date = new Date(p.date).toLocaleDateString('fr-FR');
+                return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85em;color:#5a7b8f;cursor:pointer;border-bottom:1px solid #eef4f8;">
+                    <input type="checkbox" class="pie-prestation-cb" value="${p.id}" onchange="drawPieChart()">
+                    <span><strong>${p.prestation}</strong> — ${p.client} — ${date} — ${p.prixVente.toFixed(2)} CHF</span>
+                </label>`;
+            }).join('');
+        }
+
+        function drawPieChart() {
+            const container = document.getElementById('pieChartsContainer');
+            const empty = document.getElementById('pieEmpty');
+            const mode = document.querySelector('input[name="pieMode"]:checked')?.value || 'all';
+
+            let sourcePrestations;
+            if (mode === 'all') {
+                sourcePrestations = prestationsSauvegardees;
+            } else {
+                const checked = [...document.querySelectorAll('.pie-prestation-cb:checked')].map(cb => parseInt(cb.value));
+                sourcePrestations = prestationsSauvegardees.filter(p => checked.includes(p.id));
+            }
+
+            container.innerHTML = '';
+
+            if (sourcePrestations.length === 0) {
                 empty.style.display = 'block';
                 return;
             }
             empty.style.display = 'none';
 
-            const cx = 110, cy = 110, r = 90;
-            let startAngle = -Math.PI / 2;
-            let paths = '';
-
-            slices.forEach(sl => {
-                const angle = (sl.value / total) * 2 * Math.PI;
-                const endAngle = startAngle + angle;
-                const x1 = cx + r * Math.cos(startAngle);
-                const y1 = cy + r * Math.sin(startAngle);
-                const x2 = cx + r * Math.cos(endAngle);
-                const y2 = cy + r * Math.sin(endAngle);
-                const large = angle > Math.PI ? 1 : 0;
-
-                // Midpoint for label
-                const midAngle = startAngle + angle / 2;
-                const lx = cx + (r * 0.62) * Math.cos(midAngle);
-                const ly = cy + (r * 0.62) * Math.sin(midAngle);
-                const pct = Math.round(sl.value / total * 100);
-
-                paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${sl.color}" stroke="#fff" stroke-width="2"/>`;
-                if (pct >= 5) {
-                    paths += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="bold" fill="#2d3e50">${pct}%</text>`;
-                }
-                startAngle = endAngle;
-            });
-
-            svg.innerHTML = paths;
-
-            legend.innerHTML = slices.map(sl => {
-                const pct = (sl.value / total * 100).toFixed(1);
-                return `<div style="display:flex; align-items:center; gap:8px; font-size:0.88em; color:#5a7b8f;">
-                    <span style="width:14px; height:14px; border-radius:3px; background:${sl.color}; flex-shrink:0;"></span>
-                    <span><strong>${sl.label}</strong> — ${sl.value.toFixed(2)} CHF (${pct}%)</span>
-                </div>`;
-            }).join('');
+            // Comparaison côte à côte si exactement 2 sélectionnées
+            if (mode === 'selection' && sourcePrestations.length === 2) {
+                sourcePrestations.forEach(p => {
+                    const slices = buildSlices([p]);
+                    const div = document.createElement('div');
+                    container.appendChild(div);
+                    renderOnePie(div, slices, `${p.prestation} (${p.client})`);
+                });
+                // Tableau comparatif
+                const [a, b] = sourcePrestations;
+                const names = ['M.O. CEA','Encadrement MSP','Consommables','Stockage','Frais généraux'];
+                const fns = [p=>p.coutMO||0, p=>p.coutEncadrement||0, p=>p.coutConsommables||0, p=>p.coutStockage||0, p=>p.prixRevient-(p.coutMO||0)-(p.coutEncadrement||0)-(p.coutConsommables||0)-(p.coutStockage||0)];
+                const colors = ['#a8d5e2','#c9b3d4','#f5c6a0','#a8e2c0','#e2c4a8'];
+                let rows = names.map((name, i) => {
+                    const va = fns[i](a), vb = fns[i](b);
+                    const diff = vb - va;
+                    const diffStyle = diff > 0 ? 'color:#c0392b' : diff < 0 ? 'color:#27ae60' : 'color:#7a9db1';
+                    return `<tr>
+                        <td style="padding:6px 10px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colors[i]};margin-right:6px;"></span>${name}</td>
+                        <td style="padding:6px 10px;text-align:right;">${va.toFixed(2)} CHF</td>
+                        <td style="padding:6px 10px;text-align:right;">${vb.toFixed(2)} CHF</td>
+                        <td style="padding:6px 10px;text-align:right;font-weight:bold;${diffStyle}">${diff >= 0 ? '+' : ''}${diff.toFixed(2)} CHF</td>
+                    </tr>`;
+                }).join('');
+                const cmpDiv = document.createElement('div');
+                cmpDiv.style.cssText = 'width:100%;margin-top:10px;overflow-x:auto;';
+                cmpDiv.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.88em;">
+                    <thead><tr style="background:#f0f4f8;">
+                        <th style="padding:8px 10px;text-align:left;color:#6b8fa3;">Poste</th>
+                        <th style="padding:8px 10px;text-align:right;color:#6b8fa3;">${a.prestation}</th>
+                        <th style="padding:8px 10px;text-align:right;color:#6b8fa3;">${b.prestation}</th>
+                        <th style="padding:8px 10px;text-align:right;color:#6b8fa3;">Écart</th>
+                    </tr></thead><tbody>${rows}</tbody>
+                    <tfoot><tr style="border-top:2px solid #a8d5e2;font-weight:bold;">
+                        <td style="padding:8px 10px;">Total revient</td>
+                        <td style="padding:8px 10px;text-align:right;">${a.prixRevient.toFixed(2)} CHF</td>
+                        <td style="padding:8px 10px;text-align:right;">${b.prixRevient.toFixed(2)} CHF</td>
+                        <td style="padding:8px 10px;text-align:right;${(b.prixRevient-a.prixRevient)>=0?'color:#c0392b':'color:#27ae60'}">${(b.prixRevient-a.prixRevient)>=0?'+':''}${(b.prixRevient-a.prixRevient).toFixed(2)} CHF</td>
+                    </tr></tfoot>
+                </table>`;
+                container.appendChild(cmpDiv);
+            } else {
+                // Camembert unique (toutes ou sélection 1/3+)
+                const slices = buildSlices(sourcePrestations);
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex;flex-wrap:wrap;gap:30px;align-items:center;justify-content:center;width:100%;';
+                container.appendChild(div);
+                const title = mode === 'selection' && sourcePrestations.length === 1
+                    ? `${sourcePrestations[0].prestation} (${sourcePrestations[0].client})`
+                    : mode === 'selection' ? `Sélection (${sourcePrestations.length} prestations)` : null;
+                renderOnePie(div, slices, title);
+            }
         }
 
         function updateBilanStock() {
