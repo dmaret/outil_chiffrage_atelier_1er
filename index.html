@@ -458,6 +458,37 @@
         .chart-container { overflow-x:auto; margin-top:10px; }
         .chart-bar-label { font-size:0.75em; fill:#5a7b8f; }
         .chart-bar-value { font-size:0.7em; fill:#2d3e50; font-weight:bold; }
+
+        /* Modèles */
+        .modeles-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:14px 0; }
+        .modeles-bar select { padding:7px 10px; border:1px solid #ddd; border-radius:5px; font-size:0.9em; min-width:200px; }
+
+        /* Simulation volumes */
+        #simulVolumesPanel { display:none; margin-top:12px; }
+        #simulVolumesPanel table { margin-top:8px; }
+        .simul-economy { color:#27ae60; font-weight:bold; font-size:0.85em; }
+
+        /* Badge statut prestation */
+        .badge-statut-devis { background:#fff4d6; color:#9d7020; border:1px solid #f0c040; }
+        .badge-statut-valide { background:#d4f0e3; color:#236b45; border:1px solid #5bc98b; }
+        .badge-statut-facture { background:#d6e8fb; color:#1a4f8a; border:1px solid #5090d0; }
+
+        /* Filtres prestations */
+        .prestations-filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; align-items:center; }
+        .prestations-filters input, .prestations-filters select { padding:8px 10px; border:1px solid #ddd; border-radius:5px; font-size:0.88em; }
+
+        /* Indicateur sauvegarde */
+        #saveIndicator { position:absolute; top:20px; right:120px; font-size:0.78em; color:rgba(45,62,80,0.8); background:rgba(255,255,255,0.4); padding:4px 10px; border-radius:20px; font-weight:600; pointer-events:none; white-space:nowrap; }
+
+        /* Modale historique stock */
+        .stock-history-panel { background:#f0f7fc; border:1px solid #c8dde8; border-radius:8px; padding:12px; margin-top:8px; }
+        .stock-history-panel table { margin-top:6px; font-size:0.82em; }
+
+        /* Devis PDF */
+        .devis-print { font-family:'Segoe UI',sans-serif; max-width:800px; margin:0 auto; padding:30px; color:#2d3e50; }
+        .devis-header { background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%); padding:25px; border-radius:12px; margin-bottom:25px; }
+        .devis-num { font-size:1.8em; font-weight:bold; color:#2d3e50; }
+        .devis-footer { text-align:center; font-size:0.8em; color:#999; margin-top:30px; border-top:1px solid #eee; padding-top:15px; }
     </style>
 </head>
 <body>
@@ -479,6 +510,7 @@
         <div class="header" style="position:relative;">
             <h1>🏭 Outil Complet Atelier - La Pallanterie</h1>
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
+            <span id="saveIndicator">💾 Sauvegardé à l'instant</span>
             <button id="superUserToggle" onclick="toggleSuperUser()" style="position:absolute;top:15px;right:65px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode admin">🔓</button>
             <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
         </div>
@@ -497,6 +529,18 @@
         <div class="content">
             <!-- ONGLET CALCULATEUR -->
             <div id="calculateur" class="tab-content active">
+                <div class="section" style="border-left-color:#c9b3d4;">
+                    <h2>Modèles de prestation</h2>
+                    <div class="modeles-bar">
+                        <select id="modeleSelect" onchange="">
+                            <option value="">— Sélectionner un modèle —</option>
+                        </select>
+                        <button class="btn btn-secondary btn-small" onclick="chargerModele()">📋 Charger</button>
+                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
+                        <button class="btn btn-danger btn-small" onclick="supprimerModele()">🗑️ Supprimer</button>
+                    </div>
+                </div>
+
                 <div class="section">
                     <h2>Informations prestation</h2>
                     <div class="form-row">
@@ -535,6 +579,21 @@
                             <input type="number" id="nbPieces" min="1" value="1" onchange="calculateTotal()" style="font-weight:bold;border-color:#a8d5e2;">
                             <span class="help-text">Gestes et consommables × nb pièces</span>
                         </div>
+                    </div>
+                    <div style="margin-top:8px;">
+                        <button class="btn btn-secondary btn-small" onclick="toggleSimulVolumes()">⚡ Simuler volumes</button>
+                    </div>
+                    <div id="simulVolumesPanel">
+                        <h3 style="margin-top:14px;">Simulation tarification dégressive</h3>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+                            <span style="font-size:0.85em;color:#7a9db1;">Quantités :</span>
+                            <input type="number" class="simul-qty" value="100" min="1" onchange="renderSimulVolumes()" style="width:80px;">
+                            <input type="number" class="simul-qty" value="250" min="1" onchange="renderSimulVolumes()" style="width:80px;">
+                            <input type="number" class="simul-qty" value="500" min="1" onchange="renderSimulVolumes()" style="width:80px;">
+                            <input type="number" class="simul-qty" value="1000" min="1" onchange="renderSimulVolumes()" style="width:80px;">
+                            <input type="number" class="simul-qty" value="2500" min="1" onchange="renderSimulVolumes()" style="width:80px;">
+                        </div>
+                        <div id="simulVolumesTable"></div>
                     </div>
                 </div>
 
@@ -647,6 +706,7 @@
                     <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer</button>
                     <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
+                    <button class="btn btn-secondary" onclick="genererDevis()">📄 Générer devis</button>
                 </div>
             </div>
 
@@ -1001,6 +1061,19 @@
             <div id="prestations" class="tab-content">
                 <div class="section">
                     <h2>Prestations enregistrées</h2>
+                    <div class="prestations-filters">
+                        <input type="text" id="filtreTexte" placeholder="🔍 Client, prestation, référence..." oninput="renderPrestations()" style="flex:2;min-width:180px;">
+                        <select id="filtreStatut" onchange="renderPrestations()" style="flex:1;min-width:120px;">
+                            <option value="">Tous statuts</option>
+                            <option value="devis">Devis</option>
+                            <option value="valide">Validé</option>
+                            <option value="facture">Facturé</option>
+                        </select>
+                        <select id="filtreClient" onchange="renderPrestations()" style="flex:1;min-width:120px;">
+                            <option value="">Tous clients</option>
+                        </select>
+                        <button class="btn btn-small" onclick="exportPrestationsCSV()" style="white-space:nowrap;">📥 Export CSV</button>
+                    </div>
                     <div id="prestationsList"></div>
                 </div>
             </div>
@@ -1256,6 +1329,11 @@
         let stockageLines = [];
         let editingMouvementId = null;
 
+        // Feature variables
+        let configModeles = [];
+        let lastSaveTime = null;
+        let devisCounter = parseInt(localStorage.getItem('devisCounter') || '0');
+
         // Chargement
         loadFromStorage();
         renderStockSelects();
@@ -1270,6 +1348,7 @@
         addGesteLine();
         addConsommableLine();
         addStockageLine();
+        updateModeleSelect();
 
         function loadFromStorage() {
             const savedConfig = localStorage.getItem('configAtelier');
@@ -1295,6 +1374,9 @@
             if (savedEmplacements) configEmplacements = JSON.parse(savedEmplacements);
             if (savedUnites) configUnites = JSON.parse(savedUnites);
             if (savedTypesStock) configTypesStock = JSON.parse(savedTypesStock);
+            const savedModeles = localStorage.getItem('configModeles');
+            if (savedModeles) configModeles = JSON.parse(savedModeles);
+            devisCounter = parseInt(localStorage.getItem('devisCounter') || '0');
             loadConfig();
         }
 
@@ -1308,6 +1390,10 @@
             localStorage.setItem('configEmplacements', JSON.stringify(configEmplacements));
             localStorage.setItem('configUnites', JSON.stringify(configUnites));
             localStorage.setItem('configTypesStock', JSON.stringify(configTypesStock));
+            localStorage.setItem('configModeles', JSON.stringify(configModeles));
+            localStorage.setItem('devisCounter', String(devisCounter));
+            lastSaveTime = Date.now();
+            updateSaveIndicator();
         }
 
         function loadConfig() {
@@ -1724,7 +1810,8 @@
                 coutConsommables: parseFloat(document.getElementById('coutConsommables').textContent),
                 coutStockage: parseFloat(document.getElementById('coutStockage').textContent),
                 nbPieces: parseFloat(document.getElementById('nbPieces').value || 1),
-                prixVentePiece: parseFloat(document.getElementById('prixVentePiece')?.textContent || 0)
+                prixVentePiece: parseFloat(document.getElementById('prixVentePiece')?.textContent || 0),
+                statut: 'devis'
             };
             
             prestationsSauvegardees.push(prest);
@@ -1881,24 +1968,79 @@
             container.innerHTML = html;
         }
 
+        function getStatutBadgeHtml(statut) {
+            if (statut === 'valide') return '<span class="badge badge-statut-valide">🟢 Validé</span>';
+            if (statut === 'facture') return '<span class="badge badge-statut-facture">🔵 Facturé</span>';
+            return '<span class="badge badge-statut-devis">🟡 Devis</span>';
+        }
+
+        function cycleStatut(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const cycle = ['devis', 'valide', 'facture'];
+            const current = p.statut || 'devis';
+            const nextIdx = (cycle.indexOf(current) + 1) % cycle.length;
+            p.statut = cycle[nextIdx];
+            saveToStorage();
+            renderPrestations();
+        }
+
         function renderPrestations() {
             const container = document.getElementById('prestationsList');
-            
+
+            // Update client filter select
+            const filtreClient = document.getElementById('filtreClient');
+            if (filtreClient) {
+                const clients = [...new Set(prestationsSauvegardees.map(p => p.client).filter(Boolean))].sort();
+                const currentClient = filtreClient.value;
+                filtreClient.innerHTML = '<option value="">Tous clients</option>' +
+                    clients.map(c => `<option value="${c}" ${c === currentClient ? 'selected' : ''}>${c}</option>`).join('');
+            }
+
             if (prestationsSauvegardees.length === 0) {
                 container.innerHTML = '<div class="empty-state">Aucune prestation</div>';
                 return;
             }
-            
-            const sorted = [...prestationsSauvegardees].sort((a, b) => new Date(b.date) - new Date(a.date));
-            
+
+            // Get filter values
+            const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
+            const statut = document.getElementById('filtreStatut')?.value || '';
+            const client = document.getElementById('filtreClient')?.value || '';
+
+            let filtered = [...prestationsSauvegardees].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (texte) {
+                filtered = filtered.filter(p =>
+                    (p.client || '').toLowerCase().includes(texte) ||
+                    (p.prestation || '').toLowerCase().includes(texte) ||
+                    (p.reference || '').toLowerCase().includes(texte)
+                );
+            }
+            if (statut) {
+                filtered = filtered.filter(p => (p.statut || 'devis') === statut);
+            }
+            if (client) {
+                filtered = filtered.filter(p => p.client === client);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucune prestation correspondante</div>';
+                return;
+            }
+
             let html = '';
-            sorted.forEach(p => {
+            filtered.forEach(p => {
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
                 const margeChfVal = (p.prixVente - p.prixRevient).toFixed(2);
+                const statutBadge = getStatutBadgeHtml(p.statut || 'devis');
                 html += `<div style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap:wrap; gap:6px;">
-                        <strong style="font-size: 1.1em; color: #6b8fa3;">${p.prestation}</strong>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <strong style="font-size: 1.1em; color: #6b8fa3;">${p.prestation}</strong>
+                            ${statutBadge}
+                        </div>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Changer statut">🔄 Statut</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF">📄 PDF</button>
                             <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
                             <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
@@ -2382,14 +2524,15 @@
             
             let html = `<table><thead><tr>
                 <th>Référence</th><th>Qté</th><th>Lots</th>
-                <th>Valeur</th><th>Prix moy</th><th>+ ancien</th>
+                <th>Valeur</th><th>Prix moy</th><th>+ ancien</th><th>Historique</th>
             </tr></thead><tbody>`;
-            
+
             Object.entries(stockActuel).forEach(([ref, data]) => {
                 const valeurTotale = data.lots.reduce((sum, lot) => sum + (lot.qte * lot.prix), 0);
                 const prixMoyen = data.total > 0 ? valeurTotale / data.total : 0;
                 const plusAncien = data.lots.length > 0 ? new Date(data.lots[0].date).toLocaleDateString('fr-FR') : '-';
-                
+                const refId = ref.replace(/[^a-zA-Z0-9]/g, '_');
+
                 html += `<tr>
                     <td><strong>${ref}</strong></td>
                     <td>${data.total.toFixed(0)}</td>
@@ -2397,9 +2540,15 @@
                     <td>${valeurTotale.toFixed(2)} CHF</td>
                     <td>${prixMoyen.toFixed(2)}</td>
                     <td>${plusAncien}</td>
+                    <td><button class="btn btn-small btn-secondary" onclick="toggleStockHistory('${refId}', '${ref}')">📋 Historique</button></td>
+                </tr>
+                <tr id="history-row-${refId}" style="display:none;">
+                    <td colspan="7">
+                        <div class="stock-history-panel" id="history-panel-${refId}"></div>
+                    </td>
                 </tr>`;
             });
-            
+
             html += '</tbody></table>';
             container.innerHTML = html;
         }
@@ -2987,6 +3136,625 @@
             saveToStorage();
             renderAdminList(type);
             renderStockSelects();
+        }
+
+        // ============================================================
+        // FEATURE 1 : Modèles de prestation
+        // ============================================================
+        function updateModeleSelect() {
+            const sel = document.getElementById('modeleSelect');
+            if (!sel) return;
+            const current = sel.value;
+            sel.innerHTML = '<option value="">— Sélectionner un modèle —</option>' +
+                configModeles.map(m => `<option value="${m.id}">${m.nom}</option>`).join('');
+            if (current) sel.value = current;
+        }
+
+        function sauverModele() {
+            const nom = prompt('Nom du modèle :');
+            if (!nom || !nom.trim()) return;
+
+            // Capture current form state
+            const gestes = [];
+            gesteLines.forEach(lineId => {
+                const line = document.getElementById('line-' + lineId);
+                if (line) {
+                    const sel = line.querySelector('select');
+                    const code = sel?.value;
+                    if (code) {
+                        const qte = parseFloat(document.getElementById('quantite-' + lineId)?.value || 1);
+                        gestes.push({code, quantite: qte});
+                    }
+                }
+            });
+
+            const consommables = [];
+            consommableLines.forEach(lineId => {
+                const line = document.getElementById('consom-' + lineId);
+                if (line) {
+                    const sel = line.querySelector('select');
+                    const idx = sel?.value;
+                    if (idx !== '' && idx !== undefined) {
+                        const c = catalogueConsommables[parseInt(idx)];
+                        const qte = parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 1);
+                        if (c) consommables.push({nom: c.nom, prix: c.prix, qte});
+                    }
+                }
+            });
+
+            const stockage = [];
+            stockageLines.forEach(lineId => {
+                const type = document.getElementById('type-stock-' + lineId)?.value;
+                const qte = parseFloat(document.getElementById('qte-stock-' + lineId)?.value || 1);
+                const duree = parseFloat(document.getElementById('duree-stock-' + lineId)?.value || 1);
+                if (type) stockage.push({type, qte, duree});
+            });
+
+            const modele = {
+                id: Date.now(),
+                nom: nom.trim(),
+                nbCEA: parseFloat(document.getElementById('nbCEA').value || 1),
+                nbMSP: parseFloat(document.getElementById('nbMSP').value || 0.5),
+                nbPieces: parseFloat(document.getElementById('nbPieces').value || 1),
+                margeDefaut: parseFloat(document.getElementById('margePercent').value || 15),
+                tempsMailsMin: parseFloat(document.getElementById('tempsMailsMin').value || 0),
+                tempsImpressionMin: parseFloat(document.getElementById('tempsImpressionMin').value || 0),
+                tempsCoordMin: parseFloat(document.getElementById('tempsCoordMin').value || 0),
+                gestes,
+                consommables,
+                stockage
+            };
+
+            configModeles.push(modele);
+            saveToStorage();
+            updateModeleSelect();
+            document.getElementById('modeleSelect').value = modele.id;
+            alert('✅ Modèle "' + modele.nom + '" sauvegardé');
+        }
+
+        function chargerModele() {
+            const sel = document.getElementById('modeleSelect');
+            const id = parseInt(sel.value);
+            if (!id) { alert('Sélectionnez d\'abord un modèle'); return; }
+
+            const modele = configModeles.find(m => m.id === id);
+            if (!modele) return;
+
+            // Fill numeric fields (don't touch client/prestation/reference/date)
+            document.getElementById('nbCEA').value = modele.nbCEA;
+            document.getElementById('nbMSP').value = modele.nbMSP;
+            document.getElementById('nbPieces').value = modele.nbPieces;
+            document.getElementById('margePercent').value = modele.margeDefaut;
+            document.getElementById('tempsMailsMin').value = modele.tempsMailsMin;
+            document.getElementById('tempsImpressionMin').value = modele.tempsImpressionMin;
+            document.getElementById('tempsCoordMin').value = modele.tempsCoordMin;
+
+            // Clear and rebuild gestes
+            document.getElementById('gestesContainer').innerHTML = '';
+            gesteLines = [];
+            (modele.gestes || []).forEach(g => {
+                const container = document.getElementById('gestesContainer');
+                const lineId = Date.now() + Math.random();
+                const line = document.createElement('div');
+                line.className = 'geste-line';
+                line.id = 'line-' + lineId;
+                const geste = catalogueGestes.find(cg => cg.code === g.code);
+                const tempsAjuste = geste ? Math.round(geste.temps * geste.coef) : 0;
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Geste</label>
+                        <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
+                            <option value="">Sélectionner...</option>
+                            ${catalogueGestes.map(cg =>
+                                `<option value="${cg.code}" ${cg.code === g.code ? 'selected' : ''}>[${cg.code}] ${cg.description}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Temps (sec)</label>
+                        <input type="number" id="temps-${lineId}" value="${tempsAjuste}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="quantite-${lineId}" min="0" value="${g.quantite}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(line);
+                gesteLines.push(lineId);
+            });
+            if (gesteLines.length === 0) addGesteLine();
+
+            // Clear and rebuild consommables
+            document.getElementById('consommablesContainer').innerHTML = '';
+            consommableLines = [];
+            (modele.consommables || []).forEach(mc => {
+                const container = document.getElementById('consommablesContainer');
+                const lineId = Date.now() + Math.random();
+                const line = document.createElement('div');
+                line.className = 'consommable-line';
+                line.id = 'consom-' + lineId;
+                const cIdx = catalogueConsommables.findIndex(c => c.nom === mc.nom);
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Consommable</label>
+                        <select onchange="updateConsommableDetails(this, ${lineId}); calculateTotal()">
+                            <option value="">Sélectionner...</option>
+                            ${catalogueConsommables.map((c, idx) =>
+                                `<option value="${idx}" ${idx === cIdx ? 'selected' : ''}>${c.nom} (${c.prix} CHF)</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Prix (CHF)</label>
+                        <input type="number" id="prix-consom-${lineId}" value="${mc.prix}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="qte-consom-${lineId}" min="0" value="${mc.qte}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Total (CHF)</label>
+                        <input type="number" id="total-consom-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeConsommableLine(${lineId})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(line);
+                consommableLines.push(lineId);
+            });
+            if (consommableLines.length === 0) addConsommableLine();
+
+            // Clear and rebuild stockage
+            document.getElementById('stockageContainer').innerHTML = '';
+            stockageLines = [];
+            (modele.stockage || []).forEach(s => {
+                const container = document.getElementById('stockageContainer');
+                const lineId = Date.now() + Math.random();
+                const line = document.createElement('div');
+                line.className = 'stock-line';
+                line.id = 'stock-' + lineId;
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="type-stock-${lineId}" onchange="calculateTotal()">
+                            <option value="palette" ${s.type === 'palette' ? 'selected' : ''}>Palette</option>
+                            <option value="m2" ${s.type === 'm2' ? 'selected' : ''}>m²</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Durée (j)</label>
+                        <input type="number" id="duree-stock-${lineId}" min="0" step="0.5" value="${s.duree}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Tarif/j</label>
+                        <input type="number" id="tarif-stock-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="number" id="total-stock-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeStockageLine(${lineId})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(line);
+                stockageLines.push(lineId);
+            });
+            if (stockageLines.length === 0) addStockageLine();
+
+            calculateTotal();
+            alert('✅ Modèle "' + modele.nom + '" chargé');
+        }
+
+        function supprimerModele() {
+            const sel = document.getElementById('modeleSelect');
+            const id = parseInt(sel.value);
+            if (!id) { alert('Sélectionnez d\'abord un modèle à supprimer'); return; }
+            const modele = configModeles.find(m => m.id === id);
+            if (!modele) return;
+            if (!confirm(`Supprimer le modèle "${modele.nom}" ?`)) return;
+            configModeles = configModeles.filter(m => m.id !== id);
+            saveToStorage();
+            updateModeleSelect();
+            alert('✅ Modèle supprimé');
+        }
+
+        // ============================================================
+        // FEATURE 2 : Simulation volumes
+        // ============================================================
+        function toggleSimulVolumes() {
+            const panel = document.getElementById('simulVolumesPanel');
+            const isVisible = panel.style.display === 'block';
+            panel.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) renderSimulVolumes();
+        }
+
+        function calcPrixForQty(qty) {
+            // Same cost structure as calculateTotal() but with given qty
+            let secondesParPiece = 0;
+            gesteLines.forEach(lineId => {
+                const temps = parseFloat(document.getElementById('temps-' + lineId)?.value || 0);
+                const quantite = parseFloat(document.getElementById('quantite-' + lineId)?.value || 0);
+                secondesParPiece += temps * quantite;
+            });
+
+            const mailsMin = parseFloat(document.getElementById('tempsMailsMin')?.value || 0);
+            const impressionMin = parseFloat(document.getElementById('tempsImpressionMin')?.value || 0);
+            const coordMin = parseFloat(document.getElementById('tempsCoordMin')?.value || 0);
+            const secondesAdmin = (mailsMin + impressionMin + coordMin) * 60;
+
+            const totalSecondes = secondesParPiece * qty + secondesAdmin;
+            const totalHeures = totalSecondes / 3600;
+
+            const nbCEA = parseFloat(document.getElementById('nbCEA')?.value || 1);
+            const nbMSP = parseFloat(document.getElementById('nbMSP')?.value || 0);
+
+            const coutMO = totalHeures * nbCEA * config.coutHoraireCEA;
+            const coutEncadrement = totalHeures * nbMSP * config.coutHoraireMSP;
+
+            let coutConsommables = 0;
+            consommableLines.forEach(lineId => {
+                const prix = parseFloat(document.getElementById('prix-consom-' + lineId)?.value || 0);
+                const qte = parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 0);
+                coutConsommables += prix * qte * qty;
+            });
+
+            let coutStockage = 0;
+            stockageLines.forEach(lineId => {
+                const type = document.getElementById('type-stock-' + lineId)?.value;
+                const qte = parseFloat(document.getElementById('qte-stock-' + lineId)?.value || 0);
+                const duree = parseFloat(document.getElementById('duree-stock-' + lineId)?.value || 0);
+                const tarif = type === 'palette' ? config.coutPalette : config.coutRack;
+                coutStockage += qte * duree * tarif;
+            });
+
+            let fraisGeneraux = 0;
+            if (config.modeFraisGeneraux === 'pourcentage') {
+                fraisGeneraux = (coutMO + coutEncadrement) * config.fraisGenerauxPourcent / 100;
+            } else if (config.modeFraisGeneraux === 'horaire') {
+                fraisGeneraux = totalHeures * config.fraisGenerauxHoraire;
+            } else {
+                fraisGeneraux = config.fraisGenerauxFixe;
+            }
+
+            const prixRevient = coutMO + coutEncadrement + coutConsommables + coutStockage + fraisGeneraux;
+            const marge = parseFloat(document.getElementById('margePercent')?.value || 0);
+            const prixVente = prixRevient * (1 + marge / 100);
+            return prixVente;
+        }
+
+        function renderSimulVolumes() {
+            const container = document.getElementById('simulVolumesTable');
+            const qtyInputs = document.querySelectorAll('.simul-qty');
+            const qtys = [...qtyInputs].map(i => parseFloat(i.value) || 0).filter(q => q > 0);
+
+            if (qtys.length === 0) {
+                container.innerHTML = '<p style="color:#aaa;font-style:italic;font-size:0.85em;">Aucune quantité définie</p>';
+                return;
+            }
+
+            const results = qtys.map(q => ({ qty: q, prix: calcPrixForQty(q) }));
+            const baseQty = results[0].qty;
+            const basePrix = results[0].prix;
+
+            let html = `<table><thead><tr>
+                <th>Quantité</th><th>Prix total (CHF)</th><th>Prix / pièce (CHF)</th><th>Économie vs ${baseQty} pcs</th>
+            </tr></thead><tbody>`;
+
+            results.forEach(r => {
+                const prixPiece = r.qty > 0 ? r.prix / r.qty : 0;
+                const basePrixPiece = basePrix / baseQty;
+                const economy = r.qty !== baseQty ? basePrixPiece - prixPiece : null;
+                const econHtml = economy !== null
+                    ? `<span class="simul-economy">${economy >= 0 ? '-' : '+'}${Math.abs(economy).toFixed(3)} CHF/pcs (${(Math.abs(economy) / basePrixPiece * 100).toFixed(1)}%)</span>`
+                    : '<span style="color:#aaa;">—</span>';
+                html += `<tr>
+                    <td><strong>${r.qty}</strong></td>
+                    <td>${r.prix.toFixed(2)}</td>
+                    <td>${prixPiece.toFixed(3)}</td>
+                    <td>${econHtml}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // FEATURE 3 : Export CSV prestations
+        // ============================================================
+        function exportPrestationsCSV() {
+            // Get currently filtered prestations
+            const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
+            const statut = document.getElementById('filtreStatut')?.value || '';
+            const client = document.getElementById('filtreClient')?.value || '';
+
+            let filtered = [...prestationsSauvegardees].sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (texte) filtered = filtered.filter(p =>
+                (p.client||'').toLowerCase().includes(texte) ||
+                (p.prestation||'').toLowerCase().includes(texte) ||
+                (p.reference||'').toLowerCase().includes(texte)
+            );
+            if (statut) filtered = filtered.filter(p => (p.statut || 'devis') === statut);
+            if (client) filtered = filtered.filter(p => p.client === client);
+
+            const cols = ['Date','Client','Prestation','Référence','Nb pièces','Heures','Prix revient','Marge%','Prix vente','Prix/pièce','Statut'];
+            const rows = [cols];
+            filtered.forEach(p => {
+                rows.push([
+                    p.date,
+                    p.client,
+                    p.prestation,
+                    p.reference,
+                    p.nbPieces || 1,
+                    p.heures.toFixed(2),
+                    p.prixRevient.toFixed(2),
+                    p.marge,
+                    p.prixVente.toFixed(2),
+                    p.nbPieces > 1 ? (p.prixVente / p.nbPieces).toFixed(3) : '',
+                    p.statut || 'devis'
+                ]);
+            });
+
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `prestations_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================================
+        // FEATURE 4 : Historique par référence stock
+        // ============================================================
+        function toggleStockHistory(refId, ref) {
+            const row = document.getElementById('history-row-' + refId);
+            const panel = document.getElementById('history-panel-' + refId);
+            if (!row) return;
+            const isVisible = row.style.display !== 'none';
+            row.style.display = isVisible ? 'none' : '';
+            if (!isVisible) {
+                // Build history content
+                const refMouvements = mouvements.filter(m => m.ref === ref).sort((a, b) => new Date(a.date) - new Date(b.date));
+                if (refMouvements.length === 0) {
+                    panel.innerHTML = '<p style="color:#aaa;font-style:italic;font-size:0.85em;margin:0;">Aucun mouvement enregistré pour cette référence.</p>';
+                    return;
+                }
+                let html = `<strong style="color:#6b8fa3;">Historique des mouvements — ${ref}</strong>
+                    <table style="margin-top:6px;font-size:0.82em;"><thead><tr>
+                        <th>Date</th><th>Type</th><th>Qté</th><th>Prix unit.</th><th>Emplacement</th>
+                    </tr></thead><tbody>`;
+                refMouvements.forEach(m => {
+                    const badgeClass = m.type === 'entree' ? 'badge-success' : m.type === 'sortie' ? 'badge-danger' : 'badge-info';
+                    html += `<tr>
+                        <td>${new Date(m.date).toLocaleDateString('fr-FR')}</td>
+                        <td><span class="badge ${badgeClass}">${m.type.toUpperCase()}</span></td>
+                        <td>${m.qte} ${m.unite}</td>
+                        <td>${m.prix.toFixed(2)} CHF</td>
+                        <td>${m.emplacement}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                panel.innerHTML = html;
+            }
+        }
+
+        // ============================================================
+        // FEATURE 5 : Indicateur de sauvegarde
+        // ============================================================
+        function updateSaveIndicator() {
+            const el = document.getElementById('saveIndicator');
+            if (!el) return;
+            if (!lastSaveTime) {
+                el.textContent = '💾 Jamais sauvegardé';
+                return;
+            }
+            const diff = Math.floor((Date.now() - lastSaveTime) / 1000);
+            if (diff < 30) {
+                el.textContent = '💾 Sauvegardé à l\'instant';
+            } else if (diff < 3600) {
+                const mins = Math.floor(diff / 60);
+                el.textContent = `💾 Sauvegardé il y a ${mins} min`;
+            } else {
+                const hrs = Math.floor(diff / 3600);
+                el.textContent = `💾 Sauvegardé il y a ${hrs} h`;
+            }
+        }
+        // Update indicator every 30 seconds
+        setInterval(updateSaveIndicator, 30000);
+        // Initialize: set lastSaveTime on first load if data exists
+        if (localStorage.getItem('configAtelier')) {
+            lastSaveTime = Date.now();
+            updateSaveIndicator();
+        }
+
+        // ============================================================
+        // FEATURE 6 : Devis PDF
+        // ============================================================
+        function genererDevis() {
+            const client = document.getElementById('client').value;
+            const prestation = document.getElementById('prestation').value;
+            const reference = document.getElementById('reference').value;
+
+            if (!client || !prestation) {
+                alert('Merci de remplir Client et Prestation avant de générer un devis');
+                return;
+            }
+
+            devisCounter++;
+            localStorage.setItem('devisCounter', String(devisCounter));
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const num = String(devisCounter).padStart(3, '0');
+            const devisNum = `DEV-${year}-${num}`;
+            const dateStr = now.toLocaleDateString('fr-FR');
+
+            const nbPieces = parseFloat(document.getElementById('nbPieces').value || 1);
+            const nbCEA = parseFloat(document.getElementById('nbCEA').value || 1);
+            const nbMSP = parseFloat(document.getElementById('nbMSP').value || 0);
+            const marge = parseFloat(document.getElementById('margePercent').value || 0);
+
+            const prixRevient = parseFloat(document.getElementById('totalRevient').textContent || 0);
+            const prixVente = parseFloat(document.getElementById('prixVente').textContent || 0);
+            const margeChf = parseFloat(document.getElementById('margeChf').textContent || 0);
+            const totalHeures = parseFloat(document.getElementById('totalHeures').textContent || 0);
+            const coutMO = parseFloat((document.getElementById('coutMO').textContent || '0').replace(' CHF',''));
+            const coutEncadrement = parseFloat((document.getElementById('coutEncadrement').textContent || '0').replace(' CHF',''));
+            const coutConsommables = parseFloat((document.getElementById('coutConsommables').textContent || '0').replace(' CHF',''));
+            const coutStockage = parseFloat((document.getElementById('coutStockage').textContent || '0').replace(' CHF',''));
+            const coutFrais = parseFloat((document.getElementById('coutFraisGeneraux').textContent || '0').replace(' CHF',''));
+
+            // Build gestes table
+            let gestesRows = '';
+            gesteLines.forEach(lineId => {
+                const line = document.getElementById('line-' + lineId);
+                if (line) {
+                    const sel = line.querySelector('select');
+                    const code = sel?.value;
+                    if (code) {
+                        const geste = catalogueGestes.find(g => g.code === code);
+                        const temps = parseFloat(document.getElementById('temps-' + lineId)?.value || 0);
+                        const qte = parseFloat(document.getElementById('quantite-' + lineId)?.value || 1);
+                        const totalSec = temps * qte * nbPieces;
+                        gestesRows += `<tr>
+                            <td style="padding:7px 10px;">${code}</td>
+                            <td style="padding:7px 10px;">${geste?.description || ''}</td>
+                            <td style="padding:7px 10px;text-align:right;">${temps}s</td>
+                            <td style="padding:7px 10px;text-align:right;">${qte}</td>
+                            <td style="padding:7px 10px;text-align:right;">${(totalSec/60).toFixed(1)} min</td>
+                        </tr>`;
+                    }
+                }
+            });
+
+            // Build consommables table
+            let consomRows = '';
+            consommableLines.forEach(lineId => {
+                const line = document.getElementById('consom-' + lineId);
+                if (line) {
+                    const sel = line.querySelector('select');
+                    const idx = sel?.value;
+                    if (idx !== '' && idx !== undefined) {
+                        const c = catalogueConsommables[parseInt(idx)];
+                        const prix = parseFloat(document.getElementById('prix-consom-' + lineId)?.value || 0);
+                        const qte = parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 0);
+                        if (c && prix > 0) {
+                            consomRows += `<tr>
+                                <td style="padding:7px 10px;">${c.nom}</td>
+                                <td style="padding:7px 10px;text-align:right;">${qte} × ${prix.toFixed(2)} CHF × ${nbPieces} pcs</td>
+                                <td style="padding:7px 10px;text-align:right;">${(prix * qte * nbPieces).toFixed(2)} CHF</td>
+                            </tr>`;
+                        }
+                    }
+                }
+            });
+
+            const prixPieceHtml = nbPieces > 1
+                ? `<div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.5);border-radius:8px;">
+                        <span style="font-size:0.95em;color:#5a7b8f;">Prix unitaire / pièce :</span>
+                        <strong style="font-size:1.4em;color:#6b8fa3;margin-left:12px;">${(prixVente/nbPieces).toFixed(3)} CHF</strong>
+                    </div>` : '';
+
+            const html = `
+                <div class="devis-print">
+                    <div class="devis-header">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+                            <div>
+                                <div class="devis-num">DEVIS ${devisNum}</div>
+                                <div style="font-size:0.9em;color:#2d3e50;opacity:0.8;margin-top:4px;">Date : ${dateStr}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-weight:bold;font-size:1.1em;">🏭 Atelier La Pallanterie</div>
+                                <div style="font-size:0.85em;opacity:0.8;">Outil Chiffrage Atelier</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:25px;">
+                        <div style="background:#f5f9fc;padding:15px;border-radius:10px;border-left:4px solid #a8d5e2;">
+                            <div style="font-weight:bold;color:#6b8fa3;margin-bottom:8px;font-size:0.9em;">ÉMETTEUR</div>
+                            <div style="font-weight:bold;">Atelier La Pallanterie</div>
+                            <div style="font-size:0.85em;color:#7a9db1;">Date : ${dateStr}</div>
+                        </div>
+                        <div style="background:#f5f9fc;padding:15px;border-radius:10px;border-left:4px solid #c9b3d4;">
+                            <div style="font-weight:bold;color:#6b8fa3;margin-bottom:8px;font-size:0.9em;">CLIENT</div>
+                            <div style="font-weight:bold;">${client}</div>
+                            <div style="font-size:0.85em;color:#7a9db1;">Réf : ${reference || '—'}</div>
+                        </div>
+                    </div>
+
+                    <div style="background:#f0f4f8;padding:12px 15px;border-radius:8px;margin-bottom:20px;">
+                        <strong style="color:#6b8fa3;">Objet :</strong> ${prestation}
+                        ${nbPieces > 1 ? ` — <span style="color:#7a9db1;">${nbPieces} pièces</span>` : ''}
+                        | Équipe : ${nbCEA} CEA + ${nbMSP} MSP
+                    </div>
+
+                    ${gestesRows ? `<h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-bottom:10px;">Gestes de production</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:0.88em;">
+                        <thead><tr style="background:#a8d5e2;">
+                            <th style="padding:8px 10px;text-align:left;">Code</th>
+                            <th style="padding:8px 10px;text-align:left;">Description</th>
+                            <th style="padding:8px 10px;text-align:right;">Temps/u</th>
+                            <th style="padding:8px 10px;text-align:right;">Qté</th>
+                            <th style="padding:8px 10px;text-align:right;">Total</th>
+                        </tr></thead>
+                        <tbody>${gestesRows}</tbody>
+                    </table>` : ''}
+
+                    ${consomRows ? `<h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-bottom:10px;">Consommables</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:0.88em;">
+                        <thead><tr style="background:#c9b3d4;">
+                            <th style="padding:8px 10px;text-align:left;">Consommable</th>
+                            <th style="padding:8px 10px;text-align:right;">Détail</th>
+                            <th style="padding:8px 10px;text-align:right;">Montant</th>
+                        </tr></thead>
+                        <tbody>${consomRows}</tbody>
+                    </table>` : ''}
+
+                    <h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-bottom:10px;">Récapitulatif des coûts</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:0.88em;">
+                        <tbody>
+                            <tr><td style="padding:7px 10px;">Main d'œuvre CEA (${totalHeures.toFixed(2)} h × ${nbCEA} pers.)</td><td style="padding:7px 10px;text-align:right;">${coutMO.toFixed(2)} CHF</td></tr>
+                            <tr style="background:#f7f7f7;"><td style="padding:7px 10px;">Encadrement MSP (${totalHeures.toFixed(2)} h × ${nbMSP} pers.)</td><td style="padding:7px 10px;text-align:right;">${coutEncadrement.toFixed(2)} CHF</td></tr>
+                            <tr><td style="padding:7px 10px;">Consommables</td><td style="padding:7px 10px;text-align:right;">${coutConsommables.toFixed(2)} CHF</td></tr>
+                            <tr style="background:#f7f7f7;"><td style="padding:7px 10px;">Stockage</td><td style="padding:7px 10px;text-align:right;">${coutStockage.toFixed(2)} CHF</td></tr>
+                            <tr><td style="padding:7px 10px;">Frais généraux</td><td style="padding:7px 10px;text-align:right;">${coutFrais.toFixed(2)} CHF</td></tr>
+                            <tr style="font-weight:bold;border-top:2px solid #a8d5e2;"><td style="padding:9px 10px;">PRIX DE REVIENT</td><td style="padding:9px 10px;text-align:right;">${prixRevient.toFixed(2)} CHF</td></tr>
+                            <tr style="background:#f7f7f7;"><td style="padding:7px 10px;">Marge (${marge}%)</td><td style="padding:7px 10px;text-align:right;">${margeChf.toFixed(2)} CHF</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div style="background:linear-gradient(135deg,#c9dff0 0%,#e0d4ed 100%);padding:20px;border-radius:10px;text-align:center;margin-bottom:25px;">
+                        <div style="font-size:1em;color:#5a7b8f;margin-bottom:8px;">PRIX DE VENTE${nbPieces > 1 ? ` (× ${nbPieces} pièces)` : ''}</div>
+                        <div style="font-size:2.4em;font-weight:bold;color:#6b8fa3;">${prixVente.toFixed(2)} CHF</div>
+                        ${prixPieceHtml}
+                    </div>
+
+                    <div class="devis-footer">
+                        Devis valable 30 jours — ${devisNum} — Généré le ${dateStr} — Atelier La Pallanterie
+                    </div>
+                </div>`;
+
+            const printZone = document.getElementById('printZone');
+            printZone.innerHTML = html;
+            printZone.style.display = 'block';
+            window.print();
+            printZone.style.display = 'none';
+            printZone.innerHTML = '';
         }
 
     </script>
