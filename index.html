@@ -437,6 +437,8 @@
         body.dark-mode table thead tr th { color: #e0eef5; }
         body.dark-mode .section { color: #cdd6e0; }
 
+        body.dark-mode .admin-section { border-left-color: #7a5a9a; }
+
         /* PIN modal */
         #pinModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; }
         #pinModal.visible { display:flex; }
@@ -477,6 +479,7 @@
         <div class="header" style="position:relative;">
             <h1>🏭 Outil Complet Atelier - La Pallanterie</h1>
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
+            <button id="superUserToggle" onclick="toggleSuperUser()" style="position:absolute;top:15px;right:65px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode admin">🔓</button>
             <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
         </div>
 
@@ -688,10 +691,7 @@
                         <div class="form-group">
                             <label>Type</label>
                             <select id="typeMouvement">
-                                <option value="entree">Entrée</option>
-                                <option value="sortie">Sortie</option>
-                                <option value="transfert">Transfert</option>
-                                <option value="inventaire">Inventaire</option>
+                                <option value="">Chargement...</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -705,9 +705,7 @@
                         <div class="form-group">
                             <label>Unité</label>
                             <select id="uniteMouvement">
-                                <option value="palette">Palette</option>
-                                <option value="carton">Carton</option>
-                                <option value="piece">Pièce</option>
+                                <option value="">Chargement...</option>
                             </select>
                         </div>
                     </div>
@@ -715,11 +713,7 @@
                         <div class="form-group">
                             <label>Emplacement</label>
                             <select id="emplacementStock">
-                                <option value="palette">Zone palette</option>
-                                <option value="rack-A">Rack A</option>
-                                <option value="rack-B">Rack B</option>
-                                <option value="rack-C">Rack C</option>
-                                <option value="picking">Picking</option>
+                                <option value="">Chargement...</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -870,6 +864,34 @@
                 <div style="text-align: center; margin-top: 20px;">
                     <button class="btn btn-success" onclick="saveConfig()">💾 Sauvegarder</button>
                     <button class="btn btn-secondary" onclick="resetConfig()">🔄 Réinitialiser</button>
+                </div>
+
+                <!-- SECTIONS ADMIN -->
+                <div class="section admin-section" style="display:none; border-left: 4px solid #c9b3d4;">
+                    <h2>🔧 Types de mouvement <span style="background:#c9b3d4;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                    <div id="adminListTypes"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+                        <input type="text" id="newTypeInput" placeholder="Nouveau type..." style="max-width:220px;">
+                        <button class="btn btn-success btn-small" onclick="addConfigItem('types')">➕ Ajouter</button>
+                    </div>
+                </div>
+
+                <div class="section admin-section" style="display:none; border-left: 4px solid #c9b3d4;">
+                    <h2>📍 Emplacements <span style="background:#c9b3d4;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                    <div id="adminListEmplacements"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+                        <input type="text" id="newEmplacementInput" placeholder="Nouvel emplacement..." style="max-width:220px;">
+                        <button class="btn btn-success btn-small" onclick="addConfigItem('emplacements')">➕ Ajouter</button>
+                    </div>
+                </div>
+
+                <div class="section admin-section" style="display:none; border-left: 4px solid #c9b3d4;">
+                    <h2>📦 Unités <span style="background:#c9b3d4;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                    <div id="adminListUnites"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+                        <input type="text" id="newUniteInput" placeholder="Nouvelle unité..." style="max-width:220px;">
+                        <button class="btn btn-success btn-small" onclick="addConfigItem('unites')">➕ Ajouter</button>
+                    </div>
                 </div>
             </div>
 
@@ -1156,6 +1178,10 @@
             capacitePalettes: 100
         };
         let stockMins = {}; // {ref: minQte}
+        let configEmplacements = ['Zone palette', 'Rack A', 'Rack B', 'Rack C', 'Picking'];
+        let configUnites = ['Palette', 'Carton', 'Pièce'];
+        let configTypesStock = ['entree', 'sortie', 'transfert', 'inventaire'];
+        let isSuperUser = false;
 
         // Bases de données
         let catalogueGestes = [
@@ -1202,6 +1228,7 @@
 
         // Chargement
         loadFromStorage();
+        renderStockSelects();
         document.getElementById('date').valueAsDate = new Date();
         document.getElementById('dateMouvement').valueAsDate = new Date();
         document.getElementById('margePercent').value = config.margeDefaut;
@@ -1232,6 +1259,12 @@
                 stockActuel = data.stockActuel || {};
             }
             if (savedStockMins) stockMins = JSON.parse(savedStockMins);
+            const savedEmplacements = localStorage.getItem('configEmplacements');
+            const savedUnites = localStorage.getItem('configUnites');
+            const savedTypesStock = localStorage.getItem('configTypesStock');
+            if (savedEmplacements) configEmplacements = JSON.parse(savedEmplacements);
+            if (savedUnites) configUnites = JSON.parse(savedUnites);
+            if (savedTypesStock) configTypesStock = JSON.parse(savedTypesStock);
             loadConfig();
         }
 
@@ -1242,6 +1275,9 @@
             localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
             localStorage.setItem('stockData', JSON.stringify({mouvements, stockActuel}));
             localStorage.setItem('stockMins', JSON.stringify(stockMins));
+            localStorage.setItem('configEmplacements', JSON.stringify(configEmplacements));
+            localStorage.setItem('configUnites', JSON.stringify(configUnites));
+            localStorage.setItem('configTypesStock', JSON.stringify(configTypesStock));
         }
 
         function loadConfig() {
@@ -2679,6 +2715,140 @@
                 setTimeout(() => document.getElementById('pinInput').focus(), 100);
             }
         })();
+
+        // ============================================================
+        // Listes configurables : selects stock
+        // ============================================================
+        function renderStockSelects() {
+            // Type mouvement
+            const selType = document.getElementById('typeMouvement');
+            if (selType) {
+                const currentType = selType.value;
+                selType.innerHTML = configTypesStock.map(t => {
+                    const label = t.charAt(0).toUpperCase() + t.slice(1);
+                    return `<option value="${t}">${label}</option>`;
+                }).join('');
+                if (currentType) selType.value = currentType;
+            }
+
+            // Unité
+            const selUnite = document.getElementById('uniteMouvement');
+            if (selUnite) {
+                const currentUnite = selUnite.value;
+                selUnite.innerHTML = configUnites.map(u => `<option value="${u}">${u}</option>`).join('');
+                if (currentUnite) selUnite.value = currentUnite;
+            }
+
+            // Emplacement
+            const selEmpl = document.getElementById('emplacementStock');
+            if (selEmpl) {
+                const currentEmpl = selEmpl.value;
+                selEmpl.innerHTML = configEmplacements.map(e => `<option value="${e}">${e}</option>`).join('');
+                if (currentEmpl) selEmpl.value = currentEmpl;
+            }
+        }
+
+        // ============================================================
+        // Mode super-utilisateur
+        // ============================================================
+        function toggleSuperUser() {
+            const btn = document.getElementById('superUserToggle');
+            if (isSuperUser) {
+                isSuperUser = false;
+                btn.textContent = '🔓';
+                hideAdminSections();
+            } else {
+                const pin = localStorage.getItem('appPin');
+                if (!pin) {
+                    alert('Configurez d\'abord un PIN dans l\'onglet Config');
+                    return;
+                }
+                // Afficher la modale PIN dédiée au mode admin
+                const entered = prompt('🔐 Entrez le PIN administrateur :');
+                if (entered === null) return;
+                if (entered === pin) {
+                    isSuperUser = true;
+                    btn.textContent = '🔑';
+                    showAdminSections();
+                    renderAdminList('types');
+                    renderAdminList('emplacements');
+                    renderAdminList('unites');
+                } else {
+                    alert('❌ PIN incorrect');
+                }
+            }
+        }
+
+        function showAdminSections() {
+            document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'block');
+        }
+
+        function hideAdminSections() {
+            document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
+        }
+
+        // ============================================================
+        // Gestion des listes configurables (admin)
+        // ============================================================
+        function renderAdminList(type) {
+            let arr, containerId;
+            if (type === 'types') { arr = configTypesStock; containerId = 'adminListTypes'; }
+            else if (type === 'emplacements') { arr = configEmplacements; containerId = 'adminListEmplacements'; }
+            else if (type === 'unites') { arr = configUnites; containerId = 'adminListUnites'; }
+            else return;
+
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (arr.length === 0) {
+                container.innerHTML = '<p style="color:#aaa;font-style:italic;font-size:0.9em;">Aucun élément</p>';
+                return;
+            }
+
+            container.innerHTML = arr.map((item, idx) => `
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #eee;">
+                    <span style="flex:1;font-size:0.95em;">${item}</span>
+                    <button class="delete-btn btn-small" onclick="deleteConfigItem('${type}', ${idx})"
+                        ${arr.length <= 2 ? 'disabled title="Minimum 2 éléments requis" style="opacity:0.4;cursor:not-allowed;"' : ''}>🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function addConfigItem(type) {
+            let inputId, arr;
+            if (type === 'types') { inputId = 'newTypeInput'; arr = configTypesStock; }
+            else if (type === 'emplacements') { inputId = 'newEmplacementInput'; arr = configEmplacements; }
+            else if (type === 'unites') { inputId = 'newUniteInput'; arr = configUnites; }
+            else return;
+
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const val = input.value.trim();
+            if (!val) { alert('Merci de saisir une valeur'); return; }
+            if (arr.includes(val)) { alert('Cette valeur existe déjà'); return; }
+
+            arr.push(val);
+            input.value = '';
+            saveToStorage();
+            renderAdminList(type);
+            renderStockSelects();
+        }
+
+        function deleteConfigItem(type, idx) {
+            let arr;
+            if (type === 'types') arr = configTypesStock;
+            else if (type === 'emplacements') arr = configEmplacements;
+            else if (type === 'unites') arr = configUnites;
+            else return;
+
+            if (arr.length <= 2) { alert('Impossible : minimum 2 éléments requis'); return; }
+            if (!confirm(`Supprimer "${arr[idx]}" ?`)) return;
+
+            arr.splice(idx, 1);
+            saveToStorage();
+            renderAdminList(type);
+            renderStockSelects();
+        }
 
     </script>
 </body>
