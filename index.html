@@ -298,6 +298,25 @@
         .clients-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-top:12px; }
         .capacite-bar { height:22px; border-radius:4px; background:#a8d5e2; transition:width 0.3s; display:flex; align-items:center; padding-left:8px; font-size:0.78em; font-weight:bold; color:#2d3e50; min-width:4px; }
         .capacite-bar.over { background:#f5b8c0; }
+
+        /* ── Modes d'affichage ─────────────────────────────────── */
+        body.density-compact .content { padding: 12px 15px; }
+        body.density-compact .section { padding: 12px; margin-bottom: 10px; }
+        body.density-compact .section h2 { font-size: 1.1em; margin-bottom: 10px; }
+        body.density-compact .stat-card { padding: 10px 14px; }
+        body.density-compact .stat-card .value { font-size: 1.3em; }
+        body.density-compact table td, body.density-compact table th { padding: 5px 8px; font-size: 0.82em; }
+        body.density-compact .btn { padding: 7px 14px; font-size: 0.88em; }
+        body.density-compact .geste-line, body.density-compact .consommable-line, body.density-compact .stock-line { gap: 6px; margin-bottom: 6px; }
+        body.density-compact input, body.density-compact select, body.density-compact textarea { padding: 6px; font-size: 0.88em; }
+
+        .prest-compact-row { display:flex; align-items:center; gap:8px; padding:9px 12px; background:#fff; border-radius:8px; border-left:4px solid #a8d5e2; margin-bottom:6px; flex-wrap:wrap; font-size:0.88em; }
+        .prest-compact-row:hover { background:#f5fafe; }
+        .prest-table-wrap table { font-size:0.85em; }
+
+        .display-mode-btn { padding:8px 16px; border-radius:8px; border:2px solid #dde8f0; background:#f5f9fc; color:#5a7b8f; cursor:pointer; font-size:0.9em; font-weight:600; transition:all 0.2s; }
+        .display-mode-btn.active { border-color:#a8d5e2; background:#e8f6fb; color:#3a6a7e; }
+        .display-mode-btn:hover:not(.active) { border-color:#c0d8e8; background:#edf5fa; }
         
         .total-box {
             background: linear-gradient(135deg, #c9dff0 0%, #e0d4ed 100%);
@@ -618,13 +637,13 @@
                     <button class="btn" onclick="addGesteLine()">+ Ajouter geste</button>
                 </div>
 
-                <div class="section">
+                <div class="section" id="sectionConsommables">
                     <h2>Consommables</h2>
                     <div id="consommablesContainer"></div>
                     <button class="btn" onclick="addConsommableLine()">+ Ajouter consommable</button>
                 </div>
 
-                <div class="section">
+                <div class="section" id="sectionStockage">
                     <h2>Stockage</h2>
                     <div id="stockageContainer"></div>
                     <button class="btn" onclick="addStockageLine()">+ Période stockage</button>
@@ -1144,6 +1163,30 @@
                     </div>
                     <div id="pinStatus" style="margin-top:10px;font-size:0.9em;color:#7a9db1;"></div>
                 </div>
+
+                <div class="section" style="border-left-color:#a8d5e2;">
+                    <h2>🖥️ Modes d'affichage</h2>
+                    <div class="info-box">Personnalisez l'interface selon vos préférences. Les réglages sont sauvegardés automatiquement.</div>
+
+                    <h3 style="margin-top:16px;margin-bottom:10px;">Vue de la liste des prestations</h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="display-mode-btn" id="btn-vue-detaillee" onclick="setDisplayPref('vuePrestations','detaillee')">📋 Détaillée<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Cartes complètes avec métriques</span></button>
+                        <button class="display-mode-btn" id="btn-vue-compacte" onclick="setDisplayPref('vuePrestations','compacte')">⚡ Compacte<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Une ligne par prestation</span></button>
+                        <button class="display-mode-btn" id="btn-vue-tableau" onclick="setDisplayPref('vuePrestations','tableau')">📊 Tableau<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Grille avec colonnes triables</span></button>
+                    </div>
+
+                    <h3 style="margin-top:18px;margin-bottom:10px;">Densité de l'interface</h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="display-mode-btn" id="btn-densite-normale" onclick="setDisplayPref('densite','normale')">🔲 Normale<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Espacement standard</span></button>
+                        <button class="display-mode-btn" id="btn-densite-compacte" onclick="setDisplayPref('densite','compacte')">🗜️ Compacte<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Moins d'espacement, plus de contenu visible</span></button>
+                    </div>
+
+                    <h3 style="margin-top:18px;margin-bottom:10px;">Mode calculateur</h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="display-mode-btn" id="btn-calc-complet" onclick="setDisplayPref('modeCalculateur','complet')">🔧 Complet<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Consommables + Stockage visibles</span></button>
+                        <button class="display-mode-btn" id="btn-calc-simplifie" onclick="setDisplayPref('modeCalculateur','simplifie')">✂️ Simplifié<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Sections avancées masquées par défaut</span></button>
+                    </div>
+                </div>
             </div>
 
             <!-- ONGLET STATS -->
@@ -1338,6 +1381,7 @@
         let configUnites = ['Palette', 'Carton', 'Pièce'];
         let configTypesStock = ['entree', 'sortie', 'transfert', 'inventaire'];
         let isSuperUser = false;
+        let displayPrefs = { vuePrestations: 'detaillee', densite: 'normale', modeCalculateur: 'complet' };
 
         // Bases de données
         let catalogueGestes = [
@@ -1452,6 +1496,8 @@
             const savedModeles = localStorage.getItem('configModeles');
             if (savedModeles) configModeles = JSON.parse(savedModeles);
             devisCounter = parseInt(localStorage.getItem('devisCounter') || '0');
+            const savedDisplayPrefs = localStorage.getItem('displayPrefs');
+            if (savedDisplayPrefs) displayPrefs = Object.assign(displayPrefs, JSON.parse(savedDisplayPrefs));
             loadConfig();
         }
 
@@ -1467,6 +1513,7 @@
             localStorage.setItem('configTypesStock', JSON.stringify(configTypesStock));
             localStorage.setItem('configModeles', JSON.stringify(configModeles));
             localStorage.setItem('devisCounter', String(devisCounter));
+            localStorage.setItem('displayPrefs', JSON.stringify(displayPrefs));
             lastSaveTime = Date.now();
             updateSaveIndicator();
         }
@@ -1550,7 +1597,7 @@
                 renderStockMinTable();
             }
             else if (tabName === 'parametrage') loadConfig();
-            else if (tabName === 'config') { loadConfig(); updatePinStatus(); }
+            else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); }
         }
 
         function addGesteLine(opts) {
@@ -2422,7 +2469,13 @@
             const statut = document.getElementById('filtreStatut')?.value || '';
             const client = document.getElementById('filtreClient')?.value || '';
 
-            let filtered = [...prestationsSauvegardees].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const sortF = window._prestSort || 'date';
+            const sortD = window._prestSortDir !== undefined ? window._prestSortDir : -1;
+            let filtered = [...prestationsSauvegardees].sort((a, b) => {
+                const va = sortF === 'date' ? new Date(a[sortF] || 0) : (typeof a[sortF] === 'string' ? (a[sortF]||'').toLowerCase() : (a[sortF] || 0));
+                const vb = sortF === 'date' ? new Date(b[sortF] || 0) : (typeof b[sortF] === 'string' ? (b[sortF]||'').toLowerCase() : (b[sortF] || 0));
+                return (va < vb ? -1 : va > vb ? 1 : 0) * sortD;
+            });
 
             if (texte) {
                 filtered = filtered.filter(p =>
@@ -2519,7 +2572,59 @@
                 </div>`;
             });
 
-            container.innerHTML = html;
+            if (displayPrefs.vuePrestations === 'compacte') {
+                container.innerHTML = filtered.map(p => {
+                    const badge = getStatutBadgeHtml(p.statut || 'devis');
+                    return `<div class="prest-compact-row">
+                        ${badge}
+                        <strong style="color:#6b8fa3;min-width:140px;">${p.prestation}</strong>
+                        <span style="color:#7a9db1;">🏢 ${p.client}</span>
+                        <span style="color:#aaa;font-size:0.85em;">📅 ${new Date(p.date).toLocaleDateString('fr-FR')}</span>
+                        <span style="margin-left:auto;font-weight:bold;color:#6b8fa3;">${p.prixVente.toFixed(2)} CHF</span>
+                        <span style="color:${(p.prixVente-p.prixRevient)>=0?'#27ae60':'#e74c3c'};font-size:0.85em;">${p.marge}%</span>
+                        <div style="display:flex;gap:4px;">
+                            <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Statut">🔄</button>
+                            <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
+                            <button class="btn btn-small" onclick="printPrestation(${p.id})">📄</button>
+                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            } else if (displayPrefs.vuePrestations === 'tableau') {
+                let sortField = window._prestSort || 'date';
+                let sortDir = window._prestSortDir || -1;
+                const sortArrow = dir => dir > 0 ? ' ▲' : ' ▼';
+                const th = (f, label) => `<th style="cursor:pointer;user-select:none;" onclick="sortPrestations('${f}')">${label}${sortField===f?sortArrow(sortDir):''}</th>`;
+                let thtml = `<div class="prest-table-wrap"><table><thead><tr>
+                    ${th('date','Date')}${th('client','Client')}${th('prestation','Prestation')}${th('statut','Statut')}
+                    ${th('prixVente','Prix vente')}${th('marge','Marge')}${th('heures','Heures')}
+                    <th>Actions</th></tr></thead><tbody>`;
+                filtered.forEach(p => {
+                    const badge = getStatutBadgeHtml(p.statut || 'devis');
+                    thtml += `<tr>
+                        <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
+                        <td>${p.client}</td><td><strong>${p.prestation}</strong><br><span style="font-size:0.78em;color:#aaa;">${p.reference}</span></td>
+                        <td>${badge}</td>
+                        <td style="font-weight:bold;">${p.prixVente.toFixed(2)} CHF</td>
+                        <td style="color:${(p.prixVente-p.prixRevient)>=0?'#27ae60':'#e74c3c'}">${p.marge}%</td>
+                        <td>${p.heures.toFixed(1)}h</td>
+                        <td style="white-space:nowrap;">
+                            <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})">🔄</button>
+                            <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
+                            <button class="btn btn-small" onclick="printPrestation(${p.id})">📄</button>
+                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                        </td></tr>`;
+                });
+                container.innerHTML = thtml + '</tbody></table></div>';
+            } else {
+                container.innerHTML = html;
+            }
+        }
+
+        function sortPrestations(field) {
+            if (window._prestSort === field) window._prestSortDir = (window._prestSortDir || -1) * -1;
+            else { window._prestSort = field; window._prestSortDir = -1; }
+            renderPrestations();
         }
 
         function deletePrestation(id) {
@@ -3495,6 +3600,41 @@
             const btn = document.getElementById('darkModeToggle');
             if (btn) btn.textContent = '☀️';
         }
+
+        // ============================================================
+        // FEATURE : Modes d'affichage
+        // ============================================================
+        function setDisplayPref(key, value) {
+            displayPrefs[key] = value;
+            saveToStorage();
+            applyDisplayPrefs();
+            // Refresh la vue prestations si on change la vue
+            if (key === 'vuePrestations') renderPrestations();
+        }
+
+        function applyDisplayPrefs() {
+            // Densité
+            document.body.classList.toggle('density-compact', displayPrefs.densite === 'compacte');
+            // Mode calculateur
+            const secConsom = document.getElementById('sectionConsommables');
+            const secStock = document.getElementById('sectionStockage');
+            if (secConsom) secConsom.style.display = displayPrefs.modeCalculateur === 'simplifie' ? 'none' : '';
+            if (secStock) secStock.style.display = displayPrefs.modeCalculateur === 'simplifie' ? 'none' : '';
+            // Boutons actifs dans Config
+            updateDisplayModeButtons();
+        }
+
+        function updateDisplayModeButtons() {
+            [['vuePrestations','detaillee'],['vuePrestations','compacte'],['vuePrestations','tableau'],
+             ['densite','normale'],['densite','compacte'],
+             ['modeCalculateur','complet'],['modeCalculateur','simplifie']].forEach(([key, val]) => {
+                const btn = document.getElementById(`btn-${key==='vuePrestations'?'vue':key==='modeCalculateur'?'calc':key}-${val}`);
+                if (btn) btn.classList.toggle('active', displayPrefs[key] === val);
+            });
+        }
+
+        // Appliquer au chargement
+        applyDisplayPrefs();
 
         // ============================================================
         // FEATURE 10 : Code PIN
