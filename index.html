@@ -2707,14 +2707,7 @@
             el.textContent = pin ? `🔒 PIN configuré (${pin.length} caractères)` : '🔓 Aucun PIN configuré';
         }
 
-        // Show PIN modal on load if configured
-        (function initPin() {
-            const pin = localStorage.getItem('appPin');
-            if (pin) {
-                document.getElementById('pinModal').classList.add('visible');
-                setTimeout(() => document.getElementById('pinInput').focus(), 100);
-            }
-        })();
+        // PIN utilisé uniquement pour le mode admin (bouton 🔓)
 
         // ============================================================
         // Listes configurables : selects stock
