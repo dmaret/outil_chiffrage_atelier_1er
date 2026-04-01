@@ -530,11 +530,16 @@
                             <label>Responsable</label>
                             <input type="text" id="responsable" value="Davie Maret">
                         </div>
+                        <div class="form-group">
+                            <label>🔢 Nb de pièces</label>
+                            <input type="number" id="nbPieces" min="1" value="1" onchange="calculateTotal()" style="font-weight:bold;border-color:#a8d5e2;">
+                            <span class="help-text">Gestes et consommables × nb pièces</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="section">
-                    <h2>Gestes de production</h2>
+                    <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
                     <div id="gestesContainer"></div>
                     <button class="btn" onclick="addGesteLine()">+ Ajouter geste</button>
                 </div>
@@ -605,14 +610,18 @@
                             <div class="value"><span id="totalHeures">0.00</span> h</div>
                         </div>
                         <div class="total-item">
+                            <div class="label">Temps / pièce</div>
+                            <div class="value" id="totalHeuresPiece" style="font-size:1.2em;">— h</div>
+                        </div>
+                        <div class="total-item">
                             <div class="label">Prix revient</div>
                             <div class="value"><span id="totalRevient">0.00</span> CHF</div>
                         </div>
                         <div class="total-item">
                             <div class="label">Marge %</div>
                             <div class="value">
-                                <input type="number" id="margePercent" min="0" max="100" value="15" 
-                                       onchange="calculateTotal()" 
+                                <input type="number" id="margePercent" min="0" max="100" value="15"
+                                       onchange="calculateTotal()"
                                        style="width: 70px; text-align: center; background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; font-size: 0.9em; font-weight: bold; padding: 3px;">
                             </div>
                         </div>
@@ -621,9 +630,15 @@
                             <div class="value"><span id="margeChf">0.00</span></div>
                         </div>
                     </div>
-                    <div class="prix-final">
-                        <div class="label">💵 PRIX DE VENTE</div>
-                        <div class="value"><span id="prixVente">0.00</span> CHF</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;">
+                        <div class="prix-final" id="prixUnitaireBox" style="display:none;">
+                            <div class="label">📦 PRIX / PIÈCE</div>
+                            <div class="value"><span id="prixVentePiece">0.00</span> CHF</div>
+                        </div>
+                        <div class="prix-final" id="prixTotalBox">
+                            <div class="label">💵 PRIX DE VENTE <span id="prixVenteTotalLabel"></span></div>
+                            <div class="value"><span id="prixVente">0.00</span> CHF</div>
+                        </div>
                     </div>
                     <div id="alerteMargeBasse">⚠️ Attention : la marge est en dessous du seuil minimum configuré !</div>
                 </div>
@@ -1537,33 +1552,37 @@
         }
 
         function calculateTotal() {
-            let totalSecondes = 0;
-            
+            const nbPieces = Math.max(1, parseFloat(document.getElementById('nbPieces')?.value || 1));
+            let secondesParPiece = 0;
+
             gesteLines.forEach(lineId => {
                 const temps = parseFloat(document.getElementById('temps-' + lineId)?.value || 0);
                 const quantite = parseFloat(document.getElementById('quantite-' + lineId)?.value || 0);
-                totalSecondes += temps * quantite;
+                secondesParPiece += temps * quantite;
             });
-            
+
             const mailsMin = parseFloat(document.getElementById('tempsMailsMin')?.value || 0);
             const impressionMin = parseFloat(document.getElementById('tempsImpressionMin')?.value || 0);
             const coordMin = parseFloat(document.getElementById('tempsCoordMin')?.value || 0);
-            
-            totalSecondes += (mailsMin + impressionMin + coordMin) * 60;
-            
+            const secondesAdmin = (mailsMin + impressionMin + coordMin) * 60;
+
+            // Gestes × nb pièces + admin fixe
+            const totalSecondes = secondesParPiece * nbPieces + secondesAdmin;
             const totalHeures = totalSecondes / 3600;
-            
+            const heuresParPiece = secondesParPiece / 3600;
+
             const nbCEA = parseFloat(document.getElementById('nbCEA')?.value || 0);
             const nbMSP = parseFloat(document.getElementById('nbMSP')?.value || 0);
-            
+
             const coutMO = totalHeures * nbCEA * config.coutHoraireCEA;
             const coutEncadrement = totalHeures * nbMSP * config.coutHoraireMSP;
-            
+
+            // Consommables × nb pièces
             let coutConsommables = 0;
             consommableLines.forEach(lineId => {
                 const prix = parseFloat(document.getElementById('prix-consom-' + lineId)?.value || 0);
                 const qte = parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 0);
-                const total = prix * qte;
+                const total = prix * qte * nbPieces;
                 if (document.getElementById('total-consom-' + lineId)) {
                     document.getElementById('total-consom-' + lineId).value = total.toFixed(2);
                 }
@@ -1603,7 +1622,10 @@
             const margeChf = prixRevient * margePourcent / 100;
             const prixVente = prixRevient + margeChf;
             
+            const prixVentePiece = nbPieces > 1 ? prixVente / nbPieces : null;
+
             document.getElementById('totalHeures').textContent = totalHeures.toFixed(2);
+            document.getElementById('totalHeuresPiece').textContent = nbPieces > 1 ? (heuresParPiece * 60).toFixed(1) + ' min' : '—';
             document.getElementById('coutMO').textContent = coutMO.toFixed(2) + ' CHF';
             document.getElementById('coutEncadrement').textContent = coutEncadrement.toFixed(2) + ' CHF';
             document.getElementById('coutConsommables').textContent = coutConsommables.toFixed(2) + ' CHF';
@@ -1613,6 +1635,21 @@
             document.getElementById('totalRevient').textContent = prixRevient.toFixed(2);
             document.getElementById('margeChf').textContent = margeChf.toFixed(2);
             document.getElementById('prixVente').textContent = prixVente.toFixed(2);
+
+            // Affichage prix unitaire si nb pièces > 1
+            const boxUnitaire = document.getElementById('prixUnitaireBox');
+            const boxTotal = document.getElementById('prixTotalBox');
+            const labelTotal = document.getElementById('prixVenteTotalLabel');
+            if (nbPieces > 1) {
+                boxUnitaire.style.display = 'block';
+                boxTotal.style.cssText = '';
+                document.getElementById('prixVentePiece').textContent = prixVentePiece.toFixed(2);
+                if (labelTotal) labelTotal.textContent = `(× ${nbPieces} pièces)`;
+            } else {
+                boxUnitaire.style.display = 'none';
+                if (boxTotal) boxTotal.style.gridColumn = '1 / -1';
+                if (labelTotal) labelTotal.textContent = '';
+            }
 
             // Alerte marge basse
             const seuilMin = config.seuilMargeMin || 0;
@@ -1685,7 +1722,9 @@
                 coutMO: parseFloat(document.getElementById('coutMO').textContent),
                 coutEncadrement: parseFloat(document.getElementById('coutEncadrement').textContent),
                 coutConsommables: parseFloat(document.getElementById('coutConsommables').textContent),
-                coutStockage: parseFloat(document.getElementById('coutStockage').textContent)
+                coutStockage: parseFloat(document.getElementById('coutStockage').textContent),
+                nbPieces: parseFloat(document.getElementById('nbPieces').value || 1),
+                prixVentePiece: parseFloat(document.getElementById('prixVentePiece')?.textContent || 0)
             };
             
             prestationsSauvegardees.push(prest);
@@ -1701,6 +1740,7 @@
             document.getElementById('date').valueAsDate = new Date();
             document.getElementById('nbCEA').value = '1';
             document.getElementById('nbMSP').value = '0.5';
+            document.getElementById('nbPieces').value = '1';
             document.getElementById('tempsMailsMin').value = '0';
             document.getElementById('tempsImpressionMin').value = '0';
             document.getElementById('tempsCoordMin').value = '0';
@@ -1865,7 +1905,7 @@
                         </div>
                     </div>
                     <div style="font-size: 0.85em; color: #7a9db1; margin-bottom: 10px;">
-                        📅 ${date} | 🏢 ${p.client} | 📋 ${p.reference} | 👥 ${p.nbCEA} CEA + ${p.nbMSP} MSP
+                        📅 ${date} | 🏢 ${p.client} | 📋 ${p.reference} | 👥 ${p.nbCEA} CEA + ${p.nbMSP} MSP${p.nbPieces > 1 ? ` | 🔢 ${p.nbPieces} pièces` : ''}
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
                         <div style="text-align: center;">
@@ -1881,9 +1921,13 @@
                             <div style="font-weight: bold; color: #6b8fa3;">${p.marge}% (${margeChfVal} CHF)</div>
                         </div>
                         <div style="text-align: center;">
-                            <div style="font-size: 0.75em; color: #7a9db1;">Vente</div>
+                            <div style="font-size: 0.75em; color: #7a9db1;">Vente ${p.nbPieces > 1 ? 'total' : ''}</div>
                             <div style="font-weight: bold; color: #6b8fa3;">${p.prixVente.toFixed(2)} CHF</div>
                         </div>
+                        ${p.nbPieces > 1 ? `<div style="text-align: center;">
+                            <div style="font-size: 0.75em; color: #7a9db1;">Prix / pièce</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${(p.prixVente / p.nbPieces).toFixed(2)} CHF</div>
+                        </div>` : ''}
                     </div>
                 </div>`;
             });
