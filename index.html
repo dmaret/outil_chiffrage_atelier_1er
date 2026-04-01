@@ -706,7 +706,8 @@
                             <input type="date" id="dateMouvement">
                         </div>
                     </div>
-                    <button class="btn" onclick="addMouvement()">➕ Enregistrer</button>
+                    <button class="btn" id="btnSaveMouvement" onclick="addMouvement()">➕ Enregistrer</button>
+                    <button class="btn btn-secondary" id="btnCancelEdit" style="display:none;" onclick="cancelEditMouvement()">✖ Annuler</button>
                 </div>
 
                 <div class="section">
@@ -1172,6 +1173,7 @@
         let gesteLines = [];
         let consommableLines = [];
         let stockageLines = [];
+        let editingMouvementId = null;
 
         // Chargement
         loadFromStorage();
@@ -1948,6 +1950,53 @@
             document.getElementById('bilanTempsStock').textContent = totalTempsStockH.toFixed(1) + ' h';
         }
 
+        function editMouvement(id) {
+            const m = mouvements.find(x => x.id === id);
+            if (!m) return;
+            editingMouvementId = id;
+            document.getElementById('typeMouvement').value = m.type;
+            document.getElementById('refProduit').value = m.ref;
+            document.getElementById('qteMouvement').value = m.qte;
+            document.getElementById('uniteMouvement').value = m.unite;
+            document.getElementById('emplacementStock').value = m.emplacement;
+            document.getElementById('prixUnitaire').value = m.prix;
+            document.getElementById('dateMouvement').value = m.date;
+            document.getElementById('btnSaveMouvement').textContent = '✅ Sauvegarder la modification';
+            document.getElementById('btnSaveMouvement').style.background = '#a8e2c0';
+            document.getElementById('btnCancelEdit').style.display = 'inline-block';
+            document.getElementById('btnSaveMouvement').scrollIntoView({behavior: 'smooth', block: 'center'});
+        }
+
+        function cancelEditMouvement() {
+            editingMouvementId = null;
+            document.getElementById('refProduit').value = '';
+            document.getElementById('qteMouvement').value = '1';
+            document.getElementById('prixUnitaire').value = '';
+            document.getElementById('btnSaveMouvement').textContent = '➕ Enregistrer';
+            document.getElementById('btnSaveMouvement').style.background = '';
+            document.getElementById('btnCancelEdit').style.display = 'none';
+        }
+
+        function recalculerStock() {
+            stockActuel = {};
+            mouvements.forEach(m => {
+                if (m.type === 'entree') {
+                    if (!stockActuel[m.ref]) stockActuel[m.ref] = {lots: [], total: 0};
+                    stockActuel[m.ref].lots.push({date: m.date, qte: m.qte, prix: m.prix, emplacement: m.emplacement});
+                    stockActuel[m.ref].total += m.qte;
+                } else if (m.type === 'sortie' && stockActuel[m.ref]) {
+                    let reste = m.qte;
+                    while (reste > 0 && stockActuel[m.ref].lots.length > 0) {
+                        const lot = stockActuel[m.ref].lots[0];
+                        if (lot.qte <= reste) { reste -= lot.qte; stockActuel[m.ref].lots.shift(); }
+                        else { lot.qte -= reste; reste = 0; }
+                    }
+                    stockActuel[m.ref].total -= m.qte;
+                    if (stockActuel[m.ref].total <= 0) delete stockActuel[m.ref];
+                }
+            });
+        }
+
         function addMouvement() {
             const type = document.getElementById('typeMouvement').value;
             const ref = document.getElementById('refProduit').value.trim();
@@ -1956,12 +2005,28 @@
             const emplacement = document.getElementById('emplacementStock').value;
             const prix = parseFloat(document.getElementById('prixUnitaire').value || 0);
             const date = document.getElementById('dateMouvement').value;
-            
+
             if (!ref || qte <= 0) {
                 alert('Merci de remplir Référence et Quantité');
                 return;
             }
-            
+
+            if (editingMouvementId !== null) {
+                // Mode modification : remplacer le mouvement existant
+                const idx = mouvements.findIndex(m => m.id === editingMouvementId);
+                if (idx !== -1) {
+                    mouvements[idx] = { id: editingMouvementId, type, date, ref, qte, unite, emplacement, prix };
+                }
+                recalculerStock();
+                cancelEditMouvement();
+                saveToStorage();
+                updateStockStats();
+                renderMouvements();
+                renderValorisation();
+                alert('✅ Mouvement modifié');
+                return;
+            }
+
             const mouvement = {
                 id: Date.now(),
                 type: type,
@@ -1972,7 +2037,7 @@
                 emplacement: emplacement,
                 prix: prix
             };
-            
+
             mouvements.push(mouvement);
             
             if (type === 'entree') {
@@ -2089,7 +2154,10 @@
                     <td>${m.qte} ${m.unite}</td>
                     <td>${m.emplacement}</td>
                     <td>${m.prix.toFixed(2)}</td>
-                    <td><button class="delete-btn btn-small" onclick="deleteMouvement(${m.id})">🗑️</button></td>
+                    <td style="display:flex;gap:4px;">
+                        <button class="btn btn-small" style="padding:4px 8px;font-size:0.8em;background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editMouvement(${m.id})">✏️</button>
+                        <button class="delete-btn btn-small" onclick="deleteMouvement(${m.id})">🗑️</button>
+                    </td>
                 </tr>`;
             });
             
@@ -2132,16 +2200,7 @@
         function deleteMouvement(id) {
             if (confirm('Supprimer ce mouvement?')) {
                 mouvements = mouvements.filter(m => m.id !== id);
-                stockActuel = {};
-                mouvements.forEach(m => {
-                    if (m.type === 'entree') {
-                        if (!stockActuel[m.ref]) {
-                            stockActuel[m.ref] = {lots: [], total: 0};
-                        }
-                        stockActuel[m.ref].lots.push({date: m.date, qte: m.qte, prix: m.prix, emplacement: m.emplacement});
-                        stockActuel[m.ref].total += m.qte;
-                    }
-                });
+                recalculerStock();
                 saveToStorage();
                 updateStockStats();
                 renderMouvements();
