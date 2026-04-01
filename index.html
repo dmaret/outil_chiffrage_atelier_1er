@@ -703,7 +703,8 @@
                 </div>
 
                 <div style="margin-top: 25px; text-align: center;">
-                    <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer</button>
+                    <button class="btn btn-success" id="btnSavePrestation" onclick="savePrestation()">💾 Enregistrer</button>
+                    <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
                     <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
                     <button class="btn btn-secondary" onclick="genererDevis()">📄 Générer devis</button>
@@ -1307,6 +1308,27 @@
             {code: "PRE-02", categorie: "Préparation", description: "Picking", temps: 20, coef: 1.1, notes: "Prélèvement article selon bon"},
             {code: "EXP-01", categorie: "Expédition", description: "Peser colis", temps: 15, coef: 1.0, notes: "Balance de précision"},
             {code: "EXP-02", categorie: "Expédition", description: "Filmer palette", temps: 180, coef: 1.2, notes: "Film étirable machine ou manuel"},
+            {code: "ASS-04", categorie: "Assemblage", description: "Calage (carton / caisse)", temps: 3, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-05", categorie: "Assemblage", description: "Fermeture d'un sachet mini-grip", temps: 3, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-06", categorie: "Assemblage", description: "Filmage (élément unitaire)", temps: 12, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-07", categorie: "Assemblage", description: "Banderolage produit", temps: 12, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-08", categorie: "Assemblage", description: "Formage + fermeture d'un étui carton complexe", temps: 10, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-09", categorie: "Assemblage", description: "Formage + fermeture d'un étui carton simple", temps: 5, coef: 1.0, notes: "Niveau 1"},
+            {code: "ASS-10", categorie: "Assemblage", description: "Formage et mise en place d'un fourreau orienté", temps: 10, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-11", categorie: "Assemblage", description: "Groupage de plusieurs éléments avec un élastique", temps: 10, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-12", categorie: "Assemblage", description: "Insertion d'un élément complexe (orienté/insertion difficile)", temps: 5, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-13", categorie: "Assemblage", description: "Insertion d'un élément (comptage par balance)", temps: 0.5, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-14", categorie: "Assemblage", description: "Insertion d'un élément simple (orienté)", temps: 2, coef: 1.0, notes: "Niveau 1"},
+            {code: "ASS-15", categorie: "Assemblage", description: "Pliage complexe", temps: 6, coef: 1.2, notes: "Niveau 2"},
+            {code: "ASS-16", categorie: "Assemblage", description: "Pliage simple (par rainure)", temps: 3, coef: 1.0, notes: "Niveau 1"},
+            {code: "CTR-02", categorie: "Contrôle", description: "Contrôle d'un élément fini (par élément)", temps: 1.5, coef: 1.2, notes: "Niveau 2"},
+            {code: "CTR-03", categorie: "Contrôle", description: "Mise en conformité avant envoi (caisse/carton)", temps: 10, coef: 1.5, notes: "Contrôle fin - Niveau 3"},
+            {code: "CTR-04", categorie: "Contrôle", description: "Mise en conformité avant envoi palette", temps: 60, coef: 1.5, notes: "Contrôle fin - Niveau 3"},
+            {code: "ETI-04", categorie: "Étiquetage", description: "Collage d'une étiquette orientée (complexe/précise)", temps: 5, coef: 1.2, notes: "Niveau 2"},
+            {code: "ETI-05", categorie: "Étiquetage", description: "Collage d'une étiquette orientée (simple)", temps: 3, coef: 1.0, notes: "Niveau 1"},
+            {code: "ETI-06", categorie: "Étiquetage", description: "Impression Inkjet ou caractère manuscrit", temps: 3, coef: 1.2, notes: "Niveau 2"},
+            {code: "PRE-03", categorie: "Préparation", description: "Reconditionnement d'un élément (comptage/orientation)", temps: 3, coef: 1.2, notes: "Niveau 2"},
+            {code: "REC-03", categorie: "Réception", description: "Déballage d'un élément", temps: 5, coef: 1.0, notes: "Niveau 1"},
         ];
 
         let catalogueConsommables = [
@@ -1328,6 +1350,7 @@
         let consommableLines = [];
         let stockageLines = [];
         let editingMouvementId = null;
+        let editingPrestationId = null;
 
         // Feature variables
         let configModeles = [];
@@ -1770,12 +1793,12 @@
             const client = document.getElementById('client').value;
             const prestation = document.getElementById('prestation').value;
             const reference = document.getElementById('reference').value;
-            
+
             if (!client || !prestation || !reference) {
                 alert('Merci de remplir Client, Prestation et Référence');
                 return;
             }
-            
+
             const gestes = [];
             gesteLines.forEach(lineId => {
                 const line = document.getElementById('line-' + lineId);
@@ -1785,14 +1808,38 @@
                     if (code) {
                         const temps = parseFloat(document.getElementById('temps-' + lineId).value || 0);
                         const quantite = parseFloat(document.getElementById('quantite-' + lineId).value || 0);
+                        const typeApp = document.getElementById('type-geste-' + lineId)?.value || 'piece';
                         const geste = catalogueGestes.find(g => g.code === code);
-                        gestes.push({code, description: geste?.description || '', temps, quantite});
+                        gestes.push({code, description: geste?.description || '', temps, quantite, typeApp});
                     }
                 }
             });
-            
+
+            const consommables = [];
+            consommableLines.forEach(lineId => {
+                const line = document.getElementById('consom-' + lineId);
+                if (line) {
+                    const idx = line.querySelector('select')?.value;
+                    if (idx !== '' && idx !== undefined) {
+                        const c = catalogueConsommables[parseInt(idx)];
+                        const qte = parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 1);
+                        if (c) consommables.push({nom: c.nom, prix: c.prix, qte});
+                    }
+                }
+            });
+
+            const stockage = [];
+            stockageLines.forEach(lineId => {
+                const type = document.getElementById('type-stock-' + lineId)?.value;
+                if (type) {
+                    const qte = parseFloat(document.getElementById('qte-stock-' + lineId)?.value || 1);
+                    const duree = parseFloat(document.getElementById('duree-stock-' + lineId)?.value || 1);
+                    stockage.push({type, qte, duree});
+                }
+            });
+
             const prest = {
-                id: Date.now(),
+                id: editingPrestationId || Date.now(),
                 date: document.getElementById('date').value,
                 client: client,
                 prestation: prestation,
@@ -1805,6 +1852,8 @@
                 marge: parseFloat(document.getElementById('margePercent').value),
                 prixVente: parseFloat(document.getElementById('prixVente').textContent),
                 gestes: gestes,
+                consommables: consommables,
+                stockage: stockage,
                 coutMO: parseFloat(document.getElementById('coutMO').textContent),
                 coutEncadrement: parseFloat(document.getElementById('coutEncadrement').textContent),
                 coutConsommables: parseFloat(document.getElementById('coutConsommables').textContent),
@@ -1813,14 +1862,31 @@
                 prixVentePiece: parseFloat(document.getElementById('prixVentePiece')?.textContent || 0),
                 statut: 'devis'
             };
-            
-            prestationsSauvegardees.push(prest);
-            saveToStorage();
-            alert('✅ Prestation enregistrée');
+
+            if (editingPrestationId !== null) {
+                const idx = prestationsSauvegardees.findIndex(x => x.id === editingPrestationId);
+                if (idx !== -1) {
+                    prest.statut = prestationsSauvegardees[idx].statut;
+                    prestationsSauvegardees[idx] = prest;
+                }
+                saveToStorage();
+                alert('✅ Prestation mise à jour');
+            } else {
+                prestationsSauvegardees.push(prest);
+                saveToStorage();
+                alert('✅ Prestation enregistrée');
+            }
+
             resetCalculateur();
         }
 
         function resetCalculateur() {
+            editingPrestationId = null;
+            const btnSave = document.getElementById('btnSavePrestation');
+            const btnCancel = document.getElementById('btnCancelEditPrestation');
+            if (btnSave) { btnSave.textContent = '💾 Enregistrer'; btnSave.style.background = ''; }
+            if (btnCancel) btnCancel.style.display = 'none';
+
             document.getElementById('client').value = '';
             document.getElementById('prestation').value = '';
             document.getElementById('reference').value = '';
@@ -1832,18 +1898,178 @@
             document.getElementById('tempsImpressionMin').value = '0';
             document.getElementById('tempsCoordMin').value = '0';
             document.getElementById('margePercent').value = config.margeDefaut;
-            
+
             document.getElementById('gestesContainer').innerHTML = '';
             document.getElementById('consommablesContainer').innerHTML = '';
             document.getElementById('stockageContainer').innerHTML = '';
             gesteLines = [];
             consommableLines = [];
             stockageLines = [];
-            
+
             addGesteLine();
             addConsommableLine();
             addStockageLine();
             calculateTotal();
+        }
+
+        function editPrestation(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            editingPrestationId = id;
+
+            // Basculer sur l'onglet calculateur
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('.tab').classList.add('active');
+            document.getElementById('calculateur').classList.add('active');
+
+            // Mettre le bouton en mode "Mettre à jour"
+            const btnSave = document.getElementById('btnSavePrestation');
+            const btnCancel = document.getElementById('btnCancelEditPrestation');
+            if (btnSave) { btnSave.textContent = '💾 Mettre à jour'; btnSave.style.background = '#a8e2c0'; }
+            if (btnCancel) btnCancel.style.display = 'inline-block';
+
+            // Remplir les champs infos
+            document.getElementById('client').value = p.client || '';
+            document.getElementById('prestation').value = p.prestation || '';
+            document.getElementById('reference').value = p.reference || '';
+            if (p.date) document.getElementById('date').value = p.date;
+            document.getElementById('nbCEA').value = p.nbCEA || 1;
+            document.getElementById('nbMSP').value = p.nbMSP !== undefined ? p.nbMSP : 0.5;
+            document.getElementById('nbPieces').value = p.nbPieces || 1;
+            document.getElementById('margePercent').value = p.marge || config.margeDefaut;
+            document.getElementById('responsable').value = p.responsable || '';
+            document.getElementById('tempsMailsMin').value = p.tempsMailsMin || 0;
+            document.getElementById('tempsImpressionMin').value = p.tempsImpressionMin || 0;
+            document.getElementById('tempsCoordMin').value = p.tempsCoordMin || 0;
+
+            // Reconstruire les gestes
+            document.getElementById('gestesContainer').innerHTML = '';
+            gesteLines = [];
+            (p.gestes || []).forEach(g => {
+                const lineId = Date.now() + Math.random();
+                const line = document.createElement('div');
+                line.className = 'geste-line';
+                line.id = 'line-' + lineId;
+                const isPiece = (!g.typeApp || g.typeApp === 'piece') ? 'selected' : '';
+                const isLot = (g.typeApp === 'lot') ? 'selected' : '';
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Geste</label>
+                        <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
+                            <option value="">Sélectionner...</option>
+                            ${catalogueGestes.map(cg => `<option value="${cg.code}" ${cg.code === g.code ? 'selected' : ''}>[${cg.code}] ${cg.description}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Temps (sec)</label>
+                        <input type="number" id="temps-${lineId}" value="${g.temps}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="quantite-${lineId}" min="0" value="${g.quantite}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Application</label>
+                        <select id="type-geste-${lineId}" onchange="calculateTotal()">
+                            <option value="piece" ${isPiece}>Par pièce</option>
+                            <option value="lot" ${isLot}>Par lot (1x)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
+                    </div>`;
+                document.getElementById('gestesContainer').appendChild(line);
+                gesteLines.push(lineId);
+            });
+            if (gesteLines.length === 0) addGesteLine();
+
+            // Reconstruire les consommables
+            document.getElementById('consommablesContainer').innerHTML = '';
+            consommableLines = [];
+            (p.consommables || []).forEach(mc => {
+                const lineId = Date.now() + Math.random();
+                const cIdx = catalogueConsommables.findIndex(c => c.nom === mc.nom);
+                const line = document.createElement('div');
+                line.className = 'consommable-line';
+                line.id = 'consom-' + lineId;
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Consommable</label>
+                        <select onchange="updateConsommableDetails(this, ${lineId}); calculateTotal()">
+                            <option value="">Sélectionner...</option>
+                            ${catalogueConsommables.map((c, idx) => `<option value="${idx}" ${idx === cIdx ? 'selected' : ''}>${c.nom} (${c.prix} CHF)</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Prix (CHF)</label>
+                        <input type="number" id="prix-consom-${lineId}" value="${mc.prix}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="qte-consom-${lineId}" min="0" value="${mc.qte}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="number" id="total-consom-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeConsommableLine(${lineId})">🗑️</button>
+                    </div>`;
+                document.getElementById('consommablesContainer').appendChild(line);
+                consommableLines.push(lineId);
+            });
+            if (consommableLines.length === 0) addConsommableLine();
+
+            // Reconstruire le stockage
+            document.getElementById('stockageContainer').innerHTML = '';
+            stockageLines = [];
+            (p.stockage || []).forEach(s => {
+                const lineId = Date.now() + Math.random();
+                const line = document.createElement('div');
+                line.className = 'stock-line';
+                line.id = 'stock-' + lineId;
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="type-stock-${lineId}" onchange="calculateTotal()">
+                            <option value="palette" ${s.type === 'palette' ? 'selected' : ''}>Palette</option>
+                            <option value="m2" ${s.type === 'm2' ? 'selected' : ''}>m²</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Durée (j)</label>
+                        <input type="number" id="duree-stock-${lineId}" min="0" step="0.5" value="${s.duree}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Tarif/j</label>
+                        <input type="number" id="tarif-stock-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="number" id="total-stock-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeStockageLine(${lineId})">🗑️</button>
+                    </div>`;
+                document.getElementById('stockageContainer').appendChild(line);
+                stockageLines.push(lineId);
+            });
+            if (stockageLines.length === 0) addStockageLine();
+
+            calculateTotal();
+            btnSave?.scrollIntoView({behavior: 'smooth', block: 'end'});
+        }
+
+        function cancelEditPrestation() {
+            resetCalculateur();
         }
 
         function renderCatalogue() {
@@ -2041,6 +2267,7 @@
                         </div>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Changer statut">🔄 Statut</button>
+                            <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})" title="Éditer">✏️ Éditer</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF">📄 PDF</button>
                             <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
                             <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
@@ -2640,7 +2867,7 @@
             // Switch to calculateur tab
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab').classList.add('active'); // first tab
+            document.querySelector('.tab').classList.add('active');
             document.getElementById('calculateur').classList.add('active');
 
             // Fill in the form fields
@@ -2649,11 +2876,15 @@
             document.getElementById('reference').value = (p.reference || '') + ' (copie)';
             document.getElementById('date').valueAsDate = new Date();
             document.getElementById('nbCEA').value = p.nbCEA || 1;
-            document.getElementById('nbMSP').value = p.nbMSP || 0.5;
+            document.getElementById('nbMSP').value = p.nbMSP !== undefined ? p.nbMSP : 0.5;
+            document.getElementById('nbPieces').value = p.nbPieces || 1;
             document.getElementById('responsable').value = p.responsable || '';
             document.getElementById('margePercent').value = p.marge || config.margeDefaut;
+            document.getElementById('tempsMailsMin').value = p.tempsMailsMin || 0;
+            document.getElementById('tempsImpressionMin').value = p.tempsImpressionMin || 0;
+            document.getElementById('tempsCoordMin').value = p.tempsCoordMin || 0;
 
-            // Clear and rebuild geste lines
+            // Clear containers
             document.getElementById('gestesContainer').innerHTML = '';
             document.getElementById('consommablesContainer').innerHTML = '';
             document.getElementById('stockageContainer').innerHTML = '';
@@ -2663,19 +2894,18 @@
 
             // Re-add geste lines from saved data
             (p.gestes || []).forEach(g => {
-                const container = document.getElementById('gestesContainer');
                 const lineId = Date.now() + Math.random();
                 const line = document.createElement('div');
                 line.className = 'geste-line';
                 line.id = 'line-' + lineId;
+                const isPiece = (!g.typeApp || g.typeApp === 'piece') ? 'selected' : '';
+                const isLot = (g.typeApp === 'lot') ? 'selected' : '';
                 line.innerHTML = `
                     <div class="form-group">
                         <label>Geste</label>
                         <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
                             <option value="">Sélectionner...</option>
-                            ${catalogueGestes.map(cg =>
-                                `<option value="${cg.code}" ${cg.code === g.code ? 'selected' : ''}>[${cg.code}] ${cg.description}</option>`
-                            ).join('')}
+                            ${catalogueGestes.map(cg => `<option value="${cg.code}" ${cg.code === g.code ? 'selected' : ''}>[${cg.code}] ${cg.description}</option>`).join('')}
                         </select>
                     </div>
                     <div class="form-group">
@@ -2687,19 +2917,97 @@
                         <input type="number" id="quantite-${lineId}" min="0" value="${g.quantite}" onchange="calculateTotal()">
                     </div>
                     <div class="form-group">
+                        <label>Application</label>
+                        <select id="type-geste-${lineId}" onchange="calculateTotal()">
+                            <option value="piece" ${isPiece}>Par pièce</option>
+                            <option value="lot" ${isLot}>Par lot (1x)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>&nbsp;</label>
                         <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
-                    </div>
-                `;
-                container.appendChild(line);
+                    </div>`;
+                document.getElementById('gestesContainer').appendChild(line);
                 gesteLines.push(lineId);
             });
-
             if (gesteLines.length === 0) addGesteLine();
-            addConsommableLine();
-            addStockageLine();
-            calculateTotal();
 
+            // Re-add consommable lines
+            (p.consommables || []).forEach(mc => {
+                const lineId = Date.now() + Math.random();
+                const cIdx = catalogueConsommables.findIndex(c => c.nom === mc.nom);
+                const line = document.createElement('div');
+                line.className = 'consommable-line';
+                line.id = 'consom-' + lineId;
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Consommable</label>
+                        <select onchange="updateConsommableDetails(this, ${lineId}); calculateTotal()">
+                            <option value="">Sélectionner...</option>
+                            ${catalogueConsommables.map((c, idx) => `<option value="${idx}" ${idx === cIdx ? 'selected' : ''}>${c.nom} (${c.prix} CHF)</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Prix (CHF)</label>
+                        <input type="number" id="prix-consom-${lineId}" value="${mc.prix}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="qte-consom-${lineId}" min="0" value="${mc.qte}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="number" id="total-consom-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeConsommableLine(${lineId})">🗑️</button>
+                    </div>`;
+                document.getElementById('consommablesContainer').appendChild(line);
+                consommableLines.push(lineId);
+            });
+            if (consommableLines.length === 0) addConsommableLine();
+
+            // Re-add stockage lines
+            (p.stockage || []).forEach(s => {
+                const lineId = Date.now() + Math.random();
+                const line = document.createElement('div');
+                line.className = 'stock-line';
+                line.id = 'stock-' + lineId;
+                line.innerHTML = `
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="type-stock-${lineId}" onchange="calculateTotal()">
+                            <option value="palette" ${s.type === 'palette' ? 'selected' : ''}>Palette</option>
+                            <option value="m2" ${s.type === 'm2' ? 'selected' : ''}>m²</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Durée (j)</label>
+                        <input type="number" id="duree-stock-${lineId}" min="0" step="0.5" value="${s.duree}" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Tarif/j</label>
+                        <input type="number" id="tarif-stock-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Total</label>
+                        <input type="number" id="total-stock-${lineId}" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="delete-btn" onclick="removeStockageLine(${lineId})">🗑️</button>
+                    </div>`;
+                document.getElementById('stockageContainer').appendChild(line);
+                stockageLines.push(lineId);
+            });
+            if (stockageLines.length === 0) addStockageLine();
+
+            calculateTotal();
             alert('✅ Prestation dupliquée dans le calculateur. Modifiez et enregistrez.');
         }
 
