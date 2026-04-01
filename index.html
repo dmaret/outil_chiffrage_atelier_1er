@@ -281,9 +281,23 @@
             align-items: end;
         }
         
-        .geste-line { grid-template-columns: 2fr 1fr 1fr 80px; }
+        .geste-line { grid-template-columns: 2fr 0.7fr 0.7fr 1fr 110px; }
         .consommable-line { grid-template-columns: 2fr 1fr 1fr 1fr 80px; }
         .stock-line { grid-template-columns: 1.5fr 0.8fr 0.8fr 0.8fr 1fr 80px; }
+        .geste-search { width:100%; padding:4px 7px; border:1px solid #e0ecf5; border-radius:4px; font-size:0.8em; margin-bottom:4px; background:#f7fbff; }
+        .btn-copy { padding:5px 8px; background:#e8f4f8; color:#5a7b8f; border:1px solid #a8d5e2; border-radius:6px; cursor:pointer; font-size:0.85em; }
+        .btn-copy:hover { background:#d0eaf5; }
+        .notes-internes-display { background:#fffbea; border-left:3px solid #f0c040; padding:8px 12px; border-radius:6px; font-size:0.82em; color:#7a6030; margin-top:8px; white-space:pre-wrap; }
+        .suivi-reel-panel { background:#f0f7f0; border:1px solid #b8e0c0; border-radius:8px; padding:12px; margin-top:10px; }
+        .suivi-reel-panel h4 { color:#3a7a4a; font-size:0.9em; margin-bottom:10px; }
+        .ecart-positif { color:#27ae60; font-weight:bold; }
+        .ecart-negatif { color:#e74c3c; font-weight:bold; }
+        .revisions-panel { background:#f5f0fa; border:1px solid #d0b8e8; border-radius:8px; padding:10px; margin-top:8px; font-size:0.82em; }
+        .client-card { background:linear-gradient(135deg,#fff 0%,#f7fcff 100%); padding:18px; border-radius:12px; border-left:4px solid #a8d5e2; box-shadow:0 2px 8px rgba(168,213,226,0.15); cursor:pointer; transition:transform 0.2s; }
+        .client-card:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(168,213,226,0.3); }
+        .clients-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-top:12px; }
+        .capacite-bar { height:22px; border-radius:4px; background:#a8d5e2; transition:width 0.3s; display:flex; align-items:center; padding-left:8px; font-size:0.78em; font-weight:bold; color:#2d3e50; min-width:4px; }
+        .capacite-bar.over { background:#f5b8c0; }
         
         .total-box {
             background: linear-gradient(135deg, #c9dff0 0%, #e0d4ed 100%);
@@ -522,6 +536,7 @@
             <button class="tab" onclick="switchTab('catalogue')">📚 Gestes</button>
             <button class="tab" onclick="switchTab('consommables')">🛒 Consommables</button>
             <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
+            <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
             <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
             <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
         </div>
@@ -700,6 +715,11 @@
                         </div>
                     </div>
                     <div id="alerteMargeBasse">⚠️ Attention : la marge est en dessous du seuil minimum configuré !</div>
+                </div>
+
+                <div class="section" style="border-left-color:#c9b3d4;">
+                    <h2>📝 Notes internes</h2>
+                    <textarea id="notesInternes" placeholder="Notes internes (non imprimées sur le devis) : contraintes, remarques client, conditions particulières..." rows="3" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;resize:vertical;"></textarea>
                 </div>
 
                 <div style="margin-top: 25px; text-align: center;">
@@ -1079,6 +1099,22 @@
                 </div>
             </div>
 
+            <!-- ONGLET CLIENTS -->
+            <div id="clients" class="tab-content">
+                <div class="section">
+                    <h2>Fiches clients</h2>
+                    <div class="info-box">Synthèse automatique par client basée sur les prestations enregistrées. Cliquez sur un client pour voir son historique détaillé.</div>
+                    <div id="clientsGrid"></div>
+                </div>
+                <div class="section" id="clientDetailSection" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <h2 id="clientDetailNom" style="margin:0;"></h2>
+                        <button class="btn btn-secondary btn-small" onclick="closeClientDetail()">✖ Fermer le détail</button>
+                    </div>
+                    <div id="clientDetailContent" style="margin-top:14px;"></div>
+                </div>
+            </div>
+
             <!-- ONGLET CONFIG -->
             <div id="config" class="tab-content">
                 <div class="section">
@@ -1230,6 +1266,22 @@
                 <div class="section">
                     <h2>Top 5 prestations (marge CHF)</h2>
                     <div id="top5Table"></div>
+                </div>
+
+                <div class="section">
+                    <h2>📅 Tableau de bord capacité</h2>
+                    <div class="info-box">Heures CEA engagées (prestations <strong>Validées</strong>) sur les 8 prochaines semaines, comparées à la capacité disponible.</div>
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+                        <label style="font-size:0.88em;font-weight:600;color:#5a7b8f;">Capacité CEA dispo/semaine (h) :</label>
+                        <input type="number" id="capaciteHebdo" value="35" min="1" step="1" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:5px;" onchange="renderCapacite()">
+                    </div>
+                    <div id="capaciteTable"></div>
+                </div>
+
+                <div class="section">
+                    <h2>🎯 Précision des estimations</h2>
+                    <div class="info-box">Comparaison estimé vs réel pour les prestations où le temps réel a été saisi. Permet d'identifier les gestes à recalibrer.</div>
+                    <div id="precisionTable"></div>
                 </div>
 
                 <div class="section">
@@ -1489,6 +1541,7 @@
             if (tabName === 'catalogue') renderCatalogue();
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') renderPrestations();
+            else if (tabName === 'clients') renderClients();
             else if (tabName === 'stats') updateStats();
             else if (tabName === 'stock') {
                 updateStockStats();
@@ -1500,40 +1553,67 @@
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); }
         }
 
-        function addGesteLine() {
+        function addGesteLine(opts) {
             const container = document.getElementById('gestesContainer');
             const lineId = Date.now() + Math.random();
-            
             const line = document.createElement('div');
             line.className = 'geste-line';
             line.id = 'line-' + lineId;
-            
+            const selCode = opts?.code || '';
+            const selTemps = opts?.temps || '';
+            const selQte = opts?.quantite || 1;
+            const selType = opts?.typeApp || 'piece';
             line.innerHTML = `
                 <div class="form-group">
                     <label>Geste</label>
-                    <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
+                    <input type="text" class="geste-search" placeholder="🔍 Filtrer les gestes..." oninput="filterGesteSelect(this, ${lineId})">
+                    <select id="select-geste-${lineId}" onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
                         <option value="">Sélectionner...</option>
-                        ${catalogueGestes.map(g => 
-                            `<option value="${g.code}">[${g.code}] ${g.description}</option>`
+                        ${catalogueGestes.map(g =>
+                            `<option value="${g.code}" ${g.code === selCode ? 'selected' : ''}>[${g.code}] ${g.description}</option>`
                         ).join('')}
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Temps (sec)</label>
-                    <input type="number" id="temps-${lineId}" readonly style="background: #f0f0f0;">
+                    <label>Temps (s)</label>
+                    <input type="number" id="temps-${lineId}" value="${selTemps}" readonly style="background:#f0f0f0;">
                 </div>
                 <div class="form-group">
                     <label>Quantité</label>
-                    <input type="number" id="quantite-${lineId}" min="0" value="1" onchange="calculateTotal()">
+                    <input type="number" id="quantite-${lineId}" min="0" value="${selQte}" onchange="calculateTotal()">
                 </div>
                 <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
+                    <label>Application</label>
+                    <select id="type-geste-${lineId}" onchange="calculateTotal()">
+                        <option value="piece" ${selType === 'piece' ? 'selected' : ''}>Par pièce</option>
+                        <option value="lot" ${selType === 'lot' ? 'selected' : ''}>Par lot (1×)</option>
+                    </select>
                 </div>
-            `;
-            
+                <div class="form-group" style="display:flex;gap:4px;align-items:flex-end;">
+                    <button class="btn-copy" onclick="duplicateGesteLine(${lineId})" title="Dupliquer cette ligne">📋</button>
+                    <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
+                </div>`;
             container.appendChild(line);
             gesteLines.push(lineId);
+            if (selCode) updateGesteDetails(line.querySelector('select'), lineId);
+        }
+
+        function filterGesteSelect(input, lineId) {
+            const q = input.value.toLowerCase();
+            const sel = document.getElementById('select-geste-' + lineId);
+            if (!sel) return;
+            [...sel.options].forEach(opt => {
+                opt.style.display = (!q || opt.value === '' || opt.text.toLowerCase().includes(q)) ? '' : 'none';
+            });
+        }
+
+        function duplicateGesteLine(lineId) {
+            const code = document.getElementById('select-geste-' + lineId)?.value || '';
+            const temps = document.getElementById('temps-' + lineId)?.value || '';
+            const qte = document.getElementById('quantite-' + lineId)?.value || 1;
+            const typeApp = document.getElementById('type-geste-' + lineId)?.value || 'piece';
+            addGesteLine({code, temps, quantite: parseFloat(qte), typeApp});
+            calculateTotal();
         }
 
         function removeGesteLine(lineId) {
@@ -1801,17 +1881,13 @@
 
             const gestes = [];
             gesteLines.forEach(lineId => {
-                const line = document.getElementById('line-' + lineId);
-                if (line) {
-                    const select = line.querySelector('select');
-                    const code = select?.value;
-                    if (code) {
-                        const temps = parseFloat(document.getElementById('temps-' + lineId).value || 0);
-                        const quantite = parseFloat(document.getElementById('quantite-' + lineId).value || 0);
-                        const typeApp = document.getElementById('type-geste-' + lineId)?.value || 'piece';
-                        const geste = catalogueGestes.find(g => g.code === code);
-                        gestes.push({code, description: geste?.description || '', temps, quantite, typeApp});
-                    }
+                const code = document.getElementById('select-geste-' + lineId)?.value || '';
+                if (code) {
+                    const temps = parseFloat(document.getElementById('temps-' + lineId)?.value || 0);
+                    const quantite = parseFloat(document.getElementById('quantite-' + lineId)?.value || 0);
+                    const typeApp = document.getElementById('type-geste-' + lineId)?.value || 'piece';
+                    const geste = catalogueGestes.find(g => g.code === code);
+                    gestes.push({code, description: geste?.description || '', temps, quantite, typeApp});
                 }
             });
 
@@ -1860,13 +1936,26 @@
                 coutStockage: parseFloat(document.getElementById('coutStockage').textContent),
                 nbPieces: parseFloat(document.getElementById('nbPieces').value || 1),
                 prixVentePiece: parseFloat(document.getElementById('prixVentePiece')?.textContent || 0),
+                notesInternes: document.getElementById('notesInternes')?.value || '',
                 statut: 'devis'
             };
 
             if (editingPrestationId !== null) {
                 const idx = prestationsSauvegardees.findIndex(x => x.id === editingPrestationId);
                 if (idx !== -1) {
-                    prest.statut = prestationsSauvegardees[idx].statut;
+                    const old = prestationsSauvegardees[idx];
+                    prest.statut = old.statut;
+                    prest.heuresReelles = old.heuresReelles;
+                    prest.notesReel = old.notesReel;
+                    // Historique des révisions
+                    prest.revisions = [...(old.revisions || []), {
+                        version: (old.revisions || []).length + 1,
+                        date: new Date().toISOString().split('T')[0],
+                        prixVente: old.prixVente,
+                        prixRevient: old.prixRevient,
+                        marge: old.marge,
+                        heures: old.heures
+                    }];
                     prestationsSauvegardees[idx] = prest;
                 }
                 saveToStorage();
@@ -1906,6 +1995,7 @@
             consommableLines = [];
             stockageLines = [];
 
+            if (document.getElementById('notesInternes')) document.getElementById('notesInternes').value = '';
             addGesteLine();
             addConsommableLine();
             addStockageLine();
@@ -1946,44 +2036,9 @@
             // Reconstruire les gestes
             document.getElementById('gestesContainer').innerHTML = '';
             gesteLines = [];
-            (p.gestes || []).forEach(g => {
-                const lineId = Date.now() + Math.random();
-                const line = document.createElement('div');
-                line.className = 'geste-line';
-                line.id = 'line-' + lineId;
-                const isPiece = (!g.typeApp || g.typeApp === 'piece') ? 'selected' : '';
-                const isLot = (g.typeApp === 'lot') ? 'selected' : '';
-                line.innerHTML = `
-                    <div class="form-group">
-                        <label>Geste</label>
-                        <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
-                            <option value="">Sélectionner...</option>
-                            ${catalogueGestes.map(cg => `<option value="${cg.code}" ${cg.code === g.code ? 'selected' : ''}>[${cg.code}] ${cg.description}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Temps (sec)</label>
-                        <input type="number" id="temps-${lineId}" value="${g.temps}" readonly style="background: #f0f0f0;">
-                    </div>
-                    <div class="form-group">
-                        <label>Quantité</label>
-                        <input type="number" id="quantite-${lineId}" min="0" value="${g.quantite}" onchange="calculateTotal()">
-                    </div>
-                    <div class="form-group">
-                        <label>Application</label>
-                        <select id="type-geste-${lineId}" onchange="calculateTotal()">
-                            <option value="piece" ${isPiece}>Par pièce</option>
-                            <option value="lot" ${isLot}>Par lot (1x)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
-                    </div>`;
-                document.getElementById('gestesContainer').appendChild(line);
-                gesteLines.push(lineId);
-            });
+            (p.gestes || []).forEach(g => addGesteLine({code: g.code, temps: g.temps, quantite: g.quantite, typeApp: g.typeApp || 'piece'}));
             if (gesteLines.length === 0) addGesteLine();
+            if (document.getElementById('notesInternes')) document.getElementById('notesInternes').value = p.notesInternes || '';
 
             // Reconstruire les consommables
             document.getElementById('consommablesContainer').innerHTML = '';
@@ -2070,6 +2125,140 @@
 
         function cancelEditPrestation() {
             resetCalculateur();
+        }
+
+        // ============================================================
+        // FEATURE : Fiches clients
+        // ============================================================
+        function renderClients() {
+            const grid = document.getElementById('clientsGrid');
+            if (!grid) return;
+            const map = {};
+            prestationsSauvegardees.forEach(p => {
+                if (!p.client) return;
+                if (!map[p.client]) map[p.client] = {prestations: [], ca: 0, revient: 0, heures: 0};
+                map[p.client].prestations.push(p);
+                map[p.client].ca += p.prixVente || 0;
+                map[p.client].revient += p.prixRevient || 0;
+                map[p.client].heures += p.heures || 0;
+            });
+            const clients = Object.entries(map).sort((a,b) => b[1].ca - a[1].ca);
+            if (clients.length === 0) { grid.innerHTML = '<div class="empty-state">Aucun client enregistré</div>'; return; }
+            grid.innerHTML = '<div class="clients-grid">' + clients.map(([nom, d]) => {
+                const marge = d.ca - d.revient;
+                const margePct = d.ca > 0 ? (marge / d.ca * 100).toFixed(1) : '0';
+                const derniere = d.prestations.reduce((a, b) => a.date > b.date ? a : b);
+                return `<div class="client-card" onclick="openClientDetail('${nom.replace(/'/g,"\\'")}')">
+                    <div style="font-size:1.1em;font-weight:bold;color:#6b8fa3;margin-bottom:8px;">🏢 ${nom}</div>
+                    <div style="font-size:0.82em;color:#7a9db1;margin-bottom:10px;">Dernière : ${new Date(derniere.date).toLocaleDateString('fr-FR')}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.85em;">
+                        <div><span style="color:#999;">Prestations</span><br><strong>${d.prestations.length}</strong></div>
+                        <div><span style="color:#999;">CA total</span><br><strong>${d.ca.toFixed(0)} CHF</strong></div>
+                        <div><span style="color:#999;">Marge</span><br><strong style="color:${marge>=0?'#27ae60':'#e74c3c'}">${margePct}%</strong></div>
+                        <div><span style="color:#999;">Heures</span><br><strong>${d.heures.toFixed(1)} h</strong></div>
+                    </div>
+                </div>`;
+            }).join('') + '</div>';
+        }
+
+        function openClientDetail(nom) {
+            const section = document.getElementById('clientDetailSection');
+            const title = document.getElementById('clientDetailNom');
+            const content = document.getElementById('clientDetailContent');
+            if (!section || !title || !content) return;
+            title.textContent = '🏢 ' + nom;
+            const prestations = prestationsSauvegardees.filter(p => p.client === nom).sort((a,b) => new Date(b.date) - new Date(a.date));
+            const ca = prestations.reduce((s,p) => s + p.prixVente, 0);
+            const revient = prestations.reduce((s,p) => s + p.prixRevient, 0);
+            const marge = ca - revient;
+            let html = `<div class="stats-grid" style="margin-bottom:16px;">
+                <div class="stat-card"><div class="label">Prestations</div><div class="value">${prestations.length}</div></div>
+                <div class="stat-card"><div class="label">CA total</div><div class="value" style="font-size:1.3em;">${ca.toFixed(2)} CHF</div></div>
+                <div class="stat-card"><div class="label">Marge totale</div><div class="value" style="font-size:1.3em;color:${marge>=0?'#27ae60':'#e74c3c'}">${marge.toFixed(2)} CHF</div></div>
+            </div>
+            <table><thead><tr><th>Date</th><th>Prestation</th><th>Réf.</th><th>Statut</th><th>Prix vente</th><th>Marge</th></tr></thead><tbody>`;
+            prestations.forEach(p => {
+                const badge = getStatutBadgeHtml(p.statut || 'devis');
+                html += `<tr><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${p.prestation}</td><td style="font-size:0.8em;color:#aaa;">${p.reference}</td><td>${badge}</td><td>${p.prixVente.toFixed(2)} CHF</td><td style="color:${(p.prixVente-p.prixRevient)>=0?'#27ae60':'#e74c3c'}">${(p.prixVente-p.prixRevient).toFixed(2)} CHF</td></tr>`;
+            });
+            html += '</tbody></table>';
+            content.innerHTML = html;
+            section.style.display = 'block';
+            section.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+
+        function closeClientDetail() {
+            const s = document.getElementById('clientDetailSection');
+            if (s) s.style.display = 'none';
+        }
+
+        // ============================================================
+        // FEATURE : Suivi Estimé vs Réel
+        // ============================================================
+        function toggleRevisions(id) {
+            const el = document.getElementById('rev-' + id);
+            if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleReelSection(id) {
+            const el = document.getElementById('reel-panel-' + id);
+            if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function saveReelPrestation(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const h = parseFloat(document.getElementById('reel-heures-' + id)?.value);
+            const notes = document.getElementById('reel-notes-' + id)?.value || '';
+            if (isNaN(h) || h < 0) { alert('Saisissez des heures réelles valides'); return; }
+            p.heuresReelles = h;
+            p.notesReel = notes;
+            saveToStorage();
+            renderPrestations();
+        }
+
+        // ============================================================
+        // FEATURE : Tableau de bord capacité
+        // ============================================================
+        function renderCapacite() {
+            const container = document.getElementById('capaciteTable');
+            if (!container) return;
+            const capaciteHebdo = parseFloat(document.getElementById('capaciteHebdo')?.value || 35);
+            const now = new Date();
+            const lundi = new Date(now);
+            lundi.setDate(now.getDate() - now.getDay() + 1);
+            lundi.setHours(0,0,0,0);
+
+            const semaines = [];
+            for (let i = 0; i < 8; i++) {
+                const debut = new Date(lundi); debut.setDate(lundi.getDate() + i * 7);
+                const fin = new Date(debut); fin.setDate(debut.getDate() + 6);
+                const label = debut.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'}) + ' – ' + fin.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'});
+                const heures = prestationsSauvegardees
+                    .filter(p => (p.statut === 'valide') && p.date >= debut.toISOString().split('T')[0] && p.date <= fin.toISOString().split('T')[0])
+                    .reduce((s,p) => s + (p.heures || 0), 0);
+                semaines.push({label, heures, debut, fin});
+            }
+
+            const max = Math.max(...semaines.map(s => s.heures), capaciteHebdo);
+            let html = '<table style="width:100%;border-collapse:collapse;">';
+            html += '<thead><tr><th style="text-align:left;padding:6px;">Semaine</th><th style="text-align:left;padding:6px;">Heures engagées</th><th style="padding:6px;min-width:160px;text-align:left;">Charge</th></tr></thead><tbody>';
+            semaines.forEach(s => {
+                const pct = max > 0 ? Math.min(s.heures / max * 100, 100) : 0;
+                const over = s.heures > capaciteHebdo;
+                const pctCap = capaciteHebdo > 0 ? (s.heures / capaciteHebdo * 100).toFixed(0) : '—';
+                html += `<tr>
+                    <td style="padding:6px;font-size:0.85em;color:#5a7b8f;">${s.label}</td>
+                    <td style="padding:6px;font-size:0.85em;font-weight:bold;color:${over?'#e74c3c':'#6b8fa3'};">${s.heures.toFixed(1)} h <span style="color:#aaa;font-weight:normal;">(${pctCap}%)</span></td>
+                    <td style="padding:6px;">
+                        <div style="background:#e8f0f5;border-radius:4px;overflow:hidden;height:22px;">
+                            <div class="capacite-bar ${over?'over':''}" style="width:${pct}%">${s.heures > 0 ? s.heures.toFixed(1)+'h' : ''}</div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += `</tbody><tfoot><tr><td colspan="3" style="padding:8px 6px;font-size:0.8em;color:#aaa;border-top:1px solid #eee;">Capacité configurée : <strong>${capaciteHebdo} h/semaine</strong> — Seules les prestations au statut <strong>Validé</strong> sont comptabilisées.</td></tr></tfoot></table>`;
+            container.innerHTML = html;
         }
 
         function renderCatalogue() {
@@ -2268,6 +2457,7 @@
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Changer statut">🔄 Statut</button>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})" title="Éditer">✏️ Éditer</button>
+                            <button class="btn btn-small" style="background:#f0f7f0;color:#3a7a4a;border:1px solid #b8e0c0;" onclick="toggleReelSection(${p.id})" title="Saisir temps réel">⏱️ Réel</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF">📄 PDF</button>
                             <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
                             <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
@@ -2297,6 +2487,34 @@
                             <div style="font-size: 0.75em; color: #7a9db1;">Prix / pièce</div>
                             <div style="font-weight: bold; color: #6b8fa3;">${(p.prixVente / p.nbPieces).toFixed(2)} CHF</div>
                         </div>` : ''}
+                        ${p.heuresReelles != null ? `<div style="text-align:center;">
+                            <div style="font-size:0.75em;color:#3a7a4a;">Temps réel</div>
+                            <div style="font-weight:bold;color:${p.heuresReelles <= p.heures ? '#27ae60' : '#e74c3c'};">${p.heuresReelles.toFixed(2)} h
+                                <span style="font-size:0.78em;color:#aaa;">(${p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(0)+'%' : '—'})</span>
+                            </div>
+                        </div>` : ''}
+                    </div>
+                    ${p.notesInternes ? `<div class="notes-internes-display">📝 ${p.notesInternes}</div>` : ''}
+                    ${(p.revisions||[]).length > 0 ? `<div style="margin-top:6px;font-size:0.8em;color:#9a7ac0;cursor:pointer;" onclick="toggleRevisions(${p.id})">🔄 ${p.revisions.length} révision(s) — cliquez pour voir l'historique</div>
+                    <div class="revisions-panel" id="rev-${p.id}" style="display:none;">
+                        <table style="width:100%;font-size:0.82em;"><thead><tr><th>V.</th><th>Date archivage</th><th>Prix vente</th><th>Marge</th><th>Heures</th></tr></thead><tbody>
+                        ${(p.revisions||[]).map(r => `<tr><td>v${r.version}</td><td>${new Date(r.date).toLocaleDateString('fr-FR')}</td><td>${r.prixVente?.toFixed(2)} CHF</td><td>${r.marge}%</td><td>${r.heures?.toFixed(2)} h</td></tr>`).join('')}
+                        </tbody></table>
+                    </div>` : ''}
+                    <div class="suivi-reel-panel" id="reel-panel-${p.id}" style="display:none;">
+                        <h4>⏱️ Saisie du temps réel</h4>
+                        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                            <div class="form-group">
+                                <label style="font-size:0.85em;">Heures réelles passées</label>
+                                <input type="number" id="reel-heures-${p.id}" min="0" step="0.25" value="${p.heuresReelles ?? ''}" placeholder="ex: 2.5" style="width:100px;">
+                            </div>
+                            <div class="form-group" style="flex:2;">
+                                <label style="font-size:0.85em;">Commentaire</label>
+                                <input type="text" id="reel-notes-${p.id}" value="${(p.notesReel||'').replace(/"/g,'&quot;')}" placeholder="Raisons de l'écart...">
+                            </div>
+                            <button class="btn btn-success btn-small" onclick="saveReelPrestation(${p.id})">💾 Enregistrer</button>
+                        </div>
+                        ${p.heuresReelles != null ? `<div style="margin-top:8px;font-size:0.85em;">Estimé : <strong>${p.heures.toFixed(2)}h</strong> → Réel : <strong>${p.heuresReelles.toFixed(2)}h</strong> → Écart : <strong class="${p.heuresReelles <= p.heures ? 'ecart-positif' : 'ecart-negatif'}">${p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1)+'%' : '—'}</strong></div>` : ''}
                     </div>
                 </div>`;
             });
@@ -2334,6 +2552,51 @@
             updateBilanStock();
             drawCAChart();
             renderTop5();
+            renderCapacite();
+            renderPrecisionParGeste();
+        }
+
+        function renderPrecisionParGeste() {
+            const container = document.getElementById('precisionTable');
+            if (!container) return;
+            const avecReel = prestationsSauvegardees.filter(p => p.heuresReelles != null && p.heures > 0);
+            if (avecReel.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding:20px;">Aucune prestation avec temps réel saisi. Utilisez le bouton <strong>⏱️ Réel</strong> dans l\'onglet Prestations.</div>';
+                return;
+            }
+            // Agrégation par geste : temps estimé total vs ratio réel global de la prestation
+            const gesteMap = {};
+            avecReel.forEach(p => {
+                const ratio = p.heuresReelles / p.heures;
+                (p.gestes || []).forEach(g => {
+                    if (!gesteMap[g.code]) gesteMap[g.code] = {description: g.description, tempsEstime: 0, ratioSum: 0, count: 0};
+                    const contribution = g.temps * g.quantite * (g.typeApp === 'lot' ? 1 : (p.nbPieces || 1)) / 3600;
+                    gesteMap[g.code].tempsEstime += contribution;
+                    gesteMap[g.code].ratioSum += ratio * contribution;
+                    gesteMap[g.code].count++;
+                });
+            });
+            const rows = Object.entries(gesteMap).map(([code, d]) => {
+                const ratioMoy = d.tempsEstime > 0 ? d.ratioSum / d.tempsEstime : 1;
+                return {code, description: d.description, tempsEstime: d.tempsEstime, ratioMoy, count: d.count};
+            }).sort((a,b) => Math.abs(b.ratioMoy - 1) - Math.abs(a.ratioMoy - 1));
+
+            let html = `<p style="font-size:0.82em;color:#7a9db1;margin-bottom:10px;">Basé sur <strong>${avecReel.length}</strong> prestation(s) avec temps réel. Un ratio > 1 signifie que le geste prend plus de temps que prévu.</p>`;
+            html += `<table><thead><tr><th>Code</th><th>Geste</th><th>Temps estimé (h)</th><th>Ratio réel/estimé</th><th>Calibrage</th></tr></thead><tbody>`;
+            rows.forEach(r => {
+                const pct = ((r.ratioMoy - 1) * 100).toFixed(1);
+                const color = r.ratioMoy > 1.15 ? '#e74c3c' : r.ratioMoy < 0.85 ? '#27ae60' : '#6b8fa3';
+                const conseil = r.ratioMoy > 1.15 ? `⬆️ Augmenter le temps de ${Math.abs(pct)}%` : r.ratioMoy < 0.85 ? `⬇️ Réduire le temps de ${Math.abs(pct)}%` : '✅ Bien calibré';
+                html += `<tr>
+                    <td><strong>${r.code}</strong></td>
+                    <td style="font-size:0.85em;">${r.description}</td>
+                    <td>${r.tempsEstime.toFixed(2)} h</td>
+                    <td style="font-weight:bold;color:${color};">×${r.ratioMoy.toFixed(2)} (${pct>0?'+':''}${pct}%)</td>
+                    <td style="font-size:0.82em;color:${color};">${conseil}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
         }
 
         function buildSlices(prestations) {
@@ -2893,43 +3156,7 @@
             stockageLines = [];
 
             // Re-add geste lines from saved data
-            (p.gestes || []).forEach(g => {
-                const lineId = Date.now() + Math.random();
-                const line = document.createElement('div');
-                line.className = 'geste-line';
-                line.id = 'line-' + lineId;
-                const isPiece = (!g.typeApp || g.typeApp === 'piece') ? 'selected' : '';
-                const isLot = (g.typeApp === 'lot') ? 'selected' : '';
-                line.innerHTML = `
-                    <div class="form-group">
-                        <label>Geste</label>
-                        <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
-                            <option value="">Sélectionner...</option>
-                            ${catalogueGestes.map(cg => `<option value="${cg.code}" ${cg.code === g.code ? 'selected' : ''}>[${cg.code}] ${cg.description}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Temps (sec)</label>
-                        <input type="number" id="temps-${lineId}" value="${g.temps}" readonly style="background: #f0f0f0;">
-                    </div>
-                    <div class="form-group">
-                        <label>Quantité</label>
-                        <input type="number" id="quantite-${lineId}" min="0" value="${g.quantite}" onchange="calculateTotal()">
-                    </div>
-                    <div class="form-group">
-                        <label>Application</label>
-                        <select id="type-geste-${lineId}" onchange="calculateTotal()">
-                            <option value="piece" ${isPiece}>Par pièce</option>
-                            <option value="lot" ${isLot}>Par lot (1x)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
-                    </div>`;
-                document.getElementById('gestesContainer').appendChild(line);
-                gesteLines.push(lineId);
-            });
+            (p.gestes || []).forEach(g => addGesteLine({code: g.code, temps: g.temps, quantite: g.quantite, typeApp: g.typeApp || 'piece'}));
             if (gesteLines.length === 0) addGesteLine();
 
             // Re-add consommable lines
