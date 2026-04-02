@@ -472,6 +472,25 @@
 
         body.dark-mode .admin-section { border-left-color: #7a5a9a; }
 
+        /* Tabs admin-only */
+        .tab.admin-only { display: none; }
+        body.admin-mode .tab.admin-only { display: inline-block; }
+
+        /* Gantt */
+        .gantt-table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
+        .gantt-table th, .gantt-table td { border: 1px solid #e8f0f5; }
+        .gantt-table thead th { background: #f0f4f8; position: sticky; top: 0; z-index: 1; }
+        .gantt-table tbody tr:hover { background: #f5f9fc; }
+        .gantt-bar { height: 22px; border-radius: 4px; }
+        .gantt-weekend { background: #f8f0f0; }
+        .gantt-today-col { background: rgba(168,213,226,0.2); }
+        .gantt-legend { display: flex; gap: 16px; align-items: center; margin-top: 12px; font-size: 0.82em; }
+        .gantt-legend-dot { width: 16px; height: 16px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 4px; }
+
+        /* Historique */
+        .history-table { font-size: 0.85em; }
+        .history-table td:first-child { white-space: nowrap; color: #7a9db1; }
+
         /* PIN modal */
         #pinModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; }
         #pinModal.visible { display:flex; }
@@ -558,6 +577,9 @@
             <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
             <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
             <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
+            <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
+            <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
+            <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
         </div>
 
         <div class="content">
@@ -1357,6 +1379,116 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ONGLET ACCOMPAGNEMENT (admin) -->
+            <div id="accompagnement" class="tab-content">
+                <div class="info-box" style="border-left-color:#8bc98b; background:#eef8f3;">
+                    <strong>Espace d'analyse socio-éducative.</strong> Croisement des exigences de production et du projet d'accompagnement individuel. Réservé aux MSP / Administrateurs.
+                </div>
+
+                <div class="section">
+                    <h2>Matrice d'Apprenance & Autonomie (P. Carré / J. Piaget)</h2>
+                    <table id="matriceApprenanceTable">
+                        <thead><tr><th>Collaborateur (CEA)</th><th>Tâche assignée</th><th>Stade d'assimilation</th><th>Dynamique d'apprenance</th><th style="width:50px;"></th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" value="Alice M." style="width:100%;border:none;background:transparent;"></td>
+                                <td><input type="text" value="LOG-01 Pliage carton" style="width:100%;border:none;background:transparent;"></td>
+                                <td><select><option>Découverte</option><option selected>Assimilation en cours</option><option>Acquis / Autonomie</option></select></td>
+                                <td><select><option>Besoin de réassurance</option><option selected>Ouverture / Curiosité</option><option>Proactivité</option></select></td>
+                                <td><button class="delete-btn btn-small" onclick="this.closest('tr').remove()">🗑️</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" value="Marc J." style="width:100%;border:none;background:transparent;"></td>
+                                <td><input type="text" value="ETI-02 Coller étiquette" style="width:100%;border:none;background:transparent;"></td>
+                                <td><select><option selected>Découverte (Déséquilibre)</option><option>Assimilation en cours</option><option>Acquis / Autonomie</option></select></td>
+                                <td><select><option selected>Besoin de réassurance</option><option>Ouverture / Curiosité</option><option>Proactivité</option></select></td>
+                                <td><button class="delete-btn btn-small" onclick="this.closest('tr').remove()">🗑️</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="btn btn-small" style="margin-top:10px;" onclick="ajouterLigneMatrice()">+ Ajouter ligne</button>
+                </div>
+
+                <div class="section">
+                    <h2>Situations cliniques en atelier</h2>
+                    <p style="font-size:0.9em;color:#5a7b8f;margin-bottom:12px;">Documentation des anomalies de production (retards, erreurs) comme symptômes d'une dynamique interactionnelle.</p>
+                    <div style="overflow-x:auto;">
+                        <table style="font-size:0.85em;">
+                            <thead><tr style="background:#eef8f3;"><th>Tâche / Contexte</th><th>Symptôme observé</th><th>Hypothèse Systémique</th><th>Piste de régulation (Posture MSP)</th></tr></thead>
+                            <tbody>
+                                <tr><td>Conditionnement sachets zip</td><td>Baisse de cadence, soupirs, erreurs de comptage</td><td><strong>Surcharge cognitive (Piaget)</strong> : étapes dépassent la zone proximale</td><td><strong>Faire avec :</strong> Séquencer la tâche. Isoler le comptage du remplissage.</td></tr>
+                                <tr><td>Palettisation croisée</td><td>Conflit avec le voisin sur l'espace de stockage</td><td><strong>Frontières poreuses (Minuchin)</strong> : territoire spatial et de rôle mal défini</td><td>Redéfinir physiquement les zones (marquage au sol) et clarifier les tâches</td></tr>
+                                <tr><td>Pliage de cartons</td><td>Plaintes somatiques (mal au dos) récurrentes à ce poste</td><td><strong>Symptôme comme message (Palo Alto)</strong> : refus non verbalisé du poste</td><td>Entretien d'explicitation. Rotation de poste toutes les 2h.</td></tr>
+                                <tr><td>Étiquetage orienté</td><td>Sollicite le MSP toutes les 2 min pour valider son geste</td><td><strong>Double contrainte (Bateson)</strong> : "Sois autonome" vs "Aucune erreur tolérée"</td><td>Restaurer le droit à l'erreur. Validation par échantillonnage (1/10).</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section" style="background:#fef9e6;border-left-color:#c9b84a;">
+                    <h2 style="color:#7a6208;">📚 Référentiel Théorique</h2>
+                    <ul style="font-size:0.85em;color:#7a6208;line-height:1.8;padding-left:20px;">
+                        <li><strong>Posture d'accompagnement :</strong> Paul, M. (2004). L'accompagnement.</li>
+                        <li><strong>Apprenance :</strong> Carré, P. (2020). Pourquoi et comment les adultes apprennent.</li>
+                        <li><strong>Systémique :</strong> École de Palo Alto. Minuchin, S. — Familles en thérapie.</li>
+                        <li><strong>Double contrainte :</strong> Bateson, G. (1956). Toward a theory of schizophrenia.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ONGLET HISTORIQUE (admin) -->
+            <div id="historique" class="tab-content">
+                <div class="section">
+                    <h2>📝 Journal d'audit</h2>
+                    <div class="info-box">Ce journal trace automatiquement les actions critiques : créations, modifications, suppressions de prestations, mouvements de stock, changements de paramètres.</div>
+                    <button class="btn btn-danger btn-small" onclick="clearHistory()" style="margin-bottom:15px;">🗑️ Vider l'historique</button>
+                    <div id="historyTableContainer"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET GANTT / PLANIFICATION -->
+            <div id="gantt" class="tab-content">
+                <div class="section">
+                    <h2>📅 Planning Gantt des prestations</h2>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-small" onclick="ganttNav(-1)">← Mois préc.</button>
+                        <strong id="ganttPeriodLabel" style="font-size:1.05em;color:#6b8fa3;min-width:160px;text-align:center;"></strong>
+                        <button class="btn btn-secondary btn-small" onclick="ganttNav(1)">Mois suiv. →</button>
+                        <button class="btn btn-small" onclick="ganttOffset=0;renderGantt()">Aujourd'hui</button>
+                        <select id="ganttFilter" onchange="renderGantt()" style="margin-left:auto;">
+                            <option value="">Tous les statuts</option>
+                            <option value="devis">Devis</option>
+                            <option value="valide">Validé</option>
+                            <option value="facture">Facturé</option>
+                        </select>
+                    </div>
+                    <div id="ganttChart"></div>
+                </div>
+
+                <div class="section">
+                    <h2>Planifier les dates d'une prestation</h2>
+                    <div class="info-box">Définissez les dates de début et de fin planifiées pour faire apparaître une prestation sur le Gantt. Par défaut, la date de création est utilisée comme début.</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Prestation</label>
+                            <select id="ganttPrestSelect" onchange="loadGanttPrestDates()">
+                                <option value="">— Sélectionner —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date début planifiée</label>
+                            <input type="date" id="ganttDateDebut">
+                        </div>
+                        <div class="form-group">
+                            <label>Date fin planifiée</label>
+                            <input type="date" id="ganttDateFin">
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="saveGanttDates()">💾 Enregistrer les dates</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -1382,6 +1514,8 @@
         let configTypesStock = ['entree', 'sortie', 'transfert', 'inventaire'];
         let isSuperUser = false;
         let displayPrefs = { vuePrestations: 'detaillee', densite: 'normale', modeCalculateur: 'complet' };
+        let actionHistory = [];
+        let ganttOffset = 0;
 
         // Bases de données
         let catalogueGestes = [
@@ -1498,6 +1632,8 @@
             devisCounter = parseInt(localStorage.getItem('devisCounter') || '0');
             const savedDisplayPrefs = localStorage.getItem('displayPrefs');
             if (savedDisplayPrefs) displayPrefs = Object.assign(displayPrefs, JSON.parse(savedDisplayPrefs));
+            const savedHistory = localStorage.getItem('actionHistory');
+            if (savedHistory) actionHistory = JSON.parse(savedHistory);
             loadConfig();
         }
 
@@ -1514,6 +1650,7 @@
             localStorage.setItem('configModeles', JSON.stringify(configModeles));
             localStorage.setItem('devisCounter', String(devisCounter));
             localStorage.setItem('displayPrefs', JSON.stringify(displayPrefs));
+            localStorage.setItem('actionHistory', JSON.stringify(actionHistory.slice(0, 200)));
             lastSaveTime = Date.now();
             updateSaveIndicator();
         }
@@ -1598,6 +1735,8 @@
             }
             else if (tabName === 'parametrage') loadConfig();
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); }
+            else if (tabName === 'historique') renderHistory();
+            else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
         }
 
         function addGesteLine(opts) {
@@ -1994,6 +2133,8 @@
                     prest.statut = old.statut;
                     prest.heuresReelles = old.heuresReelles;
                     prest.notesReel = old.notesReel;
+                    prest.dateDebut = old.dateDebut;
+                    prest.dateFin = old.dateFin;
                     // Historique des révisions
                     prest.revisions = [...(old.revisions || []), {
                         version: (old.revisions || []).length + 1,
@@ -2005,10 +2146,12 @@
                     }];
                     prestationsSauvegardees[idx] = prest;
                 }
+                logAction(`Modification prestation : ${prest.prestation} (${prest.client})`);
                 saveToStorage();
                 alert('✅ Prestation mise à jour');
             } else {
                 prestationsSauvegardees.push(prest);
+                logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${prest.prixVente.toFixed(2)} CHF`);
                 saveToStorage();
                 alert('✅ Prestation enregistrée');
             }
@@ -2629,6 +2772,8 @@
 
         function deletePrestation(id) {
             if (confirm('Supprimer cette prestation?')) {
+                const p = prestationsSauvegardees.find(x => x.id === id);
+                if (p) logAction(`Suppression prestation : ${p.prestation} (${p.client})`);
                 prestationsSauvegardees = prestationsSauvegardees.filter(p => p.id !== id);
                 saveToStorage();
                 renderPrestations();
@@ -2983,7 +3128,8 @@
             };
 
             mouvements.push(mouvement);
-            
+            logAction(`Mouvement stock : ${type} — ${ref} × ${qte} ${unite}`);
+
             if (type === 'entree') {
                 if (!stockActuel[ref]) {
                     stockActuel[ref] = {lots: [], total: 0};
@@ -3719,7 +3865,9 @@
             if (isSuperUser) {
                 isSuperUser = false;
                 btn.textContent = '🔓';
+                document.body.classList.remove('admin-mode');
                 hideAdminSections();
+                logAction('Déconnexion mode administrateur');
             } else {
                 const pin = localStorage.getItem('appPin');
                 if (!pin) {
@@ -3732,12 +3880,15 @@
                 if (entered === pin) {
                     isSuperUser = true;
                     btn.textContent = '🔑';
+                    document.body.classList.add('admin-mode');
                     showAdminSections();
                     renderAdminList('types');
                     renderAdminList('emplacements');
                     renderAdminList('unites');
+                    logAction('Connexion mode administrateur');
                 } else {
                     alert('❌ PIN incorrect');
+                    logAction('Tentative connexion admin échouée');
                 }
             }
         }
@@ -4430,6 +4581,195 @@
             window.print();
             printZone.style.display = 'none';
             printZone.innerHTML = '';
+        }
+
+        // ============================================================
+        // AUDIT LOG (Historique)
+        // ============================================================
+        function logAction(desc) {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('fr-FR') + ' ' + now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+            actionHistory.unshift({ date: dateStr, desc });
+            if (actionHistory.length > 200) actionHistory.pop();
+            // Sauvegarde légère sans déclencher updateSaveIndicator
+            localStorage.setItem('actionHistory', JSON.stringify(actionHistory.slice(0, 200)));
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyTableContainer');
+            if (!container) return;
+            if (!actionHistory.length) {
+                container.innerHTML = '<p style="color:#7a9db1;font-style:italic;">Aucune action enregistrée.</p>';
+                return;
+            }
+            container.innerHTML = `<table class="history-table">
+                <thead><tr><th style="width:170px;">Date & Heure</th><th>Action</th></tr></thead>
+                <tbody>${actionHistory.map(h => `<tr><td>${h.date}</td><td>${h.desc}</td></tr>`).join('')}</tbody>
+            </table>`;
+        }
+
+        function clearHistory() {
+            if (confirm('Vider tout le journal d\'audit ?')) {
+                actionHistory = [];
+                localStorage.setItem('actionHistory', '[]');
+                renderHistory();
+            }
+        }
+
+        // ============================================================
+        // ACCOMPAGNEMENT — Matrice
+        // ============================================================
+        function ajouterLigneMatrice() {
+            const tbody = document.querySelector('#matriceApprenanceTable tbody');
+            if (!tbody) return;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" placeholder="Nom CEA" style="width:100%;border:none;background:transparent;"></td>
+                <td><input type="text" placeholder="Ex: ASS-01 Kit 2 pièces" style="width:100%;border:none;background:transparent;"></td>
+                <td><select><option>Découverte</option><option>Assimilation en cours</option><option>Acquis / Autonomie</option></select></td>
+                <td><select><option>Besoin de réassurance</option><option>Ouverture / Curiosité</option><option>Proactivité</option></select></td>
+                <td><button class="delete-btn btn-small" onclick="this.closest('tr').remove()">🗑️</button></td>`;
+            tbody.appendChild(tr);
+        }
+
+        // ============================================================
+        // GANTT — Planification
+        // ============================================================
+        function ganttNav(dir) {
+            ganttOffset += dir;
+            renderGantt();
+        }
+
+        function addWorkDays(startDate, days) {
+            const d = new Date(startDate);
+            let added = 0;
+            while (added < days) {
+                d.setDate(d.getDate() + 1);
+                if (d.getDay() !== 0 && d.getDay() !== 6) added++;
+            }
+            return d;
+        }
+
+        function renderGantt() {
+            const container = document.getElementById('ganttChart');
+            if (!container) return;
+
+            const today = new Date();
+            const periodStart = new Date(today.getFullYear(), today.getMonth() + ganttOffset, 1);
+            const periodEnd = new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 0);
+            const days = periodEnd.getDate();
+
+            const label = periodStart.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
+            const lbl = document.getElementById('ganttPeriodLabel');
+            if (lbl) lbl.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+
+            const filterStatut = document.getElementById('ganttFilter')?.value || '';
+            let prests = prestationsSauvegardees.filter(p => {
+                if (filterStatut && (p.statut || 'devis') !== filterStatut) return false;
+                const dStart = new Date(p.dateDebut || p.date || today);
+                const estJours = Math.max(1, Math.ceil((p.heures || 1) / 8));
+                const dEnd = p.dateFin ? new Date(p.dateFin) : addWorkDays(dStart, estJours);
+                return dStart <= periodEnd && dEnd >= periodStart;
+            });
+
+            if (!prests.length) {
+                container.innerHTML = '<p class="empty-state">Aucune prestation sur cette période.<br><small>Définissez des dates de planification ci-dessous, ou vérifiez les filtres.</small></p>';
+                return;
+            }
+
+            // Build day headers
+            const dayInfos = [];
+            for (let d = 1; d <= days; d++) {
+                const day = new Date(periodStart.getFullYear(), periodStart.getMonth(), d);
+                dayInfos.push({
+                    d,
+                    isToday: day.toDateString() === today.toDateString(),
+                    isWeekend: day.getDay() === 0 || day.getDay() === 6,
+                    dayObj: day
+                });
+            }
+
+            const statColors = { facture: '#b8e5d0', valide: '#a8d5e2', devis: '#c9b3d4' };
+
+            let html = `<div style="overflow-x:auto;"><table class="gantt-table">
+                <thead><tr>
+                    <th style="min-width:150px;text-align:left;padding:6px 10px;font-size:0.8em;">Prestation</th>
+                    <th style="min-width:90px;text-align:left;padding:6px;font-size:0.8em;">Client</th>
+                    ${dayInfos.map(({d, isToday, isWeekend}) =>
+                        `<th style="min-width:26px;width:26px;text-align:center;padding:3px 1px;font-size:0.72em;${isToday ? 'background:#a8d5e2;font-weight:bold;' : ''}${isWeekend ? 'color:#bbb;' : ''}">${d}</th>`
+                    ).join('')}
+                </tr></thead>
+                <tbody>`;
+
+            prests.forEach(p => {
+                const dStart = new Date(p.dateDebut || p.date || today);
+                const estJours = Math.max(1, Math.ceil((p.heures || 1) / 8));
+                const dEnd = p.dateFin ? new Date(p.dateFin) : addWorkDays(dStart, estJours);
+                const color = statColors[p.statut || 'devis'];
+
+                html += `<tr>
+                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${p.prestation}"><strong>${p.prestation.length > 22 ? p.prestation.slice(0,20)+'…' : p.prestation}</strong></td>
+                    <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;">${p.client}</td>`;
+
+                dayInfos.forEach(({dayObj, isWeekend}) => {
+                    const dDay = new Date(dayObj.getFullYear(), dayObj.getMonth(), dayObj.getDate());
+                    const dS = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
+                    const dE = new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate());
+                    const inRange = dDay >= dS && dDay <= dE;
+                    html += `<td style="padding:2px 1px;${isWeekend ? 'background:#f8f0f0;' : ''}">
+                        ${inRange ? `<div class="gantt-bar" style="background:${color};" title="${p.prestation} • ${p.statut || 'devis'}"></div>` : ''}
+                    </td>`;
+                });
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table></div>
+            <div class="gantt-legend">
+                <span>Légende :</span>
+                <span><span class="gantt-legend-dot" style="background:#c9b3d4;"></span>Devis</span>
+                <span><span class="gantt-legend-dot" style="background:#a8d5e2;"></span>Validé</span>
+                <span><span class="gantt-legend-dot" style="background:#b8e5d0;"></span>Facturé</span>
+            </div>`;
+
+            container.innerHTML = html;
+        }
+
+        function loadGanttPrestSelect() {
+            const sel = document.getElementById('ganttPrestSelect');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">— Sélectionner —</option>' +
+                [...prestationsSauvegardees]
+                    .sort((a, b) => (a.client || '').localeCompare(b.client || ''))
+                    .map(p => `<option value="${p.id}">${p.client} — ${p.prestation}</option>`)
+                    .join('');
+        }
+
+        function loadGanttPrestDates() {
+            const id = parseInt(document.getElementById('ganttPrestSelect')?.value);
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const debEl = document.getElementById('ganttDateDebut');
+            const finEl = document.getElementById('ganttDateFin');
+            if (debEl) debEl.value = p.dateDebut || p.date || '';
+            if (finEl) finEl.value = p.dateFin || '';
+        }
+
+        function saveGanttDates() {
+            const id = parseInt(document.getElementById('ganttPrestSelect')?.value);
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return alert('Sélectionnez une prestation');
+            const deb = document.getElementById('ganttDateDebut')?.value;
+            const fin = document.getElementById('ganttDateFin')?.value;
+            if (deb && fin && new Date(fin) < new Date(deb)) {
+                alert('La date de fin doit être après la date de début');
+                return;
+            }
+            p.dateDebut = deb || '';
+            p.dateFin = fin || '';
+            logAction(`Planification : ${p.prestation} → ${deb} au ${fin || '?'}`);
+            saveToStorage();
+            renderGantt();
+            alert('✅ Dates de planification enregistrées');
         }
 
     </script>
