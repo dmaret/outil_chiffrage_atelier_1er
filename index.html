@@ -1466,9 +1466,8 @@
             <!-- ONGLET HISTORIQUE (admin) -->
             <div id="historique" class="tab-content">
                 <div class="section">
-                    <h2>📝 Journal d'audit</h2>
-                    <div class="info-box">Ce journal trace automatiquement les actions critiques : créations, modifications, suppressions de prestations, mouvements de stock, changements de paramètres.</div>
-                    <button class="btn btn-danger btn-small" onclick="clearHistory()" style="margin-bottom:15px;">🗑️ Vider l'historique</button>
+                    <h2>🔄 Historique des versions de prestations</h2>
+                    <div class="info-box">Chaque fois qu'une prestation est modifiée, l'ancienne version est archivée ici. Permet de tracer l'évolution des prix et des conditions.</div>
                     <div id="historyTableContainer"></div>
                 </div>
             </div>
@@ -4781,22 +4780,51 @@
         function renderHistory() {
             const container = document.getElementById('historyTableContainer');
             if (!container) return;
-            if (!actionHistory.length) {
-                container.innerHTML = '<p style="color:#7a9db1;font-style:italic;">Aucune action enregistrée.</p>';
+
+            const avecRevisions = prestationsSauvegardees.filter(p => p.revisions && p.revisions.length > 0)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (!avecRevisions.length) {
+                container.innerHTML = '<p style="color:#7a9db1;font-style:italic;">Aucune prestation modifiée pour l\'instant. Les versions apparaissent ici dès qu\'une prestation est éditée.</p>';
                 return;
             }
-            container.innerHTML = `<table class="history-table">
-                <thead><tr><th style="width:170px;">Date & Heure</th><th>Action</th></tr></thead>
-                <tbody>${actionHistory.map(h => `<tr><td>${h.date}</td><td>${h.desc}</td></tr>`).join('')}</tbody>
-            </table>`;
-        }
 
-        function clearHistory() {
-            if (confirm('Vider tout le journal d\'audit ?')) {
-                actionHistory = [];
-                localStorage.setItem('actionHistory', '[]');
-                renderHistory();
-            }
+            let html = '';
+            avecRevisions.forEach(p => {
+                html += `<div style="margin-bottom:22px;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                        <strong style="font-size:1em;">${p.prestation}</strong>
+                        <span style="color:#7a9db1;font-size:0.85em;">${p.client}</span>
+                        <span class="badge badge-info" style="font-size:0.75em;">${p.statut || 'devis'}</span>
+                    </div>
+                    <table>
+                        <thead><tr>
+                            <th>Version</th><th>Date</th>
+                            <th>Prix de revient</th><th>Prix de vente</th>
+                            <th>Marge %</th><th>Heures</th>
+                        </tr></thead>
+                        <tbody>
+                            ${p.revisions.map(r => `<tr>
+                                <td>v${r.version}</td>
+                                <td>${r.date}</td>
+                                <td>${(r.prixRevient||0).toFixed(2)} CHF</td>
+                                <td>${(r.prixVente||0).toFixed(2)} CHF</td>
+                                <td>${(r.marge||0).toFixed(1)}%</td>
+                                <td>${(r.heures||0).toFixed(2)} h</td>
+                            </tr>`).join('')}
+                            <tr style="font-weight:600;background:#f0f8f5;">
+                                <td>Actuelle</td>
+                                <td>${p.date}</td>
+                                <td>${(p.prixRevient||0).toFixed(2)} CHF</td>
+                                <td>${(p.prixVente||0).toFixed(2)} CHF</td>
+                                <td>${(p.marge||0).toFixed(1)}%</td>
+                                <td>${(p.heures||0).toFixed(2)} h</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`;
+            });
+            container.innerHTML = html;
         }
 
         // ============================================================
