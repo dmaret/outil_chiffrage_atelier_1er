@@ -283,6 +283,8 @@
         }
         
         .geste-line { grid-template-columns: 2fr 0.7fr 0.7fr 1fr 110px; }
+        .geste-notes-area { grid-column: 1 / -1; margin-top: -4px; }
+        .geste-notes-area textarea { width:100%; padding:7px; border:1px solid #d0b8e8; border-radius:6px; font-size:0.85em; resize:vertical; background:#fdf8ff; }
         .consommable-line { grid-template-columns: 2fr 1fr 1fr 1fr 80px; }
         .stock-line { grid-template-columns: 1.5fr 0.8fr 0.8fr 0.8fr 1fr 80px; }
         .geste-search { width:100%; padding:4px 7px; border:1px solid #e0ecf5; border-radius:4px; font-size:0.8em; margin-bottom:4px; background:#f7fbff; }
@@ -1816,6 +1818,7 @@
             const selTemps = opts?.temps || '';
             const selQte = opts?.quantite || 1;
             const selType = opts?.typeApp || 'piece';
+            const selNotes = opts?.notes || '';
             line.innerHTML = `
                 <div class="form-group">
                     <label>Geste</label>
@@ -1843,8 +1846,12 @@
                     </select>
                 </div>
                 <div class="form-group" style="display:flex;gap:4px;align-items:flex-end;">
+                    <button class="btn-copy" onclick="toggleGesteNotes(${lineId})" title="Notes / commentaires" style="${selNotes ? 'color:#9a5abf;' : ''}">📝</button>
                     <button class="btn-copy" onclick="duplicateGesteLine(${lineId})" title="Dupliquer cette ligne">📋</button>
                     <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
+                </div>
+                <div id="notes-geste-area-${lineId}" class="geste-notes-area" style="display:${selNotes ? 'block' : 'none'};">
+                    <textarea id="notes-geste-${lineId}" placeholder="Notes / commentaires sur ce geste (consignes particulières, variantes, précautions...)...">${selNotes}</textarea>
                 </div>`;
             container.appendChild(line);
             gesteLines.push(lineId);
@@ -1860,12 +1867,21 @@
             });
         }
 
+        function toggleGesteNotes(lineId) {
+            const area = document.getElementById('notes-geste-area-' + lineId);
+            if (!area) return;
+            const visible = area.style.display !== 'none';
+            area.style.display = visible ? 'none' : 'block';
+            if (!visible) document.getElementById('notes-geste-' + lineId)?.focus();
+        }
+
         function duplicateGesteLine(lineId) {
             const code = document.getElementById('select-geste-' + lineId)?.value || '';
             const temps = document.getElementById('temps-' + lineId)?.value || '';
             const qte = document.getElementById('quantite-' + lineId)?.value || 1;
             const typeApp = document.getElementById('type-geste-' + lineId)?.value || 'piece';
-            addGesteLine({code, temps, quantite: parseFloat(qte), typeApp});
+            const notes = document.getElementById('notes-geste-' + lineId)?.value || '';
+            addGesteLine({code, temps, quantite: parseFloat(qte), typeApp, notes});
             calculateTotal();
         }
 
@@ -2139,8 +2155,9 @@
                     const temps = parseFloat(document.getElementById('temps-' + lineId)?.value || 0);
                     const quantite = parseFloat(document.getElementById('quantite-' + lineId)?.value || 0);
                     const typeApp = document.getElementById('type-geste-' + lineId)?.value || 'piece';
+                    const notes = document.getElementById('notes-geste-' + lineId)?.value || '';
                     const geste = catalogueGestes.find(g => g.code === code);
-                    gestes.push({code, description: geste?.description || '', temps, quantite, typeApp});
+                    gestes.push({code, description: geste?.description || '', temps, quantite, typeApp, notes});
                 }
             });
 
@@ -2574,17 +2591,19 @@
             catalogueGestes.forEach(g => {
                 const tempsAjuste = Math.round(g.temps * g.coef);
                 const notes = g.notes || '';
-                html += `<tr>
+                const codeEsc = g.code.replace(/'/g, "\\'");
+                html += `<tr id="tr-geste-${g.code}">
                     <td><strong>${g.code}</strong></td>
                     <td>${g.categorie}</td>
                     <td>${g.description}</td>
                     <td>${g.temps}</td>
                     <td>${g.coef}</td>
                     <td><strong>${tempsAjuste}</strong></td>
-                    <td style="font-size: 0.8em; color: #7a9db1; font-style: italic;">${notes}</td>
+                    <td style="font-size:0.8em;color:#7a9db1;font-style:italic;">${notes}</td>
                     <td style="white-space:nowrap;">
-                        <button class="btn btn-small btn-secondary" onclick="imprimerFicheGeste('${g.code}')" title="Fiche PDF">🖨️ Fiche PDF</button>
-                        <button class="delete-btn btn-small" onclick="deleteGeste('${g.code}')">🗑️</button>
+                        <button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>
+                        <button class="btn btn-small btn-secondary" onclick="imprimerFicheGeste('${codeEsc}')" title="Fiche PDF">🖨️</button>
+                        <button class="delete-btn btn-small" onclick="deleteGeste('${codeEsc}')">🗑️</button>
                     </td>
                 </tr>`;
             });
@@ -2640,6 +2659,44 @@
                 saveToStorage();
                 renderCatalogue();
             }
+        }
+
+        function editGesteInline(code) {
+            const g = catalogueGestes.find(x => x.code === code);
+            const tr = document.getElementById('tr-geste-' + code);
+            if (!g || !tr) return;
+            const cats = ['Réception','Contrôle','Étiquetage','Assemblage','Stockage','Expédition','Préparation','Administratif'];
+            tr.innerHTML = `
+                <td><input type="text" id="edit-code-${code}" value="${g.code}" style="width:80px;"></td>
+                <td><select id="edit-cat-${code}">${cats.map(c => `<option ${c===g.categorie?'selected':''}>${c}</option>`).join('')}<option ${!cats.includes(g.categorie)?'selected':''}>${g.categorie}</option></select></td>
+                <td><input type="text" id="edit-desc-${code}" value="${g.description.replace(/"/g,'&quot;')}" style="width:100%;min-width:160px;"></td>
+                <td><input type="number" id="edit-temps-${code}" value="${g.temps}" style="width:65px;"></td>
+                <td><input type="number" id="edit-coef-${code}" value="${g.coef}" step="0.05" style="width:55px;"></td>
+                <td style="color:#aaa;font-size:0.85em;">${Math.round(g.temps * g.coef)}</td>
+                <td><input type="text" id="edit-notes-${code}" value="${(g.notes||'').replace(/"/g,'&quot;')}" placeholder="Notes..." style="width:100%;"></td>
+                <td style="white-space:nowrap;">
+                    <button class="btn btn-success btn-small" onclick="saveGesteInline('${code}')">💾</button>
+                    <button class="btn btn-secondary btn-small" onclick="renderCatalogue()">✖</button>
+                </td>`;
+            document.getElementById('edit-desc-' + code)?.focus();
+        }
+
+        function saveGesteInline(oldCode) {
+            const g = catalogueGestes.find(x => x.code === oldCode);
+            if (!g) return;
+            const newCode = document.getElementById('edit-code-' + oldCode)?.value.trim();
+            if (!newCode) return alert('Le code ne peut pas être vide');
+            if (newCode !== oldCode && catalogueGestes.find(x => x.code === newCode)) return alert('Ce code existe déjà');
+            g.code = newCode;
+            g.categorie = document.getElementById('edit-cat-' + oldCode)?.value || g.categorie;
+            g.description = document.getElementById('edit-desc-' + oldCode)?.value.trim() || g.description;
+            g.temps = parseFloat(document.getElementById('edit-temps-' + oldCode)?.value) || g.temps;
+            g.coef = parseFloat(document.getElementById('edit-coef-' + oldCode)?.value) || g.coef;
+            g.notes = document.getElementById('edit-notes-' + oldCode)?.value || '';
+            catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
+            saveToStorage();
+            logAction(`Modification geste : ${g.code} — ${g.description}`);
+            renderCatalogue();
         }
 
         function filterCatalogue() {
