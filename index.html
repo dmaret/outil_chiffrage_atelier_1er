@@ -1831,7 +1831,6 @@
             line.innerHTML = `
                 <div class="form-group">
                     <label>Geste</label>
-                    <input type="text" class="geste-search" placeholder="🔍 Filtrer les gestes..." oninput="filterGesteSelect(this, ${lineId})">
                     <select id="select-geste-${lineId}" onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
                         <option value="">Sélectionner...</option>
                         ${catalogueGestes.map(g =>
