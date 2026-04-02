@@ -1579,7 +1579,7 @@
         let ganttOffset = 0;
 
         // Bases de données
-        let catalogueGestes = [
+        const defaultCatalogueGestes = [
             {code: "REC-01", categorie: "Réception", description: "Décharger palette", temps: 180, coef: 1.2, notes: "Avec transpalette électrique"},
             {code: "REC-02", categorie: "Réception", description: "Contrôle visuel", temps: 60, coef: 1.0, notes: "État général palette et emballages"},
             {code: "REC-04", categorie: "Réception", description: "Ouvrir carton", temps: 20, coef: 1.0, notes: "Avec cutter sécurisé"},
@@ -1621,6 +1621,7 @@
             {code: "PRE-03", categorie: "Préparation", description: "Reconditionnement d'un élément (comptage/orientation)", temps: 3, coef: 1.2, notes: "Niveau 2"},
             {code: "REC-03", categorie: "Réception", description: "Déballage d'un élément", temps: 5, coef: 1.0, notes: "Niveau 1"},
         ];
+        let catalogueGestes = [...defaultCatalogueGestes];
 
         let catalogueConsommables = [
             {nom: "Étiquette A4", unite: "pièce", prix: 0.15},
@@ -1679,7 +1680,15 @@
             const savedStockMins = localStorage.getItem('stockMins');
 
             if (savedConfig) { const c = JSON.parse(savedConfig); config = Object.assign(config, c); }
-            if (savedCatalogue) catalogueGestes = JSON.parse(savedCatalogue);
+            if (savedCatalogue) {
+                catalogueGestes = JSON.parse(savedCatalogue);
+                // Migration : ajouter les gestes par défaut manquants
+                const codesDefaut = defaultCatalogueGestes.filter(d => !catalogueGestes.find(g => g.code === d.code));
+                if (codesDefaut.length > 0) {
+                    catalogueGestes = [...catalogueGestes, ...codesDefaut];
+                    catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
+                }
+            }
             if (savedConsommables) catalogueConsommables = JSON.parse(savedConsommables);
             if (savedPrestations) prestationsSauvegardees = JSON.parse(savedPrestations);
             if (savedStock) {
