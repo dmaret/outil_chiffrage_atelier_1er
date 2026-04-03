@@ -4817,17 +4817,16 @@
             const nom = prompt('Nom du modèle :');
             if (!nom || !nom.trim()) return;
 
-            // Capture current form state
             const gestes = [];
             gesteLines.forEach(lineId => {
-                const line = document.getElementById('line-' + lineId);
-                if (line) {
-                    const sel = line.querySelector('select');
-                    const code = sel?.value;
-                    if (code) {
-                        const qte = parseFloat(document.getElementById('quantite-' + lineId)?.value || 1);
-                        gestes.push({code, quantite: qte});
-                    }
+                const code = document.getElementById('select-geste-' + lineId)?.value || '';
+                if (code) {
+                    gestes.push({
+                        code,
+                        quantite:  parseFloat(document.getElementById('quantite-' + lineId)?.value || 1),
+                        typeApp:   document.getElementById('type-geste-' + lineId)?.value || 'piece',
+                        notes:     document.getElementById('notes-geste-' + lineId)?.value || '',
+                    });
                 }
             });
 
@@ -4848,7 +4847,7 @@
             const stockage = [];
             stockageLines.forEach(lineId => {
                 const type = document.getElementById('type-stock-' + lineId)?.value;
-                const qte = parseFloat(document.getElementById('qte-stock-' + lineId)?.value || 1);
+                const qte  = parseFloat(document.getElementById('qte-stock-' + lineId)?.value || 1);
                 const duree = parseFloat(document.getElementById('duree-stock-' + lineId)?.value || 1);
                 if (type) stockage.push({type, qte, duree});
             });
@@ -4856,13 +4855,15 @@
             const modele = {
                 id: Date.now(),
                 nom: nom.trim(),
-                nbCEA: parseFloat(document.getElementById('nbCEA').value || 1),
-                nbMSP: parseFloat(document.getElementById('nbMSP').value || 0.5),
-                nbPieces: parseFloat(document.getElementById('nbPieces').value || 1),
-                margeDefaut: parseFloat(document.getElementById('margePercent').value || 15),
-                tempsMailsMin: parseFloat(document.getElementById('tempsMailsMin').value || 0),
+                nbCEA:              parseFloat(document.getElementById('nbCEA').value || 1),
+                nbMSP:              parseFloat(document.getElementById('nbMSP').value || 0.5),
+                nbPieces:           parseFloat(document.getElementById('nbPieces').value || 1),
+                margeDefaut:        parseFloat(document.getElementById('margePercent').value || 15),
+                tempsMailsMin:      parseFloat(document.getElementById('tempsMailsMin').value || 0),
                 tempsImpressionMin: parseFloat(document.getElementById('tempsImpressionMin').value || 0),
-                tempsCoordMin: parseFloat(document.getElementById('tempsCoordMin').value || 0),
+                tempsCoordMin:      parseFloat(document.getElementById('tempsCoordMin').value || 0),
+                responsable:        document.getElementById('responsable')?.value || '',
+                conditionsPaiement: document.getElementById('conditionsPaiement')?.value || '',
                 gestes,
                 consommables,
                 stockage
@@ -4883,136 +4884,61 @@
             const modele = configModeles.find(m => m.id === id);
             if (!modele) return;
 
-            // Fill numeric fields (don't touch client/prestation/reference/date)
-            document.getElementById('nbCEA').value = modele.nbCEA;
-            document.getElementById('nbMSP').value = modele.nbMSP;
-            document.getElementById('nbPieces').value = modele.nbPieces;
-            document.getElementById('margePercent').value = modele.margeDefaut;
-            document.getElementById('tempsMailsMin').value = modele.tempsMailsMin;
-            document.getElementById('tempsImpressionMin').value = modele.tempsImpressionMin;
-            document.getElementById('tempsCoordMin').value = modele.tempsCoordMin;
+            // Champs numériques / texte
+            document.getElementById('nbCEA').value              = modele.nbCEA ?? 1;
+            document.getElementById('nbMSP').value              = modele.nbMSP ?? 0.5;
+            document.getElementById('nbPieces').value           = modele.nbPieces ?? 1;
+            document.getElementById('margePercent').value       = modele.margeDefaut ?? 15;
+            document.getElementById('tempsMailsMin').value      = modele.tempsMailsMin ?? 0;
+            document.getElementById('tempsImpressionMin').value = modele.tempsImpressionMin ?? 0;
+            document.getElementById('tempsCoordMin').value      = modele.tempsCoordMin ?? 0;
+            if (modele.responsable)        document.getElementById('responsable').value        = modele.responsable;
+            if (modele.conditionsPaiement) document.getElementById('conditionsPaiement').value = modele.conditionsPaiement;
 
-            // Clear and rebuild gestes
+            // Gestes — utilise addGesteLine() pour avoir le bon HTML à jour
             document.getElementById('gestesContainer').innerHTML = '';
             gesteLines = [];
             (modele.gestes || []).forEach(g => {
-                const container = document.getElementById('gestesContainer');
-                const lineId = Date.now() + Math.random();
-                const line = document.createElement('div');
-                line.className = 'geste-line';
-                line.id = 'line-' + lineId;
                 const geste = catalogueGestes.find(cg => cg.code === g.code);
-                const tempsAjuste = geste ? Math.round(geste.temps * geste.coef) : 0;
-                line.innerHTML = `
-                    <div class="form-group">
-                        <label>Geste</label>
-                        <select onchange="updateGesteDetails(this, ${lineId}); calculateTotal()">
-                            <option value="">Sélectionner...</option>
-                            ${catalogueGestes.map(cg =>
-                                `<option value="${cg.code}" ${cg.code === g.code ? 'selected' : ''}>[${cg.code}] ${cg.description}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Temps (sec)</label>
-                        <input type="number" id="temps-${lineId}" value="${tempsAjuste}" readonly style="background: #f0f0f0;">
-                    </div>
-                    <div class="form-group">
-                        <label>Quantité</label>
-                        <input type="number" id="quantite-${lineId}" min="0" value="${g.quantite}" onchange="calculateTotal()">
-                    </div>
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button class="delete-btn" onclick="removeGesteLine(${lineId})">🗑️</button>
-                    </div>
-                `;
-                container.appendChild(line);
-                gesteLines.push(lineId);
+                addGesteLine({
+                    code:     g.code,
+                    temps:    geste ? Math.round(geste.temps * geste.coef) : (g.temps || 0),
+                    quantite: g.quantite ?? 1,
+                    typeApp:  g.typeApp  || 'piece',
+                    notes:    g.notes   || '',
+                });
             });
             if (gesteLines.length === 0) addGesteLine();
 
-            // Clear and rebuild consommables
+            // Consommables — ajoute une ligne vierge puis remplit
             document.getElementById('consommablesContainer').innerHTML = '';
             consommableLines = [];
             (modele.consommables || []).forEach(mc => {
-                const container = document.getElementById('consommablesContainer');
-                const lineId = Date.now() + Math.random();
-                const line = document.createElement('div');
-                line.className = 'consommable-line';
-                line.id = 'consom-' + lineId;
+                addConsommableLine();
+                const lineId = consommableLines[consommableLines.length - 1];
                 const cIdx = catalogueConsommables.findIndex(c => c.nom === mc.nom);
-                line.innerHTML = `
-                    <div class="form-group">
-                        <label>Consommable</label>
-                        <select onchange="updateConsommableDetails(this, ${lineId}); calculateTotal()">
-                            <option value="">Sélectionner...</option>
-                            ${catalogueConsommables.map((c, idx) =>
-                                `<option value="${idx}" ${idx === cIdx ? 'selected' : ''}>${c.nom} (${c.prix} CHF)</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Prix (CHF)</label>
-                        <input type="number" id="prix-consom-${lineId}" value="${mc.prix}" readonly style="background: #f0f0f0;">
-                    </div>
-                    <div class="form-group">
-                        <label>Quantité</label>
-                        <input type="number" id="qte-consom-${lineId}" min="0" value="${mc.qte}" onchange="calculateTotal()">
-                    </div>
-                    <div class="form-group">
-                        <label>Total (CHF)</label>
-                        <input type="number" id="total-consom-${lineId}" readonly style="background: #f0f0f0;">
-                    </div>
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button class="delete-btn" onclick="removeConsommableLine(${lineId})">🗑️</button>
-                    </div>
-                `;
-                container.appendChild(line);
-                consommableLines.push(lineId);
+                const sel = document.querySelector('#consom-' + lineId + ' select');
+                if (sel && cIdx >= 0) {
+                    sel.value = cIdx;
+                    updateConsommableDetails(sel, lineId);
+                }
+                const qteEl = document.getElementById('qte-consom-' + lineId);
+                if (qteEl) qteEl.value = mc.qte;
             });
             if (consommableLines.length === 0) addConsommableLine();
 
-            // Clear and rebuild stockage
+            // Stockage — ajoute une ligne vierge puis remplit
             document.getElementById('stockageContainer').innerHTML = '';
             stockageLines = [];
             (modele.stockage || []).forEach(s => {
-                const container = document.getElementById('stockageContainer');
-                const lineId = Date.now() + Math.random();
-                const line = document.createElement('div');
-                line.className = 'stock-line';
-                line.id = 'stock-' + lineId;
-                line.innerHTML = `
-                    <div class="form-group">
-                        <label>Type</label>
-                        <select id="type-stock-${lineId}" onchange="calculateTotal()">
-                            <option value="palette" ${s.type === 'palette' ? 'selected' : ''}>Palette</option>
-                            <option value="m2" ${s.type === 'm2' ? 'selected' : ''}>m²</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Quantité</label>
-                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="calculateTotal()">
-                    </div>
-                    <div class="form-group">
-                        <label>Durée (j)</label>
-                        <input type="number" id="duree-stock-${lineId}" min="0" step="0.5" value="${s.duree}" onchange="calculateTotal()">
-                    </div>
-                    <div class="form-group">
-                        <label>Tarif/j</label>
-                        <input type="number" id="tarif-stock-${lineId}" readonly style="background: #f0f0f0;">
-                    </div>
-                    <div class="form-group">
-                        <label>Total</label>
-                        <input type="number" id="total-stock-${lineId}" readonly style="background: #f0f0f0;">
-                    </div>
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button class="delete-btn" onclick="removeStockageLine(${lineId})">🗑️</button>
-                    </div>
-                `;
-                container.appendChild(line);
-                stockageLines.push(lineId);
+                addStockageLine();
+                const lineId = stockageLines[stockageLines.length - 1];
+                const typeEl = document.getElementById('type-stock-' + lineId);
+                const qteEl  = document.getElementById('qte-stock-'  + lineId);
+                const dureeEl= document.getElementById('duree-stock-' + lineId);
+                if (typeEl)  typeEl.value  = s.type  || 'palette';
+                if (qteEl)   qteEl.value   = s.qte   ?? 1;
+                if (dureeEl) dureeEl.value  = s.duree ?? 1;
             });
             if (stockageLines.length === 0) addStockageLine();
 
