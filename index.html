@@ -4988,13 +4988,20 @@
             const modele = {
                 id: Date.now(),
                 nom: nom.trim(),
-                nbCEA:              parseFloat(document.getElementById('nbCEA').value || 1),
-                nbMSP:              parseFloat(document.getElementById('nbMSP').value || 0.5),
-                nbPieces:           parseFloat(document.getElementById('nbPieces').value || 1),
-                margeDefaut:        parseFloat(document.getElementById('margePercent').value || 15),
-                tempsMailsMin:      parseFloat(document.getElementById('tempsMailsMin').value || 0),
-                tempsImpressionMin: parseFloat(document.getElementById('tempsImpressionMin').value || 0),
-                tempsCoordMin:      parseFloat(document.getElementById('tempsCoordMin').value || 0),
+                // Infos prestation
+                client:             document.getElementById('client')?.value || '',
+                prestation:         document.getElementById('prestation')?.value || '',
+                reference:          document.getElementById('reference')?.value || '',
+                date:               document.getElementById('date')?.value || '',
+                dateValidite:       document.getElementById('dateValidite')?.value || '',
+                // Paramètres production
+                nbCEA:              parseFloat(document.getElementById('nbCEA').value) || 1,
+                nbMSP:              parseFloat(document.getElementById('nbMSP').value) || 0.5,
+                nbPieces:           parseFloat(document.getElementById('nbPieces').value) || 1,
+                margeDefaut:        parseFloat(document.getElementById('margePercent').value) || 15,
+                tempsMailsMin:      parseFloat(document.getElementById('tempsMailsMin').value) || 0,
+                tempsImpressionMin: parseFloat(document.getElementById('tempsImpressionMin').value) || 0,
+                tempsCoordMin:      parseFloat(document.getElementById('tempsCoordMin').value) || 0,
                 responsable:        document.getElementById('responsable')?.value || '',
                 conditionsPaiement: document.getElementById('conditionsPaiement')?.value || '',
                 gestes,
@@ -5017,16 +5024,22 @@
             const modele = configModeles.find(m => m.id === id);
             if (!modele) return;
 
-            // Champs numériques / texte
-            document.getElementById('nbCEA').value              = modele.nbCEA ?? 1;
-            document.getElementById('nbMSP').value              = modele.nbMSP ?? 0.5;
-            document.getElementById('nbPieces').value           = modele.nbPieces ?? 1;
-            document.getElementById('margePercent').value       = modele.margeDefaut ?? 15;
-            document.getElementById('tempsMailsMin').value      = modele.tempsMailsMin ?? 0;
-            document.getElementById('tempsImpressionMin').value = modele.tempsImpressionMin ?? 0;
-            document.getElementById('tempsCoordMin').value      = modele.tempsCoordMin ?? 0;
-            if (modele.responsable)        document.getElementById('responsable').value        = modele.responsable;
-            if (modele.conditionsPaiement) document.getElementById('conditionsPaiement').value = modele.conditionsPaiement;
+            // Infos prestation
+            document.getElementById('client').value             = modele.client             || '';
+            document.getElementById('prestation').value         = modele.prestation         || '';
+            document.getElementById('reference').value          = modele.reference          || '';
+            document.getElementById('date').value               = modele.date               || '';
+            if (modele.dateValidite) document.getElementById('dateValidite').value = modele.dateValidite;
+            // Paramètres production
+            document.getElementById('nbCEA').value              = modele.nbCEA              ?? 1;
+            document.getElementById('nbMSP').value              = modele.nbMSP              ?? 0.5;
+            document.getElementById('nbPieces').value           = modele.nbPieces           ?? 1;
+            document.getElementById('margePercent').value       = modele.margeDefaut         ?? 15;
+            document.getElementById('tempsMailsMin').value      = modele.tempsMailsMin       ?? 0;
+            document.getElementById('tempsImpressionMin').value = modele.tempsImpressionMin  ?? 0;
+            document.getElementById('tempsCoordMin').value      = modele.tempsCoordMin       ?? 0;
+            document.getElementById('responsable').value        = modele.responsable         || '';
+            document.getElementById('conditionsPaiement').value = modele.conditionsPaiement  || '';
 
             // Gestes — utilise addGesteLine() pour avoir le bon HTML à jour
             document.getElementById('gestesContainer').innerHTML = '';
