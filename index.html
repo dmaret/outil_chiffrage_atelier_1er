@@ -646,6 +646,12 @@
         .print-check input[type=checkbox] { width:16px; height:16px; cursor:pointer; accent-color: var(--color-primary-dark); }
         .print-preset-btn { padding:8px 16px; border-radius:8px; border:2px solid #dde; cursor:pointer; font-size:0.85em; font-weight:600; background:#fff; transition:all 0.2s; }
         .print-preset-btn:hover { border-color: var(--color-primary); background:#f0f8fb; }
+
+        /* Toggle MSP */
+        .cost-line.msp-off { opacity: 0.38; }
+        .cost-line.msp-off span { text-decoration: line-through; color: #aaa; }
+        #btnToggleMSP { padding: 2px 9px; border-radius: 20px; border: 1px solid #c8dde8; background: #e8f6fb; color: #3a6a7e; font-size: 0.75em; font-weight: 700; cursor: pointer; transition: all 0.2s; vertical-align: middle; margin-left: 6px; }
+        #btnToggleMSP.off { background: #f0f0f0; color: #aaa; border-color: #ddd; }
     </style>
 </head>
 <body>
@@ -894,8 +900,8 @@
                         <span>Main d'œuvre CEA</span>
                         <span id="coutMO">0.00 CHF</span>
                     </div>
-                    <div class="cost-line">
-                        <span>Encadrement MSP</span>
+                    <div class="cost-line" id="costLineMSP">
+                        <span>Encadrement MSP <button id="btnToggleMSP" onclick="toggleMSP()" title="Inclure / exclure du calcul">ON</button></span>
                         <span id="coutEncadrement">0.00 CHF</span>
                     </div>
                     <div class="cost-line">
@@ -1846,6 +1852,7 @@
             round:  { lg:'20px', md:'12px', sm:'8px'  },
         };
         let _dragSrcId = null;
+        let mspActif = true;
         const STATUT_CONFIG = {
             'brouillon': { label:'⬜ Brouillon', cls:'badge-statut-brouillon' },
             'devis':     { label:'🟡 Devis',     cls:'badge-statut-devis' },
@@ -2301,6 +2308,16 @@
             calculateTotal();
         }
 
+        // ── Toggle MSP ──────────────────────────────────────────────
+        function toggleMSP() {
+            mspActif = !mspActif;
+            const btn  = document.getElementById('btnToggleMSP');
+            const line = document.getElementById('costLineMSP');
+            if (btn)  { btn.textContent = mspActif ? 'ON' : 'OFF'; btn.classList.toggle('off', !mspActif); }
+            if (line) line.classList.toggle('msp-off', !mspActif);
+            calculateTotal();
+        }
+
         // ── Fonctions Thème ─────────────────────────────────────────
         function applyThemeCss(t, r, f) {
             const root = document.documentElement;
@@ -2598,7 +2615,8 @@
             const nbMSP = parseFloat(document.getElementById('nbMSP')?.value || 0);
 
             const coutMO = totalHeures * nbCEA * config.coutHoraireCEA;
-            const coutEncadrement = totalHeures * nbMSP * config.coutHoraireMSP;
+            const coutEncadrementBrut = totalHeures * nbMSP * config.coutHoraireMSP;
+            const coutEncadrement = mspActif ? coutEncadrementBrut : 0;
 
             // Consommables × nb pièces
             let coutConsommables = 0;
@@ -2650,7 +2668,7 @@
             document.getElementById('totalHeures').textContent = totalHeures.toFixed(2);
             document.getElementById('totalHeuresPiece').textContent = nbPieces > 1 ? (heuresParPiece * 60).toFixed(1) + ' min' : '—';
             document.getElementById('coutMO').textContent = coutMO.toFixed(2) + ' CHF';
-            document.getElementById('coutEncadrement').textContent = coutEncadrement.toFixed(2) + ' CHF';
+            document.getElementById('coutEncadrement').textContent = coutEncadrementBrut.toFixed(2) + ' CHF';
             document.getElementById('coutConsommables').textContent = coutConsommables.toFixed(2) + ' CHF';
             document.getElementById('coutStockage').textContent = coutStockage.toFixed(2) + ' CHF';
             document.getElementById('coutFraisGeneraux').textContent = fraisGeneraux.toFixed(2) + ' CHF';
