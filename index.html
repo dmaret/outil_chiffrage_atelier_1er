@@ -652,6 +652,66 @@
         .cost-line.msp-off span { text-decoration: line-through; color: #aaa; }
         #btnToggleMSP { padding: 2px 9px; border-radius: 20px; border: 1px solid #c8dde8; background: #e8f6fb; color: #3a6a7e; font-size: 0.75em; font-weight: 700; cursor: pointer; transition: all 0.2s; vertical-align: middle; margin-left: 6px; }
         #btnToggleMSP.off { background: #f0f0f0; color: #aaa; border-color: #ddd; }
+        /* ── Toast notifications ───────────────────────────────────── */
+        #toastContainer { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column-reverse; gap:8px; pointer-events:none; }
+        .toast { display:flex; align-items:center; gap:10px; padding:12px 18px; border-radius:10px; font-size:0.88em; font-weight:600; color:#fff; min-width:220px; max-width:380px; box-shadow:0 4px 20px rgba(0,0,0,0.18); pointer-events:all; transform:translateX(120%); transition:transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s; opacity:0; }
+        .toast.show { transform:translateX(0); opacity:1; }
+        .toast.success { background:linear-gradient(135deg,#27ae60,#2ecc71); }
+        .toast.error   { background:linear-gradient(135deg,#e74c3c,#c0392b); }
+        .toast.info    { background:linear-gradient(135deg,#3498db,#2980b9); }
+        .toast.warning { background:linear-gradient(135deg,#f39c12,#d68910); }
+        .toast-icon { font-size:1.2em; flex-shrink:0; }
+        .toast-close { margin-left:auto; cursor:pointer; opacity:0.7; font-size:1.1em; }
+        .toast-close:hover { opacity:1; }
+
+        /* Modale confirm personnalisée */
+        #confirmModal { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.45); z-index:3000; align-items:center; justify-content:center; }
+        #confirmModal.open { display:flex; }
+        .confirm-box { background:#fff; border-radius:14px; padding:28px 32px; max-width:400px; width:95%; box-shadow:0 10px 40px rgba(0,0,0,0.2); text-align:center; }
+        .confirm-box p { color:#5a7b8f; margin:10px 0 22px; font-size:0.95em; line-height:1.5; }
+        .confirm-actions { display:flex; gap:10px; justify-content:center; }
+
+        /* ── Recherche globale ──────────────────────────────────────── */
+        #searchGlobalOverlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.5); z-index:4000; align-items:flex-start; justify-content:center; padding-top:80px; }
+        #searchGlobalOverlay.open { display:flex; }
+        .search-global-box { background:#fff; border-radius:14px; width:95%; max-width:600px; box-shadow:0 20px 60px rgba(0,0,0,0.25); overflow:hidden; }
+        .search-global-input { width:100%; padding:16px 20px; font-size:1.1em; border:none; outline:none; border-bottom:1px solid #eee; }
+        .search-results { max-height:400px; overflow-y:auto; }
+        .search-result-item { padding:12px 20px; cursor:pointer; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:12px; }
+        .search-result-item:hover { background:#f5f9fc; }
+        .search-result-item .sri-icon { font-size:1.1em; width:24px; text-align:center; flex-shrink:0; }
+        .search-result-item .sri-title { font-weight:600; font-size:0.9em; color:#2d3e50; }
+        .search-result-item .sri-sub { font-size:0.78em; color:#9ab8c8; margin-top:1px; }
+        .search-empty { padding:20px; text-align:center; color:#aaa; font-size:0.9em; }
+
+        /* ── Mode plein écran calculateur ───────────────────────────── */
+        body.fullscreen-calc .tabs { display:none; }
+        body.fullscreen-calc .header { padding:14px 20px; }
+        body.fullscreen-calc .header h1 { font-size:1.2em; margin:0; }
+        body.fullscreen-calc .header p { display:none; }
+        #btnFullscreen { position:absolute; top:15px; right:170px; background:rgba(255,255,255,0.25); border:none; border-radius:50%; width:42px; height:42px; font-size:1.2em; cursor:pointer; transition:background 0.3s; }
+        #btnFullscreen:hover { background:rgba(255,255,255,0.4); }
+
+        /* ── Objectif CA mensuel ─────────────────────────────────────── */
+        .objectif-bar-wrap { background:#e8f4f8; border-radius:8px; height:14px; overflow:hidden; margin:8px 0 4px; }
+        .objectif-bar-fill { height:100%; border-radius:8px; background:linear-gradient(90deg,var(--color-primary),var(--color-secondary)); transition:width 0.5s; }
+        .objectif-bar-fill.over { background:linear-gradient(90deg,#27ae60,#2ecc71); }
+
+        /* ── Badges difficulté gestes ────────────────────────────────── */
+        .badge-diff-1 { background:#d4f0e3; color:#236b45; border:1px solid #5bc98b; padding:1px 7px; border-radius:12px; font-size:0.72em; font-weight:700; }
+        .badge-diff-2 { background:#fff4d6; color:#9d7020; border:1px solid #f0c040; padding:1px 7px; border-radius:12px; font-size:0.72em; font-weight:700; }
+        .badge-diff-3 { background:#fde8e8; color:#c0392b; border:1px solid #e74c3c; padding:1px 7px; border-radius:12px; font-size:0.72em; font-weight:700; }
+
+        /* ── Autosave indicator ─────────────────────────────────────── */
+        .autosave-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#27ae60; margin-right:4px; animation:pulse-dot 2s infinite; }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* ── Rapport mensuel ─────────────────────────────────────────── */
+        .rapport-section { page-break-inside:avoid; margin-bottom:24px; }
+
+        /* ── Import CSV ──────────────────────────────────────────────── */
+        .import-drop-zone { border:2px dashed #a8d5e2; border-radius:10px; padding:20px; text-align:center; cursor:pointer; color:#7a9db1; transition:all 0.2s; }
+        .import-drop-zone:hover { background:#f0f8fb; border-color:#6b8fa3; }
     </style>
 </head>
 <body>
@@ -740,11 +800,35 @@
         </div>
     </div>
 
+    <!-- Toast notifications container -->
+    <div id="toastContainer"></div>
+
+    <!-- Custom confirm modal -->
+    <div id="confirmModal">
+        <div class="confirm-box">
+            <p id="confirmMessage"></p>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+                <button class="btn btn-secondary btn-small" onclick="confirmModalCancel()">Annuler</button>
+                <button class="btn btn-danger btn-small" id="confirmModalOk" onclick="confirmModalAccept()">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global search overlay -->
+    <div id="searchGlobalOverlay" onclick="if(event.target===this)closeGlobalSearch()">
+        <div class="search-global-box">
+            <input type="text" id="searchGlobalInput" placeholder="🔍 Rechercher dans toute l'application..." oninput="runGlobalSearch(this.value)" onkeydown="if(event.key==='Escape')closeGlobalSearch()">
+            <div id="searchGlobalResults"></div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header" style="position:relative;">
             <h1>🏭 Outil Complet Atelier - La Pallanterie</h1>
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
-            <span id="saveIndicator">💾 Sauvegardé à l'instant</span>
+            <span id="saveIndicator"><span class="autosave-dot" id="autosaveDot"></span>💾 Sauvegardé à l'instant</span>
+            <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
+            <button onclick="openGlobalSearch()" style="position:absolute;top:15px;right:225px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Recherche globale">🔍</button>
             <button id="superUserToggle" onclick="toggleSuperUser()" style="position:absolute;top:15px;right:65px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode admin">🔓</button>
             <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
         </div>
@@ -1274,12 +1358,29 @@
                             <input type="number" id="newCoef" min="0.1" step="0.1" value="1.0" placeholder="1.0">
                         </div>
                         <div class="form-group">
+                            <label>Niveau de difficulté</label>
+                            <select id="newDifficulte">
+                                <option value="1">1 — Facile</option>
+                                <option value="2">2 — Moyen</option>
+                                <option value="3">3 — Difficile</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Notes / Commentaires</label>
                             <input type="text" id="newNotes" placeholder="Ex: Avec transpalette, temps variable selon...">
                             <span class="help-text">Description détaillée, remarques, conditions particulières</span>
                         </div>
                     </div>
                     <button class="btn" onclick="addGeste()">➕ Ajouter au catalogue</button>
+                </div>
+
+                <div class="section">
+                    <h2>📥 Import catalogue CSV</h2>
+                    <div class="import-drop-zone" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleCsvDrop(event)">
+                        <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                        <p style="font-size:0.8em;margin-top:4px;">Format attendu : code,categorie,description,temps,coef,difficulte,notes</p>
+                    </div>
+                    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="importCatalogueCSV(this)">
                 </div>
 
                 <div class="section">
@@ -1630,8 +1731,26 @@
                 </div>
 
                 <div class="section">
+                    <h2>🎯 Objectif CA mensuel</h2>
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+                        <label style="font-size:0.88em;font-weight:600;color:#5a7b8f;">Objectif mensuel (CHF) :</label>
+                        <input type="number" id="objectifCAInput" value="0" min="0" step="100"
+                               style="width:120px;padding:6px;border:1px solid #ddd;border-radius:5px;"
+                               oninput="renderObjectifCA()">
+                        <button class="btn btn-secondary btn-small" onclick="rapportMensuelPDF()">📄 Rapport mensuel PDF</button>
+                    </div>
+                    <div id="objectifCABar"></div>
+                </div>
+
+                <div class="section">
                     <h2>📊 Prévisions CA (3 mois)</h2>
                     <div id="previsionsCaSection"></div>
+                </div>
+
+                <div class="section">
+                    <h2>🔍 Rentabilité par geste</h2>
+                    <div class="info-box">Analyse du temps et du coût moyen par geste sur l'ensemble des prestations enregistrées.</div>
+                    <div id="rentabiliteGestesTable"></div>
                 </div>
 
                 <div class="section">
@@ -1987,6 +2106,13 @@
             // Escape : fermer modales
             if (e.key === 'Escape') {
                 closeQuickGesteModal();
+                closeGlobalSearch();
+                document.getElementById('confirmModal')?.classList.remove('open');
+            }
+            // Ctrl+F : recherche globale
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                openGlobalSearch();
             }
         });
 
@@ -2088,7 +2214,7 @@
             config.margeDefaut = parseFloat(document.getElementById('margeDefaut').value);
             config.seuilMargeMin = parseFloat(document.getElementById('seuilMargeMin').value) || 0;
             saveToStorage();
-            alert('✅ Configuration sauvegardée');
+            toast('✅ Configuration sauvegardée', 'success');
         }
 
         function saveStockConfig() {
@@ -2100,7 +2226,7 @@
         }
 
         function resetConfig() {
-            if (confirm('Réinitialiser tous les paramètres?')) {
+            toastConfirm('Réinitialiser tous les paramètres?', () => {
                 config = {
                     coutHoraireCEA: 35,
                     coutHoraireMSP: 65,
@@ -2119,7 +2245,7 @@
                 saveToStorage();
                 calculateTotal();
                 calculateRatio();
-            }
+            });
         }
 
         function switchTab(tabName) {
@@ -2292,8 +2418,8 @@
         function saveQuickGeste() {
             const code = document.getElementById('qg-code').value.trim().toUpperCase();
             const desc = document.getElementById('qg-desc').value.trim();
-            if (!code || !desc) { alert('Code et description requis'); return; }
-            if (catalogueGestes.find(g => g.code === code)) { alert('Ce code existe déjà'); return; }
+            if (!code || !desc) { toast('Code et description requis', 'warning'); return; }
+            if (catalogueGestes.find(g => g.code === code)) { toast('Ce code existe déjà', 'warning'); return; }
             const newGeste = {
                 code, categorie: document.getElementById('qg-cat').value,
                 description: desc,
@@ -2727,7 +2853,7 @@
             const reference = document.getElementById('reference').value;
 
             if (!client || !prestation || !reference) {
-                alert('Merci de remplir Client, Prestation et Référence');
+                toast('Merci de remplir Client, Prestation et Référence', 'warning');
                 return;
             }
 
@@ -2818,12 +2944,12 @@
                 }
                 logAction(`Modification prestation : ${prest.prestation} (${prest.client})`);
                 saveToStorage();
-                alert('✅ Prestation mise à jour');
+                toast('✅ Prestation mise à jour', 'success');
             } else {
                 prestationsSauvegardees.push(prest);
                 logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${prest.prixVente.toFixed(2)} CHF`);
                 saveToStorage();
-                alert('✅ Prestation enregistrée');
+                toast('✅ Prestation enregistrée', 'success');
             }
 
             resetCalculateur();
@@ -3163,7 +3289,7 @@
             if (!p) return;
             const h = parseFloat(document.getElementById('reel-heures-' + id)?.value);
             const notes = document.getElementById('reel-notes-' + id)?.value || '';
-            if (isNaN(h) || h < 0) { alert('Saisissez des heures réelles valides'); return; }
+            if (isNaN(h) || h < 0) { toast('Saisissez des heures réelles valides', 'warning'); return; }
             p.heuresReelles = h;
             p.notesReel = notes;
             saveToStorage();
@@ -3219,13 +3345,15 @@
 
             let html = `<table><thead><tr>
                 <th>Code</th><th>Catégorie</th><th>Description</th>
-                <th>Temps (sec)</th><th>Coef</th><th>Ajusté</th><th>Notes</th><th>Actions</th>
+                <th>Temps (sec)</th><th>Coef</th><th>Ajusté</th><th>Difficulté</th><th>Notes</th><th>Actions</th>
             </tr></thead><tbody id="catalogueBody">`;
 
             catalogueGestes.forEach(g => {
                 const tempsAjuste = Math.round(g.temps * g.coef);
                 const notes = g.notes || '';
                 const codeEsc = g.code.replace(/'/g, "\\'");
+                const diff = g.difficulte || 1;
+                const diffLabel = ['','Facile','Moyen','Difficile'][diff] || '—';
                 html += `<tr id="tr-geste-${g.code}">
                     <td><strong>${g.code}</strong></td>
                     <td>${g.categorie}</td>
@@ -3233,6 +3361,7 @@
                     <td>${g.temps}</td>
                     <td>${g.coef}</td>
                     <td><strong>${tempsAjuste}</strong></td>
+                    <td><span class="badge-diff-${diff}">${diffLabel}</span></td>
                     <td style="font-size:0.8em;color:#7a9db1;font-style:italic;">${notes}</td>
                     <td style="white-space:nowrap;">
                         <button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>
@@ -3252,15 +3381,16 @@
             const description = document.getElementById('newDescription').value.trim();
             const temps = parseFloat(document.getElementById('newTemps').value);
             const coef = parseFloat(document.getElementById('newCoef').value);
+            const difficulte = parseInt(document.getElementById('newDifficulte')?.value) || 1;
             const notes = document.getElementById('newNotes').value.trim();
             
             if (!code || !description || !temps) {
-                alert('Merci de remplir au minimum: Code, Description et Temps');
+                toast('Merci de remplir au minimum: Code, Description et Temps', 'warning');
                 return;
             }
             
             if (catalogueGestes.find(g => g.code === code)) {
-                alert('Ce code geste existe déjà. Utilise un autre code.');
+                toast('Ce code geste existe déjà. Utilise un autre code.', 'warning');
                 return;
             }
             
@@ -3270,6 +3400,7 @@
                 description: description,
                 temps: temps,
                 coef: coef,
+                difficulte: difficulte,
                 notes: notes
             });
             
@@ -3284,15 +3415,15 @@
             document.getElementById('newCoef').value = '1.0';
             document.getElementById('newNotes').value = '';
             
-            alert('✅ Geste ajouté au catalogue!');
+            toast('✅ Geste ajouté au catalogue!', 'success');
         }
 
         function deleteGeste(code) {
-            if (confirm(`Supprimer le geste ${code}?`)) {
+            toastConfirm(`Supprimer le geste ${code}?`, () => {
                 catalogueGestes = catalogueGestes.filter(g => g.code !== code);
                 saveToStorage();
                 renderCatalogue();
-            }
+            });
         }
 
         function editGesteInline(code) {
@@ -3319,8 +3450,8 @@
             const g = catalogueGestes.find(x => x.code === oldCode);
             if (!g) return;
             const newCode = document.getElementById('edit-code-' + oldCode)?.value.trim();
-            if (!newCode) return alert('Le code ne peut pas être vide');
-            if (newCode !== oldCode && catalogueGestes.find(x => x.code === newCode)) return alert('Ce code existe déjà');
+            if (!newCode) { toast('Le code ne peut pas être vide', 'warning'); return; }
+            if (newCode !== oldCode && catalogueGestes.find(x => x.code === newCode)) { toast('Ce code existe déjà', 'warning'); return; }
             g.code = newCode;
             g.categorie = document.getElementById('edit-cat-' + oldCode)?.value || g.categorie;
             g.description = document.getElementById('edit-desc-' + oldCode)?.value.trim() || g.description;
@@ -3347,7 +3478,7 @@
             const prix = parseFloat(document.getElementById('newConsomPrix').value);
             
             if (!nom || !prix) {
-                alert('Merci de remplir Nom et Prix');
+                toast('Merci de remplir Nom et Prix', 'warning');
                 return;
             }
             
@@ -3357,7 +3488,7 @@
             
             document.getElementById('newConsomNom').value = '';
             document.getElementById('newConsomPrix').value = '';
-            alert('✅ Consommable ajouté');
+            toast('✅ Consommable ajouté', 'success');
         }
 
         function renderConsommablesTable() {
@@ -3607,14 +3738,14 @@
         }
 
         function deletePrestation(id) {
-            if (confirm('Supprimer cette prestation?')) {
+            toastConfirm('Supprimer cette prestation?', () => {
                 const p = prestationsSauvegardees.find(x => x.id === id);
                 if (p) logAction(`Suppression prestation : ${p.prestation} (${p.client})`);
                 prestationsSauvegardees = prestationsSauvegardees.filter(p => p.id !== id);
                 saveToStorage();
                 renderPrestations();
                 updateStats();
-            }
+            });
         }
 
         function updateStats() {
@@ -3641,6 +3772,8 @@
             renderCapacite();
             renderPrecisionParGeste();
             renderPrevisions();
+            renderObjectifCA();
+            renderRentabiliteGestes();
         }
 
         function renderPrecisionParGeste() {
@@ -3933,7 +4066,7 @@
             const date = document.getElementById('dateMouvement').value;
 
             if (!ref || qte <= 0) {
-                alert('Merci de remplir Référence et Quantité');
+                toast('Merci de remplir Référence et Quantité', 'warning');
                 return;
             }
 
@@ -3949,7 +4082,7 @@
                 updateStockStats();
                 renderMouvements();
                 renderValorisation();
-                alert('✅ Mouvement modifié');
+                toast('✅ Mouvement modifié', 'success');
                 return;
             }
 
@@ -4002,7 +4135,7 @@
             document.getElementById('qteMouvement').value = '1';
             document.getElementById('prixUnitaire').value = '';
             
-            alert('✅ Mouvement enregistré');
+            toast('✅ Mouvement enregistré', 'success');
         }
 
         function updateStockStats() {
@@ -4132,14 +4265,14 @@
         }
 
         function deleteMouvement(id) {
-            if (confirm('Supprimer ce mouvement?')) {
+            toastConfirm('Supprimer ce mouvement?', () => {
                 mouvements = mouvements.filter(m => m.id !== id);
                 recalculerStock();
                 saveToStorage();
                 updateStockStats();
                 renderMouvements();
                 renderValorisation();
-            }
+            });
         }
 
         // ============================================================
@@ -4323,7 +4456,7 @@
             if (stockageLines.length === 0) addStockageLine();
 
             calculateTotal();
-            alert('✅ Prestation dupliquée dans le calculateur. Modifiez et enregistrez.');
+            toast('✅ Prestation dupliquée dans le calculateur. Modifiez et enregistrez.', 'success');
         }
 
         // ============================================================
@@ -4479,7 +4612,7 @@
         function saveStockMins() {
             saveToStorage();
             renderStockMinTable();
-            alert('✅ Stocks minimums sauvegardés');
+            toast('✅ Stocks minimums sauvegardés', 'success');
         }
 
         // ============================================================
@@ -4537,28 +4670,28 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (!confirm('Importer ces données ? Cela remplacera toutes les données actuelles.')) return;
+                    toastConfirm('Importer ces données ? Cela remplacera toutes les données actuelles.', () => {
+                        if (data.config) config = Object.assign(config, data.config);
+                        if (data.catalogueGestes) catalogueGestes = data.catalogueGestes;
+                        if (data.catalogueConsommables) catalogueConsommables = data.catalogueConsommables;
+                        if (data.prestationsSauvegardees) prestationsSauvegardees = data.prestationsSauvegardees;
+                        if (data.mouvements) mouvements = data.mouvements;
+                        if (data.stockActuel) stockActuel = data.stockActuel;
+                        if (data.stockMins) stockMins = data.stockMins;
 
-                    if (data.config) config = Object.assign(config, data.config);
-                    if (data.catalogueGestes) catalogueGestes = data.catalogueGestes;
-                    if (data.catalogueConsommables) catalogueConsommables = data.catalogueConsommables;
-                    if (data.prestationsSauvegardees) prestationsSauvegardees = data.prestationsSauvegardees;
-                    if (data.mouvements) mouvements = data.mouvements;
-                    if (data.stockActuel) stockActuel = data.stockActuel;
-                    if (data.stockMins) stockMins = data.stockMins;
-
-                    saveToStorage();
-                    loadConfig();
-                    renderCatalogue();
-                    renderConsommablesTable();
-                    renderPrestations();
-                    updateStockStats();
-                    renderMouvements();
-                    renderValorisation();
-                    updateStats();
-                    alert('✅ Données importées avec succès !');
+                        saveToStorage();
+                        loadConfig();
+                        renderCatalogue();
+                        renderConsommablesTable();
+                        renderPrestations();
+                        updateStockStats();
+                        renderMouvements();
+                        renderValorisation();
+                        updateStats();
+                        toast('✅ Données importées avec succès !', 'success');
+                    });
                 } catch(err) {
-                    alert('❌ Erreur lors de l\'importation : ' + err.message);
+                    toast('❌ Erreur lors de l\'importation : ' + err.message, 'error');
                 }
                 input.value = '';
             };
@@ -4638,19 +4771,19 @@
 
         function setPin() {
             const val = document.getElementById('newPinInput').value.trim();
-            if (val.length < 4) { alert('Le PIN doit faire au moins 4 caractères'); return; }
+            if (val.length < 4) { toast('Le PIN doit faire au moins 4 caractères', 'warning'); return; }
             localStorage.setItem('appPin', val);
             document.getElementById('newPinInput').value = '';
             updatePinStatus();
-            alert('✅ PIN défini avec succès');
+            toast('✅ PIN défini avec succès', 'success');
         }
 
         function removePin() {
-            if (confirm('Supprimer le code PIN ?')) {
+            toastConfirm('Supprimer le code PIN ?', () => {
                 localStorage.removeItem('appPin');
                 updatePinStatus();
-                alert('✅ PIN supprimé');
-            }
+                toast('✅ PIN supprimé', 'success');
+            });
         }
 
         function updatePinStatus() {
@@ -4708,7 +4841,7 @@
             } else {
                 const pin = localStorage.getItem('appPin');
                 if (!pin) {
-                    alert('Configurez d\'abord un PIN dans l\'onglet Config');
+                    toast('Configurez d\'abord un PIN dans l\'onglet Config', 'warning');
                     return;
                 }
                 // Afficher la modale PIN dédiée au mode admin
@@ -4724,7 +4857,7 @@
                     renderAdminList('unites');
                     logAction('Connexion mode administrateur');
                 } else {
-                    alert('❌ PIN incorrect');
+                    toast('❌ PIN incorrect', 'error');
                     logAction('Tentative connexion admin échouée');
                 }
             }
@@ -4775,8 +4908,8 @@
             const input = document.getElementById(inputId);
             if (!input) return;
             const val = input.value.trim();
-            if (!val) { alert('Merci de saisir une valeur'); return; }
-            if (arr.includes(val)) { alert('Cette valeur existe déjà'); return; }
+            if (!val) { toast('Merci de saisir une valeur', 'warning'); return; }
+            if (arr.includes(val)) { toast('Cette valeur existe déjà', 'warning'); return; }
 
             arr.push(val);
             input.value = '';
@@ -4792,13 +4925,13 @@
             else if (type === 'unites') arr = configUnites;
             else return;
 
-            if (arr.length <= 2) { alert('Impossible : minimum 2 éléments requis'); return; }
-            if (!confirm(`Supprimer "${arr[idx]}" ?`)) return;
-
-            arr.splice(idx, 1);
-            saveToStorage();
-            renderAdminList(type);
-            renderStockSelects();
+            if (arr.length <= 2) { toast('Impossible : minimum 2 éléments requis', 'warning'); return; }
+            toastConfirm(`Supprimer "${arr[idx]}" ?`, () => {
+                arr.splice(idx, 1);
+                saveToStorage();
+                renderAdminList(type);
+                renderStockSelects();
+            });
         }
 
         // ============================================================
@@ -4873,13 +5006,13 @@
             saveToStorage();
             updateModeleSelect();
             document.getElementById('modeleSelect').value = modele.id;
-            alert('✅ Modèle "' + modele.nom + '" sauvegardé');
+            toast('✅ Modèle "' + modele.nom + '" sauvegardé', 'success');
         }
 
         function chargerModele() {
             const sel = document.getElementById('modeleSelect');
             const id = parseInt(sel.value);
-            if (!id) { alert('Sélectionnez d\'abord un modèle'); return; }
+            if (!id) { toast('Sélectionnez d\'abord un modèle', 'warning'); return; }
 
             const modele = configModeles.find(m => m.id === id);
             if (!modele) return;
@@ -4943,20 +5076,22 @@
             if (stockageLines.length === 0) addStockageLine();
 
             calculateTotal();
-            alert('✅ Modèle "' + modele.nom + '" chargé');
+            toast('✅ Modèle "' + modele.nom + '" chargé', 'success');
         }
 
         function supprimerModele() {
             const sel = document.getElementById('modeleSelect');
             const id = parseInt(sel.value);
-            if (!id) { alert('Sélectionnez d\'abord un modèle à supprimer'); return; }
+            if (!id) { toast('Sélectionnez d\'abord un modèle à supprimer', 'warning'); return; }
             const modele = configModeles.find(m => m.id === id);
             if (!modele) return;
-            if (!confirm(`Supprimer le modèle "${modele.nom}" ?`)) return;
-            configModeles = configModeles.filter(m => m.id !== id);
-            saveToStorage();
-            updateModeleSelect();
-            alert('✅ Modèle supprimé');
+            toastConfirm(`Supprimer le modèle "${modele.nom}" ?`, () => {
+                configModeles = configModeles.filter(m => m.id !== id);
+                saveToStorage();
+                updateModeleSelect();
+                toast('✅ Modèle supprimé', 'success');
+            });
+            return;
         }
 
         // ============================================================
@@ -5164,6 +5299,8 @@
         }
         // Update indicator every 30 seconds
         setInterval(updateSaveIndicator, 30000);
+        // Autosave every 60 seconds if dirty
+        setInterval(autosaveNow, 60000);
         // Initialize: set lastSaveTime on first load if data exists
         if (localStorage.getItem('configAtelier')) {
             lastSaveTime = Date.now();
@@ -5179,7 +5316,7 @@
             const reference = document.getElementById('reference').value;
 
             if (!client || !prestation) {
-                alert('Merci de remplir Client et Prestation avant de générer un devis');
+                toast('Merci de remplir Client et Prestation avant de générer un devis', 'warning');
                 return;
             }
 
@@ -5616,11 +5753,11 @@
         function saveGanttDates() {
             const id = parseInt(document.getElementById('ganttPrestSelect')?.value);
             const p = prestationsSauvegardees.find(x => x.id === id);
-            if (!p) return alert('Sélectionnez une prestation');
+            if (!p) { toast('Sélectionnez une prestation', 'warning'); return; }
             const deb = document.getElementById('ganttDateDebut')?.value;
             const fin = document.getElementById('ganttDateFin')?.value;
             if (deb && fin && new Date(fin) < new Date(deb)) {
-                alert('La date de fin doit être après la date de début');
+                toast('La date de fin doit être après la date de début', 'warning');
                 return;
             }
             p.dateDebut = deb || '';
@@ -5628,7 +5765,7 @@
             logAction(`Planification : ${p.prestation} → ${deb} au ${fin || '?'}`);
             saveToStorage();
             renderGantt();
-            alert('✅ Dates de planification enregistrées');
+            toast('✅ Dates de planification enregistrées', 'success');
         }
 
         // ============================================================
@@ -5880,7 +6017,7 @@
             saveToStorage();
             logAction(`Récurrence créée : ${newPrest.prestation} (${newPrest.client}) → ${newDateStr}`);
             renderPrestations();
-            alert(`✅ Prestation récurrente créée pour ${newDateStr} (réf. ${newPrest.reference})`);
+            toast(`✅ Prestation récurrente créée pour ${newDateStr} (réf. ${newPrest.reference})`, 'success');
         }
 
         // ============================================================
@@ -5910,15 +6047,15 @@
                 </div>
                 <div style="text-align:center;font-size:0.75em;color:#999;border-top:1px solid #eee;padding-top:10px;">Atelier La Pallanterie — EPI Genève — Fiche geste ${g.code}</div>
             </div>`;
-            if (typeof html2pdf === 'undefined') { alert('html2pdf non disponible'); return; }
+            if (typeof html2pdf === 'undefined') { toast('html2pdf non disponible', 'error'); return; }
             const el = document.createElement('div'); el.innerHTML = html;
             document.body.appendChild(el);
             html2pdf().set({ margin: 5, filename: `fiche-geste-${g.code}.pdf`, jsPDF: { format: 'a5', orientation: 'portrait' } }).from(el).save().then(() => document.body.removeChild(el));
         }
 
         function imprimerToutCatalogue() {
-            if (catalogueGestes.length === 0) { alert('Catalogue vide'); return; }
-            if (typeof html2pdf === 'undefined') { alert('html2pdf non disponible'); return; }
+            if (catalogueGestes.length === 0) { toast('Catalogue vide', 'warning'); return; }
+            if (typeof html2pdf === 'undefined') { toast('html2pdf non disponible', 'error'); return; }
             let allHtml = '';
             catalogueGestes.forEach(g => {
                 const tempsAjuste = Math.round(g.temps * (g.coef || 1));
@@ -5987,6 +6124,281 @@
             });
             tableHtml += '</tbody></table>';
             container.innerHTML = svg + tableHtml;
+        }
+
+        // ============================================================
+        // TOAST NOTIFICATIONS
+        // ============================================================
+        function toast(msg, type='info', duration=3500) {
+            const tc = document.getElementById('toastContainer');
+            if (!tc) return;
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = msg;
+            t.style.pointerEvents = 'auto';
+            t.onclick = () => t.remove();
+            tc.appendChild(t);
+            setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(110%)'; setTimeout(()=>t.remove(), 350); }, duration);
+        }
+
+        let _confirmCallback = null;
+        function toastConfirm(msg, callback) {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmMessage').textContent = msg;
+            _confirmCallback = callback;
+            modal.classList.add('open');
+        }
+        function confirmModalAccept() {
+            document.getElementById('confirmModal').classList.remove('open');
+            if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
+        }
+        function confirmModalCancel() {
+            document.getElementById('confirmModal').classList.remove('open');
+            _confirmCallback = null;
+        }
+
+        // ============================================================
+        // AUTOSAVE
+        // ============================================================
+        let _autosaveDirty = false;
+        function markDirty() { _autosaveDirty = true; const dot = document.getElementById('autosaveDot'); if (dot) dot.style.background='#e67e22'; }
+        function autosaveNow() {
+            if (!_autosaveDirty) return;
+            saveToStorage();
+            _autosaveDirty = false;
+            const dot = document.getElementById('autosaveDot'); if (dot) dot.style.background='#27ae60';
+            const ind = document.getElementById('saveIndicator'); if (ind) { ind.style.opacity='1'; setTimeout(()=>ind.style.opacity='0',2500); }
+        }
+
+        // ============================================================
+        // FULLSCREEN CALCULATOR
+        // ============================================================
+        function toggleFullscreen() {
+            const btn = document.getElementById('btnFullscreen');
+            if (document.body.classList.toggle('fullscreen-calc')) {
+                btn.textContent = '⛶'; btn.title = 'Quitter plein écran';
+                document.querySelector('.content').style.maxHeight = 'calc(100vh - 90px)';
+            } else {
+                btn.textContent = '⛶'; btn.title = 'Plein écran';
+                document.querySelector('.content').style.maxHeight = '';
+            }
+        }
+
+        // ============================================================
+        // GLOBAL SEARCH
+        // ============================================================
+        function openGlobalSearch() {
+            document.getElementById('searchGlobalOverlay').classList.add('open');
+            const inp = document.getElementById('searchGlobalInput');
+            inp.value = '';
+            document.getElementById('searchGlobalResults').innerHTML = '';
+            inp.focus();
+        }
+        function closeGlobalSearch() {
+            document.getElementById('searchGlobalOverlay').classList.remove('open');
+        }
+        function runGlobalSearch(q) {
+            const res = document.getElementById('searchGlobalResults');
+            if (!q || q.length < 2) { res.innerHTML = ''; return; }
+            const ql = q.toLowerCase();
+            let items = [];
+            // Prestations
+            prestationsSauvegardees.forEach(p => {
+                if ((p.client||'').toLowerCase().includes(ql) || (p.prestation||'').toLowerCase().includes(ql) || (p.reference||'').toLowerCase().includes(ql)) {
+                    items.push({ icon:'💼', label: `${p.reference} — ${p.client}`, sub: p.prestation, action: ()=>{ closeGlobalSearch(); switchTab('prestations'); } });
+                }
+            });
+            // Gestes catalogue
+            catalogueGestes.forEach(g => {
+                if (g.code.toLowerCase().includes(ql) || g.description.toLowerCase().includes(ql) || (g.notes||'').toLowerCase().includes(ql)) {
+                    items.push({ icon:'📋', label: `${g.code} — ${g.description}`, sub: g.categorie + (g.notes ? ' · '+g.notes : ''), action: ()=>{ closeGlobalSearch(); switchTab('catalogue'); } });
+                }
+            });
+            // Clients
+            Object.entries(clientsData).forEach(([nom, c]) => {
+                if (nom.toLowerCase().includes(ql) || (c.email||'').toLowerCase().includes(ql)) {
+                    items.push({ icon:'👤', label: nom, sub: c.email||c.tel||'', action: ()=>{ closeGlobalSearch(); switchTab('clients'); } });
+                }
+            });
+            // Stock
+            (JSON.parse(localStorage.getItem('atelier_stock')||'[]')).forEach(s => {
+                if ((s.reference||'').toLowerCase().includes(ql) || (s.description||'').toLowerCase().includes(ql)) {
+                    items.push({ icon:'📦', label: s.reference, sub: s.description, action: ()=>{ closeGlobalSearch(); switchTab('stock'); } });
+                }
+            });
+            if (items.length === 0) { res.innerHTML = '<div style="padding:12px;color:#7a9db1;font-style:italic;">Aucun résultat</div>'; return; }
+            res.innerHTML = items.slice(0,20).map((it,i) =>
+                `<div class="search-result-item" onclick="searchResultActions[${i}]()">
+                    <span style="font-size:1.2em">${it.icon}</span>
+                    <div><div style="font-weight:600">${it.label}</div><div style="font-size:0.82em;color:#7a9db1">${it.sub}</div></div>
+                </div>`
+            ).join('');
+            window.searchResultActions = items.slice(0,20).map(it=>it.action);
+        }
+
+        // ============================================================
+        // OBJECTIF CA MENSUEL
+        // ============================================================
+        function renderObjectifCA() {
+            const container = document.getElementById('objectifCABar');
+            if (!container) return;
+            const objectif = parseFloat(document.getElementById('objectifCAInput')?.value)||0;
+            const now = new Date();
+            const caActuel = prestationsSauvegardees.filter(p => {
+                const d = new Date(p.dateDebut || p.date || '');
+                return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear() && ['accepte','en-cours','termine','facture'].includes(p.statut||'');
+            }).reduce((s,p)=>s+(p.prixVente||0),0);
+            if (objectif <= 0) { container.innerHTML = '<div style="color:#7a9db1;font-style:italic;font-size:0.9em;">Définissez un objectif mensuel pour voir la progression</div>'; return; }
+            const pct = Math.min(100, (caActuel/objectif)*100);
+            const color = pct >= 100 ? '#27ae60' : pct >= 60 ? '#f39c12' : '#e74c3c';
+            container.innerHTML = `
+                <div class="objectif-bar-wrap">
+                    <div class="objectif-bar-fill" style="width:${pct.toFixed(1)}%;background:${color};">
+                        ${pct>=15 ? pct.toFixed(0)+'%' : ''}
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:0.85em;color:#5a7b8f;margin-top:4px;">
+                    <span>CA confirmé ce mois : <strong style="color:${color}">${caActuel.toFixed(2)} CHF</strong></span>
+                    <span>Objectif : <strong>${objectif.toFixed(0)} CHF</strong></span>
+                </div>`;
+        }
+
+        // ============================================================
+        // ANALYSE RENTABILITE PAR GESTE
+        // ============================================================
+        function renderRentabiliteGestes() {
+            const container = document.getElementById('rentabiliteGestesTable');
+            if (!container) return;
+            const stats = {};
+            prestationsSauvegardees.forEach(p => {
+                (p.gestes||[]).forEach(g => {
+                    if (!g.code) return;
+                    if (!stats[g.code]) stats[g.code] = { code:g.code, count:0, totalTemps:0, totalCout:0 };
+                    const gestefull = catalogueGestes.find(x=>x.code===g.code);
+                    const temps = gestefull ? Math.round(gestefull.temps*(gestefull.coef||1)) : 0;
+                    const qte = parseFloat(g.quantite)||1;
+                    stats[g.code].count += qte;
+                    stats[g.code].totalTemps += (temps*qte)/3600;
+                    stats[g.code].totalCout += (temps/3600)*qte*config.coutHoraireCEA;
+                });
+            });
+            const rows = Object.values(stats).sort((a,b)=>b.totalCout-a.totalCout);
+            if (rows.length === 0) { container.innerHTML = '<div style="color:#7a9db1;font-style:italic;">Aucune donnée</div>'; return; }
+            container.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.88em;">
+                <thead><tr><th>Code geste</th><th>Nb utilisations</th><th>Total heures</th><th>Coût MO (CHF)</th><th>Difficulté</th></tr></thead>
+                <tbody>${rows.map(r => {
+                    const g = catalogueGestes.find(x=>x.code===r.code);
+                    const diff = g?.difficulte||1;
+                    const badgeClass = `badge-diff-${diff}`;
+                    const diffLabel = ['','Facile','Moyen','Difficile'][diff]||'—';
+                    return `<tr>
+                        <td><strong>${r.code}</strong></td>
+                        <td>${r.count}</td>
+                        <td>${r.totalTemps.toFixed(2)} h</td>
+                        <td>${r.totalCout.toFixed(2)} CHF</td>
+                        <td><span class="${badgeClass}">${diffLabel}</span></td>
+                    </tr>`;
+                }).join('')}</tbody>
+            </table>`;
+        }
+
+        // ============================================================
+        // IMPORT CATALOGUE CSV
+        // ============================================================
+        function handleCsvDrop(e) {
+            e.preventDefault();
+            document.getElementById('csvDropZone').style.background = '';
+            const file = e.dataTransfer.files[0];
+            if (file) importCatalogueCSV({ files:[file] });
+        }
+        function importCatalogueCSV(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const lines = e.target.result.split('\n').map(l=>l.trim()).filter(l=>l && !l.startsWith('#'));
+                let added = 0, skipped = 0;
+                lines.forEach((line, idx) => {
+                    if (idx === 0 && line.toLowerCase().startsWith('code')) return; // skip header
+                    const parts = line.split(',');
+                    if (parts.length < 4) { skipped++; return; }
+                    const [code, categorie, description, temps, coef, difficulte, ...notesParts] = parts;
+                    const notes = notesParts.join(',').trim();
+                    if (!code || !description) { skipped++; return; }
+                    if (catalogueGestes.find(g=>g.code===code.trim())) { skipped++; return; }
+                    catalogueGestes.push({
+                        code: code.trim().toUpperCase(),
+                        categorie: categorie?.trim()||'Divers',
+                        description: description.trim(),
+                        temps: parseInt(temps)||30,
+                        coef: parseFloat(coef)||1.0,
+                        difficulte: parseInt(difficulte)||1,
+                        notes: notes||''
+                    });
+                    added++;
+                });
+                saveToStorage();
+                renderCatalogue();
+                document.querySelectorAll('.geste-select').forEach(sel => { const v = sel.value; sel.innerHTML = buildGesteOptions(v); sel.value = v; });
+                toast(`✅ ${added} geste(s) importé(s), ${skipped} ignoré(s)`, 'success');
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // ============================================================
+        // RAPPORT MENSUEL PDF
+        // ============================================================
+        function rapportMensuelPDF() {
+            if (typeof html2pdf === 'undefined') { toast('html2pdf non disponible', 'error'); return; }
+            const now = new Date();
+            const moisLabel = now.toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+            const prestMois = prestationsSauvegardees.filter(p => {
+                const d = new Date(p.dateDebut||p.date||'');
+                return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+            });
+            const caTotal = prestMois.reduce((s,p)=>s+(p.prixVente||0),0);
+            const coutTotal = prestMois.reduce((s,p)=>s+(p.coutRevient||0),0);
+            const margeTotal = caTotal - coutTotal;
+            const objectif = parseFloat(document.getElementById('objectifCAInput')?.value)||0;
+            const pct = objectif>0 ? Math.min(100,(caTotal/objectif)*100).toFixed(1) : '—';
+            let rows = prestMois.map(p=>`<tr>
+                <td>${p.reference||''}</td>
+                <td>${p.client||''}</td>
+                <td>${p.statut||''}</td>
+                <td>${(p.prixVente||0).toFixed(2)} CHF</td>
+                <td>${(p.coutRevient||0).toFixed(2)} CHF</td>
+                <td>${((p.prixVente||0)-(p.coutRevient||0)).toFixed(2)} CHF</td>
+            </tr>`).join('');
+            const html = `<div style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:30px;color:#2d3e50;">
+                <div style="background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%);padding:20px;border-radius:10px;margin-bottom:24px;text-align:center;">
+                    <h1 style="margin:0;font-size:1.6em;">📊 Rapport mensuel — Atelier La Pallanterie</h1>
+                    <p style="margin:6px 0 0;opacity:0.85;">${moisLabel}</p>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
+                    <div style="background:#f5f9fc;border-radius:8px;padding:14px;text-align:center;">
+                        <div style="font-size:0.8em;color:#7a9db1;margin-bottom:4px;">CA du mois</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:#3a6a7e;">${caTotal.toFixed(2)} CHF</div>
+                        ${objectif>0?`<div style="font-size:0.8em;color:#5a7b8f;">${pct}% de l'objectif</div>`:''}
+                    </div>
+                    <div style="background:#f5f9fc;border-radius:8px;padding:14px;text-align:center;">
+                        <div style="font-size:0.8em;color:#7a9db1;margin-bottom:4px;">Coûts totaux</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:#c0392b;">${coutTotal.toFixed(2)} CHF</div>
+                    </div>
+                    <div style="background:#f5f9fc;border-radius:8px;padding:14px;text-align:center;">
+                        <div style="font-size:0.8em;color:#7a9db1;margin-bottom:4px;">Marge nette</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:${margeTotal>=0?'#27ae60':'#e74c3c'}">${margeTotal.toFixed(2)} CHF</div>
+                    </div>
+                </div>
+                <h2 style="font-size:1.1em;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-bottom:12px;">Détail des prestations</h2>
+                <table style="width:100%;border-collapse:collapse;font-size:0.85em;">
+                    <thead><tr style="background:#e8f4f8;"><th style="padding:8px;text-align:left">Réf.</th><th>Client</th><th>Statut</th><th>CA</th><th>Coût</th><th>Marge</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <p style="font-size:0.7em;color:#aaa;margin-top:24px;text-align:right;">Généré le ${new Date().toLocaleDateString('fr-FR')} — Outil Atelier La Pallanterie</p>
+            </div>`;
+            const el = document.createElement('div'); el.innerHTML = html;
+            document.body.appendChild(el);
+            html2pdf().set({margin:8, filename:`rapport-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}.pdf`, jsPDF:{format:'a4',orientation:'portrait'}}).from(el).save().then(()=>document.body.removeChild(el));
         }
 
     </script>
