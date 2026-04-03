@@ -7,10 +7,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
+        /* ── CSS Variables (thème) ─────────────────────────────────── */
+        :root {
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --color-primary: #a8d5e2;
+            --color-primary-dark: #6b8fa3;
+            --color-secondary: #c9b3d4;
+            --color-secondary-dark: #9a70b8;
+            --color-bg-from: #e8f4f8;
+            --color-bg-to: #f5e6f0;
+            --color-container: #fffef9;
+            --color-header-from: #a8d5e2;
+            --color-header-to: #c9b3d4;
+            --color-text: #2d3e50;
+            --color-text-muted: #5a7b8f;
+            --border-radius-lg: 20px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e8f4f8 0%, #f5e6f0 100%);
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--color-bg-from) 0%, var(--color-bg-to) 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -18,15 +37,15 @@
         .container {
             max-width: 1600px;
             margin: 0 auto;
-            background: #fffef9;
-            border-radius: 20px;
+            background: var(--color-container);
+            border-radius: var(--border-radius-lg);
             box-shadow: 0 10px 40px rgba(150,150,180,0.15);
             overflow: hidden;
         }
-        
+
         .header {
-            background: linear-gradient(135deg, #a8d5e2 0%, #c9b3d4 100%);
-            color: #2d3e50;
+            background: linear-gradient(135deg, var(--color-header-from) 0%, var(--color-header-to) 100%);
+            color: var(--color-text);
             padding: 35px;
             text-align: center;
         }
@@ -601,6 +620,32 @@
         .alert-banner { background: #fff3cd; border-left: 4px solid #f39c12; padding: 12px 20px; margin-bottom: 15px; border-radius: 6px; font-size: 0.88em; }
         .alert-banner.danger { background: #fde8e8; border-left-color: #e74c3c; }
         .alert-banner .alert-item { margin: 3px 0; }
+
+        /* ── Sélecteur de thème ────────────────────────────────────── */
+        .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-bottom: 18px; }
+        .theme-card { border: 3px solid transparent; border-radius: 10px; cursor: pointer; overflow: hidden; transition: all 0.2s; }
+        .theme-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .theme-card.selected { border-color: #5a7b8f; box-shadow: 0 0 0 2px #a8d5e2; }
+        .theme-card .theme-preview { height: 48px; }
+        .theme-card .theme-label { padding: 6px 8px; font-size: 0.82em; font-weight: 600; color: #5a7b8f; text-align: center; background: #f9f9f9; }
+
+        .font-btn { padding: 8px 14px; border: 2px solid #dde; border-radius: 8px; cursor: pointer; font-size: 0.9em; background: #fff; transition: all 0.2s; }
+        .font-btn:hover { border-color: var(--color-primary); }
+        .font-btn.selected { border-color: var(--color-primary-dark); background: #f0f8fb; font-weight: 600; }
+
+        .radius-btn { padding: 6px 12px; border: 2px solid #dde; border-radius: 6px; cursor: pointer; background: #fff; font-size: 0.82em; transition: all 0.2s; }
+        .radius-btn:hover { border-color: var(--color-primary); }
+        .radius-btn.selected { border-color: var(--color-primary-dark); background: #f0f8fb; font-weight: 600; }
+
+        /* ── Modale préférences impression ────────────────────────── */
+        #printPrefsModal { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.45); z-index:2000; align-items:center; justify-content:center; }
+        #printPrefsModal.open { display:flex; }
+        .print-prefs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+        .print-check { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f5f9fc; border-radius:7px; cursor:pointer; font-size:0.88em; }
+        .print-check:hover { background:#e8f4f8; }
+        .print-check input[type=checkbox] { width:16px; height:16px; cursor:pointer; accent-color: var(--color-primary-dark); }
+        .print-preset-btn { padding:8px 16px; border-radius:8px; border:2px solid #dde; cursor:pointer; font-size:0.85em; font-weight:600; background:#fff; transition:all 0.2s; }
+        .print-preset-btn:hover { border-color: var(--color-primary); background:#f0f8fb; }
     </style>
 </head>
 <body>
@@ -658,6 +703,33 @@
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;">
                 <button class="btn btn-secondary" onclick="closeQuickGesteModal()">Annuler</button>
                 <button class="btn btn-success" onclick="saveQuickGeste()">✅ Créer et ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale préférences impression / PDF -->
+    <div id="printPrefsModal">
+        <div class="modal-box" style="max-width:540px;">
+            <h3>📄 Options du devis PDF</h3>
+            <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                <button class="print-preset-btn" onclick="applyPrintPreset('client')">👤 Version client</button>
+                <button class="print-preset-btn" onclick="applyPrintPreset('interne')">🏭 Version interne</button>
+            </div>
+            <div class="print-prefs-grid">
+                <label class="print-check"><input type="checkbox" id="pp-gestes" checked> Détail des gestes</label>
+                <label class="print-check"><input type="checkbox" id="pp-consommables" checked> Consommables</label>
+                <label class="print-check"><input type="checkbox" id="pp-recap-couts"> Récap. coûts (MO, frais…)</label>
+                <label class="print-check"><input type="checkbox" id="pp-mo"> Main d'œuvre détaillée</label>
+                <label class="print-check"><input type="checkbox" id="pp-frais"> Frais généraux</label>
+                <label class="print-check"><input type="checkbox" id="pp-prix-revient"> Prix de revient</label>
+                <label class="print-check"><input type="checkbox" id="pp-marge"> Marge appliquée</label>
+                <label class="print-check"><input type="checkbox" id="pp-conditions" checked> Conditions paiement</label>
+                <label class="print-check"><input type="checkbox" id="pp-signature" checked> Bloc signature</label>
+                <label class="print-check"><input type="checkbox" id="pp-equipe"> Composition équipe</label>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;">
+                <button class="btn btn-secondary" onclick="closePrintPrefsModal()">Annuler</button>
+                <button class="btn btn-success" onclick="genererDevis()">✅ Générer le PDF</button>
             </div>
         </div>
     </div>
@@ -895,7 +967,7 @@
                     <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
                     <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
-                    <button class="btn btn-secondary" onclick="genererDevis()">📄 Générer devis</button>
+                    <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis…</button>
                 </div>
             </div>
 
@@ -1308,6 +1380,70 @@
                     </div>
                 </div>
 
+                <!-- SECTION THÈME -->
+                <div class="section">
+                    <h2>🎨 Apparence & Thème</h2>
+                    <div class="info-box">Personnalisez les couleurs, la typographie et le style général de l'interface.</div>
+
+                    <h3 style="font-size:0.95em;color:#5a7b8f;margin:16px 0 10px;">Thèmes prédéfinis</h3>
+                    <div class="theme-grid" id="themeGrid">
+                        <div class="theme-card" onclick="applyTheme('classique')" id="theme-classique">
+                            <div class="theme-preview" style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);"></div>
+                            <div class="theme-label">🌊 Classique</div>
+                        </div>
+                        <div class="theme-card" onclick="applyTheme('corporate')" id="theme-corporate">
+                            <div class="theme-preview" style="background:linear-gradient(135deg,#1a3a5c,#2e6da4);"></div>
+                            <div class="theme-label">🏢 Corporate</div>
+                        </div>
+                        <div class="theme-card" onclick="applyTheme('minimaliste')" id="theme-minimaliste">
+                            <div class="theme-preview" style="background:linear-gradient(135deg,#6c757d,#adb5bd);"></div>
+                            <div class="theme-label">⬜ Minimaliste</div>
+                        </div>
+                        <div class="theme-card" onclick="applyTheme('chaleureux')" id="theme-chaleureux">
+                            <div class="theme-preview" style="background:linear-gradient(135deg,#c0392b,#e67e22);"></div>
+                            <div class="theme-label">🌿 Chaleureux</div>
+                        </div>
+                        <div class="theme-card" onclick="applyTheme('nature')" id="theme-nature">
+                            <div class="theme-preview" style="background:linear-gradient(135deg,#27ae60,#1abc9c);"></div>
+                            <div class="theme-label">🌱 Nature</div>
+                        </div>
+                        <div class="theme-card" onclick="applyTheme('nuit')" id="theme-nuit">
+                            <div class="theme-preview" style="background:linear-gradient(135deg,#2c3e50,#8e44ad);"></div>
+                            <div class="theme-label">🌙 Nuit</div>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size:0.95em;color:#5a7b8f;margin:16px 0 10px;">Typographie</h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;" id="fontButtons">
+                        <button class="font-btn" onclick="applyFont('Segoe UI')" style="font-family:'Segoe UI'">Segoe UI</button>
+                        <button class="font-btn" onclick="applyFont('Inter')" style="font-family:'Inter',sans-serif">Inter</button>
+                        <button class="font-btn" onclick="applyFont('Georgia')" style="font-family:'Georgia'">Georgia</button>
+                        <button class="font-btn" onclick="applyFont('Arial')" style="font-family:'Arial'">Arial</button>
+                        <button class="font-btn" onclick="applyFont('Roboto')" style="font-family:'Roboto',sans-serif">Roboto</button>
+                        <button class="font-btn" onclick="applyFont('monospace')" style="font-family:monospace">Monospace</button>
+                    </div>
+
+                    <h3 style="font-size:0.95em;color:#5a7b8f;margin:16px 0 10px;">Coins arrondis</h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;" id="radiusButtons">
+                        <button class="radius-btn" onclick="applyRadius('square')" style="border-radius:2px;">■ Carré</button>
+                        <button class="radius-btn" onclick="applyRadius('soft')" style="border-radius:8px;">▢ Doux</button>
+                        <button class="radius-btn" onclick="applyRadius('round')" style="border-radius:20px;">◯ Arrondi</button>
+                    </div>
+
+                    <h3 style="font-size:0.95em;color:#5a7b8f;margin:16px 0 10px;">Couleurs personnalisées</h3>
+                    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+                        <label style="display:flex;align-items:center;gap:8px;font-size:0.88em;cursor:pointer;">
+                            Couleur primaire
+                            <input type="color" id="colorPrimary" value="#a8d5e2" oninput="applyCustomColors()">
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:0.88em;cursor:pointer;">
+                            Couleur secondaire
+                            <input type="color" id="colorSecondary" value="#c9b3d4" oninput="applyCustomColors()">
+                        </label>
+                        <button class="btn btn-secondary btn-small" onclick="resetTheme()">↩ Réinitialiser</button>
+                    </div>
+                </div>
+
                 <div class="section">
                     <h2>Code PIN</h2>
                     <div class="info-box">Si un PIN est défini, il sera demandé à chaque ouverture de l'application.</div>
@@ -1695,6 +1831,20 @@
         let favoriteGestes = [];   // codes gestes favoris
         let recentGestes = [];     // 10 derniers codes utilisés
         let clientsData = {};      // {nom: {tel, email, adresse, notes, tarifSpecial}}
+        let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
+        const THEMES = {
+            classique:   { primary:'#a8d5e2', primaryDark:'#6b8fa3', secondary:'#c9b3d4', secondaryDark:'#9a70b8', bgFrom:'#e8f4f8', bgTo:'#f5e6f0', hFrom:'#a8d5e2', hTo:'#c9b3d4', container:'#fffef9' },
+            corporate:   { primary:'#2e6da4', primaryDark:'#1a3a5c', secondary:'#4a90d9', secondaryDark:'#1a3a5c', bgFrom:'#eaf1f8', bgTo:'#dde8f2', hFrom:'#1a3a5c', hTo:'#2e6da4', container:'#ffffff' },
+            minimaliste: { primary:'#adb5bd', primaryDark:'#6c757d', secondary:'#ced4da', secondaryDark:'#495057', bgFrom:'#f4f4f4', bgTo:'#e9ecef', hFrom:'#6c757d', hTo:'#adb5bd', container:'#ffffff' },
+            chaleureux:  { primary:'#e67e22', primaryDark:'#c0392b', secondary:'#f39c12', secondaryDark:'#e74c3c', bgFrom:'#fdf3e7', bgTo:'#fce8e8', hFrom:'#c0392b', hTo:'#e67e22', container:'#fffcf8' },
+            nature:      { primary:'#27ae60', primaryDark:'#1e8449', secondary:'#1abc9c', secondaryDark:'#148f77', bgFrom:'#e8f8f1', bgTo:'#e0f7f2', hFrom:'#1e8449', hTo:'#1abc9c', container:'#f8fffc' },
+            nuit:        { primary:'#8e44ad', primaryDark:'#2c3e50', secondary:'#9b59b6', secondaryDark:'#1a252f', bgFrom:'#eae0f0', bgTo:'#dde8f5', hFrom:'#2c3e50', hTo:'#8e44ad', container:'#fffef9' },
+        };
+        const RADIUS_SETS = {
+            square: { lg:'4px',  md:'4px',  sm:'3px'  },
+            soft:   { lg:'10px', md:'8px',  sm:'6px'  },
+            round:  { lg:'20px', md:'12px', sm:'8px'  },
+        };
         let _dragSrcId = null;
         const STATUT_CONFIG = {
             'brouillon': { label:'⬜ Brouillon', cls:'badge-statut-brouillon' },
@@ -1806,6 +1956,7 @@
         addStockageLine();
         updateModeleSelect();
         renderDashboard();
+        initTheme();
 
         // ── Raccourcis clavier globaux ───────────────────────────────
         document.addEventListener('keydown', e => {
@@ -1877,6 +2028,8 @@
             if (savedRecent) recentGestes = JSON.parse(savedRecent);
             const savedClientsData = localStorage.getItem('clientsData');
             if (savedClientsData) clientsData = JSON.parse(savedClientsData);
+            const savedTheme = localStorage.getItem('themePrefs');
+            if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme));
             loadConfig();
         }
 
@@ -1897,6 +2050,7 @@
             localStorage.setItem('favoriteGestes', JSON.stringify(favoriteGestes));
             localStorage.setItem('recentGestes', JSON.stringify(recentGestes));
             localStorage.setItem('clientsData', JSON.stringify(clientsData));
+            localStorage.setItem('themePrefs', JSON.stringify(themePrefs));
             lastSaveTime = Date.now();
             updateSaveIndicator();
         }
@@ -1982,7 +2136,7 @@
                 checkAndShowAlerts();
             }
             else if (tabName === 'parametrage') loadConfig();
-            else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); }
+            else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
         }
@@ -2145,6 +2299,128 @@
             closeQuickGesteModal();
             addGesteLine({code: newGeste.code, temps: Math.round(newGeste.temps * newGeste.coef), quantite: 1});
             calculateTotal();
+        }
+
+        // ── Fonctions Thème ─────────────────────────────────────────
+        function applyThemeCss(t, r, f) {
+            const root = document.documentElement;
+            root.style.setProperty('--color-primary',       t.primary);
+            root.style.setProperty('--color-primary-dark',  t.primaryDark);
+            root.style.setProperty('--color-secondary',     t.secondary);
+            root.style.setProperty('--color-secondary-dark',t.secondaryDark);
+            root.style.setProperty('--color-bg-from',       t.bgFrom);
+            root.style.setProperty('--color-bg-to',         t.bgTo);
+            root.style.setProperty('--color-header-from',   t.hFrom);
+            root.style.setProperty('--color-header-to',     t.hTo);
+            root.style.setProperty('--color-container',     t.container);
+            root.style.setProperty('--border-radius-lg',    r.lg);
+            root.style.setProperty('--border-radius-md',    r.md);
+            root.style.setProperty('--border-radius-sm',    r.sm);
+            root.style.setProperty('--font-family',         `'${f}', sans-serif`);
+            document.body.style.fontFamily = `'${f}', sans-serif`;
+        }
+
+        function applyTheme(name) {
+            const t = THEMES[name];
+            if (!t) return;
+            themePrefs.theme = name;
+            applyThemeCss(t, RADIUS_SETS[themePrefs.radius], themePrefs.font);
+            saveToStorage();
+            // Sync color pickers
+            const cp = document.getElementById('colorPrimary');
+            const cs = document.getElementById('colorSecondary');
+            if (cp) cp.value = t.primary;
+            if (cs) cs.value = t.secondary;
+            updateThemeUI();
+        }
+
+        function applyFont(font) {
+            themePrefs.font = font;
+            const t = THEMES[themePrefs.theme] || THEMES.classique;
+            applyThemeCss(t, RADIUS_SETS[themePrefs.radius], font);
+            saveToStorage();
+            updateThemeUI();
+        }
+
+        function applyRadius(r) {
+            themePrefs.radius = r;
+            const t = THEMES[themePrefs.theme] || THEMES.classique;
+            applyThemeCss(t, RADIUS_SETS[r], themePrefs.font);
+            saveToStorage();
+            updateThemeUI();
+        }
+
+        function applyCustomColors() {
+            const primary = document.getElementById('colorPrimary')?.value || '#a8d5e2';
+            const secondary = document.getElementById('colorSecondary')?.value || '#c9b3d4';
+            const custom = { ...THEMES.classique, primary, secondary, hFrom: primary, hTo: secondary };
+            themePrefs.theme = 'custom';
+            applyThemeCss(custom, RADIUS_SETS[themePrefs.radius], themePrefs.font);
+            saveToStorage();
+            updateThemeUI();
+        }
+
+        function resetTheme() {
+            themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
+            applyThemeCss(THEMES.classique, RADIUS_SETS.round, 'Segoe UI');
+            saveToStorage();
+            updateThemeUI();
+        }
+
+        function updateThemeUI() {
+            // Theme cards
+            document.querySelectorAll('.theme-card').forEach(c => {
+                c.classList.toggle('selected', c.id === 'theme-' + themePrefs.theme);
+            });
+            // Font buttons
+            document.querySelectorAll('.font-btn').forEach(b => {
+                b.classList.toggle('selected', b.textContent.trim() === themePrefs.font);
+            });
+            // Radius buttons
+            document.querySelectorAll('.radius-btn').forEach(b => {
+                b.classList.toggle('selected', b.getAttribute('onclick')?.includes(themePrefs.radius));
+            });
+        }
+
+        function initTheme() {
+            const t = THEMES[themePrefs.theme] || THEMES.classique;
+            const r = RADIUS_SETS[themePrefs.radius] || RADIUS_SETS.round;
+            applyThemeCss(t, r, themePrefs.font);
+        }
+
+        // ── Fonctions Impression / PDF ──────────────────────────────
+        function openPrintPrefsModal() {
+            document.getElementById('printPrefsModal').classList.add('open');
+        }
+        function closePrintPrefsModal() {
+            document.getElementById('printPrefsModal').classList.remove('open');
+        }
+        function applyPrintPreset(preset) {
+            const isClient = preset === 'client';
+            document.getElementById('pp-gestes').checked        = true;
+            document.getElementById('pp-consommables').checked  = true;
+            document.getElementById('pp-recap-couts').checked   = !isClient;
+            document.getElementById('pp-mo').checked            = !isClient;
+            document.getElementById('pp-frais').checked         = !isClient;
+            document.getElementById('pp-prix-revient').checked  = !isClient;
+            document.getElementById('pp-marge').checked         = !isClient;
+            document.getElementById('pp-conditions').checked    = true;
+            document.getElementById('pp-signature').checked     = isClient;
+            document.getElementById('pp-equipe').checked        = !isClient;
+        }
+        function getPrintPrefs() {
+            return {
+                gestes:       document.getElementById('pp-gestes')?.checked ?? true,
+                consommables: document.getElementById('pp-consommables')?.checked ?? true,
+                recapCouts:   document.getElementById('pp-recap-couts')?.checked ?? false,
+                mo:           document.getElementById('pp-mo')?.checked ?? false,
+                frais:        document.getElementById('pp-frais')?.checked ?? false,
+                prixRevient:  document.getElementById('pp-prix-revient')?.checked ?? false,
+                marge:        document.getElementById('pp-marge')?.checked ?? false,
+                conditions:   document.getElementById('pp-conditions')?.checked ?? true,
+                signature:    document.getElementById('pp-signature')?.checked ?? true,
+                equipe:       document.getElementById('pp-equipe')?.checked ?? false,
+            };
         }
 
         function filterGesteSelect(input, lineId) {
@@ -4990,6 +5266,9 @@
             const coutStockage = parseFloat((document.getElementById('coutStockage').textContent || '0').replace(' CHF',''));
             const coutFrais = parseFloat((document.getElementById('coutFraisGeneraux').textContent || '0').replace(' CHF',''));
 
+            closePrintPrefsModal();
+            const pp = getPrintPrefs();
+
             // Build gestes table
             let gestesRows = '';
             let gestesTotalMin = 0;
@@ -5079,10 +5358,10 @@
                     <span style="font-weight:bold;color:#6b8fa3;">Objet de la prestation : </span>
                     <span style="font-weight:bold;">${prestation}</span>
                     ${nbPieces > 1 ? ` — <span style="color:#7a9db1;">${nbPieces} pièces</span>` : ''}
-                    <span style="color:#7a9db1;margin-left:10px;">| Équipe : ${nbCEA} CEA + ${nbMSP} MSP</span>
+                    ${pp.equipe ? `<span style="color:#7a9db1;margin-left:10px;">| Équipe : ${nbCEA} CEA + ${nbMSP} MSP</span>` : ''}
                 </div>
 
-                ${gestesRows ? `<!-- GESTES -->
+                ${pp.gestes && gestesRows ? `<!-- GESTES -->
                 <div style="margin-bottom:22px;">
                     <div style="font-weight:bold;color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:7px;margin-bottom:10px;font-size:1em;">Gestes de production</div>
                     <table style="width:100%;border-collapse:collapse;font-size:0.88em;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
@@ -5103,7 +5382,7 @@
                     </table>
                 </div>` : ''}
 
-                ${consomRows ? `<!-- CONSOMMABLES -->
+                ${pp.consommables && consomRows ? `<!-- CONSOMMABLES -->
                 <div style="margin-bottom:22px;">
                     <div style="font-weight:bold;color:#6b8fa3;border-bottom:2px solid #c9b3d4;padding-bottom:7px;margin-bottom:10px;font-size:1em;">Consommables</div>
                     <table style="width:100%;border-collapse:collapse;font-size:0.88em;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
@@ -5118,27 +5397,27 @@
                     </table>
                 </div>` : ''}
 
-                <!-- RECAP COUTS -->
+                ${pp.recapCouts ? `<!-- RECAP COUTS -->
                 <div style="margin-bottom:22px;">
                     <div style="font-weight:bold;color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:7px;margin-bottom:10px;font-size:1em;">Récapitulatif des coûts</div>
                     <table style="width:100%;border-collapse:collapse;font-size:0.88em;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
                         <tbody>
-                            <tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Main d'œuvre CEA (${totalHeures.toFixed(2)} h × ${nbCEA} pers.)</td><td style="padding:8px 14px;text-align:right;">${coutMO.toFixed(2)} CHF</td></tr>
-                            <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Encadrement MSP (${totalHeures.toFixed(2)} h × ${nbMSP} pers.)</td><td style="padding:8px 14px;text-align:right;">${coutEncadrement.toFixed(2)} CHF</td></tr>
+                            ${pp.mo ? `<tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Main d'œuvre CEA (${totalHeures.toFixed(2)} h × ${nbCEA} pers.)</td><td style="padding:8px 14px;text-align:right;">${coutMO.toFixed(2)} CHF</td></tr>
+                            <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Encadrement MSP (${totalHeures.toFixed(2)} h × ${nbMSP} pers.)</td><td style="padding:8px 14px;text-align:right;">${coutEncadrement.toFixed(2)} CHF</td></tr>` : ''}
                             <tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Consommables</td><td style="padding:8px 14px;text-align:right;">${coutConsommables.toFixed(2)} CHF</td></tr>
                             <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Frais de stockage</td><td style="padding:8px 14px;text-align:right;">${coutStockage.toFixed(2)} CHF</td></tr>
-                            <tr style="border-bottom:2px solid #a8d5e2;"><td style="padding:8px 14px;">Frais généraux</td><td style="padding:8px 14px;text-align:right;">${coutFrais.toFixed(2)} CHF</td></tr>
-                            <tr style="font-weight:bold;background:#f0f7fb;"><td style="padding:10px 14px;">PRIX DE REVIENT</td><td style="padding:10px 14px;text-align:right;">${prixRevient.toFixed(2)} CHF</td></tr>
+                            ${pp.frais ? `<tr style="border-bottom:2px solid #a8d5e2;"><td style="padding:8px 14px;">Frais généraux</td><td style="padding:8px 14px;text-align:right;">${coutFrais.toFixed(2)} CHF</td></tr>` : ''}
+                            ${pp.prixRevient ? `<tr style="font-weight:bold;background:#f0f7fb;"><td style="padding:10px 14px;">PRIX DE REVIENT</td><td style="padding:10px 14px;text-align:right;">${prixRevient.toFixed(2)} CHF</td></tr>` : ''}
                         </tbody>
                     </table>
-                </div>
+                </div>` : ''}
 
                 <!-- PRIX DE VENTE -->
                 <div style="background:linear-gradient(135deg,#c9dff0 0%,#e0d4ed 100%);padding:22px;border-radius:12px;margin-bottom:22px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;">
                     <div>
-                        <div style="font-size:0.82em;color:#5a7b8f;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Prix de revient</div>
-                        <div style="font-size:1.4em;font-weight:bold;color:#5a7b8f;">${prixRevient.toFixed(2)} CHF</div>
-                        <div style="font-size:0.82em;color:#7a9db1;margin-top:6px;">Marge appliquée : ${marge}% (${margeChf.toFixed(2)} CHF)</div>
+                        ${pp.prixRevient ? `<div style="font-size:0.82em;color:#5a7b8f;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Prix de revient</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:#5a7b8f;">${prixRevient.toFixed(2)} CHF</div>` : ''}
+                        ${pp.marge ? `<div style="font-size:0.82em;color:#7a9db1;margin-top:6px;">Marge appliquée : ${marge}% (${margeChf.toFixed(2)} CHF)</div>` : ''}
                     </div>
                     <div style="text-align:right;">
                         <div style="font-size:0.85em;color:#5a7b8f;text-transform:uppercase;letter-spacing:0.5px;">PRIX DE VENTE HT${nbPieces > 1 ? ` (${nbPieces} pcs)` : ''}</div>
@@ -5147,21 +5426,21 @@
                     </div>
                 </div>
 
-                <!-- CONDITIONS & SIGNATURE -->
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;">
-                    <div style="background:#f5f9fc;padding:14px;border-radius:8px;border-left:3px solid #a8d5e2;">
+                ${(pp.conditions || pp.signature) ? `<!-- CONDITIONS & SIGNATURE -->
+                <div style="display:grid;grid-template-columns:${pp.conditions && pp.signature ? '1fr 1fr' : '1fr'};gap:18px;margin-bottom:22px;">
+                    ${pp.conditions ? `<div style="background:#f5f9fc;padding:14px;border-radius:8px;border-left:3px solid #a8d5e2;">
                         <div style="font-weight:bold;color:#6b8fa3;margin-bottom:8px;font-size:0.85em;">Conditions</div>
                         <div style="font-size:0.85em;color:#5a7b8f;line-height:1.7;">
                             <div>Conditions de paiement : <strong>${condPaiement}</strong></div>
                             <div>Validité de l'offre : <strong>${dateValiditeStr || '30 jours'}</strong></div>
                         </div>
-                    </div>
-                    <div style="background:#f5f9fc;padding:14px;border-radius:8px;border-left:3px solid #c9b3d4;">
+                    </div>` : ''}
+                    ${pp.signature ? `<div style="background:#f5f9fc;padding:14px;border-radius:8px;border-left:3px solid #c9b3d4;">
                         <div style="font-weight:bold;color:#6b8fa3;margin-bottom:8px;font-size:0.85em;">Signature & Acceptation</div>
                         <div style="font-size:0.8em;color:#aaa;margin-bottom:20px;">Date et signature du client</div>
                         <div style="border-bottom:1px solid #ccc;height:28px;"></div>
-                    </div>
-                </div>
+                    </div>` : ''}
+                </div>` : ''}
 
                 <!-- FOOTER -->
                 <div style="text-align:center;font-size:0.75em;color:#aaa;border-top:1px solid #eee;padding-top:14px;">
