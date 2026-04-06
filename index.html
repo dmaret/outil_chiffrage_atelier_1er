@@ -55,15 +55,15 @@
         
         .tabs-wrapper { position:relative; background:#f0f4f8; border-bottom:2px solid #d5e3ed; }
         .tabs-scroll-btn {
-            position:absolute; top:0; bottom:0; width:32px;
-            background:linear-gradient(to right, #f0f4f8 60%, transparent);
-            border:none; cursor:pointer; font-size:1.1em; color:#5a7b8f;
+            position:absolute; top:0; bottom:0; width:40px;
+            border:none; cursor:pointer; font-size:1.4em; font-weight:bold; color:#6b8fa3;
             z-index:10; display:flex; align-items:center; justify-content:center;
             opacity:0; pointer-events:none; transition:opacity 0.2s;
         }
-        .tabs-scroll-btn.left  { left:0;  background:linear-gradient(to right,  #f0f4f8 60%, transparent); }
-        .tabs-scroll-btn.right { right:0; background:linear-gradient(to left,   #f0f4f8 60%, transparent); }
+        .tabs-scroll-btn.left  { left:0;  background:linear-gradient(to right,  #f0f4f8 80%, transparent); }
+        .tabs-scroll-btn.right { right:0; background:linear-gradient(to left,   #f0f4f8 80%, transparent); }
         .tabs-scroll-btn.visible { opacity:1; pointer-events:auto; }
+        .tabs-scroll-btn:hover { color:#2d3e50; }
         .tabs {
             display: flex;
             background: #f0f4f8;
@@ -5337,21 +5337,24 @@
         // ── Tabs scroll arrows ─────────────────────────────────────
         function scrollTabs(delta) {
             const bar = document.getElementById('tabsBar');
-            if (bar) bar.scrollBy({ left: delta, behavior: 'smooth' });
+            if (bar) { bar.scrollBy({ left: delta, behavior: 'smooth' }); }
         }
         function updateTabScrollBtns() {
             const bar = document.getElementById('tabsBar');
             if (!bar) return;
             const btnL = document.getElementById('tabScrollLeft');
             const btnR = document.getElementById('tabScrollRight');
+            const hasOverflow = bar.scrollWidth > bar.clientWidth + 2;
             if (btnL) btnL.classList.toggle('visible', bar.scrollLeft > 4);
-            if (btnR) btnR.classList.toggle('visible', bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 4);
+            if (btnR) btnR.classList.toggle('visible', hasOverflow && bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 4);
         }
         const tabsBar = document.getElementById('tabsBar');
         if (tabsBar) {
             tabsBar.addEventListener('scroll', updateTabScrollBtns);
-            new ResizeObserver(updateTabScrollBtns).observe(tabsBar);
-            updateTabScrollBtns();
+            window.addEventListener('resize', updateTabScrollBtns);
+            // Délai pour laisser le navigateur calculer les dimensions
+            setTimeout(updateTabScrollBtns, 100);
+            setTimeout(updateTabScrollBtns, 500);
         }
         // Initialize: set lastSaveTime on first load if data exists
         if (localStorage.getItem('configAtelier')) {
