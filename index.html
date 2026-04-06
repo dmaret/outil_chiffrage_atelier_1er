@@ -604,7 +604,7 @@
         .prestations-filters input, .prestations-filters select { padding:8px 10px; border:1px solid #ddd; border-radius:5px; font-size:0.88em; }
 
         /* Indicateur sauvegarde */
-        #saveIndicator { position:absolute; top:20px; right:120px; font-size:0.78em; color:rgba(45,62,80,0.8); background:rgba(255,255,255,0.4); padding:4px 10px; border-radius:20px; font-weight:600; pointer-events:none; white-space:nowrap; }
+        #saveIndicator { position:absolute; top:20px; left:20px; font-size:0.78em; color:rgba(45,62,80,0.8); background:rgba(255,255,255,0.4); padding:4px 10px; border-radius:20px; font-weight:600; pointer-events:none; white-space:nowrap; }
 
         /* Modale historique stock */
         .stock-history-panel { background:#f0f7fc; border:1px solid #c8dde8; border-radius:8px; padding:12px; margin-top:8px; }
@@ -689,7 +689,7 @@
         body.fullscreen-calc .header { padding:14px 20px; }
         body.fullscreen-calc .header h1 { font-size:1.2em; margin:0; }
         body.fullscreen-calc .header p { display:none; }
-        #btnFullscreen { position:absolute; top:15px; right:170px; background:rgba(255,255,255,0.25); border:none; border-radius:50%; width:42px; height:42px; font-size:1.2em; cursor:pointer; transition:background 0.3s; }
+        #btnFullscreen { position:absolute; top:15px; right:226px; background:rgba(255,255,255,0.25); border:none; border-radius:50%; width:42px; height:42px; font-size:1.2em; cursor:pointer; transition:background 0.3s; }
         #btnFullscreen:hover { background:rgba(255,255,255,0.4); }
 
         /* ── Objectif CA mensuel ─────────────────────────────────────── */
@@ -828,9 +828,9 @@
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
             <span id="saveIndicator"><span class="autosave-dot" id="autosaveDot"></span>💾 Sauvegardé à l'instant</span>
             <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
-            <button onclick="openGlobalSearch()" style="position:absolute;top:15px;right:225px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Recherche globale">🔍</button>
-            <button id="superUserToggle" onclick="toggleSuperUser()" style="position:absolute;top:15px;right:65px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode admin">🔓</button>
-            <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
+            <button onclick="openGlobalSearch()" style="position:absolute;top:15px;right:279px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Recherche globale (Ctrl+F)">🔍</button>
+            <button id="superUserToggle" onclick="toggleSuperUser()" style="position:absolute;top:15px;right:172px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode admin">🔓</button>
+            <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:120px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
         </div>
 
         <div class="tabs">
