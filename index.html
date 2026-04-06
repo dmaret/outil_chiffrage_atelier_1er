@@ -53,12 +53,24 @@
         .header h1 { font-size: 2em; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 1.05em; }
         
+        .tabs-wrapper { position:relative; background:#f0f4f8; border-bottom:2px solid #d5e3ed; }
+        .tabs-scroll-btn {
+            position:absolute; top:0; bottom:0; width:32px;
+            background:linear-gradient(to right, #f0f4f8 60%, transparent);
+            border:none; cursor:pointer; font-size:1.1em; color:#5a7b8f;
+            z-index:10; display:flex; align-items:center; justify-content:center;
+            opacity:0; pointer-events:none; transition:opacity 0.2s;
+        }
+        .tabs-scroll-btn.left  { left:0;  background:linear-gradient(to right,  #f0f4f8 60%, transparent); }
+        .tabs-scroll-btn.right { right:0; background:linear-gradient(to left,   #f0f4f8 60%, transparent); }
+        .tabs-scroll-btn.visible { opacity:1; pointer-events:auto; }
         .tabs {
             display: flex;
             background: #f0f4f8;
-            border-bottom: 2px solid #d5e3ed;
             overflow-x: auto;
+            scrollbar-width: none;
         }
+        .tabs::-webkit-scrollbar { display:none; }
         
         .tab {
             padding: 14px 18px;
@@ -456,7 +468,10 @@
         body.dark-mode { background: linear-gradient(135deg, #1a2535 0%, #2a1f35 100%); }
         body.dark-mode .container { background: #1e2530; color: #cdd6e0; }
         body.dark-mode .header { background: linear-gradient(135deg, #2a5a6e 0%, #4a3560 100%); color: #e0eef5; }
-        body.dark-mode .tabs { background: #151d28; border-bottom-color: #2a3a4a; }
+        body.dark-mode .tabs-wrapper { background: #151d28; border-bottom-color: #2a3a4a; }
+        body.dark-mode .tabs { background: #151d28; }
+        body.dark-mode .tabs-scroll-btn.left  { background:linear-gradient(to right,  #151d28 60%, transparent); color:#a0bccf; }
+        body.dark-mode .tabs-scroll-btn.right { background:linear-gradient(to left,   #151d28 60%, transparent); color:#a0bccf; }
         body.dark-mode .tab { background: #151d28; color: #8aacbc; }
         body.dark-mode .tab:hover { background: #1e2d3d; }
         body.dark-mode .tab.active { background: #1e2530; color: #a8d5e2; border-bottom-color: #a8d5e2; }
@@ -833,20 +848,24 @@
             <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:120px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
         </div>
 
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
-            <button class="tab" onclick="switchTab('calculateur')">💼 Calculateur</button>
-            <button class="tab" onclick="switchTab('stock')">📦 Gestion Stock</button>
-            <button class="tab" onclick="switchTab('parametrage')">⚙️ Paramétrage</button>
-            <button class="tab" onclick="switchTab('catalogue')">📚 Gestes</button>
-            <button class="tab" onclick="switchTab('consommables')">🛒 Consommables</button>
-            <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
-            <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
-            <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
-            <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
-            <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
-            <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
-            <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
+        <div class="tabs-wrapper">
+            <button class="tabs-scroll-btn left" id="tabScrollLeft" onclick="scrollTabs(-150)">&#8249;</button>
+            <div class="tabs" id="tabsBar">
+                <button class="tab active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
+                <button class="tab" onclick="switchTab('calculateur')">💼 Calculateur</button>
+                <button class="tab" onclick="switchTab('stock')">📦 Gestion Stock</button>
+                <button class="tab" onclick="switchTab('parametrage')">⚙️ Paramétrage</button>
+                <button class="tab" onclick="switchTab('catalogue')">📚 Gestes</button>
+                <button class="tab" onclick="switchTab('consommables')">🛒 Consommables</button>
+                <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
+                <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
+                <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
+                <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
+                <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
+                <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
+                <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
+            </div>
+            <button class="tabs-scroll-btn right" id="tabScrollRight" onclick="scrollTabs(150)">&#8250;</button>
         </div>
 
         <div class="content">
@@ -5314,6 +5333,26 @@
         setInterval(updateSaveIndicator, 30000);
         // Autosave every 60 seconds if dirty
         setInterval(autosaveNow, 60000);
+
+        // ── Tabs scroll arrows ─────────────────────────────────────
+        function scrollTabs(delta) {
+            const bar = document.getElementById('tabsBar');
+            if (bar) bar.scrollBy({ left: delta, behavior: 'smooth' });
+        }
+        function updateTabScrollBtns() {
+            const bar = document.getElementById('tabsBar');
+            if (!bar) return;
+            const btnL = document.getElementById('tabScrollLeft');
+            const btnR = document.getElementById('tabScrollRight');
+            if (btnL) btnL.classList.toggle('visible', bar.scrollLeft > 4);
+            if (btnR) btnR.classList.toggle('visible', bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 4);
+        }
+        const tabsBar = document.getElementById('tabsBar');
+        if (tabsBar) {
+            tabsBar.addEventListener('scroll', updateTabScrollBtns);
+            new ResizeObserver(updateTabScrollBtns).observe(tabsBar);
+            updateTabScrollBtns();
+        }
         // Initialize: set lastSaveTime on first load if data exists
         if (localStorage.getItem('configAtelier')) {
             lastSaveTime = Date.now();
