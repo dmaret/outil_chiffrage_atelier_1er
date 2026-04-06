@@ -58,11 +58,11 @@
             position:absolute; top:0; bottom:0; width:40px;
             border:none; cursor:pointer; font-size:1.4em; font-weight:bold; color:#6b8fa3;
             z-index:10; display:flex; align-items:center; justify-content:center;
-            opacity:0; pointer-events:none; transition:opacity 0.2s;
+            transition:opacity 0.2s;
         }
         .tabs-scroll-btn.left  { left:0;  background:linear-gradient(to right,  #f0f4f8 80%, transparent); }
         .tabs-scroll-btn.right { right:0; background:linear-gradient(to left,   #f0f4f8 80%, transparent); }
-        .tabs-scroll-btn.visible { opacity:1; pointer-events:auto; }
+        .tabs-scroll-btn.hidden { opacity:0; pointer-events:none; }
         .tabs-scroll-btn:hover { color:#2d3e50; }
         .tabs {
             display: flex;
@@ -5344,18 +5344,18 @@
             if (!bar) return;
             const btnL = document.getElementById('tabScrollLeft');
             const btnR = document.getElementById('tabScrollRight');
-            const hasOverflow = bar.scrollWidth > bar.clientWidth + 2;
-            if (btnL) btnL.classList.toggle('visible', bar.scrollLeft > 4);
-            if (btnR) btnR.classList.toggle('visible', hasOverflow && bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 4);
+            const atStart = bar.scrollLeft <= 4;
+            const atEnd   = bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 4;
+            if (btnL) btnL.classList.toggle('hidden', atStart);
+            if (btnR) btnR.classList.toggle('hidden', atEnd);
         }
-        const tabsBar = document.getElementById('tabsBar');
-        if (tabsBar) {
-            tabsBar.addEventListener('scroll', updateTabScrollBtns);
+        window.addEventListener('load', () => {
+            const bar = document.getElementById('tabsBar');
+            if (!bar) return;
+            bar.addEventListener('scroll', updateTabScrollBtns);
             window.addEventListener('resize', updateTabScrollBtns);
-            // Délai pour laisser le navigateur calculer les dimensions
-            setTimeout(updateTabScrollBtns, 100);
-            setTimeout(updateTabScrollBtns, 500);
-        }
+            updateTabScrollBtns();
+        });
         // Initialize: set lastSaveTime on first load if data exists
         if (localStorage.getItem('configAtelier')) {
             lastSaveTime = Date.now();
