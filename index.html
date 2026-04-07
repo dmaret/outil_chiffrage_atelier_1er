@@ -906,6 +906,7 @@
             <h3 style="margin:0 0 16px;color:#6b8fa3;">⌨️ Raccourcis clavier</h3>
             <table style="width:100%;border-collapse:collapse;font-size:0.9em;">
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+G</kbd></td><td>Ajouter un geste</td></tr>
+                <tr><td style="padding:6px 0;"><kbd>Ctrl+Z</kbd></td><td>Annuler la dernière action</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+S</kbd></td><td>Sauvegarder la prestation</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+F</kbd></td><td>Recherche globale</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Escape</kbd></td><td>Fermer les modales</td></tr>
@@ -931,6 +932,7 @@
             <button class="tabs-scroll-btn left" id="tabScrollLeft" onclick="scrollTabs(-150)">&#8249;</button>
             <div class="tabs" id="tabsBar">
                 <button class="tab active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
+                <button class="tab admin-only" onclick="switchTab('assistant')">🧙 Assistant</button>
                 <button class="tab" onclick="switchTab('calculateur')">💼 Calculateur</button>
                 <button class="tab" onclick="switchTab('stock')">📦 Gestion Stock</button>
                 <button class="tab" onclick="switchTab('parametrage')">⚙️ Paramétrage</button>
@@ -940,7 +942,6 @@
                 <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
                 <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
-                <button class="tab admin-only" onclick="switchTab('assistant')">🧙 Assistant</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
@@ -1045,6 +1046,7 @@
                         <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd">Ctrl+G</span></button>
                         <button class="btn btn-secondary btn-small" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
                         <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
+                        <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
                     </div>
                 </div>
 
@@ -2409,6 +2411,14 @@
                 document.getElementById('shortcutsModal')?.style.setProperty('display','none');
                 closeAssistantModal();
             }
+            // Ctrl+Z : annuler
+            if (e.ctrlKey && e.key === 'z') {
+                const tag = document.activeElement?.tagName;
+                if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+                    e.preventDefault();
+                    undoLastAction();
+                }
+            }
             // Ctrl+F : recherche globale
             if (e.ctrlKey && e.key === 'f') {
                 e.preventDefault();
@@ -2702,9 +2712,91 @@
             saveToStorage();
         }
 
+        // ============================================================
+        // UNDO — Annulation (Ctrl+Z)
+        // ============================================================
+        const MAX_UNDO = 25;
+        let undoStack = [];
+        let _undoDebounceTimer = null;
+
+        function captureFormGestes() {
+            const lines = [];
+            document.querySelectorAll('#gestesContainer .geste-line').forEach(line => {
+                const id = line.id.replace('line-', '');
+                const code  = document.getElementById('sel-'         + id)?.value || '';
+                const temps = parseInt(document.getElementById('temps-'       + id)?.value) || 0;
+                const qte   = parseFloat(document.getElementById('qte-'         + id)?.value) || 1;
+                const typeApp = document.getElementById('type-geste-' + id)?.value || 'piece';
+                const notes = document.getElementById('notes-geste-'  + id)?.value || '';
+                lines.push({ code, temps, quantite: qte, typeApp, notes });
+            });
+            return lines;
+        }
+
+        function pushUndoSnapshot(label, debounceMs) {
+            if (debounceMs) {
+                clearTimeout(_undoDebounceTimer);
+                _undoDebounceTimer = setTimeout(() => pushUndoSnapshot(label), debounceMs);
+                return;
+            }
+            const snap = {
+                label: label || 'Modification',
+                ts: Date.now(),
+                formGestes: captureFormGestes(),
+                catalogueGestes: JSON.parse(JSON.stringify(catalogueGestes)),
+                prestationsSauvegardees: JSON.parse(JSON.stringify(prestationsSauvegardees)),
+                configModeles: JSON.parse(JSON.stringify(configModeles)),
+                catalogueConsommables: JSON.parse(JSON.stringify(catalogueConsommables)),
+                clientsData: JSON.parse(JSON.stringify(clientsData)),
+            };
+            undoStack.push(snap);
+            if (undoStack.length > MAX_UNDO) undoStack.shift();
+            updateUndoBtn();
+        }
+
+        function undoLastAction() {
+            if (undoStack.length === 0) { toast('Rien à annuler', 'info'); return; }
+            const snap = undoStack.pop();
+
+            // Restore persistent data
+            catalogueGestes = snap.catalogueGestes;
+            prestationsSauvegardees = snap.prestationsSauvegardees;
+            configModeles = snap.configModeles;
+            catalogueConsommables = snap.catalogueConsommables;
+            clientsData = snap.clientsData;
+
+            // Restore calculator form gestes
+            if (snap.formGestes !== undefined) {
+                document.getElementById('gestesContainer').innerHTML = '';
+                gesteLines = [];
+                snap.formGestes.forEach(g => addGesteLine(g));
+                if (gesteLines.length === 0) addGesteLine();
+                calculateTotal();
+            }
+
+            // Re-render views that may have changed
+            renderCatalogue();
+            renderConsommablesTable();
+            updateModeleSelect();
+
+            updateUndoBtn();
+            toast(`↩ Annulé : ${snap.label}`, 'info');
+        }
+
+        function updateUndoBtn() {
+            const btn = document.getElementById('btnUndo');
+            if (!btn) return;
+            btn.disabled = undoStack.length === 0;
+            btn.style.opacity = undoStack.length > 0 ? '1' : '0.4';
+            btn.title = undoStack.length > 0
+                ? `Annuler : ${undoStack[undoStack.length - 1].label} (Ctrl+Z)`
+                : 'Rien à annuler (Ctrl+Z)';
+        }
+
         function applyBundle(bundleKey) {
             const bundle = GESTES_BUNDLES[bundleKey];
             if (!bundle) return;
+            pushUndoSnapshot('Bundle "' + bundle.label + '"');
             bundle.codes.forEach(code => {
                 const g = catalogueGestes.find(x => x.code === code);
                 if (g) addGesteLine({code: g.code, temps: Math.round(g.temps * g.coef), quantite: 1});
@@ -3778,6 +3870,7 @@
 
         function deleteGeste(code) {
             toastConfirm(`Supprimer le geste ${code}?`, () => {
+                pushUndoSnapshot('Suppression geste ' + code);
                 catalogueGestes = catalogueGestes.filter(g => g.code !== code);
                 saveToStorage();
                 renderCatalogue();
@@ -6384,6 +6477,9 @@
             const qte = parseFloat(document.getElementById('a-quantite')?.value) || 1;
             const checked = [...document.querySelectorAll('#assistantModalBody input[name="ag"]:checked')];
             if (checked.length === 0) { toast('Sélectionnez au moins un geste.', 'warning'); return; }
+
+            // Snapshot before clearing
+            pushUndoSnapshot('Import assistant (' + checked.length + ' gestes)');
 
             // Clear existing geste lines and import
             document.getElementById('gestesContainer').innerHTML = '';
