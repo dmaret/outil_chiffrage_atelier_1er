@@ -798,6 +798,19 @@
         body.dark-mode #analyseResultat h3 { color:#c090e0; }
         body.dark-mode #analyseResultat .result-theory { color:#d0a0f0; }
         body.dark-mode #analyseResultat .result-posture { background:#2a1540; border-left-color:#8e44ad; color:#c090e0; }
+
+        /* ── Chronomètre ─────────────────────────────────── */
+        .chrono-bar { display:flex; align-items:center; gap:10px; padding:8px 12px; background:#f0f8ff; border:1px solid #c5e0f5; border-radius:8px; margin-top:8px; flex-wrap:wrap; }
+        .chrono-display { font-family:monospace; font-size:1.4em; font-weight:700; color:#2d3e50; min-width:80px; }
+        .chrono-bar .btn-small { padding:4px 10px; font-size:0.82em; }
+
+        /* ── Mode présentation ────────────────────────────── */
+        body.presentation-mode .cost-breakdown { display:none !important; }
+        body.presentation-mode .admin-section { display:none !important; }
+        body.presentation-mode #costLineMSP { display:none !important; }
+        body.presentation-mode .prix-interne { display:none !important; }
+        .presentation-banner { display:none; background:linear-gradient(135deg,#27ae60,#2ecc71); color:white; padding:8px 16px; text-align:center; font-weight:600; font-size:0.9em; }
+        body.presentation-mode .presentation-banner { display:block; }
     </style>
 </head>
 <body>
