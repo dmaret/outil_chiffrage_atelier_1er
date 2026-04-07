@@ -954,6 +954,7 @@
             <button onclick="openGlobalSearch()" style="position:absolute;top:15px;right:279px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Recherche globale (Ctrl+F)">🔍</button>
             <button id="superUserToggle" onclick="toggleSuperUser()" style="position:absolute;top:15px;right:172px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode admin">🔓</button>
             <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:120px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
+            <button id="btnPresentation" onclick="togglePresentation()" title="Mode présentation client — masque les coûts internes" style="position:absolute;top:15px;right:68px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;">🖥️</button>
         </div>
 
         <div class="tabs-wrapper">
@@ -982,6 +983,7 @@
             <div id="alertBanner" style="display:none;"></div>
             <!-- ONGLET CALCULATEUR -->
             <div id="calculateur" class="tab-content">
+                <div class="presentation-banner">🖥️ MODE PRÉSENTATION CLIENT — Coûts internes masqués</div>
                 <div class="section" style="border-left-color:#c9b3d4;">
                     <h2>Modèles de prestation</h2>
                     <div class="modeles-bar">
@@ -1072,6 +1074,14 @@
                         <button class="btn btn-secondary btn-small" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
                         <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
                         <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
+                    </div>
+                    <div class="chrono-bar" id="chronoBar">
+                        <span style="font-size:0.82em;color:#6b8fa3;font-weight:600;">⏱️ Chronomètre :</span>
+                        <span class="chrono-display" id="chronoDisplay">00:00</span>
+                        <button class="btn btn-small" id="chronoBtnStart" onclick="chronoToggle()">▶ Démarrer</button>
+                        <button class="btn btn-secondary btn-small" onclick="chronoReset()">↺ Reset</button>
+                        <button class="btn btn-secondary btn-small" onclick="chronoApply()" title="Copier le temps mesuré dans le dernier geste sélectionné">→ Appliquer au geste</button>
+                        <span style="font-size:0.78em;color:#8aacbc;" id="chronoStatus"></span>
                     </div>
                 </div>
 
@@ -1583,6 +1593,7 @@
                         <label style="font-size:0.85em;color:#7a9db1;white-space:nowrap;">Au</label>
                         <input type="date" id="filtreDateA" oninput="renderPrestations()" style="flex:1;min-width:120px;">
                         <button class="btn btn-small" onclick="exportPrestationsCSV()" style="white-space:nowrap;">📥 Export CSV</button>
+                        <button class="btn btn-small" onclick="openCompareModal()" style="white-space:nowrap;background:#edf5ff;border-color:#a8c8f0;color:#5a7b8f;">📊 Comparer</button>
                     </div>
                     <div id="prestationsList"></div>
                 </div>
@@ -2238,6 +2249,21 @@
     </div>
 
     <!-- Paiement Modal -->
+    <!-- Comparateur de prestations -->
+    <div id="compareModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:5000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeCompareModal()">
+        <div style="background:white;border-radius:16px;padding:24px;max-width:800px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 15px 50px rgba(0,0,0,0.25);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="margin:0;color:#2d3e50;">📊 Comparateur de prestations</h3>
+                <button class="btn btn-secondary btn-small" onclick="closeCompareModal()">✕ Fermer</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                <div><label style="font-size:0.85em;color:#6b8fa3;">Prestation A</label><select id="compareSelA" onchange="renderCompare()" style="width:100%;margin-top:4px;"><option value="">— Choisir —</option></select></div>
+                <div><label style="font-size:0.85em;color:#6b8fa3;">Prestation B</label><select id="compareSelB" onchange="renderCompare()" style="width:100%;margin-top:4px;"><option value="">— Choisir —</option></select></div>
+            </div>
+            <div id="compareResult"></div>
+        </div>
+    </div>
+
     <div id="paiementModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;">
       <div style="background:#fff;border-radius:16px;padding:30px;max-width:400px;width:90%;">
         <h3 style="color:#6b8fa3;margin-bottom:20px;">💶 Suivi paiement</h3>
@@ -2428,6 +2454,7 @@
         renderConsommablesTable();
         calculateRatio();
         updateStockStats();
+        updateStockAlertBadge();
         updateStats();
         addGesteLine();
         addConsommableLine();
@@ -3869,6 +3896,7 @@
                     <td style="white-space:nowrap;">
                         <button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>
                         <button class="btn btn-small btn-secondary" onclick="imprimerFicheGeste('${codeEsc}')" title="Fiche PDF">🖨️</button>
+                        <button class="btn btn-small btn-secondary" onclick="voirHistoriqueGeste('${codeEsc}')" title="Historique des modifications">📈</button>
                         <button class="delete-btn btn-small" onclick="deleteGeste('${codeEsc}')">🗑️</button>
                     </td>
                 </tr>`;
@@ -3953,6 +3981,7 @@
         function saveGesteInline(oldCode) {
             const g = catalogueGestes.find(x => x.code === oldCode);
             if (!g) return;
+            pushGesteHistoire(g.code, g);
             const newCode = document.getElementById('edit-code-' + oldCode)?.value.trim();
             if (!newCode) { toast('Le code ne peut pas être vide', 'warning'); return; }
             if (newCode !== oldCode && catalogueGestes.find(x => x.code === newCode)) { toast('Ce code existe déjà', 'warning'); return; }
@@ -4121,16 +4150,22 @@
                 return;
             }
 
+            const _today = new Date(); _today.setHours(0,0,0,0);
             let html = '';
             filtered.forEach(p => {
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
                 const margeChfVal = (p.prixVente - p.prixRevient).toFixed(2);
                 const statutBadge = getStatutBadgeHtml(p.statut || 'devis');
+                const _dv = p.dateValidite ? new Date(p.dateValidite) : null;
+                const _daysLeft = _dv ? Math.ceil((_dv - _today) / 86400000) : null;
+                const expiryBadge = _daysLeft !== null && _daysLeft <= 7
+                    ? `<span style="background:${_daysLeft <= 0 ? '#e74c3c' : '#e67e22'};color:white;border-radius:4px;padding:1px 6px;font-size:0.75em;margin-left:4px;">${_daysLeft <= 0 ? '⚠️ Expiré' : `⚠️ ${_daysLeft}j`}</span>`
+                    : '';
                 html += `<div style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap:wrap; gap:6px;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                             <strong style="font-size: 1.1em; color: #6b8fa3;">${p.prestation}</strong>
-                            ${statutBadge}
+                            ${statutBadge}${expiryBadge}
                         </div>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
                             <select onchange="setStatutDirect(${p.id}, this.value)" style="font-size:0.82em;padding:3px 6px;border-radius:6px;border:1px solid #d5e3ed;background:#f7fbfd;cursor:pointer;">
@@ -4712,6 +4747,7 @@
             document.getElementById('statValorisationStock').textContent = totalValeur.toFixed(2) + ' CHF';
             document.getElementById('statCoutStockage').textContent = coutStock7j.toFixed(2) + ' CHF';
             document.getElementById('statCoutStockageMois').textContent = (totalQte * config.coutPalette * 30).toFixed(2) + ' CHF';
+            updateStockAlertBadge();
         }
 
         function renderMouvements() {
@@ -6630,6 +6666,161 @@
             toast(`${checked.length} geste(s) importé(s) dans le calculateur !`, 'success');
         }
 
+        // ── Chronomètre ────────────────────────────────────────────
+        let _chronoRunning = false, _chronoStart = 0, _chronoElapsed = 0, _chronoInterval = null;
+        function chronoToggle() {
+            if (_chronoRunning) {
+                clearInterval(_chronoInterval);
+                _chronoElapsed += Date.now() - _chronoStart;
+                _chronoRunning = false;
+                document.getElementById('chronoBtnStart').textContent = '▶ Reprendre';
+            } else {
+                _chronoStart = Date.now();
+                _chronoRunning = true;
+                document.getElementById('chronoBtnStart').textContent = '⏸ Pause';
+                _chronoInterval = setInterval(chronoTick, 100);
+            }
+        }
+        function chronoTick() {
+            const total = Math.floor((_chronoElapsed + Date.now() - _chronoStart) / 1000);
+            const m = String(Math.floor(total / 60)).padStart(2, '0');
+            const s = String(total % 60).padStart(2, '0');
+            document.getElementById('chronoDisplay').textContent = m + ':' + s;
+        }
+        function chronoReset() {
+            clearInterval(_chronoInterval);
+            _chronoRunning = false; _chronoElapsed = 0;
+            document.getElementById('chronoDisplay').textContent = '00:00';
+            document.getElementById('chronoBtnStart').textContent = '▶ Démarrer';
+            document.getElementById('chronoStatus').textContent = '';
+        }
+        function chronoApply() {
+            const total = Math.floor((_chronoElapsed + (_chronoRunning ? Date.now() - _chronoStart : 0)) / 1000);
+            if (total === 0) { toast('Démarrez le chronomètre d\'abord', 'warning'); return; }
+            const lastId = gesteLines[gesteLines.length - 1];
+            if (!lastId) { toast('Aucun geste dans le calculateur', 'warning'); return; }
+            const input = document.getElementById('temps-' + lastId);
+            if (input) {
+                input.value = total;
+                calculateTotal();
+                document.getElementById('chronoStatus').textContent = `✅ ${total}s appliqués`;
+                toast(`${total} secondes appliquées au dernier geste`, 'success');
+            }
+        }
+
+        // ── Alertes devis expirants ─────────────────────────────
+        // (logic integrated in renderPrestations and renderDashboard)
+
+        // ── Stock alert badge ───────────────────────────────────
+        function updateStockAlertBadge() {
+            const stockArr = JSON.parse(localStorage.getItem('atelier_stock') || '[]');
+            const lowCount = stockArr.filter(s => {
+                const min = parseFloat(stockMins[s.reference] || 0);
+                const qty = parseFloat(stockActuel[s.reference]?.total || 0);
+                return min > 0 && qty < min;
+            }).length;
+            const tab = [...document.querySelectorAll('.tab')].find(t => t.getAttribute('onclick')?.includes("'stock'"));
+            if (tab) {
+                const existing = tab.querySelector('.stock-alert-badge');
+                if (existing) existing.remove();
+                if (lowCount > 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'stock-alert-badge';
+                    badge.style.cssText = 'background:#e74c3c;color:white;border-radius:10px;padding:1px 5px;font-size:0.7em;margin-left:4px;';
+                    badge.textContent = lowCount;
+                    tab.appendChild(badge);
+                }
+            }
+        }
+
+        // ── Comparateur de prestations ──────────────────────────
+        function openCompareModal() {
+            const modal = document.getElementById('compareModal');
+            if (!modal) return;
+            const opts = prestationsSauvegardees.map(p => `<option value="${p.id}">${p.reference || p.id} — ${p.client || ''} — ${p.prestation || ''}</option>`).join('');
+            ['compareSelA','compareSelB'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (sel) sel.innerHTML = '<option value="">— Choisir —</option>' + opts;
+            });
+            document.getElementById('compareResult').innerHTML = '';
+            modal.style.display = 'flex';
+        }
+        function closeCompareModal() { document.getElementById('compareModal').style.display = 'none'; }
+        function renderCompare() {
+            const idA = document.getElementById('compareSelA')?.value;
+            const idB = document.getElementById('compareSelB')?.value;
+            const container = document.getElementById('compareResult');
+            if (!idA || !idB || idA === idB) { container.innerHTML = '<p style="color:#8aacbc;text-align:center;">Sélectionnez deux prestations différentes</p>'; return; }
+            const pA = prestationsSauvegardees.find(p => String(p.id) === idA);
+            const pB = prestationsSauvegardees.find(p => String(p.id) === idB);
+            if (!pA || !pB) return;
+            const rows = [
+                ['Client', pA.client||'—', pB.client||'—'],
+                ['Prestation', pA.prestation||'—', pB.prestation||'—'],
+                ['Référence', pA.reference||'—', pB.reference||'—'],
+                ['Statut', pA.statut||'—', pB.statut||'—'],
+                ['Nb CEA', pA.nbCEA||'—', pB.nbCEA||'—'],
+                ['Nb MSP', pA.nbMSP||'—', pB.nbMSP||'—'],
+                ['Nb pièces', pA.nbPieces||'—', pB.nbPieces||'—'],
+                ['Prix total HT', (parseFloat(pA.prixTotal)||0).toFixed(2)+' CHF', (parseFloat(pB.prixTotal)||0).toFixed(2)+' CHF'],
+                ['Prix unit.', (parseFloat(pA.prixUnitaire)||0).toFixed(4)+' CHF', (parseFloat(pB.prixUnitaire)||0).toFixed(4)+' CHF'],
+                ['Marge %', (pA.margePercent||0)+'%', (pB.margePercent||0)+'%'],
+                ['Nb gestes', (pA.gestes||[]).length, (pB.gestes||[]).length],
+            ];
+            const better = (a, b, lowerIsBetter=false) => {
+                const na = parseFloat(a); const nb = parseFloat(b);
+                if (isNaN(na)||isNaN(nb)) return ['',''];
+                return lowerIsBetter ? [na<=nb?'background:#eef8f3':'', nb<=na?'background:#eef8f3':''] : [na>=nb?'background:#eef8f3':'', nb>=na?'background:#eef8f3':''];
+            };
+            const highlights = [['',''],['',''],['',''],['',''],['',''],['',''],['',''],better(pA.prixTotal,pB.prixTotal),better(pA.prixUnitaire,pB.prixUnitaire,true),better(pA.margePercent,pB.margePercent),['','']];
+            container.innerHTML = `<table style="width:100%;font-size:0.88em;border-collapse:collapse;">
+                <thead><tr><th style="text-align:left;padding:8px;background:#f0f4f8;border-radius:6px 0 0 0;">Critère</th><th style="padding:8px;background:#edf5ff;text-align:center;">Prestation A</th><th style="padding:8px;background:#fff0f5;text-align:center;">Prestation B</th></tr></thead>
+                <tbody>${rows.map((r,i)=>`<tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;color:#6b8fa3;">${r[0]}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;${highlights[i][0]}">${r[1]}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;${highlights[i][1]}">${r[2]}</td></tr>`).join('')}
+                </tbody></table>`;
+        }
+
+        // ── Mode présentation client ────────────────────────────
+        let _presentationMode = false;
+        function togglePresentation() {
+            _presentationMode = !_presentationMode;
+            document.body.classList.toggle('presentation-mode', _presentationMode);
+            const btn = document.getElementById('btnPresentation');
+            if (btn) {
+                btn.style.background = _presentationMode ? 'rgba(39,174,96,0.3)' : 'rgba(255,255,255,0.25)';
+                btn.title = _presentationMode ? 'Désactiver mode présentation' : 'Mode présentation client';
+            }
+            toast(_presentationMode ? '🖥️ Mode présentation activé — coûts internes masqués' : 'Mode normal restauré', _presentationMode ? 'success' : 'info');
+        }
+
+        // ── Historique gestes ───────────────────────────────────
+        function pushGesteHistoire(code, geste) {
+            const h = JSON.parse(localStorage.getItem('gesteHistoire') || '{}');
+            if (!h[code]) h[code] = [];
+            h[code].unshift({ date: new Date().toISOString(), temps: geste.temps, coef: geste.coef, description: geste.description, notes: geste.notes || '' });
+            if (h[code].length > 20) h[code] = h[code].slice(0, 20);
+            localStorage.setItem('gesteHistoire', JSON.stringify(h));
+        }
+        function voirHistoriqueGeste(code) {
+            const h = JSON.parse(localStorage.getItem('gesteHistoire') || '{}');
+            const entries = h[code] || [];
+            if (entries.length === 0) { toast('Aucun historique pour ce geste', 'info'); return; }
+            const rows = entries.map(e => `<tr><td>${new Date(e.date).toLocaleDateString('fr-CH')}</td><td>${e.description}</td><td>${e.temps}s</td><td>×${e.coef}</td></tr>`).join('');
+            const existing = document.getElementById('gesteHistoireModal');
+            if (existing) existing.remove();
+            const div = document.createElement('div');
+            div.id = 'gesteHistoireModal';
+            div.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:6000;display:flex;align-items:center;justify-content:center;padding:16px;';
+            div.innerHTML = `<div style="background:white;border-radius:14px;padding:22px;max-width:560px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <h3 style="margin:0;color:#2d3e50;">📈 Historique — ${code}</h3>
+                    <button onclick="document.getElementById('gesteHistoireModal').remove()" class="btn btn-secondary btn-small">✕</button>
+                </div>
+                <table style="font-size:0.85em;width:100%;"><thead><tr><th>Date</th><th>Description</th><th>Temps</th><th>Coef</th></tr></thead><tbody>${rows}</tbody></table>
+            </div>`;
+            div.onclick = e => { if (e.target === div) div.remove(); };
+            document.body.appendChild(div);
+        }
+
         // ============================================================
         // GANTT — Planification
         // ============================================================
@@ -6892,6 +7083,24 @@
                 // Devis expirés
                 const expires = devisEnAttente.filter(p => (now - new Date(p.date)) / 86400000 > 30);
                 if (expires.length > 0) alertes.push({ type: 'warning', msg: `📋 ${expires.length} devis expiré(s) (> 30 jours)` });
+                // Devis avec dateValidite expirant dans 7 jours
+                const todayDash = new Date(); todayDash.setHours(0,0,0,0);
+                const expiringDevis = prestationsSauvegardees.filter(p => {
+                    if (!p.dateValidite) return false;
+                    const dv = new Date(p.dateValidite);
+                    const days = Math.ceil((dv - todayDash) / 86400000);
+                    return days <= 7;
+                }).sort((a,b) => new Date(a.dateValidite) - new Date(b.dateValidite));
+                if (expiringDevis.length > 0) {
+                    const expiredCount = expiringDevis.filter(p => Math.ceil((new Date(p.dateValidite) - todayDash) / 86400000) <= 0).length;
+                    const soonCount = expiringDevis.length - expiredCount;
+                    let msg = `⚠️ Validité devis : `;
+                    if (expiredCount > 0) msg += `<strong>${expiredCount} expiré(s)</strong>`;
+                    if (expiredCount > 0 && soonCount > 0) msg += `, `;
+                    if (soonCount > 0) msg += `${soonCount} expire(nt) dans ≤7j`;
+                    msg += ` — <em>${expiringDevis.map(p => p.reference || p.client).join(', ')}</em>`;
+                    alertes.push({ type: expiredCount > 0 ? 'danger' : 'warning', msg });
+                }
                 // Capacité
                 const semDebut = new Date(now); semDebut.setDate(now.getDate() - now.getDay() + 1); semDebut.setHours(0,0,0,0);
                 const semFin = new Date(semDebut); semFin.setDate(semDebut.getDate() + 6);
