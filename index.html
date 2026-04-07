@@ -1470,6 +1470,10 @@
                         <select id="filtreClient" onchange="renderPrestations()" style="flex:1;min-width:120px;">
                             <option value="">Tous clients</option>
                         </select>
+                        <label style="font-size:0.85em;color:#7a9db1;white-space:nowrap;">Du</label>
+                        <input type="date" id="filtreDateDe" oninput="renderPrestations()" style="flex:1;min-width:120px;">
+                        <label style="font-size:0.85em;color:#7a9db1;white-space:nowrap;">Au</label>
+                        <input type="date" id="filtreDateA" oninput="renderPrestations()" style="flex:1;min-width:120px;">
                         <button class="btn btn-small" onclick="exportPrestationsCSV()" style="white-space:nowrap;">📥 Export CSV</button>
                     </div>
                     <div id="prestationsList"></div>
@@ -1486,7 +1490,10 @@
                 <div class="section" id="clientDetailSection" style="display:none;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                         <h2 id="clientDetailNom" style="margin:0;"></h2>
-                        <button class="btn btn-secondary btn-small" onclick="closeClientDetail()">✖ Fermer le détail</button>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <span id="clientDetailPdfBtn"></span>
+                            <button class="btn btn-secondary btn-small" onclick="closeClientDetail()">✖ Fermer le détail</button>
+                        </div>
                     </div>
                     <div id="clientDetailContent" style="margin-top:14px;"></div>
                 </div>
@@ -1991,6 +1998,7 @@
         };
         let _dragSrcId = null;
         let mspActif = true;
+        let ganttMode = 'month';
         const STATUT_CONFIG = {
             'brouillon': { label:'⬜ Brouillon', cls:'badge-statut-brouillon' },
             'devis':     { label:'🟡 Devis',     cls:'badge-statut-devis' },
@@ -3219,6 +3227,9 @@
             const content = document.getElementById('clientDetailContent');
             if (!section || !title || !content) return;
             title.textContent = '🏢 ' + nom;
+            // Bouton PDF ajouté dans le header du détail
+            const pdfBtnContainer = document.getElementById('clientDetailPdfBtn');
+            if (pdfBtnContainer) pdfBtnContainer.innerHTML = `<button class="btn btn-small" onclick="printFicheClient('${nom.replace(/'/g,"\\'")}')">📄 Fiche PDF</button>`;
             const prestations = prestationsSauvegardees.filter(p => p.client === nom).sort((a,b) => new Date(b.date) - new Date(a.date));
             const ca = prestations.reduce((s,p) => s + p.prixVente, 0);
             const revient = prestations.reduce((s,p) => s + p.prixRevient, 0);
@@ -3288,6 +3299,52 @@
         function closeClientDetail() {
             const s = document.getElementById('clientDetailSection');
             if (s) s.style.display = 'none';
+        }
+
+        function printFicheClient(clientNom) {
+            if (typeof html2pdf === 'undefined') { toast('html2pdf non disponible','error'); return; }
+            const prests = prestationsSauvegardees.filter(p => p.client === clientNom).sort((a,b) => new Date(b.date)-new Date(a.date));
+            const caTotal = prests.reduce((s,p)=>s+(p.prixVente||0),0);
+            const heuresTotal = prests.reduce((s,p)=>s+(p.heures||0),0);
+            const rows = prests.map(p=>`<tr>
+                <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
+                <td>${p.prestation}</td>
+                <td>${p.reference||''}</td>
+                <td>${p.statut||'devis'}</td>
+                <td>${(p.prixVente||0).toFixed(2)} CHF</td>
+                <td>${p.marge}%</td>
+                <td>${(p.heures||0).toFixed(1)} h</td>
+            </tr>`).join('');
+            const html = `<div style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:30px;color:#2d3e50;">
+                <div style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);padding:20px;border-radius:10px;margin-bottom:20px;">
+                    <h1 style="margin:0;font-size:1.5em;">👤 Fiche client — ${clientNom}</h1>
+                    <p style="margin:6px 0 0;opacity:0.85;">Généré le ${new Date().toLocaleDateString('fr-FR')}</p>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+                    <div style="background:#f5f9fc;border-radius:8px;padding:12px;text-align:center;">
+                        <div style="font-size:0.8em;color:#7a9db1;">Prestations</div>
+                        <div style="font-size:1.4em;font-weight:bold;">${prests.length}</div>
+                    </div>
+                    <div style="background:#f5f9fc;border-radius:8px;padding:12px;text-align:center;">
+                        <div style="font-size:0.8em;color:#7a9db1;">CA total</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:#3a6a7e;">${caTotal.toFixed(2)} CHF</div>
+                    </div>
+                    <div style="background:#f5f9fc;border-radius:8px;padding:12px;text-align:center;">
+                        <div style="font-size:0.8em;color:#7a9db1;">Heures totales</div>
+                        <div style="font-size:1.4em;font-weight:bold;">${heuresTotal.toFixed(1)} h</div>
+                    </div>
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:0.85em;">
+                    <thead><tr style="background:#e8f4f8;">
+                        <th style="padding:8px;text-align:left">Date</th><th>Prestation</th><th>Réf.</th><th>Statut</th><th>CA</th><th>Marge</th><th>Heures</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <p style="font-size:0.7em;color:#aaa;margin-top:20px;text-align:right;">Atelier La Pallanterie — EPI Genève</p>
+            </div>`;
+            const el = document.createElement('div'); el.innerHTML = html;
+            document.body.appendChild(el);
+            html2pdf().set({margin:8, filename:`fiche-client-${clientNom.replace(/\s+/g,'-')}.pdf`, jsPDF:{format:'a4'}}).from(el).save().then(()=>document.body.removeChild(el));
         }
 
         // ============================================================
@@ -3544,6 +3601,15 @@
             renderPrestations();
         }
 
+        function setStatutDirect(id, val) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            p.statut = val;
+            saveToStorage();
+            renderPrestations();
+            updateStats();
+        }
+
         function renderRelances() {
             const panel = document.getElementById('relancesPanel');
             const list  = document.getElementById('relancesList');
@@ -3617,6 +3683,10 @@
             if (client) {
                 filtered = filtered.filter(p => p.client === client);
             }
+            const dateDe = document.getElementById('filtreDateDe')?.value;
+            const dateA  = document.getElementById('filtreDateA')?.value;
+            if (dateDe) filtered = filtered.filter(p => (p.date || p.dateDebut || '') >= dateDe);
+            if (dateA)  filtered = filtered.filter(p => (p.date || p.dateDebut || '') <= dateA);
 
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="empty-state">Aucune prestation correspondante</div>';
@@ -3634,8 +3704,16 @@
                             <strong style="font-size: 1.1em; color: #6b8fa3;">${p.prestation}</strong>
                             ${statutBadge}
                         </div>
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                            <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Changer statut">🔄 Statut</button>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                            <select onchange="setStatutDirect(${p.id}, this.value)" style="font-size:0.82em;padding:3px 6px;border-radius:6px;border:1px solid #d5e3ed;background:#f7fbfd;cursor:pointer;">
+                              <option value="brouillon" ${(p.statut||'devis')==='brouillon'?'selected':''}>⬜ Brouillon</option>
+                              <option value="devis" ${(p.statut||'devis')==='devis'?'selected':''}>🟡 Devis</option>
+                              <option value="soumis" ${(p.statut||'devis')==='soumis'?'selected':''}>🟠 Soumis</option>
+                              <option value="accepte" ${(p.statut||'devis')==='accepte'?'selected':''}>🔵 Accepté</option>
+                              <option value="en-cours" ${(p.statut||'devis')==='en-cours'?'selected':''}>🟣 En cours</option>
+                              <option value="termine" ${(p.statut||'devis')==='termine'?'selected':''}>🟢 Terminé</option>
+                              <option value="facture" ${(p.statut||'devis')==='facture'?'selected':''}>💙 Facturé</option>
+                            </select>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})" title="Éditer">✏️ Éditer</button>
                             <button class="btn btn-small" style="background:#f0f7f0;color:#3a7a4a;border:1px solid #b8e0c0;" onclick="toggleReelSection(${p.id})" title="Saisir temps réel">⏱️ Réel</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF">📄 PDF</button>
