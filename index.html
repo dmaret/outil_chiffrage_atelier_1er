@@ -5728,6 +5728,15 @@
                 return;
             }
 
+            // Palette de couleurs distinctes par projet
+            const GANTT_PALETTE = [
+                '#4e9af1','#e05c97','#27ae60','#e67e22','#8e44ad',
+                '#16a085','#c0392b','#2980b9','#f39c12','#1abc9c',
+                '#d35400','#7f8c8d','#6c3483','#1e8449','#922b21'
+            ];
+            const projectColors = {};
+            prests.forEach((p, i) => { projectColors[p.id] = GANTT_PALETTE[i % GANTT_PALETTE.length]; });
+
             // Build day headers
             const dayInfos = [];
             for (let d = 1; d <= days; d++) {
@@ -5740,7 +5749,7 @@
                 });
             }
 
-            const statColors = { facture: '#b8e5d0', valide: '#a8d5e2', devis: '#c9b3d4' };
+            const statutLabels = { facture:'Facturé', valide:'Validé', 'accepte':'Accepté', 'en-cours':'En cours', 'termine':'Terminé', devis:'Devis', brouillon:'Brouillon', soumis:'Soumis' };
 
             let html = `<div style="overflow-x:auto;"><table class="gantt-table">
                 <thead><tr>
@@ -5756,30 +5765,41 @@
                 const dStart = new Date(p.dateDebut || p.date || today);
                 const estJours = Math.max(1, Math.ceil((p.heures || 1) / 8));
                 const dEnd = p.dateFin ? new Date(p.dateFin) : addWorkDays(dStart, estJours);
-                const color = statColors[p.statut || 'devis'];
+                const color = projectColors[p.id];
+                const statut = p.statut || 'devis';
 
                 html += `<tr>
-                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${p.prestation}"><strong>${p.prestation.length > 22 ? p.prestation.slice(0,20)+'…' : p.prestation}</strong></td>
+                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${p.prestation}">
+                        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;vertical-align:middle;"></span>
+                        <strong>${p.prestation.length > 22 ? p.prestation.slice(0,20)+'…' : p.prestation}</strong>
+                    </td>
                     <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;">${p.client}</td>`;
 
-                dayInfos.forEach(({dayObj, isWeekend}) => {
+                let inRange = false;
+                dayInfos.forEach(({dayObj, isWeekend}, idx) => {
                     const dDay = new Date(dayObj.getFullYear(), dayObj.getMonth(), dayObj.getDate());
                     const dS = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
                     const dE = new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate());
-                    const inRange = dDay >= dS && dDay <= dE;
-                    html += `<td style="padding:2px 1px;${isWeekend ? 'background:#f8f0f0;' : ''}">
-                        ${inRange ? `<div class="gantt-bar" style="background:${color};" title="${p.prestation} • ${p.statut || 'devis'}"></div>` : ''}
+                    const isStart = dDay.getTime() === dS.getTime();
+                    const isEnd   = dDay.getTime() === dE.getTime();
+                    inRange = dDay >= dS && dDay <= dE;
+
+                    const borderRadius = isStart && isEnd ? '6px' : isStart ? '6px 0 0 6px' : isEnd ? '0 6px 6px 0' : '0';
+                    html += `<td style="padding:2px 0;${isWeekend ? 'background:#f8f0f0;' : ''}">
+                        ${inRange ? `<div style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};" title="${p.prestation} — ${statutLabels[statut]||statut}"></div>` : ''}
                     </td>`;
                 });
                 html += `</tr>`;
             });
 
             html += `</tbody></table></div>
-            <div class="gantt-legend">
-                <span>Légende :</span>
-                <span><span class="gantt-legend-dot" style="background:#c9b3d4;"></span>Devis</span>
-                <span><span class="gantt-legend-dot" style="background:#a8d5e2;"></span>Validé</span>
-                <span><span class="gantt-legend-dot" style="background:#b8e5d0;"></span>Facturé</span>
+            <div class="gantt-legend" style="margin-top:12px;flex-wrap:wrap;gap:12px;">
+                <span style="font-weight:600;color:#5a7b8f;">Projets :</span>
+                ${prests.map(p => `<span style="display:flex;align-items:center;gap:5px;font-size:0.82em;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${projectColors[p.id]};"></span>
+                    ${p.prestation.length > 18 ? p.prestation.slice(0,16)+'…' : p.prestation}
+                    <span style="color:#aaa;font-size:0.88em;">(${statutLabels[p.statut||'devis']||p.statut})</span>
+                </span>`).join('')}
             </div>`;
 
             container.innerHTML = html;
