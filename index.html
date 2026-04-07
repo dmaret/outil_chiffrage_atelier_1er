@@ -729,6 +729,26 @@
         .import-drop-zone { border:2px dashed #a8d5e2; border-radius:10px; padding:20px; text-align:center; cursor:pointer; color:#7a9db1; transition:all 0.2s; }
         .import-drop-zone:hover { background:#f0f8fb; border-color:#6b8fa3; }
 
+        /* ── Assistant de prestation ────────────────────────────────── */
+        .assistant-type-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:20px; }
+        .assistant-type-card { border:2px solid #d5e3ed; border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; transition:all 0.2s; background:white; }
+        .assistant-type-card:hover { border-color:#4e9af1; background:#f0f8ff; transform:translateY(-2px); }
+        .assistant-type-card.selected { border-color:#4e9af1; background:#e8f4ff; box-shadow:0 2px 10px rgba(78,154,241,0.3); }
+        .assistant-type-card .card-icon { font-size:2em; margin-bottom:5px; }
+        .assistant-type-card .card-label { font-size:0.85em; font-weight:600; color:#2d3e50; }
+        .assistant-type-card .card-desc { font-size:0.75em; color:#8aacbc; margin-top:3px; }
+        .assistant-geste-row { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:6px; margin-bottom:5px; background:#f8fbfd; border:1px solid #e0eef5; transition:background 0.15s; }
+        .assistant-geste-row:hover { background:#eef6fd; }
+        .assistant-geste-row label { flex:1; font-size:0.86em; cursor:pointer; color:#2d3e50; line-height:1.3; }
+        .assistant-geste-row .a-time { width:56px; border:1px solid #c5d8e4; border-radius:4px; padding:3px 5px; text-align:center; font-size:0.84em; }
+        .assistant-phase-header { font-size:0.76em; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#6b8fa3; margin:10px 0 5px; padding-bottom:3px; border-bottom:1px solid #d5e3ed; }
+        body.dark-mode .assistant-type-card { background:#1a2535; border-color:#2a3a4a; }
+        body.dark-mode .assistant-type-card:hover { background:#1e2d3d; border-color:#4e9af1; }
+        body.dark-mode .assistant-type-card .card-label { color:#a8d5e2; }
+        body.dark-mode .assistant-geste-row { background:#1a2535; border-color:#2a3a4a; }
+        body.dark-mode .assistant-geste-row label { color:#cdd6e0; }
+        body.dark-mode .assistant-geste-row .a-time { background:#243040; border-color:#3a5060; color:#cdd6e0; }
+
         /* ── Accompagnement — Théorie & Analyse ─────────────────────── */
         .theorie-card { border:1px solid #e0d08a; border-radius:8px; margin-bottom:10px; overflow:hidden; cursor:pointer; transition:box-shadow 0.2s; }
         .theorie-card:hover { box-shadow:0 2px 10px rgba(0,0,0,0.1); }
@@ -873,6 +893,13 @@
         </div>
     </div>
 
+    <!-- Assistant Modal -->
+    <div id="assistantModal" onclick="if(event.target===this)closeAssistantModal()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:5000;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:white;border-radius:16px;padding:24px;max-width:640px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 15px 50px rgba(0,0,0,0.25);">
+            <div id="assistantModalBody"></div>
+        </div>
+    </div>
+
     <!-- Shortcuts Modal -->
     <div id="shortcutsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:5000;align-items:center;justify-content:center;">
         <div style="background:white;border-radius:16px;padding:28px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
@@ -913,6 +940,7 @@
                 <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
                 <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
+                <button class="tab admin-only" onclick="switchTab('assistant')">🧙 Assistant</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
@@ -1016,6 +1044,7 @@
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
                         <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd">Ctrl+G</span></button>
                         <button class="btn btn-secondary btn-small" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
+                        <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
                     </div>
                 </div>
 
@@ -1862,6 +1891,65 @@
                 </div>
             </div>
 
+            <!-- ONGLET ASSISTANT (admin) -->
+            <div id="assistant" class="tab-content">
+                <div class="info-box" style="border-left-color:#4e9af1;background:#edf5ff;">
+                    <strong>Assistant de composition de prestation.</strong> Créez rapidement une prestation en sélectionnant un type et en cochant les gestes habituels — pré-remplis selon les séquencements typiques de l'atelier.
+                </div>
+                <div class="section" style="border-left-color:#4e9af1;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                        <div>
+                            <h2 style="margin:0 0 4px;">🧙 Assistant de prestation</h2>
+                            <p style="margin:0;font-size:0.85em;color:#7a9db1;">Sélectionnez un type de prestation pour charger les gestes habituels, ajustez les temps, puis importez directement dans le calculateur.</p>
+                        </div>
+                        <button class="btn" onclick="openAssistantModal()" style="font-size:1em;padding:12px 22px;">🧙 Démarrer l'assistant</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+                        <div style="background:#f0f8ff;border:1px solid #c5e0f5;border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="openAssistantModal('conditionnement')">
+                            <div style="font-size:1.8em;">📦</div><div style="font-weight:600;font-size:0.9em;color:#2d3e50;margin-top:4px;">Conditionnement</div>
+                            <div style="font-size:0.75em;color:#6b8fa3;margin-top:2px;">Kit, sachet, étui</div>
+                        </div>
+                        <div style="background:#f0fff4;border:1px solid #c0e8d0;border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="openAssistantModal('etiquetage')">
+                            <div style="font-size:1.8em;">🏷️</div><div style="font-weight:600;font-size:0.9em;color:#2d3e50;margin-top:4px;">Étiquetage</div>
+                            <div style="font-size:0.75em;color:#6b8fa3;margin-top:2px;">Collage, impression</div>
+                        </div>
+                        <div style="background:#fff8f0;border:1px solid #f0d8b0;border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="openAssistantModal('assemblage')">
+                            <div style="font-size:1.8em;">🏭</div><div style="font-weight:600;font-size:0.9em;color:#2d3e50;margin-top:4px;">Assemblage</div>
+                            <div style="font-size:0.75em;color:#6b8fa3;margin-top:2px;">Kitting, multi-pièces</div>
+                        </div>
+                        <div style="background:#fdf0ff;border:1px solid #e0c0f0;border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="openAssistantModal('palettisation')">
+                            <div style="font-size:1.8em;">🏗️</div><div style="font-weight:600;font-size:0.9em;color:#2d3e50;margin-top:4px;">Palettisation</div>
+                            <div style="font-size:0.75em;color:#6b8fa3;margin-top:2px;">Filmage, mise sur palette</div>
+                        </div>
+                        <div style="background:#f8f8f8;border:1px solid #d5d5d5;border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="openAssistantModal('custom')">
+                            <div style="font-size:1.8em;">✏️</div><div style="font-weight:600;font-size:0.9em;color:#2d3e50;margin-top:4px;">Personnalisé</div>
+                            <div style="font-size:0.75em;color:#6b8fa3;margin-top:2px;">Sélection libre</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <h2>💡 Gestes de référence — séquencement type</h2>
+                    <table style="font-size:0.85em;">
+                        <thead><tr><th>Phase</th><th>Geste</th><th>Code</th><th>Temps unitaire indicatif</th></tr></thead>
+                        <tbody>
+                            <tr><td>📦 Réception</td><td>Réception marchandise / déchargement palette</td><td>REC-01</td><td>~3 min/palette</td></tr>
+                            <tr><td>📦 Réception</td><td>Contrôle à réception</td><td>REC-02</td><td>~1 min/carton</td></tr>
+                            <tr><td>📦 Réception</td><td>Déballage / ouverture carton</td><td>REC-04</td><td>~20 s</td></tr>
+                            <tr><td>📦 Réception</td><td>Déballage d'un élément</td><td>REC-03</td><td>~5 s/pce</td></tr>
+                            <tr><td>🔍 Contrôle</td><td>Contrôle visuel unitaire</td><td>CTR-01</td><td>~10 s/pce</td></tr>
+                            <tr><td>🔍 Contrôle</td><td>Mise en conformité avant envoi (carton)</td><td>CTR-03</td><td>~15 s/carton</td></tr>
+                            <tr><td>🏷️ Étiquetage</td><td>Collage étiquette simple</td><td>ETI-05</td><td>~3 s/pce</td></tr>
+                            <tr><td>🏷️ Étiquetage</td><td>Étiquetage carton d'expédition</td><td>ETI-02</td><td>~12 s/carton</td></tr>
+                            <tr><td>🏭 Conditionnement</td><td>Insertion élément simple</td><td>ASS-14</td><td>~2 s/pce</td></tr>
+                            <tr><td>🏭 Conditionnement</td><td>Fermeture étui carton simple</td><td>ASS-09</td><td>~5 s/pce</td></tr>
+                            <tr><td>🚚 Expédition</td><td>Filmage palette</td><td>EXP-02</td><td>~3 min/palette</td></tr>
+                            <tr><td>🚚 Expédition</td><td>Livraison par la Poste</td><td>EXP-03</td><td>~15 min/tournée</td></tr>
+                            <tr><td>🚚 Expédition</td><td>Mise à disposition transports EPI</td><td>EXP-04</td><td>~10 min/tournée</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- ONGLET ACCOMPAGNEMENT (admin) -->
             <div id="accompagnement" class="tab-content">
                 <div class="info-box" style="border-left-color:#8bc98b; background:#eef8f3;">
@@ -2260,6 +2348,8 @@
             {code: "ETI-06", categorie: "Étiquetage", description: "Impression Inkjet ou caractère manuscrit", temps: 3, coef: 1.2, notes: "Niveau 2"},
             {code: "PRE-03", categorie: "Préparation", description: "Reconditionnement d'un élément (comptage/orientation)", temps: 3, coef: 1.2, notes: "Niveau 2"},
             {code: "REC-03", categorie: "Réception", description: "Déballage d'un élément", temps: 5, coef: 1.0, notes: "Niveau 1"},
+            {code: "EXP-03", categorie: "Expédition", description: "Livraison par la Poste", temps: 15, coef: 1.0, notes: "Dépôt en bureau de poste"},
+            {code: "EXP-04", categorie: "Expédition", description: "Mise à disposition transports EPI", temps: 10, coef: 1.0, notes: "Préparation et remise au transporteur EPI"},
         ];
         let catalogueGestes = [...defaultCatalogueGestes];
 
@@ -2338,6 +2428,7 @@
                 closeGlobalSearch();
                 document.getElementById('confirmModal')?.classList.remove('open');
                 document.getElementById('shortcutsModal')?.style.setProperty('display','none');
+                closeAssistantModal();
             }
             // Ctrl+F : recherche globale
             if (e.ctrlKey && e.key === 'f') {
@@ -6167,6 +6258,169 @@
             document.querySelectorAll('#analyseQuestionnaire input[type=radio]').forEach(r => r.checked = false);
             const res = document.getElementById('analyseResultat');
             if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+        }
+
+        // ============================================================
+        // ASSISTANT DE PRESTATION
+        // ============================================================
+        const ASSISTANT_GESTES = [
+            // Réception
+            { id:'g-rec01', phase:'📦 Réception', label:'Réception marchandise (déchargement palette)', code:'REC-01', time:216 },
+            { id:'g-rec02', phase:'📦 Réception', label:'Contrôle à réception (visuel général)', code:'REC-02', time:60 },
+            { id:'g-rec04', phase:'📦 Réception', label:'Déballage / ouverture carton', code:'REC-04', time:20 },
+            { id:'g-rec03', phase:'📦 Réception', label:'Déballage d\'un élément (à l\'unité)', code:'REC-03', time:5 },
+            // Contrôle qualité
+            { id:'g-ctr01', phase:'🔍 Contrôle qualité', label:'Contrôle visuel unitaire (par pièce)', code:'CTR-01', time:10 },
+            { id:'g-ctr02', phase:'🔍 Contrôle qualité', label:'Contrôle élément fini (par pièce)', code:'CTR-02', time:2 },
+            { id:'g-ctr03', phase:'🔍 Contrôle qualité', label:'Mise en conformité avant envoi (carton)', code:'CTR-03', time:15 },
+            { id:'g-ctr04', phase:'🔍 Contrôle qualité', label:'Mise en conformité avant envoi (palette)', code:'CTR-04', time:90 },
+            // Étiquetage
+            { id:'g-eti05', phase:'🏷️ Étiquetage', label:'Collage étiquette simple', code:'ETI-05', time:3 },
+            { id:'g-eti04', phase:'🏷️ Étiquetage', label:'Collage étiquette orientée (complexe/précise)', code:'ETI-04', time:6 },
+            { id:'g-eti02', phase:'🏷️ Étiquetage', label:'Étiquetage carton d\'expédition', code:'ETI-02', time:12 },
+            { id:'g-eti06', phase:'🏷️ Étiquetage', label:'Impression inkjet ou caractère manuscrit', code:'ETI-06', time:4 },
+            // Conditionnement & assemblage
+            { id:'g-ass14', phase:'🏭 Conditionnement & Assemblage', label:'Insertion élément simple (orienté)', code:'ASS-14', time:2 },
+            { id:'g-ass12', phase:'🏭 Conditionnement & Assemblage', label:'Insertion élément complexe (orienté / difficile)', code:'ASS-12', time:6 },
+            { id:'g-ass09', phase:'🏭 Conditionnement & Assemblage', label:'Formage + fermeture étui carton simple', code:'ASS-09', time:5 },
+            { id:'g-ass08', phase:'🏭 Conditionnement & Assemblage', label:'Formage + fermeture étui carton complexe', code:'ASS-08', time:12 },
+            { id:'g-ass05', phase:'🏭 Conditionnement & Assemblage', label:'Fermeture sachet mini-grip', code:'ASS-05', time:4 },
+            { id:'g-ass03', phase:'🏭 Conditionnement & Assemblage', label:'Emballer film bulles (protection)', code:'ASS-03', time:33 },
+            // Expédition
+            { id:'g-exp02', phase:'🚚 Expédition', label:'Filmage de la palette', code:'EXP-02', time:216 },
+            { id:'g-exp01', phase:'🚚 Expédition', label:'Peser colis', code:'EXP-01', time:15 },
+            { id:'g-exp03', phase:'🚚 Expédition', label:'Livraison par la Poste', code:'EXP-03', time:15 },
+            { id:'g-exp04', phase:'🚚 Expédition', label:'Mise à disposition transports EPI', code:'EXP-04', time:10 },
+        ];
+
+        const ASSISTANT_PRESETS = {
+            conditionnement: ['g-rec01','g-rec02','g-rec04','g-ctr01','g-ass14','g-ass09','g-eti02','g-ctr03','g-exp02'],
+            etiquetage:      ['g-rec01','g-ctr01','g-eti05','g-eti02','g-ctr03','g-exp03'],
+            assemblage:      ['g-rec01','g-rec04','g-ctr01','g-ass14','g-ass09','g-eti02','g-ctr03'],
+            palettisation:   ['g-rec01','g-rec02','g-ctr04','g-exp02','g-exp04'],
+            custom:          []
+        };
+
+        function openAssistantModal(preselectedType) {
+            const modal = document.getElementById('assistantModal');
+            if (!modal) return;
+            modal.style.display = 'flex';
+            if (preselectedType) {
+                assistantSelectType(preselectedType);
+            } else {
+                renderAssistantStep1();
+            }
+        }
+
+        function closeAssistantModal() {
+            const modal = document.getElementById('assistantModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function renderAssistantStep1() {
+            const body = document.getElementById('assistantModalBody');
+            if (!body) return;
+            const types = [
+                { id:'conditionnement', icon:'📦', label:'Conditionnement', desc:'Kit, sachet, étui' },
+                { id:'etiquetage',      icon:'🏷️', label:'Étiquetage',      desc:'Collage, impression' },
+                { id:'assemblage',      icon:'🏭', label:'Assemblage',      desc:'Kitting, multi-pièces' },
+                { id:'palettisation',   icon:'🏗️', label:'Palettisation',   desc:'Filmage, mise sur palette' },
+                { id:'custom',          icon:'✏️', label:'Personnalisé',    desc:'Sélection libre' },
+            ];
+            body.innerHTML = `
+                <h3 style="margin:0 0 4px;color:#2d3e50;">🧙 Assistant de prestation</h3>
+                <p style="font-size:0.85em;color:#7a9db1;margin:0 0 18px;">Quel type de prestation voulez-vous créer ?</p>
+                <div class="assistant-type-cards">
+                    ${types.map(t=>`
+                        <div class="assistant-type-card" onclick="assistantSelectType('${t.id}')">
+                            <div class="card-icon">${t.icon}</div>
+                            <div class="card-label">${t.label}</div>
+                            <div class="card-desc">${t.desc}</div>
+                        </div>`).join('')}
+                </div>
+                <div style="text-align:right;">
+                    <button class="btn btn-secondary" onclick="closeAssistantModal()">Annuler</button>
+                </div>`;
+        }
+
+        function assistantSelectType(type) {
+            const body = document.getElementById('assistantModalBody');
+            if (!body) return;
+            const typeLabels = {
+                conditionnement:'📦 Conditionnement', etiquetage:'🏷️ Étiquetage',
+                assemblage:'🏭 Assemblage', palettisation:'🏗️ Palettisation', custom:'✏️ Personnalisé'
+            };
+            const preset = ASSISTANT_PRESETS[type] || [];
+
+            // Group by phase
+            const phases = {};
+            ASSISTANT_GESTES.forEach(g => { (phases[g.phase] = phases[g.phase] || []).push(g); });
+
+            let gestesHtml = '';
+            Object.entries(phases).forEach(([phase, gestes]) => {
+                gestesHtml += `<div class="assistant-phase-header">${phase}</div>`;
+                gestes.forEach(g => {
+                    const chk = preset.includes(g.id) ? 'checked' : '';
+                    gestesHtml += `
+                        <div class="assistant-geste-row">
+                            <input type="checkbox" id="ag-${g.id}" name="ag" value="${g.id}" ${chk} style="flex-shrink:0;accent-color:#4e9af1;width:16px;height:16px;">
+                            <label for="ag-${g.id}">${g.label} <span style="color:#8aacbc;font-size:0.8em;">[${g.code}]</span></label>
+                            <input type="number" class="a-time" id="at-${g.id}" value="${g.time}" min="1" title="Temps en secondes par pièce">
+                            <span style="font-size:0.77em;color:#8aacbc;white-space:nowrap;">s/pce</span>
+                        </div>`;
+                });
+            });
+
+            const checkAllId = 'ag-checkall-' + type;
+            body.innerHTML = `
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <button class="btn btn-secondary btn-small" onclick="renderAssistantStep1()">← Retour</button>
+                    <h3 style="margin:0;color:#2d3e50;">${typeLabels[type]}</h3>
+                </div>
+                <p style="font-size:0.83em;color:#7a9db1;margin:0 0 10px;">Cochez les gestes à inclure. Les temps sont en <strong>secondes par pièce</strong>. Ajustez si nécessaire.</p>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.84em;">
+                    <input type="checkbox" id="${checkAllId}" onchange="assistantToggleAll(this)" style="accent-color:#4e9af1;">
+                    <label for="${checkAllId}" style="cursor:pointer;color:#6b8fa3;">Tout cocher / décocher</label>
+                </div>
+                <div style="max-height:50vh;overflow-y:auto;padding-right:4px;">${gestesHtml}</div>
+                <div style="border-top:1px solid #d5e3ed;padding-top:12px;margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <label style="font-size:0.85em;color:#4a6070;display:flex;align-items:center;gap:6px;">
+                        Quantité / lot :
+                        <input type="number" id="a-quantite" value="1" min="1" style="width:70px;border:1px solid #c5d8e4;border-radius:4px;padding:4px 6px;">
+                    </label>
+                    <div style="margin-left:auto;display:flex;gap:8px;">
+                        <button class="btn btn-secondary" onclick="closeAssistantModal()">Annuler</button>
+                        <button class="btn" onclick="importerGestesAssistant()">✅ Importer dans le calculateur</button>
+                    </div>
+                </div>`;
+        }
+
+        function assistantToggleAll(cb) {
+            document.querySelectorAll('#assistantModalBody input[name="ag"]').forEach(c => c.checked = cb.checked);
+        }
+
+        function importerGestesAssistant() {
+            const qte = parseFloat(document.getElementById('a-quantite')?.value) || 1;
+            const checked = [...document.querySelectorAll('#assistantModalBody input[name="ag"]:checked')];
+            if (checked.length === 0) { toast('Sélectionnez au moins un geste.', 'warning'); return; }
+
+            // Clear existing geste lines and import
+            document.getElementById('gestesContainer').innerHTML = '';
+            gesteLines = [];
+
+            checked.forEach(cb => {
+                const geste = ASSISTANT_GESTES.find(g => g.id === cb.value);
+                if (!geste) return;
+                const timeInput = document.getElementById('at-' + geste.id);
+                const temps = parseInt(timeInput?.value) || geste.time;
+                addGesteLine({ code: geste.code, temps, quantite: qte });
+            });
+
+            if (gesteLines.length === 0) addGesteLine();
+            calculateTotal();
+            closeAssistantModal();
+            switchTab('calculateur');
+            toast(`${checked.length} geste(s) importé(s) dans le calculateur !`, 'success');
         }
 
         // ============================================================
