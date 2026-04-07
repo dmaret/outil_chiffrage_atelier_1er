@@ -5235,11 +5235,13 @@
                     renderAdminList('emplacements');
                     renderAdminList('unites');
                     logAction('Connexion mode administrateur');
+                    setTimeout(updateTabScrollBtns, 50);
                 } else {
                     toast('❌ PIN incorrect', 'error');
                     logAction('Tentative connexion admin échouée');
                 }
             }
+            setTimeout(updateTabScrollBtns, 50);
         }
 
         function showAdminSections() {
