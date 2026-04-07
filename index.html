@@ -591,8 +591,14 @@
 
         /* Bundles de gestes */
         .bundles-bar { display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding:8px 0 10px 0; margin-bottom:4px; border-bottom:1px dashed #e0c8f0; }
-        .bundle-btn { padding:5px 11px; background:#f0e8ff; color:#7a40a0; border:1px solid #d0b0ec; border-radius:20px; cursor:pointer; font-size:0.82em; font-weight:600; transition:all 0.2s; }
+        .bundle-btn { position:relative; padding:5px 11px; background:#f0e8ff; color:#7a40a0; border:1px solid #d0b0ec; border-radius:20px; cursor:pointer; font-size:0.82em; font-weight:600; transition:all 0.2s; }
         .bundle-btn:hover { background:#e0d0f8; border-color:#b090d8; transform:scale(1.04); }
+        .bundle-tooltip { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); min-width:200px; background:#2d1f4a; color:#f0e8ff; border-radius:10px; padding:10px 13px; font-size:0.8em; line-height:1.7; white-space:nowrap; box-shadow:0 4px 18px rgba(0,0,0,0.25); pointer-events:none; opacity:0; transition:opacity 0.15s; z-index:200; }
+        .bundle-tooltip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:#2d1f4a; }
+        .bundle-btn:hover .bundle-tooltip { opacity:1; }
+        .bundle-tooltip-title { font-weight:700; color:#d0b0f8; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:4px; }
+        .bundle-tooltip-item { display:flex; align-items:center; gap:6px; }
+        .bundle-tooltip-item::before { content:'·'; color:#a080d0; }
 
         /* Geste favori */
         .btn-favorite { padding:4px 7px; background:transparent; border:1px solid #e8d8f8; border-radius:6px; cursor:pointer; font-size:0.9em; line-height:1; transition:all 0.2s; }
@@ -1035,11 +1041,7 @@
                     <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
                     <div class="bundles-bar" id="bundlesBar">
                         <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
-                        <button class="bundle-btn" onclick="applyBundle('reception')">📥 Réception</button>
-                        <button class="bundle-btn" onclick="applyBundle('preparation')">📦 Préparation</button>
-                        <button class="bundle-btn" onclick="applyBundle('expedition')">🚚 Expédition</button>
-                        <button class="bundle-btn" onclick="applyBundle('etiquetage')">🏷️ Étiquetage</button>
-                        <button class="bundle-btn" onclick="applyBundle('assemblage')">🔧 Assemblage</button>
+                        <!-- rendered by renderBundleButtons() on load -->
                     </div>
                     <div id="gestesContainer"></div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
@@ -2287,6 +2289,30 @@
             'assemblage':  {label:'🔧 Assemblage kit',       codes:['ASS-01','ASS-03','CTR-01','EXP-01']},
         };
 
+        function renderBundleButtons() {
+            const bar = document.getElementById('bundlesBar');
+            if (!bar) return;
+            // Keep the label span, replace buttons only
+            const label = bar.querySelector('span');
+            bar.innerHTML = '';
+            if (label) bar.appendChild(label);
+            Object.entries(GESTES_BUNDLES).forEach(([key, bundle]) => {
+                const items = bundle.codes.map(code => {
+                    const g = catalogueGestes.find(x => x.code === code);
+                    return g ? `<div class="bundle-tooltip-item">${g.description} <span style="color:#a080d0;font-size:0.85em;">(${code})</span></div>` : '';
+                }).join('');
+                const btn = document.createElement('button');
+                btn.className = 'bundle-btn';
+                btn.innerHTML = `${bundle.label}
+                    <div class="bundle-tooltip">
+                        <div class="bundle-tooltip-title">${bundle.label}</div>
+                        ${items}
+                    </div>`;
+                btn.addEventListener('click', () => applyBundle(key));
+                bar.appendChild(btn);
+            });
+        }
+
         // Bases de données
         const defaultCatalogueGestes = [
             {code: "REC-01", categorie: "Réception", description: "Décharger palette", temps: 180, coef: 1.2, notes: "Avec transpalette électrique"},
@@ -2372,6 +2398,7 @@
             if (dv) { const d = new Date(); d.setDate(d.getDate() + 30); dv.value = d.toISOString().split('T')[0]; }
         })();
         renderCatalogue();
+        renderBundleButtons();
         renderConsommablesTable();
         calculateRatio();
         updateStockStats();
