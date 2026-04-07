@@ -526,6 +526,15 @@
         .tab.admin-only { display: none; }
         body.admin-mode .tab.admin-only { display: inline-block; }
 
+        /* Tabs drag-to-reorder (admin mode) */
+        body.admin-mode .tab { cursor: grab; }
+        body.admin-mode .tab:active { cursor: grabbing; }
+        .tab.tab-drag-over { opacity: 0.4; }
+        .tab.tab-drop-before { box-shadow: -3px 0 0 0 #4e9af1; }
+        .tab.tab-drop-after  { box-shadow:  3px 0 0 0 #4e9af1; }
+        .tabs-drag-hint { display:none; font-size:0.7em; color:#8aacbc; padding:0 8px; line-height:1; white-space:nowrap; }
+        body.admin-mode .tabs-drag-hint { display:inline; }
+
         /* Gantt */
         .gantt-table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
         .gantt-table th, .gantt-table td { border: 1px solid #e8f0f5; }
@@ -952,6 +961,7 @@
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
             </div>
+            <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
             <button class="tabs-scroll-btn right" id="tabScrollRight" onclick="scrollTabs(150)">&#8250;</button>
         </div>
 
@@ -1897,8 +1907,9 @@
 
             <!-- ONGLET ASSISTANT (admin) -->
             <div id="assistant" class="tab-content">
-                <div class="info-box" style="border-left-color:#4e9af1;background:#edf5ff;">
-                    <strong>Assistant de composition de prestation.</strong> Créez rapidement une prestation en sélectionnant un type et en cochant les gestes habituels — pré-remplis selon les séquencements typiques de l'atelier.
+                <div class="info-box" style="border-left-color:#4e9af1;background:#edf5ff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <span><strong>Assistant de composition de prestation.</strong> Créez rapidement une prestation en sélectionnant un type et en cochant les gestes habituels — pré-remplis selon les séquencements typiques de l'atelier.</span>
+                    <button class="btn btn-secondary btn-small" onclick="resetTabOrder()" title="Remettre les onglets dans leur ordre d'origine">↺ Réinitialiser l'ordre des onglets</button>
                 </div>
                 <div class="section" style="border-left-color:#4e9af1;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
@@ -2397,6 +2408,7 @@
             const dv = document.getElementById('dateValidite');
             if (dv) { const d = new Date(); d.setDate(d.getDate() + 30); dv.value = d.toISOString().split('T')[0]; }
         })();
+        loadTabOrder();
         renderCatalogue();
         renderBundleButtons();
         renderConsommablesTable();
@@ -5355,7 +5367,7 @@
                     renderAdminList('emplacements');
                     renderAdminList('unites');
                     logAction('Connexion mode administrateur');
-                    setTimeout(updateTabScrollBtns, 50);
+                    setTimeout(() => { updateTabScrollBtns(); initTabDrag(); }, 50);
                 } else {
                     toast('❌ PIN incorrect', 'error');
                     logAction('Tentative connexion admin échouée');
@@ -5830,6 +5842,85 @@
         function scrollTabs(delta) {
             const bar = document.getElementById('tabsBar');
             if (bar) { bar.scrollBy({ left: delta, behavior: 'smooth' }); }
+        }
+
+        // ── Tab drag-to-reorder (admin mode) ────────────────────────
+        let _tabDragSrc = null;
+
+        function initTabDrag() {
+            const bar = document.getElementById('tabsBar');
+            if (!bar || bar._tabDragReady) return;
+            bar._tabDragReady = true;
+            bar.addEventListener('dragstart', e => {
+                const tab = e.target.closest('.tab');
+                if (!tab || !isSuperUser) { e.preventDefault(); return; }
+                _tabDragSrc = tab;
+                tab.classList.add('tab-drag-over');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            bar.addEventListener('dragend', () => {
+                bar.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-drag-over','tab-drop-before','tab-drop-after'));
+                _tabDragSrc = null;
+                saveTabOrder();
+                updateTabScrollBtns();
+            });
+            bar.addEventListener('dragover', e => {
+                if (!_tabDragSrc || !isSuperUser) return;
+                e.preventDefault();
+                const tab = e.target.closest('.tab');
+                if (!tab || tab === _tabDragSrc) return;
+                bar.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-drop-before','tab-drop-after'));
+                const rect = tab.getBoundingClientRect();
+                tab.classList.add(e.clientX < rect.left + rect.width / 2 ? 'tab-drop-before' : 'tab-drop-after');
+            });
+            bar.addEventListener('dragleave', e => {
+                const tab = e.target.closest('.tab');
+                if (tab) tab.classList.remove('tab-drop-before','tab-drop-after');
+            });
+            bar.addEventListener('drop', e => {
+                if (!_tabDragSrc || !isSuperUser) return;
+                e.preventDefault();
+                const tab = e.target.closest('.tab');
+                if (!tab || tab === _tabDragSrc) return;
+                tab.classList.remove('tab-drop-before','tab-drop-after');
+                const rect = tab.getBoundingClientRect();
+                if (e.clientX < rect.left + rect.width / 2) bar.insertBefore(_tabDragSrc, tab);
+                else bar.insertBefore(_tabDragSrc, tab.nextSibling);
+            });
+            // Set draggable on all tabs
+            bar.querySelectorAll('.tab').forEach(t => t.setAttribute('draggable', 'true'));
+        }
+
+        function saveTabOrder() {
+            const bar = document.getElementById('tabsBar');
+            if (!bar) return;
+            const order = [...bar.querySelectorAll('.tab')].map(tab => {
+                const m = tab.getAttribute('onclick')?.match(/switchTab\('(\w+)'\)/);
+                return m ? m[1] : null;
+            }).filter(Boolean);
+            localStorage.setItem('tabOrder', JSON.stringify(order));
+        }
+
+        function loadTabOrder() {
+            const saved = localStorage.getItem('tabOrder');
+            if (!saved) return;
+            try {
+                const order = JSON.parse(saved);
+                const bar = document.getElementById('tabsBar');
+                if (!bar) return;
+                order.forEach(tabId => {
+                    const tab = [...bar.querySelectorAll('.tab')].find(t =>
+                        t.getAttribute('onclick')?.includes(`'${tabId}'`)
+                    );
+                    if (tab) bar.appendChild(tab);
+                });
+            } catch(e) { /* silent */ }
+        }
+
+        function resetTabOrder() {
+            localStorage.removeItem('tabOrder');
+            toast('Ordre des onglets réinitialisé — rechargement…', 'info');
+            setTimeout(() => location.reload(), 1200);
         }
         function updateTabScrollBtns() {
             const bar = document.getElementById('tabsBar');
