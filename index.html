@@ -587,6 +587,7 @@
 
         /* Raccourcis clavier badge */
         .kbd { display:inline-block; background:#f0f0f0; border:1px solid #ccc; border-bottom:2px solid #aaa; border-radius:4px; padding:1px 5px; font-size:0.72em; font-family:monospace; color:#666; vertical-align:middle; }
+        kbd { background:#e8f0f5; border:1px solid #b0c8d8; border-radius:4px; padding:2px 7px; font-size:0.88em; font-family:monospace; }
 
         /* Bundles de gestes */
         .bundles-bar { display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding:8px 0 10px 0; margin-bottom:4px; border-bottom:1px dashed #e0c8f0; }
@@ -837,12 +838,28 @@
         </div>
     </div>
 
+    <!-- Shortcuts Modal -->
+    <div id="shortcutsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:5000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:16px;padding:28px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+            <h3 style="margin:0 0 16px;color:#6b8fa3;">⌨️ Raccourcis clavier</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:0.9em;">
+                <tr><td style="padding:6px 0;"><kbd>Ctrl+G</kbd></td><td>Ajouter un geste</td></tr>
+                <tr><td style="padding:6px 0;"><kbd>Ctrl+S</kbd></td><td>Sauvegarder la prestation</td></tr>
+                <tr><td style="padding:6px 0;"><kbd>Ctrl+F</kbd></td><td>Recherche globale</td></tr>
+                <tr><td style="padding:6px 0;"><kbd>Escape</kbd></td><td>Fermer les modales</td></tr>
+                <tr><td style="padding:6px 0;"><kbd>?</kbd></td><td>Cette aide</td></tr>
+            </table>
+            <button class="btn btn-secondary" onclick="document.getElementById('shortcutsModal').style.display='none'" style="margin-top:16px;width:100%;">Fermer</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header" style="position:relative;">
             <h1>🏭 Outil Complet Atelier - La Pallanterie</h1>
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
             <span id="saveIndicator"><span class="autosave-dot" id="autosaveDot"></span>💾 Sauvegardé à l'instant</span>
             <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
+            <button onclick="document.getElementById('shortcutsModal').style.display='flex'" style="position:absolute;top:15px;right:332px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Aide raccourcis clavier">?</button>
             <button onclick="openGlobalSearch()" style="position:absolute;top:15px;right:279px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Recherche globale (Ctrl+F)">🔍</button>
             <button id="superUserToggle" onclick="toggleSuperUser()" style="position:absolute;top:15px;right:172px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode admin">🔓</button>
             <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:120px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
@@ -1881,10 +1898,11 @@
                 <div class="section">
                     <h2>📅 Planning Gantt des prestations</h2>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-                        <button class="btn btn-secondary btn-small" onclick="ganttNav(-1)">← Mois préc.</button>
+                        <button class="btn btn-secondary btn-small" onclick="ganttNav(-1)">← Préc.</button>
                         <strong id="ganttPeriodLabel" style="font-size:1.05em;color:#6b8fa3;min-width:160px;text-align:center;"></strong>
-                        <button class="btn btn-secondary btn-small" onclick="ganttNav(1)">Mois suiv. →</button>
+                        <button class="btn btn-secondary btn-small" onclick="ganttNav(1)">Suiv. →</button>
                         <button class="btn btn-small" onclick="ganttOffset=0;renderGantt()">Aujourd'hui</button>
+                        <button class="btn btn-small" onclick="ganttMode=ganttMode==='month'?'week':'month';ganttOffset=0;renderGantt()" id="btnGanttMode">📅 Vue semaine</button>
                         <select id="ganttFilter" onchange="renderGantt()" style="margin-left:auto;">
                             <option value="">Tous les statuts</option>
                             <option value="devis">Devis</option>
@@ -1934,6 +1952,10 @@
               <div class="section" style="margin-top:20px;">
                 <h2>📈 Pipeline CA (3 prochains mois)</h2>
                 <div id="dashPipelineChart"></div>
+              </div>
+              <div class="section" style="margin-top:20px;">
+                <h2>🏆 Top clients — CA 12 mois</h2>
+                <div id="dashClientChart"></div>
               </div>
             </div>
 
@@ -2135,11 +2157,21 @@
                 closeQuickGesteModal();
                 closeGlobalSearch();
                 document.getElementById('confirmModal')?.classList.remove('open');
+                document.getElementById('shortcutsModal')?.style.setProperty('display','none');
             }
             // Ctrl+F : recherche globale
             if (e.ctrlKey && e.key === 'f') {
                 e.preventDefault();
                 openGlobalSearch();
+            }
+            // ? : aide raccourcis
+            if (e.key === '?' && !e.ctrlKey && !e.altKey) {
+                const activeEl = document.activeElement;
+                const tag = activeEl ? activeEl.tagName : '';
+                if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+                    const modal = document.getElementById('shortcutsModal');
+                    if (modal) modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+                }
             }
         });
 
@@ -5323,21 +5355,31 @@
             if (statut) filtered = filtered.filter(p => (p.statut || 'devis') === statut);
             if (client) filtered = filtered.filter(p => p.client === client);
 
-            const cols = ['Date','Client','Prestation','Référence','Nb pièces','Heures','Prix revient','Marge%','Prix vente','Prix/pièce','Statut'];
+            const cols = ['Date','Client','Prestation','Référence','Nb pièces','Nb CEA','Nb MSP','Heures estimées','Heures réelles','Écart%','Prix revient','Marge%','Prix vente','Prix/pièce','Statut','Date début','Date fin','Gestes','Notes internes'];
             const rows = [cols];
             filtered.forEach(p => {
+                const ecart = p.heuresReelles != null && p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1)+'%' : '';
+                const gestes = (p.gestes||[]).map(g=>g.code).filter(Boolean).join(' | ');
                 rows.push([
                     p.date,
                     p.client,
                     p.prestation,
                     p.reference,
                     p.nbPieces || 1,
+                    p.nbCEA || 1,
+                    p.nbMSP || 0.5,
                     p.heures.toFixed(2),
+                    p.heuresReelles != null ? p.heuresReelles.toFixed(2) : '',
+                    ecart,
                     p.prixRevient.toFixed(2),
                     p.marge,
                     p.prixVente.toFixed(2),
                     p.nbPieces > 1 ? (p.prixVente / p.nbPieces).toFixed(3) : '',
-                    p.statut || 'devis'
+                    p.statut || 'devis',
+                    p.dateDebut || '',
+                    p.dateFin || '',
+                    gestes,
+                    p.notesInternes || ''
                 ]);
             });
 
@@ -5784,15 +5826,58 @@
             if (!container) return;
 
             const today = new Date();
-            const periodStart = new Date(today.getFullYear(), today.getMonth() + ganttOffset, 1);
-            const periodEnd = new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 0);
-            const days = periodEnd.getDate();
-
-            const label = periodStart.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
-            const lbl = document.getElementById('ganttPeriodLabel');
-            if (lbl) lbl.textContent = label.charAt(0).toUpperCase() + label.slice(1);
-
             const filterStatut = document.getElementById('ganttFilter')?.value || '';
+            const GANTT_PALETTE = [
+                '#4e9af1','#e05c97','#27ae60','#e67e22','#8e44ad',
+                '#16a085','#c0392b','#2980b9','#f39c12','#1abc9c',
+                '#d35400','#7f8c8d','#6c3483','#1e8449','#922b21'
+            ];
+            const statutLabels = { facture:'Facturé', valide:'Validé', 'accepte':'Accepté', 'en-cours':'En cours', 'termine':'Terminé', devis:'Devis', brouillon:'Brouillon', soumis:'Soumis' };
+
+            // Update toggle button label
+            const modeBtn = document.getElementById('btnGanttMode');
+
+            let periodStart, periodEnd, dayInfos = [];
+
+            if (ganttMode === 'week') {
+                if (modeBtn) modeBtn.textContent = '📅 Vue mois';
+                // Compute Monday of current week + offset
+                const monday = new Date(today);
+                monday.setDate(today.getDate() - ((today.getDay() || 7) - 1) + ganttOffset * 7);
+                monday.setHours(0,0,0,0);
+                const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+                periodStart = monday; periodEnd = sunday;
+                const lbl = document.getElementById('ganttPeriodLabel');
+                if (lbl) lbl.textContent = `Sem. du ${monday.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} au ${sunday.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}`;
+                for (let i = 0; i < 7; i++) {
+                    const day = new Date(monday); day.setDate(monday.getDate() + i);
+                    const dayNames = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+                    dayInfos.push({
+                        d: dayNames[day.getDay()] + ' ' + day.getDate(),
+                        isToday: day.toDateString() === today.toDateString(),
+                        isWeekend: day.getDay() === 0 || day.getDay() === 6,
+                        dayObj: day
+                    });
+                }
+            } else {
+                if (modeBtn) modeBtn.textContent = '📅 Vue semaine';
+                periodStart = new Date(today.getFullYear(), today.getMonth() + ganttOffset, 1);
+                periodEnd = new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 0);
+                const days = periodEnd.getDate();
+                const label = periodStart.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
+                const lbl = document.getElementById('ganttPeriodLabel');
+                if (lbl) lbl.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+                for (let d = 1; d <= days; d++) {
+                    const day = new Date(periodStart.getFullYear(), periodStart.getMonth(), d);
+                    dayInfos.push({
+                        d,
+                        isToday: day.toDateString() === today.toDateString(),
+                        isWeekend: day.getDay() === 0 || day.getDay() === 6,
+                        dayObj: day
+                    });
+                }
+            }
+
             let prests = prestationsSauvegardees.filter(p => {
                 if (filterStatut && (p.statut || 'devis') !== filterStatut) return false;
                 const dStart = new Date(p.dateDebut || p.date || today);
@@ -5806,28 +5891,8 @@
                 return;
             }
 
-            // Palette de couleurs distinctes par projet
-            const GANTT_PALETTE = [
-                '#4e9af1','#e05c97','#27ae60','#e67e22','#8e44ad',
-                '#16a085','#c0392b','#2980b9','#f39c12','#1abc9c',
-                '#d35400','#7f8c8d','#6c3483','#1e8449','#922b21'
-            ];
             const projectColors = {};
             prests.forEach((p, i) => { projectColors[p.id] = GANTT_PALETTE[i % GANTT_PALETTE.length]; });
-
-            // Build day headers
-            const dayInfos = [];
-            for (let d = 1; d <= days; d++) {
-                const day = new Date(periodStart.getFullYear(), periodStart.getMonth(), d);
-                dayInfos.push({
-                    d,
-                    isToday: day.toDateString() === today.toDateString(),
-                    isWeekend: day.getDay() === 0 || day.getDay() === 6,
-                    dayObj: day
-                });
-            }
-
-            const statutLabels = { facture:'Facturé', valide:'Validé', 'accepte':'Accepté', 'en-cours':'En cours', 'termine':'Terminé', devis:'Devis', brouillon:'Brouillon', soumis:'Soumis' };
 
             let html = `<div style="overflow-x:auto;"><table class="gantt-table">
                 <thead><tr>
@@ -5850,11 +5915,12 @@
                     <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${p.prestation}">
                         <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;vertical-align:middle;"></span>
                         <strong>${p.prestation.length > 22 ? p.prestation.slice(0,20)+'…' : p.prestation}</strong>
+                        <button onclick="duplicatePrestation(${p.id})" style="background:none;border:none;cursor:pointer;font-size:0.8em;padding:1px 3px;" title="Dupliquer">📋</button>
                     </td>
                     <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;">${p.client}</td>`;
 
                 let inRange = false;
-                dayInfos.forEach(({dayObj, isWeekend}, idx) => {
+                dayInfos.forEach(({dayObj, isWeekend}) => {
                     const dDay = new Date(dayObj.getFullYear(), dayObj.getMonth(), dayObj.getDate());
                     const dS = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
                     const dE = new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate());
@@ -5941,13 +6007,24 @@
                 .reduce((s, p) => s + (p.heures || 0), 0);
             const capaciteH = (config.capacitePalettes || 100);
 
+            const capaciteHebdo = parseFloat(document.getElementById('capaciteHebdo')?.value || 35);
+            const capaciteMois = capaciteHebdo * 4;
+            const tauxOccupation = capaciteMois > 0 ? Math.min(100, (heuresMois / capaciteMois * 100)).toFixed(0) : 0;
+
             const kpiEl = document.getElementById('dashboardKpis');
             if (kpiEl) {
                 kpiEl.innerHTML = `
                     <div class="stat-card"><div class="label">Prestations totales</div><div class="value">${total}</div></div>
                     <div class="stat-card"><div class="label">CA ce mois (confirmé)</div><div class="value" style="font-size:1.3em;">${caMois.toFixed(0)} CHF</div></div>
                     <div class="stat-card"><div class="label">Devis en attente</div><div class="value">${devisEnAttente.length} <span style="font-size:0.55em;color:#9a7ac0;">(${devisTotal.toFixed(0)} CHF)</span></div></div>
-                    <div class="stat-card"><div class="label">Heures engagées ce mois</div><div class="value">${heuresMois.toFixed(1)} h <span style="font-size:0.5em;color:#aaa;">/ ~${capaciteH} pal.</span></div></div>
+                    <div class="stat-card"><div class="label">Heures engagées ce mois</div><div class="value">${heuresMois.toFixed(1)} h <span style="font-size:0.5em;color:#aaa;">/ ${capaciteMois} h cap.</span></div></div>
+                    <div class="stat-card">
+                        <div class="label">Taux occupation CEA</div>
+                        <div class="value">${tauxOccupation}%</div>
+                        <div style="background:#e8f0f5;border-radius:10px;height:6px;margin-top:6px;">
+                            <div style="background:${tauxOccupation>85?'#e74c3c':tauxOccupation>60?'#f39c12':'#27ae60'};height:6px;border-radius:10px;width:${tauxOccupation}%;transition:width 0.5s;"></div>
+                        </div>
+                    </div>
                 `;
             }
 
@@ -6038,6 +6115,33 @@
                 svg += `<rect x="100" y="${H+32}" width="14" height="10" fill="#c9b3d4" rx="2"/><text x="118" y="${H+41}" font-size="11" fill="#5a7b8f">Potentiel (devis)</text>`;
                 svg += '</svg>';
                 chartEl.innerHTML = svg;
+            }
+
+            // Top clients — 12 mois
+            const clientCAEl = document.getElementById('dashClientChart');
+            if (clientCAEl) {
+                const twelveMonthsAgo = new Date(now); twelveMonthsAgo.setFullYear(now.getFullYear()-1);
+                const caByClient = {};
+                prestationsSauvegardees.filter(p => new Date(p.date) >= twelveMonthsAgo).forEach(p => {
+                    caByClient[p.client] = (caByClient[p.client]||0) + (p.prixVente||0);
+                });
+                const top5 = Object.entries(caByClient).sort((a,b)=>b[1]-a[1]).slice(0,5);
+                if (top5.length === 0) {
+                    clientCAEl.innerHTML = '<div style="color:#7a9db1;font-style:italic;padding:12px;">Aucune donnée</div>';
+                } else {
+                    const maxCA = top5[0][1];
+                    const COLORS = ['#4e9af1','#e05c97','#27ae60','#e67e22','#8e44ad'];
+                    clientCAEl.innerHTML = top5.map(([client, ca], i) => `
+                        <div style="margin-bottom:10px;">
+                            <div style="display:flex;justify-content:space-between;font-size:0.85em;margin-bottom:3px;">
+                                <span style="font-weight:600;color:#2d3e50;">${client}</span>
+                                <span style="color:#6b8fa3;">${ca.toFixed(0)} CHF</span>
+                            </div>
+                            <div style="background:#e8f0f5;border-radius:6px;height:10px;">
+                                <div style="background:${COLORS[i]};height:10px;border-radius:6px;width:${(ca/maxCA*100).toFixed(1)}%;transition:width 0.5s;"></div>
+                            </div>
+                        </div>`).join('');
+                }
             }
 
             checkAndShowAlerts();
