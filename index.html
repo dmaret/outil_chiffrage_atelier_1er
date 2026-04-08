@@ -812,9 +812,8 @@
         .presentation-banner { display:none; background:linear-gradient(135deg,#27ae60,#2ecc71); color:white; padding:8px 16px; text-align:center; font-weight:600; font-size:0.9em; }
         body.presentation-mode .presentation-banner { display:block; }
 
-        /* Bouton présentation visible seulement en mode admin */
-        #btnPresentation { display:none !important; }
-        body.admin-mode #btnPresentation { display:flex !important; }
+        /* Bouton présentation visible pour tous les utilisateurs */
+        #btnPresentation { display:flex; }
 
         /* ── Barre de navigation présentation (flottante bas) ── */
         #presentationNav {
