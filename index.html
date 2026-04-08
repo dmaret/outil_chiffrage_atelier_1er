@@ -4026,11 +4026,11 @@
             const capaciteHebdo = parseFloat(document.getElementById('capaciteHebdo')?.value || 35);
             const now = new Date();
             const lundi = new Date(now);
-            lundi.setDate(now.getDate() - now.getDay() + 1);
+            lundi.setDate(now.getDate() - now.getDay() + 1 - 14); // démarre 2 semaines en arrière
             lundi.setHours(0,0,0,0);
 
             const semaines = [];
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 10; i++) {
                 const debut = new Date(lundi); debut.setDate(lundi.getDate() + i * 7);
                 const fin = new Date(debut); fin.setDate(debut.getDate() + 6);
                 const label = debut.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'}) + ' – ' + fin.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'});
@@ -7116,11 +7116,13 @@
         // ── Mode présentation (refonte) ───────────────────────────
         let _presentationMode = false;
         // Config mémorisée de la présentation
-        let _presentationConfig = JSON.parse(localStorage.getItem('presentationConfig') || 'null') || {
-            tabs: ['dashboard','calculateur','prestations','clients'],
-            hideCosts: true,
-            hideAdminTabs: true
-        };
+        let _presentationConfig = (() => {
+            try {
+                const s = JSON.parse(localStorage.getItem('presentationConfig') || 'null');
+                if (s && Array.isArray(s.tabs) && s.tabs.length > 0) return s;
+            } catch(e) {}
+            return { tabs: ['dashboard','calculateur','prestations','clients'], hideCosts: true, hideAdminTabs: true };
+        })();
 
         function togglePresentation() {
             if (_presentationMode) {
