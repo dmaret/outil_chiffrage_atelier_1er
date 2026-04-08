@@ -1306,17 +1306,29 @@
                             <input type="number" id="nbCEA" min="1" value="1" onchange="calculateTotal()">
                         </div>
                         <div class="form-group">
-                            <label>Nb MSP</label>
-                            <input type="number" id="nbMSP" min="0" step="0.1" value="0.5" onchange="calculateTotal()">
+                            <label>MSP (%)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="nbMSP" min="0" step="5" value="50" onchange="calculateTotal()">
+                                <span class="unit">%</span>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Responsable</label>
                             <input type="text" id="responsable" value="Davie Maret">
                         </div>
                         <div class="form-group">
-                            <label>🔢 Nb de pièces</label>
-                            <input type="number" id="nbPieces" min="1" value="1" onchange="calculateTotal()" style="font-weight:bold;border-color:#a8d5e2;">
-                            <span class="help-text">Gestes et consommables × nb pièces</span>
+                            <label id="labelNbPieces">🔢 Nb de pièces</label>
+                            <div style="display:flex;gap:4px;align-items:center;">
+                                <input type="number" id="nbPieces" min="1" value="1" onchange="calculateTotal()" style="font-weight:bold;border-color:#a8d5e2;flex:1;min-width:60px;">
+                                <select id="uniteCalc" onchange="updateUniteCalcLabel();calculateTotal()" style="flex:1;min-width:80px;">
+                                    <option value="pièce">pièce</option>
+                                    <option value="carton">carton</option>
+                                    <option value="palette">palette</option>
+                                    <option value="lot">lot</option>
+                                    <option value="colis">colis</option>
+                                </select>
+                            </div>
+                            <span class="help-text" id="helpNbPieces">Gestes et consommables × nb pièces</span>
                         </div>
                     </div>
                     <div class="form-row">
@@ -1435,7 +1447,7 @@
                             <div class="value"><span id="totalHeures">0.00</span> h</div>
                         </div>
                         <div class="total-item">
-                            <div class="label">Temps / pièce</div>
+                            <div class="label" id="labelTempsPiece">Temps / pièce</div>
                             <div class="value" id="totalHeuresPiece" style="font-size:1.2em;">— h</div>
                         </div>
                         <div class="total-item">
@@ -1457,7 +1469,7 @@
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;">
                         <div class="prix-final" id="prixUnitaireBox" style="display:none;">
-                            <div class="label">📦 PRIX / PIÈCE</div>
+                            <div class="label" id="labelPrixPiece">📦 PRIX / PIÈCE</div>
                             <div class="value"><span id="prixVentePiece">0.00</span> CHF</div>
                         </div>
                         <div class="prix-final" id="prixTotalBox">
@@ -2756,6 +2768,7 @@
         loadTabProfiles();
         renderCatalogue();
         renderBundleButtons();
+        updateUniteCalcLabel();
         renderConsommablesTable();
         calculateRatio();
         updateStockStats();
@@ -3505,6 +3518,20 @@
             calculateTotal();
         }
 
+        function updateUniteCalcLabel() {
+            const u = document.getElementById('uniteCalc')?.value || 'pièce';
+            const lbl = document.getElementById('gestesParPieceLabel');
+            if (lbl) lbl.textContent = `(par ${u})`;
+            const lt = document.getElementById('labelTempsPiece');
+            if (lt) lt.textContent = `Temps / ${u}`;
+            const lp = document.getElementById('labelPrixPiece');
+            if (lp) lp.textContent = `📦 PRIX / ${u.toUpperCase()}`;
+            const ln = document.getElementById('labelNbPieces');
+            if (ln) ln.textContent = `🔢 Nb de ${u}s`;
+            const lh = document.getElementById('helpNbPieces');
+            if (lh) lh.textContent = `Gestes et consommables × nb ${u}s`;
+        }
+
         function calculateTotal() {
             const nbPieces = Math.max(1, parseFloat(document.getElementById('nbPieces')?.value || 1));
             let secondesParPiece = 0;
@@ -3526,7 +3553,7 @@
             const heuresParPiece = secondesParPiece / 3600;
 
             const nbCEA = parseFloat(document.getElementById('nbCEA')?.value || 0);
-            const nbMSP = parseFloat(document.getElementById('nbMSP')?.value || 0);
+            const nbMSP = parseFloat(document.getElementById('nbMSP')?.value || 0) / 100;
 
             const coutMO = totalHeures * nbCEA * config.coutHoraireCEA;
             const coutEncadrementBrut = totalHeures * nbMSP * config.coutHoraireMSP;
@@ -3688,7 +3715,8 @@
                 prestation: prestation,
                 reference: reference,
                 nbCEA: parseFloat(document.getElementById('nbCEA').value),
-                nbMSP: parseFloat(document.getElementById('nbMSP').value),
+                nbMSP: parseFloat(document.getElementById('nbMSP').value) / 100,
+                unite: document.getElementById('uniteCalc')?.value || 'pièce',
                 responsable: document.getElementById('responsable').value,
                 heures: parseFloat(document.getElementById('totalHeures').textContent),
                 prixRevient: parseFloat(document.getElementById('totalRevient').textContent),
@@ -3755,8 +3783,9 @@
             document.getElementById('reference').value = '';
             document.getElementById('date').valueAsDate = new Date();
             document.getElementById('nbCEA').value = '1';
-            document.getElementById('nbMSP').value = '0.5';
+            document.getElementById('nbMSP').value = '50';
             document.getElementById('nbPieces').value = '1';
+            if (document.getElementById('uniteCalc')) { document.getElementById('uniteCalc').value = 'pièce'; updateUniteCalcLabel(); }
             document.getElementById('tempsMailsMin').value = '0';
             document.getElementById('tempsImpressionMin').value = '0';
             document.getElementById('tempsCoordMin').value = '0';
@@ -3802,8 +3831,9 @@
             document.getElementById('reference').value = p.reference || '';
             if (p.date) document.getElementById('date').value = p.date;
             document.getElementById('nbCEA').value = p.nbCEA || 1;
-            document.getElementById('nbMSP').value = p.nbMSP !== undefined ? p.nbMSP : 0.5;
+            document.getElementById('nbMSP').value = p.nbMSP !== undefined ? Math.round(p.nbMSP * 100) : 50;
             document.getElementById('nbPieces').value = p.nbPieces || 1;
+            if (document.getElementById('uniteCalc')) { document.getElementById('uniteCalc').value = p.unite || 'pièce'; updateUniteCalcLabel(); }
             document.getElementById('margePercent').value = p.marge || config.margeDefaut;
             document.getElementById('responsable').value = p.responsable || '';
             document.getElementById('tempsMailsMin').value = p.tempsMailsMin || 0;
@@ -4494,7 +4524,7 @@
                         </div>
                     </div>
                     <div style="font-size: 0.85em; color: #7a9db1; margin-bottom: 10px;">
-                        📅 ${date} | 🏢 ${p.client} | 📋 ${p.reference} | 👥 ${p.nbCEA} CEA + ${p.nbMSP} MSP${p.nbPieces > 1 ? ` | 🔢 ${p.nbPieces} pièces` : ''}
+                        📅 ${date} | 🏢 ${p.client} | 📋 ${p.reference} | 👥 ${p.nbCEA} CEA + ${Math.round((p.nbMSP||0)*100)}% MSP${p.nbPieces > 1 ? ` | 🔢 ${p.nbPieces} ${p.unite || 'pièce'}` : ''}
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
                         <div style="text-align: center;">
@@ -5180,7 +5210,7 @@
                         <tr><td style="padding:6px 10px;font-weight:bold;">Prestation</td><td style="padding:6px 10px;">${p.prestation}</td>
                             <td style="padding:6px 10px;font-weight:bold;">Référence</td><td style="padding:6px 10px;">${p.reference}</td></tr>
                         <tr><td style="padding:6px 10px;font-weight:bold;">Responsable</td><td style="padding:6px 10px;">${p.responsable || '-'}</td>
-                            <td style="padding:6px 10px;font-weight:bold;">Équipe</td><td style="padding:6px 10px;">${p.nbCEA} CEA + ${p.nbMSP} MSP</td></tr>
+                            <td style="padding:6px 10px;font-weight:bold;">Équipe</td><td style="padding:6px 10px;">${p.nbCEA} CEA + ${Math.round((p.nbMSP||0)*100)}% MSP</td></tr>
                     </table>
 
                     ${gestesHtml ? `<h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-top:20px;">Détail des gestes</h3>
@@ -5237,8 +5267,9 @@
             document.getElementById('reference').value = (p.reference || '') + ' (copie)';
             document.getElementById('date').valueAsDate = new Date();
             document.getElementById('nbCEA').value = p.nbCEA || 1;
-            document.getElementById('nbMSP').value = p.nbMSP !== undefined ? p.nbMSP : 0.5;
+            document.getElementById('nbMSP').value = p.nbMSP !== undefined ? Math.round(p.nbMSP * 100) : 50;
             document.getElementById('nbPieces').value = p.nbPieces || 1;
+            if (document.getElementById('uniteCalc')) { document.getElementById('uniteCalc').value = p.unite || 'pièce'; updateUniteCalcLabel(); }
             document.getElementById('responsable').value = p.responsable || '';
             document.getElementById('margePercent').value = p.marge || config.margeDefaut;
             document.getElementById('tempsMailsMin').value = p.tempsMailsMin || 0;
@@ -5876,7 +5907,8 @@
                 dateValidite:       document.getElementById('dateValidite')?.value || '',
                 // Paramètres production
                 nbCEA:              parseFloat(document.getElementById('nbCEA').value) || 1,
-                nbMSP:              parseFloat(document.getElementById('nbMSP').value) || 0.5,
+                nbMSP:              (parseFloat(document.getElementById('nbMSP').value) || 50) / 100,
+                unite:              document.getElementById('uniteCalc')?.value || 'pièce',
                 nbPieces:           parseFloat(document.getElementById('nbPieces').value) || 1,
                 margeDefaut:        parseFloat(document.getElementById('margePercent').value) || 15,
                 tempsMailsMin:      parseFloat(document.getElementById('tempsMailsMin').value) || 0,
@@ -5911,9 +5943,10 @@
             document.getElementById('date').value               = modele.date               || '';
             if (modele.dateValidite) document.getElementById('dateValidite').value = modele.dateValidite;
             // Paramètres production
-            document.getElementById('nbCEA').value              = modele.nbCEA              ?? 1;
-            document.getElementById('nbMSP').value              = modele.nbMSP              ?? 0.5;
-            document.getElementById('nbPieces').value           = modele.nbPieces           ?? 1;
+            document.getElementById('nbCEA').value              = modele.nbCEA ?? 1;
+            document.getElementById('nbMSP').value              = Math.round((modele.nbMSP ?? 0.5) * 100);
+            document.getElementById('nbPieces').value           = modele.nbPieces ?? 1;
+            if (document.getElementById('uniteCalc')) { document.getElementById('uniteCalc').value = modele.unite || 'pièce'; updateUniteCalcLabel(); }
             document.getElementById('margePercent').value       = modele.margeDefaut         ?? 15;
             document.getElementById('tempsMailsMin').value      = modele.tempsMailsMin       ?? 0;
             document.getElementById('tempsImpressionMin').value = modele.tempsImpressionMin  ?? 0;
@@ -6015,7 +6048,7 @@
             const totalHeures = totalSecondes / 3600;
 
             const nbCEA = parseFloat(document.getElementById('nbCEA')?.value || 1);
-            const nbMSP = parseFloat(document.getElementById('nbMSP')?.value || 0);
+            const nbMSP = parseFloat(document.getElementById('nbMSP')?.value || 0) / 100;
 
             const coutMO = totalHeures * nbCEA * config.coutHoraireCEA;
             const coutEncadrement = totalHeures * nbMSP * config.coutHoraireMSP;
@@ -6106,7 +6139,7 @@
             if (statut) filtered = filtered.filter(p => (p.statut || 'devis') === statut);
             if (client) filtered = filtered.filter(p => p.client === client);
 
-            const cols = ['Date','Client','Prestation','Référence','Nb pièces','Nb CEA','Nb MSP','Heures estimées','Heures réelles','Écart%','Prix revient','Marge%','Prix vente','Prix/pièce','Statut','Date début','Date fin','Gestes','Notes internes'];
+            const cols = ['Date','Client','Prestation','Référence','Nb unités','Unité','Nb CEA','MSP%','Heures estimées','Heures réelles','Écart%','Prix revient','Marge%','Prix vente','Prix/unité','Statut','Date début','Date fin','Gestes','Notes internes'];
             const rows = [cols];
             filtered.forEach(p => {
                 const ecart = p.heuresReelles != null && p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1)+'%' : '';
@@ -6117,8 +6150,9 @@
                     p.prestation,
                     p.reference,
                     p.nbPieces || 1,
+                    p.unite || 'pièce',
                     p.nbCEA || 1,
-                    p.nbMSP || 0.5,
+                    Math.round((p.nbMSP||0)*100) + '%',
                     p.heures.toFixed(2),
                     p.heuresReelles != null ? p.heuresReelles.toFixed(2) : '',
                     ecart,
@@ -6335,6 +6369,7 @@
             const dateStr = now.toLocaleDateString('fr-FR');
 
             const nbPieces = parseFloat(document.getElementById('nbPieces').value || 1);
+            const uniteCalc = document.getElementById('uniteCalc')?.value || 'pièce';
             const nbCEA = parseFloat(document.getElementById('nbCEA').value || 1);
             const nbMSP = parseFloat(document.getElementById('nbMSP').value || 0);
             const marge = parseFloat(document.getElementById('margePercent').value || 0);
@@ -6443,8 +6478,8 @@
                 <div style="background:#f0f4f8;padding:13px 16px;border-radius:8px;margin-bottom:22px;border-left:4px solid #a8d5e2;">
                     <span style="font-weight:bold;color:#6b8fa3;">Objet de la prestation : </span>
                     <span style="font-weight:bold;">${prestation}</span>
-                    ${nbPieces > 1 ? ` — <span style="color:#7a9db1;">${nbPieces} pièces</span>` : ''}
-                    ${pp.equipe ? `<span style="color:#7a9db1;margin-left:10px;">| Équipe : ${nbCEA} CEA + ${nbMSP} MSP</span>` : ''}
+                    ${nbPieces > 1 ? ` — <span style="color:#7a9db1;">${nbPieces} ${uniteCalc}</span>` : ''}
+                    ${pp.equipe ? `<span style="color:#7a9db1;margin-left:10px;">| Équipe : ${nbCEA} CEA + ${nbMSP}% MSP</span>` : ''}
                 </div>
 
                 ${pp.gestes && gestesRows ? `<!-- GESTES -->
@@ -6489,7 +6524,7 @@
                     <table style="width:100%;border-collapse:collapse;font-size:0.88em;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
                         <tbody>
                             ${pp.mo ? `<tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Main d'œuvre CEA (${totalHeures.toFixed(2)} h × ${nbCEA} pers.)</td><td style="padding:8px 14px;text-align:right;">${coutMO.toFixed(2)} CHF</td></tr>
-                            <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Encadrement MSP (${totalHeures.toFixed(2)} h × ${nbMSP} pers.)</td><td style="padding:8px 14px;text-align:right;">${coutEncadrement.toFixed(2)} CHF</td></tr>` : ''}
+                            <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Encadrement MSP (${totalHeures.toFixed(2)} h × ${nbMSP}%)</td><td style="padding:8px 14px;text-align:right;">${coutEncadrement.toFixed(2)} CHF</td></tr>` : ''}
                             <tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Consommables</td><td style="padding:8px 14px;text-align:right;">${coutConsommables.toFixed(2)} CHF</td></tr>
                             <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Frais de stockage</td><td style="padding:8px 14px;text-align:right;">${coutStockage.toFixed(2)} CHF</td></tr>
                             ${pp.frais ? `<tr style="border-bottom:2px solid #a8d5e2;"><td style="padding:8px 14px;">Frais généraux</td><td style="padding:8px 14px;text-align:right;">${coutFrais.toFixed(2)} CHF</td></tr>` : ''}
@@ -7077,7 +7112,7 @@
                 ['Référence', pA.reference||'—', pB.reference||'—'],
                 ['Statut', pA.statut||'—', pB.statut||'—'],
                 ['Nb CEA', pA.nbCEA||'—', pB.nbCEA||'—'],
-                ['Nb MSP', pA.nbMSP||'—', pB.nbMSP||'—'],
+                ['MSP (%)', pA.nbMSP != null ? Math.round(pA.nbMSP*100)+'%' : '—', pB.nbMSP != null ? Math.round(pB.nbMSP*100)+'%' : '—'],
                 ['Nb pièces', pA.nbPieces||'—', pB.nbPieces||'—'],
                 ['Prix total HT', (parseFloat(pA.prixTotal)||0).toFixed(2)+' CHF', (parseFloat(pB.prixTotal)||0).toFixed(2)+' CHF'],
                 ['Prix unit.', (parseFloat(pA.prixUnitaire)||0).toFixed(4)+' CHF', (parseFloat(pB.prixUnitaire)||0).toFixed(4)+' CHF'],
