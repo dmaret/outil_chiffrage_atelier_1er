@@ -992,7 +992,7 @@
     <!-- Shortcuts Modal -->
     <!-- ── Modal Documentation ──────────────────────────────────────── -->
     <div id="docModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:5000;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
-        <div style="background:white;border-radius:16px;padding:0;max-width:860px;width:95%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.25);">
+        <div style="background:white;border-radius:16px;padding:0;max-width:960px;width:96%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.25);">
             <div style="padding:22px 28px 16px;border-bottom:1px solid #e8eef3;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
                 <h2 style="margin:0;color:#6b8fa3;font-size:1.25em;">📖 Documentation — Outil Complet Atelier</h2>
                 <button onclick="document.getElementById('docModal').style.display='none'" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#9aa;line-height:1;" title="Fermer">&times;</button>
@@ -1001,98 +1001,203 @@
 
                 <p style="background:#f0f7fa;border-left:4px solid #a8d5e2;padding:10px 16px;border-radius:6px;margin-bottom:24px;font-style:italic;">Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
 
+                <!-- 1 -->
                 <h3 style="color:#6b8fa3;margin:0 0 8px;">1. Présentation générale</h3>
-                <p>Application web monopage autonome pour la gestion financière et opérationnelle de l'atelier. Fonctionne entièrement <strong>hors ligne</strong> dans le navigateur — aucune installation, aucune donnée ne quitte l'appareil.</p>
-                <ul style="margin:8px 0 16px 20px;">
-                    <li><strong>Chiffrer</strong> des prestations (coût de revient, prix de vente, marges)</li>
+                <p><strong>Outil Complet Atelier - La Pallanterie</strong> est une application web monopage (SPA) autonome conçue pour la gestion financière et opérationnelle d'un atelier de travail adapté.</p>
+                <p style="margin:8px 0 4px;">L'outil permet de :</p>
+                <ul style="margin:4px 0 8px 20px;">
+                    <li><strong>Chiffrer</strong> des prestations de services (coût de revient, prix de vente, marges)</li>
                     <li><strong>Gérer les stocks</strong> avec valorisation FIFO automatique</li>
                     <li><strong>Suivre les clients</strong> et leur historique de prestations</li>
                     <li><strong>Planifier</strong> les prestations via un diagramme de Gantt</li>
-                    <li><strong>Analyser</strong> la rentabilité via des tableaux de bord</li>
+                    <li><strong>Analyser</strong> la rentabilité et les performances via des tableaux de bord</li>
                 </ul>
-
+                <p>L'application fonctionne entièrement <strong>hors ligne</strong> dans le navigateur, sans serveur, sans installation. Toutes les données sont stockées localement via le <code>localStorage</code> du navigateur.</p>
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
+                <!-- 2 -->
                 <h3 style="color:#6b8fa3;margin:0 0 8px;">2. Démarrage rapide</h3>
-                <ol style="margin:8px 0 8px 20px;">
-                    <li>Ouvrir <code>index.html</code> dans un navigateur (Chrome, Firefox, Edge)</li>
-                    <li>Aller dans <strong>Paramétrage</strong> : saisir les coûts horaires CEA/MSP, les frais généraux et le taux de marge</li>
-                    <li>Importer le catalogue de gestes via <strong>Gestes → Import CSV</strong></li>
-                    <li>Créer une première prestation dans le <strong>Calculateur</strong></li>
-                    <li>Effectuer une sauvegarde via <strong>Config → Export JSON</strong></li>
+                <p><strong>Installation :</strong> aucune. Ouvrez simplement <code>index.html</code> dans un navigateur moderne (Chrome, Firefox, Edge).</p>
+                <p style="margin:10px 0 4px;"><strong>Premier lancement :</strong></p>
+                <ol style="margin:4px 0 8px 20px;">
+                    <li>Accédez à l'onglet <strong>Paramétrage</strong> : coût horaire CEA/MSP, frais généraux, taux de marge par défaut</li>
+                    <li>Importez votre catalogue de gestes via <strong>Gestes → Import CSV</strong></li>
+                    <li>Créez votre première prestation dans le <strong>Calculateur</strong></li>
                 </ol>
-
+                <p><strong>Sauvegarde initiale :</strong> dès que des données sont saisies, exportez via <strong>Configuration → Export JSON</strong>.</p>
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
-                <h3 style="color:#6b8fa3;margin:0 0 12px;">3. Modules fonctionnels (14 onglets)</h3>
-
-                <table style="width:100%;border-collapse:collapse;font-size:0.92em;margin-bottom:16px;">
-                    <thead><tr style="background:#f0f7fa;"><th style="padding:8px 12px;text-align:left;border-bottom:2px solid #d5e3ed;">Onglet</th><th style="padding:8px 12px;text-align:left;border-bottom:2px solid #d5e3ed;">Rôle</th></tr></thead>
-                    <tbody>
-                        <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">🏠 Dashboard</td><td style="padding:7px 12px;">Vue d'ensemble, alertes, pipeline CA 3 mois, top clients</td></tr>
-                        <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">🧙 Assistant <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></td><td style="padding:7px 12px;">Guidage pas-à-pas pour créer une prestation, modèles pré-configurés</td></tr>
-                        <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">💼 Calculateur</td><td style="padding:7px 12px;"><strong>Module central</strong> : construction et chiffrage d'une prestation</td></tr>
-                        <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">📦 Gestion Stock</td><td style="padding:7px 12px;">Entrées/sorties/transferts, stock en temps réel, alertes seuils</td></tr>
-                        <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">⚙️ Paramétrage</td><td style="padding:7px 12px;">Coûts horaires, frais généraux, marges, profils d'onglets (admin)</td></tr>
-                        <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">📚 Gestes</td><td style="padding:7px 12px;">Catalogue des activités élémentaires, import CSV, historique</td></tr>
-                        <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">🛒 Consommables</td><td style="padding:7px 12px;">Catalogue des matières et fournitures avec coûts</td></tr>
-                        <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">📊 Prestations</td><td style="padding:7px 12px;">Historique, filtres, statuts, révisions, duplication</td></tr>
-                        <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">👥 Clients</td><td style="padding:7px 12px;">Fiches clients, tarifs personnalisés, historique, export PDF</td></tr>
-                        <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">📈 Stats</td><td style="padding:7px 12px;">Tableaux de bord analytiques, rentabilité, prévisions, capacité</td></tr>
-                        <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">⚙️ Config</td><td style="padding:7px 12px;">Export/Import JSON, thèmes, code PIN, préférences d'affichage</td></tr>
-                        <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">🧠 Accompagnement <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></td><td style="padding:7px 12px;">Cas cliniques, cadres théoriques, supports de formation</td></tr>
-                        <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:7px 12px;">📝 Historique <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></td><td style="padding:7px 12px;">Traçabilité complète des révisions de prestations</td></tr>
-                        <tr style="background:#f9fbfc;"><td style="padding:7px 12px;">📅 Planification</td><td style="padding:7px 12px;">Diagramme de Gantt, vues mois/semaine, codage couleur par projet</td></tr>
-                    </tbody>
-                </table>
-
-                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
-
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">4. Calculs financiers</h3>
-                <div style="background:#f9fbfc;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:0.88em;margin-bottom:8px;border:1px solid #e0eaf0;">
-                    Coût de revient = Coût MO CEA + Coût MO MSP + Consommables + Stockage + Frais généraux<br>
-                    Coût MO = (Temps en h) × Nb agents × Taux horaire chargé<br>
-                    Frais stockage = Nb jours × Taux journalier<br>
-                    Prix de vente = Coût de revient × (1 + Taux marge / 100)
+                <!-- 3 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">3. Structure du projet</h3>
+                <div style="background:#f9fbfc;border-radius:8px;padding:12px 16px;font-family:monospace;font-size:0.88em;border:1px solid #e0eaf0;margin-bottom:8px;">
+                    index.html &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Application complète<br>
+                    catalogue_gestes_import.csv &nbsp;# Modèle CSV pour l'import<br>
+                    DOCUMENTATION.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Documentation complète
                 </div>
-                <p style="margin-bottom:16px;">La méthode <strong>FIFO</strong> valorise chaque sortie au coût des lots les plus anciens. La simulation de volumes calcule le coût unitaire pour 100, 250, 500, 1 000 et 2 500 unités.</p>
-
+                <ul style="margin:4px 0 8px 20px;">
+                    <li>Déploiement sans étape de compilation</li>
+                    <li>Fonctionnement 100 % hors ligne</li>
+                    <li>Absence de dépendances serveur</li>
+                    <li>Confidentialité totale des données (rien ne quitte l'appareil)</li>
+                </ul>
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">5. Raccourcis clavier</h3>
-                <table style="border-collapse:collapse;font-size:0.92em;margin-bottom:16px;">
-                    <tr><td style="padding:5px 12px 5px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;font-size:0.9em;">Ctrl+G</kbd></td><td>Ajouter un geste</td></tr>
-                    <tr><td style="padding:5px 12px 5px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;font-size:0.9em;">Ctrl+S</kbd></td><td>Sauvegarder la prestation</td></tr>
-                    <tr><td style="padding:5px 12px 5px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;font-size:0.9em;">Ctrl+Z</kbd></td><td>Annuler la dernière action</td></tr>
-                    <tr><td style="padding:5px 12px 5px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;font-size:0.9em;">Ctrl+F</kbd></td><td>Recherche globale</td></tr>
-                    <tr><td style="padding:5px 12px 5px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;font-size:0.9em;">?</kbd></td><td>Aide raccourcis clavier</td></tr>
+                <!-- 4 -->
+                <h3 style="color:#6b8fa3;margin:0 0 12px;">4. Modules fonctionnels (14 onglets)</h3>
+                <p style="margin-bottom:10px;">L'interface est organisée en <strong>14 onglets</strong> accessibles via la barre de navigation. Selon le profil actif, certains onglets peuvent être masqués.</p>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.1 🏠 Tableau de bord</h4>
+                <ul style="margin:0 0 8px 20px;"><li>Devis en attente (alertes et actions rapides)</li><li>Pipeline de chiffre d'affaires sur 3 mois</li><li>Top clients par CA sur 12 mois</li><li>Indicateurs d'alerte (stock, devis expirés)</li><li>Cadres théoriques recommandés</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.2 🧙 Assistant <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
+                <ul style="margin:0 0 8px 20px;"><li>Assistant pas-à-pas pour construire une prestation</li><li>Modèles de services pré-configurés</li><li>Analyse de situations et recommandations théoriques</li><li>Support à la formation des encadrants</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.3 💼 Calculateur — module central</h4>
+                <p style="margin:0 0 6px;"><em>Informations de la prestation :</em> client, intitulé, référence, date, responsable.</p>
+                <p style="margin:0 0 6px;"><em>Personnel :</em> <strong>CEA</strong> (travailleurs) et <strong>MSP</strong> (encadrants).</p>
+                <p style="margin:0 0 4px;"><em>Gestion des gestes :</em></p>
+                <ul style="margin:0 0 6px 20px;"><li>Ajouter depuis le catalogue ou créer à la volée</li><li>Durée (minutes) et quantité par pièce</li><li>Réorganiser par glisser-déposer, favoris, annuler/refaire (Ctrl+Z)</li><li><strong>Bundles</strong> : raccourcis de combinaisons de gestes</li><li><strong>Chronomètre</strong> intégré pour mesurer le temps réel</li></ul>
+                <p style="margin:0 0 4px;"><em>Valorisation financière :</em> coût MO CEA + MSP, consommables, stockage, frais généraux, coût de revient, marge, prix de vente.</p>
+                <p style="margin:0 0 4px;"><em>Simulation de volumes :</em> coût unitaire pour 100, 250, 500, 1 000 et 2 500 unités.</p>
+                <p style="margin:0 0 8px;"><em>Export PDF :</em> version client (sans coûts) ou version interne (détail complet).</p>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.4 📦 Gestion de stock</h4>
+                <ul style="margin:0 0 8px 20px;"><li>Mouvements : entrées, sorties, transferts avec traçabilité complète</li><li>Stock actuel en temps réel (quantité, valeur FIFO, emplacement)</li><li>Valorisation <strong>FIFO</strong> automatique (Premier Entré, Premier Sorti)</li><li>Alertes automatiques sous le seuil minimum défini</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.5 ⚙️ Paramétrage</h4>
+                <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:8px;">
+                    <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Paramètre</th><th style="padding:6px 10px;text-align:left;">Description</th></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Coût horaire CEA</td><td style="padding:5px 10px;">Taux horaire chargé d'un travailleur</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Coût horaire MSP</td><td style="padding:5px 10px;">Taux horaire chargé d'un encadrant</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Frais généraux</td><td style="padding:5px 10px;">Charges fixes (loyer, fluides…)</td></tr>
+                    <tr style="background:#f9fbfc;"><td style="padding:5px 10px;">Taux de marge</td><td style="padding:5px 10px;">Pourcentage de marge commerciale par défaut</td></tr>
                 </table>
+                <p style="margin:0 0 8px;"><em>Admin :</em> profils d'onglets, types de mouvements, emplacements, unités.</p>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.6 📚 Catalogue des gestes</h4>
+                <p style="margin:0 0 4px;">Bibliothèque de toutes les activités élémentaires. Chaque geste contient : code unique (ex. <code>REC-01</code>), catégorie, description, durée standard, coefficient (1,0–1,5), notes.</p>
+                <p style="margin:0 0 8px;">Import CSV : glisser-déposer le fichier <code>catalogue_gestes_import.csv</code> (43 gestes pré-définis).</p>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.7 🛒 Consommables</h4>
+                <p style="margin:0 0 8px;">Catalogue des matières et fournitures avec désignation, référence, coût unitaire, unité. Réutilisables directement depuis le Calculateur.</p>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.8 📊 Prestations</h4>
+                <ul style="margin:0 0 8px 20px;"><li>Filtres par date, statut, client</li><li>Modifier, dupliquer, suivre les révisions</li><li>Statuts : Brouillon, Devis, Soumis, Accepté, En cours, Terminé, Facturé</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.9 👥 Clients</h4>
+                <ul style="margin:0 0 8px 20px;"><li>Coordonnées, tarifs personnalisés, conditions de paiement</li><li>Historique des prestations, export fiche client en PDF</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.10 📈 Statistiques</h4>
+                <ul style="margin:0 0 8px 20px;"><li>Synthèse globale (CA, coûts, marges)</li><li>Répartition des coûts — camemberts comparatifs</li><li>Bilan de gestion des stocks</li><li>Évolution CA et coûts sur 6 mois</li><li>Top 5 des prestations les plus rentables</li><li>Tableau de bord capacitaire (taux d'occupation CEA/MSP)</li><li>Précision des estimations vs réalisé</li><li>Objectifs mensuels de CA, prévisions sur 3 mois</li><li>Rentabilité par geste, statistiques de stock mensuelles</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.11 ⚙️ Configuration</h4>
+                <ul style="margin:0 0 8px 20px;"><li><strong>Export JSON</strong> : sauvegarde complète de toutes les données</li><li><strong>Import JSON</strong> : restauration depuis une sauvegarde</li><li>Thèmes, police, densité, code PIN, préférences d'impression</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.12 🧠 Accompagnement <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
+                <ul style="margin:0 0 8px 20px;"><li>Études de cas cliniques interactives</li><li>Cadres théoriques recommandés</li><li>Supports de formation</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.13 📝 Historique <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
+                <ul style="margin:0 0 8px 20px;"><li>Toutes les versions successives d'une prestation</li><li>Comparaison entre révisions, audit trail des changements</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.14 📅 Planification</h4>
+                <ul style="margin:0 0 8px 20px;"><li>Diagramme de Gantt, vues mois/semaine</li><li>Codage couleur par projet/client, duplication de blocs</li></ul>
 
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">6. Modes d'affichage</h3>
-                <ul style="margin:8px 0 16px 20px;">
-                    <li><strong>Mode sombre</strong> : bouton 🌙 en haut à droite</li>
-                    <li><strong>Mode présentation</strong> : bouton 🖥️ — masque les coûts internes pour une présentation client (admin uniquement)</li>
+                <!-- 5 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">5. Calculs et méthodes financières</h3>
+                <div style="background:#f9fbfc;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:0.88em;border:1px solid #e0eaf0;margin-bottom:10px;">
+                    Coût de revient = Coût MO CEA + Coût MO MSP + Consommables + Stockage + Frais généraux<br>
+                    Coût MO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= (Temps en h) × Nb agents × Taux horaire chargé<br>
+                    Frais stockage = Nb jours × Taux journalier<br>
+                    Prix de vente &nbsp;= Coût de revient × (1 + Taux marge / 100)<br>
+                    Valeur sortie &nbsp;= Σ (Quantité lot × Prix unitaire lot) &nbsp;[FIFO]
+                </div>
+                <p>Le temps total intègre la somme des gestes × coefficient × quantité par pièce × nombre de pièces, plus le temps administratif additionnel. La simulation de volumes identifie les seuils de rentabilité pour 100, 250, 500, 1 000 et 2 500 unités.</p>
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 6 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">6. Import / Export de données</h3>
+                <p><strong>Export JSON</strong> (Config → Export JSON) : sauvegarde complète — gestes, consommables, prestations, clients, stock, mouvements, paramètres.</p>
+                <p><strong>Import JSON</strong> (Config → Import JSON) : restauration depuis une sauvegarde. <em>Attention : remplace les données existantes.</em></p>
+                <p><strong>Import CSV gestes</strong> (Gestes → Import CSV) : format <code>code, categorie, description, duree_minutes, coefficient, notes</code>.</p>
+                <p><strong>Export PDF</strong> (Calculateur ou Clients) : version client (prix de vente uniquement) ou version interne (détail complet des coûts et marges).</p>
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 7 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">7. Raccourcis clavier</h3>
+                <table style="border-collapse:collapse;font-size:0.92em;margin-bottom:8px;">
+                    <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+G</kbd></td><td>Ajouter un geste dans le Calculateur</td></tr>
+                    <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+S</kbd></td><td>Sauvegarder la prestation en cours</td></tr>
+                    <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+Z</kbd></td><td>Annuler la dernière action</td></tr>
+                    <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+F</kbd></td><td>Recherche globale</td></tr>
+                    <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">?</kbd></td><td>Afficher l'aide des raccourcis</td></tr>
+                </table>
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 8 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">8. Modes d'affichage</h3>
+                <ul style="margin:4px 0 8px 20px;">
+                    <li><strong>Mode sombre</strong> : bouton 🌙 en haut à droite ou Config → Thème</li>
+                    <li><strong>Mode présentation</strong> : bouton 🖥️ — masque les coûts internes pour une présentation client</li>
+                    <li><strong>Mode plein écran</strong> : F11 ou bouton ⛶ dans l'interface</li>
                     <li><strong>Mode administrateur</strong> : bouton 🔓 + code PIN — déverrouille les onglets et fonctions avancées</li>
                 </ul>
-
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">7. Sauvegarde des données</h3>
-                <p>Toutes les données sont stockées dans le navigateur (localStorage). <strong>Effectuer un export JSON régulier</strong> depuis <em>Config → Export JSON</em> pour éviter toute perte en cas de nettoyage du navigateur.</p>
-
+                <!-- 9 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">9. Gestion des accès et profils</h3>
+                <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:10px;">
+                    <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Niveau</th><th style="padding:6px 10px;text-align:left;">Accès</th></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Utilisateur standard</td><td style="padding:5px 10px;">Onglets opérationnels — par défaut</td></tr>
+                    <tr style="background:#f9fbfc;"><td style="padding:5px 10px;">Administrateur</td><td style="padding:5px 10px;">Tous les onglets — après saisie du code PIN (bouton 🔓)</td></tr>
+                </table>
+                <p><strong>Profils d'onglets</strong> (admin — Paramétrage) : créer des groupes nommés (ex. « Encadrant », « Direction ») avec des sélections d'onglets personnalisées. Permet d'adapter l'interface sans supprimer de données.</p>
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">8. Glossaire</h3>
+                <!-- 10 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">10. Données et persistance</h3>
+                <p>Toutes les données sont enregistrées dans le <strong>localStorage</strong> du navigateur (JSON). Elles persistent entre les sessions tant que le cache n'est pas effacé.</p>
+                <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin:8px 0;">
+                    <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Variable</th><th style="padding:6px 10px;text-align:left;">Contenu</th></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><code>config</code></td><td style="padding:5px 10px;">Paramètres financiers</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><code>catalogueGestes</code></td><td style="padding:5px 10px;">Liste des gestes de l'atelier</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><code>prestationsSauvegardees</code></td><td style="padding:5px 10px;">Toutes les prestations</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><code>clientsData</code></td><td style="padding:5px 10px;">Données clients</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><code>stockActuel</code></td><td style="padding:5px 10px;">État courant du stock</td></tr>
+                    <tr style="background:#f9fbfc;"><td style="padding:5px 10px;"><code>mouvements</code></td><td style="padding:5px 10px;">Historique des mouvements de stock</td></tr>
+                </table>
+                <p><strong>Recommandation :</strong> export JSON hebdomadaire minimum. Le localStorage est limité à ~5–10 Mo selon le navigateur.</p>
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 11 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">11. Technologies utilisées</h3>
+                <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:8px;">
+                    <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Composant</th><th style="padding:6px 10px;text-align:left;">Technologie</th></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Interface</td><td style="padding:5px 10px;">HTML5, CSS3 (variables CSS), JavaScript ES6+</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Génération PDF</td><td style="padding:5px 10px;">html2pdf.js v0.10.1</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Stockage</td><td style="padding:5px 10px;">Browser localStorage (JSON)</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Mise en page</td><td style="padding:5px 10px;">CSS Grid et Flexbox</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Frameworks</td><td style="padding:5px 10px;">Aucun (JavaScript natif)</td></tr>
+                </table>
+                <p>L'absence de framework garantit la pérennité de l'outil : aucune dépendance à mettre à jour, aucune rupture de compatibilité.</p>
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 12 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">12. Glossaire</h3>
                 <table style="width:100%;border-collapse:collapse;font-size:0.91em;">
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:6px 12px 6px 0;font-weight:600;white-space:nowrap;">CEA</td><td style="padding:6px 0;">Conseillers en Emploi Accompagné — travailleurs de l'atelier</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;background:#f9fbfc;"><td style="padding:6px 12px 6px 0;font-weight:600;">MSP</td><td style="padding:6px 0;">Moniteurs de Stage et de Production — encadrants</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:6px 12px 6px 0;font-weight:600;">Geste</td><td style="padding:6px 0;">Étape élémentaire mesurable d'une prestation (ex. : contrôle, emballage)</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;background:#f9fbfc;"><td style="padding:6px 12px 6px 0;font-weight:600;">FIFO</td><td style="padding:6px 0;">First In, First Out — les lots les plus anciens sont consommés en premier</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:6px 12px 6px 0;font-weight:600;">Bundle</td><td style="padding:6px 0;">Raccourci regroupant plusieurs gestes fréquemment utilisés ensemble</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;background:#f9fbfc;"><td style="padding:6px 12px 6px 0;font-weight:600;">Pipeline CA</td><td style="padding:6px 0;">Prévision de chiffre d'affaires basée sur les devis en cours</td></tr>
-                    <tr><td style="padding:6px 12px 6px 0;font-weight:600;">Profil d'onglets</td><td style="padding:6px 0;">Configuration personnalisée des onglets visibles selon le rôle</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;white-space:nowrap;">CEA</td><td style="padding:5px 0;">Conseillers en Emploi Accompagné — travailleurs de l'atelier</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">MSP</td><td style="padding:5px 0;">Moniteurs de Stage et de Production — encadrants</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Geste</td><td style="padding:5px 0;">Étape élémentaire mesurable d'une prestation (ex. : contrôle, emballage)</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Prestation</td><td style="padding:5px 0;">Ensemble de gestes formant un service proposé à un client</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Devis</td><td style="padding:5px 0;">Document chiffré transmis au client avant validation</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">FIFO</td><td style="padding:5px 0;">First In, First Out — les lots les plus anciens sont consommés en premier</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Coût de revient</td><td style="padding:5px 0;">Somme de tous les coûts nécessaires à la réalisation d'une prestation</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Marge</td><td style="padding:5px 0;">Différence entre le prix de vente et le coût de revient</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Bundle</td><td style="padding:5px 0;">Raccourci regroupant plusieurs gestes fréquemment utilisés ensemble</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Profil d'onglets</td><td style="padding:5px 0;">Configuration personnalisée des onglets visibles selon le rôle</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Valorisation</td><td style="padding:5px 0;">Calcul de la valeur monétaire d'un stock ou d'une prestation</td></tr>
+                    <tr style="background:#f9fbfc;"><td style="padding:5px 10px 5px 0;font-weight:600;">Pipeline CA</td><td style="padding:5px 0;">Prévision de chiffre d'affaires basée sur les devis en cours</td></tr>
                 </table>
 
                 <p style="margin-top:24px;color:#aaa;font-size:0.85em;text-align:center;">Documentation — Outil Complet Atelier - La Pallanterie • Avril 2026</p>
