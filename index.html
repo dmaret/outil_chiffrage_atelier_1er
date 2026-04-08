@@ -2619,6 +2619,16 @@
         let stockageLines = [];
         let editingMouvementId = null;
         let editingPrestationId = null;
+        let tabProfiles = [];
+        let activeTabProfileId = null;
+        let _presentationMode = false;
+        let _presentationConfig = (() => {
+            try {
+                const s = JSON.parse(localStorage.getItem('presentationConfig') || 'null');
+                if (s && Array.isArray(s.tabs) && s.tabs.length > 0) return s;
+            } catch(e) {}
+            return { tabs: ['dashboard','calculateur','prestations','clients'], hideCosts: true, hideAdminTabs: true };
+        })();
 
         // Feature variables
         let configModeles = [];
@@ -6991,8 +7001,6 @@
         ];
 
         // ── Profils d'onglets ─────────────────────────────────────
-        let tabProfiles = [];
-        let activeTabProfileId = null;
 
         function saveTabProfiles() {
             localStorage.setItem('tabProfiles', JSON.stringify(tabProfiles));
@@ -7114,15 +7122,7 @@
         }
 
         // ── Mode présentation (refonte) ───────────────────────────
-        let _presentationMode = false;
-        // Config mémorisée de la présentation
-        let _presentationConfig = (() => {
-            try {
-                const s = JSON.parse(localStorage.getItem('presentationConfig') || 'null');
-                if (s && Array.isArray(s.tabs) && s.tabs.length > 0) return s;
-            } catch(e) {}
-            return { tabs: ['dashboard','calculateur','prestations','clients'], hideCosts: true, hideAdminTabs: true };
-        })();
+        // _presentationMode et _presentationConfig sont déclarés en début de script
 
         function togglePresentation() {
             if (_presentationMode) {
