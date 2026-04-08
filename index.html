@@ -1973,7 +1973,7 @@
 
                     <!-- Sélecteur de prestations (mode sélection) -->
                     <div id="piePrestationSelector" style="display:none;margin-bottom:14px;max-height:180px;overflow-y:auto;border:1px solid #d5e3ed;border-radius:10px;padding:10px;background:#f7fbfd;">
-                        <div style="font-size:0.8em;color:#7a9db1;margin-bottom:8px;">Coche 1 prestation pour l'analyser, 2 pour comparer, 3+ pour combiner.</div>
+                        <div style="font-size:0.8em;color:#7a9db1;margin-bottom:8px;">Coche 1 prestation pour l'analyser, 2 pour comparer côte à côte, 3+ pour afficher en grille.</div>
                         <div id="piePrestationList"></div>
                     </div>
 
@@ -4714,8 +4714,17 @@
                     </tr></tfoot>
                 </table>`;
                 container.appendChild(cmpDiv);
+            } else if (mode === 'selection' && sourcePrestations.length >= 3) {
+                // Camemberts individuels en grille responsive (max 4 par ligne)
+                sourcePrestations.forEach(p => {
+                    const slices = buildSlices([p]);
+                    const div = document.createElement('div');
+                    div.style.cssText = 'flex:1 1 220px;max-width:calc(25% - 24px);min-width:200px;';
+                    container.appendChild(div);
+                    renderOnePie(div, slices, `${p.prestation} (${p.client})`);
+                });
             } else {
-                // Camembert unique (toutes ou sélection 1/3+)
+                // Camembert unique (toutes ou sélection 1)
                 const slices = buildSlices(sourcePrestations);
                 const div = document.createElement('div');
                 div.style.cssText = 'display:flex;flex-wrap:wrap;gap:30px;align-items:center;justify-content:center;width:100%;';
