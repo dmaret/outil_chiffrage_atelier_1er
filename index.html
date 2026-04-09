@@ -1279,6 +1279,7 @@
             <span id="saveIndicator"><span class="autosave-dot" id="autosaveDot"></span>💾 Sauvegardé à l'instant</span>
             <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
             <button onclick="document.getElementById('docModal').style.display='flex'" style="position:absolute;top:15px;right:384px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Documentation">📖</button>
+            <div id="headerAuthBadge" style="display:none;position:absolute;top:13px;right:436px;background:rgba(255,255,255,0.30);border:1.5px solid rgba(255,255,255,0.55);border-radius:20px;padding:5px 13px;font-size:0.82em;font-weight:800;cursor:pointer;backdrop-filter:blur(4px);color:#2d3e50;white-space:nowrap;transition:background 0.2s;" onclick="doLogout()" title="Connecté — cliquer pour se déconnecter"><span id="headerAuthBadgeText">🔐</span></div>
             <button onclick="document.getElementById('shortcutsModal').style.display='flex'" style="position:absolute;top:15px;right:332px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Aide raccourcis clavier">?</button>
             <button onclick="openGlobalSearch()" style="position:absolute;top:15px;right:279px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Recherche globale (Ctrl+F)">🔍</button>
             <button id="superUserToggle" onclick="toggleSuperUser()" style="position:absolute;top:15px;right:172px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode admin">🔓</button>
@@ -7632,8 +7633,10 @@
             document.body.classList.remove('admin-mode');
             hideAdminSections();
             isSuperUser = false;
-            // Hide badge
+            // Hide badges
             document.getElementById('tabProfileBadge')?.classList.remove('visible');
+            const hBadge = document.getElementById('headerAuthBadge');
+            if (hBadge) hBadge.style.display = 'none';
             logAction('Déconnexion');
             showLoginModal();
         }
@@ -7662,10 +7665,21 @@
                 document.body.classList.remove('admin-mode');
                 hideAdminSections();
             }
-            // Update badge
+            // Update tab bar badge
             const badge = document.getElementById('tabProfileBadge');
             const nameEl = document.getElementById('tabProfileBadgeName');
             if (badge && nameEl) { nameEl.textContent = group.name; badge.classList.add('visible'); }
+            // Update header badge
+            const hBadge = document.getElementById('headerAuthBadge');
+            const hText = document.getElementById('headerAuthBadgeText');
+            if (hBadge && hText) {
+                const colors = { cea:'#4e9af1', asp:'#27ae60', msp:'#e67e22', admin:'#f39c12' };
+                const c = colors[group.id] || '#6b8fa3';
+                hBadge.style.display = 'block';
+                hBadge.style.borderColor = c;
+                hBadge.style.background = `${c}33`;
+                hText.textContent = `🔐 ${group.name}`;
+            }
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
