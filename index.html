@@ -2722,7 +2722,7 @@
             { id: 'asp', name: 'ASP', password: 'asp2026',
               tabs: ['dashboard','calculateur','stock','consommables','catalogue','gantt'] },
             { id: 'msp', name: 'MSP', password: 'msp2026',
-              tabs: ['dashboard','stock','consommables','stats','parametrage'] },
+              tabs: ['dashboard','assistant','stock','consommables','stats','parametrage'] },
             { id: 'admin', name: 'ADMIN', password: 'admin2026', tabs: ['*'] },
         ];
         let displayPrefs = { vuePrestations: 'detaillee', densite: 'normale', modeCalculateur: 'complet' };
@@ -7644,11 +7644,12 @@
         function applyAuthGroup(group) {
             const isAdmin = group.id === 'admin' || group.tabs[0] === '*';
             // Show/hide tabs based on group permissions
+            // Use 'inline-block' (not '') to override admin-only CSS display:none
             document.querySelectorAll('#tabsBar .tab').forEach(btn => {
                 const m = btn.getAttribute('onclick')?.match(/switchTab\('(\w+)'\)/);
                 if (!m) return;
                 const key = m[1];
-                btn.style.display = (isAdmin || group.tabs.includes(key)) ? '' : 'none';
+                btn.style.display = (isAdmin || group.tabs.includes(key)) ? 'inline-block' : 'none';
             });
             // Admin mode
             if (isAdmin) {
