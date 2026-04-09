@@ -2696,6 +2696,34 @@
         let configTypesStock = ['entree', 'sortie', 'transfert', 'inventaire'];
         let isSuperUser = false;
         let authGroups = [];
+
+        // Déclarations globales (doivent précéder les appels init)
+        const ALL_TABS = [
+            {key:'dashboard',      label:'🏠 Dashboard'},
+            {key:'assistant',      label:'🧙 Assistant',       adminOnly:true},
+            {key:'calculateur',    label:'💼 Calculateur'},
+            {key:'stock',          label:'📦 Gestion Stock'},
+            {key:'parametrage',    label:'⚙️ Paramétrage'},
+            {key:'catalogue',      label:'📚 Gestes'},
+            {key:'consommables',   label:'🛒 Consommables'},
+            {key:'prestations',    label:'📊 Prestations'},
+            {key:'clients',        label:'👥 Clients'},
+            {key:'stats',          label:'📈 Stats'},
+            {key:'config',         label:'⚙️ Config'},
+            {key:'accompagnement', label:'🧠 Accompagnement',  adminOnly:true},
+            {key:'historique',     label:'📝 Historique',      adminOnly:true},
+            {key:'gantt',          label:'📅 Planification'},
+        ];
+
+        const DEFAULT_AUTH_GROUPS = [
+            { id: 'cea', name: 'CEA', password: 'cea2026',
+              tabs: ['dashboard','calculateur','prestations','clients','stats','catalogue','gantt'] },
+            { id: 'asp', name: 'ASP', password: 'asp2026',
+              tabs: ['dashboard','calculateur','stock','consommables','catalogue','gantt'] },
+            { id: 'msp', name: 'MSP', password: 'msp2026',
+              tabs: ['dashboard','stock','consommables','stats','parametrage'] },
+            { id: 'admin', name: 'ADMIN', password: 'admin2026', tabs: ['*'] },
+        ];
         let displayPrefs = { vuePrestations: 'detaillee', densite: 'normale', modeCalculateur: 'complet' };
         let actionHistory = [];
         let ganttOffset = 0;
@@ -7395,24 +7423,6 @@
         }
 
         // ── Mode présentation client ────────────────────────────
-        // ── Référentiel des onglets ───────────────────────────────
-        const ALL_TABS = [
-            {key:'dashboard',      label:'🏠 Dashboard'},
-            {key:'assistant',      label:'🧙 Assistant',       adminOnly:true},
-            {key:'calculateur',    label:'💼 Calculateur'},
-            {key:'stock',          label:'📦 Gestion Stock'},
-            {key:'parametrage',    label:'⚙️ Paramétrage'},
-            {key:'catalogue',      label:'📚 Gestes'},
-            {key:'consommables',   label:'🛒 Consommables'},
-            {key:'prestations',    label:'📊 Prestations'},
-            {key:'clients',        label:'👥 Clients'},
-            {key:'stats',          label:'📈 Stats'},
-            {key:'config',         label:'⚙️ Config'},
-            {key:'accompagnement', label:'🧠 Accompagnement',  adminOnly:true},
-            {key:'historique',     label:'📝 Historique',      adminOnly:true},
-            {key:'gantt',          label:'📅 Planification'},
-        ];
-
         // ── Profils d'onglets ─────────────────────────────────────
 
         function saveTabProfiles() {
@@ -7545,16 +7555,6 @@
         }
 
         // ── Système d'authentification par groupe ─────────────────────
-
-        const DEFAULT_AUTH_GROUPS = [
-            { id: 'cea', name: 'CEA', password: 'cea2026',
-              tabs: ['dashboard','calculateur','prestations','clients','stats','catalogue','gantt'] },
-            { id: 'asp', name: 'ASP', password: 'asp2026',
-              tabs: ['dashboard','calculateur','stock','consommables','catalogue','gantt'] },
-            { id: 'msp', name: 'MSP', password: 'msp2026',
-              tabs: ['dashboard','stock','consommables','stats','parametrage'] },
-            { id: 'admin', name: 'ADMIN', password: 'admin2026', tabs: ['*'] },
-        ];
 
         function initAuthGroups() {
             const saved = localStorage.getItem('authGroups');
