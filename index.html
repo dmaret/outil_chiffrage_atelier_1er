@@ -550,6 +550,36 @@
         .tabs-drag-hint { display:none; font-size:0.7em; color:#8aacbc; padding:0 8px; line-height:1; white-space:nowrap; }
         body.admin-mode .tabs-drag-hint { display:inline; }
 
+        /* ── Auth login overlay ──────────────────────────────────────── */
+        .auth-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: linear-gradient(135deg, #e8f4f8 0%, #f5e6f0 100%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-box {
+            background: #fffef9; border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(100,120,150,0.25);
+            padding: 40px; width: 380px; max-width: 92vw; text-align: center;
+        }
+        .auth-box h2 { font-size: 1.5em; margin-bottom: 6px; color: #2d3e50; }
+        .auth-subtitle { font-size: 0.88em; color: #7a9db1; margin-bottom: 24px; }
+        .auth-box select, .auth-box input[type="password"] {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #d5e3ed;
+            border-radius: 10px; font-size: 1em; margin-bottom: 14px;
+            background: #f8fbfd; color: #2d3e50; outline: none;
+            transition: border-color 0.2s;
+        }
+        .auth-box select:focus, .auth-box input[type="password"]:focus { border-color: #6b8fa3; }
+        .auth-error { color: #e74c3c; font-size: 0.88em; margin-bottom: 12px; min-height: 20px; }
+        .btn-login {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #a8d5e2, #c9b3d4);
+            color: #2d3e50; border: none; border-radius: 12px; font-size: 1.05em;
+            font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+        }
+        .btn-login:hover { opacity: 0.88; }
+        .auth-footer { font-size: 0.72em; color: #bbb; margin-top: 20px; }
+
         /* Gantt */
         .gantt-table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
         .gantt-table th, .gantt-table td { border: 1px solid #e8f0f5; }
@@ -1276,8 +1306,8 @@
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
             <div class="tab-profile-badge" id="tabProfileBadge">
-                👁️ <span id="tabProfileBadgeName"></span>
-                <span class="badge-close" onclick="resetTabProfile()" title="Désactiver ce profil">✕</span>
+                🔐 <span id="tabProfileBadgeName"></span>
+                <span class="badge-close" onclick="doLogout()" title="Se déconnecter">🚪</span>
             </div>
             <button class="tabs-scroll-btn right" id="tabScrollRight" onclick="scrollTabs(150)">&#8250;</button>
         </div>
@@ -1769,6 +1799,12 @@
                 </div>
 
                 <!-- SECTIONS ADMIN -->
+                <div class="section admin-section" style="display:none; border-left: 4px solid #f39c12;">
+                    <h2>🔐 Groupes d'accès <span style="background:#f39c12;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                    <p style="font-size:0.88em;color:#7a9db1;margin-bottom:14px;">Gérez les mots de passe et onglets accessibles pour chaque groupe (CEA, ASP, MSP, ADMIN).</p>
+                    <div id="authGroupsList"></div>
+                </div>
+
                 <div class="section admin-section" style="display:none; border-left: 4px solid #a8d5e2;">
                     <h2>👁️ Profils d'onglets <span style="background:#a8d5e2;color:#2d3e50;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
                     <p style="font-size:0.88em;color:#7a9db1;margin-bottom:14px;">Créez des groupes nommés d'onglets pour adapter l'interface selon le contexte (vue client, vue interne, compta…).</p>
@@ -2659,6 +2695,7 @@
         let configUnites = ['Palette', 'Carton', 'Pièce'];
         let configTypesStock = ['entree', 'sortie', 'transfert', 'inventaire'];
         let isSuperUser = false;
+        let authGroups = [];
         let displayPrefs = { vuePrestations: 'detaillee', densite: 'normale', modeCalculateur: 'complet' };
         let actionHistory = [];
         let ganttOffset = 0;
@@ -2835,6 +2872,8 @@
         renderDashboard();
         initTheme();
         initMatrice();
+        initAuthGroups();
+        checkAuthSession();
 
         // ── Raccourcis clavier globaux ───────────────────────────────
         document.addEventListener('keydown', e => {
@@ -2864,6 +2903,7 @@
                 closeAssistantModal();
                 closeTabProfileModal();
                 closePresentationConfigModal();
+                closeAuthGroupModal();
             }
             // Ctrl+Z : annuler
             if (e.ctrlKey && e.key === 'z') {
@@ -5846,6 +5886,14 @@
         // Mode super-utilisateur
         // ============================================================
         function toggleSuperUser() {
+            // Block non-admin auth sessions from elevating
+            try {
+                const s = sessionStorage.getItem('authSession');
+                if (s) {
+                    const sess = JSON.parse(s);
+                    if (sess.id !== 'admin') { toast('Accès réservé au groupe ADMIN', 'warning'); return; }
+                }
+            } catch(e) {}
             const btn = document.getElementById('superUserToggle');
             if (isSuperUser) {
                 isSuperUser = false;
@@ -5883,6 +5931,7 @@
         function showAdminSections() {
             document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'block');
             renderTabProfiles();
+            renderAuthGroups();
         }
 
         function hideAdminSections() {
@@ -7397,6 +7446,16 @@
         }
 
         function resetTabProfile() {
+            try {
+                const s = sessionStorage.getItem('authSession');
+                if (s) {
+                    const sess = JSON.parse(s);
+                    if (sess.id !== 'admin') {
+                        toast('Seul le groupe ADMIN peut réinitialiser les onglets.', 'warning');
+                        return;
+                    }
+                }
+            } catch(e) {}
             applyTabProfile(null);
             toast('Tous les onglets affichés', 'info');
         }
@@ -7483,6 +7542,202 @@
                 renderTabProfiles();
                 toast('Profil supprimé', 'info');
             });
+        }
+
+        // ── Système d'authentification par groupe ─────────────────────
+
+        const DEFAULT_AUTH_GROUPS = [
+            { id: 'cea', name: 'CEA', password: 'cea2026',
+              tabs: ['dashboard','calculateur','prestations','clients','stats','catalogue','gantt'] },
+            { id: 'asp', name: 'ASP', password: 'asp2026',
+              tabs: ['dashboard','calculateur','stock','consommables','catalogue','gantt'] },
+            { id: 'msp', name: 'MSP', password: 'msp2026',
+              tabs: ['dashboard','stock','consommables','stats','parametrage'] },
+            { id: 'admin', name: 'ADMIN', password: 'admin2026', tabs: ['*'] },
+        ];
+
+        function initAuthGroups() {
+            const saved = localStorage.getItem('authGroups');
+            if (saved) { try { authGroups = JSON.parse(saved); } catch(e){} }
+            // Ensure all 4 default groups exist
+            DEFAULT_AUTH_GROUPS.forEach(def => {
+                if (!authGroups.find(g => g.id === def.id)) {
+                    authGroups.push({ ...def });
+                }
+            });
+            saveAuthGroups();
+            // Populate login select
+            const sel = document.getElementById('authGroupSelect');
+            if (sel) {
+                sel.innerHTML = '<option value="">— Sélectionnez votre groupe —</option>' +
+                    authGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+            }
+        }
+
+        function saveAuthGroups() {
+            localStorage.setItem('authGroups', JSON.stringify(authGroups));
+        }
+
+        function checkAuthSession() {
+            try {
+                const s = sessionStorage.getItem('authSession');
+                if (s) {
+                    const sess = JSON.parse(s);
+                    const group = authGroups.find(g => g.id === sess.id);
+                    if (group) { applyAuthGroup(group); return; }
+                }
+            } catch(e) {}
+            showLoginModal();
+        }
+
+        function showLoginModal() {
+            const overlay = document.getElementById('authOverlay');
+            if (overlay) overlay.style.display = 'flex';
+            const pw = document.getElementById('authPasswordInput');
+            if (pw) { pw.value = ''; }
+            const err = document.getElementById('authError');
+            if (err) err.textContent = '';
+            // Focus on select or password after slight delay
+            setTimeout(() => {
+                const sel = document.getElementById('authGroupSelect');
+                if (sel && !sel.value) sel.focus();
+                else document.getElementById('authPasswordInput')?.focus();
+            }, 50);
+        }
+
+        function doLogin() {
+            const groupId = document.getElementById('authGroupSelect')?.value;
+            const password = document.getElementById('authPasswordInput')?.value;
+            const errEl = document.getElementById('authError');
+            if (!groupId) { if(errEl) errEl.textContent = 'Veuillez sélectionner un groupe.'; return; }
+            const group = authGroups.find(g => g.id === groupId);
+            if (!group || group.password !== password) {
+                if(errEl) errEl.textContent = '❌ Mot de passe incorrect.';
+                document.getElementById('authPasswordInput')?.select();
+                return;
+            }
+            // Auth OK
+            sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
+            document.getElementById('authOverlay').style.display = 'none';
+            applyAuthGroup(group);
+            toast(`Bienvenue, groupe ${group.name} !`, 'success');
+            logAction(`Connexion groupe ${group.name}`);
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem('authSession');
+            // Reset tab visibility
+            document.querySelectorAll('#tabsBar .tab').forEach(btn => btn.style.display = '');
+            // Remove admin mode
+            document.body.classList.remove('admin-mode');
+            hideAdminSections();
+            isSuperUser = false;
+            // Hide badge
+            document.getElementById('tabProfileBadge')?.classList.remove('visible');
+            logAction('Déconnexion');
+            showLoginModal();
+        }
+
+        function applyAuthGroup(group) {
+            const isAdmin = group.id === 'admin' || group.tabs[0] === '*';
+            // Show/hide tabs based on group permissions
+            document.querySelectorAll('#tabsBar .tab').forEach(btn => {
+                const m = btn.getAttribute('onclick')?.match(/switchTab\('(\w+)'\)/);
+                if (!m) return;
+                const key = m[1];
+                btn.style.display = (isAdmin || group.tabs.includes(key)) ? '' : 'none';
+            });
+            // Admin mode
+            if (isAdmin) {
+                isSuperUser = true;
+                document.body.classList.add('admin-mode');
+                showAdminSections();
+                renderAdminList('types');
+                renderAdminList('emplacements');
+                renderAdminList('unites');
+                renderTabProfiles();
+                renderAuthGroups();
+            } else {
+                isSuperUser = false;
+                document.body.classList.remove('admin-mode');
+                hideAdminSections();
+            }
+            // Update badge
+            const badge = document.getElementById('tabProfileBadge');
+            const nameEl = document.getElementById('tabProfileBadgeName');
+            if (badge && nameEl) { nameEl.textContent = group.name; badge.classList.add('visible'); }
+            // Redirect to first visible tab if current tab is now hidden
+            const activeTabEl = document.querySelector('.tab-content.active');
+            if (activeTabEl) {
+                const activeKey = activeTabEl.id;
+                const tabBtn = document.querySelector(`#tabsBar .tab[onclick*="switchTab('${activeKey}')"]`);
+                if (tabBtn && tabBtn.style.display === 'none') {
+                    const firstVisible = document.querySelector('#tabsBar .tab:not([style*="none"])');
+                    if (firstVisible) firstVisible.click();
+                }
+            }
+            setTimeout(updateTabScrollBtns, 50);
+        }
+
+        function renderAuthGroups() {
+            const container = document.getElementById('authGroupsList');
+            if (!container) return;
+            container.innerHTML = authGroups.map(g => {
+                const tabCount = g.tabs[0] === '*' ? 'Tous les onglets' : `${g.tabs.length} onglets`;
+                return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f5f9fc;margin-bottom:8px;border:1px solid #e0e8f0;flex-wrap:wrap;">
+                    <strong style="min-width:70px;">${g.name}</strong>
+                    <span style="font-size:0.82em;color:#7a9db1;flex:1;">${tabCount}</span>
+                    <span style="font-size:0.82em;color:#aaa;font-family:monospace;background:#f0f4f8;padding:2px 8px;border-radius:6px;">••••••</span>
+                    <button class="btn btn-small btn-secondary" onclick="openAuthGroupModal('${g.id}')">✏️ Modifier</button>
+                </div>`;
+            }).join('');
+        }
+
+        function openAuthGroupModal(groupId) {
+            const group = authGroups.find(g => g.id === groupId);
+            if (!group) return;
+            document.getElementById('authGroupModalTitle').textContent = `Modifier groupe : ${group.name}`;
+            document.getElementById('authGroupEditId').value = groupId;
+            document.getElementById('authGroupNameInput').value = group.name;
+            document.getElementById('authGroupPasswordInput').value = group.password;
+            const isAll = group.tabs[0] === '*';
+            const cl = document.getElementById('authGroupChecklist');
+            cl.innerHTML = `<label style="margin-bottom:10px;display:block;padding:8px;background:#f0f4f8;border-radius:6px;">
+                <input type="checkbox" id="authTabsAll" ${isAll?'checked':''} onchange="toggleAuthAllTabs(this.checked)">
+                <strong> Tous les onglets (accès complet)</strong>
+            </label>` +
+                ALL_TABS.map(t => {
+                    const checked = isAll || group.tabs.includes(t.key);
+                    return `<label>
+                        <input type="checkbox" class="auth-tab-cb" value="${t.key}" ${checked?'checked':''}>
+                        ${t.label}${t.adminOnly ? ' <span style="font-size:0.7em;background:#c9b3d4;color:#fff;border-radius:8px;padding:1px 6px;">admin</span>' : ''}
+                    </label>`;
+                }).join('');
+            document.getElementById('authGroupModal').classList.add('open');
+        }
+
+        function toggleAuthAllTabs(allChecked) {
+            document.querySelectorAll('#authGroupChecklist .auth-tab-cb').forEach(cb => cb.checked = allChecked);
+        }
+
+        function closeAuthGroupModal() {
+            document.getElementById('authGroupModal')?.classList.remove('open');
+        }
+
+        function saveAuthGroupModal() {
+            const id = document.getElementById('authGroupEditId').value;
+            const password = document.getElementById('authGroupPasswordInput').value.trim();
+            if (!password) { toast('Le mot de passe ne peut pas être vide', 'warning'); return; }
+            const allChecked = document.getElementById('authTabsAll')?.checked;
+            const tabs = allChecked ? ['*'] :
+                [...document.querySelectorAll('#authGroupChecklist .auth-tab-cb:checked')].map(cb => cb.value);
+            if (!allChecked && tabs.length === 0) { toast('Sélectionnez au moins un onglet', 'warning'); return; }
+            const idx = authGroups.findIndex(g => g.id === id);
+            if (idx >= 0) { authGroups[idx].password = password; authGroups[idx].tabs = tabs; }
+            saveAuthGroups();
+            renderAuthGroups();
+            closeAuthGroupModal();
+            toast(`Groupe ${authGroups[idx]?.name || ''} mis à jour`, 'success');
         }
 
         // ── Mode présentation (refonte) ───────────────────────────
@@ -8505,6 +8760,46 @@
         }
 
     </script>
+
+    <!-- Auth : écran de connexion -->
+    <div id="authOverlay" class="auth-overlay" style="display:none;">
+        <div class="auth-box">
+            <div style="font-size:2.8em;margin-bottom:6px;">🏭</div>
+            <h2>Atelier La Pallanterie</h2>
+            <p class="auth-subtitle">Connectez-vous pour accéder à l'outil</p>
+            <select id="authGroupSelect" onchange="document.getElementById('authPasswordInput').focus()">
+                <option value="">— Sélectionnez votre groupe —</option>
+            </select>
+            <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
+            <div class="auth-error" id="authError"></div>
+            <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
+            <p class="auth-footer">© 2025–2026 MARET Davie — Atelier La Pallanterie — EPI Genève</p>
+        </div>
+    </div>
+
+    <!-- Modal : Modifier groupe d'accès -->
+    <div class="prof-modal-overlay" id="authGroupModal">
+        <div class="prof-modal-box">
+            <h3 id="authGroupModalTitle">Modifier le groupe</h3>
+            <input type="hidden" id="authGroupEditId">
+            <div style="margin-bottom:14px;">
+                <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:6px;">Nom du groupe</label>
+                <input type="text" id="authGroupNameInput" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;background:#f8f8f8;" readonly>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:6px;">Mot de passe</label>
+                <input type="text" id="authGroupPasswordInput" placeholder="Nouveau mot de passe…" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+            </div>
+            <div>
+                <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:8px;">Onglets accessibles</label>
+                <div class="prof-checklist" id="authGroupChecklist"></div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="closeAuthGroupModal()">Annuler</button>
+                <button class="btn btn-success" onclick="saveAuthGroupModal()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal : Profils d'onglets -->
     <div class="prof-modal-overlay" id="tabProfileModal">
