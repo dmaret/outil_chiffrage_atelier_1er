@@ -2901,8 +2901,11 @@
         renderDashboard();
         initTheme();
         initMatrice();
-        initAuthGroups();
-        checkAuthSession();
+        // Auth init différé : authOverlay est déclaré après le script dans le DOM
+        window.addEventListener('load', () => {
+            initAuthGroups();
+            checkAuthSession();
+        });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
         document.addEventListener('keydown', e => {
