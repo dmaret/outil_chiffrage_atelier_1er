@@ -141,8 +141,8 @@ Outil pédagogique de guidage à la création de prestations.
 
 #### Personnel
 
-- **CEA** : nombre de travailleurs (Conseillers en Emploi Accompagné ou participants)
-- **MSP** : nombre d'encadrants (Moniteurs de Stage et de Production)
+- **CEA** : nombre de travailleurs (Collaborateurs en Emploi Adapté)
+- **MSP** : nombre d'encadrants (Maîtres SocioProfessionnels)
 
 #### Gestion des gestes
 
@@ -589,8 +589,8 @@ L'absence de framework garantit la pérennité de l'outil : aucune dépendance �
 
 | Terme | Définition |
 |-------|-----------|
-| **CEA** | Conseillers en Emploi Accompagné — désigne les travailleurs dans le calcul des coûts |
-| **MSP** | Moniteurs de Stage et de Production — désigne les encadrants |
+| **CEA** | Collaborateurs en Emploi Adapté — travailleurs de l'atelier |
+| **MSP** | Maître SocioProfessionnel — encadrant |
 | **Geste** | Étape élémentaire et mesurable d'une prestation (ex. : contrôle, emballage) |
 | **Prestation** | Ensemble de gestes formant un service proposé à un client |
 | **Devis** | Document chiffré transmis au client avant validation |
@@ -604,4 +604,4 @@ L'absence de framework garantit la pérennité de l'outil : aucune dépendance �
 
 ---
 
-*Documentation générée le 8 avril 2026 — Outil Complet Atelier - La Pallanterie*
+*Documentation — © 2025–2026 MARET Davie — Tous droits réservés*

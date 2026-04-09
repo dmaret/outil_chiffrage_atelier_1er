@@ -4300,7 +4300,7 @@
                     </tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
-                <p style="font-size:0.7em;color:#aaa;margin-top:20px;text-align:right;">Atelier La Pallanterie — EPI Genève</p>
+                <p style="font-size:0.7em;color:#aaa;margin-top:20px;text-align:right;">© MARET Davie — Tous droits réservés</p>
                 <p style="font-size:0.65em;color:#bbb;margin-top:6px;text-align:center;border-top:1px dashed #eee;padding-top:6px;">© ${new Date().getFullYear()} MARET Davie — Tous droits réservés. Toute reproduction sans accord préalable est interdite.</p>
             </div>`;
             const el = document.createElement('div'); el.innerHTML = html;
@@ -6733,7 +6733,7 @@
                         </div>
                         <div style="text-align:right;">
                             <div style="font-weight:bold;font-size:1.15em;color:#2d3e50;">🏭 Atelier La Pallanterie</div>
-                            <div style="font-size:0.82em;color:#2d3e50;opacity:0.75;">EPI Genève — Prestations logistiques</div>
+                            <div style="font-size:0.82em;color:#2d3e50;opacity:0.75;">Prestations logistiques</div>
                         </div>
                     </div>
                 </div>
@@ -6743,7 +6743,7 @@
                     <div style="background:#f5f9fc;padding:16px;border-radius:10px;border-left:4px solid #a8d5e2;">
                         <div style="font-weight:bold;color:#6b8fa3;margin-bottom:8px;font-size:0.85em;text-transform:uppercase;letter-spacing:1px;">Émetteur</div>
                         <div style="font-weight:bold;font-size:1em;">Atelier La Pallanterie</div>
-                        <div style="font-size:0.82em;color:#7a9db1;margin-top:4px;">EPI Genève</div>
+                        <div style="font-size:0.82em;color:#7a9db1;margin-top:4px;">© MARET Davie</div>
                     </div>
                     <div style="background:#f5f9fc;padding:16px;border-radius:10px;border-left:4px solid #c9b3d4;">
                         <div style="font-weight:bold;color:#6b8fa3;margin-bottom:8px;font-size:0.85em;text-transform:uppercase;letter-spacing:1px;">Client</div>
@@ -6857,7 +6857,7 @@
 
                 <!-- FOOTER -->
                 <div style="text-align:center;font-size:0.75em;color:#aaa;border-top:1px solid #eee;padding-top:14px;margin-top:20px;">
-                    ${devisNum} — Émis le ${dateStr} — Atelier La Pallanterie | EPI Genève<br>
+                    ${devisNum} — Émis le ${dateStr} — Atelier La Pallanterie | © MARET Davie<br>
                     Devis valable jusqu'au ${dateValiditeStr || '30 jours après émission'} — Conditions de paiement : ${condPaiement}
                     <div style="margin-top:8px;font-size:0.9em;color:#bbb;border-top:1px dashed #eee;padding-top:6px;">
                         © ${new Date().getFullYear()} MARET Davie — Tous droits réservés. Toute reproduction, utilisation ou distribution de ce logiciel, de son code source ou de toute partie de celui-ci est interdite sans l'accord écrit préalable de l'auteur.
@@ -8420,7 +8420,7 @@
                     <div style="height:18px;border-bottom:1px solid #ccc;margin-bottom:6px;"></div>
                     <div style="height:18px;border-bottom:1px solid #ccc;"></div>
                 </div>
-                <div style="text-align:center;font-size:0.75em;color:#999;border-top:1px solid #eee;padding-top:10px;">Atelier La Pallanterie — EPI Genève — Fiche geste ${g.code}<br><span style="font-size:0.85em;color:#bbb;">© ${new Date().getFullYear()} MARET Davie — Tous droits réservés.</span></div>
+                <div style="text-align:center;font-size:0.75em;color:#999;border-top:1px solid #eee;padding-top:10px;">Fiche geste ${g.code}<br><span style="font-size:0.85em;color:#bbb;">© ${new Date().getFullYear()} MARET Davie — Tous droits réservés.</span></div>
             </div>`;
             if (typeof html2pdf === 'undefined') { toast('html2pdf non disponible', 'error'); return; }
             const el = document.createElement('div'); el.innerHTML = html;
@@ -8791,7 +8791,7 @@
             <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
             <div class="auth-error" id="authError"></div>
             <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
-            <p class="auth-footer">© 2025–2026 MARET Davie — Atelier La Pallanterie — EPI Genève</p>
+            <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
         </div>
     </div>
 
