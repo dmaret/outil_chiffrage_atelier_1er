@@ -11,7 +11,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Outil Complet Atelier - La Pallanterie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
+    <!-- PWA -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Atelier LP">
+    <meta name="theme-color" content="#6b8fa3">
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1222,8 +1230,10 @@
             <h3 style="margin:0 0 16px;color:#6b8fa3;">⌨️ Raccourcis clavier</h3>
             <table style="width:100%;border-collapse:collapse;font-size:0.9em;">
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+G</kbd></td><td>Ajouter un geste</td></tr>
+                <tr><td style="padding:6px 0;"><kbd>Ctrl+D</kbd></td><td>Dupliquer le dernier geste</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+Z</kbd></td><td>Annuler la dernière action</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+S</kbd></td><td>Sauvegarder la prestation</td></tr>
+                <tr><td style="padding:6px 0;"><kbd>Ctrl+P</kbd></td><td>Générer devis / imprimer</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+F</kbd></td><td>Recherche globale</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Escape</kbd></td><td>Fermer les modales</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>?</kbd></td><td>Cette aide</td></tr>
@@ -1406,7 +1416,7 @@
                 </div>
 
                 <div class="section">
-                    <h2>Temps administratif</h2>
+                    <h2>Temps administratif &amp; logistique</h2>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Mails (min)</label>
@@ -1419,6 +1429,16 @@
                         <div class="form-group">
                             <label>Coordination (min)</label>
                             <input type="number" id="tempsCoordMin" min="0" value="0" onchange="calculateTotal()">
+                        </div>
+                        <div class="form-group">
+                            <label>🔧 Préparation (min)</label>
+                            <input type="number" id="tempsPrepMin" min="0" value="0" onchange="calculateTotal()">
+                            <span class="help-text">Mise en place du poste, outillage</span>
+                        </div>
+                        <div class="form-group">
+                            <label>🧹 Nettoyage/rangement (min)</label>
+                            <input type="number" id="tempsNettoyageMin" min="0" value="0" onchange="calculateTotal()">
+                            <span class="help-text">Remise en ordre après prestation</span>
                         </div>
                     </div>
                 </div>
@@ -1490,6 +1510,17 @@
                         </div>
                     </div>
                     <div id="alerteMargeBasse">⚠️ Attention : la marge est en dessous du seuil minimum configuré !</div>
+                    <!-- Variantes de prix -->
+                    <div style="margin-top:14px;background:#f7fafc;border:1px solid #d5e3ed;border-radius:8px;padding:10px 14px;">
+                        <div style="font-size:0.82em;color:#6b8fa3;font-weight:600;margin-bottom:8px;">🎯 Variantes de prix (appliquer une marge)</div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                            <button class="btn btn-secondary btn-small" onclick="applyMargePreset(10)" style="background:#eef8f3;border-color:#a0d0b0;color:#2d6a4f;">Éco 10%</button>
+                            <button class="btn btn-secondary btn-small" onclick="applyMargePreset(20)" style="background:#f0f8fc;border-color:#a8c8e8;color:#1a5276;">Std 20%</button>
+                            <button class="btn btn-secondary btn-small" onclick="applyMargePreset(35)" style="background:#fdf0ff;border-color:#c0a0d8;color:#5a2d8a;">Premium 35%</button>
+                            <span style="font-size:0.8em;color:#aaa;margin-left:4px;">→ modifie le champ Marge %</span>
+                        </div>
+                        <div id="variantesPrix" style="margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:0.82em;"></div>
+                    </div>
                 </div>
 
                 <div class="section" style="border-left-color:#c9b3d4;">
@@ -1910,7 +1941,8 @@
                         <input type="date" id="filtreDateDe" oninput="renderPrestations()" style="flex:1;min-width:120px;">
                         <label style="font-size:0.85em;color:#7a9db1;white-space:nowrap;">Au</label>
                         <input type="date" id="filtreDateA" oninput="renderPrestations()" style="flex:1;min-width:120px;">
-                        <button class="btn btn-small" onclick="exportPrestationsCSV()" style="white-space:nowrap;">📥 Export CSV</button>
+                        <button class="btn btn-small" onclick="exportPrestationsCSV()" style="white-space:nowrap;">📥 CSV</button>
+                        <button class="btn btn-small" onclick="exportPrestationsXLSX()" style="white-space:nowrap;background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">📊 Excel</button>
                         <button class="btn btn-small" onclick="openCompareModal()" style="white-space:nowrap;background:#edf5ff;border-color:#a8c8f0;color:#5a7b8f;">📊 Comparer</button>
                     </div>
                     <div id="prestationsList"></div>
@@ -2083,6 +2115,10 @@
                         <div class="stat-card">
                             <div class="label">Heures MSP</div>
                             <div class="value" id="statHeuresMSP">0 h</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Taux MSP</div>
+                            <div class="value" id="statTauxMSP">0 %</div>
                         </div>
                     </div>
                 </div>
@@ -2842,6 +2878,22 @@
                 e.preventDefault();
                 openGlobalSearch();
             }
+            // Ctrl+D : dupliquer le dernier geste
+            if (e.ctrlKey && e.key === 'd') {
+                const calcTab = document.getElementById('calculateur');
+                if (calcTab && calcTab.classList.contains('active')) {
+                    e.preventDefault();
+                    if (gesteLines.length > 0) duplicateGesteLine(gesteLines[gesteLines.length - 1]);
+                }
+            }
+            // Ctrl+P : ouvrir modale impression/devis
+            if (e.ctrlKey && e.key === 'p') {
+                const calcTab = document.getElementById('calculateur');
+                if (calcTab && calcTab.classList.contains('active')) {
+                    e.preventDefault();
+                    openPrintPrefsModal();
+                }
+            }
             // ? : aide raccourcis
             if (e.key === '?' && !e.ctrlKey && !e.altKey) {
                 const activeEl = document.activeElement;
@@ -3536,6 +3588,24 @@
             calculateTotal();
         }
 
+        function applyMargePreset(pct) {
+            const el = document.getElementById('margePercent');
+            if (el) { el.value = pct; calculateTotal(); }
+        }
+
+        function updateVariantesPrix(prixRevient) {
+            const el = document.getElementById('variantesPrix');
+            if (!el || !prixRevient) return;
+            const nbPieces = Math.max(1, parseFloat(document.getElementById('nbPieces')?.value || 1));
+            const unite = document.getElementById('uniteCalc')?.value || 'pièce';
+            const variants = [{label:'Éco 10%', pct:10, bg:'#eef8f3', color:'#2d6a4f'}, {label:'Std 20%', pct:20, bg:'#f0f8fc', color:'#1a5276'}, {label:'Premium 35%', pct:35, bg:'#fdf0ff', color:'#5a2d8a'}];
+            el.innerHTML = variants.map(v => {
+                const total = prixRevient * (1 + v.pct/100);
+                const perUnit = nbPieces > 1 ? ` | ${(total/nbPieces).toFixed(2)} CHF/${unite}` : '';
+                return `<div style="background:${v.bg};border-radius:6px;padding:5px 8px;"><span style="color:${v.color};font-weight:600;">${v.label}</span> : <strong>${total.toFixed(2)} CHF</strong>${perUnit}</div>`;
+            }).join('');
+        }
+
         function updateUniteCalcLabel() {
             const u = document.getElementById('uniteCalc')?.value || 'pièce';
             const lbl = document.getElementById('gestesParPieceLabel');
@@ -3563,7 +3633,9 @@
             const mailsMin = parseFloat(document.getElementById('tempsMailsMin')?.value || 0);
             const impressionMin = parseFloat(document.getElementById('tempsImpressionMin')?.value || 0);
             const coordMin = parseFloat(document.getElementById('tempsCoordMin')?.value || 0);
-            const secondesAdmin = (mailsMin + impressionMin + coordMin) * 60;
+            const prepMin = parseFloat(document.getElementById('tempsPrepMin')?.value || 0);
+            const nettoyageMin = parseFloat(document.getElementById('tempsNettoyageMin')?.value || 0);
+            const secondesAdmin = (mailsMin + impressionMin + coordMin + prepMin + nettoyageMin) * 60;
 
             // Gestes × nb pièces + admin fixe
             const totalSecondes = secondesParPiece * nbPieces + secondesAdmin;
@@ -3662,6 +3734,7 @@
                     alerteEl.style.display = 'none';
                 }
             }
+            updateVariantesPrix(prixRevient);
         }
 
         function calculateRatio() {
@@ -3753,6 +3826,8 @@
                 tempsMailsMin: parseFloat(document.getElementById('tempsMailsMin')?.value || 0),
                 tempsImpressionMin: parseFloat(document.getElementById('tempsImpressionMin')?.value || 0),
                 tempsCoordMin: parseFloat(document.getElementById('tempsCoordMin')?.value || 0),
+                tempsPrepMin: parseFloat(document.getElementById('tempsPrepMin')?.value || 0),
+                tempsNettoyageMin: parseFloat(document.getElementById('tempsNettoyageMin')?.value || 0),
                 statut: 'devis'
             };
 
@@ -3807,6 +3882,8 @@
             document.getElementById('tempsMailsMin').value = '0';
             document.getElementById('tempsImpressionMin').value = '0';
             document.getElementById('tempsCoordMin').value = '0';
+            document.getElementById('tempsPrepMin').value = '0';
+            document.getElementById('tempsNettoyageMin').value = '0';
             document.getElementById('margePercent').value = config.margeDefaut;
 
             document.getElementById('gestesContainer').innerHTML = '';
@@ -3857,6 +3934,8 @@
             document.getElementById('tempsMailsMin').value = p.tempsMailsMin || 0;
             document.getElementById('tempsImpressionMin').value = p.tempsImpressionMin || 0;
             document.getElementById('tempsCoordMin').value = p.tempsCoordMin || 0;
+            document.getElementById('tempsPrepMin').value = p.tempsPrepMin || 0;
+            document.getElementById('tempsNettoyageMin').value = p.tempsNettoyageMin || 0;
 
             // Reconstruire les gestes
             document.getElementById('gestesContainer').innerHTML = '';
@@ -4678,6 +4757,9 @@
             document.getElementById('statMarge').textContent = marge.toFixed(2) + ' CHF';
             document.getElementById('statHeuresCEA').textContent = heuresCEA.toFixed(1) + ' h';
             document.getElementById('statHeuresMSP').textContent = heuresMSP.toFixed(1) + ' h';
+            const tauxMSP = (heuresCEA + heuresMSP) > 0 ? (heuresMSP / (heuresCEA + heuresMSP) * 100) : 0;
+            const tauxEl = document.getElementById('statTauxMSP');
+            if (tauxEl) { tauxEl.textContent = tauxMSP.toFixed(1) + ' %'; tauxEl.style.color = tauxMSP > 25 ? '#e07b30' : ''; }
 
             const mode = document.querySelector('input[name="pieMode"]:checked')?.value;
             if (mode === 'selection') renderPieSelector();
@@ -5294,6 +5376,8 @@
             document.getElementById('tempsMailsMin').value = p.tempsMailsMin || 0;
             document.getElementById('tempsImpressionMin').value = p.tempsImpressionMin || 0;
             document.getElementById('tempsCoordMin').value = p.tempsCoordMin || 0;
+            document.getElementById('tempsPrepMin').value = p.tempsPrepMin || 0;
+            document.getElementById('tempsNettoyageMin').value = p.tempsNettoyageMin || 0;
 
             // Clear containers
             document.getElementById('gestesContainer').innerHTML = '';
@@ -5403,7 +5487,7 @@
 
             const now = new Date();
             const months = [];
-            for (let i = 5; i >= 0; i--) {
+            for (let i = 11; i >= 0; i--) {
                 const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
                 months.push({ year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString('fr-FR', {month:'short', year:'2-digit'}) });
             }
@@ -5420,38 +5504,42 @@
             });
 
             const maxVal = Math.max(...caByMonth, ...coutsByMonth, 1);
-            const W = 560, H = 200, pad = 40, barW = 30;
-            const groupSpacing = (W - pad * 2) / 6;
+            const W = 900, H = 200, pad = 40, barW = 18;
+            const groupSpacing = (W - pad * 2) / 12;
 
             let paths = '';
-            // Y axis
             paths += `<line x1="${pad}" y1="10" x2="${pad}" y2="${H}" stroke="#d5e3ed" stroke-width="1"/>`;
             paths += `<line x1="${pad}" y1="${H}" x2="${W-10}" y2="${H}" stroke="#d5e3ed" stroke-width="1"/>`;
+            // Y grid lines
+            [0.25,0.5,0.75,1].forEach(frac => {
+                const y = H - Math.round(frac * (H-20));
+                const val = Math.round(maxVal * frac);
+                paths += `<line x1="${pad}" y1="${y}" x2="${W-10}" y2="${y}" stroke="#f0f4f8" stroke-width="1"/>`;
+                paths += `<text x="${pad-4}" y="${y+4}" text-anchor="end" font-size="8" fill="#9ab0be">${val}</text>`;
+            });
 
             months.forEach((m, i) => {
                 const x = pad + i * groupSpacing + groupSpacing / 2;
                 const caH = caByMonth[i] > 0 ? Math.round((caByMonth[i] / maxVal) * (H - 20)) : 0;
                 const coutH = coutsByMonth[i] > 0 ? Math.round((coutsByMonth[i] / maxVal) * (H - 20)) : 0;
 
-                // CA bar
-                paths += `<rect x="${x - barW - 4}" y="${H - caH}" width="${barW}" height="${caH}" fill="#a8d5e2" rx="3"/>`;
-                if (caByMonth[i] > 0) paths += `<text x="${x - barW/2 - 4}" y="${H - caH - 4}" text-anchor="middle" font-size="9" fill="#2d3e50">${caByMonth[i].toFixed(0)}</text>`;
+                paths += `<rect x="${x - barW - 2}" y="${H - caH}" width="${barW}" height="${caH}" fill="#a8d5e2" rx="2"/>`;
+                if (caByMonth[i] > 0) paths += `<text x="${x - barW/2 - 2}" y="${H - caH - 3}" text-anchor="middle" font-size="7.5" fill="#2d3e50">${caByMonth[i].toFixed(0)}</text>`;
 
-                // Coûts bar
-                paths += `<rect x="${x + 4}" y="${H - coutH}" width="${barW}" height="${coutH}" fill="#c9b3d4" rx="3"/>`;
-                if (coutsByMonth[i] > 0) paths += `<text x="${x + 4 + barW/2}" y="${H - coutH - 4}" text-anchor="middle" font-size="9" fill="#2d3e50">${coutsByMonth[i].toFixed(0)}</text>`;
+                paths += `<rect x="${x + 2}" y="${H - coutH}" width="${barW}" height="${coutH}" fill="#c9b3d4" rx="2"/>`;
+                if (coutsByMonth[i] > 0) paths += `<text x="${x + 2 + barW/2}" y="${H - coutH - 3}" text-anchor="middle" font-size="7.5" fill="#2d3e50">${coutsByMonth[i].toFixed(0)}</text>`;
 
-                // Month label
-                paths += `<text x="${x}" y="${H + 16}" text-anchor="middle" font-size="10" fill="#5a7b8f">${m.label}</text>`;
+                paths += `<text x="${x}" y="${H + 14}" text-anchor="middle" font-size="8.5" fill="#5a7b8f">${m.label}</text>`;
             });
 
-            // Legend
-            paths += `<rect x="${pad}" y="${H+30}" width="12" height="12" fill="#a8d5e2" rx="2"/>`;
-            paths += `<text x="${pad+16}" y="${H+41}" font-size="10" fill="#5a7b8f">CA</text>`;
-            paths += `<rect x="${pad+60}" y="${H+30}" width="12" height="12" fill="#c9b3d4" rx="2"/>`;
-            paths += `<text x="${pad+76}" y="${H+41}" font-size="10" fill="#5a7b8f">Coûts</text>`;
+            const caTotal = caByMonth.reduce((s,v)=>s+v,0);
+            const legendY = H+32;
+            paths += `<rect x="${pad}" y="${legendY}" width="10" height="10" fill="#a8d5e2" rx="2"/>`;
+            paths += `<text x="${pad+14}" y="${legendY+9}" font-size="9" fill="#5a7b8f">CA (total: ${caTotal.toFixed(0)} CHF)</text>`;
+            paths += `<rect x="${pad+160}" y="${legendY}" width="10" height="10" fill="#c9b3d4" rx="2"/>`;
+            paths += `<text x="${pad+174}" y="${legendY+9}" font-size="9" fill="#5a7b8f">Coûts</text>`;
 
-            svg.setAttribute('viewBox', `0 0 ${W} ${H+50}`);
+            svg.setAttribute('viewBox', `0 0 ${W} ${H+48}`);
             svg.innerHTML = paths;
         }
 
@@ -5933,6 +6021,8 @@
                 tempsMailsMin:      parseFloat(document.getElementById('tempsMailsMin').value) || 0,
                 tempsImpressionMin: parseFloat(document.getElementById('tempsImpressionMin').value) || 0,
                 tempsCoordMin:      parseFloat(document.getElementById('tempsCoordMin').value) || 0,
+                tempsPrepMin:       parseFloat(document.getElementById('tempsPrepMin').value) || 0,
+                tempsNettoyageMin:  parseFloat(document.getElementById('tempsNettoyageMin').value) || 0,
                 responsable:        document.getElementById('responsable')?.value || '',
                 conditionsPaiement: document.getElementById('conditionsPaiement')?.value || '',
                 gestes,
@@ -5970,6 +6060,8 @@
             document.getElementById('tempsMailsMin').value      = modele.tempsMailsMin       ?? 0;
             document.getElementById('tempsImpressionMin').value = modele.tempsImpressionMin  ?? 0;
             document.getElementById('tempsCoordMin').value      = modele.tempsCoordMin       ?? 0;
+            document.getElementById('tempsPrepMin').value       = modele.tempsPrepMin        ?? 0;
+            document.getElementById('tempsNettoyageMin').value  = modele.tempsNettoyageMin   ?? 0;
             document.getElementById('responsable').value        = modele.responsable         || '';
             document.getElementById('conditionsPaiement').value = modele.conditionsPaiement  || '';
 
@@ -6061,7 +6153,9 @@
             const mailsMin = parseFloat(document.getElementById('tempsMailsMin')?.value || 0);
             const impressionMin = parseFloat(document.getElementById('tempsImpressionMin')?.value || 0);
             const coordMin = parseFloat(document.getElementById('tempsCoordMin')?.value || 0);
-            const secondesAdmin = (mailsMin + impressionMin + coordMin) * 60;
+            const prepMin = parseFloat(document.getElementById('tempsPrepMin')?.value || 0);
+            const nettoyageMin = parseFloat(document.getElementById('tempsNettoyageMin')?.value || 0);
+            const secondesAdmin = (mailsMin + impressionMin + coordMin + prepMin + nettoyageMin) * 60;
 
             const totalSecondes = secondesParPiece * qty + secondesAdmin;
             const totalHeures = totalSecondes / 3600;
@@ -6116,9 +6210,52 @@
             const results = qtys.map(q => ({ qty: q, prix: calcPrixForQty(q) }));
             const baseQty = results[0].qty;
             const basePrix = results[0].prix;
+            const unite = document.getElementById('uniteCalc')?.value || 'pièce';
 
-            let html = `<table><thead><tr>
-                <th>Quantité</th><th>Prix total (CHF)</th><th>Prix / pièce (CHF)</th><th>Économie vs ${baseQty} pcs</th>
+            // Calcul coûts fixes vs variables pour seuil de rentabilité
+            let secParPiece = 0;
+            gesteLines.forEach(lineId => {
+                const t = parseFloat(document.getElementById('temps-' + lineId)?.value || 0);
+                const q = parseFloat(document.getElementById('quantite-' + lineId)?.value || 0);
+                secParPiece += t * q;
+            });
+            const mailsMin2 = parseFloat(document.getElementById('tempsMailsMin')?.value || 0);
+            const impMin2 = parseFloat(document.getElementById('tempsImpressionMin')?.value || 0);
+            const coordMin2 = parseFloat(document.getElementById('tempsCoordMin')?.value || 0);
+            const prepMin2 = parseFloat(document.getElementById('tempsPrepMin')?.value || 0);
+            const nettMin2 = parseFloat(document.getElementById('tempsNettoyageMin')?.value || 0);
+            const secAdmin = (mailsMin2 + impMin2 + coordMin2 + prepMin2 + nettMin2) * 60;
+            const nbCEA2 = parseFloat(document.getElementById('nbCEA')?.value || 1);
+            const nbMSP2 = parseFloat(document.getElementById('nbMSP')?.value || 0) / 100;
+            const tauxCEA = config.coutHoraireCEA || 0;
+            const tauxMSP = config.coutHoraireMSP || 0;
+            const marge2 = parseFloat(document.getElementById('margePercent')?.value || 0);
+            let consoPerUnit = 0;
+            consommableLines.forEach(lineId => {
+                consoPerUnit += parseFloat(document.getElementById('prix-consom-' + lineId)?.value || 0) * parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 0);
+            });
+            let fixedStock = 0;
+            stockageLines.forEach(lineId => {
+                const type = document.getElementById('type-stock-' + lineId)?.value;
+                fixedStock += parseFloat(document.getElementById('qte-stock-' + lineId)?.value || 0) * parseFloat(document.getElementById('duree-stock-' + lineId)?.value || 0) * (type === 'palette' ? config.coutPalette : config.coutRack);
+            });
+
+            const fixedMO = secAdmin / 3600 * (nbCEA2 * tauxCEA + nbMSP2 * tauxMSP);
+            const varUnitMO = secParPiece / 3600 * (nbCEA2 * tauxCEA + nbMSP2 * tauxMSP);
+            const fixedTotal = fixedMO + fixedStock;
+            const varUnitTotal = varUnitMO + consoPerUnit;
+            const seuilHtml = varUnitTotal > 0
+                ? `<span style="color:#e07b30;font-weight:600;">${Math.ceil(fixedTotal / varUnitTotal)} ${unite}s</span> (coûts fixes ÷ coût variable/unité)`
+                : '<span style="color:#aaa;">— (aucun coût variable)</span>';
+
+            let html = `
+            <div style="background:#f8f4ec;border:1px solid #e8dfc0;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:0.85em;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
+                <div><span style="color:#9ab0be;">Coûts fixes</span><br><strong>${fixedTotal.toFixed(2)} CHF</strong><span style="font-size:0.8em;color:#aaa;"> (admin + stockage)</span></div>
+                <div><span style="color:#9ab0be;">Coût variable / ${unite}</span><br><strong>${varUnitTotal.toFixed(3)} CHF</strong><span style="font-size:0.8em;color:#aaa;"> (MO + consommables)</span></div>
+                <div><span style="color:#9ab0be;">Seuil d'amortissement</span><br>${seuilHtml}</div>
+            </div>
+            <table><thead><tr>
+                <th>Quantité</th><th>Prix total (CHF)</th><th>Prix / ${unite} (CHF)</th><th>Économie vs ${baseQty}</th>
             </tr></thead><tbody>`;
 
             results.forEach(r => {
@@ -6126,7 +6263,7 @@
                 const basePrixPiece = basePrix / baseQty;
                 const economy = r.qty !== baseQty ? basePrixPiece - prixPiece : null;
                 const econHtml = economy !== null
-                    ? `<span class="simul-economy">${economy >= 0 ? '-' : '+'}${Math.abs(economy).toFixed(3)} CHF/pcs (${(Math.abs(economy) / basePrixPiece * 100).toFixed(1)}%)</span>`
+                    ? `<span class="simul-economy">${economy >= 0 ? '-' : '+'}${Math.abs(economy).toFixed(3)} CHF/${unite} (${(Math.abs(economy) / basePrixPiece * 100).toFixed(1)}%)</span>`
                     : '<span style="color:#aaa;">—</span>';
                 html += `<tr>
                     <td><strong>${r.qty}</strong></td>
@@ -6195,6 +6332,47 @@
             a.download = `prestations_${new Date().toISOString().slice(0,10)}.csv`;
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        function exportPrestationsXLSX() {
+            if (typeof XLSX === 'undefined') { toast('SheetJS non disponible', 'error'); return; }
+            const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
+            const statut = document.getElementById('filtreStatut')?.value || '';
+            const client = document.getElementById('filtreClient')?.value || '';
+            let filtered = [...prestationsSauvegardees].sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (texte) filtered = filtered.filter(p => (p.client||'').toLowerCase().includes(texte) || (p.prestation||'').toLowerCase().includes(texte) || (p.reference||'').toLowerCase().includes(texte));
+            if (statut) filtered = filtered.filter(p => (p.statut || 'devis') === statut);
+            if (client) filtered = filtered.filter(p => p.client === client);
+
+            const headers = ['Date','Client','Prestation','Référence','Nb unités','Unité','Nb CEA','MSP %','Heures estimées','Heures réelles','Écart %','Prix revient (CHF)','Marge %','Prix vente (CHF)','Prix/unité (CHF)','Statut','Date début','Date fin','Notes internes'];
+            const rows = filtered.map(p => {
+                const ecart = p.heuresReelles != null && p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1) : '';
+                return [p.date, p.client, p.prestation, p.reference, p.nbPieces||1, p.unite||'pièce', p.nbCEA||1, Math.round((p.nbMSP||0)*100), parseFloat(p.heures||0), p.heuresReelles != null ? parseFloat(p.heuresReelles) : '', ecart !== '' ? parseFloat(ecart) : '', parseFloat((p.prixRevient||0).toFixed(2)), p.marge||0, parseFloat((p.prixVente||0).toFixed(2)), p.nbPieces > 1 ? parseFloat((p.prixVente/p.nbPieces).toFixed(3)) : '', p.statut||'devis', p.dateDebut||'', p.dateFin||'', p.notesInternes||''];
+            });
+
+            const wb = XLSX.utils.book_new();
+            const wsData = [headers, ...rows];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            // Column widths
+            ws['!cols'] = [10,18,28,16,8,8,7,7,10,10,8,14,8,14,12,10,10,10,28].map(w => ({wch: w}));
+            XLSX.utils.book_append_sheet(wb, ws, 'Prestations');
+
+            // Stats sheet
+            const ca = filtered.reduce((s,p) => s+(p.prixVente||0), 0);
+            const cout = filtered.reduce((s,p) => s+(p.prixRevient||0), 0);
+            const wsStats = XLSX.utils.aoa_to_sheet([
+                ['Statistiques — export du ' + new Date().toLocaleDateString('fr-FR')],
+                [],
+                ['Nb prestations', filtered.length],
+                ['CA total (CHF)', parseFloat(ca.toFixed(2))],
+                ['Coûts totaux (CHF)', parseFloat(cout.toFixed(2))],
+                ['Marge totale (CHF)', parseFloat((ca-cout).toFixed(2))],
+                ['Marge moyenne (%)', filtered.length ? parseFloat((filtered.reduce((s,p)=>s+(p.marge||0),0)/filtered.length).toFixed(1)) : 0],
+            ]);
+            XLSX.utils.book_append_sheet(wb, wsStats, 'Statistiques');
+
+            XLSX.writeFile(wb, `prestations-atelier-${new Date().toISOString().slice(0,10)}.xlsx`);
+            toast('Export Excel téléchargé !', 'success');
         }
 
         // ============================================================
@@ -6582,8 +6760,22 @@
                     </div>` : ''}
                 </div>` : ''}
 
+                <!-- SIGNATURES -->
+                <div style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:48px;">
+                    <div style="text-align:center;">
+                        <p style="font-size:0.78em;color:#7a9db1;margin-bottom:8px;font-weight:600;">Pour l'Atelier La Pallanterie</p>
+                        <div style="border-bottom:1px solid #bbb;height:52px;margin-bottom:6px;"></div>
+                        <p style="font-size:0.7em;color:#aaa;">Signature et cachet</p>
+                    </div>
+                    <div style="text-align:center;">
+                        <p style="font-size:0.78em;color:#7a9db1;margin-bottom:8px;font-weight:600;">Bon pour accord — Client</p>
+                        <div style="border-bottom:1px solid #bbb;height:52px;margin-bottom:6px;"></div>
+                        <p style="font-size:0.7em;color:#aaa;">Date et signature : ____________________</p>
+                    </div>
+                </div>
+
                 <!-- FOOTER -->
-                <div style="text-align:center;font-size:0.75em;color:#aaa;border-top:1px solid #eee;padding-top:14px;">
+                <div style="text-align:center;font-size:0.75em;color:#aaa;border-top:1px solid #eee;padding-top:14px;margin-top:20px;">
                     ${devisNum} — Émis le ${dateStr} — Atelier La Pallanterie | EPI Genève<br>
                     Devis valable jusqu'au ${dateValiditeStr || '30 jours après émission'} — Conditions de paiement : ${condPaiement}
                     <div style="margin-top:8px;font-size:0.9em;color:#bbb;border-top:1px dashed #eee;padding-top:6px;">
@@ -7804,9 +7996,20 @@
                     alertes.push({ danger: true, msg: `📦 Stock bas : <strong>${ref}</strong> (${data.total || 0} ≤ min ${min})` });
                 }
             });
-            // Devis expirés
-            const expires = prestationsSauvegardees.filter(p => (p.statut || 'devis') === 'devis' && (now - new Date(p.date)) / 86400000 > 30);
-            if (expires.length > 0) alertes.push({ danger: false, msg: `📋 ${expires.length} devis expiré(s) de plus de 30 jours` });
+            // Devis expirés (utilise dateValidite si présente, sinon date+30j)
+            const expires = prestationsSauvegardees.filter(p => {
+                if (!['devis','soumis'].includes(p.statut || 'devis')) return false;
+                const limite = p.dateValidite ? new Date(p.dateValidite) : new Date(new Date(p.date).getTime() + 30*86400000);
+                return now > limite;
+            });
+            const expireSoon = prestationsSauvegardees.filter(p => {
+                if (!['devis','soumis'].includes(p.statut || 'devis')) return false;
+                if (expires.includes(p)) return false;
+                const limite = p.dateValidite ? new Date(p.dateValidite) : new Date(new Date(p.date).getTime() + 30*86400000);
+                return (limite - now) / 86400000 <= 7;
+            });
+            if (expires.length > 0) alertes.push({ danger: true, msg: `📋 ${expires.length} devis expiré(s) : ${expires.map(p=>`<strong>${p.reference||p.prestation}</strong>`).join(', ')}` });
+            if (expireSoon.length > 0) alertes.push({ danger: false, msg: `⏰ ${expireSoon.length} devis expire(nt) dans &lt;7 jours : ${expireSoon.map(p=>`<strong>${p.reference||p.prestation}</strong>`).join(', ')}` });
             // Capacité semaine
             const semDebut = new Date(now); semDebut.setDate(now.getDate() - now.getDay() + 1); semDebut.setHours(0,0,0,0);
             const semFin = new Date(semDebut); semFin.setDate(semDebut.getDate() + 6);
