@@ -479,6 +479,43 @@
             #printZone { position: fixed; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
         }
 
+        /* ── Mode Portable (Mobile/Tablet) ───────────────────────────────── */
+        @media (max-width: 768px) {
+            .container { padding: 8px; }
+            .header { padding: 10px 8px; }
+            .header h1 { font-size: 1.3em; }
+            .header p { font-size: 0.75em; }
+            .tabs-wrapper { overflow-x: auto; }
+            .tabs { overflow-x: auto; }
+            .tab { padding: 10px 12px; font-size: 0.85em; }
+            .section { margin: 10px 0; padding: 12px; }
+            input, select, textarea { font-size: 16px !important; } /* Empêche le zoom sur iOS */
+            .btn { padding: 10px 12px; font-size: 0.9em; }
+            .stat-card { flex: 1 1 48%; }
+            table { font-size: 0.8em; }
+            th, td { padding: 6px 4px; }
+            .header button { width: 36px; height: 36px; font-size: 1em; right: 8px; }
+            #headerAuthBadge { right: 50px !important; }
+            .prof-table-container { overflow-x: auto; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 4px; }
+            .header { padding: 8px 4px; }
+            .header h1 { font-size: 1.1em; }
+            .header p { display: none; }
+            .section { margin: 6px 0; padding: 8px; }
+            .tab { padding: 8px 10px; font-size: 0.75em; }
+            .btn { padding: 8px 10px; font-size: 0.85em; width: 100%; margin-bottom: 6px; }
+            .stat-card { flex: 1 1 100%; }
+            .header button { width: 32px; height: 32px; font-size: 0.9em; top: 8px; }
+            label { display: block; margin-bottom: 6px; }
+            input[type="text"], input[type="number"], select, textarea { width: 100%; margin-bottom: 8px; }
+            .modal-box, .prof-modal-box { width: 95% !important; padding: 12px; }
+            table { font-size: 0.7em; }
+            th, td { padding: 4px 2px; }
+        }
+
         /* Dark mode */
         body.dark-mode { background: linear-gradient(135deg, #1a2535 0%, #2a1f35 100%); }
         body.dark-mode .container { background: #1e2530; color: #cdd6e0; }
