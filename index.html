@@ -1493,7 +1493,7 @@
                     <div id="gestesContainer"></div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
                         <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd">Ctrl+G</span></button>
-                        <button class="btn btn-secondary btn-small" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
+                        <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
                         <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
                         <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
                     </div>
@@ -1876,8 +1876,8 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn btn-success" onclick="saveConfig()">💾 Sauvegarder</button>
-                    <button class="btn btn-secondary" onclick="resetConfig()">🔄 Réinitialiser</button>
+                    <button class="btn btn-success" data-perm="manage_config" onclick="saveConfig()">💾 Sauvegarder</button>
+                    <button class="btn btn-secondary" data-perm="manage_config" onclick="resetConfig()">🔄 Réinitialiser</button>
                 </div>
 
                 <!-- SECTIONS ADMIN -->
@@ -1975,7 +1975,7 @@
                             <span class="help-text">Description détaillée, remarques, conditions particulières</span>
                         </div>
                     </div>
-                    <button class="btn" onclick="addGeste()">➕ Ajouter au catalogue</button>
+                    <button class="btn" data-perm="manage_gestes" onclick="addGeste()">➕ Ajouter au catalogue</button>
                 </div>
 
                 <div class="section">
@@ -2023,7 +2023,7 @@
                             <input type="number" id="newConsomPrix" step="0.01" placeholder="0.50">
                         </div>
                     </div>
-                    <button class="btn" onclick="addConsommable()">➕ Ajouter</button>
+                    <button class="btn" data-perm="manage_consommables" onclick="addConsommable()">➕ Ajouter</button>
                 </div>
 
                 <div class="section">
