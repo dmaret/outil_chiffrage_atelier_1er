@@ -381,6 +381,9 @@
         .video-card-icon { font-size:2em; margin-bottom:6px; }
         .video-card-title { font-size:0.85em; font-weight:600; }
 
+        .modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; display:none; }
+        .modal.visible { display:flex; }
+
         /* ── Modes d'affichage ─────────────────────────────────── */
         body.density-compact .content { padding: 12px 15px; }
         body.density-compact .section { padding: 12px; margin-bottom: 10px; }
@@ -4249,11 +4252,11 @@
             document.getElementById('learnerName').value = '';
             document.getElementById('learnerRole').value = 'CEA';
             document.getElementById('learnerStartDate').valueAsDate = new Date();
-            document.getElementById('formationModal').style.display = 'flex';
+            document.getElementById('formationModal').classList.add('visible');
         }
 
         function closeFormationModal() {
-            document.getElementById('formationModal').style.display = 'none';
+            document.getElementById('formationModal').classList.remove('visible');
         }
 
         function addLearner() {
@@ -4421,11 +4424,11 @@
                 </ol>
             `;
 
-            document.getElementById('gestureVideoModal').style.display = 'flex';
+            document.getElementById('gestureVideoModal').classList.add('visible');
         }
 
         function closeGestureVideoModal() {
-            document.getElementById('gestureVideoModal').style.display = 'none';
+            document.getElementById('gestureVideoModal').classList.remove('visible');
         }
 
         function saveFormationData() {
@@ -10851,7 +10854,7 @@
                 <button class="btn btn-secondary" onclick="closeTrainingImportModal()">Annuler</button>
 
     <!-- MODAL FORMATION - AJOUTER APPRENANT -->
-    <div id="formationModal" class="modal" style="display:none;">
+    <div id="formationModal" class="modal">
         <div class="modal-box" style="max-width:500px;">
             <h3>➕ Ajouter un apprenant</h3>
             <div class="form-group">
@@ -10879,7 +10882,7 @@
     </div>
 
     <!-- MODAL FORMATION - VIDÉO GESTE -->
-    <div id="gestureVideoModal" class="modal" style="display:none;">
+    <div id="gestureVideoModal" class="modal">
         <div class="modal-box" style="max-width:700px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <h3 id="videoGestureName">Vidéo du geste</h3>
