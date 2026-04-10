@@ -368,6 +368,19 @@
         .attachment-item:hover .delete-attachment { display:block; }
         .attachment-item .file-info { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:white; font-size:0.7em; padding:4px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
+        .learner-card { background:linear-gradient(135deg,#e8f8f5 0%,#f0f9f8 100%); border:2px solid #27ae60; border-radius:10px; padding:14px; }
+        .learner-card h4 { color:#27ae60; margin-bottom:8px; }
+        .learner-progress-bar { width:100%; height:8px; background:#ddd; border-radius:4px; margin:8px 0; overflow:hidden; }
+        .learner-progress-fill { height:100%; background:linear-gradient(90deg,#27ae60,#2ecc71); }
+        .geste-checklist-item { background:#f9f9f9; border-left:4px solid #3498db; padding:12px; border-radius:4px; margin-bottom:8px; }
+        .geste-checklist-item input[type="checkbox"] { margin-right:8px; }
+        .geste-checklist-item label { cursor:pointer; display:flex; align-items:center; }
+        .geste-checklist-item .geste-level { font-size:0.8em; color:#7a9db1; margin-left:auto; }
+        .video-card { background:linear-gradient(135deg,#ffe8cc 0%,#fff0e6 100%); border:2px solid #e67e22; border-radius:10px; padding:12px; text-align:center; cursor:pointer; transition:all 0.2s; }
+        .video-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(230,126,34,0.2); }
+        .video-card-icon { font-size:2em; margin-bottom:6px; }
+        .video-card-title { font-size:0.85em; font-weight:600; }
+
         /* ── Modes d'affichage ─────────────────────────────────── */
         body.density-compact .content { padding: 12px 15px; }
         body.density-compact .section { padding: 12px; margin-bottom: 10px; }
@@ -1411,6 +1424,7 @@
                 <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
                 <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
                 <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
+                <button class="tab" onclick="switchTab('formation')">🎓 Formation</button>
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
@@ -2140,6 +2154,43 @@
                         </div>
                     </div>
                     <div id="clientDetailContent" style="margin-top:14px;"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET FORMATION -->
+            <div id="formation" class="tab-content">
+                <div class="section">
+                    <h2>🎓 Système de Formation</h2>
+                    <p style="font-size:0.9em;color:#666;margin-bottom:16px;">Suivez la progression des apprentissages, consultez les vidéos de formation et complétez les checklists de gestes.</p>
+
+                    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                        <button class="btn btn-success" onclick="openFormationModal()">➕ Ajouter un apprenant</button>
+                        <button class="btn" onclick="exportFormationProgress()">📤 Exporter progression</button>
+                    </div>
+                </div>
+
+                <!-- SECTION APPRENANTS -->
+                <div class="section" style="border-left-color:#27ae60;">
+                    <h3>👤 Apprenants</h3>
+                    <div id="learnersListContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:12px;"></div>
+                </div>
+
+                <!-- SECTION GESTES & PROGRESSION -->
+                <div class="section" style="border-left-color:#3498db;">
+                    <h3>✓ Checklist de gestes</h3>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                            <input type="text" id="filterGestesFormation" placeholder="Filtrer les gestes..." style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">
+                        </label>
+                    </div>
+                    <div id="formationChecklistContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;"></div>
+                </div>
+
+                <!-- SECTION VIDÉOS -->
+                <div class="section" style="border-left-color:#e67e22;">
+                    <h3>📹 Vidéos de formation</h3>
+                    <p style="font-size:0.9em;color:#666;margin-bottom:12px;">Cliquez sur un geste ci-dessous pour voir sa vidéo de formation (si disponible)</p>
+                    <div id="formationVideosContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;"></div>
                 </div>
             </div>
 
@@ -2998,6 +3049,8 @@
         let currentAttachments = [];
         let tabProfiles = [];
         let activeTabProfileId = null;
+        let learnersList = [];
+        let formationProgress = {};
         let _presentationMode = false;
         let _presentationConfig = (() => {
             try {
@@ -3040,6 +3093,12 @@
         renderDashboard();
         initTheme();
         initMatrice();
+        loadFormationData();
+        // Écouteur pour le filtre des gestes de formation
+        const filterFormation = document.getElementById('filterGestesFormation');
+        if (filterFormation) {
+            filterFormation.addEventListener('input', () => renderChecklistGestes());
+        }
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
             initAuthGroups();
@@ -4182,6 +4241,243 @@
             currentAttachments = currentAttachments.filter(a => a.id !== id);
             renderAttachments();
         }
+
+        // ============================================================
+        // FEATURE : Système de Formation (Vidéos, Checklist, Progression)
+        // ============================================================
+        function openFormationModal() {
+            document.getElementById('learnerName').value = '';
+            document.getElementById('learnerRole').value = 'CEA';
+            document.getElementById('learnerStartDate').valueAsDate = new Date();
+            document.getElementById('formationModal').style.display = 'flex';
+        }
+
+        function closeFormationModal() {
+            document.getElementById('formationModal').style.display = 'none';
+        }
+
+        function addLearner() {
+            const name = document.getElementById('learnerName').value.trim();
+            const role = document.getElementById('learnerRole').value;
+            const startDate = document.getElementById('learnerStartDate').value;
+
+            if (!name) {
+                toast('Veuillez entrer le nom de l\'apprenant', 'warning');
+                return;
+            }
+
+            const learner = {
+                id: Date.now(),
+                name: name,
+                role: role,
+                startDate: startDate,
+                progress: {}
+            };
+
+            catalogueGestes.forEach(g => {
+                learner.progress[g.code] = {
+                    level: 'non-vu',
+                    watchedAt: null,
+                    checkedAt: null,
+                    notes: ''
+                };
+            });
+
+            learnersList.push(learner);
+            saveFormationData();
+            renderLearners();
+            closeFormationModal();
+            toast(`✅ Apprenant "${name}" ajouté`, 'success');
+        }
+
+        function removeLearner(learnerId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet apprenant?')) return;
+            learnersList = learnersList.filter(l => l.id !== learnerId);
+            saveFormationData();
+            renderLearners();
+        }
+
+        function renderLearners() {
+            const container = document.getElementById('learnersListContainer');
+            if (learnersList.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;">Aucun apprenant enregistré</div>';
+                return;
+            }
+
+            container.innerHTML = learnersList.map(learner => {
+                const total = Object.keys(learner.progress).length;
+                const completed = Object.values(learner.progress).filter(p => p.level === 'maîtrisé').length;
+                const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+                return `
+                    <div class="learner-card">
+                        <div style="display:flex;justify-content:space-between;align-items:start;">
+                            <div>
+                                <h4>${learner.name}</h4>
+                                <p style="font-size:0.85em;color:#7a9db1;margin:4px 0;">${learner.role}</p>
+                                <p style="font-size:0.8em;color:#aaa;margin:4px 0;">Depuis ${new Date(learner.startDate).toLocaleDateString('fr')}</p>
+                            </div>
+                            <button onclick="removeLearner(${learner.id})" style="background:#ffebee;border:none;color:#c0392b;padding:4px 8px;border-radius:4px;cursor:pointer;">✕</button>
+                        </div>
+                        <div class="learner-progress-bar">
+                            <div class="learner-progress-fill" style="width:${percent}%;"></div>
+                        </div>
+                        <p style="font-size:0.85em;margin:8px 0 0 0;">Progression: <strong>${completed}/${total} gestes maîtrisés (${percent}%)</strong></p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderChecklistGestes() {
+            const container = document.getElementById('formationChecklistContainer');
+            const filter = document.getElementById('filterGestesFormation').value.toLowerCase();
+            const filtered = catalogueGestes.filter(g => g.code.toLowerCase().includes(filter) || (g.description || '').toLowerCase().includes(filter));
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;">Aucun geste correspondant</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(g => {
+                const progressData = learnersList.length > 0 ? learnersList[0].progress[g.code] : {level: 'non-vu'};
+                const levelColors = {
+                    'non-vu': '#999',
+                    'vu': '#f39c12',
+                    'pratiqué': '#3498db',
+                    'maîtrisé': '#27ae60'
+                };
+
+                return `
+                    <div class="geste-checklist-item" style="border-left-color:${levelColors[progressData.level || 'non-vu']};">
+                        <label>
+                            <input type="checkbox" ${progressData.level === 'maîtrisé' ? 'checked' : ''} onchange="updateGestureProgress('${g.code}', this.checked)">
+                            <strong>${g.code}</strong> - ${g.description || ''}
+                            <span class="geste-level">${progressData.level || 'non-vu'}</span>
+                        </label>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateGestureProgress(code, isChecked) {
+            if (learnersList.length === 0) {
+                toast('⚠️ Veuillez d\'abord ajouter un apprenant', 'warning');
+                return;
+            }
+            const learner = learnersList[0];
+            if (learner.progress[code]) {
+                learner.progress[code].level = isChecked ? 'maîtrisé' : 'pratiqué';
+                learner.progress[code].checkedAt = new Date().toISOString();
+                saveFormationData();
+                renderChecklistGestes();
+                renderLearners();
+            }
+        }
+
+        function renderFormationVideos() {
+            const container = document.getElementById('formationVideosContainer');
+            container.innerHTML = catalogueGestes.slice(0, 12).map(g => {
+                const hasVideo = g.videoUrl ? true : false;
+                return `
+                    <div class="video-card" onclick="openGestureVideoModal('${g.code}')">
+                        <div class="video-card-icon">${hasVideo ? '🎬' : '📹'}</div>
+                        <div class="video-card-title">${g.code}</div>
+                        <div style="font-size:0.75em;color:#666;margin-top:4px;">${g.description || ''}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openGestureVideoModal(code) {
+            const geste = catalogueGestes.find(g => g.code === code);
+            if (!geste) return;
+
+            document.getElementById('videoGestureName').textContent = `📹 ${geste.code} - ${geste.description || ''}`;
+
+            const videoContainer = document.getElementById('gestureVideoContainer');
+            if (geste.videoUrl) {
+                videoContainer.innerHTML = `<video src="${geste.videoUrl}" controls style="width:100%;height:100%;object-fit:contain;"></video>`;
+            } else {
+                videoContainer.innerHTML = `
+                    <div style="text-align:center;color:#fff;">
+                        <p style="font-size:1.2em;margin-bottom:10px;">📹 Vidéo non disponible</p>
+                        <p style="font-size:0.9em;">Vous pouvez ajouter une URL vidéo au geste</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('gestureVideoDescription').innerHTML = `
+                <h4 style="margin:0 0 8px 0;">Description:</h4>
+                <p>${geste.description || 'Aucune description'}</p>
+                ${geste.videoUrl ? `<p style="margin-top:8px;"><strong>Source vidéo:</strong> ${geste.videoUrl}</p>` : ''}
+            `;
+
+            document.getElementById('gestureVideoSteps').innerHTML = `
+                <ol style="margin:0;padding-left:20px;">
+                    <li>Regarder la vidéo attentivement</li>
+                    <li>Noter les points clés</li>
+                    <li>Pratiquer le geste</li>
+                    <li>Demander une validation</li>
+                </ol>
+            `;
+
+            document.getElementById('gestureVideoModal').style.display = 'flex';
+        }
+
+        function closeGestureVideoModal() {
+            document.getElementById('gestureVideoModal').style.display = 'none';
+        }
+
+        function saveFormationData() {
+            localStorage.setItem('learnersList', JSON.stringify(learnersList));
+        }
+
+        function loadFormationData() {
+            const saved = localStorage.getItem('learnersList');
+            if (saved) {
+                learnersList = JSON.parse(saved);
+            }
+            renderLearners();
+            renderChecklistGestes();
+            renderFormationVideos();
+        }
+
+        function exportFormationProgress() {
+            if (learnersList.length === 0) {
+                toast('⚠️ Aucun apprenant à exporter', 'warning');
+                return;
+            }
+
+            const data = {
+                exportDate: new Date().toISOString(),
+                learners: learnersList.map(l => ({
+                    name: l.name,
+                    role: l.role,
+                    startDate: l.startDate,
+                    progress: Object.entries(l.progress).map(([code, data]) => ({
+                        geste: code,
+                        level: data.level,
+                        watchedAt: data.watchedAt,
+                        checkedAt: data.checkedAt
+                    }))
+                }))
+            };
+
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `formation-progress-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('✅ Progression exportée', 'success');
+        }
+
+        // Initialiser la formation au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFormationData();
+        });
 
         function editPrestation(id) {
             const p = prestationsSauvegardees.find(x => x.id === id);
@@ -10553,6 +10849,53 @@
 
             <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;">
                 <button class="btn btn-secondary" onclick="closeTrainingImportModal()">Annuler</button>
+
+    <!-- MODAL FORMATION - AJOUTER APPRENANT -->
+    <div id="formationModal" class="modal" style="display:none;">
+        <div class="modal-box" style="max-width:500px;">
+            <h3>➕ Ajouter un apprenant</h3>
+            <div class="form-group">
+                <label>Nom de l'apprenant</label>
+                <input type="text" id="learnerName" placeholder="Prénom Nom" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+            </div>
+            <div class="form-group">
+                <label>Rôle</label>
+                <select id="learnerRole" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+                    <option value="CEA">CEA (Collaborateur en emploi adapté)</option>
+                    <option value="MSP">MSP (Maître socioprofessionnel)</option>
+                    <option value="ASP">ASP (Assistant socioprofessionnel)</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date de début</label>
+                <input type="date" id="learnerStartDate" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button class="btn btn-success" onclick="addLearner()" style="flex:1;">✅ Ajouter</button>
+                <button class="btn btn-secondary" onclick="closeFormationModal()" style="flex:1;">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FORMATION - VIDÉO GESTE -->
+    <div id="gestureVideoModal" class="modal" style="display:none;">
+        <div class="modal-box" style="max-width:700px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 id="videoGestureName">Vidéo du geste</h3>
+                <button onclick="closeGestureVideoModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;">✕</button>
+            </div>
+            <div id="gestureVideoContainer" style="background:#000;border-radius:8px;margin-bottom:16px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
+                <p style="color:#fff;">Vidéo non disponible</p>
+            </div>
+            <div id="gestureVideoDescription" style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:0.9em;line-height:1.6;"></div>
+            <div style="margin-top:16px;">
+                <h4>Étapes de la formation:</h4>
+                <div id="gestureVideoSteps" style="background:#f9f9f9;padding:12px;border-radius:6px;font-size:0.85em;"></div>
+            </div>
+            <button class="btn btn-secondary" onclick="closeGestureVideoModal()" style="width:100%;margin-top:16px;">Fermer</button>
+        </div>
+    </div>
 
 </div>
 <script src="https://dmaret.github.io/footer.js"></script>
