@@ -9579,13 +9579,6 @@
             }, false);
         }
 
-        // Initialiser le drop zone quand la modal est ouverte
-        const originalOpenModal = window.openTrainingImportModal;
-        window.openTrainingImportModal = function() {
-            originalOpenModal();
-            setTimeout(setupJSONDropZone, 100);
-        };
-
         let tempJSONReports = [];
 
         function showJSONReportsList(reports) {
@@ -9843,7 +9836,6 @@
         </div>
     </div>
 
-    </script>
 <!-- Modal statistiques -->
 <div id="stats-modal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="stats-box">
@@ -9852,7 +9844,6 @@
     <div id="stats-content"></div>
   </div>
 </div>
-</script>
 <div class="toast-container" id="toast-container"></div>
 <!-- Legal notice and copyright -->
 <div class="footer-legal" style="margin-top:40px;padding:20px;background:#f9f9f9;border-top:1px solid #ddd;font-size:10px;color:#666;line-height:1.6;text-align:center;">
