@@ -1517,6 +1517,23 @@
 
                 <div class="section">
                     <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
+
+                    <!-- Alertes intelligentes -->
+                    <div id="alertsBox" style="margin-bottom:14px;"></div>
+
+                    <!-- Chronomètre intégré -->
+                    <div style="background:#e8f4f8;padding:12px;border-radius:8px;border:2px solid #a8d5e2;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                        <div style="font-size:1.8em;font-weight:bold;color:#2a5a6e;font-family:monospace;min-width:120px;">
+                            <span id="chronoDisplay">00:00:00</span>
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn" style="padding:8px 12px;font-size:0.9em;" id="chronoStart" onclick="startChrono()">▶ Démarrer</button>
+                            <button class="btn" style="padding:8px 12px;font-size:0.9em;display:none;" id="chromoPause" onclick="pauseChrono()">⏸ Pause</button>
+                            <button class="btn btn-secondary" style="padding:8px 12px;font-size:0.9em;" onclick="resetChrono()">🔄 Réinitialiser</button>
+                            <button class="btn btn-success" style="padding:8px 12px;font-size:0.9em;" onclick="applyChronoToLastGeste()">✅ Appliquer au geste</button>
+                        </div>
+                        <span style="font-size:0.85em;color:#7a9db1;">Mesurez le temps réel des gestes</span>
+                    </div>
                     <div class="bundles-bar" id="bundlesBar">
                         <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
                         <!-- rendered by renderBundleButtons() on load -->
@@ -9823,6 +9840,126 @@
             localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
             toast(p.locked ? '🔒 Prestation verrouillée' : '🔓 Prestation déverrouillée', 'info');
             afficherPrestations();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CHRONOMÈTRE INTÉGRÉ
+        // ═══════════════════════════════════════════════════════════════
+        let chronoInterval = null;
+        let chronoSeconds = 0;
+        let chromoRunning = false;
+
+        function formatChrono(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function startChrono() {
+            if (chromoRunning) return;
+            chromoRunning = true;
+            document.getElementById('chronoStart').style.display = 'none';
+            document.getElementById('chromoPause').style.display = 'inline-block';
+
+            chronoInterval = setInterval(() => {
+                chronoSeconds++;
+                document.getElementById('chronoDisplay').textContent = formatChrono(chronoSeconds);
+            }, 1000);
+        }
+
+        function pauseChrono() {
+            chromoRunning = false;
+            clearInterval(chronoInterval);
+            document.getElementById('chronoStart').style.display = 'inline-block';
+            document.getElementById('chromoPause').style.display = 'none';
+        }
+
+        function resetChrono() {
+            pauseChrono();
+            chronoSeconds = 0;
+            document.getElementById('chronoDisplay').textContent = '00:00:00';
+        }
+
+        function applyChronoToLastGeste() {
+            if (chronoSeconds === 0) {
+                toast('Lancez le chronomètre d\'abord', 'warning');
+                return;
+            }
+
+            const lastId = gesteLines[gesteLines.length - 1];
+            if (!lastId) {
+                toast('Aucun geste dans le calculateur', 'warning');
+                return;
+            }
+
+            const input = document.getElementById('temps-' + lastId);
+            if (input) {
+                const estimatedInput = document.getElementById('temps-' + lastId);
+                const estimated = parseInt(estimatedInput?.value) || 0;
+                const realTime = chronoSeconds;
+                const ecart = estimated > 0 ? Math.abs((realTime - estimated) / estimated * 100) : 0;
+
+                input.value = chronoSeconds;
+                calculateTotal();
+
+                // Alerte intelligente si écart > 20%
+                if (ecart > 20) {
+                    const direction = realTime > estimated ? 'plus long' : 'plus rapide';
+                    toast(`⚠️ Écart de ${ecart.toFixed(0)}% (${direction} que prévu)`, 'warning');
+                }
+
+                toast(`✅ ${formatChrono(chronoSeconds)} appliqué au geste`, 'success');
+                resetChrono();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SYSTÈME D'ALERTES
+        // ═══════════════════════════════════════════════════════════════
+        function checkAlerts() {
+            const alerts = [];
+
+            // Alerte: Devis en attente depuis longtemps
+            const now = new Date();
+            prestationsSauvegardees?.forEach(p => {
+                if (p.statut === 'devis' && p.date) {
+                    const daysOld = (now - new Date(p.date)) / (1000 * 60 * 60 * 24);
+                    if (daysOld > 7) {
+                        alerts.push({type: 'warning', msg: `📋 "${p.prestation}" en attente depuis ${Math.floor(daysOld)} jours`});
+                    }
+                }
+            });
+
+            // Alerte: Stock faible
+            if (catalogueConsommables) {
+                catalogueConsommables.forEach(c => {
+                    const stock = mouvementsStock?.filter(m => m.article === c.nom && m.direction === '+').reduce((sum, m) => sum + m.quantite, 0) || 0;
+                    if (stock < 5 && stock > 0) {
+                        alerts.push({type: 'info', msg: `📦 Stock faible: "${c.nom}" (${stock} ${c.unite})`});
+                    }
+                });
+            }
+
+            return alerts;
+        }
+
+        function displayAlerts() {
+            const alerts = checkAlerts();
+            const alertBox = document.getElementById('alertsBox');
+            if (!alertBox) return;
+
+            if (alerts.length === 0) {
+                alertBox.innerHTML = '';
+                return;
+            }
+
+            alertBox.innerHTML = alerts.map((a, i) => `
+                <div style="background:${a.type === 'warning' ? '#fff3cd' : '#d1ecf1'};border-left:4px solid ${a.type === 'warning' ? '#ffc107' : '#17a2b8'};padding:10px 12px;margin-bottom:8px;border-radius:4px;font-size:0.9em;color:${a.type === 'warning' ? '#856404' : '#0c5460'};">
+                    ${a.msg}
+                    <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;cursor:pointer;font-size:1.2em;padding:0;">×</button>
+                </div>
+            `).join('');
         }
 
         // ═══════════════════════════════════════════════════════════════
