@@ -361,6 +361,13 @@
         .capacite-bar { height:22px; border-radius:4px; background:#a8d5e2; transition:width 0.3s; display:flex; align-items:center; padding-left:8px; font-size:0.78em; font-weight:bold; color:#2d3e50; min-width:4px; }
         .capacite-bar.over { background:#f5b8c0; }
 
+        .attachment-item { position:relative; border-radius:8px; overflow:hidden; background:#f5f5f5; aspect-ratio:1; display:flex; align-items:center; justify-content:center; }
+        .attachment-item img, .attachment-item video { width:100%; height:100%; object-fit:cover; }
+        .attachment-item .media-icon { font-size:3em; }
+        .attachment-item .delete-attachment { position:absolute; top:4px; right:4px; background:#c0392b; color:white; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer; font-size:0.9em; display:none; }
+        .attachment-item:hover .delete-attachment { display:block; }
+        .attachment-item .file-info { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:white; font-size:0.7em; padding:4px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
         /* ── Modes d'affichage ─────────────────────────────────── */
         body.density-compact .content { padding: 12px 15px; }
         body.density-compact .section { padding: 12px; margin-bottom: 10px; }
@@ -1680,6 +1687,14 @@
                     <textarea id="notesInternes" placeholder="Notes internes (non imprimées sur le devis) : contraintes, remarques client, conditions particulières..." rows="3" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;resize:vertical;"></textarea>
                 </div>
 
+                <div class="section" style="border-left-color:#f39c12;">
+                    <h2>📸 Photos & Vidéos</h2>
+                    <p style="font-size:0.9em;color:#666;margin-bottom:10px;">Attachez des photos ou vidéos à cette prestation (max 20 MB par fichier)</p>
+                    <input type="file" id="attachmentInput" accept="image/*,video/*" multiple style="display:none" onchange="handleAttachmentUpload()">
+                    <button class="btn" onclick="document.getElementById('attachmentInput').click()" style="background:#fff3cd;border-color:#f39c12;color:#856404;margin-bottom:12px;">➕ Ajouter photos/vidéos</button>
+                    <div id="attachmentsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px;"></div>
+                </div>
+
                 <div style="margin-top: 25px; text-align: center;">
                     <button class="btn btn-success" id="btnSavePrestation" onclick="savePrestation()">💾 Enregistrer</button>
                     <button class="btn" onclick="exportCalculatorToPDF()" title="Exporter en PDF">📄 PDF</button>
@@ -2980,6 +2995,7 @@
         let stockageLines = [];
         let editingMouvementId = null;
         let editingPrestationId = null;
+        let currentAttachments = [];
         let tabProfiles = [];
         let activeTabProfileId = null;
         let _presentationMode = false;
@@ -4023,6 +4039,7 @@
                 tempsCoordMin: parseFloat(document.getElementById('tempsCoordMin')?.value || 0),
                 tempsPrepMin: parseFloat(document.getElementById('tempsPrepMin')?.value || 0),
                 tempsNettoyageMin: parseFloat(document.getElementById('tempsNettoyageMin')?.value || 0),
+                attachments: currentAttachments,
                 statut: 'devis'
             };
 
@@ -4095,7 +4112,63 @@
             addGesteLine();
             addConsommableLine();
             addStockageLine();
+            currentAttachments = [];
+            document.getElementById('attachmentsContainer').innerHTML = '';
             calculateTotal();
+        }
+
+        function handleAttachmentUpload() {
+            const input = document.getElementById('attachmentInput');
+            const files = input.files;
+            if (!files.length) return;
+            for (let file of files) {
+                if (file.size > 20 * 1024 * 1024) {
+                    toast(`Fichier trop volumineux : ${file.name} (max 20 MB)`, 'warning');
+                    continue;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const attachment = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        data: e.target.result
+                    };
+                    currentAttachments.push(attachment);
+                    renderAttachments();
+                };
+                reader.readAsDataURL(file);
+            }
+            input.value = '';
+        }
+
+        function renderAttachments() {
+            const container = document.getElementById('attachmentsContainer');
+            container.innerHTML = currentAttachments.map(att => {
+                const isImage = att.type.startsWith('image/');
+                const isVideo = att.type.startsWith('video/');
+                let preview = '';
+                if (isImage) {
+                    preview = `<img src="${att.data}" alt="${att.name}">`;
+                } else if (isVideo) {
+                    preview = `<video src="${att.data}"></video>`;
+                } else {
+                    const ext = att.name.split('.').pop().toUpperCase();
+                    preview = `<div class="media-icon">${ext === 'PDF' ? '📄' : '📎'}</div>`;
+                }
+                return `
+                    <div class="attachment-item" title="${att.name}">
+                        ${preview}
+                        <button class="delete-attachment" onclick="deleteAttachment(${att.id})">✕</button>
+                        <div class="file-info">${att.name}</div>
+                    </div>`;
+            }).join('');
+        }
+
+        function deleteAttachment(id) {
+            currentAttachments = currentAttachments.filter(a => a.id !== id);
+            renderAttachments();
         }
 
         function editPrestation(id) {
@@ -4142,6 +4215,10 @@
             (p.gestes || []).forEach(g => addGesteLine({code: g.code, temps: g.temps, quantite: g.quantite, typeApp: g.typeApp || 'piece'}));
             if (gesteLines.length === 0) addGesteLine();
             if (document.getElementById('notesInternes')) document.getElementById('notesInternes').value = p.notesInternes || '';
+
+            // Charger les pièces jointes
+            currentAttachments = [...(p.attachments || [])];
+            renderAttachments();
 
             // Reconstruire les consommables
             document.getElementById('consommablesContainer').innerHTML = '';
