@@ -1682,6 +1682,7 @@
 
                 <div style="margin-top: 25px; text-align: center;">
                     <button class="btn btn-success" id="btnSavePrestation" onclick="savePrestation()">💾 Enregistrer</button>
+                    <button class="btn" onclick="exportCalculatorToPDF()" title="Exporter en PDF">📄 PDF</button>
                     <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
                     <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
@@ -9960,6 +9961,65 @@
                     <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;cursor:pointer;font-size:1.2em;padding:0;">×</button>
                 </div>
             `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RENTABILITÉ PAR CLIENT
+        // ═══════════════════════════════════════════════════════════════
+        function getRentabilityByClient() {
+            const clientStats = {};
+
+            prestationsSauvegardees?.forEach(p => {
+                const client = p.client || 'Sans client';
+                if (!clientStats[client]) {
+                    clientStats[client] = { ca: 0, cout: 0, count: 0, marge: 0 };
+                }
+                const ca = p.prixVente || 0;
+                const cout = p.prixRevient || 0;
+                clientStats[client].ca += ca;
+                clientStats[client].cout += cout;
+                clientStats[client].marge += (ca - cout);
+                clientStats[client].count++;
+            });
+
+            return Object.entries(clientStats)
+                .map(([client, stats]) => ({
+                    client,
+                    ca: stats.ca,
+                    cout: stats.cout,
+                    marge: stats.marge,
+                    tauxMarge: stats.ca > 0 ? ((stats.marge / stats.ca) * 100).toFixed(1) : 0,
+                    count: stats.count
+                }))
+                .sort((a, b) => b.marge - a.marge);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRÉVISIONS BASÉES HISTORIQUE
+        // ═══════════════════════════════════════════════════════════════
+        function getPredictions() {
+            const stats = {
+                avgTemps: 0,
+                avgCout: 0,
+                avgMarge: 0,
+                totalPrestations: prestationsSauvegardees?.length || 0
+            };
+
+            if (stats.totalPrestations === 0) return stats;
+
+            const totalTemps = prestationsSauvegardees.reduce((sum, p) => {
+                const temps = (p.gestes || []).reduce((s, g) => s + (g.duree || 0), 0);
+                return sum + temps;
+            }, 0);
+
+            const totalCout = prestationsSauvegardees.reduce((sum, p) => sum + (p.prixRevient || 0), 0);
+            const totalMarge = prestationsSauvegardees.reduce((sum, p) => sum + ((p.prixVente || 0) - (p.prixRevient || 0)), 0);
+
+            stats.avgTemps = Math.round(totalTemps / stats.totalPrestations);
+            stats.avgCout = (totalCout / stats.totalPrestations).toFixed(2);
+            stats.avgMarge = (totalMarge / stats.totalPrestations).toFixed(2);
+
+            return stats;
         }
 
         // ═══════════════════════════════════════════════════════════════
