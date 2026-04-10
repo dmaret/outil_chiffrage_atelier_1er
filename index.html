@@ -8979,13 +8979,21 @@
                     list.appendChild(catTitle);
 
                     gestures.forEach((geste) => {
+                        // Convertir temps en format lisible (secondes ou minutes)
+                        let tempsAffiche = geste.temps + 's';
+                        if (geste.temps >= 60) {
+                            const minutes = Math.floor(geste.temps / 60);
+                            const secondes = geste.temps % 60;
+                            tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+                        }
+
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'gesture-item';
                         itemDiv.innerHTML = `
                             <input type="checkbox" id="gesture_${geste.code}" name="gesture_${geste.code}" checked>
                             <label for="gesture_${geste.code}">
                                 <strong>${geste.code}</strong> — ${geste.description}
-                                <span style="color:#999;font-size:0.85em;">(${geste.temps}min)</span>
+                                <span style="color:#999;font-size:0.85em;">(${tempsAffiche})</span>
                             </label>
                         `;
                         list.appendChild(itemDiv);
@@ -9040,23 +9048,40 @@
             });
 
             if (selectedGestures.length === 0) {
-                toast('Veuillez sélectionner au moins un geste', 'error');
+                toast('Veuillez sélectionner au least un geste', 'error');
                 return;
             }
 
             // Remplir le rapport
             const gesturesList = document.getElementById('reportGesturesList');
             const gesturesHtml = selectedGestures
-                .map((g, i) => `<div style="padding:8px;border-bottom:1px solid #e0e8f0;margin-bottom:4px;">
-                    <div><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
-                    <div style="font-size:0.8em;color:#7a9db1;margin-top:2px;">⏱️ ${g.temps}min | 🏷️ ${g.categorie}</div>
-                </div>`)
+                .map((g, i) => {
+                    // Convertir temps en format lisible
+                    let tempsAffiche = g.temps + 's';
+                    if (g.temps >= 60) {
+                        const minutes = Math.floor(g.temps / 60);
+                        const secondes = g.temps % 60;
+                        tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+                    }
+                    return `<div style="padding:8px;border-bottom:1px solid #e0e8f0;margin-bottom:4px;">
+                        <div><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
+                        <div style="font-size:0.8em;color:#7a9db1;margin-top:2px;">⏱️ ${tempsAffiche} | 🏷️ ${g.categorie}</div>
+                    </div>`;
+                })
                 .join('');
+
             const totalTime = selectedGestures.reduce((sum, g) => sum + g.temps, 0);
+            let totalAffiche = totalTime + 's';
+            if (totalTime >= 60) {
+                const minutes = Math.floor(totalTime / 60);
+                const secondes = totalTime % 60;
+                totalAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+            }
+
             gesturesList.innerHTML = `<strong style="display:block;margin-bottom:8px;">✓ Gestes sélectionnés (${selectedGestures.length} geste${selectedGestures.length>1?'s':''}):</strong>
                 ${gesturesHtml}
                 <div style="padding:8px;background:#f5f9fc;border-radius:6px;margin-top:8px;text-align:center;">
-                    <strong>Temps total estimé: ${totalTime} minutes</strong>
+                    <strong>Temps total estimé: ${totalAffiche}</strong>
                 </div>`;
 
             // Afficher l'étape 3
