@@ -4045,6 +4045,10 @@
         function editPrestation(id) {
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
+            if (p.locked) {
+                toast('⚠️ Cette prestation est verrouillée', 'warning');
+                return;
+            }
             editingPrestationId = id;
 
             // Basculer sur l'onglet calculateur
@@ -9773,6 +9777,15 @@
                 }
             }
         });
+
+        function togglePrestationLock(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            p.locked = !p.locked;
+            localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
+            toast(p.locked ? '🔒 Prestation verrouillée' : '🔓 Prestation déverrouillée', 'info');
+            afficherPrestations();
+        }
 
         // ═══════════════════════════════════════════════════════════════
         // IMPORT TRAINING REPORTS INTO MAIN TOOL
