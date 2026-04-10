@@ -6028,6 +6028,10 @@
         // FEATURE 7 : Export CSV inventaire
         // ============================================================
         function exportStockCSV() {
+            // Check permission
+            if (!checkPermission('export_data')) {
+                return;
+            }
             const rows = [['Référence','Quantité','Lots','Valeur (CHF)','Prix moyen','Emplacement principal','Stock min','Alerte']];
             Object.entries(stockActuel).forEach(([ref, data]) => {
                 const valeur = data.lots.reduce((s, l) => s + l.qte * l.prix, 0);
@@ -6052,6 +6056,10 @@
         // FEATURE 8 : Sauvegarde/restauration JSON
         // ============================================================
         function exportJSON() {
+            // Check permission
+            if (!checkPermission('export_data')) {
+                return;
+            }
             const data = {
                 version: 1,
                 exportDate: new Date().toISOString(),
@@ -6684,6 +6692,10 @@
         // FEATURE 3 : Export CSV prestations
         // ============================================================
         function exportPrestationsCSV() {
+            // Check permission
+            if (!checkPermission('export_data')) {
+                return;
+            }
             // Get currently filtered prestations
             const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
             const statut = document.getElementById('filtreStatut')?.value || '';
@@ -6738,6 +6750,10 @@
         }
 
         function exportPrestationsXLSX() {
+            // Check permission
+            if (!checkPermission('export_data')) {
+                return;
+            }
             if (typeof XLSX === 'undefined') { toast('SheetJS non disponible', 'error'); return; }
             const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
             const statut = document.getElementById('filtreStatut')?.value || '';
