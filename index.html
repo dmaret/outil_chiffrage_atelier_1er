@@ -2811,6 +2811,105 @@
         let actionHistory = [];
         let ganttOffset = 0;
         let favoriteGestes = [];   // codes gestes favoris
+
+        // Système de permissions par rôle
+        const ROLE_PERMISSIONS = {
+            'admin': {
+                create_prestation: true,
+                edit_prestation: true,
+                delete_prestation: true,
+                create_client: true,
+                edit_client: true,
+                delete_client: true,
+                manage_stock: true,
+                manage_consommables: true,
+                manage_gestes: true,
+                manage_config: true,
+                view_audit: true,
+                export_data: true,
+                manage_users: true
+            },
+            'cea': {
+                create_prestation: true,
+                edit_prestation: true,
+                delete_prestation: false,
+                create_client: true,
+                edit_client: true,
+                delete_client: false,
+                manage_stock: false,
+                manage_consommables: false,
+                manage_gestes: false,
+                manage_config: false,
+                view_audit: true,
+                export_data: true,
+                manage_users: false
+            },
+            'msp': {
+                create_prestation: false,
+                edit_prestation: true,
+                delete_prestation: false,
+                create_client: false,
+                edit_client: false,
+                delete_client: false,
+                manage_stock: true,
+                manage_consommables: true,
+                manage_gestes: false,
+                manage_config: false,
+                view_audit: true,
+                export_data: true,
+                manage_users: false
+            },
+            'asp': {
+                create_prestation: false,
+                edit_prestation: false,
+                delete_prestation: false,
+                create_client: false,
+                edit_client: false,
+                delete_client: false,
+                manage_stock: true,
+                manage_consommables: true,
+                manage_gestes: false,
+                manage_config: false,
+                view_audit: false,
+                export_data: false,
+                manage_users: false
+            }
+        };
+
+        // ============================================================
+        // Vérification des permissions
+        // ============================================================
+        function hasPermission(action) {
+            if (!currentUserSession) return false;
+            const role = currentUserSession.role;
+            const permissions = ROLE_PERMISSIONS[role];
+            return permissions ? permissions[action] === true : false;
+        }
+
+        function checkPermission(action, showError = true) {
+            const hasPerm = hasPermission(action);
+            if (!hasPerm && showError) {
+                const actionLabels = {
+                    'create_prestation': 'créer une prestation',
+                    'edit_prestation': 'modifier une prestation',
+                    'delete_prestation': 'supprimer une prestation',
+                    'create_client': 'créer un client',
+                    'edit_client': 'modifier un client',
+                    'delete_client': 'supprimer un client',
+                    'manage_stock': 'gérer le stock',
+                    'manage_consommables': 'gérer les consommables',
+                    'manage_gestes': 'gérer les gestes',
+                    'manage_config': 'accéder à la configuration',
+                    'view_audit': 'voir l\'historique',
+                    'export_data': 'exporter les données',
+                    'manage_users': 'gérer les utilisateurs'
+                };
+                const label = actionLabels[action] || action;
+                toast(`❌ Vous n'avez pas la permission de ${label}`, 'error');
+            }
+            return hasPerm;
+        }
+
         let recentGestes = [];     // 10 derniers codes utilisés
         let clientsData = {};      // {nom: {tel, email, adresse, notes, tarifSpecial}}
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
@@ -3162,14 +3261,23 @@
         }
 
         function saveStockConfig() {
+            // Check permission
+            if (!checkPermission('manage_config')) {
+                return;
+            }
             config.coutPalette = parseFloat(document.getElementById('coutPalette').value);
             config.coutRack = parseFloat(document.getElementById('coutRack').value);
             config.surfaceRack = parseFloat(document.getElementById('surfaceRack').value);
             config.capacitePalettes = parseFloat(document.getElementById('capacitePalettes').value);
+            logAction('Mise à jour configuration stock', 'UPDATE');
             saveToStorage();
         }
 
         function resetConfig() {
+            // Check permission
+            if (!checkPermission('manage_config')) {
+                return;
+            }
             toastConfirm('Réinitialiser tous les paramètres?', () => {
                 config = {
                     coutHoraireCEA: 35,
@@ -3918,6 +4026,13 @@
                 return;
             }
 
+            // Check permissions
+            const isEdit = editingPrestationId !== null;
+            const permission = isEdit ? 'edit_prestation' : 'create_prestation';
+            if (!checkPermission(permission)) {
+                return;
+            }
+
             const gestes = [];
             gesteLines.forEach(lineId => {
                 const code = document.getElementById('select-geste-' + lineId)?.value || '';
@@ -4314,12 +4429,17 @@
         }
 
         function saveClientInfo(nom) {
+            // Check permission
+            if (!checkPermission('edit_client')) {
+                return;
+            }
             const tel   = document.getElementById('ci-tel')?.value.trim() || '';
             const email = document.getElementById('ci-email')?.value.trim() || '';
             const adresse = document.getElementById('ci-adresse')?.value.trim() || '';
             const notes   = document.getElementById('ci-notes')?.value.trim() || '';
             const tarif   = document.getElementById('ci-tarif')?.value.trim() || '';
             clientsData[nom] = { tel, email, adresse, notes, tarifSpecial: tarif };
+            logAction(`Mise à jour client : ${nom}`, 'UPDATE');
             saveToStorage();
             const indicator = document.getElementById('ci-saved');
             if (indicator) { indicator.style.opacity = '1'; setTimeout(() => indicator.style.opacity = '0', 1500); }
@@ -4545,10 +4665,10 @@
                     <td><span class="badge-diff-${diff}">${diffLabel}</span></td>
                     <td style="font-size:0.8em;color:#7a9db1;font-style:italic;">${notes}</td>
                     <td style="white-space:nowrap;">
-                        <button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>
+                        ${hasPermission('manage_gestes') ? `<button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>` : ''}
                         <button class="btn btn-small btn-secondary" onclick="imprimerFicheGeste('${codeEsc}')" title="Fiche PDF">🖨️</button>
                         <button class="btn btn-small btn-secondary" onclick="voirHistoriqueGeste('${codeEsc}')" title="Historique des modifications">📈</button>
-                        <button class="delete-btn btn-small" onclick="deleteGeste('${codeEsc}')">🗑️</button>
+                        ${hasPermission('manage_gestes') ? `<button class="delete-btn btn-small" onclick="deleteGeste('${codeEsc}')">🗑️</button>` : ''}
                     </td>
                 </tr>`;
             });
@@ -4558,6 +4678,10 @@
         }
 
         function addGeste() {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
+                return;
+            }
             const code = document.getElementById('newCode').value.trim();
             const categorie = document.getElementById('newCategorie').value;
             const description = document.getElementById('newDescription').value.trim();
@@ -4565,7 +4689,7 @@
             const coef = parseFloat(document.getElementById('newCoef').value);
             const difficulte = parseInt(document.getElementById('newDifficulte')?.value) || 1;
             const notes = document.getElementById('newNotes').value.trim();
-            
+
             if (!code || !description || !temps) {
                 toast('Merci de remplir au minimum: Code, Description et Temps', 'warning');
                 return;
@@ -4601,9 +4725,15 @@
         }
 
         function deleteGeste(code) {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
+                return;
+            }
             toastConfirm(`Supprimer le geste ${code}?`, () => {
                 pushUndoSnapshot('Suppression geste ' + code);
+                const g = catalogueGestes.find(x => x.code === code);
                 catalogueGestes = catalogueGestes.filter(g => g.code !== code);
+                logAction(`Suppression geste : ${code} - ${g?.description || ''}`, 'DELETE');
                 saveToStorage();
                 renderCatalogue();
             });
@@ -4834,7 +4964,7 @@
                             <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
                             ${(p.statut === 'valide' || p.statut === 'facture') ? `<button class="btn btn-small" style="background:#f0e8f8;color:#7a5a9a;border:1px solid #c9b3d4;" onclick="programmerRecurrence(${p.id})" title="Créer récurrence">🔁 Récurrence</button>` : ''}
                             ${p.statut === 'facture' ? `<button class="btn btn-small" style="background:#f5fce8;color:#4a7a2a;border:1px solid #b8d890;" onclick="openPaiementModal(${p.id})" title="Suivi paiement">💶 Paiement</button>` : ''}
-                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                            ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
                         </div>
                     </div>
                     <div style="font-size: 0.85em; color: #7a9db1; margin-bottom: 10px;">
@@ -4907,7 +5037,7 @@
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Statut">🔄</button>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})">📄</button>
-                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                            ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
                         </div>
                     </div>`;
                 }).join('');
@@ -4933,7 +5063,7 @@
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})">🔄</button>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})">📄</button>
-                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                            ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
                         </td></tr>`;
                 });
                 container.innerHTML = thtml + '</tbody></table></div>';
@@ -4949,9 +5079,13 @@
         }
 
         function deletePrestation(id) {
+            // Check permission
+            if (!checkPermission('delete_prestation')) {
+                return;
+            }
             toastConfirm('Supprimer cette prestation?', () => {
                 const p = prestationsSauvegardees.find(x => x.id === id);
-                if (p) logAction(`Suppression prestation : ${p.prestation} (${p.client})`);
+                if (p) logAction(`Suppression prestation : ${p.prestation} (${p.client})`, 'DELETE');
                 prestationsSauvegardees = prestationsSauvegardees.filter(p => p.id !== id);
                 saveToStorage();
                 renderPrestations();
