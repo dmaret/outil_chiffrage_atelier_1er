@@ -368,22 +368,6 @@
         .attachment-item:hover .delete-attachment { display:block; }
         .attachment-item .file-info { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:white; font-size:0.7em; padding:4px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-        .learner-card { background:linear-gradient(135deg,#e8f8f5 0%,#f0f9f8 100%); border:2px solid #27ae60; border-radius:10px; padding:14px; }
-        .learner-card h4 { color:#27ae60; margin-bottom:8px; }
-        .learner-progress-bar { width:100%; height:8px; background:#ddd; border-radius:4px; margin:8px 0; overflow:hidden; }
-        .learner-progress-fill { height:100%; background:linear-gradient(90deg,#27ae60,#2ecc71); }
-        .geste-checklist-item { background:#f9f9f9; border-left:4px solid #3498db; padding:12px; border-radius:4px; margin-bottom:8px; }
-        .geste-checklist-item input[type="checkbox"] { margin-right:8px; }
-        .geste-checklist-item label { cursor:pointer; display:flex; align-items:center; }
-        .geste-checklist-item .geste-level { font-size:0.8em; color:#7a9db1; margin-left:auto; }
-        .video-card { background:linear-gradient(135deg,#ffe8cc 0%,#fff0e6 100%); border:2px solid #e67e22; border-radius:10px; padding:12px; text-align:center; cursor:pointer; transition:all 0.2s; }
-        .video-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(230,126,34,0.2); }
-        .video-card-icon { font-size:2em; margin-bottom:6px; }
-        .video-card-title { font-size:0.85em; font-weight:600; }
-
-        .modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; display:none; }
-        .modal.visible { display:flex; }
-
         /* ── Modes d'affichage ─────────────────────────────────── */
         body.density-compact .content { padding: 12px 15px; }
         body.density-compact .section { padding: 12px; margin-bottom: 10px; }
@@ -500,43 +484,6 @@
             body { background: white; padding: 0; }
             #printZone, #printZone * { visibility: visible; }
             #printZone { position: fixed; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
-        }
-
-        /* ── Mode Portable (Mobile/Tablet) ───────────────────────────────── */
-        @media (max-width: 768px) {
-            .container { padding: 8px; }
-            .header { padding: 10px 8px; }
-            .header h1 { font-size: 1.3em; }
-            .header p { font-size: 0.75em; }
-            .tabs-wrapper { overflow-x: auto; }
-            .tabs { overflow-x: auto; }
-            .tab { padding: 10px 12px; font-size: 0.85em; }
-            .section { margin: 10px 0; padding: 12px; }
-            input, select, textarea { font-size: 16px !important; } /* Empêche le zoom sur iOS */
-            .btn { padding: 10px 12px; font-size: 0.9em; }
-            .stat-card { flex: 1 1 48%; }
-            table { font-size: 0.8em; }
-            th, td { padding: 6px 4px; }
-            .header button { width: 36px; height: 36px; font-size: 1em; right: 8px; }
-            #headerAuthBadge { right: 50px !important; }
-            .prof-table-container { overflow-x: auto; }
-        }
-
-        @media (max-width: 480px) {
-            .container { padding: 4px; }
-            .header { padding: 8px 4px; }
-            .header h1 { font-size: 1.1em; }
-            .header p { display: none; }
-            .section { margin: 6px 0; padding: 8px; }
-            .tab { padding: 8px 10px; font-size: 0.75em; }
-            .btn { padding: 8px 10px; font-size: 0.85em; width: 100%; margin-bottom: 6px; }
-            .stat-card { flex: 1 1 100%; }
-            .header button { width: 32px; height: 32px; font-size: 0.9em; top: 8px; }
-            label { display: block; margin-bottom: 6px; }
-            input[type="text"], input[type="number"], select, textarea { width: 100%; margin-bottom: 8px; }
-            .modal-box, .prof-modal-box { width: 95% !important; padding: 12px; }
-            table { font-size: 0.7em; }
-            th, td { padding: 4px 2px; }
         }
 
         /* Dark mode */
@@ -1357,18 +1304,17 @@
                 <!-- 12 -->
                 <h3 style="color:#6b8fa3;margin:0 0 8px;">12. Glossaire</h3>
                 <table style="width:100%;border-collapse:collapse;font-size:0.91em;">
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;white-space:nowrap;">CEA</td><td style="padding:5px 0;">Collaborateurs en emploi adapté — travailleurs de l'atelier</td></tr>
-                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">MSP</td><td style="padding:5px 0;">Maître socioprofessionnel — responsable de production</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">ASP</td><td style="padding:5px 0;">Assistant socioprofessionnel — encadrant de formation</td></tr>
-                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Geste</td><td style="padding:5px 0;">Étape élémentaire mesurable d'une prestation (ex. : contrôle, emballage)</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Prestation</td><td style="padding:5px 0;">Ensemble de gestes formant un service proposé à un client</td></tr>
-                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Devis</td><td style="padding:5px 0;">Document chiffré transmis au client avant validation</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">FIFO</td><td style="padding:5px 0;">First In, First Out — les lots les plus anciens sont consommés en premier</td></tr>
-                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Coût de revient</td><td style="padding:5px 0;">Somme de tous les coûts nécessaires à la réalisation d'une prestation</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Marge</td><td style="padding:5px 0;">Différence entre le prix de vente et le coût de revient</td></tr>
-                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Bundle</td><td style="padding:5px 0;">Raccourci regroupant plusieurs gestes fréquemment utilisés ensemble</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Profil d'onglets</td><td style="padding:5px 0;">Configuration personnalisée des onglets visibles selon le rôle</td></tr>
-                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Valorisation</td><td style="padding:5px 0;">Calcul de la valeur monétaire d'un stock ou d'une prestation</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;white-space:nowrap;">CEA</td><td style="padding:5px 0;">Conseillers en Emploi Accompagné — travailleurs de l'atelier</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">MSP</td><td style="padding:5px 0;">Moniteurs de Stage et de Production — encadrants</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Geste</td><td style="padding:5px 0;">Étape élémentaire mesurable d'une prestation (ex. : contrôle, emballage)</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Prestation</td><td style="padding:5px 0;">Ensemble de gestes formant un service proposé à un client</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Devis</td><td style="padding:5px 0;">Document chiffré transmis au client avant validation</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">FIFO</td><td style="padding:5px 0;">First In, First Out — les lots les plus anciens sont consommés en premier</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Coût de revient</td><td style="padding:5px 0;">Somme de tous les coûts nécessaires à la réalisation d'une prestation</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Marge</td><td style="padding:5px 0;">Différence entre le prix de vente et le coût de revient</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Bundle</td><td style="padding:5px 0;">Raccourci regroupant plusieurs gestes fréquemment utilisés ensemble</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Profil d'onglets</td><td style="padding:5px 0;">Configuration personnalisée des onglets visibles selon le rôle</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">Valorisation</td><td style="padding:5px 0;">Calcul de la valeur monétaire d'un stock ou d'une prestation</td></tr>
                     <tr style="background:#f9fbfc;"><td style="padding:5px 10px 5px 0;font-weight:600;">Pipeline CA</td><td style="padding:5px 0;">Prévision de chiffre d'affaires basée sur les devis en cours</td></tr>
                 </table>
 
@@ -1427,11 +1373,9 @@
                 <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
                 <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
                 <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
-                <button class="tab" onclick="switchTab('formation')">🎓 Formation</button>
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
-                <button class="tab" onclick="switchTab('audit')">📋 Audit Trail</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
@@ -1542,23 +1486,6 @@
 
                 <div class="section">
                     <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
-
-                    <!-- Alertes intelligentes -->
-                    <div id="alertsBox" style="margin-bottom:14px;"></div>
-
-                    <!-- Chronomètre intégré -->
-                    <div style="background:#e8f4f8;padding:12px;border-radius:8px;border:2px solid #a8d5e2;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                        <div style="font-size:1.8em;font-weight:bold;color:#2a5a6e;font-family:monospace;min-width:120px;">
-                            <span id="chronoDisplay">00:00:00</span>
-                        </div>
-                        <div style="display:flex;gap:6px;">
-                            <button class="btn" style="padding:8px 12px;font-size:0.9em;" id="chronoStart" onclick="startChrono()">▶ Démarrer</button>
-                            <button class="btn" style="padding:8px 12px;font-size:0.9em;display:none;" id="chromoPause" onclick="pauseChrono()">⏸ Pause</button>
-                            <button class="btn btn-secondary" style="padding:8px 12px;font-size:0.9em;" onclick="resetChrono()">🔄 Réinitialiser</button>
-                            <button class="btn btn-success" style="padding:8px 12px;font-size:0.9em;" onclick="applyChronoToLastGeste()">✅ Appliquer au geste</button>
-                        </div>
-                        <span style="font-size:0.85em;color:#7a9db1;">Mesurez le temps réel des gestes</span>
-                    </div>
                     <div class="bundles-bar" id="bundlesBar">
                         <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
                         <!-- rendered by renderBundleButtons() on load -->
@@ -1566,7 +1493,7 @@
                     <div id="gestesContainer"></div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
                         <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd">Ctrl+G</span></button>
-                        <button class="btn btn-secondary btn-small" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
+                        <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
                         <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
                         <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
                     </div>
@@ -1715,7 +1642,6 @@
 
                 <div style="margin-top: 25px; text-align: center;">
                     <button class="btn btn-success" id="btnSavePrestation" onclick="savePrestation()">💾 Enregistrer</button>
-                    <button class="btn" onclick="exportCalculatorToPDF()" title="Exporter en PDF">📄 PDF</button>
                     <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
                     <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
@@ -1950,8 +1876,8 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn btn-success" onclick="saveConfig()">💾 Sauvegarder</button>
-                    <button class="btn btn-secondary" onclick="resetConfig()">🔄 Réinitialiser</button>
+                    <button class="btn btn-success" data-perm="manage_config" onclick="saveConfig()">💾 Sauvegarder</button>
+                    <button class="btn btn-secondary" data-perm="manage_config" onclick="resetConfig()">🔄 Réinitialiser</button>
                 </div>
 
                 <!-- SECTIONS ADMIN -->
@@ -2049,7 +1975,7 @@
                             <span class="help-text">Description détaillée, remarques, conditions particulières</span>
                         </div>
                     </div>
-                    <button class="btn" onclick="addGeste()">➕ Ajouter au catalogue</button>
+                    <button class="btn" data-perm="manage_gestes" onclick="addGeste()">➕ Ajouter au catalogue</button>
                 </div>
 
                 <div class="section">
@@ -2097,7 +2023,7 @@
                             <input type="number" id="newConsomPrix" step="0.01" placeholder="0.50">
                         </div>
                     </div>
-                    <button class="btn" onclick="addConsommable()">➕ Ajouter</button>
+                    <button class="btn" data-perm="manage_consommables" onclick="addConsommable()">➕ Ajouter</button>
                 </div>
 
                 <div class="section">
@@ -2158,43 +2084,6 @@
                         </div>
                     </div>
                     <div id="clientDetailContent" style="margin-top:14px;"></div>
-                </div>
-            </div>
-
-            <!-- ONGLET FORMATION -->
-            <div id="formation" class="tab-content">
-                <div class="section">
-                    <h2>🎓 Système de Formation</h2>
-                    <p style="font-size:0.9em;color:#666;margin-bottom:16px;">Suivez la progression des apprentissages, consultez les vidéos de formation et complétez les checklists de gestes.</p>
-
-                    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-                        <button class="btn btn-success" onclick="openFormationModal()">➕ Ajouter un apprenant</button>
-                        <button class="btn" onclick="exportFormationProgress()">📤 Exporter progression</button>
-                    </div>
-                </div>
-
-                <!-- SECTION APPRENANTS -->
-                <div class="section" style="border-left-color:#27ae60;">
-                    <h3>👤 Apprenants</h3>
-                    <div id="learnersListContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:12px;"></div>
-                </div>
-
-                <!-- SECTION GESTES & PROGRESSION -->
-                <div class="section" style="border-left-color:#3498db;">
-                    <h3>✓ Checklist de gestes</h3>
-                    <div style="margin-bottom:12px;">
-                        <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                            <input type="text" id="filterGestesFormation" placeholder="Filtrer les gestes..." style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">
-                        </label>
-                    </div>
-                    <div id="formationChecklistContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;"></div>
-                </div>
-
-                <!-- SECTION VIDÉOS -->
-                <div class="section" style="border-left-color:#e67e22;">
-                    <h3>📹 Vidéos de formation</h3>
-                    <p style="font-size:0.9em;color:#666;margin-bottom:12px;">Cliquez sur un geste ci-dessous pour voir sa vidéo de formation (si disponible)</p>
-                    <div id="formationVideosContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;"></div>
                 </div>
             </div>
 
@@ -2763,32 +2652,6 @@
                 </div>
             </div>
 
-            <!-- ONGLET AUDIT TRAIL -->
-            <div id="audit" class="tab-content">
-                <div class="section">
-                    <h2>📋 Audit Trail - Historique des actions</h2>
-                    <p style="font-size:0.9em;color:#666;margin-bottom:16px;">Toutes les actions effectuées dans l'outil sont enregistrées avec l'utilisateur et l'heure.</p>
-
-                    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-                        <input type="text" id="auditFilterUser" placeholder="Filtrer par utilisateur..." style="padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;flex:1;min-width:200px;">
-                        <select id="auditFilterType" style="padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">
-                            <option value="">Tous les types</option>
-                            <option value="CREATE">Créations</option>
-                            <option value="UPDATE">Modifications</option>
-                            <option value="DELETE">Suppressions</option>
-                            <option value="LOGIN">Connexions</option>
-                            <option value="INFO">Autres</option>
-                        </select>
-                        <button class="btn btn-secondary btn-small" onclick="filterAuditLog()">🔍 Filtrer</button>
-                        <button class="btn btn-secondary btn-small" onclick="exportAuditLog()">📤 Exporter</button>
-                    </div>
-
-                    <div id="auditTableContainer" style="margin-top:16px;">
-                        <!-- Audit log entries -->
-                    </div>
-                </div>
-            </div>
-
             <!-- ONGLET GANTT / PLANIFICATION -->
             <div id="gantt" class="tab-content">
                 <div class="section">
@@ -2946,9 +2809,135 @@
         ];
         let displayPrefs = { vuePrestations: 'detaillee', densite: 'normale', modeCalculateur: 'complet' };
         let actionHistory = [];
-        let currentUserSession = null;
         let ganttOffset = 0;
         let favoriteGestes = [];   // codes gestes favoris
+
+        // Système de permissions par rôle
+        const ROLE_PERMISSIONS = {
+            'admin': {
+                create_prestation: true,
+                edit_prestation: true,
+                delete_prestation: true,
+                create_client: true,
+                edit_client: true,
+                delete_client: true,
+                manage_stock: true,
+                manage_consommables: true,
+                manage_gestes: true,
+                manage_config: true,
+                view_audit: true,
+                export_data: true,
+                manage_users: true
+            },
+            'cea': {
+                create_prestation: true,
+                edit_prestation: true,
+                delete_prestation: false,
+                create_client: true,
+                edit_client: true,
+                delete_client: false,
+                manage_stock: false,
+                manage_consommables: false,
+                manage_gestes: false,
+                manage_config: false,
+                view_audit: true,
+                export_data: true,
+                manage_users: false
+            },
+            'msp': {
+                create_prestation: false,
+                edit_prestation: true,
+                delete_prestation: false,
+                create_client: false,
+                edit_client: false,
+                delete_client: false,
+                manage_stock: true,
+                manage_consommables: true,
+                manage_gestes: false,
+                manage_config: false,
+                view_audit: true,
+                export_data: true,
+                manage_users: false
+            },
+            'asp': {
+                create_prestation: false,
+                edit_prestation: false,
+                delete_prestation: false,
+                create_client: false,
+                edit_client: false,
+                delete_client: false,
+                manage_stock: true,
+                manage_consommables: true,
+                manage_gestes: false,
+                manage_config: false,
+                view_audit: false,
+                export_data: false,
+                manage_users: false
+            }
+        };
+
+        // ============================================================
+        // Vérification des permissions
+        // ============================================================
+        function hasPermission(action) {
+            if (!currentUserSession) return false;
+            const role = currentUserSession.role;
+            const permissions = ROLE_PERMISSIONS[role];
+            return permissions ? permissions[action] === true : false;
+        }
+
+        function checkPermission(action, showError = true) {
+            const hasPerm = hasPermission(action);
+            if (!hasPerm && showError) {
+                const actionLabels = {
+                    'create_prestation': 'créer une prestation',
+                    'edit_prestation': 'modifier une prestation',
+                    'delete_prestation': 'supprimer une prestation',
+                    'create_client': 'créer un client',
+                    'edit_client': 'modifier un client',
+                    'delete_client': 'supprimer un client',
+                    'manage_stock': 'gérer le stock',
+                    'manage_consommables': 'gérer les consommables',
+                    'manage_gestes': 'gérer les gestes',
+                    'manage_config': 'accéder à la configuration',
+                    'view_audit': 'voir l\'historique',
+                    'export_data': 'exporter les données',
+                    'manage_users': 'gérer les utilisateurs'
+                };
+                const label = actionLabels[action] || action;
+                toast(`❌ Vous n'avez pas la permission de ${label}`, 'error');
+            }
+            return hasPerm;
+        }
+
+        function updateUIPermissions() {
+            // Update button visibility based on permissions
+            const canManageGestes = hasPermission('manage_gestes');
+            const canManageConsommables = hasPermission('manage_consommables');
+            const canManageStock = hasPermission('manage_stock');
+            const canManageConfig = hasPermission('manage_config');
+
+            // Hide/show manage gestes buttons
+            document.querySelectorAll('[data-perm="manage_gestes"]').forEach(el => {
+                el.style.display = canManageGestes ? '' : 'none';
+            });
+
+            // Hide/show manage consommables buttons
+            document.querySelectorAll('[data-perm="manage_consommables"]').forEach(el => {
+                el.style.display = canManageConsommables ? '' : 'none';
+            });
+
+            // Hide/show manage stock buttons
+            document.querySelectorAll('[data-perm="manage_stock"]').forEach(el => {
+                el.style.display = canManageStock ? '' : 'none';
+            });
+
+            // Hide/show manage config buttons
+            document.querySelectorAll('[data-perm="manage_config"]').forEach(el => {
+                el.style.display = canManageConfig ? '' : 'none';
+            });
+        }
+
         let recentGestes = [];     // 10 derniers codes utilisés
         let clientsData = {};      // {nom: {tel, email, adresse, notes, tarifSpecial}}
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
@@ -3080,8 +3069,6 @@
         let currentAttachments = [];
         let tabProfiles = [];
         let activeTabProfileId = null;
-        let learnersList = [];
-        let formationProgress = {};
         let _presentationMode = false;
         let _presentationConfig = (() => {
             try {
@@ -3124,12 +3111,6 @@
         renderDashboard();
         initTheme();
         initMatrice();
-        loadFormationData();
-        // Écouteur pour le filtre des gestes de formation
-        const filterFormation = document.getElementById('filterGestesFormation');
-        if (filterFormation) {
-            filterFormation.addEventListener('input', () => renderChecklistGestes());
-        }
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
             initAuthGroups();
@@ -3308,14 +3289,23 @@
         }
 
         function saveStockConfig() {
+            // Check permission
+            if (!checkPermission('manage_config')) {
+                return;
+            }
             config.coutPalette = parseFloat(document.getElementById('coutPalette').value);
             config.coutRack = parseFloat(document.getElementById('coutRack').value);
             config.surfaceRack = parseFloat(document.getElementById('surfaceRack').value);
             config.capacitePalettes = parseFloat(document.getElementById('capacitePalettes').value);
+            logAction('Mise à jour configuration stock', 'UPDATE');
             saveToStorage();
         }
 
         function resetConfig() {
+            // Check permission
+            if (!checkPermission('manage_config')) {
+                return;
+            }
             toastConfirm('Réinitialiser tous les paramètres?', () => {
                 config = {
                     coutHoraireCEA: 35,
@@ -3361,7 +3351,6 @@
             else if (tabName === 'parametrage') loadConfig();
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
             else if (tabName === 'historique') renderHistory();
-            else if (tabName === 'audit') renderAuditLog();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
         }
 
@@ -3852,14 +3841,14 @@
             line.innerHTML = `
                 <div class="form-group">
                     <label>Type</label>
-                    <select id="type-stock-${lineId}" onchange="updateStockTypeAndStep(${lineId}); calculateTotal()">
+                    <select id="type-stock-${lineId}" onchange="calculateTotal()">
                         <option value="palette">Palette</option>
                         <option value="m2">m²</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Quantité</label>
-                    <input type="number" id="qte-stock-${lineId}" min="0" step="1" value="1" onchange="calculateTotal()">
+                    <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="1" onchange="calculateTotal()">
                 </div>
                 <div class="form-group">
                     <label>Durée (j)</label>
@@ -3888,18 +3877,6 @@
             document.getElementById('stock-' + lineId)?.remove();
             stockageLines = stockageLines.filter(id => id !== lineId);
             calculateTotal();
-        }
-
-        function updateStockTypeAndStep(lineId) {
-            const typeSelect = document.getElementById('type-stock-' + lineId);
-            const qteInput = document.getElementById('qte-stock-' + lineId);
-            if (typeSelect && qteInput) {
-                if (typeSelect.value === 'palette') {
-                    qteInput.step = '1';
-                } else if (typeSelect.value === 'm2') {
-                    qteInput.step = '0.1';
-                }
-            }
         }
 
         function applyMargePreset(pct) {
@@ -4077,6 +4054,13 @@
                 return;
             }
 
+            // Check permissions
+            const isEdit = editingPrestationId !== null;
+            const permission = isEdit ? 'edit_prestation' : 'create_prestation';
+            if (!checkPermission(permission)) {
+                return;
+            }
+
             const gestes = [];
             gesteLines.forEach(lineId => {
                 const code = document.getElementById('select-geste-' + lineId)?.value || '';
@@ -4168,68 +4152,15 @@
                 }
                 logAction(`Modification prestation : ${prest.prestation} (${prest.client})`);
                 saveToStorage();
-                showSaveConfirmModal(prest, true);
+                toast('✅ Prestation mise à jour', 'success');
             } else {
                 prestationsSauvegardees.push(prest);
                 logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${prest.prixVente.toFixed(2)} CHF`);
                 saveToStorage();
-                showSaveConfirmModal(prest, false);
+                toast('✅ Prestation enregistrée', 'success');
             }
 
             resetCalculateur();
-        }
-
-        function showSaveConfirmModal(prest, isUpdate) {
-            document.getElementById('saveConfirmTitle').textContent = isUpdate ? '✏️ Prestation mise à jour' : '✅ Prestation créée';
-            document.getElementById('savePrestClient').textContent = prest.client;
-            document.getElementById('savePrestName').textContent = prest.prestation;
-            document.getElementById('savePrestRef').textContent = prest.reference;
-            document.getElementById('savePrestAmount').textContent = prest.prixVente.toFixed(2);
-
-            // Sauvegarder les données actuelles pour export/print
-            window.currentSavedPrestation = prest;
-
-            document.getElementById('saveConfirmModal').classList.add('visible');
-        }
-
-        function closeSaveConfirmModal() {
-            document.getElementById('saveConfirmModal').classList.remove('visible');
-        }
-
-        function exportCurrentPrestation() {
-            if (!window.currentSavedPrestation) return;
-            const json = JSON.stringify(window.currentSavedPrestation, null, 2);
-            const blob = new Blob([json], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `prestation-${window.currentSavedPrestation.reference || 'export'}-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            toast('✅ Prestation téléchargée', 'success');
-        }
-
-        function printCurrentPrestation() {
-            if (!window.currentSavedPrestation) return;
-            const html = `
-                <div style="font-family:Arial;padding:20px;max-width:800px;margin:0 auto;">
-                    <h2 style="color:#6b8fa3;margin-bottom:20px;">Prestation</h2>
-                    <div style="border:1px solid #ddd;padding:15px;border-radius:8px;margin-bottom:20px;">
-                        <p><strong>Client:</strong> ${window.currentSavedPrestation.client}</p>
-                        <p><strong>Prestation:</strong> ${window.currentSavedPrestation.prestation}</p>
-                        <p><strong>Référence:</strong> ${window.currentSavedPrestation.reference}</p>
-                        <p><strong>Date:</strong> ${window.currentSavedPrestation.date}</p>
-                        <p><strong>Prix de vente:</strong> ${window.currentSavedPrestation.prixVente.toFixed(2)} CHF</p>
-                        <p><strong>Coût revient:</strong> ${window.currentSavedPrestation.prixRevient.toFixed(2)} CHF</p>
-                        <p><strong>Marge:</strong> ${window.currentSavedPrestation.marge}%</p>
-                        <p><strong>Heures:</strong> ${(window.currentSavedPrestation.heures || 0).toFixed(2)}h</p>
-                    </div>
-                </div>
-            `;
-            const printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write(html);
-            printWindow.document.close();
-            printWindow.print();
         }
 
         function resetCalculateur() {
@@ -4327,254 +4258,9 @@
             renderAttachments();
         }
 
-        // ============================================================
-        // FEATURE : Système de Formation (Vidéos, Checklist, Progression)
-        // ============================================================
-        function openFormationModal() {
-            document.getElementById('learnerName').value = '';
-            document.getElementById('learnerRole').value = 'CEA';
-            document.getElementById('learnerStartDate').valueAsDate = new Date();
-            document.getElementById('formationModal').classList.add('visible');
-        }
-
-        function closeFormationModal() {
-            document.getElementById('formationModal').classList.remove('visible');
-        }
-
-        function addLearner() {
-            const name = document.getElementById('learnerName').value.trim();
-            const role = document.getElementById('learnerRole').value;
-            const startDate = document.getElementById('learnerStartDate').value;
-
-            if (!name) {
-                toast('Veuillez entrer le nom de l\'apprenant', 'warning');
-                return;
-            }
-
-            const learner = {
-                id: Date.now(),
-                name: name,
-                role: role,
-                startDate: startDate,
-                progress: {}
-            };
-
-            catalogueGestes.forEach(g => {
-                learner.progress[g.code] = {
-                    level: 'non-vu',
-                    watchedAt: null,
-                    checkedAt: null,
-                    notes: ''
-                };
-            });
-
-            learnersList.push(learner);
-            saveFormationData();
-            renderLearners();
-            renderChecklistGestes();
-            renderFormationVideos();
-            closeFormationModal();
-            toast(`✅ Apprenant "${name}" ajouté`, 'success');
-        }
-
-        function removeLearner(learnerId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cet apprenant?')) return;
-            learnersList = learnersList.filter(l => l.id !== learnerId);
-            saveFormationData();
-            renderLearners();
-        }
-
-        function renderLearners() {
-            const container = document.getElementById('learnersListContainer');
-            if (learnersList.length === 0) {
-                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;">Aucun apprenant enregistré</div>';
-                return;
-            }
-
-            container.innerHTML = learnersList.map(learner => {
-                const total = Object.keys(learner.progress).length;
-                const completed = Object.values(learner.progress).filter(p => p.level === 'maîtrisé').length;
-                const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-                return `
-                    <div class="learner-card">
-                        <div style="display:flex;justify-content:space-between;align-items:start;">
-                            <div>
-                                <h4>${learner.name}</h4>
-                                <p style="font-size:0.85em;color:#7a9db1;margin:4px 0;">${learner.role}</p>
-                                <p style="font-size:0.8em;color:#aaa;margin:4px 0;">Depuis ${new Date(learner.startDate).toLocaleDateString('fr')}</p>
-                            </div>
-                            <button onclick="removeLearner(${learner.id})" style="background:#ffebee;border:none;color:#c0392b;padding:4px 8px;border-radius:4px;cursor:pointer;">✕</button>
-                        </div>
-                        <div class="learner-progress-bar">
-                            <div class="learner-progress-fill" style="width:${percent}%;"></div>
-                        </div>
-                        <p style="font-size:0.85em;margin:8px 0 0 0;">Progression: <strong>${completed}/${total} gestes maîtrisés (${percent}%)</strong></p>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderChecklistGestes() {
-            const container = document.getElementById('formationChecklistContainer');
-            if (!container) return;
-            const filterInput = document.getElementById('filterGestesFormation');
-            const filter = filterInput ? filterInput.value.toLowerCase() : '';
-            const filtered = catalogueGestes.filter(g => g.code.toLowerCase().includes(filter) || (g.description || '').toLowerCase().includes(filter));
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;">Aucun geste correspondant</div>';
-                return;
-            }
-
-            container.innerHTML = filtered.map(g => {
-                const progressData = learnersList.length > 0 ? learnersList[0].progress[g.code] : {level: 'non-vu'};
-                const levelColors = {
-                    'non-vu': '#999',
-                    'vu': '#f39c12',
-                    'pratiqué': '#3498db',
-                    'maîtrisé': '#27ae60'
-                };
-
-                return `
-                    <div class="geste-checklist-item" style="border-left-color:${levelColors[progressData.level || 'non-vu']};">
-                        <label>
-                            <input type="checkbox" ${progressData.level === 'maîtrisé' ? 'checked' : ''} onchange="updateGestureProgress('${g.code}', this.checked)">
-                            <strong>${g.code}</strong> - ${g.description || ''}
-                            <span class="geste-level">${progressData.level || 'non-vu'}</span>
-                        </label>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateGestureProgress(code, isChecked) {
-            if (learnersList.length === 0) {
-                toast('⚠️ Veuillez d\'abord ajouter un apprenant', 'warning');
-                return;
-            }
-            const learner = learnersList[0];
-            if (learner.progress[code]) {
-                learner.progress[code].level = isChecked ? 'maîtrisé' : 'pratiqué';
-                learner.progress[code].checkedAt = new Date().toISOString();
-                saveFormationData();
-                renderChecklistGestes();
-                renderLearners();
-            }
-        }
-
-        function renderFormationVideos() {
-            const container = document.getElementById('formationVideosContainer');
-            container.innerHTML = catalogueGestes.slice(0, 12).map(g => {
-                const hasVideo = g.videoUrl ? true : false;
-                return `
-                    <div class="video-card" onclick="openGestureVideoModal('${g.code}')">
-                        <div class="video-card-icon">${hasVideo ? '🎬' : '📹'}</div>
-                        <div class="video-card-title">${g.code}</div>
-                        <div style="font-size:0.75em;color:#666;margin-top:4px;">${g.description || ''}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function openGestureVideoModal(code) {
-            const geste = catalogueGestes.find(g => g.code === code);
-            if (!geste) return;
-
-            document.getElementById('videoGestureName').textContent = `📹 ${geste.code} - ${geste.description || ''}`;
-
-            const videoContainer = document.getElementById('gestureVideoContainer');
-            if (geste.videoUrl) {
-                videoContainer.innerHTML = `<video src="${geste.videoUrl}" controls style="width:100%;height:100%;object-fit:contain;"></video>`;
-            } else {
-                videoContainer.innerHTML = `
-                    <div style="text-align:center;color:#fff;">
-                        <p style="font-size:1.2em;margin-bottom:10px;">📹 Vidéo non disponible</p>
-                        <p style="font-size:0.9em;">Vous pouvez ajouter une URL vidéo au geste</p>
-                    </div>
-                `;
-            }
-
-            document.getElementById('gestureVideoDescription').innerHTML = `
-                <h4 style="margin:0 0 8px 0;">Description:</h4>
-                <p>${geste.description || 'Aucune description'}</p>
-                ${geste.videoUrl ? `<p style="margin-top:8px;"><strong>Source vidéo:</strong> ${geste.videoUrl}</p>` : ''}
-            `;
-
-            document.getElementById('gestureVideoSteps').innerHTML = `
-                <ol style="margin:0;padding-left:20px;">
-                    <li>Regarder la vidéo attentivement</li>
-                    <li>Noter les points clés</li>
-                    <li>Pratiquer le geste</li>
-                    <li>Demander une validation</li>
-                </ol>
-            `;
-
-            document.getElementById('gestureVideoModal').classList.add('visible');
-        }
-
-        function closeGestureVideoModal() {
-            document.getElementById('gestureVideoModal').classList.remove('visible');
-        }
-
-        function saveFormationData() {
-            localStorage.setItem('learnersList', JSON.stringify(learnersList));
-        }
-
-        function loadFormationData() {
-            const saved = localStorage.getItem('learnersList');
-            if (saved) {
-                learnersList = JSON.parse(saved);
-            }
-            renderLearners();
-            renderChecklistGestes();
-            renderFormationVideos();
-        }
-
-        function exportFormationProgress() {
-            if (learnersList.length === 0) {
-                toast('⚠️ Aucun apprenant à exporter', 'warning');
-                return;
-            }
-
-            const data = {
-                exportDate: new Date().toISOString(),
-                learners: learnersList.map(l => ({
-                    name: l.name,
-                    role: l.role,
-                    startDate: l.startDate,
-                    progress: Object.entries(l.progress).map(([code, data]) => ({
-                        geste: code,
-                        level: data.level,
-                        watchedAt: data.watchedAt,
-                        checkedAt: data.checkedAt
-                    }))
-                }))
-            };
-
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `formation-progress-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            toast('✅ Progression exportée', 'success');
-        }
-
-        // Initialiser la formation au chargement
-        document.addEventListener('DOMContentLoaded', () => {
-            loadFormationData();
-        });
-
         function editPrestation(id) {
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
-            if (p.locked) {
-                toast('⚠️ Cette prestation est verrouillée', 'warning');
-                return;
-            }
             editingPrestationId = id;
 
             // Basculer sur l'onglet calculateur
@@ -4666,14 +4352,14 @@
                 line.innerHTML = `
                     <div class="form-group">
                         <label>Type</label>
-                        <select id="type-stock-${lineId}" onchange="updateStockTypeAndStep(${lineId}); calculateTotal()">
+                        <select id="type-stock-${lineId}" onchange="calculateTotal()">
                             <option value="palette" ${s.type === 'palette' ? 'selected' : ''}>Palette</option>
                             <option value="m2" ${s.type === 'm2' ? 'selected' : ''}>m²</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
-                        <input type="number" id="qte-stock-${lineId}" min="0" step="1" value="${s.qte}" onchange="calculateTotal()">
+                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="calculateTotal()">
                     </div>
                     <div class="form-group">
                         <label>Durée (j)</label>
@@ -4693,7 +4379,6 @@
                     </div>`;
                 document.getElementById('stockageContainer').appendChild(line);
                 stockageLines.push(lineId);
-                updateStockTypeAndStep(lineId);
             });
             if (stockageLines.length === 0) addStockageLine();
 
@@ -4772,12 +4457,17 @@
         }
 
         function saveClientInfo(nom) {
+            // Check permission
+            if (!checkPermission('edit_client')) {
+                return;
+            }
             const tel   = document.getElementById('ci-tel')?.value.trim() || '';
             const email = document.getElementById('ci-email')?.value.trim() || '';
             const adresse = document.getElementById('ci-adresse')?.value.trim() || '';
             const notes   = document.getElementById('ci-notes')?.value.trim() || '';
             const tarif   = document.getElementById('ci-tarif')?.value.trim() || '';
             clientsData[nom] = { tel, email, adresse, notes, tarifSpecial: tarif };
+            logAction(`Mise à jour client : ${nom}`, 'UPDATE');
             saveToStorage();
             const indicator = document.getElementById('ci-saved');
             if (indicator) { indicator.style.opacity = '1'; setTimeout(() => indicator.style.opacity = '0', 1500); }
@@ -5003,10 +4693,10 @@
                     <td><span class="badge-diff-${diff}">${diffLabel}</span></td>
                     <td style="font-size:0.8em;color:#7a9db1;font-style:italic;">${notes}</td>
                     <td style="white-space:nowrap;">
-                        <button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>
+                        ${hasPermission('manage_gestes') ? `<button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>` : ''}
                         <button class="btn btn-small btn-secondary" onclick="imprimerFicheGeste('${codeEsc}')" title="Fiche PDF">🖨️</button>
                         <button class="btn btn-small btn-secondary" onclick="voirHistoriqueGeste('${codeEsc}')" title="Historique des modifications">📈</button>
-                        <button class="delete-btn btn-small" onclick="deleteGeste('${codeEsc}')">🗑️</button>
+                        ${hasPermission('manage_gestes') ? `<button class="delete-btn btn-small" onclick="deleteGeste('${codeEsc}')">🗑️</button>` : ''}
                     </td>
                 </tr>`;
             });
@@ -5016,6 +4706,10 @@
         }
 
         function addGeste() {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
+                return;
+            }
             const code = document.getElementById('newCode').value.trim();
             const categorie = document.getElementById('newCategorie').value;
             const description = document.getElementById('newDescription').value.trim();
@@ -5023,7 +4717,7 @@
             const coef = parseFloat(document.getElementById('newCoef').value);
             const difficulte = parseInt(document.getElementById('newDifficulte')?.value) || 1;
             const notes = document.getElementById('newNotes').value.trim();
-            
+
             if (!code || !description || !temps) {
                 toast('Merci de remplir au minimum: Code, Description et Temps', 'warning');
                 return;
@@ -5059,15 +4753,25 @@
         }
 
         function deleteGeste(code) {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
+                return;
+            }
             toastConfirm(`Supprimer le geste ${code}?`, () => {
                 pushUndoSnapshot('Suppression geste ' + code);
+                const g = catalogueGestes.find(x => x.code === code);
                 catalogueGestes = catalogueGestes.filter(g => g.code !== code);
+                logAction(`Suppression geste : ${code} - ${g?.description || ''}`, 'DELETE');
                 saveToStorage();
                 renderCatalogue();
             });
         }
 
         function editGesteInline(code) {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
+                return;
+            }
             const g = catalogueGestes.find(x => x.code === code);
             const tr = document.getElementById('tr-geste-' + code);
             if (!g || !tr) return;
@@ -5088,6 +4792,10 @@
         }
 
         function saveGesteInline(oldCode) {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
+                return;
+            }
             const g = catalogueGestes.find(x => x.code === oldCode);
             if (!g) return;
             pushGesteHistoire(g.code, g);
@@ -5115,10 +4823,14 @@
         }
 
         function addConsommable() {
+            // Check permission
+            if (!checkPermission('manage_consommables')) {
+                return;
+            }
             const nom = document.getElementById('newConsomNom').value.trim();
             const unite = document.getElementById('newConsomUnite').value;
             const prix = parseFloat(document.getElementById('newConsomPrix').value);
-            
+
             if (!nom || !prix) {
                 toast('Merci de remplir Nom et Prix', 'warning');
                 return;
@@ -5292,7 +5004,7 @@
                             <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
                             ${(p.statut === 'valide' || p.statut === 'facture') ? `<button class="btn btn-small" style="background:#f0e8f8;color:#7a5a9a;border:1px solid #c9b3d4;" onclick="programmerRecurrence(${p.id})" title="Créer récurrence">🔁 Récurrence</button>` : ''}
                             ${p.statut === 'facture' ? `<button class="btn btn-small" style="background:#f5fce8;color:#4a7a2a;border:1px solid #b8d890;" onclick="openPaiementModal(${p.id})" title="Suivi paiement">💶 Paiement</button>` : ''}
-                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                            ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
                         </div>
                     </div>
                     <div style="font-size: 0.85em; color: #7a9db1; margin-bottom: 10px;">
@@ -5365,7 +5077,7 @@
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Statut">🔄</button>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})">📄</button>
-                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                            ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
                         </div>
                     </div>`;
                 }).join('');
@@ -5391,7 +5103,7 @@
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})">🔄</button>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})">📄</button>
-                            <button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>
+                            ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
                         </td></tr>`;
                 });
                 container.innerHTML = thtml + '</tbody></table></div>';
@@ -5407,9 +5119,13 @@
         }
 
         function deletePrestation(id) {
+            // Check permission
+            if (!checkPermission('delete_prestation')) {
+                return;
+            }
             toastConfirm('Supprimer cette prestation?', () => {
                 const p = prestationsSauvegardees.find(x => x.id === id);
-                if (p) logAction(`Suppression prestation : ${p.prestation} (${p.client})`);
+                if (p) logAction(`Suppression prestation : ${p.prestation} (${p.client})`, 'DELETE');
                 prestationsSauvegardees = prestationsSauvegardees.filter(p => p.id !== id);
                 saveToStorage();
                 renderPrestations();
@@ -6110,14 +5826,14 @@
                 line.innerHTML = `
                     <div class="form-group">
                         <label>Type</label>
-                        <select id="type-stock-${lineId}" onchange="updateStockTypeAndStep(${lineId}); calculateTotal()">
+                        <select id="type-stock-${lineId}" onchange="calculateTotal()">
                             <option value="palette" ${s.type === 'palette' ? 'selected' : ''}>Palette</option>
                             <option value="m2" ${s.type === 'm2' ? 'selected' : ''}>m²</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
-                        <input type="number" id="qte-stock-${lineId}" min="0" step="1" value="${s.qte}" onchange="calculateTotal()">
+                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="calculateTotal()">
                     </div>
                     <div class="form-group">
                         <label>Durée (j)</label>
@@ -6312,6 +6028,10 @@
         // FEATURE 7 : Export CSV inventaire
         // ============================================================
         function exportStockCSV() {
+            // Check permission
+            if (!checkPermission('export_data')) {
+                return;
+            }
             const rows = [['Référence','Quantité','Lots','Valeur (CHF)','Prix moyen','Emplacement principal','Stock min','Alerte']];
             Object.entries(stockActuel).forEach(([ref, data]) => {
                 const valeur = data.lots.reduce((s, l) => s + l.qte * l.prix, 0);
@@ -6336,6 +6056,10 @@
         // FEATURE 8 : Sauvegarde/restauration JSON
         // ============================================================
         function exportJSON() {
+            // Check permission
+            if (!checkPermission('export_data')) {
+                return;
+            }
             const data = {
                 version: 1,
                 exportDate: new Date().toISOString(),
@@ -6968,6 +6692,10 @@
         // FEATURE 3 : Export CSV prestations
         // ============================================================
         function exportPrestationsCSV() {
+            // Check permission
+            if (!checkPermission('export_data')) {
+                return;
+            }
             // Get currently filtered prestations
             const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
             const statut = document.getElementById('filtreStatut')?.value || '';
@@ -7022,6 +6750,10 @@
         }
 
         function exportPrestationsXLSX() {
+            // Check permission
+            if (!checkPermission('export_data')) {
+                return;
+            }
             if (typeof XLSX === 'undefined') { toast('SheetJS non disponible', 'error'); return; }
             const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
             const statut = document.getElementById('filtreStatut')?.value || '';
@@ -7494,108 +7226,16 @@
         // ============================================================
         // AUDIT LOG (Historique)
         // ============================================================
-        function getCurrentUser() {
-            try {
-                const sess = sessionStorage.getItem('authSession');
-                if (sess) {
-                    const data = JSON.parse(sess);
-                    return data.name || 'Utilisateur';
-                }
-            } catch(e) {}
-            return 'Système';
-        }
-
         function logAction(desc, actionType = 'INFO') {
             const now = new Date();
             const dateStr = now.toLocaleDateString('fr-FR') + ' ' + now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             const user = getCurrentUser();
+            const timestamp = now.toISOString();
             const fullDesc = `[${user}] ${desc}`;
-            actionHistory.unshift({
-                date: dateStr,
-                desc: fullDesc,
-                user: user,
-                type: actionType,
-                timestamp: now.getTime()
-            });
+            actionHistory.unshift({ date: dateStr, desc: fullDesc, user, type: actionType, timestamp });
             if (actionHistory.length > 500) actionHistory.pop();
             // Sauvegarde légère sans déclencher updateSaveIndicator
             localStorage.setItem('actionHistory', JSON.stringify(actionHistory.slice(0, 500)));
-        }
-
-        function renderAuditLog() {
-            const container = document.getElementById('auditTableContainer');
-            if (!container) return;
-
-            if (actionHistory.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Aucune action enregistrée</div>';
-                return;
-            }
-
-            container.innerHTML = '<div style="border:1px solid #ddd;border-radius:8px;overflow:hidden;">' +
-                '<div style="background:#f5f5f5;padding:12px;border-bottom:1px solid #ddd;display:grid;grid-template-columns:120px 200px 1fr auto;gap:12px;font-weight:600;font-size:0.85em;">' +
-                '<div>Heure</div><div>Utilisateur</div><div>Action</div><div style="text-align:center;">Type</div></div>' +
-                actionHistory.map((log, idx) => {
-                    const colors = {'CREATE':'#27ae60','UPDATE':'#3498db','DELETE':'#e74c3c','LOGIN':'#f39c12','INFO':'#95a5a6'};
-                    const c = colors[log.type] || '#95a5a6';
-                    return `
-                        <div style="border-bottom:1px solid #eee;padding:10px 12px;display:grid;grid-template-columns:120px 200px 1fr auto;gap:12px;align-items:center;font-size:0.85em;">
-                            <div style="color:#7a9db1;">${log.date || ''}</div>
-                            <div style="color:#5a7b8f;"><strong>${log.user || 'Système'}</strong></div>
-                            <div style="color:#333;">${log.desc || ''}</div>
-                            <div style="background:${c}1a;color:${c};padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600;text-align:center;white-space:nowrap;">${log.type || 'INFO'}</div>
-                        </div>
-                    `;
-                }).join('') + '</div>';
-        }
-
-        function filterAuditLog() {
-            const userFilter = document.getElementById('auditFilterUser')?.value.toLowerCase() || '';
-            const typeFilter = document.getElementById('auditFilterType')?.value || '';
-            const container = document.getElementById('auditTableContainer');
-            if (!container) return;
-
-            const filtered = actionHistory.filter(log => {
-                const matchUser = !userFilter || (log.user || '').toLowerCase().includes(userFilter);
-                const matchType = !typeFilter || log.type === typeFilter;
-                return matchUser && matchType;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Aucune action correspondant aux filtres</div>';
-                return;
-            }
-
-            container.innerHTML = '<div style="border:1px solid #ddd;border-radius:8px;overflow:hidden;">' +
-                '<div style="background:#f5f5f5;padding:12px;border-bottom:1px solid #ddd;display:grid;grid-template-columns:120px 200px 1fr auto;gap:12px;font-weight:600;font-size:0.85em;">' +
-                '<div>Heure</div><div>Utilisateur</div><div>Action</div><div style="text-align:center;">Type</div></div>' +
-                filtered.map(log => {
-                    const colors = {'CREATE':'#27ae60','UPDATE':'#3498db','DELETE':'#e74c3c','LOGIN':'#f39c12','INFO':'#95a5a6'};
-                    const c = colors[log.type] || '#95a5a6';
-                    return `
-                        <div style="border-bottom:1px solid #eee;padding:10px 12px;display:grid;grid-template-columns:120px 200px 1fr auto;gap:12px;align-items:center;font-size:0.85em;">
-                            <div style="color:#7a9db1;">${log.date || ''}</div>
-                            <div style="color:#5a7b8f;"><strong>${log.user || 'Système'}</strong></div>
-                            <div style="color:#333;">${log.desc || ''}</div>
-                            <div style="background:${c}1a;color:${c};padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600;text-align:center;white-space:nowrap;">${log.type || 'INFO'}</div>
-                        </div>
-                    `;
-                }).join('') + '</div>';
-        }
-
-        function exportAuditLog() {
-            const json = JSON.stringify({
-                exportDate: new Date().toISOString(),
-                totalActions: actionHistory.length,
-                actions: actionHistory
-            }, null, 2);
-            const blob = new Blob([json], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `audit-log-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            toast('✅ Audit trail exporté', 'success');
         }
 
         function renderHistory() {
@@ -8374,7 +8014,6 @@
                 renderAdminList('unites');
                 renderTabProfiles();
                 renderAuthGroups();
-                setTimeout(() => initTabDrag(), 50);
             } else {
                 isSuperUser = false;
                 document.body.classList.remove('admin-mode');
@@ -8395,9 +8034,10 @@
                 hBadge.style.background = `${c}33`;
                 hText.textContent = `🔐 ${group.name}`;
             }
-            // Store current user session for audit trail
+            // Store current user session and update permissions
             currentUserSession = { id: group.id, name: group.name, role: group.id };
             logAction(`Connexion en tant que ${group.name}`, 'LOGIN');
+            updateUIPermissions();
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
@@ -9658,9 +9298,6 @@
                 document.getElementById('gesturesSection').style.display = 'none';
                 document.getElementById('reportSection').style.display = 'none';
                 resetTraining();
-                loadTrainingAutoDraft();
-                enableTrainingAutoSave();
-                initAdditionalGestureSelect();
             }
         }
 
@@ -9877,226 +9514,6 @@
             toast('Geste ajouté ✓', 'success');
         }
 
-        function addAdditionalGesture() {
-            const name = document.getElementById('additionalGestureName').value.trim();
-            const desc = document.getElementById('additionalGestureDesc').value.trim();
-            if (!name) {
-                toast('Veuillez entrer un nom de geste', 'error');
-                return;
-            }
-
-            // Créer un objet geste supplémentaire
-            const additionalGesture = {
-                code: 'ADD',
-                description: name,
-                tempsDescription: desc,
-                temps: 0,
-                coef: 1,
-                difficulte: 1,
-                categorie: 'Supplémentaire'
-            };
-
-            selectedGestures.push(additionalGesture);
-            refreshReportGesturesDisplay();
-
-            document.getElementById('additionalGestureName').value = '';
-            document.getElementById('additionalGestureDesc').value = '';
-            toast('Geste supplémentaire ajouté ✓', 'success');
-        }
-
-        function initAdditionalGestureSelect() {
-            const select = document.getElementById('additionalGestureSelect');
-            if (!select) return;
-            select.innerHTML = '<option value="">-- Choisir un geste --</option>';
-
-            // Charger les favoris
-            const favorites = JSON.parse(localStorage.getItem('favoriteGestures') || '[]');
-
-            // Ajouter d'abord les gestes favoris
-            if (favorites.length > 0) {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = '⭐ Favoris';
-                favorites.forEach(code => {
-                    const geste = catalogueGestes.find(g => g.code === code);
-                    if (geste) {
-                        const option = document.createElement('option');
-                        option.value = geste.code;
-                        option.textContent = `[${geste.code}] ${geste.description}`;
-                        optgroup.appendChild(option);
-                    }
-                });
-                select.appendChild(optgroup);
-            }
-
-            // Puis tous les gestes groupés par catégorie
-            const categories = [...new Set(catalogueGestes.map(g => g.categorie))].sort();
-            categories.forEach(cat => {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = cat;
-                catalogueGestes
-                    .filter(g => g.categorie === cat)
-                    .forEach(geste => {
-                        const option = document.createElement('option');
-                        option.value = geste.code;
-                        option.textContent = `[${geste.code}] ${geste.description}`;
-                        optgroup.appendChild(option);
-                    });
-                select.appendChild(optgroup);
-            });
-        }
-
-        function toggleFavoriteGesture(code) {
-            let favorites = JSON.parse(localStorage.getItem('favoriteGestures') || '[]');
-            if (favorites.includes(code)) {
-                favorites = favorites.filter(c => c !== code);
-                toast('Retiré des favoris', 'info');
-            } else {
-                favorites.push(code);
-                toast('Ajouté aux favoris ⭐', 'success');
-            }
-            localStorage.setItem('favoriteGestures', JSON.stringify(favorites));
-            initAdditionalGestureSelect();
-        }
-
-        function toggleFavoriteSelectedGesture() {
-            const select = document.getElementById('additionalGestureSelect');
-            const code = select?.value || '';
-            if (!code) {
-                toast('Sélectionnez un geste d\'abord', 'error');
-                return;
-            }
-            toggleFavoriteGesture(code);
-        }
-
-        function filterGestures() {
-            const searchInput = document.getElementById('gestureSearchInput');
-            const query = searchInput?.value.toLowerCase() || '';
-            const select = document.getElementById('additionalGestureSelect');
-            if (!select) return;
-
-            // Réinitialiser le select avec tous les gestes
-            initAdditionalGestureSelect();
-
-            if (!query) return;
-
-            // Filtrer les options
-            const options = select.querySelectorAll('option');
-            const visibleGroups = new Set();
-
-            options.forEach(opt => {
-                if (opt.value === '') {
-                    opt.style.display = 'block';
-                    return;
-                }
-                const text = opt.textContent.toLowerCase();
-                const matches = text.includes(query);
-                opt.style.display = matches ? 'block' : 'none';
-                if (matches && opt.parentElement.tagName === 'OPTGROUP') {
-                    visibleGroups.add(opt.parentElement);
-                }
-            });
-
-            // Masquer les optgroups vides
-            select.querySelectorAll('optgroup').forEach(group => {
-                const visibleOpts = [...group.querySelectorAll('option')].filter(opt => opt.style.display !== 'none');
-                group.style.display = visibleOpts.length > 0 ? 'block' : 'none';
-            });
-        }
-
-        function addGestureFromCatalogue() {
-            const select = document.getElementById('additionalGestureSelect');
-            const code = select?.value || '';
-            if (!code) {
-                toast('Veuillez sélectionner un geste', 'error');
-                return;
-            }
-
-            const geste = catalogueGestes.find(g => g.code === code);
-            if (!geste) return;
-
-            // Créer un objet geste à partir du catalogue
-            const gestureFromCatalogue = {
-                code: geste.code,
-                description: geste.description,
-                tempsDescription: geste.notes || '',
-                temps: geste.temps,
-                coef: geste.coef,
-                difficulte: 1,
-                categorie: geste.categorie
-            };
-
-            selectedGestures.push(gestureFromCatalogue);
-            refreshReportGesturesDisplay();
-
-            select.value = '';
-            toast('Geste ajouté ✓', 'success');
-        }
-
-        function refreshReportGesturesDisplay() {
-            const gesturesList = document.getElementById('reportGesturesList');
-            if (!gesturesList) return;
-
-            const gesturesHtml = selectedGestures
-                .map((g, i) => {
-                    let tempsAffiche = (g.temps || 0) + 's';
-                    if ((g.temps || 0) >= 60) {
-                        const minutes = Math.floor((g.temps || 0) / 60);
-                        const secondes = (g.temps || 0) % 60;
-                        tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
-                    }
-
-                    const tempsAjuste = Math.round((g.temps || 0) * (g.coef || 1));
-                    let tempsAjusteAffiche = tempsAjuste + 's';
-                    if (tempsAjuste >= 60) {
-                        const minutes = Math.floor(tempsAjuste / 60);
-                        const secondes = tempsAjuste % 60;
-                        tempsAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
-                    }
-
-                    const diff = g.difficulte || 1;
-                    const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
-
-                    return `<div style="padding:10px;border-bottom:1px solid #e0e8f0;margin-bottom:6px;background:#f9fbfc;border-radius:4px;">
-                        <div style="margin-bottom:4px;"><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
-                        <div style="font-size:0.8em;color:#7a9db1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
-                            <div>🏷️ ${g.categorie}</div>
-                            <div>⏱️ ${tempsAffiche} → ${tempsAjusteAffiche}</div>
-                            <div>📊 ${diffLabel}</div>
-                        </div>
-                        ${g.tempsDescription ? `<div style="font-size:0.85em;color:#666;margin-top:6px;font-style:italic;">${g.tempsDescription}</div>` : ''}
-                    </div>`;
-                })
-                .join('');
-            gesturesList.innerHTML = gesturesHtml;
-
-            // Afficher le temps total
-            updateTrainingTotalTime();
-        }
-
-        function updateTrainingTotalTime() {
-            const totalBrut = selectedGestures.reduce((sum, g) => sum + (g.temps || 0), 0);
-            const totalAjuste = selectedGestures.reduce((sum, g) => sum + Math.round((g.temps || 0) * (g.coef || 1)), 0);
-
-            let brutAffiche = totalBrut + 's';
-            if (totalBrut >= 60) {
-                const m = Math.floor(totalBrut / 60);
-                const s = totalBrut % 60;
-                brutAffiche = s > 0 ? `${m}m${s}s` : `${m}m`;
-            }
-
-            let ajusteAffiche = totalAjuste + 's';
-            if (totalAjuste >= 60) {
-                const m = Math.floor(totalAjuste / 60);
-                const s = totalAjuste % 60;
-                ajusteAffiche = s > 0 ? `${m}m${s}s` : `${m}m`;
-            }
-
-            const timeDisplay = document.getElementById('trainingTotalTimeDisplay');
-            if (timeDisplay) {
-                timeDisplay.innerHTML = `⏱️ Temps brut: <strong>${brutAffiche}</strong> → Temps ajusté: <strong>${ajusteAffiche}</strong>`;
-            }
-        }
-
         function generateReport() {
             // Récupérer les gestes cochés
             const checkboxes = document.querySelectorAll('#proposedGesturesList input[type="checkbox"]');
@@ -10278,10 +9695,6 @@
                         <div><strong>${r.reference}</strong> - ${r.client}</div>
                         <div style="font-size:0.8em;color:#7a9db1;">${r.prestation} | ${r.date}</div>
                         <div style="font-size:0.75em;color:#999;">${r.gestures.length} geste(s)</div>
-                        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
-                            <button class="btn btn-mini" style="padding:4px 8px;font-size:0.75em;" onclick="cloneTrainingReport(${idx})">🔄 Cloner</button>
-                            <button class="btn btn-mini" style="padding:4px 8px;font-size:0.75em;" onclick="saveReportAsTemplate(${idx})">💾 Modèle</button>
-                        </div>
                     </div>`;
                 });
                 html += '</div>';
@@ -10294,305 +9707,6 @@
             const savedReportsDiv = document.createElement('div');
             savedReportsDiv.innerHTML = html;
             section.insertBefore(savedReportsDiv, section.lastElementChild);
-        }
-
-        function cloneTrainingReport(idx) {
-            const reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
-            if (!reports[idx]) return;
-
-            const reportToClone = reports[idx];
-            const clonedReport = {
-                ...reportToClone,
-                reference: reportToClone.reference + ' (Copie)',
-                createdAt: new Date().toISOString()
-            };
-
-            reports.push(clonedReport);
-            localStorage.setItem('trainingReports', JSON.stringify(reports));
-            toast('✅ Rapport cloné!', 'success');
-            showTrainingSavedReports();
-        }
-
-        function saveReportAsTemplate(idx) {
-            const reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
-            if (!reports[idx]) return;
-
-            const templates = JSON.parse(localStorage.getItem('trainingTemplates') || '[]');
-            const report = reports[idx];
-
-            const template = {
-                name: prompt('Nom du modèle:', report.prestation) || report.prestation,
-                description: report.description,
-                gestures: report.gestures,
-                customGestures: report.customGestures,
-                createdAt: new Date().toISOString()
-            };
-
-            templates.push(template);
-            localStorage.setItem('trainingTemplates', JSON.stringify(templates));
-            toast('✅ Modèle sauvegardé!', 'success');
-        }
-
-        function loadTrainingTemplate(idx) {
-            const templates = JSON.parse(localStorage.getItem('trainingTemplates') || '[]');
-            if (!templates[idx]) return;
-
-            const template = templates[idx];
-            currentTrainingOffer = template.description;
-            selectedGestures = template.gestures || [];
-            customGestures = template.customGestures || [];
-
-            document.getElementById('offerInputSection').style.display = 'none';
-            document.getElementById('gesturesSection').style.display = 'none';
-            document.getElementById('reportSection').style.display = 'block';
-            refreshReportGesturesDisplay();
-
-            toast('✅ Modèle chargé!', 'success');
-        }
-
-        // Auto-save pour le formulaire d'offre
-        function enableTrainingAutoSave() {
-            const offerInput = document.getElementById('offerDescription');
-            const clientInput = document.getElementById('reportClient');
-            const prestationInput = document.getElementById('reportPrestation');
-
-            function saveAsAutoDraft() {
-                const draftData = {
-                    offer: offerInput?.value || '',
-                    client: clientInput?.value || '',
-                    prestation: prestationInput?.value || '',
-                    timestamp: Date.now()
-                };
-                localStorage.setItem('trainingAutoDraft', JSON.stringify(draftData));
-            }
-
-            if (offerInput) offerInput.addEventListener('input', saveAsAutoDraft);
-            if (clientInput) clientInput.addEventListener('input', saveAsAutoDraft);
-            if (prestationInput) prestationInput.addEventListener('input', saveAsAutoDraft);
-        }
-
-        function loadTrainingAutoDraft() {
-            const draftData = JSON.parse(localStorage.getItem('trainingAutoDraft') || 'null');
-            if (!draftData) return;
-
-            const offerInput = document.getElementById('offerDescription');
-            const clientInput = document.getElementById('reportClient');
-            const prestationInput = document.getElementById('reportPrestation');
-
-            if (offerInput) offerInput.value = draftData.offer || '';
-            if (clientInput) clientInput.value = draftData.client || '';
-            if (prestationInput) prestationInput.value = draftData.prestation || '';
-        }
-
-        // Raccourcis clavier
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                if (e.key === 's' || e.key === 'S') {
-                    e.preventDefault();
-                    const reportSection = document.getElementById('reportSection');
-                    if (reportSection && reportSection.style.display !== 'none') {
-                        uploadToMainTool();
-                    }
-                }
-                if (e.key === 'n' || e.key === 'N') {
-                    e.preventDefault();
-                    resetTraining();
-                }
-            }
-            if (e.key === 'Escape') {
-                const trainingOverlay = document.getElementById('trainingOverlay');
-                if (trainingOverlay && trainingOverlay.style.display === 'flex') {
-                    closeTrainingModule();
-                }
-            }
-        });
-
-        function togglePrestationLock(id) {
-            const p = prestationsSauvegardees.find(x => x.id === id);
-            if (!p) return;
-            p.locked = !p.locked;
-            localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
-            toast(p.locked ? '🔒 Prestation verrouillée' : '🔓 Prestation déverrouillée', 'info');
-            afficherPrestations();
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // CHRONOMÈTRE INTÉGRÉ
-        // ═══════════════════════════════════════════════════════════════
-        let chronoInterval = null;
-        let chronoSeconds = 0;
-        let chromoRunning = false;
-
-        function formatChrono(seconds) {
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const s = seconds % 60;
-            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        }
-
-        function startChrono() {
-            if (chromoRunning) return;
-            chromoRunning = true;
-            document.getElementById('chronoStart').style.display = 'none';
-            document.getElementById('chromoPause').style.display = 'inline-block';
-
-            chronoInterval = setInterval(() => {
-                chronoSeconds++;
-                document.getElementById('chronoDisplay').textContent = formatChrono(chronoSeconds);
-            }, 1000);
-        }
-
-        function pauseChrono() {
-            chromoRunning = false;
-            clearInterval(chronoInterval);
-            document.getElementById('chronoStart').style.display = 'inline-block';
-            document.getElementById('chromoPause').style.display = 'none';
-        }
-
-        function resetChrono() {
-            pauseChrono();
-            chronoSeconds = 0;
-            document.getElementById('chronoDisplay').textContent = '00:00:00';
-        }
-
-        function applyChronoToLastGeste() {
-            if (chronoSeconds === 0) {
-                toast('Lancez le chronomètre d\'abord', 'warning');
-                return;
-            }
-
-            const lastId = gesteLines[gesteLines.length - 1];
-            if (!lastId) {
-                toast('Aucun geste dans le calculateur', 'warning');
-                return;
-            }
-
-            const input = document.getElementById('temps-' + lastId);
-            if (input) {
-                const estimatedInput = document.getElementById('temps-' + lastId);
-                const estimated = parseInt(estimatedInput?.value) || 0;
-                const realTime = chronoSeconds;
-                const ecart = estimated > 0 ? Math.abs((realTime - estimated) / estimated * 100) : 0;
-
-                input.value = chronoSeconds;
-                calculateTotal();
-
-                // Alerte intelligente si écart > 20%
-                if (ecart > 20) {
-                    const direction = realTime > estimated ? 'plus long' : 'plus rapide';
-                    toast(`⚠️ Écart de ${ecart.toFixed(0)}% (${direction} que prévu)`, 'warning');
-                }
-
-                toast(`✅ ${formatChrono(chronoSeconds)} appliqué au geste`, 'success');
-                resetChrono();
-            }
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // SYSTÈME D'ALERTES
-        // ═══════════════════════════════════════════════════════════════
-        function checkAlerts() {
-            const alerts = [];
-
-            // Alerte: Devis en attente depuis longtemps
-            const now = new Date();
-            prestationsSauvegardees?.forEach(p => {
-                if (p.statut === 'devis' && p.date) {
-                    const daysOld = (now - new Date(p.date)) / (1000 * 60 * 60 * 24);
-                    if (daysOld > 7) {
-                        alerts.push({type: 'warning', msg: `📋 "${p.prestation}" en attente depuis ${Math.floor(daysOld)} jours`});
-                    }
-                }
-            });
-
-            // Alerte: Stock faible
-            if (catalogueConsommables) {
-                catalogueConsommables.forEach(c => {
-                    const stock = mouvementsStock?.filter(m => m.article === c.nom && m.direction === '+').reduce((sum, m) => sum + m.quantite, 0) || 0;
-                    if (stock < 5 && stock > 0) {
-                        alerts.push({type: 'info', msg: `📦 Stock faible: "${c.nom}" (${stock} ${c.unite})`});
-                    }
-                });
-            }
-
-            return alerts;
-        }
-
-        function displayAlerts() {
-            const alerts = checkAlerts();
-            const alertBox = document.getElementById('alertsBox');
-            if (!alertBox) return;
-
-            if (alerts.length === 0) {
-                alertBox.innerHTML = '';
-                return;
-            }
-
-            alertBox.innerHTML = alerts.map((a, i) => `
-                <div style="background:${a.type === 'warning' ? '#fff3cd' : '#d1ecf1'};border-left:4px solid ${a.type === 'warning' ? '#ffc107' : '#17a2b8'};padding:10px 12px;margin-bottom:8px;border-radius:4px;font-size:0.9em;color:${a.type === 'warning' ? '#856404' : '#0c5460'};">
-                    ${a.msg}
-                    <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;cursor:pointer;font-size:1.2em;padding:0;">×</button>
-                </div>
-            `).join('');
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // RENTABILITÉ PAR CLIENT
-        // ═══════════════════════════════════════════════════════════════
-        function getRentabilityByClient() {
-            const clientStats = {};
-
-            prestationsSauvegardees?.forEach(p => {
-                const client = p.client || 'Sans client';
-                if (!clientStats[client]) {
-                    clientStats[client] = { ca: 0, cout: 0, count: 0, marge: 0 };
-                }
-                const ca = p.prixVente || 0;
-                const cout = p.prixRevient || 0;
-                clientStats[client].ca += ca;
-                clientStats[client].cout += cout;
-                clientStats[client].marge += (ca - cout);
-                clientStats[client].count++;
-            });
-
-            return Object.entries(clientStats)
-                .map(([client, stats]) => ({
-                    client,
-                    ca: stats.ca,
-                    cout: stats.cout,
-                    marge: stats.marge,
-                    tauxMarge: stats.ca > 0 ? ((stats.marge / stats.ca) * 100).toFixed(1) : 0,
-                    count: stats.count
-                }))
-                .sort((a, b) => b.marge - a.marge);
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // PRÉVISIONS BASÉES HISTORIQUE
-        // ═══════════════════════════════════════════════════════════════
-        function getPredictions() {
-            const stats = {
-                avgTemps: 0,
-                avgCout: 0,
-                avgMarge: 0,
-                totalPrestations: prestationsSauvegardees?.length || 0
-            };
-
-            if (stats.totalPrestations === 0) return stats;
-
-            const totalTemps = prestationsSauvegardees.reduce((sum, p) => {
-                const temps = (p.gestes || []).reduce((s, g) => s + (g.duree || 0), 0);
-                return sum + temps;
-            }, 0);
-
-            const totalCout = prestationsSauvegardees.reduce((sum, p) => sum + (p.prixRevient || 0), 0);
-            const totalMarge = prestationsSauvegardees.reduce((sum, p) => sum + ((p.prixVente || 0) - (p.prixRevient || 0)), 0);
-
-            stats.avgTemps = Math.round(totalTemps / stats.totalPrestations);
-            stats.avgCout = (totalCout / stats.totalPrestations).toFixed(2);
-            stats.avgMarge = (totalMarge / stats.totalPrestations).toFixed(2);
-
-            return stats;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -10833,7 +9947,7 @@
                 <select id="authGroupSelect" onchange="document.getElementById('authPasswordInput').focus()">
                     <option value="">— Sélectionnez votre groupe —</option>
                 </select>
-                <div style="position:relative;">   <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">   <span onclick="var p=document.getElementById('authPasswordInput');if(p.type==='password'){p.type='text';this.textContent='🙈'}else{p.type='password';this.textContent='👁'}" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.3em;user-select:none;">👁</span> </div>
+                <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
                 <div class="auth-error" id="authError"></div>
                 <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
                 <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
@@ -10964,38 +10078,11 @@
                         <p style="margin-bottom:8px;"><strong>Référence:</strong> <input type="text" id="reportRef" placeholder="Référence" style="width:60%;padding:6px;border:1px solid #ddd;border-radius:4px;"></p>
                         <p><strong>Date:</strong> <input type="date" id="reportDate" style="width:200px;padding:6px;border:1px solid #ddd;border-radius:4px;"></p>
                     </div>
-                    <div id="trainingTotalTimeDisplay" style="background:#e8f9f3;padding:12px;border-radius:8px;border-left:4px solid #4ca88f;margin-bottom:12px;font-weight:600;color:#3a7a6f;text-align:center;">
-                        ⏱️ Temps brut: <strong>0s</strong> → Temps ajusté: <strong>0s</strong>
-                    </div>
                     <div id="reportGesturesList" style="background:#fffef9;padding:12px;border-radius:8px;border:1px solid #d5e3ed;margin-bottom:12px;max-height:200px;overflow-y:auto;">
                         <!-- Résumé des gestes s'affichera ici -->
                     </div>
-                    <details style="margin-bottom:12px;">
-                        <summary style="cursor:pointer;font-weight:600;color:#6b8fa3;">+ Ajouter un geste supplémentaire</summary>
-                        <div style="margin-top:10px;padding:12px;background:#f5f9fc;border-radius:8px;">
-                            <p style="font-size:0.9em;color:#7a9db1;margin-top:0;margin-bottom:10px;"><strong>Sélectionner un geste du catalogue :</strong></p>
-                            <div style="margin-bottom:10px;">
-                                <input type="text" id="gestureSearchInput" placeholder="🔍 Chercher un geste (code, description...)" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;font-size:0.95em;" onkeyup="filterGestures()">
-                            </div>
-                            <select id="additionalGestureSelect" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:12px;font-size:0.95em;">
-                                <option value="">-- Choisir un geste --</option>
-                            </select>
-                            <button class="btn btn-success" style="width:100%;margin-bottom:8px;" onclick="addGestureFromCatalogue()">✅ Ajouter ce geste</button>
-                            <button class="btn" style="width:100%;margin-bottom:12px;" onclick="toggleFavoriteSelectedGesture()">⭐ Ajouter aux favoris</button>
-
-                            <hr style="border:none;border-top:1px dashed #ccc;margin:12px 0;">
-
-                            <p style="font-size:0.9em;color:#7a9db1;margin-bottom:10px;"><strong>Ou créer un geste personnalisé :</strong></p>
-                            <input type="text" id="additionalGestureName" placeholder="Nom du geste" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;">
-                            <textarea id="additionalGestureDesc" placeholder="Description du geste" style="width:100%;height:60px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;font-family:inherit;margin-bottom:8px;"></textarea>
-                            <button class="btn btn-success" style="width:100%;" onclick="addAdditionalGesture()">✅ Ajouter ce geste personnalisé</button>
-                        </div>
-                    </details>
-                    <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #a8d5e2;margin-bottom:12px;">
-                        <p style="margin:0;font-size:0.9em;color:#5a7b8f;"><strong>💾 Destination de sauvegarde:</strong><br/>Le rapport sera sauvegardé dans localStorage et synchronisé avec l'onglet Prestations de l'outil principal.</p>
-                    </div>
                     <button class="btn btn-success" style="width:100%;margin-bottom:8px;" onclick="uploadToMainTool(); setTimeout(() => showTrainingSavedReports(), 500);">💾 Sauvegarder & Uploader</button>
-                    <button class="btn" style="width:100%;margin-bottom:8px;" onclick="uploadToMainTool(); setTimeout(() => downloadTrainingReportsJSON(), 500);">📥 Télécharger tous les rapports (JSON)</button>
+                    <button class="btn" style="width:100%;margin-bottom:8px;" onclick="downloadTrainingReportsJSON();">📥 Télécharger tous les rapports (JSON)</button>
                     <button class="btn btn-secondary" style="width:100%;" onclick="showTrainingSavedReports()">📋 Voir rapports sauvegardés</button>
                 </div>
 
@@ -11036,92 +10123,21 @@
 
             <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;">
                 <button class="btn btn-secondary" onclick="closeTrainingImportModal()">Annuler</button>
-
-    <!-- MODAL FORMATION - AJOUTER APPRENANT -->
-    <div id="formationModal" class="modal">
-        <div class="modal-box" style="max-width:500px;">
-            <h3>➕ Ajouter un apprenant</h3>
-            <div class="form-group">
-                <label>Nom de l'apprenant</label>
-                <input type="text" id="learnerName" placeholder="Prénom Nom" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
-            </div>
-            <div class="form-group">
-                <label>Rôle</label>
-                <select id="learnerRole" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
-                    <option value="CEA">CEA (Collaborateur en emploi adapté)</option>
-                    <option value="MSP">MSP (Maître socioprofessionnel)</option>
-                    <option value="ASP">ASP (Assistant socioprofessionnel)</option>
-                    <option value="Autre">Autre</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Date de début</label>
-                <input type="date" id="learnerStartDate" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
-            </div>
-            <div style="display:flex;gap:10px;margin-top:16px;">
-                <button class="btn btn-success" onclick="addLearner()" style="flex:1;">✅ Ajouter</button>
-                <button class="btn btn-secondary" onclick="closeFormationModal()" style="flex:1;">Fermer</button>
             </div>
         </div>
     </div>
-
-    <!-- MODAL FORMATION - VIDÉO GESTE -->
-    <div id="gestureVideoModal" class="modal">
-        <div class="modal-box" style="max-width:700px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h3 id="videoGestureName">Vidéo du geste</h3>
-                <button onclick="closeGestureVideoModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;">✕</button>
-            </div>
-            <div id="gestureVideoContainer" style="background:#000;border-radius:8px;margin-bottom:16px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
-                <p style="color:#fff;">Vidéo non disponible</p>
-            </div>
-            <div id="gestureVideoDescription" style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:0.9em;line-height:1.6;"></div>
-            <div style="margin-top:16px;">
-                <h4>Étapes de la formation:</h4>
-                <div id="gestureVideoSteps" style="background:#f9f9f9;padding:12px;border-radius:6px;font-size:0.85em;"></div>
-            </div>
-            <button class="btn btn-secondary" onclick="closeGestureVideoModal()" style="width:100%;margin-top:16px;">Fermer</button>
-        </div>
-    </div>
-
-    <!-- MODAL SAUVEGARDE PRESTATION -->
-    <div id="saveConfirmModal" class="modal">
-        <div class="modal-box" style="max-width:600px;">
-            <h3 id="saveConfirmTitle">✅ Prestation sauvegardée</h3>
-            <div style="background:#f0f8f5;border-left:4px solid #27ae60;padding:14px;border-radius:6px;margin:16px 0;">
-                <p style="margin:0 0 10px 0;"><strong>Détails de la sauvegarde:</strong></p>
-                <ul style="margin:0;padding-left:20px;">
-                    <li><strong>Client:</strong> <span id="savePrestClient">-</span></li>
-                    <li><strong>Prestation:</strong> <span id="savePrestName">-</span></li>
-                    <li><strong>Référence:</strong> <span id="savePrestRef">-</span></li>
-                    <li><strong>Montant:</strong> <span id="savePrestAmount">-</span> CHF</li>
-                </ul>
-            </div>
-
-            <div style="background:#f5f9ff;border-left:4px solid #3498db;padding:14px;border-radius:6px;margin:16px 0;">
-                <p style="margin:0 0 10px 0;"><strong>📁 Lieu de sauvegarde:</strong></p>
-                <p style="margin:0;font-size:0.9em;color:#5a7b8f;">
-                    💾 <strong>Mémoire du navigateur</strong> (localStorage)<br>
-                    <span style="font-size:0.85em;color:#7a9db1;">Les données sont conservées localement sur cet appareil.</span>
-                </p>
-            </div>
-
-            <div style="margin:16px 0;">
-                <p style="font-size:0.9em;color:#666;margin-bottom:10px;"><strong>Options:</strong></p>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <button class="btn btn-secondary btn-small" onclick="exportCurrentPrestation()" style="background:#fff3cd;border-color:#f39c12;color:#856404;">📤 Télécharger JSON</button>
-                    <button class="btn btn-secondary btn-small" onclick="printCurrentPrestation()" style="background:#e8f4f8;border-color:#a8d5e2;color:#5a7b8f;">📄 Imprimer</button>
-                </div>
-            </div>
-
-            <div style="display:flex;gap:10px;margin-top:20px;">
-                <button class="btn btn-success" onclick="closeSaveConfirmModal()" style="flex:1;">✅ Continuer</button>
-                <button class="btn btn-secondary" onclick="closeSaveConfirmModal()" style="flex:1;">Fermer</button>
-            </div>
-        </div>
-    </div>
-
+<div class="toast-container" id="toast-container"></div>
+<!-- Legal notice and copyright -->
+<div class="footer-legal" style="margin-top:40px;padding:20px;background:#f9f9f9;border-top:1px solid #ddd;font-size:10px;color:#666;line-height:1.6;text-align:center;">
+  <strong style="color:#333;">© 2025–2026 MARET Davie — Tous droits réservés</strong><br>
+  <br>
+  <strong style="color:#555;">Conditions d'utilisation du code :</strong><br>
+  • Le code source de ces projets est fourni à titre informatif et éducatif<br>
+  • Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite<br>
+  • Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur<br>
+  • Pour toute demande de réutilisation ou de collaboration, contactez l'auteur<br>
+  <br>
+  <strong style="color:#555;">Attribution :</strong> Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret © 2025–2026
 </div>
-<script src="https://dmaret.github.io/footer.js"></script>
 </body>
 </html>
