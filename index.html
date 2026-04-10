@@ -2910,6 +2910,34 @@
             return hasPerm;
         }
 
+        function updateUIPermissions() {
+            // Update button visibility based on permissions
+            const canManageGestes = hasPermission('manage_gestes');
+            const canManageConsommables = hasPermission('manage_consommables');
+            const canManageStock = hasPermission('manage_stock');
+            const canManageConfig = hasPermission('manage_config');
+
+            // Hide/show manage gestes buttons
+            document.querySelectorAll('[data-perm="manage_gestes"]').forEach(el => {
+                el.style.display = canManageGestes ? '' : 'none';
+            });
+
+            // Hide/show manage consommables buttons
+            document.querySelectorAll('[data-perm="manage_consommables"]').forEach(el => {
+                el.style.display = canManageConsommables ? '' : 'none';
+            });
+
+            // Hide/show manage stock buttons
+            document.querySelectorAll('[data-perm="manage_stock"]').forEach(el => {
+                el.style.display = canManageStock ? '' : 'none';
+            });
+
+            // Hide/show manage config buttons
+            document.querySelectorAll('[data-perm="manage_config"]').forEach(el => {
+                el.style.display = canManageConfig ? '' : 'none';
+            });
+        }
+
         let recentGestes = [];     // 10 derniers codes utilisés
         let clientsData = {};      // {nom: {tel, email, adresse, notes, tarifSpecial}}
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
@@ -4740,6 +4768,10 @@
         }
 
         function editGesteInline(code) {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
+                return;
+            }
             const g = catalogueGestes.find(x => x.code === code);
             const tr = document.getElementById('tr-geste-' + code);
             if (!g || !tr) return;
@@ -4760,6 +4792,10 @@
         }
 
         function saveGesteInline(oldCode) {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
+                return;
+            }
             const g = catalogueGestes.find(x => x.code === oldCode);
             if (!g) return;
             pushGesteHistoire(g.code, g);
@@ -4787,10 +4823,14 @@
         }
 
         function addConsommable() {
+            // Check permission
+            if (!checkPermission('manage_consommables')) {
+                return;
+            }
             const nom = document.getElementById('newConsomNom').value.trim();
             const unite = document.getElementById('newConsomUnite').value;
             const prix = parseFloat(document.getElementById('newConsomPrix').value);
-            
+
             if (!nom || !prix) {
                 toast('Merci de remplir Nom et Prix', 'warning');
                 return;
@@ -7975,6 +8015,10 @@
                 hBadge.style.background = `${c}33`;
                 hText.textContent = `🔐 ${group.name}`;
             }
+            // Store current user session and update permissions
+            currentUserSession = { id: group.id, name: group.name, role: group.id };
+            logAction(`Connexion en tant que ${group.name}`, 'LOGIN');
+            updateUIPermissions();
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
