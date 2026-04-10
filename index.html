@@ -4342,6 +4342,8 @@
             learnersList.push(learner);
             saveFormationData();
             renderLearners();
+            renderChecklistGestes();
+            renderFormationVideos();
             closeFormationModal();
             toast(`✅ Apprenant "${name}" ajouté`, 'success');
         }
@@ -4386,7 +4388,9 @@
 
         function renderChecklistGestes() {
             const container = document.getElementById('formationChecklistContainer');
-            const filter = document.getElementById('filterGestesFormation').value.toLowerCase();
+            if (!container) return;
+            const filterInput = document.getElementById('filterGestesFormation');
+            const filter = filterInput ? filterInput.value.toLowerCase() : '';
             const filtered = catalogueGestes.filter(g => g.code.toLowerCase().includes(filter) || (g.description || '').toLowerCase().includes(filter));
 
             if (filtered.length === 0) {
