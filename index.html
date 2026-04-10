@@ -8979,7 +8979,7 @@
                     list.appendChild(catTitle);
 
                     gestures.forEach((geste) => {
-                        // Convertir temps en format lisible (secondes ou minutes)
+                        // Temps brut
                         let tempsAffiche = geste.temps + 's';
                         if (geste.temps >= 60) {
                             const minutes = Math.floor(geste.temps / 60);
@@ -8987,13 +8987,30 @@
                             tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
                         }
 
+                        // Temps ajusté (temps × coefficient)
+                        const tempsAjuste = Math.round(geste.temps * (geste.coef || 1));
+                        let tempsAjusteAffiche = tempsAjuste + 's';
+                        if (tempsAjuste >= 60) {
+                            const minutes = Math.floor(tempsAjuste / 60);
+                            const secondes = tempsAjuste % 60;
+                            tempsAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+                        }
+
+                        // Difficulté
+                        const diff = geste.difficulte || 1;
+                        const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
+
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'gesture-item';
                         itemDiv.innerHTML = `
                             <input type="checkbox" id="gesture_${geste.code}" name="gesture_${geste.code}" checked>
-                            <label for="gesture_${geste.code}">
+                            <label for="gesture_${geste.code}" style="flex:1;">
                                 <strong>${geste.code}</strong> — ${geste.description}
-                                <span style="color:#999;font-size:0.85em;">(${tempsAffiche})</span>
+                                <div style="font-size:0.75em;color:#999;margin-top:3px;">
+                                    ⏱️ ${tempsAffiche} × ${geste.coef} = ${tempsAjusteAffiche} |
+                                    📊 ${diffLabel}
+                                    ${geste.notes ? '| ' + geste.notes : ''}
+                                </div>
                             </label>
                         `;
                         list.appendChild(itemDiv);
@@ -9056,32 +9073,64 @@
             const gesturesList = document.getElementById('reportGesturesList');
             const gesturesHtml = selectedGestures
                 .map((g, i) => {
-                    // Convertir temps en format lisible
+                    // Temps brut
                     let tempsAffiche = g.temps + 's';
                     if (g.temps >= 60) {
                         const minutes = Math.floor(g.temps / 60);
                         const secondes = g.temps % 60;
                         tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
                     }
-                    return `<div style="padding:8px;border-bottom:1px solid #e0e8f0;margin-bottom:4px;">
-                        <div><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
-                        <div style="font-size:0.8em;color:#7a9db1;margin-top:2px;">⏱️ ${tempsAffiche} | 🏷️ ${g.categorie}</div>
+
+                    // Temps ajusté
+                    const tempsAjuste = Math.round(g.temps * (g.coef || 1));
+                    let tempsAjusteAffiche = tempsAjuste + 's';
+                    if (tempsAjuste >= 60) {
+                        const minutes = Math.floor(tempsAjuste / 60);
+                        const secondes = tempsAjuste % 60;
+                        tempsAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+                    }
+
+                    // Difficulté
+                    const diff = g.difficulte || 1;
+                    const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
+
+                    return `<div style="padding:10px;border-bottom:1px solid #e0e8f0;margin-bottom:6px;background:#f9fbfc;border-radius:4px;">
+                        <div style="margin-bottom:4px;"><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
+                        <div style="font-size:0.8em;color:#7a9db1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
+                            <div>🏷️ ${g.categorie}</div>
+                            <div>⏱️ ${tempsAffiche} × ${g.coef || 1} = <strong>${tempsAjusteAffiche}</strong></div>
+                            <div>📊 ${diffLabel}</div>
+                            ${g.notes ? `<div style="grid-column:1/-1;font-style:italic;color:#999;">📝 ${g.notes}</div>` : ''}
+                        </div>
                     </div>`;
                 })
                 .join('');
 
-            const totalTime = selectedGestures.reduce((sum, g) => sum + g.temps, 0);
-            let totalAffiche = totalTime + 's';
-            if (totalTime >= 60) {
-                const minutes = Math.floor(totalTime / 60);
-                const secondes = totalTime % 60;
-                totalAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+            // Temps brut total
+            const totalTimeBrut = selectedGestures.reduce((sum, g) => sum + g.temps, 0);
+            let totalBrutAffiche = totalTimeBrut + 's';
+            if (totalTimeBrut >= 60) {
+                const minutes = Math.floor(totalTimeBrut / 60);
+                const secondes = totalTimeBrut % 60;
+                totalBrutAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+            }
+
+            // Temps ajusté total (avec coefficient)
+            const totalTimeAjuste = selectedGestures.reduce((sum, g) => sum + Math.round(g.temps * (g.coef || 1)), 0);
+            let totalAjusteAffiche = totalTimeAjuste + 's';
+            if (totalTimeAjuste >= 60) {
+                const minutes = Math.floor(totalTimeAjuste / 60);
+                const secondes = totalTimeAjuste % 60;
+                totalAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
             }
 
             gesturesList.innerHTML = `<strong style="display:block;margin-bottom:8px;">✓ Gestes sélectionnés (${selectedGestures.length} geste${selectedGestures.length>1?'s':''}):</strong>
                 ${gesturesHtml}
-                <div style="padding:8px;background:#f5f9fc;border-radius:6px;margin-top:8px;text-align:center;">
-                    <strong>Temps total estimé: ${totalAffiche}</strong>
+                <div style="padding:12px;background:linear-gradient(135deg,#e8f4f8 0%,#f5e6f0 100%);border-radius:8px;margin-top:12px;border:1px solid #d5e3ed;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-weight:600;">
+                        <div>⏱️ Temps brut: <span style="color:#6b8fa3;">${totalBrutAffiche}</span></div>
+                        <div>⏱️ Temps ajusté: <span style="color:#9a70b8;">${totalAjusteAffiche}</span></div>
+                    </div>
                 </div>`;
 
             // Afficher l'étape 3
