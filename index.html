@@ -5706,15 +5706,19 @@
             sorted.forEach((p, i) => {
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+                const prixVente = (p.prixVente || 0);
+                const prixRevient = (p.prixRevient || 0);
+                const margeChf = (p.margeChf || 0);
+                const marge = (p.marge || 0);
                 html += `<tr>
                     <td>${medal}</td>
                     <td><strong>${p.prestation}</strong></td>
                     <td>${p.client}</td>
                     <td>${date}</td>
-                    <td>${p.prixVente.toFixed(2)}</td>
-                    <td>${p.prixRevient.toFixed(2)}</td>
-                    <td style="color:#4a8966;font-weight:bold;">${p.margeChf.toFixed(2)}</td>
-                    <td>${p.marge}%</td>
+                    <td>${prixVente.toFixed(2)}</td>
+                    <td>${prixRevient.toFixed(2)}</td>
+                    <td style="color:#4a8966;font-weight:bold;">${margeChf.toFixed(2)}</td>
+                    <td>${marge}%</td>
                 </tr>`;
             });
             html += '</tbody></table>';
@@ -9357,7 +9361,9 @@
                     date,
                     statut: 'brouillon',
                     prixVente: 0,
-                    coutRevient: 0,
+                    prixRevient: 0,
+                    marge: 0,
+                    margeChf: 0,
                     description: `[Assistant Gestes]\n${gesturesDesc}`,
                     gestes: selectedGestures.map(g => ({ code: g.code, nom: g.description, duree: g.temps, cout: 0 }))
                 };
@@ -9621,7 +9627,9 @@
                 date: new Date().toISOString().split('T')[0],
                 statut: 'brouillon',
                 prixVente: 0,
-                coutRevient: 0,
+                prixRevient: 0,
+                marge: 0,
+                margeChf: 0,
                 description: `[Import rapport formation]\n${reportData.reference}`,
                 gestes: reportData.gestures.map(g => ({
                     code: g.code,
