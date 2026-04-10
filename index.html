@@ -9262,41 +9262,7 @@
             };
 
             selectedGestures.push(additionalGesture);
-
-            // Rafraîchir l'affichage du rapport
-            const gesturesList = document.getElementById('reportGesturesList');
-            const gesturesHtml = selectedGestures
-                .map((g, i) => {
-                    let tempsAffiche = (g.temps || 0) + 's';
-                    if ((g.temps || 0) >= 60) {
-                        const minutes = Math.floor((g.temps || 0) / 60);
-                        const secondes = (g.temps || 0) % 60;
-                        tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
-                    }
-
-                    const tempsAjuste = Math.round((g.temps || 0) * (g.coef || 1));
-                    let tempsAjusteAffiche = tempsAjuste + 's';
-                    if (tempsAjuste >= 60) {
-                        const minutes = Math.floor(tempsAjuste / 60);
-                        const secondes = tempsAjuste % 60;
-                        tempsAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
-                    }
-
-                    const diff = g.difficulte || 1;
-                    const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
-
-                    return `<div style="padding:10px;border-bottom:1px solid #e0e8f0;margin-bottom:6px;background:#f9fbfc;border-radius:4px;">
-                        <div style="margin-bottom:4px;"><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
-                        <div style="font-size:0.8em;color:#7a9db1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
-                            <div>🏷️ ${g.categorie}</div>
-                            <div>⏱️ ${tempsAffiche} → ${tempsAjusteAffiche}</div>
-                            <div>📊 ${diffLabel}</div>
-                        </div>
-                        ${g.tempsDescription ? `<div style="font-size:0.85em;color:#666;margin-top:6px;font-style:italic;">${g.tempsDescription}</div>` : ''}
-                    </div>`;
-                })
-                .join('');
-            gesturesList.innerHTML = gesturesHtml;
+            refreshReportGesturesDisplay();
 
             document.getElementById('additionalGestureName').value = '';
             document.getElementById('additionalGestureDesc').value = '';
@@ -9307,11 +9273,98 @@
             const select = document.getElementById('additionalGestureSelect');
             if (!select) return;
             select.innerHTML = '<option value="">-- Choisir un geste --</option>';
-            catalogueGestes.forEach(geste => {
-                const option = document.createElement('option');
-                option.value = geste.code;
-                option.textContent = `[${geste.code}] ${geste.description}`;
-                select.appendChild(option);
+
+            // Charger les favoris
+            const favorites = JSON.parse(localStorage.getItem('favoriteGestures') || '[]');
+
+            // Ajouter d'abord les gestes favoris
+            if (favorites.length > 0) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = '⭐ Favoris';
+                favorites.forEach(code => {
+                    const geste = catalogueGestes.find(g => g.code === code);
+                    if (geste) {
+                        const option = document.createElement('option');
+                        option.value = geste.code;
+                        option.textContent = `[${geste.code}] ${geste.description}`;
+                        optgroup.appendChild(option);
+                    }
+                });
+                select.appendChild(optgroup);
+            }
+
+            // Puis tous les gestes groupés par catégorie
+            const categories = [...new Set(catalogueGestes.map(g => g.categorie))].sort();
+            categories.forEach(cat => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = cat;
+                catalogueGestes
+                    .filter(g => g.categorie === cat)
+                    .forEach(geste => {
+                        const option = document.createElement('option');
+                        option.value = geste.code;
+                        option.textContent = `[${geste.code}] ${geste.description}`;
+                        optgroup.appendChild(option);
+                    });
+                select.appendChild(optgroup);
+            });
+        }
+
+        function toggleFavoriteGesture(code) {
+            let favorites = JSON.parse(localStorage.getItem('favoriteGestures') || '[]');
+            if (favorites.includes(code)) {
+                favorites = favorites.filter(c => c !== code);
+                toast('Retiré des favoris', 'info');
+            } else {
+                favorites.push(code);
+                toast('Ajouté aux favoris ⭐', 'success');
+            }
+            localStorage.setItem('favoriteGestures', JSON.stringify(favorites));
+            initAdditionalGestureSelect();
+        }
+
+        function toggleFavoriteSelectedGesture() {
+            const select = document.getElementById('additionalGestureSelect');
+            const code = select?.value || '';
+            if (!code) {
+                toast('Sélectionnez un geste d\'abord', 'error');
+                return;
+            }
+            toggleFavoriteGesture(code);
+        }
+
+        function filterGestures() {
+            const searchInput = document.getElementById('gestureSearchInput');
+            const query = searchInput?.value.toLowerCase() || '';
+            const select = document.getElementById('additionalGestureSelect');
+            if (!select) return;
+
+            // Réinitialiser le select avec tous les gestes
+            initAdditionalGestureSelect();
+
+            if (!query) return;
+
+            // Filtrer les options
+            const options = select.querySelectorAll('option');
+            const visibleGroups = new Set();
+
+            options.forEach(opt => {
+                if (opt.value === '') {
+                    opt.style.display = 'block';
+                    return;
+                }
+                const text = opt.textContent.toLowerCase();
+                const matches = text.includes(query);
+                opt.style.display = matches ? 'block' : 'none';
+                if (matches && opt.parentElement.tagName === 'OPTGROUP') {
+                    visibleGroups.add(opt.parentElement);
+                }
+            });
+
+            // Masquer les optgroups vides
+            select.querySelectorAll('optgroup').forEach(group => {
+                const visibleOpts = [...group.querySelectorAll('option')].filter(opt => opt.style.display !== 'none');
+                group.style.display = visibleOpts.length > 0 ? 'block' : 'none';
             });
         }
 
@@ -9338,9 +9391,16 @@
             };
 
             selectedGestures.push(gestureFromCatalogue);
+            refreshReportGesturesDisplay();
 
-            // Rafraîchir l'affichage du rapport
+            select.value = '';
+            toast('Geste ajouté ✓', 'success');
+        }
+
+        function refreshReportGesturesDisplay() {
             const gesturesList = document.getElementById('reportGesturesList');
+            if (!gesturesList) return;
+
             const gesturesHtml = selectedGestures
                 .map((g, i) => {
                     let tempsAffiche = (g.temps || 0) + 's';
@@ -9374,8 +9434,32 @@
                 .join('');
             gesturesList.innerHTML = gesturesHtml;
 
-            select.value = '';
-            toast('Geste ajouté ✓', 'success');
+            // Afficher le temps total
+            updateTrainingTotalTime();
+        }
+
+        function updateTrainingTotalTime() {
+            const totalBrut = selectedGestures.reduce((sum, g) => sum + (g.temps || 0), 0);
+            const totalAjuste = selectedGestures.reduce((sum, g) => sum + Math.round((g.temps || 0) * (g.coef || 1)), 0);
+
+            let brutAffiche = totalBrut + 's';
+            if (totalBrut >= 60) {
+                const m = Math.floor(totalBrut / 60);
+                const s = totalBrut % 60;
+                brutAffiche = s > 0 ? `${m}m${s}s` : `${m}m`;
+            }
+
+            let ajusteAffiche = totalAjuste + 's';
+            if (totalAjuste >= 60) {
+                const m = Math.floor(totalAjuste / 60);
+                const s = totalAjuste % 60;
+                ajusteAffiche = s > 0 ? `${m}m${s}s` : `${m}m`;
+            }
+
+            const timeDisplay = document.getElementById('trainingTotalTimeDisplay');
+            if (timeDisplay) {
+                timeDisplay.innerHTML = `⏱️ Temps brut: <strong>${brutAffiche}</strong> → Temps ajusté: <strong>${ajusteAffiche}</strong>`;
+            }
         }
 
         function generateReport() {
@@ -9942,6 +10026,9 @@
                         <p style="margin-bottom:8px;"><strong>Référence:</strong> <input type="text" id="reportRef" placeholder="Référence" style="width:60%;padding:6px;border:1px solid #ddd;border-radius:4px;"></p>
                         <p><strong>Date:</strong> <input type="date" id="reportDate" style="width:200px;padding:6px;border:1px solid #ddd;border-radius:4px;"></p>
                     </div>
+                    <div id="trainingTotalTimeDisplay" style="background:#e8f9f3;padding:12px;border-radius:8px;border-left:4px solid #4ca88f;margin-bottom:12px;font-weight:600;color:#3a7a6f;text-align:center;">
+                        ⏱️ Temps brut: <strong>0s</strong> → Temps ajusté: <strong>0s</strong>
+                    </div>
                     <div id="reportGesturesList" style="background:#fffef9;padding:12px;border-radius:8px;border:1px solid #d5e3ed;margin-bottom:12px;max-height:200px;overflow-y:auto;">
                         <!-- Résumé des gestes s'affichera ici -->
                     </div>
@@ -9949,10 +10036,14 @@
                         <summary style="cursor:pointer;font-weight:600;color:#6b8fa3;">+ Ajouter un geste supplémentaire</summary>
                         <div style="margin-top:10px;padding:12px;background:#f5f9fc;border-radius:8px;">
                             <p style="font-size:0.9em;color:#7a9db1;margin-top:0;margin-bottom:10px;"><strong>Sélectionner un geste du catalogue :</strong></p>
+                            <div style="margin-bottom:10px;">
+                                <input type="text" id="gestureSearchInput" placeholder="🔍 Chercher un geste (code, description...)" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;font-size:0.95em;" onkeyup="filterGestures()">
+                            </div>
                             <select id="additionalGestureSelect" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:12px;font-size:0.95em;">
                                 <option value="">-- Choisir un geste --</option>
                             </select>
-                            <button class="btn btn-success" style="width:100%;margin-bottom:12px;" onclick="addGestureFromCatalogue()">✅ Ajouter ce geste</button>
+                            <button class="btn btn-success" style="width:100%;margin-bottom:8px;" onclick="addGestureFromCatalogue()">✅ Ajouter ce geste</button>
+                            <button class="btn" style="width:100%;margin-bottom:12px;" onclick="toggleFavoriteSelectedGesture()">⭐ Ajouter aux favoris</button>
 
                             <hr style="border:none;border-top:1px dashed #ccc;margin:12px 0;">
 
