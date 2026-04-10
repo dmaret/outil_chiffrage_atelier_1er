@@ -7744,6 +7744,7 @@
                 renderAdminList('unites');
                 renderTabProfiles();
                 renderAuthGroups();
+                setTimeout(() => initTabDrag(), 50);
             } else {
                 isSuperUser = false;
                 document.body.classList.remove('admin-mode');
