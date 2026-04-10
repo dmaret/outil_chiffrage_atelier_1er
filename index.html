@@ -1923,6 +1923,55 @@
                         <button class="btn btn-success btn-small" onclick="addConfigItem('unites')">➕ Ajouter</button>
                     </div>
                 </div>
+
+                <div class="section" style="border-left: 4px solid #27ae60;">
+                    <h2>📧 Email Webhooks (Phase 3)</h2>
+                    <div class="info-box">Configuration de l'intégration email pour l'envoi automatique de devis et rapports.</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="webhookEmailEnabled" onchange="document.getElementById('webhookEmailConfig').style.display = this.checked ? 'block' : 'none'; saveEmailWebhooksConfig();">
+                                Activer les webhooks email
+                            </label>
+                        </div>
+                    </div>
+                    <div id="webhookEmailConfig" style="display:none; background:#f0f8f0; padding:12px; border-radius:8px; margin-top:12px;">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:2;">
+                                <label>URL du webhook</label>
+                                <input type="url" id="webhookUrl" placeholder="https://api.email-service.com/webhooks" onchange="saveEmailWebhooksConfig()">
+                                <span class="help-text">URL de votre service d'envoi d'emails (Mailgun, Sendgrid, etc.)</span>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Clé API</label>
+                                <input type="password" id="webhookApiKey" placeholder="sk_***" onchange="saveEmailWebhooksConfig()">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label>Email source</label>
+                                <input type="email" id="webhookFromEmail" placeholder="noreply@atelier.local" onchange="saveEmailWebhooksConfig()">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Nom de l'expéditeur</label>
+                                <input type="text" id="webhookFromName" placeholder="Atelier - Gestion des Prestations" onchange="saveEmailWebhooksConfig()">
+                            </div>
+                        </div>
+                        <div style="margin-top:12px;">
+                            <strong>Templates d'emails:</strong>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
+                                <label><input type="checkbox" id="tpl-prestation_created" onchange="saveEmailWebhooksConfig()"> Prestation créée</label>
+                                <label><input type="checkbox" id="tpl-prestation_updated" onchange="saveEmailWebhooksConfig()"> Prestation modifiée</label>
+                                <label><input type="checkbox" id="tpl-devis_sent" onchange="saveEmailWebhooksConfig()"> Devis envoyé</label>
+                                <label><input type="checkbox" id="tpl-report_ready" onchange="saveEmailWebhooksConfig()"> Rapport finalisé</label>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:12px;">
+                            <button class="btn btn-success btn-small" onclick="testEmailWebhook()">🧪 Test webhook</button>
+                            <button class="btn btn-secondary btn-small" onclick="resetEmailWebhooksConfig()">↻ Réinitialiser</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- ONGLET CATALOGUE GESTES -->
@@ -2938,6 +2987,180 @@
             });
         }
 
+        // ============================================================
+        // PHASE 3: EMAIL WEBHOOKS INTEGRATION
+        // ============================================================
+        let emailWebhooksConfig = {
+            enabled: false,
+            webhookUrl: '',
+            apiKey: '',
+            fromEmail: 'noreply@atelier.local',
+            fromName: 'Atelier - Gestion des Prestations',
+            templates: {
+                prestation_created: {
+                    subject: 'Nouvelle prestation: {prestation_name}',
+                    enabled: true,
+                    recipients: 'client'
+                },
+                prestation_updated: {
+                    subject: 'Prestation modifiée: {prestation_name}',
+                    enabled: true,
+                    recipients: 'client'
+                },
+                devis_sent: {
+                    subject: 'Votre devis: {prestation_name}',
+                    enabled: true,
+                    recipients: 'client'
+                },
+                report_ready: {
+                    subject: 'Rapport finalisé: {prestation_name}',
+                    enabled: true,
+                    recipients: 'client,admin'
+                },
+                user_action: {
+                    subject: '[{action_type}] {description}',
+                    enabled: false,
+                    recipients: 'admin'
+                }
+            }
+        };
+
+        function loadEmailWebhooksConfig() {
+            try {
+                const saved = localStorage.getItem('emailWebhooksConfig');
+                if (saved) emailWebhooksConfig = Object.assign(emailWebhooksConfig, JSON.parse(saved));
+            } catch(e) {}
+        }
+
+        function saveEmailWebhooksConfig() {
+            localStorage.setItem('emailWebhooksConfig', JSON.stringify(emailWebhooksConfig));
+            logAction('Mise à jour configuration webhooks email', 'UPDATE');
+        }
+
+        function triggerWebhookEmail(eventType, data) {
+            if (!emailWebhooksConfig.enabled || !emailWebhooksConfig.webhookUrl) return;
+
+            const template = emailWebhooksConfig.templates[eventType];
+            if (!template || !template.enabled) return;
+
+            // Prepare email payload
+            const payload = {
+                event: eventType,
+                timestamp: new Date().toISOString(),
+                from: { email: emailWebhooksConfig.fromEmail, name: emailWebhooksConfig.fromName },
+                template: eventType,
+                data: data,
+                recipients: template.recipients.split(',').map(r => r.trim())
+            };
+
+            // Send webhook
+            fetch(emailWebhooksConfig.webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${emailWebhooksConfig.apiKey}`,
+                    'X-Webhook-Event': eventType
+                },
+                body: JSON.stringify(payload)
+            }).then(resp => {
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                logAction(`Webhook email déclenché: ${eventType}`, 'INFO');
+            }).catch(err => {
+                console.error('Webhook email error:', err);
+                logAction(`Erreur webhook email: ${eventType} - ${err.message}`, 'ERROR');
+            });
+        }
+
+        function getEmailTemplate(eventType, data) {
+            const templates = {
+                prestation_created: (d) => `
+                    <h2>Nouvelle prestation créée</h2>
+                    <p><strong>${d.prestation}</strong> pour ${d.client}</p>
+                    <p>Montant: <strong>${d.prixVente.toFixed(2)} CHF</strong></p>
+                `,
+                prestation_updated: (d) => `
+                    <h2>Prestation mise à jour</h2>
+                    <p><strong>${d.prestation}</strong> pour ${d.client}</p>
+                    <p>Nouveau montant: <strong>${d.prixVente.toFixed(2)} CHF</strong></p>
+                `,
+                devis_sent: (d) => `
+                    <h2>Votre devis</h2>
+                    <p>Prestation: <strong>${d.prestation}</strong></p>
+                    <p>Montant: <strong>${d.prixVente.toFixed(2)} CHF</strong></p>
+                    <p>Référence: <em>${d.reference}</em></p>
+                `,
+                report_ready: (d) => `
+                    <h2>Rapport finalisé</h2>
+                    <p>Prestation: <strong>${d.prestation}</strong></p>
+                    <p>Client: <strong>${d.client}</strong></p>
+                    <p>Statut: <strong>${d.statut}</strong></p>
+                `
+            };
+
+            return templates[eventType] ? templates[eventType](data) : '';
+        }
+
+        function syncEmailWebhooksUI() {
+            document.getElementById('webhookEmailEnabled').checked = emailWebhooksConfig.enabled;
+            document.getElementById('webhookUrl').value = emailWebhooksConfig.webhookUrl || '';
+            document.getElementById('webhookApiKey').value = emailWebhooksConfig.apiKey || '';
+            document.getElementById('webhookFromEmail').value = emailWebhooksConfig.fromEmail || '';
+            document.getElementById('webhookFromName').value = emailWebhooksConfig.fromName || '';
+            document.getElementById('webhookEmailConfig').style.display = emailWebhooksConfig.enabled ? 'block' : 'none';
+
+            Object.entries(emailWebhooksConfig.templates).forEach(([key, tpl]) => {
+                const checkbox = document.getElementById(`tpl-${key}`);
+                if (checkbox) checkbox.checked = tpl.enabled;
+            });
+        }
+
+        function updateEmailWebhooksConfigFromUI() {
+            emailWebhooksConfig.enabled = document.getElementById('webhookEmailEnabled').checked;
+            emailWebhooksConfig.webhookUrl = document.getElementById('webhookUrl').value;
+            emailWebhooksConfig.apiKey = document.getElementById('webhookApiKey').value;
+            emailWebhooksConfig.fromEmail = document.getElementById('webhookFromEmail').value;
+            emailWebhooksConfig.fromName = document.getElementById('webhookFromName').value;
+
+            Object.entries(emailWebhooksConfig.templates).forEach(([key, tpl]) => {
+                const checkbox = document.getElementById(`tpl-${key}`);
+                if (checkbox) emailWebhooksConfig.templates[key].enabled = checkbox.checked;
+            });
+        }
+
+        function testEmailWebhook() {
+            updateEmailWebhooksConfigFromUI();
+            const testData = {
+                prestation: 'Test - Prestation de démonstration',
+                client: 'Client Test',
+                reference: 'TEST-001',
+                prixVente: 1234.56,
+                statut: 'devis'
+            };
+            triggerWebhookEmail('prestation_created', testData);
+            toast('✉️ Webhook de test envoyé', 'success');
+        }
+
+        function resetEmailWebhooksConfig() {
+            emailWebhooksConfig = {
+                enabled: false,
+                webhookUrl: '',
+                apiKey: '',
+                fromEmail: 'noreply@atelier.local',
+                fromName: 'Atelier - Gestion des Prestations',
+                templates: {
+                    prestation_created: { subject: 'Nouvelle prestation: {prestation_name}', enabled: true, recipients: 'client' },
+                    prestation_updated: { subject: 'Prestation modifiée: {prestation_name}', enabled: true, recipients: 'client' },
+                    devis_sent: { subject: 'Votre devis: {prestation_name}', enabled: true, recipients: 'client' },
+                    report_ready: { subject: 'Rapport finalisé: {prestation_name}', enabled: true, recipients: 'client,admin' },
+                    user_action: { subject: '[{action_type}] {description}', enabled: false, recipients: 'admin' }
+                }
+            };
+            localStorage.removeItem('emailWebhooksConfig');
+            syncEmailWebhooksUI();
+            logAction('Réinitialisation configuration webhooks email', 'UPDATE');
+            toast('✅ Configuration réinitialisée', 'success');
+        }
+
         let recentGestes = [];     // 10 derniers codes utilisés
         let clientsData = {};      // {nom: {tel, email, adresse, notes, tarifSpecial}}
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
@@ -3085,6 +3308,7 @@
 
         // Chargement
         loadFromStorage();
+        loadEmailWebhooksConfig();
         renderStockSelects();
         document.getElementById('date').valueAsDate = new Date();
         document.getElementById('dateMouvement').valueAsDate = new Date();
@@ -3115,6 +3339,7 @@
         window.addEventListener('load', () => {
             initAuthGroups();
             checkAuthSession();
+            syncEmailWebhooksUI();  // Synchronize email webhooks config UI
         });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
@@ -4150,13 +4375,15 @@
                     }];
                     prestationsSauvegardees[idx] = prest;
                 }
-                logAction(`Modification prestation : ${prest.prestation} (${prest.client})`);
+                logAction(`Modification prestation : ${prest.prestation} (${prest.client})`, 'UPDATE');
                 saveToStorage();
+                triggerWebhookEmail('prestation_updated', prest);
                 toast('✅ Prestation mise à jour', 'success');
             } else {
                 prestationsSauvegardees.push(prest);
-                logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${prest.prixVente.toFixed(2)} CHF`);
+                logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${prest.prixVente.toFixed(2)} CHF`, 'CREATE');
                 saveToStorage();
+                triggerWebhookEmail('prestation_created', prest);
                 toast('✅ Prestation enregistrée', 'success');
             }
 
