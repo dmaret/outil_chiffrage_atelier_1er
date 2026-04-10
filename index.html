@@ -1431,6 +1431,7 @@
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
+                <button class="tab" onclick="switchTab('audit')">📋 Audit Trail</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
@@ -2762,6 +2763,32 @@
                 </div>
             </div>
 
+            <!-- ONGLET AUDIT TRAIL -->
+            <div id="audit" class="tab-content">
+                <div class="section">
+                    <h2>📋 Audit Trail - Historique des actions</h2>
+                    <p style="font-size:0.9em;color:#666;margin-bottom:16px;">Toutes les actions effectuées dans l'outil sont enregistrées avec l'utilisateur et l'heure.</p>
+
+                    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                        <input type="text" id="auditFilterUser" placeholder="Filtrer par utilisateur..." style="padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;flex:1;min-width:200px;">
+                        <select id="auditFilterType" style="padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">
+                            <option value="">Tous les types</option>
+                            <option value="CREATE">Créations</option>
+                            <option value="UPDATE">Modifications</option>
+                            <option value="DELETE">Suppressions</option>
+                            <option value="LOGIN">Connexions</option>
+                            <option value="INFO">Autres</option>
+                        </select>
+                        <button class="btn btn-secondary btn-small" onclick="filterAuditLog()">🔍 Filtrer</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportAuditLog()">📤 Exporter</button>
+                    </div>
+
+                    <div id="auditTableContainer" style="margin-top:16px;">
+                        <!-- Audit log entries -->
+                    </div>
+                </div>
+            </div>
+
             <!-- ONGLET GANTT / PLANIFICATION -->
             <div id="gantt" class="tab-content">
                 <div class="section">
@@ -2919,6 +2946,7 @@
         ];
         let displayPrefs = { vuePrestations: 'detaillee', densite: 'normale', modeCalculateur: 'complet' };
         let actionHistory = [];
+        let currentUserSession = null;
         let ganttOffset = 0;
         let favoriteGestes = [];   // codes gestes favoris
         let recentGestes = [];     // 10 derniers codes utilisés
@@ -3333,6 +3361,7 @@
             else if (tabName === 'parametrage') loadConfig();
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
             else if (tabName === 'historique') renderHistory();
+            else if (tabName === 'audit') renderAuditLog();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
         }
 
@@ -7465,13 +7494,108 @@
         // ============================================================
         // AUDIT LOG (Historique)
         // ============================================================
-        function logAction(desc) {
+        function getCurrentUser() {
+            try {
+                const sess = sessionStorage.getItem('authSession');
+                if (sess) {
+                    const data = JSON.parse(sess);
+                    return data.name || 'Utilisateur';
+                }
+            } catch(e) {}
+            return 'Système';
+        }
+
+        function logAction(desc, actionType = 'INFO') {
             const now = new Date();
             const dateStr = now.toLocaleDateString('fr-FR') + ' ' + now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-            actionHistory.unshift({ date: dateStr, desc });
-            if (actionHistory.length > 200) actionHistory.pop();
+            const user = getCurrentUser();
+            const fullDesc = `[${user}] ${desc}`;
+            actionHistory.unshift({
+                date: dateStr,
+                desc: fullDesc,
+                user: user,
+                type: actionType,
+                timestamp: now.getTime()
+            });
+            if (actionHistory.length > 500) actionHistory.pop();
             // Sauvegarde légère sans déclencher updateSaveIndicator
-            localStorage.setItem('actionHistory', JSON.stringify(actionHistory.slice(0, 200)));
+            localStorage.setItem('actionHistory', JSON.stringify(actionHistory.slice(0, 500)));
+        }
+
+        function renderAuditLog() {
+            const container = document.getElementById('auditTableContainer');
+            if (!container) return;
+
+            if (actionHistory.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Aucune action enregistrée</div>';
+                return;
+            }
+
+            container.innerHTML = '<div style="border:1px solid #ddd;border-radius:8px;overflow:hidden;">' +
+                '<div style="background:#f5f5f5;padding:12px;border-bottom:1px solid #ddd;display:grid;grid-template-columns:120px 200px 1fr auto;gap:12px;font-weight:600;font-size:0.85em;">' +
+                '<div>Heure</div><div>Utilisateur</div><div>Action</div><div style="text-align:center;">Type</div></div>' +
+                actionHistory.map((log, idx) => {
+                    const colors = {'CREATE':'#27ae60','UPDATE':'#3498db','DELETE':'#e74c3c','LOGIN':'#f39c12','INFO':'#95a5a6'};
+                    const c = colors[log.type] || '#95a5a6';
+                    return `
+                        <div style="border-bottom:1px solid #eee;padding:10px 12px;display:grid;grid-template-columns:120px 200px 1fr auto;gap:12px;align-items:center;font-size:0.85em;">
+                            <div style="color:#7a9db1;">${log.date || ''}</div>
+                            <div style="color:#5a7b8f;"><strong>${log.user || 'Système'}</strong></div>
+                            <div style="color:#333;">${log.desc || ''}</div>
+                            <div style="background:${c}1a;color:${c};padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600;text-align:center;white-space:nowrap;">${log.type || 'INFO'}</div>
+                        </div>
+                    `;
+                }).join('') + '</div>';
+        }
+
+        function filterAuditLog() {
+            const userFilter = document.getElementById('auditFilterUser')?.value.toLowerCase() || '';
+            const typeFilter = document.getElementById('auditFilterType')?.value || '';
+            const container = document.getElementById('auditTableContainer');
+            if (!container) return;
+
+            const filtered = actionHistory.filter(log => {
+                const matchUser = !userFilter || (log.user || '').toLowerCase().includes(userFilter);
+                const matchType = !typeFilter || log.type === typeFilter;
+                return matchUser && matchType;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Aucune action correspondant aux filtres</div>';
+                return;
+            }
+
+            container.innerHTML = '<div style="border:1px solid #ddd;border-radius:8px;overflow:hidden;">' +
+                '<div style="background:#f5f5f5;padding:12px;border-bottom:1px solid #ddd;display:grid;grid-template-columns:120px 200px 1fr auto;gap:12px;font-weight:600;font-size:0.85em;">' +
+                '<div>Heure</div><div>Utilisateur</div><div>Action</div><div style="text-align:center;">Type</div></div>' +
+                filtered.map(log => {
+                    const colors = {'CREATE':'#27ae60','UPDATE':'#3498db','DELETE':'#e74c3c','LOGIN':'#f39c12','INFO':'#95a5a6'};
+                    const c = colors[log.type] || '#95a5a6';
+                    return `
+                        <div style="border-bottom:1px solid #eee;padding:10px 12px;display:grid;grid-template-columns:120px 200px 1fr auto;gap:12px;align-items:center;font-size:0.85em;">
+                            <div style="color:#7a9db1;">${log.date || ''}</div>
+                            <div style="color:#5a7b8f;"><strong>${log.user || 'Système'}</strong></div>
+                            <div style="color:#333;">${log.desc || ''}</div>
+                            <div style="background:${c}1a;color:${c};padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600;text-align:center;white-space:nowrap;">${log.type || 'INFO'}</div>
+                        </div>
+                    `;
+                }).join('') + '</div>';
+        }
+
+        function exportAuditLog() {
+            const json = JSON.stringify({
+                exportDate: new Date().toISOString(),
+                totalActions: actionHistory.length,
+                actions: actionHistory
+            }, null, 2);
+            const blob = new Blob([json], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audit-log-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('✅ Audit trail exporté', 'success');
         }
 
         function renderHistory() {
@@ -8271,6 +8395,9 @@
                 hBadge.style.background = `${c}33`;
                 hText.textContent = `🔐 ${group.name}`;
             }
+            // Store current user session for audit trail
+            currentUserSession = { id: group.id, name: group.name, role: group.id };
+            logAction(`Connexion en tant que ${group.name}`, 'LOGIN');
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
