@@ -9241,6 +9241,67 @@
             toast('Geste ajouté ✓', 'success');
         }
 
+        function addAdditionalGesture() {
+            const name = document.getElementById('additionalGestureName').value.trim();
+            const desc = document.getElementById('additionalGestureDesc').value.trim();
+            if (!name) {
+                toast('Veuillez entrer un nom de geste', 'error');
+                return;
+            }
+
+            // Créer un objet geste supplémentaire
+            const additionalGesture = {
+                code: 'ADD',
+                description: name,
+                tempsDescription: desc,
+                temps: 0,
+                coef: 1,
+                difficulte: 1,
+                categorie: 'Supplémentaire'
+            };
+
+            selectedGestures.push(additionalGesture);
+
+            // Rafraîchir l'affichage du rapport
+            const gesturesList = document.getElementById('reportGesturesList');
+            const gesturesHtml = selectedGestures
+                .map((g, i) => {
+                    let tempsAffiche = (g.temps || 0) + 's';
+                    if ((g.temps || 0) >= 60) {
+                        const minutes = Math.floor((g.temps || 0) / 60);
+                        const secondes = (g.temps || 0) % 60;
+                        tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+                    }
+
+                    const tempsAjuste = Math.round((g.temps || 0) * (g.coef || 1));
+                    let tempsAjusteAffiche = tempsAjuste + 's';
+                    if (tempsAjuste >= 60) {
+                        const minutes = Math.floor(tempsAjuste / 60);
+                        const secondes = tempsAjuste % 60;
+                        tempsAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+                    }
+
+                    const diff = g.difficulte || 1;
+                    const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
+
+                    return `<div style="padding:10px;border-bottom:1px solid #e0e8f0;margin-bottom:6px;background:#f9fbfc;border-radius:4px;">
+                        <div style="margin-bottom:4px;"><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
+                        <div style="font-size:0.8em;color:#7a9db1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
+                            <div>🏷️ ${g.categorie}</div>
+                            <div>⏱️ ${tempsAffiche} → ${tempsAjusteAffiche}</div>
+                            <div>📊 ${diffLabel}</div>
+                        </div>
+                        ${g.tempsDescription ? `<div style="font-size:0.85em;color:#666;margin-top:6px;font-style:italic;">${g.tempsDescription}</div>` : ''}
+                    </div>`;
+                })
+                .join('');
+            gesturesList.innerHTML = gesturesHtml;
+
+            document.getElementById('additionalGestureName').value = '';
+            document.getElementById('additionalGestureDesc').value = '';
+            toast('Geste supplémentaire ajouté ✓', 'success');
+        }
+
         function generateReport() {
             // Récupérer les gestes cochés
             const checkboxes = document.querySelectorAll('#proposedGesturesList input[type="checkbox"]');
@@ -9807,6 +9868,17 @@
                     </div>
                     <div id="reportGesturesList" style="background:#fffef9;padding:12px;border-radius:8px;border:1px solid #d5e3ed;margin-bottom:12px;max-height:200px;overflow-y:auto;">
                         <!-- Résumé des gestes s'affichera ici -->
+                    </div>
+                    <details style="margin-bottom:12px;">
+                        <summary style="cursor:pointer;font-weight:600;color:#6b8fa3;">+ Ajouter un geste supplémentaire</summary>
+                        <div style="margin-top:10px;padding:12px;background:#f5f9fc;border-radius:8px;">
+                            <input type="text" id="additionalGestureName" placeholder="Nom du geste" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;">
+                            <textarea id="additionalGestureDesc" placeholder="Description du geste" style="width:100%;height:60px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;font-family:inherit;margin-bottom:8px;"></textarea>
+                            <button class="btn btn-success" style="width:100%;" onclick="addAdditionalGesture()">✅ Ajouter ce geste</button>
+                        </div>
+                    </details>
+                    <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #a8d5e2;margin-bottom:12px;">
+                        <p style="margin:0;font-size:0.9em;color:#5a7b8f;"><strong>💾 Destination de sauvegarde:</strong><br/>Le rapport sera sauvegardé dans localStorage et synchronisé avec l'onglet Prestations de l'outil principal.</p>
                     </div>
                     <button class="btn btn-success" style="width:100%;margin-bottom:8px;" onclick="uploadToMainTool(); setTimeout(() => showTrainingSavedReports(), 500);">💾 Sauvegarder & Uploader</button>
                     <button class="btn" style="width:100%;margin-bottom:8px;" onclick="downloadTrainingReportsJSON();">📥 Télécharger tous les rapports (JSON)</button>
