@@ -4050,7 +4050,7 @@
             // Basculer sur l'onglet calculateur
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab').classList.add('active');
+            document.querySelector('.tab[onclick*="calculateur"]').classList.add('active');
             document.getElementById('calculateur').classList.add('active');
 
             // Mettre le bouton en mode "Mettre à jour"
@@ -9852,15 +9852,6 @@
             </div>
         </div>
     </div>
-
-<!-- Modal statistiques -->
-<div id="stats-modal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="stats-box">
-    <button class="stats-close" onclick="document.getElementById('stats-modal').classList.remove('open')">×</button>
-    <h3>Statistiques</h3>
-    <div id="stats-content"></div>
-  </div>
-</div>
 <div class="toast-container" id="toast-container"></div>
 <!-- Legal notice and copyright -->
 <div class="footer-legal" style="margin-top:40px;padding:20px;background:#f9f9f9;border-top:1px solid #ddd;font-size:10px;color:#666;line-height:1.6;text-align:center;">
