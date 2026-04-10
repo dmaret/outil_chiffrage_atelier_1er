@@ -8850,63 +8850,156 @@
         let currentTrainingOffer = null;
         let selectedGestures = [];
         let customGestures = [];
+        let offerDetails = {}; // Détails extraits de l'offre
+        let currentQuestionIndex = 0;
+        let conversationAnswers = {}; // Réponses du dialogue
 
-        // Fonction pour analyser les gestes disponibles dans le catalogue et matcher avec la description
-        function findMatchingGestures(description) {
+        // Questions intelligentes basées sur l'offre
+        function generateConversationQuestions(description) {
             const lower = description.toLowerCase();
-            const matched = [];
+            const questions = [];
 
-            // Parcourir tous les gestes du catalogue
-            catalogueGestes.forEach(geste => {
-                const gestDesc = geste.description.toLowerCase();
-                const gestCode = geste.code.toLowerCase();
-                const gestCat = geste.categorie.toLowerCase();
-                const gestNotes = (geste.notes || '').toLowerCase();
+            // Q1: Nombre de pièces
+            const pieceMatch = description.match(/(\d+)\s*(?:pièces?)/i);
+            if (pieceMatch) {
+                questions.push({
+                    id: 'pieces_count',
+                    question: `Vous avez mentionné ${pieceMatch[1]} pièces. C'est correct?`,
+                    type: 'confirm',
+                    value: pieceMatch[1],
+                    help: 'Nombre de pièces à assembler'
+                });
+            } else if (lower.includes('assemblage') || lower.includes('kit')) {
+                questions.push({
+                    id: 'pieces_count',
+                    question: 'Combien de pièces à assembler?',
+                    type: 'number',
+                    value: 2,
+                    help: 'Nombre total de pièces'
+                });
+            }
 
-                // Chercher des correspondances
-                let score = 0;
+            // Q2: Type d'assemblage
+            if (lower.includes('assemblage')) {
+                questions.push({
+                    id: 'assembly_type',
+                    question: 'Type d\'assemblage?',
+                    type: 'select',
+                    options: ['Simple', 'Complexe', 'Très complexe'],
+                    value: 'Simple',
+                    help: 'Simple = 2-3 pièces, Complexe = 5-7 pièces, Très complexe = 10+ pièces'
+                });
+            }
 
-                // Correspondance exacte ou partielle dans la description
-                if (description.includes(geste.code) || lower.includes(gestDesc.substring(0, 20))) {
-                    score += 10;
-                }
-
-                // Mots-clés généraux
-                if (lower.includes('assemblage') && gestCat.includes('assemblage')) score += 3;
-                if (lower.includes('étiquette') && (gestCat.includes('étiquetage') || gestDesc.includes('étiquette'))) score += 3;
-                if (lower.includes('poste') && gestDesc.includes('poste')) score += 3;
-                if (lower.includes('transporteur') && gestDesc.includes('transporter')) score += 3;
-                if (lower.includes('contrôle') && gestCat.includes('contrôle')) score += 3;
-                if (lower.includes('reception') && gestCat.includes('réception')) score += 3;
-                if (lower.includes('emballage') && (gestDesc.includes('emballer') || gestDesc.includes('film'))) score += 2;
-                if (lower.includes('film') && gestDesc.includes('film')) score += 2;
-                if (lower.includes('pièces') && (gestDesc.includes('pièce') || gestDesc.includes('kit'))) score += 2;
-
-                // Nombres de pièces
-                const pieceMatch = description.match(/(\d+)\s*(?:pièces?)/i);
-                if (pieceMatch && gestDesc.includes(pieceMatch[1])) score += 2;
-                if (pieceMatch && gestDesc.includes('kit')) score += 1;
-
-                // Notes
-                if (lower.includes('simple') && gestNotes.includes('niveau 1')) score += 2;
-                if (lower.includes('complexe') && gestNotes.includes('niveau 2')) score += 2;
-
-                if (score > 0) {
-                    matched.push({ geste, score });
-                }
-            });
-
-            // Ajouter contrôle qualité par défaut si pas de match de contrôle
-            const hasControl = matched.some(m => m.geste.categorie.includes('Contrôle'));
-            if (!hasControl) {
-                const defaultControl = catalogueGestes.find(g => g.code === 'CTR-01');
-                if (defaultControl) {
-                    matched.push({ geste: defaultControl, score: 1 });
+            // Q3: Collage/Étiquetage
+            if (lower.includes('collage') || lower.includes('étiquette')) {
+                const colMatch = description.match(/(\d+)\s*(?:collages?|étiquettes?)/i);
+                if (colMatch) {
+                    questions.push({
+                        id: 'glue_count',
+                        question: `${colMatch[1]} collages/étiquettes - c'est juste?`,
+                        type: 'confirm',
+                        value: colMatch[1],
+                        help: 'Nombre d\'étiquettes ou collages'
+                    });
+                } else {
+                    questions.push({
+                        id: 'glue_type',
+                        question: 'Type de collage?',
+                        type: 'select',
+                        options: ['Simple', 'Orienté précis', 'Double face'],
+                        value: 'Simple',
+                        help: 'Définit la difficulté et le temps'
+                    });
                 }
             }
 
-            // Trier par score et retourner
-            return matched.sort((a, b) => b.score - a.score).map(m => m.geste);
+            // Q4: Emballage
+            if (lower.includes('emballer') || lower.includes('box') || lower.includes('boîte')) {
+                questions.push({
+                    id: 'packaging',
+                    question: 'Type d\'emballage?',
+                    type: 'select',
+                    options: ['Carton simple', 'Carton renforcé', 'Film bulles', 'Pas d\'emballage'],
+                    value: 'Carton simple',
+                    help: 'Matériel de protection du produit'
+                });
+            }
+
+            // Q5: Livraison
+            if (lower.includes('livraison') || lower.includes('poste') || lower.includes('transporteur')) {
+                questions.push({
+                    id: 'delivery_type',
+                    question: 'Mode de livraison?',
+                    type: 'select',
+                    options: ['Poste', 'Transporteur', 'Client', 'Retrait'],
+                    value: 'Poste',
+                    help: 'Méthode de transport et expédition'
+                });
+            }
+
+            // Q6: Contrôle qualité
+            questions.push({
+                id: 'quality_control',
+                question: 'Contrôle qualité requis?',
+                type: 'yesno',
+                value: true,
+                help: 'Inspection avant expédition'
+            });
+
+            return questions;
+        }
+
+        // Convertir les réponses en gestes
+        function convertAnswersToGestures(answers) {
+            const gestures = [];
+
+            // Assemblage
+            if (answers.assembly_type || answers.pieces_count) {
+                if (answers.assembly_type === 'Simple' || answers.pieces_count <= 3) {
+                    gestures.push('ASS-01');
+                } else if (answers.assembly_type === 'Complexe' || (answers.pieces_count >= 5 && answers.pieces_count <= 7)) {
+                    gestures.push('ASS-02');
+                } else {
+                    gestures.push('ASS-02');
+                }
+            }
+
+            // Collage/Étiquettes
+            if (answers.glue_count || answers.glue_type) {
+                if (answers.glue_type === 'Orienté précis') {
+                    gestures.push('ETI-04');
+                } else if (answers.glue_type === 'Simple') {
+                    gestures.push('ETI-02');
+                } else if (answers.glue_count) {
+                    gestures.push('ETI-02');
+                }
+            }
+
+            // Emballage
+            if (answers.packaging) {
+                if (answers.packaging === 'Film bulles') {
+                    gestures.push('ASS-03');
+                } else if (answers.packaging !== 'Pas d\'emballage') {
+                    gestures.push('ASS-03');
+                }
+            }
+
+            // Livraison
+            if (answers.delivery_type) {
+                if (answers.delivery_type === 'Poste') gestures.push('EXP-03');
+                else if (answers.delivery_type === 'Transporteur') gestures.push('EXP-04');
+                else if (answers.delivery_type === 'Client') gestures.push('EXP-01');
+            }
+
+            // Contrôle
+            if (answers.quality_control) {
+                gestures.push('CTR-01');
+            }
+
+            // Retourner les gestes uniques avec leurs détails
+            const uniqueGestures = [...new Set(gestures)];
+            return uniqueGestures.map(code => catalogueGestes.find(g => g.code === code)).filter(Boolean);
         }
 
         function openTrainingModule() {
@@ -8952,75 +9045,163 @@
                 return;
             }
             currentTrainingOffer = description;
-            selectedGestures = [];
-            customGestures = [];
+            conversationAnswers = {};
+            currentQuestionIndex = 0;
 
-            // Analyser la description et trouver les gestes correspondants du catalogue
-            const matchedGestures = findMatchingGestures(description);
+            // Générer les questions du dialogue
+            const questions = generateConversationQuestions(description);
 
-            // Afficher les gestes proposés depuis le catalogue réel
-            const list = document.getElementById('proposedGesturesList');
-            list.innerHTML = '';
-
-            if (matchedGestures.length === 0) {
-                list.innerHTML = '<p style="color:#7a9db1;text-align:center;padding:10px;">Aucun geste proposé. Ajoutez-les manuellement ci-dessous.</p>';
-            } else {
-                // Grouper par catégorie et afficher
-                const byCategory = {};
-                matchedGestures.forEach(geste => {
-                    if (!byCategory[geste.categorie]) byCategory[geste.categorie] = [];
-                    byCategory[geste.categorie].push(geste);
-                });
-
-                Object.entries(byCategory).sort().forEach(([category, gestures]) => {
-                    const catTitle = document.createElement('div');
-                    catTitle.style.cssText = 'font-weight:700;color:#6b8fa3;margin-top:12px;margin-bottom:8px;font-size:0.9em;';
-                    catTitle.textContent = '📌 ' + category;
-                    list.appendChild(catTitle);
-
-                    gestures.forEach((geste) => {
-                        // Temps brut
-                        let tempsAffiche = geste.temps + 's';
-                        if (geste.temps >= 60) {
-                            const minutes = Math.floor(geste.temps / 60);
-                            const secondes = geste.temps % 60;
-                            tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
-                        }
-
-                        // Temps ajusté (temps × coefficient)
-                        const tempsAjuste = Math.round(geste.temps * (geste.coef || 1));
-                        let tempsAjusteAffiche = tempsAjuste + 's';
-                        if (tempsAjuste >= 60) {
-                            const minutes = Math.floor(tempsAjuste / 60);
-                            const secondes = tempsAjuste % 60;
-                            tempsAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
-                        }
-
-                        // Difficulté
-                        const diff = geste.difficulte || 1;
-                        const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
-
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'gesture-item';
-                        itemDiv.innerHTML = `
-                            <input type="checkbox" id="gesture_${geste.code}" name="gesture_${geste.code}" checked>
-                            <label for="gesture_${geste.code}" style="flex:1;">
-                                <strong>${geste.code}</strong> — ${geste.description}
-                                <div style="font-size:0.75em;color:#999;margin-top:3px;">
-                                    ⏱️ ${tempsAffiche} × ${geste.coef} = ${tempsAjusteAffiche} |
-                                    📊 ${diffLabel}
-                                    ${geste.notes ? '| ' + geste.notes : ''}
-                                </div>
-                            </label>
-                        `;
-                        list.appendChild(itemDiv);
-                    });
-                });
+            if (questions.length === 0) {
+                toast('Impossible de générer des questions. Décrivez mieux votre offre.', 'warning');
+                return;
             }
 
-            // Afficher l'étape 2
+            // Afficher le dialogue
             document.getElementById('offerInputSection').style.display = 'none';
-            document.getElementById('gesturesSection').style.display = 'block';
+            document.getElementById('gesturesSection').style.display = 'none';
+            document.getElementById('reportSection').style.display = 'none';
+
+            // Créer la section dialogue si elle n'existe pas
+            let dialogSection = document.getElementById('dialogueSection');
+            if (!dialogSection) {
+                dialogSection = document.createElement('div');
+                dialogSection.id = 'dialogueSection';
+                dialogSection.className = 'training-section';
+                document.querySelector('.training-content').insertBefore(dialogSection, document.querySelector('.training-section'));
+            }
+
+            displayQuestion(questions, 0);
+        }
+
+        function displayQuestion(questions, index) {
+            const section = document.getElementById('dialogueSection') || (() => {
+                const s = document.createElement('div');
+                s.id = 'dialogueSection';
+                s.className = 'training-section';
+                document.querySelector('.training-content').appendChild(s);
+                return s;
+            })();
+
+            if (index >= questions.length) {
+                // Fin du dialogue - générer le rapport
+                generateReportFromAnswers(questions);
+                return;
+            }
+
+            const q = questions[index];
+            let html = `<h3>Question ${index + 1}/${questions.length}</h3>
+                <div style="background:#f5f9fc;padding:14px;border-radius:8px;border-left:4px solid #a8d5e2;margin-bottom:16px;">
+                    <p style="margin:0;font-size:1.05em;color:#2d3e50;font-weight:600;margin-bottom:6px;">${q.question}</p>
+                    <p style="margin:0;font-size:0.85em;color:#7a9db1;font-style:italic;">${q.help}</p>
+                </div>
+                <div style="margin-bottom:16px;">`;
+
+            // Afficher le type de réponse approprié
+            if (q.type === 'confirm') {
+                html += `
+                    <button class="btn btn-success" onclick="answerQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui, c'est juste</button>
+                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non, corriger</button>
+                `;
+            } else if (q.type === 'yesno') {
+                html += `
+                    <button class="btn btn-success" onclick="answerQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui</button>
+                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non</button>
+                `;
+            } else if (q.type === 'number') {
+                html += `<input type="number" id="q_${q.id}" value="${q.value}" min="1" max="100" style="width:100px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:1em;margin-right:8px;">
+                    <button class="btn btn-success" onclick="answerQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
+                `;
+            } else if (q.type === 'select') {
+                html += `<select id="q_${q.id}" style="width:200px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:1em;margin-right:8px;">`;
+                q.options.forEach(opt => {
+                    html += `<option ${opt === q.value ? 'selected' : ''}>${opt}</option>`;
+                });
+                html += `</select>
+                    <button class="btn btn-success" onclick="answerQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
+                `;
+            }
+
+            html += '</div>';
+            section.innerHTML = html;
+        }
+
+        function answerQuestion(index, answer, questions) {
+            const q = questions[index];
+            conversationAnswers[q.id] = answer;
+            displayQuestion(questions, index + 1);
+        }
+
+        function generateReportFromAnswers(questions) {
+            // Convertir les réponses en gestes
+            selectedGestures = convertAnswersToGestures(conversationAnswers);
+
+            if (selectedGestures.length === 0) {
+                toast('Aucun geste identifié', 'warning');
+                return;
+            }
+
+            // Afficher le rapport final
+            document.getElementById('dialogueSection').style.display = 'none';
+            document.getElementById('reportSection').style.display = 'block';
+
+            // Remplir le rapport
+            const gesturesList = document.getElementById('reportGesturesList');
+            const gesturesHtml = selectedGestures
+                .map((g, i) => {
+                    let tempsAffiche = g.temps + 's';
+                    if (g.temps >= 60) {
+                        const minutes = Math.floor(g.temps / 60);
+                        const secondes = g.temps % 60;
+                        tempsAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+                    }
+
+                    const tempsAjuste = Math.round(g.temps * (g.coef || 1));
+                    let tempsAjusteAffiche = tempsAjuste + 's';
+                    if (tempsAjuste >= 60) {
+                        const minutes = Math.floor(tempsAjuste / 60);
+                        const secondes = tempsAjuste % 60;
+                        tempsAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+                    }
+
+                    const diff = g.difficulte || 1;
+                    const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
+
+                    return `<div style="padding:10px;border-bottom:1px solid #e0e8f0;margin-bottom:6px;background:#f9fbfc;border-radius:4px;">
+                        <div style="margin-bottom:4px;"><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
+                        <div style="font-size:0.8em;color:#7a9db1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
+                            <div>🏷️ ${g.categorie}</div>
+                            <div>⏱️ ${tempsAffiche} × ${g.coef || 1} = <strong>${tempsAjusteAffiche}</strong></div>
+                            <div>📊 ${diffLabel}</div>
+                            ${g.notes ? `<div style="grid-column:1/-1;font-style:italic;color:#999;">📝 ${g.notes}</div>` : ''}
+                        </div>
+                    </div>`;
+                })
+                .join('');
+
+            const totalTimeBrut = selectedGestures.reduce((sum, g) => sum + g.temps, 0);
+            let totalBrutAffiche = totalTimeBrut + 's';
+            if (totalTimeBrut >= 60) {
+                const minutes = Math.floor(totalTimeBrut / 60);
+                const secondes = totalTimeBrut % 60;
+                totalBrutAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+            }
+
+            const totalTimeAjuste = selectedGestures.reduce((sum, g) => sum + Math.round(g.temps * (g.coef || 1)), 0);
+            let totalAjusteAffiche = totalTimeAjuste + 's';
+            if (totalTimeAjuste >= 60) {
+                const minutes = Math.floor(totalTimeAjuste / 60);
+                const secondes = totalTimeAjuste % 60;
+                totalAjusteAffiche = secondes > 0 ? `${minutes}m${secondes}s` : `${minutes}m`;
+            }
+
+            gesturesList.innerHTML = `<strong style="display:block;margin-bottom:8px;">✓ Gestes proposés (${selectedGestures.length} geste${selectedGestures.length>1?'s':''}):</strong>
+                ${gesturesHtml}
+                <div style="padding:12px;background:linear-gradient(135deg,#e8f4f8 0%,#f5e6f0 100%);border-radius:8px;margin-top:12px;border:1px solid #d5e3ed;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-weight:600;">
+                        <div>⏱️ Temps brut: <span style="color:#6b8fa3;">${totalBrutAffiche}</span></div>
+                        <div>⏱️ Temps ajusté: <span style="color:#9a70b8;">${totalAjusteAffiche}</span></div>
+                    </div>
+                </div>`;
         }
 
         function addCustomGesture() {
@@ -9166,6 +9347,7 @@
 
             // Afficher les données pour intégration
             if (prestationsSauvegardees) {
+                const gesturesDesc = selectedGestures.map(g => `[${g.code}] ${g.description}`).join(' + ');
                 const newPrestation = {
                     id: 'training_' + Date.now(),
                     client,
@@ -9175,8 +9357,8 @@
                     statut: 'brouillon',
                     prixVente: 0,
                     coutRevient: 0,
-                    description: `[Assistant Gestes]\n${selectedGestures.join(', ')}`,
-                    gestes: selectedGestures.map(g => ({ nom: g, duree: 0, cout: 0 }))
+                    description: `[Assistant Gestes]\n${gesturesDesc}`,
+                    gestes: selectedGestures.map(g => ({ code: g.code, nom: g.description, duree: g.temps, cout: 0 }))
                 };
                 prestationsSauvegardees.push(newPrestation);
                 localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
