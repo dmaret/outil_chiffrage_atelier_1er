@@ -8851,33 +8851,63 @@
         let selectedGestures = [];
         let customGestures = [];
 
-        // Mapping pour détecter les gestes par mots-clés
-        const gestureKeywordMapping = {
-            'ASS-01': ['2 pièces', 'assemblage simple'],
-            'ASS-02': ['3 pièces', '5 pièces', 'kit', 'assemblage complexe'],
-            'ASS-03': ['film bulles', 'emballage', 'fragile'],
-            'ETI-01': ['imprimer étiquette', 'étiquette'],
-            'ETI-02': ['coller étiquette', 'étiquette'],
-            'ETI-03': ['retirer étiquette'],
-            'ETI-04': ['étiquette orientée complexe'],
-            'ETI-05': ['étiquette simple', 'étiquette orientée'],
-            'ETI-06': ['impression inkjet', 'caractère'],
-            'CTR-01': ['contrôle', 'controle'],
-            'CTR-02': ['contrôle unitaire', 'controle'],
-            'CTR-03': ['conformité', 'contrôle fin'],
-            'CTR-04': ['conformité palette'],
-            'EXP-01': ['peser', 'poids'],
-            'EXP-02': ['filmer palette', 'film'],
-            'EXP-03': ['poste', 'livraison poste'],
-            'EXP-04': ['transporteur', 'transports', 'livraison transporteur'],
-            'PRE-01': ['bon', 'bon de préparation'],
-            'PRE-02': ['picking', 'prélèvement'],
-            'REC-01': ['décharger', 'palette', 'réception'],
-            'REC-02': ['contrôle visuel'],
-            'REC-03': ['déballage'],
-            'REC-04': ['ouvrir carton'],
-            'REC-05': ['compter']
-        };
+        // Fonction pour analyser les gestes disponibles dans le catalogue et matcher avec la description
+        function findMatchingGestures(description) {
+            const lower = description.toLowerCase();
+            const matched = [];
+
+            // Parcourir tous les gestes du catalogue
+            catalogueGestes.forEach(geste => {
+                const gestDesc = geste.description.toLowerCase();
+                const gestCode = geste.code.toLowerCase();
+                const gestCat = geste.categorie.toLowerCase();
+                const gestNotes = (geste.notes || '').toLowerCase();
+
+                // Chercher des correspondances
+                let score = 0;
+
+                // Correspondance exacte ou partielle dans la description
+                if (description.includes(geste.code) || lower.includes(gestDesc.substring(0, 20))) {
+                    score += 10;
+                }
+
+                // Mots-clés généraux
+                if (lower.includes('assemblage') && gestCat.includes('assemblage')) score += 3;
+                if (lower.includes('étiquette') && (gestCat.includes('étiquetage') || gestDesc.includes('étiquette'))) score += 3;
+                if (lower.includes('poste') && gestDesc.includes('poste')) score += 3;
+                if (lower.includes('transporteur') && gestDesc.includes('transporter')) score += 3;
+                if (lower.includes('contrôle') && gestCat.includes('contrôle')) score += 3;
+                if (lower.includes('reception') && gestCat.includes('réception')) score += 3;
+                if (lower.includes('emballage') && (gestDesc.includes('emballer') || gestDesc.includes('film'))) score += 2;
+                if (lower.includes('film') && gestDesc.includes('film')) score += 2;
+                if (lower.includes('pièces') && (gestDesc.includes('pièce') || gestDesc.includes('kit'))) score += 2;
+
+                // Nombres de pièces
+                const pieceMatch = description.match(/(\d+)\s*(?:pièces?)/i);
+                if (pieceMatch && gestDesc.includes(pieceMatch[1])) score += 2;
+                if (pieceMatch && gestDesc.includes('kit')) score += 1;
+
+                // Notes
+                if (lower.includes('simple') && gestNotes.includes('niveau 1')) score += 2;
+                if (lower.includes('complexe') && gestNotes.includes('niveau 2')) score += 2;
+
+                if (score > 0) {
+                    matched.push({ geste, score });
+                }
+            });
+
+            // Ajouter contrôle qualité par défaut si pas de match de contrôle
+            const hasControl = matched.some(m => m.geste.categorie.includes('Contrôle'));
+            if (!hasControl) {
+                const defaultControl = catalogueGestes.find(g => g.code === 'CTR-01');
+                if (defaultControl) {
+                    matched.push({ geste: defaultControl, score: 1 });
+                }
+            }
+
+            // Trier par score et retourner
+            return matched.sort((a, b) => b.score - a.score).map(m => m.geste);
+        }
 
         function openTrainingModule() {
             const overlay = document.getElementById('trainingOverlay');
@@ -8925,39 +8955,21 @@
             selectedGestures = [];
             customGestures = [];
 
-            const lower = description.toLowerCase();
-            const proposedGesturesCodes = new Set();
-
-            // Analyser la description et matcher avec les gestes du catalogue
-            for (const [code, keywords] of Object.entries(gestureKeywordMapping)) {
-                for (const keyword of keywords) {
-                    if (lower.includes(keyword.toLowerCase())) {
-                        proposedGesturesCodes.add(code);
-                        break;
-                    }
-                }
-            }
-
-            // Ajouter contrôle qualité par défaut
-            if (!lower.includes('contrôle') && !lower.includes('verification')) {
-                proposedGesturesCodes.add('CTR-01');
-            }
+            // Analyser la description et trouver les gestes correspondants du catalogue
+            const matchedGestures = findMatchingGestures(description);
 
             // Afficher les gestes proposés depuis le catalogue réel
             const list = document.getElementById('proposedGesturesList');
             list.innerHTML = '';
 
-            if (proposedGesturesCodes.size === 0) {
+            if (matchedGestures.length === 0) {
                 list.innerHTML = '<p style="color:#7a9db1;text-align:center;padding:10px;">Aucun geste proposé. Ajoutez-les manuellement ci-dessous.</p>';
             } else {
                 // Grouper par catégorie et afficher
                 const byCategory = {};
-                proposedGesturesCodes.forEach(code => {
-                    const geste = catalogueGestes.find(g => g.code === code);
-                    if (geste) {
-                        if (!byCategory[geste.categorie]) byCategory[geste.categorie] = [];
-                        byCategory[geste.categorie].push(geste);
-                    }
+                matchedGestures.forEach(geste => {
+                    if (!byCategory[geste.categorie]) byCategory[geste.categorie] = [];
+                    byCategory[geste.categorie].push(geste);
                 });
 
                 Object.entries(byCategory).sort().forEach(([category, gestures]) => {
