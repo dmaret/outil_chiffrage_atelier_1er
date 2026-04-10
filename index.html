@@ -2886,6 +2886,11 @@
         let configTypesStock = ['entree', 'sortie', 'transfert', 'inventaire'];
         let isSuperUser = false;
         let authGroups = [];
+        let currentUserSession = null;
+
+        function getCurrentUser() {
+            return currentUserSession ? currentUserSession.name : 'Anonyme';
+        }
 
         // Déclarations globales (doivent précéder les appels init)
         const ALL_TABS = [
