@@ -4050,7 +4050,7 @@
             // Basculer sur l'onglet calculateur
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab').classList.add('active');
+            document.querySelector('.tab[onclick*="calculateur"]').classList.add('active');
             document.getElementById('calculateur').classList.add('active');
 
             // Mettre le bouton en mode "Mettre à jour"
