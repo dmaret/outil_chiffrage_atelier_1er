@@ -7658,10 +7658,19 @@
                 const s = sessionStorage.getItem('authSession');
                 if (s) {
                     const sess = JSON.parse(s);
+                    // Vérifier que authGroups est initialisé
+                    if (!authGroups || authGroups.length === 0) {
+                        sessionStorage.removeItem('authSession');
+                        showLoginModal();
+                        return;
+                    }
                     const group = authGroups.find(g => g.id === sess.id);
                     if (group) { applyAuthGroup(group); return; }
                 }
-            } catch(e) {}
+            } catch(e) {
+                // En cas d'erreur, nettoyer la session et afficher login
+                sessionStorage.removeItem('authSession');
+            }
             showLoginModal();
         }
 
