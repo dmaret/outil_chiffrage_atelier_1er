@@ -10062,7 +10062,7 @@
                 <select id="authGroupSelect" onchange="document.getElementById('authPasswordInput').focus()">
                     <option value="">— Sélectionnez votre groupe —</option>
                 </select>
-                <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
+                <div style="position:relative;">   <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">   <span onclick="var p=document.getElementById('authPasswordInput');if(p.type==='password'){p.type='text';this.textContent='🙈'}else{p.type='password';this.textContent='👁'}" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.3em;user-select:none;">👁</span> </div>
                 <div class="auth-error" id="authError"></div>
                 <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
                 <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
