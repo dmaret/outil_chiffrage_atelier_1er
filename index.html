@@ -2047,6 +2047,7 @@
                         <button class="btn btn-small" onclick="exportPrestationsCSV()" style="white-space:nowrap;">📥 CSV</button>
                         <button class="btn btn-small" onclick="exportPrestationsXLSX()" style="white-space:nowrap;background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">📊 Excel</button>
                         <button class="btn btn-small" onclick="openCompareModal()" style="white-space:nowrap;background:#edf5ff;border-color:#a8c8f0;color:#5a7b8f;">📊 Comparer</button>
+                        <button class="btn btn-small" onclick="openTrainingImportModal()" style="white-space:nowrap;background:#fff3cd;border-color:#ffc107;color:#856404;">📤 Importer rapport</button>
                     </div>
                     <div id="prestationsList"></div>
                 </div>
@@ -9332,7 +9333,7 @@
                 reference: ref,
                 date,
                 description: currentTrainingOffer,
-                gestures: selectedGestures,
+                gestures: selectedGestures.map(g => ({ code: g.code, description: g.description, temps: g.temps, coef: g.coef, categorie: g.categorie })),
                 customGestures,
                 createdAt: new Date().toISOString()
             };
@@ -9342,7 +9343,7 @@
             reports.push(reportData);
             localStorage.setItem('trainingReports', JSON.stringify(reports));
 
-            toast(`✅ Rapport uploadé! Référence: ${ref}`, 'success');
+            toast(`✅ Rapport sauvegardé localement! Référence: ${ref}`, 'success');
             console.log('Report data:', reportData);
 
             // Afficher les données pour intégration
@@ -9365,6 +9366,288 @@
             }
 
             setTimeout(() => closeTrainingModule(), 1500);
+        }
+
+        // Fonction pour télécharger les rapports en JSON
+        function downloadTrainingReportsJSON() {
+            const reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
+            if (reports.length === 0) {
+                toast('Aucun rapport à télécharger', 'warning');
+                return;
+            }
+
+            const dataStr = JSON.stringify(reports, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `training-reports-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            toast(`✅ ${reports.length} rapport(s) téléchargé(s)!`, 'success');
+        }
+
+        // Fonction pour afficher les rapports sauvegardés
+        function showTrainingSavedReports() {
+            const reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
+
+            let html = '<div style="padding:12px;background:#f5f9fc;border-radius:8px;border:1px solid #d5e3ed;">';
+
+            if (reports.length === 0) {
+                html += '<p style="color:#7a9db1;text-align:center;">Aucun rapport sauvegardé</p>';
+            } else {
+                html += `<p style="font-weight:600;margin-bottom:10px;">📋 ${reports.length} rapport(s) sauvegardé(s):</p>`;
+                html += '<div style="max-height:200px;overflow-y:auto;">';
+                reports.forEach((r, idx) => {
+                    html += `<div style="padding:8px;background:#fffef9;margin-bottom:6px;border-radius:6px;border-left:3px solid #a8d5e2;">
+                        <div><strong>${r.reference}</strong> - ${r.client}</div>
+                        <div style="font-size:0.8em;color:#7a9db1;">${r.prestation} | ${r.date}</div>
+                        <div style="font-size:0.75em;color:#999;">${r.gestures.length} geste(s)</div>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+
+            html += `<button class="btn btn-success" style="width:100%;margin-top:10px;" onclick="downloadTrainingReportsJSON()">📥 Télécharger JSON</button>`;
+            html += '</div>';
+
+            const section = document.getElementById('reportSection');
+            const savedReportsDiv = document.createElement('div');
+            savedReportsDiv.innerHTML = html;
+            section.insertBefore(savedReportsDiv, section.lastElementChild);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // IMPORT TRAINING REPORTS INTO MAIN TOOL
+        // ═══════════════════════════════════════════════════════════════
+
+        function openTrainingImportModal() {
+            const modal = document.getElementById('trainingImportModal');
+            modal.classList.add('open');
+            loadLocalStorageReports();
+            setTimeout(setupJSONDropZone, 100);
+        }
+
+        function closeTrainingImportModal() {
+            const modal = document.getElementById('trainingImportModal');
+            modal.classList.remove('open');
+        }
+
+        function switchImportTab(tab) {
+            const localStorageContent = document.getElementById('importTabLocalStorageContent');
+            const jsonContent = document.getElementById('importTabJSONContent');
+            const localStorageBtn = document.getElementById('importTabLocalStorage');
+            const jsonBtn = document.getElementById('importTabJSON');
+
+            if (tab === 'localStorage') {
+                localStorageContent.style.display = 'block';
+                jsonContent.style.display = 'none';
+                localStorageBtn.style.borderBottomColor = '#a8d5e2';
+                localStorageBtn.style.background = '#f0f4f8';
+                jsonBtn.style.borderBottomColor = 'transparent';
+                jsonBtn.style.background = 'transparent';
+            } else {
+                localStorageContent.style.display = 'none';
+                jsonContent.style.display = 'block';
+                localStorageBtn.style.borderBottomColor = 'transparent';
+                localStorageBtn.style.background = 'transparent';
+                jsonBtn.style.borderBottomColor = '#a8d5e2';
+                jsonBtn.style.background = '#f0f4f8';
+            }
+        }
+
+        function loadLocalStorageReports() {
+            const reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
+            const container = document.getElementById('localStorageReportsList');
+
+            if (reports.length === 0) {
+                container.innerHTML = '<p style="color:#7a9db1;text-align:center;padding:16px;">Aucun rapport de formation sauvegardé</p>';
+                return;
+            }
+
+            let html = '';
+            reports.forEach((report, idx) => {
+                html += `
+                    <div style="padding:12px;background:#fffef9;margin-bottom:8px;border-radius:8px;border-left:4px solid #a8d5e2;">
+                        <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+                            <div style="flex:1;">
+                                <div style="font-weight:600;color:#6b8fa3;">${report.reference}</div>
+                                <div style="font-size:0.9em;color:#5a7b8f;margin-top:2px;"><strong>Client:</strong> ${report.client}</div>
+                                <div style="font-size:0.9em;color:#5a7b8f;"><strong>Prestation:</strong> ${report.prestation}</div>
+                                <div style="font-size:0.85em;color:#7a9db1;margin-top:4px;"><strong>${report.gestures.length} geste(s)</strong> | ${report.date}</div>
+                            </div>
+                            <button class="btn btn-success btn-small" onclick="importFromLocalStorage(${idx})" style="white-space:nowrap;flex-shrink:0;">✓ Importer</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function importFromLocalStorage(reportIndex) {
+            const reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
+            if (reportIndex < 0 || reportIndex >= reports.length) {
+                toast('Rapport non trouvé', 'error');
+                return;
+            }
+
+            const report = reports[reportIndex];
+            createPrestationFromTrainingReport(report);
+        }
+
+        function handleJSONFileSelect(input) {
+            if (!input.files || input.files.length === 0) return;
+
+            const file = input.files[0];
+            processJSONFile(file);
+            // Reset the input so the same file can be selected again
+            input.value = '';
+        }
+
+        function processJSONFile(file) {
+            if (!file.name.endsWith('.json')) {
+                toast('Veuillez sélectionner un fichier JSON', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    // Si c'est un tableau de rapports
+                    if (Array.isArray(data) && data.length > 0) {
+                        if (data[0].reference && data[0].client && data[0].gestures) {
+                            // C'est un fichier d'export de rapports
+                            showJSONReportsList(data);
+                            return;
+                        }
+                    } else if (data.reference && data.client && data.gestures) {
+                        // C'est un rapport unique
+                        createPrestationFromTrainingReport(data);
+                        return;
+                    }
+
+                    toast('Format de fichier JSON non reconnu', 'error');
+                } catch (err) {
+                    toast('Erreur lors de la lecture du fichier JSON: ' + err.message, 'error');
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        // Drag and drop for JSON import
+        function setupJSONDropZone() {
+            const dropZone = document.getElementById('jsonDropZone');
+            if (!dropZone) return;
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.style.background = '#e8f4f8';
+                    dropZone.style.borderColor = '#6b8fa3';
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.style.background = '#f5f9fc';
+                    dropZone.style.borderColor = '#a8d5e2';
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    processJSONFile(files[0]);
+                }
+            }, false);
+        }
+
+        // Initialiser le drop zone quand la modal est ouverte
+        const originalOpenModal = window.openTrainingImportModal;
+        window.openTrainingImportModal = function() {
+            originalOpenModal();
+            setTimeout(setupJSONDropZone, 100);
+        };
+
+        let tempJSONReports = [];
+
+        function showJSONReportsList(reports) {
+            tempJSONReports = reports;
+            const container = document.getElementById('importTabJSONContent');
+            let html = '<div style="max-height:300px;overflow-y:auto;margin-bottom:16px;">';
+
+            reports.forEach((report, idx) => {
+                html += `
+                    <div style="padding:12px;background:#fffef9;margin-bottom:8px;border-radius:8px;border-left:4px solid #a8d5e2;">
+                        <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+                            <div style="flex:1;">
+                                <div style="font-weight:600;color:#6b8fa3;">${report.reference}</div>
+                                <div style="font-size:0.9em;color:#5a7b8f;margin-top:2px;"><strong>Client:</strong> ${report.client}</div>
+                                <div style="font-size:0.9em;color:#5a7b8f;"><strong>Prestation:</strong> ${report.prestation}</div>
+                                <div style="font-size:0.85em;color:#7a9db1;margin-top:4px;"><strong>${report.gestures.length} geste(s)</strong> | ${report.date}</div>
+                            </div>
+                            <button class="btn btn-success btn-small" onclick="createPrestationFromTrainingReport(tempJSONReports[${idx}])" style="white-space:nowrap;flex-shrink:0;">✓ Importer</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function createPrestationFromTrainingReport(reportData) {
+            if (!reportData.reference || !reportData.client || !Array.isArray(reportData.gestures)) {
+                toast('Données de rapport invalides', 'error');
+                return;
+            }
+
+            // Créer une nouvelle prestation
+            const newPrestation = {
+                id: 'import_' + Date.now(),
+                client: reportData.client,
+                prestation: reportData.prestation || 'Sans titre',
+                reference: reportData.reference,
+                date: new Date().toISOString().split('T')[0],
+                statut: 'brouillon',
+                prixVente: 0,
+                coutRevient: 0,
+                description: `[Import rapport formation]\n${reportData.reference}`,
+                gestes: reportData.gestures.map(g => ({
+                    code: g.code,
+                    nom: g.description,
+                    duree: g.temps,
+                    cout: 0
+                }))
+            };
+
+            // Ajouter à la liste des prestations
+            prestationsSauvegardees.push(newPrestation);
+            localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
+
+            // Fermer le modal et rafraîchir la liste
+            closeTrainingImportModal();
+            renderPrestations();
+
+            // Message de confirmation
+            toast(`✅ Prestation importée! Référence: ${reportData.reference}`, 'success');
         }
 
     </script>
@@ -9514,14 +9797,48 @@
                     <div id="reportGesturesList" style="background:#fffef9;padding:12px;border-radius:8px;border:1px solid #d5e3ed;margin-bottom:12px;max-height:200px;overflow-y:auto;">
                         <!-- Résumé des gestes s'affichera ici -->
                     </div>
-                    <button class="btn btn-success" style="width:100%;margin-bottom:8px;" onclick="generateReport()">📄 Générer le rapport PDF</button>
-                    <button class="btn" onclick="uploadToMainTool()" style="width:100%;">📤 Uploader dans l'outil complet</button>
+                    <button class="btn btn-success" style="width:100%;margin-bottom:8px;" onclick="uploadToMainTool(); setTimeout(() => showTrainingSavedReports(), 500);">💾 Sauvegarder & Uploader</button>
+                    <button class="btn" style="width:100%;margin-bottom:8px;" onclick="downloadTrainingReportsJSON();">📥 Télécharger tous les rapports (JSON)</button>
+                    <button class="btn btn-secondary" style="width:100%;" onclick="showTrainingSavedReports()">📋 Voir rapports sauvegardés</button>
                 </div>
 
                 <div style="display:flex;gap:10px;justify-content:space-between;margin-top:20px;border-top:1px solid #e0e8f0;padding-top:14px;">
                     <button class="btn btn-secondary" onclick="resetTraining()" style="flex:1;">🔄 Recommencer</button>
                     <button class="btn btn-secondary" onclick="closeTrainingModule()" style="flex:1;">Fermer</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'import de rapports de formation -->
+    <div class="prof-modal-overlay" id="trainingImportModal">
+        <div class="prof-modal-box">
+            <h3>📤 Importer un rapport de formation</h3>
+            <div style="margin-bottom:16px;border-bottom:2px solid #a8d5e2;">
+                <div style="display:flex;gap:0;">
+                    <button id="importTabLocalStorage" class="tab-import-btn" style="flex:1;padding:12px;border:none;background:#f0f4f8;color:#5a7b8f;font-weight:600;cursor:pointer;border-bottom:3px solid #a8d5e2;" onclick="switchImportTab('localStorage')">📂 Depuis localStorage</button>
+                    <button id="importTabJSON" class="tab-import-btn" style="flex:1;padding:12px;border:none;background:transparent;color:#5a7b8f;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;" onclick="switchImportTab('json')">📁 Depuis fichier JSON</button>
+                </div>
+            </div>
+
+            <!-- Tab localStorage -->
+            <div id="importTabLocalStorageContent" style="display:block;">
+                <div id="localStorageReportsList" style="max-height:300px;overflow-y:auto;margin-bottom:16px;">
+                    <!-- Les rapports sauvegardés s'afficheront ici -->
+                </div>
+            </div>
+
+            <!-- Tab JSON -->
+            <div id="importTabJSONContent" style="display:none;">
+                <div style="padding:16px;background:#f5f9fc;border-radius:8px;border:2px dashed #a8d5e2;text-align:center;cursor:pointer;" onclick="document.getElementById('jsonFileInput').click();" id="jsonDropZone">
+                    <p style="margin:0;font-size:0.95em;color:#5a7b8f;font-weight:600;">📁 Cliquez pour sélectionner un fichier JSON</p>
+                    <p style="margin:6px 0 0 0;font-size:0.85em;color:#7a9db1;">ou glissez-le ici</p>
+                </div>
+                <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="handleJSONFileSelect(this)">
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="closeTrainingImportModal()">Annuler</button>
             </div>
         </div>
     </div>
