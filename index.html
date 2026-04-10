@@ -9025,6 +9025,8 @@
                 document.getElementById('gesturesSection').style.display = 'none';
                 document.getElementById('reportSection').style.display = 'none';
                 resetTraining();
+                loadTrainingAutoDraft();
+                enableTrainingAutoSave();
                 initAdditionalGestureSelect();
             }
         }
@@ -9643,6 +9645,10 @@
                         <div><strong>${r.reference}</strong> - ${r.client}</div>
                         <div style="font-size:0.8em;color:#7a9db1;">${r.prestation} | ${r.date}</div>
                         <div style="font-size:0.75em;color:#999;">${r.gestures.length} geste(s)</div>
+                        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+                            <button class="btn btn-mini" style="padding:4px 8px;font-size:0.75em;" onclick="cloneTrainingReport(${idx})">🔄 Cloner</button>
+                            <button class="btn btn-mini" style="padding:4px 8px;font-size:0.75em;" onclick="saveReportAsTemplate(${idx})">💾 Modèle</button>
+                        </div>
                     </div>`;
                 });
                 html += '</div>';
@@ -9656,6 +9662,117 @@
             savedReportsDiv.innerHTML = html;
             section.insertBefore(savedReportsDiv, section.lastElementChild);
         }
+
+        function cloneTrainingReport(idx) {
+            const reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
+            if (!reports[idx]) return;
+
+            const reportToClone = reports[idx];
+            const clonedReport = {
+                ...reportToClone,
+                reference: reportToClone.reference + ' (Copie)',
+                createdAt: new Date().toISOString()
+            };
+
+            reports.push(clonedReport);
+            localStorage.setItem('trainingReports', JSON.stringify(reports));
+            toast('✅ Rapport cloné!', 'success');
+            showTrainingSavedReports();
+        }
+
+        function saveReportAsTemplate(idx) {
+            const reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
+            if (!reports[idx]) return;
+
+            const templates = JSON.parse(localStorage.getItem('trainingTemplates') || '[]');
+            const report = reports[idx];
+
+            const template = {
+                name: prompt('Nom du modèle:', report.prestation) || report.prestation,
+                description: report.description,
+                gestures: report.gestures,
+                customGestures: report.customGestures,
+                createdAt: new Date().toISOString()
+            };
+
+            templates.push(template);
+            localStorage.setItem('trainingTemplates', JSON.stringify(templates));
+            toast('✅ Modèle sauvegardé!', 'success');
+        }
+
+        function loadTrainingTemplate(idx) {
+            const templates = JSON.parse(localStorage.getItem('trainingTemplates') || '[]');
+            if (!templates[idx]) return;
+
+            const template = templates[idx];
+            currentTrainingOffer = template.description;
+            selectedGestures = template.gestures || [];
+            customGestures = template.customGestures || [];
+
+            document.getElementById('offerInputSection').style.display = 'none';
+            document.getElementById('gesturesSection').style.display = 'none';
+            document.getElementById('reportSection').style.display = 'block';
+            refreshReportGesturesDisplay();
+
+            toast('✅ Modèle chargé!', 'success');
+        }
+
+        // Auto-save pour le formulaire d'offre
+        function enableTrainingAutoSave() {
+            const offerInput = document.getElementById('offerDescription');
+            const clientInput = document.getElementById('reportClient');
+            const prestationInput = document.getElementById('reportPrestation');
+
+            function saveAsAutoDraft() {
+                const draftData = {
+                    offer: offerInput?.value || '',
+                    client: clientInput?.value || '',
+                    prestation: prestationInput?.value || '',
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('trainingAutoDraft', JSON.stringify(draftData));
+            }
+
+            if (offerInput) offerInput.addEventListener('input', saveAsAutoDraft);
+            if (clientInput) clientInput.addEventListener('input', saveAsAutoDraft);
+            if (prestationInput) prestationInput.addEventListener('input', saveAsAutoDraft);
+        }
+
+        function loadTrainingAutoDraft() {
+            const draftData = JSON.parse(localStorage.getItem('trainingAutoDraft') || 'null');
+            if (!draftData) return;
+
+            const offerInput = document.getElementById('offerDescription');
+            const clientInput = document.getElementById('reportClient');
+            const prestationInput = document.getElementById('reportPrestation');
+
+            if (offerInput) offerInput.value = draftData.offer || '';
+            if (clientInput) clientInput.value = draftData.client || '';
+            if (prestationInput) prestationInput.value = draftData.prestation || '';
+        }
+
+        // Raccourcis clavier
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 's' || e.key === 'S') {
+                    e.preventDefault();
+                    const reportSection = document.getElementById('reportSection');
+                    if (reportSection && reportSection.style.display !== 'none') {
+                        uploadToMainTool();
+                    }
+                }
+                if (e.key === 'n' || e.key === 'N') {
+                    e.preventDefault();
+                    resetTraining();
+                }
+            }
+            if (e.key === 'Escape') {
+                const trainingOverlay = document.getElementById('trainingOverlay');
+                if (trainingOverlay && trainingOverlay.style.display === 'flex') {
+                    closeTrainingModule();
+                }
+            }
+        });
 
         // ═══════════════════════════════════════════════════════════════
         // IMPORT TRAINING REPORTS INTO MAIN TOOL
