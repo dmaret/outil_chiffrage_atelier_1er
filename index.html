@@ -8851,12 +8851,51 @@
         let selectedGestures = [];
         let customGestures = [];
 
-        // Catalogue de gestes proposés par défaut
+        // Base de données améliorée des gestes
+        const allAvailableGestures = [
+            // Assemblage
+            { id: 'asm_2p', name: 'Assembler 2 pièces', category: 'Assemblage' },
+            { id: 'asm_3p', name: 'Assembler 3 pièces', category: 'Assemblage' },
+            { id: 'asm_5p', name: 'Assembler 5 pièces', category: 'Assemblage' },
+            { id: 'asm_7p', name: 'Assembler 7 pièces', category: 'Assemblage' },
+            { id: 'asm_10p', name: 'Assembler 10+ pièces', category: 'Assemblage' },
+            { id: 'asm_verif', name: 'Vérifier l\'assemblage', category: 'Assemblage' },
+
+            // Collage
+            { id: 'col_etiquette', name: 'Coller étiquette(s)', category: 'Collage' },
+            { id: 'col_simple', name: 'Collage simple', category: 'Collage' },
+            { id: 'col_renforcé', name: 'Collage renforcé', category: 'Collage' },
+            { id: 'col_verif', name: 'Vérifier collage', category: 'Collage' },
+            { id: 'col_seche', name: 'Séchage collage', category: 'Collage' },
+
+            // Emballage & Livraison
+            { id: 'emb_prep', name: 'Préparation emballage', category: 'Emballage/Livraison' },
+            { id: 'emb_boite', name: 'Empaquetage en boîte', category: 'Emballage/Livraison' },
+            { id: 'emb_papier', name: 'Emballage papier', category: 'Emballage/Livraison' },
+            { id: 'liv_client', name: 'Livraison client', category: 'Emballage/Livraison' },
+            { id: 'liv_poste', name: 'Livraison poste', category: 'Emballage/Livraison' },
+            { id: 'liv_transp', name: 'Livraison transporteur', category: 'Emballage/Livraison' },
+
+            // Contrôle & Finitions
+            { id: 'ctrl_qualite', name: 'Contrôle qualité', category: 'Contrôle' },
+            { id: 'ctrl_verif', name: 'Vérification finale', category: 'Contrôle' },
+            { id: 'fin_decoupe', name: 'Découpe', category: 'Finitions' },
+            { id: 'fin_poncage', name: 'Ponçage', category: 'Finitions' },
+            { id: 'fin_vernis', name: 'Vernissage', category: 'Finitions' },
+            { id: 'fin_seche', name: 'Séchage', category: 'Finitions' },
+
+            // Manutention
+            { id: 'manu_tri', name: 'Tri des matériaux', category: 'Manutention' },
+            { id: 'manu_prep', name: 'Préparation poste', category: 'Manutention' },
+            { id: 'manu_ranger', name: 'Rangement matériel', category: 'Manutention' },
+        ];
+
+        // Catalogue de gestes proposés par défaut (pour compatibilité)
         const defaultGesturesDatabase = {
-            'assemblage': ['Assembler 2 pièces', 'Assembler 3 pièces', 'Assembler 5 pièces', 'Assembler 7 pièces', 'Assembler 10 pièces'],
-            'collage': ['Collage simple', 'Collage étiquette', 'Collage doublure', 'Collage bord', 'Collage renforcé'],
+            'assemblage': ['Assembler 2 pièces', 'Assembler 3 pièces', 'Assembler 5 pièces', 'Assembler 7 pièces', 'Assembler 10+ pièces'],
+            'collage': ['Coller étiquette(s)', 'Collage simple', 'Collage renforcé'],
             'livraison': ['Préparation emballage', 'Livraison client', 'Livraison poste', 'Livraison transporteur'],
-            'controle': ['Contrôle qualité', 'Vérification joints', 'Contrôle alignement', 'Inspection finale'],
+            'controle': ['Contrôle qualité', 'Vérification finale'],
             'finitions': ['Découpe', 'Ponçage', 'Vernissage', 'Séchage']
         };
 
@@ -8906,44 +8945,100 @@
             selectedGestures = [];
             customGestures = [];
 
-            // Analyser la description pour trouver les mots-clés
             const lower = description.toLowerCase();
-            const proposedGestures = new Set();
+            const proposedGestureIds = new Set();
 
-            for (let [category, gestures] of Object.entries(defaultGesturesDatabase)) {
-                if (lower.includes(category)) {
-                    gestures.forEach(g => proposedGestures.add(g));
-                }
+            // 1. Détection d'assemblage avec nombre de pièces
+            const pieceMatches = description.match(/(\d+)\s*(?:pièces?|pcs?)/i);
+            if (pieceMatches) {
+                const nbPieces = parseInt(pieceMatches[1]);
+                if (nbPieces === 2) proposedGestureIds.add('asm_2p');
+                else if (nbPieces === 3) proposedGestureIds.add('asm_3p');
+                else if (nbPieces === 5) proposedGestureIds.add('asm_5p');
+                else if (nbPieces === 7) proposedGestureIds.add('asm_7p');
+                else if (nbPieces >= 10) proposedGestureIds.add('asm_10p');
+                if (lower.includes('assemblage')) proposedGestureIds.add('asm_verif');
+            } else if (lower.includes('assemblage')) {
+                proposedGestureIds.add('asm_3p');
+                proposedGestureIds.add('asm_verif');
             }
 
-            // Ajouter d'autres gestes courants selon mots-clés
-            if (lower.includes('pièce') || lower.includes('assemblage')) {
-                proposedGestures.add('Assemblage complet');
+            // 2. Détection collage/étiquettes
+            const collageMatches = description.match(/(\d+)\s*(?:collages?|étiquettes?)/i);
+            if (collageMatches || lower.includes('collage') || lower.includes('étiquette')) {
+                proposedGestureIds.add('col_etiquette');
+                proposedGestureIds.add('col_verif');
+                if (lower.includes('renforcé')) proposedGestureIds.add('col_renforcé');
             }
-            if (lower.includes('étiquette')) {
-                proposedGestures.add('Pose étiquettes');
+
+            // 3. Détection livraison/emballage
+            if (lower.includes('livraison') || lower.includes('emballage') || lower.includes('poste') || lower.includes('transporteur')) {
+                proposedGestureIds.add('emb_prep');
+                if (lower.includes('poste')) proposedGestureIds.add('liv_poste');
+                else if (lower.includes('transporteur') || lower.includes('transporter')) proposedGestureIds.add('liv_transp');
+                else if (lower.includes('client')) proposedGestureIds.add('liv_client');
+                else proposedGestureIds.add('liv_poste'); // par défaut
             }
-            if (lower.includes('emballage') || lower.includes('packaging')) {
-                proposedGestures.add('Emballage');
+
+            // 4. Détection finitions
+            if (lower.includes('découpe')) proposedGestureIds.add('fin_decoupe');
+            if (lower.includes('ponç')) proposedGestureIds.add('fin_poncage');
+            if (lower.includes('vernis') || lower.includes('peinture')) proposedGestureIds.add('fin_vernis');
+            if (lower.includes('séchage') || lower.includes('sécher')) proposedGestureIds.add('fin_seche');
+
+            // 5. Détection contrôle qualité
+            if (lower.includes('contrôle') || lower.includes('verification') || lower.includes('inspection')) {
+                proposedGestureIds.add('ctrl_qualite');
+                proposedGestureIds.add('ctrl_verif');
+            } else {
+                // Ajouter contrôle qualité par défaut
+                proposedGestureIds.add('ctrl_qualite');
+            }
+
+            // 6. Détection manutention
+            if (lower.includes('tri') || lower.includes('préparation') || lower.includes('preparation')) {
+                proposedGestureIds.add('manu_prep');
             }
 
             // Afficher les gestes proposés
             const list = document.getElementById('proposedGesturesList');
             list.innerHTML = '';
-            const gesturesToShow = Array.from(proposedGestures).slice(0, 12);
 
-            gesturesToShow.forEach((gesture, idx) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'gesture-item';
-                itemDiv.innerHTML = `
-                    <input type="checkbox" id="gesture_${idx}" name="gesture_${idx}">
-                    <label for="gesture_${idx}">${gesture}</label>
-                `;
-                list.appendChild(itemDiv);
+            // Convertir IDs en objets gestes et les afficher
+            const proposedGesturesMap = new Map();
+            proposedGestureIds.forEach(id => {
+                const gesture = allAvailableGestures.find(g => g.id === id);
+                if (gesture) {
+                    proposedGesturesMap.set(gesture.name, gesture);
+                }
             });
 
-            if (proposedGestures.size === 0) {
+            if (proposedGesturesMap.size === 0) {
                 list.innerHTML = '<p style="color:#7a9db1;text-align:center;padding:10px;">Aucun geste proposé. Ajoutez-les manuellement ci-dessous.</p>';
+            } else {
+                // Grouper par catégorie et afficher
+                const byCategory = {};
+                proposedGesturesMap.forEach(gesture => {
+                    if (!byCategory[gesture.category]) byCategory[gesture.category] = [];
+                    byCategory[gesture.category].push(gesture);
+                });
+
+                Object.entries(byCategory).forEach(([category, gestures]) => {
+                    const catTitle = document.createElement('div');
+                    catTitle.style.cssText = 'font-weight:700;color:#6b8fa3;margin-top:12px;margin-bottom:8px;font-size:0.9em;';
+                    catTitle.textContent = '📌 ' + category;
+                    list.appendChild(catTitle);
+
+                    gestures.forEach((gesture, idx) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'gesture-item';
+                        itemDiv.innerHTML = `
+                            <input type="checkbox" id="gesture_${gesture.id}" name="gesture_${gesture.id}" checked>
+                            <label for="gesture_${gesture.id}">${gesture.name}</label>
+                        `;
+                        list.appendChild(itemDiv);
+                    });
+                });
             }
 
             // Afficher l'étape 2
@@ -8974,13 +9069,16 @@
         }
 
         function generateReport() {
-            // Récupérer les gestes cochés
+            // Récupérer les gestes cochés (ignorer les titres de catégorie)
             const checkboxes = document.querySelectorAll('#proposedGesturesList input[type="checkbox"]');
             selectedGestures = [];
             checkboxes.forEach(cb => {
                 if (cb.checked) {
                     const label = cb.nextElementSibling.textContent.trim();
-                    selectedGestures.push(label);
+                    // Ne pas inclure les titres de catégorie
+                    if (!label.startsWith('📌')) {
+                        selectedGestures.push(label);
+                    }
                 }
             });
 
@@ -8991,8 +9089,10 @@
 
             // Remplir le rapport
             const gesturesList = document.getElementById('reportGesturesList');
-            gesturesList.innerHTML = '<strong>Gestes sélectionnés:</strong><br>' +
-                selectedGestures.map((g, i) => `${i+1}. ${g}`).join('<br>');
+            const gesturesHtml = selectedGestures
+                .map((g, i) => `<div style="padding:6px 0;border-bottom:1px solid #e0e8f0;"><strong>${i+1}.</strong> ${g}</div>`)
+                .join('');
+            gesturesList.innerHTML = '<strong style="display:block;margin-bottom:8px;">✓ Gestes sélectionnés:</strong>' + gesturesHtml;
 
             // Afficher l'étape 3
             document.getElementById('gesturesSection').style.display = 'none';
