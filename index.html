@@ -7226,13 +7226,16 @@
         // ============================================================
         // AUDIT LOG (Historique)
         // ============================================================
-        function logAction(desc) {
+        function logAction(desc, actionType = 'INFO') {
             const now = new Date();
             const dateStr = now.toLocaleDateString('fr-FR') + ' ' + now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-            actionHistory.unshift({ date: dateStr, desc });
-            if (actionHistory.length > 200) actionHistory.pop();
+            const user = getCurrentUser();
+            const timestamp = now.toISOString();
+            const fullDesc = `[${user}] ${desc}`;
+            actionHistory.unshift({ date: dateStr, desc: fullDesc, user, type: actionType, timestamp });
+            if (actionHistory.length > 500) actionHistory.pop();
             // Sauvegarde légère sans déclencher updateSaveIndicator
-            localStorage.setItem('actionHistory', JSON.stringify(actionHistory.slice(0, 200)));
+            localStorage.setItem('actionHistory', JSON.stringify(actionHistory.slice(0, 500)));
         }
 
         function renderHistory() {
