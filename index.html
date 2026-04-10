@@ -555,11 +555,19 @@
             position: fixed; inset: 0; z-index: 9999;
             background: linear-gradient(135deg, #e8f4f8 0%, #f5e6f0 100%);
             display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .auth-overlay-wrapper {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+            max-width: 880px; width: 100%;
+        }
+        @media (max-width: 768px) {
+            .auth-overlay-wrapper { grid-template-columns: 1fr; }
         }
         .auth-box {
             background: #fffef9; border-radius: 20px;
             box-shadow: 0 20px 60px rgba(100,120,150,0.25);
-            padding: 40px; width: 380px; max-width: 92vw; text-align: center;
+            padding: 40px; text-align: center;
         }
         .auth-box h2 { font-size: 1.5em; margin-bottom: 6px; color: #2d3e50; }
         .auth-subtitle { font-size: 0.88em; color: #7a9db1; margin-bottom: 24px; }
@@ -579,6 +587,65 @@
         }
         .btn-login:hover { opacity: 0.88; }
         .auth-footer { font-size: 0.72em; color: #bbb; margin-top: 20px; }
+
+        /* ── Offer training container ──────────────────────────────────── */
+        .training-box {
+            background: #fffef9; border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(100,120,150,0.25);
+            padding: 40px; text-align: center;
+        }
+        .training-box h2 { font-size: 1.5em; margin-bottom: 6px; color: #2d3e50; }
+        .training-subtitle { font-size: 0.88em; color: #7a9db1; margin-bottom: 24px; }
+        .btn-training {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #c9b3d4, #a8d5e2);
+            color: #2d3e50; border: none; border-radius: 12px; font-size: 1.05em;
+            font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+        }
+        .btn-training:hover { opacity: 0.88; }
+        .training-footer { font-size: 0.72em; color: #bbb; margin-top: 20px; }
+
+        /* ── Training Module Overlay ─────────────────────────────────── */
+        .training-overlay {
+            position: fixed; inset: 0; z-index: 10000;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .training-modal {
+            background: #fffef9; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(100,120,150,0.35);
+            max-width: 700px; width: 100%; max-height: 85vh;
+            display: flex; flex-direction: column;
+            position: relative;
+        }
+        .training-header {
+            padding: 24px; border-bottom: 2px solid #e0e8f0;
+            background: linear-gradient(135deg, #a8d5e2 0%, #c9b3d4 100%);
+            border-radius: 16px 16px 0 0;
+            position: relative;
+        }
+        .training-header h2 { color: #2d3e50; margin: 0; }
+        .training-content {
+            flex: 1; overflow-y: auto; padding: 24px;
+        }
+        .training-section {
+            margin-bottom: 24px;
+        }
+        .training-section h3 {
+            color: #6b8fa3; margin-bottom: 12px; font-size: 1.1em;
+        }
+        .gesture-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; background: #f5f9fc; border-radius: 8px;
+            margin-bottom: 8px; border: 1px solid #d5e3ed;
+        }
+        .gesture-item input[type="checkbox"] {
+            width: 18px; height: 18px; accent-color: #6b8fa3; cursor: pointer;
+        }
+        .gesture-item label {
+            flex: 1; margin: 0; cursor: pointer; font-weight: 500; color: #2d3e50;
+        }
 
         /* Gantt */
         .gantt-table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
@@ -8776,21 +8843,239 @@
             html2pdf().set({margin:8, filename:`rapport-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}.pdf`, jsPDF:{format:'a4',orientation:'portrait'}}).from(el).save().then(()=>document.body.removeChild(el));
         }
 
+        // ═════════════════════════════════════════════════════════════════════
+        // TRAINING MODULE - Offre de prix assistant gestes
+        // ═════════════════════════════════════════════════════════════════════
+
+        let currentTrainingOffer = null;
+        let selectedGestures = [];
+        let customGestures = [];
+
+        // Catalogue de gestes proposés par défaut
+        const defaultGesturesDatabase = {
+            'assemblage': ['Assembler 2 pièces', 'Assembler 3 pièces', 'Assembler 5 pièces', 'Assembler 7 pièces', 'Assembler 10 pièces'],
+            'collage': ['Collage simple', 'Collage étiquette', 'Collage doublure', 'Collage bord', 'Collage renforcé'],
+            'livraison': ['Préparation emballage', 'Livraison client', 'Livraison poste', 'Livraison transporteur'],
+            'controle': ['Contrôle qualité', 'Vérification joints', 'Contrôle alignement', 'Inspection finale'],
+            'finitions': ['Découpe', 'Ponçage', 'Vernissage', 'Séchage']
+        };
+
+        function openTrainingModule() {
+            const overlay = document.getElementById('trainingOverlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+                document.getElementById('offerInputSection').style.display = 'block';
+                document.getElementById('gesturesSection').style.display = 'none';
+                document.getElementById('reportSection').style.display = 'none';
+                resetTraining();
+            }
+        }
+
+        function closeTrainingModule() {
+            const overlay = document.getElementById('trainingOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+                resetTraining();
+            }
+        }
+
+        function resetTraining() {
+            document.getElementById('offerDescription').value = '';
+            document.getElementById('proposedGesturesList').innerHTML = '';
+            document.getElementById('reportGesturesList').innerHTML = '';
+            document.getElementById('customGestureName').value = '';
+            document.getElementById('customGestureDesc').value = '';
+            selectedGestures = [];
+            customGestures = [];
+            currentTrainingOffer = null;
+            document.getElementById('offerInputSection').style.display = 'block';
+            document.getElementById('gesturesSection').style.display = 'none';
+            document.getElementById('reportSection').style.display = 'none';
+            // Initialiser la date actuelle
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reportDate').value = today;
+        }
+
+        function analyzeOffer() {
+            const description = document.getElementById('offerDescription').value.trim();
+            if (!description) {
+                toast('Veuillez décrire votre offre', 'error');
+                return;
+            }
+            currentTrainingOffer = description;
+            selectedGestures = [];
+            customGestures = [];
+
+            // Analyser la description pour trouver les mots-clés
+            const lower = description.toLowerCase();
+            const proposedGestures = new Set();
+
+            for (let [category, gestures] of Object.entries(defaultGesturesDatabase)) {
+                if (lower.includes(category)) {
+                    gestures.forEach(g => proposedGestures.add(g));
+                }
+            }
+
+            // Ajouter d'autres gestes courants selon mots-clés
+            if (lower.includes('pièce') || lower.includes('assemblage')) {
+                proposedGestures.add('Assemblage complet');
+            }
+            if (lower.includes('étiquette')) {
+                proposedGestures.add('Pose étiquettes');
+            }
+            if (lower.includes('emballage') || lower.includes('packaging')) {
+                proposedGestures.add('Emballage');
+            }
+
+            // Afficher les gestes proposés
+            const list = document.getElementById('proposedGesturesList');
+            list.innerHTML = '';
+            const gesturesToShow = Array.from(proposedGestures).slice(0, 12);
+
+            gesturesToShow.forEach((gesture, idx) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'gesture-item';
+                itemDiv.innerHTML = `
+                    <input type="checkbox" id="gesture_${idx}" name="gesture_${idx}">
+                    <label for="gesture_${idx}">${gesture}</label>
+                `;
+                list.appendChild(itemDiv);
+            });
+
+            if (proposedGestures.size === 0) {
+                list.innerHTML = '<p style="color:#7a9db1;text-align:center;padding:10px;">Aucun geste proposé. Ajoutez-les manuellement ci-dessous.</p>';
+            }
+
+            // Afficher l'étape 2
+            document.getElementById('offerInputSection').style.display = 'none';
+            document.getElementById('gesturesSection').style.display = 'block';
+        }
+
+        function addCustomGesture() {
+            const name = document.getElementById('customGestureName').value.trim();
+            const desc = document.getElementById('customGestureDesc').value.trim();
+            if (!name) {
+                toast('Veuillez entrer un nom de geste', 'error');
+                return;
+            }
+            customGestures.push({ name, desc });
+            const list = document.getElementById('proposedGesturesList');
+            const newIdx = list.children.length;
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'gesture-item';
+            itemDiv.innerHTML = `
+                <input type="checkbox" id="gesture_custom_${newIdx}" name="gesture_custom_${newIdx}" checked>
+                <label for="gesture_custom_${newIdx}"><strong>${name}</strong> <em style="color:#7a9db1;">(personnalisé)</em></label>
+            `;
+            list.appendChild(itemDiv);
+            document.getElementById('customGestureName').value = '';
+            document.getElementById('customGestureDesc').value = '';
+            toast('Geste ajouté ✓', 'success');
+        }
+
+        function generateReport() {
+            // Récupérer les gestes cochés
+            const checkboxes = document.querySelectorAll('#proposedGesturesList input[type="checkbox"]');
+            selectedGestures = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const label = cb.nextElementSibling.textContent.trim();
+                    selectedGestures.push(label);
+                }
+            });
+
+            if (selectedGestures.length === 0) {
+                toast('Veuillez sélectionner au moins un geste', 'error');
+                return;
+            }
+
+            // Remplir le rapport
+            const gesturesList = document.getElementById('reportGesturesList');
+            gesturesList.innerHTML = '<strong>Gestes sélectionnés:</strong><br>' +
+                selectedGestures.map((g, i) => `${i+1}. ${g}`).join('<br>');
+
+            // Afficher l'étape 3
+            document.getElementById('gesturesSection').style.display = 'none';
+            document.getElementById('reportSection').style.display = 'block';
+        }
+
+        function uploadToMainTool() {
+            const client = document.getElementById('reportClient').value || 'Non spécifié';
+            const prestation = document.getElementById('reportPrestation').value || 'Non spécifiée';
+            const ref = document.getElementById('reportRef').value || 'REF-' + Date.now();
+            const date = document.getElementById('reportDate').value;
+
+            const reportData = {
+                type: 'training_offer',
+                client,
+                prestation,
+                reference: ref,
+                date,
+                description: currentTrainingOffer,
+                gestures: selectedGestures,
+                customGestures,
+                createdAt: new Date().toISOString()
+            };
+
+            // Sauvegarder dans localStorage
+            let reports = JSON.parse(localStorage.getItem('trainingReports') || '[]');
+            reports.push(reportData);
+            localStorage.setItem('trainingReports', JSON.stringify(reports));
+
+            toast(`✅ Rapport uploadé! Référence: ${ref}`, 'success');
+            console.log('Report data:', reportData);
+
+            // Afficher les données pour intégration
+            if (prestationsSauvegardees) {
+                const newPrestation = {
+                    id: 'training_' + Date.now(),
+                    client,
+                    prestation,
+                    reference: ref,
+                    date,
+                    statut: 'brouillon',
+                    prixVente: 0,
+                    coutRevient: 0,
+                    description: `[Assistant Gestes]\n${selectedGestures.join(', ')}`,
+                    gestes: selectedGestures.map(g => ({ nom: g, duree: 0, cout: 0 }))
+                };
+                prestationsSauvegardees.push(newPrestation);
+                localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
+            }
+
+            setTimeout(() => closeTrainingModule(), 1500);
+        }
+
     </script>
 
     <!-- Auth : écran de connexion -->
     <div id="authOverlay" class="auth-overlay" style="display:none;">
-        <div class="auth-box">
-            <div style="font-size:2.8em;margin-bottom:6px;">🏭</div>
-            <h2>Atelier La Pallanterie</h2>
-            <p class="auth-subtitle">Connectez-vous pour accéder à l'outil</p>
-            <select id="authGroupSelect" onchange="document.getElementById('authPasswordInput').focus()">
-                <option value="">— Sélectionnez votre groupe —</option>
-            </select>
-            <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
-            <div class="auth-error" id="authError"></div>
-            <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
-            <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
+        <div class="auth-overlay-wrapper">
+            <!-- Container 1: Connexion -->
+            <div class="auth-box">
+                <div style="font-size:2.8em;margin-bottom:6px;">🏭</div>
+                <h2>Atelier La Pallanterie</h2>
+                <p class="auth-subtitle">Connectez-vous pour accéder à l'outil</p>
+                <select id="authGroupSelect" onchange="document.getElementById('authPasswordInput').focus()">
+                    <option value="">— Sélectionnez votre groupe —</option>
+                </select>
+                <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
+                <div class="auth-error" id="authError"></div>
+                <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
+                <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
+            </div>
+
+            <!-- Container 2: Offre de prix assistant gestes -->
+            <div class="training-box">
+                <div style="font-size:2.8em;margin-bottom:6px;">📋</div>
+                <h2>Offre de Prix</h2>
+                <h3 style="font-size: 1.1em; color: #9a70b8; margin-bottom: 12px;">Assistant Gestes</h3>
+                <p class="training-subtitle">Entraînez-vous à identifier et planifier les gestes de vos offres</p>
+                <button class="btn-training" onclick="openTrainingModule()">
+                    ✏️ Démarrer l'assistant
+                </button>
+                <p class="training-footer">Outil d'entraînement parallèle • Intégrable à l'outil complet</p>
+            </div>
         </div>
     </div>
 
@@ -8865,6 +9150,61 @@
             </div>
         </div>
     </div>
+
+    <!-- Training Module: Offre de prix assistant gestes -->
+    <div id="trainingOverlay" class="training-overlay" style="display:none;">
+        <div class="training-modal">
+            <div class="training-header">
+                <h2>📋 Offre de Prix - Assistant Gestes</h2>
+                <button onclick="closeTrainingModule()" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:1.5em;cursor:pointer;color:#7a9db1;">×</button>
+            </div>
+            <div class="training-content">
+                <div class="training-section" id="offerInputSection">
+                    <h3>Étape 1: Décrivez votre offre</h3>
+                    <textarea id="offerDescription" placeholder="Ex: Assemblage avec 7 pièces et 3 collages d'étiquettes plus une livraison à la poste" style="width:100%;height:100px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:0.95em;font-family:inherit;"></textarea>
+                    <button class="btn btn-success" style="margin-top:12px;width:100%;" onclick="analyzeOffer()">🔍 Analyser l'offre</button>
+                </div>
+
+                <div class="training-section" id="gesturesSection" style="display:none;">
+                    <h3>Étape 2: Sélectionnez les gestes</h3>
+                    <p style="font-size:0.9em;color:#7a9db1;margin-bottom:12px;">Gestes proposés pour cette offre :</p>
+                    <div id="proposedGesturesList" style="margin-bottom:16px;">
+                        <!-- Gestes proposés s'afficheront ici -->
+                    </div>
+                    <hr style="border:none;border-top:1px dashed #ddd;margin:16px 0;">
+                    <details style="margin-bottom:12px;">
+                        <summary style="cursor:pointer;font-weight:600;color:#6b8fa3;">+ Ajouter un geste personnalisé</summary>
+                        <div style="margin-top:10px;padding:12px;background:#f5f9fc;border-radius:8px;">
+                            <input type="text" id="customGestureName" placeholder="Nom du geste" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;">
+                            <textarea id="customGestureDesc" placeholder="Description du geste" style="width:100%;height:60px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;font-family:inherit;margin-bottom:8px;"></textarea>
+                            <button class="btn btn-success" style="width:100%;" onclick="addCustomGesture()">✅ Ajouter ce geste</button>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="training-section" id="reportSection" style="display:none;">
+                    <h3>Étape 3: Rapport récapitulatif</h3>
+                    <div style="background:#f5f9fc;padding:14px;border-radius:8px;border:1px solid #e0e8f0;margin-bottom:12px;">
+                        <p style="margin-bottom:8px;"><strong>Client:</strong> <input type="text" id="reportClient" placeholder="Nom du client" style="width:60%;padding:6px;border:1px solid #ddd;border-radius:4px;"></p>
+                        <p style="margin-bottom:8px;"><strong>Prestation:</strong> <input type="text" id="reportPrestation" placeholder="Nom de la prestation" style="width:60%;padding:6px;border:1px solid #ddd;border-radius:4px;"></p>
+                        <p style="margin-bottom:8px;"><strong>Référence:</strong> <input type="text" id="reportRef" placeholder="Référence" style="width:60%;padding:6px;border:1px solid #ddd;border-radius:4px;"></p>
+                        <p><strong>Date:</strong> <input type="date" id="reportDate" style="width:200px;padding:6px;border:1px solid #ddd;border-radius:4px;"></p>
+                    </div>
+                    <div id="reportGesturesList" style="background:#fffef9;padding:12px;border-radius:8px;border:1px solid #d5e3ed;margin-bottom:12px;max-height:200px;overflow-y:auto;">
+                        <!-- Résumé des gestes s'affichera ici -->
+                    </div>
+                    <button class="btn btn-success" style="width:100%;margin-bottom:8px;" onclick="generateReport()">📄 Générer le rapport PDF</button>
+                    <button class="btn" onclick="uploadToMainTool()" style="width:100%;">📤 Uploader dans l'outil complet</button>
+                </div>
+
+                <div style="display:flex;gap:10px;justify-content:space-between;margin-top:20px;border-top:1px solid #e0e8f0;padding-top:14px;">
+                    <button class="btn btn-secondary" onclick="resetTraining()" style="flex:1;">🔄 Recommencer</button>
+                    <button class="btn btn-secondary" onclick="closeTrainingModule()" style="flex:1;">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     </script>
 <!-- Modal statistiques -->
 <div id="stats-modal" onclick="if(event.target===this)this.classList.remove('open')">
