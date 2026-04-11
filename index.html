@@ -12736,10 +12736,10 @@
                         <div style="background:linear-gradient(135deg,#f5f9fc,#e8f4f8);padding:16px;border-radius:10px;border:2px solid #a8d5e2;">
                             <strong style="color:#6b8fa3;display:block;margin-bottom:10px;">📊 Stats Globales:</strong>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.9em;color:#5a7b8f;">
-                                <div>✅ Jeux joués: ${playerStats.gamesPlayed || 0}</div>
-                                <div>💯 Total XP: ${playerStats.totalXP || 0}</div>
-                                <div>⭐ Badges: ${playerStats.badges ? Object.keys(playerStats.badges).filter(b => playerStats.badges[b]).length : 0}/9</div>
-                                <div>🏆 Meilleur score: ${playerStats.bestScore || 0}</div>
+                                <div>✅ Jeux joués: ${playerStats.totalGamesPlayed || 0}</div>
+                                <div>💯 Total XP: ${playerStats.xp || 0}</div>
+                                <div>⭐ Réussites: ${playerStats.achievements ? playerStats.achievements.length : 0}</div>
+                                <div>🏆 Score total: ${playerStats.totalScore || 0}</div>
                             </div>
                         </div>
                     </div>
