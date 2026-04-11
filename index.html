@@ -4194,6 +4194,17 @@
             calculateTotal();
         }
 
+        function validateStockQuantity(input, lineId) {
+            const typeSelect = document.getElementById(`type-stock-${lineId}`);
+            if (typeSelect && typeSelect.value === 'palette') {
+                const value = parseFloat(input.value);
+                if (!Number.isInteger(value)) {
+                    input.value = Math.round(value);
+                    toast('⚠️ Les palettes doivent être des unités entières', 'warning');
+                }
+            }
+        }
+
         function addStockageLine() {
             const container = document.getElementById('stockageContainer');
             const lineId = Date.now() + Math.random();
@@ -4212,7 +4223,7 @@
                 </div>
                 <div class="form-group">
                     <label>Quantité</label>
-                    <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="1" onchange="calculateTotal()">
+                    <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="1" onchange="validateStockQuantity(this, ${lineId}); calculateTotal()")
                 </div>
                 <div class="form-group">
                     <label>Durée (j)</label>
@@ -4234,6 +4245,20 @@
             
             container.appendChild(line);
             stockageLines.push(lineId);
+
+            // Add event listener to restrict palette quantities to integers
+            const typeSelect = document.getElementById(`type-stock-${lineId}`);
+            const qteInput = document.getElementById(`qte-stock-${lineId}`);
+            if (typeSelect && qteInput) {
+                typeSelect.addEventListener('change', () => {
+                    if (typeSelect.value === 'palette') {
+                        qteInput.step = '1';
+                        qteInput.value = Math.round(parseFloat(qteInput.value) || 1);
+                    } else {
+                        qteInput.step = '0.1';
+                    }
+                });
+            }
             calculateTotal();
         }
 
@@ -4725,7 +4750,7 @@
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
-                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="calculateTotal()">
+                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="validateStockQuantity(this, ${lineId}); calculateTotal()">
                     </div>
                     <div class="form-group">
                         <label>Durée (j)</label>
@@ -6399,7 +6424,7 @@
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
-                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="calculateTotal()">
+                        <input type="number" id="qte-stock-${lineId}" min="0" step="0.1" value="${s.qte}" onchange="validateStockQuantity(this, ${lineId}); calculateTotal()">
                     </div>
                     <div class="form-group">
                         <label>Durée (j)</label>
