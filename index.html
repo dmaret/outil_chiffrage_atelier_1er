@@ -5472,33 +5472,46 @@
         }
 
         function addReferenceDocument() {
-            const title = document.getElementById('docTitle')?.value.trim();
-            const url = document.getElementById('docUrl')?.value.trim();
-            const type = document.getElementById('docType')?.value || 'other';
+            try {
+                const titleField = document.getElementById('docTitle');
+                const urlField = document.getElementById('docUrl');
+                const typeField = document.getElementById('docType');
 
-            if (!title || !url) {
-                toast('Merci de remplir titre et URL', 'warning');
-                return;
+                const title = titleField?.value?.trim() || '';
+                const url = urlField?.value?.trim() || '';
+                const type = typeField?.value || 'other';
+
+                if (!title || !url) {
+                    toast('Merci de remplir titre et URL', 'warning');
+                    return;
+                }
+
+                const doc = {
+                    id: Date.now(),
+                    title: title,
+                    url: url,
+                    type: type,
+                    createdAt: new Date().toISOString().split('T')[0]
+                };
+
+                if (!referenceDocuments) {
+                    referenceDocuments = [];
+                }
+
+                referenceDocuments.push(doc);
+                saveReferenceDocuments();
+                renderReferenceDocuments();
+
+                if (titleField) titleField.value = '';
+                if (urlField) urlField.value = '';
+                if (typeField) typeField.value = 'pdf';
+
+                toast(`✅ Document "${title}" ajouté`, 'success');
+                logAction(`Ajout document référence: ${title} (${type})`, 'CREATE');
+            } catch (error) {
+                console.error('Erreur addReferenceDocument:', error);
+                toast('❌ Erreur: ' + error.message, 'error');
             }
-
-            const doc = {
-                id: Date.now(),
-                title: title,
-                url: url,
-                type: type,
-                createdAt: new Date().toISOString().split('T')[0]
-            };
-
-            referenceDocuments.push(doc);
-            saveReferenceDocuments();
-            renderReferenceDocuments();
-
-            document.getElementById('docTitle').value = '';
-            document.getElementById('docUrl').value = '';
-            document.getElementById('docType').value = 'pdf';
-
-            toast(`✅ Document "${title}" ajouté`, 'success');
-            logAction(`Ajout document référence: ${title} (${type})`, 'CREATE');
         }
 
         function saveReferenceDocuments() {
@@ -5506,39 +5519,48 @@
         }
 
         function renderReferenceDocuments() {
-            const container = document.getElementById('referenceDocumentsContainer');
-            const noMsg = document.getElementById('noDocsMsg');
+            try {
+                const container = document.getElementById('referenceDocumentsContainer');
+                const noMsg = document.getElementById('noDocsMsg');
 
-            if (referenceDocuments.length === 0) {
-                container.innerHTML = '';
-                noMsg.style.display = 'block';
-                return;
+                if (!container || !noMsg) {
+                    console.warn('Reference documents container elements not found');
+                    return;
+                }
+
+                if (!referenceDocuments || referenceDocuments.length === 0) {
+                    container.innerHTML = '';
+                    noMsg.style.display = 'block';
+                    return;
+                }
+
+                noMsg.style.display = 'none';
+                const icons = { pdf: '📄', link: '🔗', video: '🎥', other: '📦' };
+
+                container.innerHTML = `<table style="width:100%;">
+                    <thead><tr>
+                        <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Type</th>
+                        <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Titre</th>
+                        <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Date</th>
+                        <th style="text-align:right;padding:10px;border-bottom:2px solid #ddd;">Actions</th>
+                    </tr></thead>
+                    <tbody>
+                    ${referenceDocuments.map(doc => `
+                        <tr style="border-bottom:1px solid #eee;">
+                            <td style="padding:12px;"><strong>${icons[doc.type] || '📦'} ${doc.type.toUpperCase()}</strong></td>
+                            <td style="padding:12px;">${doc.title}</td>
+                            <td style="padding:12px;color:#7a9db1;font-size:0.9em;">${doc.createdAt}</td>
+                            <td style="padding:12px;text-align:right;white-space:nowrap;">
+                                <a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>
+                                <button class="delete-btn btn-small" onclick="deleteReferenceDocument(${doc.id})">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                    </tbody>
+                </table>`;
+            } catch (error) {
+                console.error('Erreur renderReferenceDocuments:', error);
             }
-
-            noMsg.style.display = 'none';
-            const icons = { pdf: '📄', link: '🔗', video: '🎥', other: '📦' };
-
-            container.innerHTML = `<table style="width:100%;">
-                <thead><tr>
-                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Type</th>
-                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Titre</th>
-                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Date</th>
-                    <th style="text-align:right;padding:10px;border-bottom:2px solid #ddd;">Actions</th>
-                </tr></thead>
-                <tbody>
-                ${referenceDocuments.map(doc => `
-                    <tr style="border-bottom:1px solid #eee;">
-                        <td style="padding:12px;"><strong>${icons[doc.type] || '📦'} ${doc.type.toUpperCase()}</strong></td>
-                        <td style="padding:12px;">${doc.title}</td>
-                        <td style="padding:12px;color:#7a9db1;font-size:0.9em;">${doc.createdAt}</td>
-                        <td style="padding:12px;text-align:right;white-space:nowrap;">
-                            <a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>
-                            <button class="delete-btn btn-small" onclick="deleteReferenceDocument(${doc.id})">🗑️</button>
-                        </td>
-                    </tr>
-                `).join('')}
-                </tbody>
-            </table>`;
         }
 
         function deleteReferenceDocument(docId) {
