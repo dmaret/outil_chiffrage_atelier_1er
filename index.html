@@ -4233,6 +4233,14 @@
             }
         }
 
+        function validateStockDuration(input, lineId) {
+            const value = parseFloat(input.value);
+            if (!Number.isInteger(value)) {
+                input.value = Math.round(value);
+                toast('⚠️ La durée doit être un nombre entier (jours)', 'warning');
+            }
+        }
+
         function addStockageLine() {
             const container = document.getElementById('stockageContainer');
             const lineId = Date.now() + Math.random();
@@ -4255,7 +4263,7 @@
                 </div>
                 <div class="form-group">
                     <label>Durée (j)</label>
-                    <input type="number" id="duree-stock-${lineId}" min="0" step="0.5" value="1" onchange="calculateTotal()">
+                    <input type="number" id="duree-stock-${lineId}" min="0" step="1" value="1" onchange="validateStockDuration(this, ${lineId}); calculateTotal()">
                 </div>
                 <div class="form-group">
                     <label>Tarif/j</label>
@@ -4782,7 +4790,7 @@
                     </div>
                     <div class="form-group">
                         <label>Durée (j)</label>
-                        <input type="number" id="duree-stock-${lineId}" min="0" step="0.5" value="${s.duree}" onchange="calculateTotal()">
+                        <input type="number" id="duree-stock-${lineId}" min="0" step="1" value="${s.duree}" onchange="validateStockDuration(this, ${lineId}); calculateTotal()">
                     </div>
                     <div class="form-group">
                         <label>Tarif/j</label>
@@ -5497,22 +5505,27 @@
             noMsg.style.display = 'none';
             const icons = { pdf: '📄', link: '🔗', video: '🎥', other: '📦' };
 
-            container.innerHTML = referenceDocuments.map(doc => `
-                <div style="border:1px solid #ddd;padding:12px;border-radius:6px;background:#f9f9f9;display:flex;justify-content:space-between;align-items:center;">
-                    <div>
-                        <h4 style="margin:0 0 4px;color:#34495e;">
-                            ${icons[doc.type] || '📦'} ${doc.title}
-                        </h4>
-                        <p style="margin:0;color:#7a9db1;font-size:0.85em;">
-                            ${doc.type.toUpperCase()} • ${doc.createdAt}
-                        </p>
-                    </div>
-                    <div style="display:flex;gap:8px;">
-                        <a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary">🔗 Ouvrir</a>
-                        <button class="delete-btn btn-small" onclick="deleteReferenceDocument(${doc.id})">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
+            container.innerHTML = `<table style="width:100%;">
+                <thead><tr>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Type</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Titre</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Date</th>
+                    <th style="text-align:right;padding:10px;border-bottom:2px solid #ddd;">Actions</th>
+                </tr></thead>
+                <tbody>
+                ${referenceDocuments.map(doc => `
+                    <tr style="border-bottom:1px solid #eee;">
+                        <td style="padding:12px;"><strong>${icons[doc.type] || '📦'} ${doc.type.toUpperCase()}</strong></td>
+                        <td style="padding:12px;">${doc.title}</td>
+                        <td style="padding:12px;color:#7a9db1;font-size:0.9em;">${doc.createdAt}</td>
+                        <td style="padding:12px;text-align:right;white-space:nowrap;">
+                            <a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>
+                            <button class="delete-btn btn-small" onclick="deleteReferenceDocument(${doc.id})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('')}
+                </tbody>
+            </table>`;
         }
 
         function deleteReferenceDocument(docId) {
@@ -6539,7 +6552,7 @@
                     </div>
                     <div class="form-group">
                         <label>Durée (j)</label>
-                        <input type="number" id="duree-stock-${lineId}" min="0" step="0.5" value="${s.duree}" onchange="calculateTotal()">
+                        <input type="number" id="duree-stock-${lineId}" min="0" step="1" value="${s.duree}" onchange="validateStockDuration(this, ${lineId}); calculateTotal()">
                     </div>
                     <div class="form-group">
                         <label>Tarif/j</label>
