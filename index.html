@@ -11845,6 +11845,203 @@
             localStorage.setItem('playerStats', JSON.stringify(playerStats));
         }
 
+        // ════════════════════════════════════════════════════════════
+        // MODE MULTI-JOUEURS & CHALLENGES SPÉCIAUX
+        // ════════════════════════════════════════════════════════════
+        let multiplayerState = {
+            players: [],
+            currentRound: 0,
+            scores: {},
+            active: false
+        };
+
+        const DAILY_CHALLENGES = [
+            { id: 'speed_rush', emoji: '⚡', nom: 'Speed Rush', desc: '10 produits en 40sec', bonus: 100, type: 'speed' },
+            { id: 'perfect_game', emoji: '✨', nom: 'Jeu Parfait', desc: 'Zéro erreur en challenge', bonus: 150, type: 'challenge' },
+            { id: 'quiz_master', emoji: '💯', nom: 'Quiz Master', desc: '100% au quiz', bonus: 120, type: 'quiz' },
+            { id: 'combo_3', emoji: '🔥', nom: 'Combo 3x', desc: 'Gagnez 3 jeux de suite', bonus: 200, type: 'combo' },
+            { id: 'high_score', emoji: '⭐', nom: 'Record', desc: 'Nouveau record personnel', bonus: 180, type: 'record' }
+        ];
+
+        const WEEKLY_CHALLENGES = [
+            { id: 'week_games_10', emoji: '🎮', nom: '10 Jeux', desc: 'Jouez 10 jeux cette semaine', bonus: 500, type: 'games' },
+            { id: 'week_quiz_5', emoji: '❓', nom: 'Quiz Expert', desc: 'Faites le quiz 5 fois', bonus: 400, type: 'quiz_multi' },
+            { id: 'week_perfect', emoji: '🏆', nom: 'Semaine Parfaite', desc: 'Pas de jour sans jeu (7j)', bonus: 1000, type: 'streak' },
+            { id: 'week_1000xp', emoji: '✨', nom: '1000 XP', desc: 'Gagnez 1000 XP', bonus: 750, type: 'xp' }
+        ];
+
+        let challengeProgress = JSON.parse(localStorage.getItem('challengeProgress') || '{}');
+
+        function startMultiplayer() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:30px;border-radius:16px;max-width:600px;width:90%;">
+                    <h2 style="color:#6b8fa3;margin-bottom:20px;">👥 Mode Multijoueur</h2>
+                    <p style="color:#666;margin-bottom:20px;">Jouez à 2 sur le même PC et comparez vos scores!</p>
+
+                    <div style="background:#f5f9fc;padding:20px;border-radius:8px;margin-bottom:20px;">
+                        <label style="display:block;margin-bottom:10px;font-weight:bold;">Joueur 1:</label>
+                        <input type="text" id="p1Name" placeholder="Nom du joueur 1" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;margin-bottom:15px;">
+
+                        <label style="display:block;margin-bottom:10px;font-weight:bold;">Joueur 2:</label>
+                        <input type="text" id="p2Name" placeholder="Nom du joueur 2" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;">
+                    </div>
+
+                    <div style="background:#fff3cd;padding:15px;border-radius:8px;margin-bottom:20px;border-left:4px solid #ffc107;">
+                        <strong style="color:#856404;">ℹ️ Comment ça marche:</strong>
+                        <ul style="margin:10px 0 0 20px;color:#856404;font-size:0.9em;">
+                            <li>Chacun joue un mini-jeu</li>
+                            <li>Les scores s'ajoutent au classement</li>
+                            <li>Qui aura le meilleur total? 🏆</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-success" onclick="launchMultiplayer()" style="width:100%;margin-bottom:10px;">🎮 Commencer!</button>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();" style="width:100%;">Annuler</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function launchMultiplayer() {
+            const p1 = document.getElementById('p1Name')?.value || 'Joueur 1';
+            const p2 = document.getElementById('p2Name')?.value || 'Joueur 2';
+
+            multiplayerState.players = [p1, p2];
+            multiplayerState.scores = { [p1]: 0, [p2]: 0 };
+            multiplayerState.active = true;
+            multiplayerState.currentRound = 0;
+
+            document.querySelector('[style*="position:fixed"]')?.remove();
+            showMultiplayerRound(0);
+        }
+
+        function showMultiplayerRound(playerIdx) {
+            const player = multiplayerState.players[playerIdx];
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:40px;border-radius:16px;max-width:500px;width:90%;text-align:center;">
+                    <h3 style="color:#6b8fa3;margin-bottom:20px;">🎮 C'est ton tour!</h3>
+                    <div style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);color:white;padding:30px;border-radius:12px;margin-bottom:20px;">
+                        <div style="font-size:2.5em;font-weight:bold;margin-bottom:10px;">${player}</div>
+                        <div style="font-size:1.2em;">Score: <strong>${multiplayerState.scores[player]}</strong></div>
+                    </div>
+                    <p style="color:#666;margin-bottom:20px;">Choisis un jeu rapide:</p>
+                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();startSpeedGame();" style="width:100%;margin-bottom:10px;">⚡ Speed Challenge</button>
+                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();startQuiz();" style="width:100%;margin-bottom:10px;">❓ Quiz Rapide</button>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();multiplayerState.active=false;" style="width:100%;">Abandonner</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function showMultiplayerResults() {
+            const sorted = Object.entries(multiplayerState.scores).sort((a, b) => b[1] - a[1]);
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:40px;border-radius:16px;max-width:500px;width:90%;text-align:center;">
+                    <h2 style="color:#6b8fa3;margin-bottom:30px;">🏆 Résultats</h2>
+                    <div style="display:grid;gap:15px;">
+            `;
+
+            sorted.forEach(([name, score], idx) => {
+                const medals = ['🥇', '🥈'];
+                html += `
+                    <div style="background:linear-gradient(135deg,${idx === 0 ? '#FFD700' : '#c0c0c0'},${idx === 0 ? '#FFA500' : '#808080'});color:white;padding:20px;border-radius:8px;">
+                        <div style="font-size:2em;">${medals[idx] || '🎖️'}</div>
+                        <div style="font-weight:bold;margin:10px 0;">${name}</div>
+                        <div style="font-size:1.5em;font-weight:bold;">${score} pts</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();multiplayerState.active=false;" style="width:100%;margin-top:20px;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function showDailyChallenges() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
+
+            let html = `
+                <div style="background:white;padding:30px;border-radius:16px;max-width:700px;width:90%;margin:20px auto;">
+                    <h2 style="color:#6b8fa3;margin-bottom:20px;">📅 Défis du Jour</h2>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;">
+            `;
+
+            DAILY_CHALLENGES.forEach(challenge => {
+                const done = challengeProgress[challenge.id];
+                html += `
+                    <div style="background:${done ? 'linear-gradient(135deg,#d5f4e6,#a8d5e2)' : '#f5f9fc'};padding:15px;border-radius:8px;border:2px ${done ? 'solid #27ae60' : 'dashed #ddd'};opacity:${done ? '1' : '0.8'};">
+                        <div style="font-size:2em;margin-bottom:8px;">${challenge.emoji}</div>
+                        <div style="font-weight:bold;color:#333;">${challenge.nom}</div>
+                        <div style="font-size:0.85em;color:#666;margin:8px 0;">${challenge.desc}</div>
+                        <div style="background:#ffc107;color:#333;padding:6px;border-radius:4px;font-weight:bold;font-size:0.9em;">+${challenge.bonus} XP</div>
+                        ${done ? '<div style="margin-top:8px;color:#27ae60;font-weight:bold;">✅ Complété!</div>' : ''}
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+
+                    <h3 style="color:#6b8fa3;margin:30px 0 20px 0;">📆 Défis de la Semaine</h3>
+                    <div style="display:grid;grid-template-columns:1fr;gap:12px;">
+            `;
+
+            WEEKLY_CHALLENGES.forEach(challenge => {
+                const done = challengeProgress['week_' + challenge.id];
+                html += `
+                    <div style="background:${done ? '#d5f4e6' : '#f5f9fc'};padding:15px;border-radius:8px;border-left:4px solid ${done ? '#27ae60' : '#6b8fa3'};display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div style="font-weight:bold;color:#333;">${challenge.emoji} ${challenge.nom}</div>
+                            <div style="font-size:0.85em;color:#666;">${challenge.desc}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="background:#ffc107;color:#333;padding:8px 12px;border-radius:4px;font-weight:bold;margin-bottom:5px;">+${challenge.bonus} XP</div>
+                            ${done ? '<div style="color:#27ae60;font-weight:bold;">✅</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();" style="width:100%;margin-top:20px;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function completeDailyChallenge(challengeId) {
+            if (!challengeProgress[challengeId]) {
+                challengeProgress[challengeId] = Date.now();
+                const challenge = DAILY_CHALLENGES.find(c => c.id === challengeId);
+                addXP(challenge.bonus);
+                localStorage.setItem('challengeProgress', JSON.stringify(challengeProgress));
+                toast(`✅ Défi complété: +${challenge.bonus} XP!`, 'success');
+            }
+        }
+
         function updateStreak() {
             const today = new Date().toDateString();
             const lastPlay = playerStats.lastPlayDate;
@@ -12169,7 +12366,9 @@
                 { id: 'speed', emoji: '⚡', nom: 'Mode Speed', desc: 'Placer 10 produits en moins de 60 sec!' },
                 { id: 'quiz', emoji: '❓', nom: 'Quiz Logistique', desc: 'Testez vos connaissances sur les règles' },
                 { id: 'badges', emoji: '🏆', nom: 'Mes Badges', desc: 'Débloquez et collectionnez des badges!' },
-                { id: 'leaderboard', emoji: '🏅', nom: 'Classement', desc: 'Comparez vos scores avec les autres' }
+                { id: 'leaderboard', emoji: '🏅', nom: 'Classement', desc: 'Comparez vos scores avec les autres' },
+                { id: 'multiplayer', emoji: '👥', nom: 'Multijoueur', desc: 'Affrontez un ami sur le même PC!' },
+                { id: 'challenges', emoji: '📅', nom: 'Défis', desc: 'Défis quotidiens & hebdo avec bonus!' }
             ];
 
             let html = `
@@ -12219,6 +12418,10 @@
                 showBadges();
             } else if (gameType === 'leaderboard') {
                 showLeaderboard();
+            } else if (gameType === 'multiplayer') {
+                startMultiplayer();
+            } else if (gameType === 'challenges') {
+                showDailyChallenges();
             }
         }
 
