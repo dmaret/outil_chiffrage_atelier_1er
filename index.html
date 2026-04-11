@@ -12744,7 +12744,7 @@
                         </div>
                     </div>
                     <div class="game-menu-footer">
-                        <button class="btn btn-success" onclick="closeGameMenu();startGame('${gameId}');" style="width:100%;font-size:1.05em;font-weight:700;">▶️ Jouer maintenant!</button>
+                        <button class="btn btn-success" onclick="closeGameMenu();startLogisticsGame('${gameId}');" style="width:100%;font-size:1.05em;font-weight:700;">▶️ Jouer maintenant!</button>
                         <button class="btn btn-secondary" onclick="closeGameMenu();">← Retour</button>
                     </div>
                 </div>
@@ -12798,7 +12798,7 @@
                 html += `
                     <div class="game-card" style="position:relative;">
                         <div style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="showGameInfo('${game.id}');event.stopPropagation();" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">ℹ️</div>
-                        <div onclick="closeGameMenu();startGame('${game.id}')" style="cursor:pointer;">
+                        <div onclick="closeGameMenu();startLogisticsGame('${game.id}')" style="cursor:pointer;">
                             <span class="game-card-emoji">${game.emoji}</span>
                             <div class="game-card-name">${game.nom}</div>
                             <div class="game-card-desc">${game.desc}</div>
@@ -12820,7 +12820,7 @@
                 html += `
                     <div class="game-card" style="position:relative;">
                         <div style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="showGameInfo('${game.id}');event.stopPropagation();" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">ℹ️</div>
-                        <div onclick="closeGameMenu();startGame('${game.id}')" style="cursor:pointer;">
+                        <div onclick="closeGameMenu();startLogisticsGame('${game.id}')" style="cursor:pointer;">
                             <span class="game-card-emoji">${game.emoji}</span>
                             <div class="game-card-name">${game.nom}</div>
                             <div class="game-card-desc">${game.desc}</div>
@@ -12842,7 +12842,7 @@
                 html += `
                     <div class="game-card" style="position:relative;">
                         <div style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="showGameInfo('${game.id}');event.stopPropagation();" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">ℹ️</div>
-                        <div onclick="closeGameMenu();startGame('${game.id}')" style="cursor:pointer;">
+                        <div onclick="closeGameMenu();startLogisticsGame('${game.id}')" style="cursor:pointer;">
                             <span class="game-card-emoji">${game.emoji}</span>
                             <div class="game-card-name">${game.nom}</div>
                             <div class="game-card-desc">${game.desc}</div>
@@ -12864,7 +12864,7 @@
                 html += `
                     <div class="game-card" style="position:relative;">
                         <div style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="showGameInfo('${game.id}');event.stopPropagation();" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">ℹ️</div>
-                        <div onclick="closeGameMenu();startGame('${game.id}')" style="cursor:pointer;">
+                        <div onclick="closeGameMenu();startLogisticsGame('${game.id}')" style="cursor:pointer;">
                             <span class="game-card-emoji">${game.emoji}</span>
                             <div class="game-card-name">${game.nom}</div>
                             <div class="game-card-desc">${game.desc}</div>
@@ -12887,7 +12887,7 @@
             document.body.appendChild(modal);
         }
 
-        function startGame(gameType) {
+        function startLogisticsGame(gameType) {
             logisticsGameState.currentGame = gameType;
             logisticsGameState.score = 0;
             logisticsGameState.time = 0;
