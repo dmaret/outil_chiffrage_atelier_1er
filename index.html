@@ -11285,12 +11285,30 @@
             }
         }
 
-        // Fermer la modale si on clique en dehors
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('conditionsModal');
-            if (event.target === modal) {
-                closeConditionsModal();
+        // Event listeners for modal
+        document.addEventListener('DOMContentLoaded', function() {
+            // Link to open modal
+            const conditionsLink = document.querySelector('.footer-legal a');
+            if (conditionsLink) {
+                conditionsLink.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    openConditionsModal(event);
+                });
             }
+
+            // Button to close modal
+            const closeButton = document.querySelector('.modal-conditions-close button');
+            if (closeButton) {
+                closeButton.addEventListener('click', closeConditionsModal);
+            }
+
+            // Close modal if clicking outside
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('conditionsModal');
+                if (event.target === modal) {
+                    closeConditionsModal();
+                }
+            });
         });
 
         // Fermer avec la touche Escape
@@ -11494,7 +11512,7 @@
 <div class="toast-container" id="toast-container"></div>
 <!-- Legal notice and copyright -->
 <div class="footer-legal">
-  <strong>© 2025–2026 MARET Davie — Tous droits réservés.</strong> Toute reproduction ou utilisation de ce logiciel sans accord préalable écrit est interdite. <a onclick="openConditionsModal(event)">Voir les conditions d'utilisation</a>
+  <strong>© 2025–2026 MARET Davie — Tous droits réservés.</strong> Toute reproduction ou utilisation de ce logiciel sans accord préalable écrit est interdite. <a href="#" style="cursor: pointer;">Voir les conditions d'utilisation</a>
 </div>
 
 <!-- Modal Conditions d'utilisation -->
@@ -11517,7 +11535,7 @@
       <p><strong>Attribution :</strong> Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret © 2025–2026</p>
     </div>
     <div class="modal-conditions-close">
-      <button onclick="closeConditionsModal()">Fermer</button>
+      <button>Fermer</button>
     </div>
   </div>
 </div>
