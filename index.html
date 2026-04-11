@@ -2928,6 +2928,7 @@
                             <button class="btn btn-small" id="btnGames" onclick="openGameMenu()" style="background:#ff6b6b;color:white;">🎮 Jeux</button>
                             <button class="btn btn-small" id="btnChallenge" onclick="startLogisticsChallenge()" style="background:#a8d5e2;color:#333;">⏱️ Chrono</button>
                             <button class="btn btn-small" id="btnAnalytics" onclick="showLogisticsAnalytics()" style="background:#ffc107;color:#333;">📊 Analytics</button>
+                            <button class="btn btn-small" id="btnStats" onclick="showPlayerStats()" style="background:#9b59b6;color:white;">👤 Profil</button>
                         </div>
                     </div>
                     <p style="color:#666;margin-bottom:15px;" id="logisticsDesc">Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.</p>
@@ -11766,6 +11767,254 @@
         let leaderboard = JSON.parse(localStorage.getItem('logisticsLeaderboard') || '[]');
         let playerBadges = JSON.parse(localStorage.getItem('playerBadges') || '{}');
 
+        // ════════════════════════════════════════════════════════════
+        // SYSTÈME DE PROGRESSION, STATS & CERTIFICATS
+        // ════════════════════════════════════════════════════════════
+        let playerStats = JSON.parse(localStorage.getItem('playerStats') || '{}')||(
+            playerStats = {
+                username: 'Joueur ' + Math.floor(Math.random()*1000),
+                level: 1,
+                xp: 0,
+                xpNextLevel: 500,
+                totalGamesPlayed: 0,
+                totalScore: 0,
+                quizAttempts: 0,
+                quizBest: 0,
+                streakDays: 0,
+                lastPlayDate: null,
+                achievements: [],
+                certifications: [],
+                createdAt: new Date().toLocaleString()
+            }
+        );
+
+        const ACHIEVEMENTS = {
+            'first_game': { emoji: '🎮', nom: 'Premier Jeu', desc: 'Jouez votre 1er jeu' },
+            'game_master': { emoji: '🎯', nom: 'Maître des Jeux', desc: 'Jouez 10 jeux' },
+            'quiz_100': { emoji: '💯', nom: 'Quiz Parfait', desc: '100% au quiz' },
+            'quiz_50_runs': { emoji: '🔁', nom: 'Quiz Addict', desc: 'Faites le quiz 50 fois' },
+            'speed_demon': { emoji: '⚡', nom: 'Démon de Vitesse', desc: 'Placez 10 produits en 40sec' },
+            'no_errors': { emoji: '✨', nom: 'Sans Erreur', desc: '8h sans erreur en challenge' },
+            'millionaire': { emoji: '💰', nom: 'Millionnaire', desc: '1000 points cumulés' },
+            'week_streak': { emoji: '🔥', nom: 'Semaine de Feu', desc: '7 jours consécutifs' },
+            'month_streak': { emoji: '🏔️', nom: 'Montagne', desc: '30 jours consécutifs' },
+            'hall_of_fame': { emoji: '👑', nom: 'Hall of Fame', desc: 'Top 3 du leaderboard' }
+        };
+
+        const CERTIFICATION_LEVELS = [
+            { level: 1, name: 'Novice', minXP: 0, emoji: '🌱', color: '#4CAF50', desc: 'Apprenti logisticien' },
+            { level: 2, name: 'Débutant', minXP: 500, emoji: '📚', color: '#2196F3', desc: 'Vous comprenez les bases' },
+            { level: 3, name: 'Intermédiaire', minXP: 1500, emoji: '💼', color: '#FF9800', desc: 'Vous maîtrisez bien' },
+            { level: 4, name: 'Avancé', minXP: 3000, emoji: '🎓', color: '#9C27B0', desc: 'Expert en logistique' },
+            { level: 5, name: 'Maître', minXP: 5000, emoji: '👑', color: '#FFD700', desc: 'Vous êtes le meilleur!' }
+        ];
+
+        function addXP(amount) {
+            playerStats.xp += amount;
+            while (playerStats.xp >= playerStats.xpNextLevel) {
+                playerStats.xp -= playerStats.xpNextLevel;
+                playerStats.level++;
+                playerStats.xpNextLevel = playerStats.level * 500;
+                toast(`🎉 LEVEL UP! Vous êtes maintenant niveau ${playerStats.level}!`, 'success');
+                checkCertifications();
+            }
+            savePlayerStats();
+        }
+
+        function checkCertifications() {
+            const cert = CERTIFICATION_LEVELS.find(c => c.minXP <= playerStats.xp + (playerStats.level - 1) * 500);
+            if (cert && !playerStats.certifications.includes(cert.level)) {
+                playerStats.certifications.push(cert.level);
+                toast(`🎓 Nouvelle Certification: ${cert.emoji} ${cert.name}!`, 'success');
+                savePlayerStats();
+            }
+        }
+
+        function unlockAchievement(achievementId) {
+            if (!playerStats.achievements.includes(achievementId)) {
+                playerStats.achievements.push(achievementId);
+                const ach = ACHIEVEMENTS[achievementId];
+                toast(`🏆 Achievement Débloqué: ${ach.emoji} ${ach.nom}!`, 'success');
+                savePlayerStats();
+                return true;
+            }
+            return false;
+        }
+
+        function savePlayerStats() {
+            localStorage.setItem('playerStats', JSON.stringify(playerStats));
+        }
+
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const lastPlay = playerStats.lastPlayDate;
+
+            if (lastPlay === today) return; // Already played today
+
+            const lastDate = lastPlay ? new Date(lastPlay) : null;
+            const todayDate = new Date();
+
+            if (lastDate && (todayDate - lastDate) / (1000 * 60 * 60 * 24) <= 1) {
+                playerStats.streakDays++;
+                if (playerStats.streakDays === 7) unlockAchievement('week_streak');
+                if (playerStats.streakDays === 30) unlockAchievement('month_streak');
+            } else {
+                playerStats.streakDays = 1;
+            }
+
+            playerStats.lastPlayDate = today;
+            savePlayerStats();
+        }
+
+        function generateCertificate() {
+            const currentCert = CERTIFICATION_LEVELS.reverse().find(c => playerStats.certifications.includes(c.level));
+            if (!currentCert) {
+                toast('❌ Vous devez d\'abord atteindre une certification!', 'warning');
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 1200;
+            canvas.height = 900;
+            const ctx = canvas.getContext('2d');
+
+            // Background gradient
+            const grad = ctx.createLinearGradient(0, 0, 1200, 900);
+            grad.addColorStop(0, '#f5f7fa');
+            grad.addColorStop(1, '#e8eef5');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1200, 900);
+
+            // Border
+            ctx.strokeStyle = currentCert.color;
+            ctx.lineWidth = 8;
+            ctx.strokeRect(40, 40, 1120, 820);
+
+            // Title
+            ctx.font = 'bold 60px Arial';
+            ctx.fillStyle = currentCert.color;
+            ctx.textAlign = 'center';
+            ctx.fillText('CERTIFICAT DE COMPÉTENCE', 600, 150);
+
+            // Subtitle
+            ctx.font = '24px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText('Système de Gestion Logistique', 600, 200);
+
+            // Certificate Name
+            ctx.font = 'bold 50px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText(currentCert.emoji + ' ' + currentCert.name, 600, 350);
+
+            // Player Name
+            ctx.font = '28px Arial';
+            ctx.fillStyle = '#555';
+            ctx.fillText('Décerné à: ' + playerStats.username, 600, 450);
+
+            // Level & XP
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#777';
+            ctx.fillText(`Niveau: ${playerStats.level} | Expérience: ${playerStats.xp} XP`, 600, 520);
+
+            // Date
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#999';
+            ctx.fillText('Date: ' + new Date().toLocaleDateString('fr-FR'), 600, 750);
+
+            // Download
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `Certificat_${playerStats.username}_${currentCert.name}.png`;
+            link.click();
+
+            toast('📜 Certificat téléchargé!', 'success');
+        }
+
+        function showPlayerStats() {
+            const currentCert = CERTIFICATION_LEVELS.find(c => c.minXP <= (playerStats.level - 1) * 500 + playerStats.xp);
+            const nextCert = CERTIFICATION_LEVELS.find(c => c.minXP > (playerStats.level - 1) * 500 + playerStats.xp);
+            const xpPercent = (playerStats.xp / playerStats.xpNextLevel) * 100;
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
+
+            let html = `
+                <div style="background:white;padding:40px;border-radius:16px;max-width:800px;width:90%;margin:20px auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+                        <h2 style="color:#6b8fa3;margin:0;">📊 Mes Statistiques</h2>
+                        <button class="btn btn-small" onclick="generateCertificate()" style="background:#FFD700;color:#333;">📜 Certificat</button>
+                    </div>
+
+                    <!-- Profil -->
+                    <div style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);padding:20px;border-radius:12px;color:white;margin-bottom:20px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;">
+                            <div style="text-align:center;">
+                                <div style="font-size:2.5em;margin-bottom:10px;">${currentCert?.emoji || '🌱'}</div>
+                                <div style="font-weight:bold;">${playerStats.username}</div>
+                                <div style="font-size:0.9em;opacity:0.9;">${currentCert?.name || 'Novice'}</div>
+                            </div>
+                            <div style="text-align:center;border-left:2px solid white;border-right:2px solid white;padding:0 15px;">
+                                <div style="font-size:2.5em;margin-bottom:10px;">⭐</div>
+                                <div style="font-weight:bold;">Niveau ${playerStats.level}</div>
+                                <div style="font-size:0.9em;">${playerStats.xp}/${playerStats.xpNextLevel} XP</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:2.5em;margin-bottom:10px;">🔥</div>
+                                <div style="font-weight:bold;">Streak</div>
+                                <div style="font-size:0.9em;">${playerStats.streakDays} jours</div>
+                            </div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:15px;">
+                            <div style="background:white;height:8px;border-radius:4px;width:${xpPercent}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+                        <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #6b8fa3;">
+                            <div style="color:#999;font-size:0.9em;">Jeux Joués</div>
+                            <div style="font-size:1.8em;font-weight:bold;color:#6b8fa3;">${playerStats.totalGamesPlayed}</div>
+                        </div>
+                        <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #c9b3d4;">
+                            <div style="color:#999;font-size:0.9em;">Score Total</div>
+                            <div style="font-size:1.8em;font-weight:bold;color:#c9b3d4;">${playerStats.totalScore}</div>
+                        </div>
+                        <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #a8d5e2;">
+                            <div style="color:#999;font-size:0.9em;">Quiz Meilleur</div>
+                            <div style="font-size:1.8em;font-weight:bold;color:#a8d5e2;">${playerStats.quizBest}%</div>
+                        </div>
+                    </div>
+
+                    <!-- Certifications -->
+                    <div style="background:#f5f9fc;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #ddd;">
+                        <div style="font-weight:bold;margin-bottom:10px;">🎓 Certifications Débloquées:</div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            ${CERTIFICATION_LEVELS.filter(c => playerStats.certifications.includes(c.level)).map(c =>
+                                `<div style="background:${c.color};color:white;padding:8px 12px;border-radius:6px;font-size:0.9em;font-weight:bold;">${c.emoji} ${c.name}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Achievements -->
+                    <div style="background:#f5f9fc;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #ddd;">
+                        <div style="font-weight:bold;margin-bottom:10px;">🏆 Achievements (${playerStats.achievements.length}/${Object.keys(ACHIEVEMENTS).length}):</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;">
+                            ${Object.entries(ACHIEVEMENTS).map(([id, ach]) =>
+                                playerStats.achievements.includes(id)
+                                    ? `<div style="background:${ach.emoji === '🏆' ? '#FFD700' : '#a8d5e2'};color:white;padding:10px;border-radius:6px;text-align:center;font-size:1.5em;">${ach.emoji}</div>`
+                                    : `<div style="background:#eee;color:#999;padding:10px;border-radius:6px;text-align:center;font-size:1.5em;opacity:0.5;">❌</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();" style="width:100%;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
         const BADGES = {
             'premier_pas': { emoji: '👣', nom: 'Premier Pas', desc: 'Terminez votre premier jeu' },
             'debutant': { emoji: '🌱', nom: 'Débutant', desc: 'Score cumulé 100 points' },
@@ -12196,7 +12445,7 @@
 
             q.options.forEach((opt, idx) => {
                 html += `
-                    <button style="padding:15px;border:2px solid #ddd;border-radius:8px;text-align:left;cursor:pointer;font-size:0.95em;transition:all 0.2s;background:white;" onmouseover="this.style.borderColor='#6b8fa3';this.style.background='#f5f9fc';" onmouseout="this.style.borderColor='#ddd';this.style.background='white';" onclick="answerQuestion(${idx}, this)">
+                    <button style="padding:15px;border:2px solid #ddd;border-radius:8px;text-align:left;cursor:pointer;font-size:0.95em;transition:all 0.2s;background:white;" onmouseover="this.style.borderColor='#6b8fa3';this.style.background='#f5f9fc';" onmouseout="this.style.borderColor='#ddd';this.style.background='white';" onclick="answerQuestion(${idx}, this, '${q.explication.replace(/'/g, "\\'")}')" id="opt${idx}">
                         ${opt.text}
                     </button>
                 `;
@@ -12212,25 +12461,34 @@
             document.body.appendChild(modal);
         }
 
-        function answerQuestion(optionIdx, btn) {
+        function answerQuestion(optionIdx, btn, explication) {
             const q = QUESTIONS_LOGISTIQUE[quizState.currentQuestion];
             const isCorrect = q.options[optionIdx].correct;
 
             btn.style.borderColor = isCorrect ? '#27ae60' : '#e74c3c';
             btn.style.background = isCorrect ? '#d5f4e6' : '#fadbd8';
             btn.style.color = isCorrect ? '#27ae60' : '#e74c3c';
+            btn.disabled = true;
+
+            // Afficher l'explication
+            const explDiv = document.createElement('div');
+            explDiv.style.cssText = 'background:#f0f4f8;padding:15px;border-radius:8px;margin-top:15px;border-left:4px solid ' + (isCorrect ? '#27ae60' : '#e74c3c') + ';';
+            explDiv.innerHTML = `<strong>${isCorrect ? '✅ Correct!' : '❌ Incorrect'}</strong><br><div style="margin-top:8px;color:#666;font-size:0.95em;">${explication}</div>`;
+            btn.parentElement.appendChild(explDiv);
 
             if (isCorrect) {
                 quizState.score += 20;
+                addXP(20);
                 toast('✅ Correct!', 'success');
             } else {
-                toast('❌ Incorrect...', 'danger');
+                addXP(5); // bonus quand même
+                toast('❌ Incorrect... mais vous apprenez!', 'danger');
             }
 
             quizState.answered.push({ id: q.id, correct: isCorrect });
             setTimeout(() => {
                 document.querySelector('[style*="position:fixed"][style*="background:rgba"]')?.remove();
-            }, 800);
+            }, 1500);
         }
 
         function showQuizResults() {
@@ -12238,10 +12496,20 @@
             let resultMessage = '';
             let resultEmoji = '';
 
+            playerStats.quizAttempts++;
+            if (percentage > playerStats.quizBest) {
+                playerStats.quizBest = percentage;
+            }
+            updateStreak();
+            savePlayerStats();
+
+            // Achievements
+            if (playerStats.quizAttempts === 1) unlockAchievement('first_game');
             if (percentage === 100) {
                 resultEmoji = '🏆';
                 resultMessage = 'PARFAIT! Expert confirmé!';
                 unlockBadge('master_rules');
+                unlockAchievement('quiz_100');
             } else if (percentage >= 80) {
                 resultEmoji = '⭐';
                 resultMessage = 'Excellent travail!';
@@ -12252,6 +12520,8 @@
                 resultEmoji = '📚';
                 resultMessage = 'Révisez les règles!';
             }
+
+            if (playerStats.quizAttempts === 50) unlockAchievement('quiz_50_runs');
 
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
