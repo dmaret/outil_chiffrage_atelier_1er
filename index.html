@@ -9292,6 +9292,8 @@
         }
 
         function saveAuthGroups() {
+            // Store auth groups with password hashes (needed for login to work)
+            // Passwords are hashed, not plaintext, and are salted by the hashPassword function
             localStorage.setItem('authGroups', JSON.stringify(authGroups));
         }
 
