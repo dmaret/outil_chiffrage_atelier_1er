@@ -3396,6 +3396,8 @@
         if (learnerStartDateField) {
             learnerStartDateField.valueAsDate = new Date();
         }
+        // Initialize tab drag-drop functionality
+        setTimeout(() => initTabDrag(), 100);
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
             initAuthGroups();
