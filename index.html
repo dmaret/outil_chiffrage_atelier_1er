@@ -11760,6 +11760,122 @@
             reglesActives: true
         };
 
+        // ════════════════════════════════════════════════════════════
+        // LEADERBOARDS & BADGES
+        // ════════════════════════════════════════════════════════════
+        let leaderboard = JSON.parse(localStorage.getItem('logisticsLeaderboard') || '[]');
+        let playerBadges = JSON.parse(localStorage.getItem('playerBadges') || '{}');
+
+        const BADGES = {
+            'premier_pas': { emoji: '👣', nom: 'Premier Pas', desc: 'Terminez votre premier jeu' },
+            'debutant': { emoji: '🌱', nom: 'Débutant', desc: 'Score cumulé 100 points' },
+            'apprenti': { emoji: '📚', nom: 'Apprenti', desc: 'Complétez le mode apprentissage' },
+            'champion': { emoji: '🏆', nom: 'Champion', desc: 'Score 500+ en mode challenge' },
+            'super_speed': { emoji: '⚡', nom: 'Super Speed', desc: 'Placer 8+ produits en 60sec' },
+            'perfectionist': { emoji: '✨', nom: 'Perfectionniste', desc: 'Aucune erreur en mode challenge' },
+            'master_rules': { emoji: '🧠', nom: 'Maître des Règles', desc: 'Score 100% au quiz' },
+            'collectionneur': { emoji: '🎨', nom: 'Collectionneur', desc: 'Débloquez 5 badges' },
+            'expert_logistique': { emoji: '🏭', nom: 'Expert Logistique', desc: 'Débloquez tous les badges' }
+        };
+
+        function addScore(playerName, gameType, score) {
+            leaderboard.push({
+                name: playerName || 'Anonyme',
+                game: gameType,
+                score: score,
+                date: new Date().toLocaleString(),
+                timestamp: Date.now()
+            });
+            leaderboard = leaderboard.sort((a, b) => b.score - a.score).slice(0, 100);
+            localStorage.setItem('logisticsLeaderboard', JSON.stringify(leaderboard));
+            return leaderboard.slice(0, 10);
+        }
+
+        function unlockBadge(badgeId) {
+            if (!playerBadges[badgeId]) {
+                playerBadges[badgeId] = {
+                    unlockedAt: new Date().toLocaleString(),
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('playerBadges', JSON.stringify(playerBadges));
+                toast(`🎉 Badge débloqué: ${BADGES[badgeId].nom}!`, 'success');
+                return true;
+            }
+            return false;
+        }
+
+        function showBadges() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
+
+            let html = `
+                <div style="background:white;padding:30px;border-radius:16px;max-width:800px;width:90%;margin:20px auto;">
+                    <h2 style="color:#6b8fa3;margin-bottom:20px;">🏆 Mes Badges (${Object.keys(playerBadges).length}/${Object.keys(BADGES).length})</h2>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin-bottom:20px;">
+            `;
+
+            Object.entries(BADGES).forEach(([id, badge]) => {
+                const unlocked = playerBadges[id];
+                html += `
+                    <div style="background:${unlocked ? 'linear-gradient(135deg,#a8d5e2,#c9b3d4)' : '#f5f5f5'};padding:15px;border-radius:8px;text-align:center;border:${unlocked ? '2px solid #6b8fa3' : '2px dashed #ccc'};opacity:${unlocked ? '1' : '0.5'};">
+                        <div style="font-size:2.5em;margin-bottom:8px;">${badge.emoji}</div>
+                        <div style="font-weight:bold;color:#333;font-size:0.9em;">${badge.nom}</div>
+                        <div style="font-size:0.8em;color:#666;margin-top:8px;">${badge.desc}</div>
+                        ${unlocked ? `<div style="font-size:0.75em;color:#999;margin-top:8px;">✅ ${unlocked.unlockedAt}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();" style="width:100%;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function showLeaderboard() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:30px;border-radius:16px;max-width:600px;width:90%;">
+                    <h2 style="color:#6b8fa3;margin-bottom:20px;">🏅 Classement</h2>
+                    <div style="max-height:400px;overflow-y:auto;">
+                        <table style="width:100%;border-collapse:collapse;">
+                            <tr style="background:#f5f5f5;font-weight:bold;border-bottom:2px solid #ddd;">
+                                <td style="padding:10px;text-align:center;width:40px;">🏅</td>
+                                <td style="padding:10px;">Joueur</td>
+                                <td style="padding:10px;">Jeu</td>
+                                <td style="padding:10px;text-align:right;">Score</td>
+                            </tr>
+            `;
+
+            leaderboard.slice(0, 20).forEach((entry, idx) => {
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}️⃣`;
+                html += `
+                    <tr style="border-bottom:1px solid #eee;">
+                        <td style="padding:10px;text-align:center;font-weight:bold;color:#6b8fa3;">${medal}</td>
+                        <td style="padding:10px;"><strong>${entry.name}</strong></td>
+                        <td style="padding:10px;font-size:0.9em;color:#666;">${entry.game}</td>
+                        <td style="padding:10px;text-align:right;color:#c9b3d4;font-weight:bold;">${entry.score}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </table>
+                    </div>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();" style="width:100%;margin-top:20px;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
         function getRandomProduits(count = 5) {
             const shuffled = [...PRODUITS_BASE].sort(() => Math.random() - 0.5);
             return shuffled.slice(0, count);
@@ -11801,7 +11917,10 @@
                 { id: 'apprendre', emoji: '📚', nom: 'Mode Apprentissage', desc: 'Apprendre les règles de compatibilité' },
                 { id: 'challenge', emoji: '🎯', nom: 'Mode Challenge', desc: 'Placer les produits en respectant les contraintes' },
                 { id: 'puzzle', emoji: '🧩', nom: 'Mode Puzzle', desc: 'Résoudre des configurations complexes' },
-                { id: 'speed', emoji: '⚡', nom: 'Mode Speed', desc: 'Placer 10 produits en moins de 60 sec!' }
+                { id: 'speed', emoji: '⚡', nom: 'Mode Speed', desc: 'Placer 10 produits en moins de 60 sec!' },
+                { id: 'quiz', emoji: '❓', nom: 'Quiz Logistique', desc: 'Testez vos connaissances sur les règles' },
+                { id: 'badges', emoji: '🏆', nom: 'Mes Badges', desc: 'Débloquez et collectionnez des badges!' },
+                { id: 'leaderboard', emoji: '🏅', nom: 'Classement', desc: 'Comparez vos scores avec les autres' }
             ];
 
             let html = `
@@ -11832,10 +11951,10 @@
         }
 
         function startGame(gameType) {
-            gameState.currentGame = gameType;
-            gameState.score = 0;
-            gameState.time = 0;
-            gameState.produits = getRandomProduits(gameType === 'speed' ? 10 : 5);
+            logisticsGameState.currentGame = gameType;
+            logisticsGameState.score = 0;
+            logisticsGameState.time = 0;
+            logisticsGameState.produits = getRandomProduits(gameType === 'speed' ? 10 : 5);
 
             if (gameType === 'apprendre') {
                 startLearningMode();
@@ -11845,6 +11964,12 @@
                 startPuzzleGame();
             } else if (gameType === 'speed') {
                 startSpeedGame();
+            } else if (gameType === 'quiz') {
+                startQuiz();
+            } else if (gameType === 'badges') {
+                showBadges();
+            } else if (gameType === 'leaderboard') {
+                showLeaderboard();
             }
         }
 
@@ -11956,6 +12081,199 @@
                     </div>
                     <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();startSpeedTimer();" style="width:100%;margin-bottom:10px;font-size:1.1em;">🚀 C'est parti!</button>
                     <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();gameState.currentGame=null;">Annuler</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // MODULE QUESTIONS/RÉPONSES - QUIZ LOGISTIQUE
+        // ════════════════════════════════════════════════════════════
+        const QUESTIONS_LOGISTIQUE = [
+            {
+                id: 'q1',
+                question: 'Où peut-on placer une bouteille d\'eau (liquide)?',
+                options: [
+                    { text: '❌ Sur un vase en porcelaine', correct: false },
+                    { text: '✅ Sur un article lourd en métal', correct: true },
+                    { text: '❌ À côté d\'un chocolat au froid', correct: false },
+                    { text: '❌ Sur du verre fragile', correct: false }
+                ],
+                explication: '💧 Les liquides peuvent être placés sur les articles lourds, mais pas sur les fragiles!'
+            },
+            {
+                id: 'q2',
+                question: 'Quels produits NE DOIVENT PAS être ensemble?',
+                options: [
+                    { text: '🍦 Glace et 🕯️ Bougie (chaud)', correct: true },
+                    { text: '🪵 Bois et ⚙️ Métal', correct: false },
+                    { text: '💧 Eau et 🫒 Huile', correct: false },
+                    { text: '🏺 Céramique et 🍷 Porcelaine', correct: false }
+                ],
+                explication: '❄️ Les produits froids et chauds DOIVENT être isolés pour éviter les problèmes!'
+            },
+            {
+                id: 'q3',
+                question: 'Un article lourd (béton) peut-il aller sur un article fragile?',
+                options: [
+                    { text: '✅ Oui, bien sûr', correct: false },
+                    { text: '❌ Non, c\'est interdit!', correct: true },
+                    { text: '⚠️ Seulement si c\'est isolé', correct: false },
+                    { text: '🤔 Ça dépend du poids', correct: false }
+                ],
+                explication: '💪 Les articles lourds doivent TOUJOURS être en bas pour protéger les fragiles!'
+            },
+            {
+                id: 'q4',
+                question: 'La céramique (fragile) et la porcelaine (fragile) peuvent aller ensemble?',
+                options: [
+                    { text: '✅ Oui, aucun problème!', correct: true },
+                    { text: '❌ Non, incompatible', correct: false },
+                    { text: '⚠️ Seulement si séparées', correct: false },
+                    { text: '🤔 Jamais', correct: false }
+                ],
+                explication: '🏺 Les articles fragiles peuvent aller ensemble! Seules les incompatibilités croisées comptent.'
+            },
+            {
+                id: 'q5',
+                question: 'Quel type de produit ne doit JAMAIS être sur un liquide?',
+                options: [
+                    { text: '❌ Les articles fragiles', correct: true },
+                    { text: '❌ Les articles lourds', correct: true },
+                    { text: '✅ Les articles métalliques', correct: false },
+                    { text: '✅ Les articles en bois', correct: false }
+                ],
+                explication: '⚠️ Fragiles ET lourds ne doivent pas être sur les liquides (sauf fragiles sur lourds sur liquide)!'
+            },
+            {
+                id: 'q6',
+                question: 'Combien de types de produits avez-vous appris?',
+                options: [
+                    { text: '3 types', correct: false },
+                    { text: '5 types', correct: true },
+                    { text: '7 types', correct: false },
+                    { text: '10 types', correct: false }
+                ],
+                explication: '📦 Liquides, Solides, Fragiles, Lourds, et Thermosensibles (froid/chaud)!'
+            }
+        ];
+
+        let quizState = {
+            currentQuestion: 0,
+            score: 0,
+            answered: [],
+            finished: false
+        };
+
+        function startQuiz() {
+            quizState = { currentQuestion: 0, score: 0, answered: [], finished: false };
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (quizState.currentQuestion >= QUESTIONS_LOGISTIQUE.length) {
+                showQuizResults();
+                return;
+            }
+
+            const q = QUESTIONS_LOGISTIQUE[quizState.currentQuestion];
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:30px;border-radius:16px;max-width:600px;width:90%;">
+                    <div style="margin-bottom:20px;">
+                        <div style="font-size:0.9em;color:#999;">Question ${quizState.currentQuestion + 1}/${QUESTIONS_LOGISTIQUE.length}</div>
+                        <div style="background:#a8d5e2;height:6px;border-radius:3px;margin-top:8px;">
+                            <div style="background:#6b8fa3;height:6px;border-radius:3px;width:${((quizState.currentQuestion + 1) / QUESTIONS_LOGISTIQUE.length) * 100}%;"></div>
+                        </div>
+                    </div>
+                    <h3 style="color:#6b8fa3;margin-bottom:25px;line-height:1.4;">${q.question}</h3>
+                    <div style="display:grid;gap:12px;margin-bottom:20px;">
+            `;
+
+            q.options.forEach((opt, idx) => {
+                html += `
+                    <button style="padding:15px;border:2px solid #ddd;border-radius:8px;text-align:left;cursor:pointer;font-size:0.95em;transition:all 0.2s;background:white;" onmouseover="this.style.borderColor='#6b8fa3';this.style.background='#f5f9fc';" onmouseout="this.style.borderColor='#ddd';this.style.background='white';" onclick="answerQuestion(${idx}, this)">
+                        ${opt.text}
+                    </button>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();quizState.currentQuestion++;showQuestion();" style="width:100%;">Suivant →</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function answerQuestion(optionIdx, btn) {
+            const q = QUESTIONS_LOGISTIQUE[quizState.currentQuestion];
+            const isCorrect = q.options[optionIdx].correct;
+
+            btn.style.borderColor = isCorrect ? '#27ae60' : '#e74c3c';
+            btn.style.background = isCorrect ? '#d5f4e6' : '#fadbd8';
+            btn.style.color = isCorrect ? '#27ae60' : '#e74c3c';
+
+            if (isCorrect) {
+                quizState.score += 20;
+                toast('✅ Correct!', 'success');
+            } else {
+                toast('❌ Incorrect...', 'danger');
+            }
+
+            quizState.answered.push({ id: q.id, correct: isCorrect });
+            setTimeout(() => {
+                document.querySelector('[style*="position:fixed"][style*="background:rgba"]')?.remove();
+            }, 800);
+        }
+
+        function showQuizResults() {
+            const percentage = (quizState.score / (QUESTIONS_LOGISTIQUE.length * 20)) * 100;
+            let resultMessage = '';
+            let resultEmoji = '';
+
+            if (percentage === 100) {
+                resultEmoji = '🏆';
+                resultMessage = 'PARFAIT! Expert confirmé!';
+                unlockBadge('master_rules');
+            } else if (percentage >= 80) {
+                resultEmoji = '⭐';
+                resultMessage = 'Excellent travail!';
+            } else if (percentage >= 60) {
+                resultEmoji = '👍';
+                resultMessage = 'Bien! Continuez à pratiquer!';
+            } else {
+                resultEmoji = '📚';
+                resultMessage = 'Révisez les règles!';
+            }
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:40px;border-radius:16px;max-width:500px;width:90%;text-align:center;">
+                    <div style="font-size:3em;margin-bottom:20px;">${resultEmoji}</div>
+                    <h2 style="color:#6b8fa3;margin-bottom:10px;">Quiz Terminé!</h2>
+                    <p style="color:#666;margin-bottom:20px;font-size:0.95em;">${resultMessage}</p>
+                    <div style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);padding:25px;border-radius:12px;margin-bottom:20px;">
+                        <div style="font-size:2.5em;font-weight:bold;color:white;margin-bottom:10px;">${quizState.score}/${QUESTIONS_LOGISTIQUE.length * 20}</div>
+                        <div style="font-size:1.5em;font-weight:bold;color:white;">${percentage.toFixed(1)}%</div>
+                    </div>
+                    <div style="background:#f5f9fc;padding:15px;border-radius:8px;margin-bottom:20px;border-left:4px solid #6b8fa3;">
+                        <div style="color:#666;margin-bottom:10px;"><strong>Résumé:</strong></div>
+                        <div style="color:#999;font-size:0.9em;">
+                            ✅ Correctes: ${quizState.answered.filter(a => a.correct).length}<br>
+                            ❌ Incorrectes: ${quizState.answered.filter(a => !a.correct).length}
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();startQuiz();" style="width:100%;margin-bottom:10px;">Refaire le Quiz</button>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();" style="width:100%;">Fermer</button>
                 </div>
             `;
 
