@@ -14007,35 +14007,48 @@
                 const searchEl = document.getElementById('logisticSearchArticle');
                 const searchVal = searchEl ? searchEl.value.toLowerCase() : '';
                 const articles = [];
+                const seen = new Set();
 
-                // Récupérer du catalogue de consommables
-                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
-                conso.forEach(c => {
-                    const designation = (c.designation || '').toLowerCase();
-                    const reference = (c.reference || '').toLowerCase();
-                    if (designation.includes(searchVal) || reference.includes(searchVal)) {
-                        articles.push({ id: 'CONSO_' + c.id, name: c.designation || 'Sans nom', type: 'Consommable', qty: 0 });
+                // Récupérer du catalogue de consommables (propriétés: nom, unite, prix)
+                catalogueConsommables.forEach((c, idx) => {
+                    const nom = (c.nom || '').toLowerCase();
+                    if (nom.includes(searchVal)) {
+                        const artId = 'CONSO_' + idx;
+                        if (!seen.has(artId)) {
+                            seen.add(artId);
+                            articles.push({ id: artId, name: c.nom || 'Sans nom', type: 'Consommable', prix: c.prix || 0 });
+                        }
                     }
                 });
 
-                // Récupérer du stock
-                const stockData = JSON.parse(localStorage.getItem('stockData') || '{}');
-                const stock = stockData.stockActuel || {};
-                Object.entries(stock).forEach(([ref, data]) => {
-                    if (ref.toLowerCase().includes(searchVal)) {
+                // Récupérer du stock actuel (variable globale)
+                Object.entries(stockActuel).forEach(([ref, data]) => {
+                    if (ref.toLowerCase().includes(searchVal) && !seen.has(ref)) {
+                        seen.add(ref);
                         articles.push({ id: ref, name: ref, type: 'Stock', qty: data.total || 0 });
                     }
                 });
 
+                // Récupérer du catalogue des gestes
+                catalogueGestes.forEach(g => {
+                    const desc = (g.description || '').toLowerCase();
+                    const code = (g.code || '').toLowerCase();
+                    if ((desc.includes(searchVal) || code.includes(searchVal)) && !seen.has(g.code)) {
+                        seen.add(g.code);
+                        articles.push({ id: 'GESTE_' + g.code, name: g.description || g.code, type: 'Geste', qty: 0 });
+                    }
+                });
+
                 const list = document.getElementById('logisticArticlesList');
+                if (!list) return;
                 list.innerHTML = articles.length === 0
-                    ? '<p style="grid-column:1/-1;color:#999;text-align:center;padding:20px;">Aucun article trouvé</p>'
+                    ? '<p style="grid-column:1/-1;color:#999;text-align:center;padding:20px;">Aucun article trouvé. Ajoutez des consommables ou du stock d\'abord.</p>'
                     : articles.map(a => `
-                        <div draggable="true" ondragstart="logisticDragStart(event, '${a.id}', '${a.name}')"
+                        <div draggable="true" ondragstart="logisticDragStart(event, '${a.id}', '${escapeHtml(a.name).replace(/'/g, "\\'")}')"
                              style="padding:10px;background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border-radius:8px;cursor:move;border:2px solid #a8d5e2;transition:all 0.2s;"
                              onmouseover="this.style.boxShadow='0 4px 12px rgba(168,213,226,0.3)'" onmouseout="this.style.boxShadow='none'">
                             <strong style="display:block;font-size:0.9em;">${escapeHtml(a.name)}</strong>
-                            <span style="font-size:0.75em;color:#666;">${a.type} • Qty: ${a.qty}</span>
+                            <span style="font-size:0.75em;color:#666;">${a.type}${a.qty ? ' • Qty: ' + a.qty : ''}${a.prix ? ' • ' + a.prix + ' CHF' : ''}</span>
                         </div>
                     `).join('');
             } catch (e) {
@@ -14059,11 +14072,12 @@
             }
 
             freeList.innerHTML = Object.entries(freeArticles).map(([articleId, qty]) => {
+                const artName = getLogisticArticleName(articleId);
                 return `
-                    <div draggable="true" ondragstart="logisticDragStart(event, '${articleId}', '${articleId}')"
+                    <div draggable="true" ondragstart="logisticDragStart(event, '${articleId}', '${escapeHtml(artName).replace(/'/g, "\\'")}')"
                          style="padding:10px;background:linear-gradient(135deg,#fff9e6,#ffecb3);border-radius:8px;cursor:move;border:2px solid #ff9800;transition:all 0.2s;text-align:center;"
                          onmouseover="this.style.boxShadow='0 4px 12px rgba(255,152,0,0.3)'" onmouseout="this.style.boxShadow='none'">
-                        <strong style="display:block;font-size:0.85em;">${articleId}</strong>
+                        <strong style="display:block;font-size:0.85em;">${escapeHtml(artName)}</strong>
                         <span style="font-size:0.75em;color:#666;">Qty: ${qty} • Libre</span>
                     </div>
                 `;
@@ -14243,16 +14257,27 @@
             renderLogisticCanvas();
         }
 
+        function getLogisticArticleName(artId) {
+            if (artId.startsWith('CONSO_')) {
+                const idx = parseInt(artId.replace('CONSO_', ''));
+                return (catalogueConsommables[idx] && catalogueConsommables[idx].nom) || artId;
+            }
+            if (artId.startsWith('GESTE_')) {
+                const code = artId.replace('GESTE_', '');
+                const g = catalogueGestes.find(g => g.code === code);
+                return g ? g.description : code;
+            }
+            return artId;
+        }
+
         function updateLogisticInfo(location) {
             const placements = logisticState.placements[location.id] || {};
-            const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
             const html = `
                 <strong>${escapeHtml(location.name)}</strong><br>
                 <span style="color:#666;">Capacité: ${location.capacity} unités</span><br><br>
                 <strong>Articles:</strong><br>
                 ${Object.entries(placements).map(([artId, qty]) => {
-                    const article = conso.find(c => c.id === artId);
-                    const articleName = article ? article.designation : artId;
+                    const articleName = getLogisticArticleName(artId);
                     return `<div style="padding:4px;background:#fff;margin:2px 0;border-radius:4px;">
                         <span>${escapeHtml(articleName)} × ${qty}</span>
                         <button class="btn-small" onclick="removeArticleFromLocation('${location.id}', '${artId}')" style="float:right;padding:2px 6px;font-size:0.75em;">Retirer</button>
@@ -14280,10 +14305,12 @@
         function renderLogisticMoveForm() {
             try {
                 const articles = [];
-                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
-                conso.forEach(c => articles.push({ id: 'CONSO_' + c.id, name: c.designation }));
-                const stock = JSON.parse(localStorage.getItem('stockActuel') || '{}');
-                Object.entries(stock).forEach(([id, info]) => articles.push({ id: id, name: info.designation }));
+                catalogueConsommables.forEach((c, idx) => {
+                    articles.push({ id: 'CONSO_' + idx, name: c.nom || 'Sans nom' });
+                });
+                Object.entries(stockActuel).forEach(([ref, data]) => {
+                    articles.push({ id: ref, name: ref });
+                });
 
                 const moveType = document.getElementById('logisticMoveType').value;
                 const sourceGroup = document.getElementById('logisticMoveSourceGroup');
