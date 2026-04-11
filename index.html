@@ -1232,6 +1232,13 @@
                     <input type="text" id="editGesteVideo" placeholder="https://example.com/video.mp4" style="padding:8px;border:1px solid #ddd;border-radius:4px;width:100%;font-size:0.9em;">
                 </div>
             </div>
+            <div class="form-row" style="gap:12px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Ou charger une vidéo locale</label>
+                    <input type="file" id="editGesteVideoFile" accept=".mp4,.webm,.mov,.avi,.mkv" style="padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9em;">
+                </div>
+            </div>
+            <p id="videoFileNameDisplay" style="color:#7a9db1;font-size:0.85em;margin-top:-8px;"></p>
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
                 <button class="btn btn-secondary" onclick="closeEditGesteModal()">Annuler</button>
                 <button class="btn btn-success" onclick="saveEditedGeste()">💾 Sauvegarder</button>
@@ -5327,7 +5334,15 @@
             document.getElementById('editGesteTemps').value = g.temps;
             document.getElementById('editGesteCoef').value = g.coef;
             document.getElementById('editGesteNotes').value = g.notes || '';
-            document.getElementById('editGesteVideo').value = g.videoUrl || '';
+            document.getElementById('editGesteVideo').value = g.videoUrl && !g.videoUrl.startsWith('data:') ? g.videoUrl : '';
+            document.getElementById('editGesteVideoFile').value = '';
+            document.getElementById('videoFileNameDisplay').textContent = g.videoUrl && g.videoUrl.startsWith('data:') ? '✅ Vidéo uploadée (fichier local)' : '';
+
+            // Add file input change handler
+            document.getElementById('editGesteVideoFile').onchange = function() {
+                const fileName = this.files?.[0]?.name;
+                document.getElementById('videoFileNameDisplay').textContent = fileName ? `📁 ${fileName}` : '';
+            };
 
             document.getElementById('editGesteModal').style.display = 'flex';
             document.getElementById('editGesteDescription').focus();
@@ -5342,6 +5357,26 @@
             if (!checkPermission('manage_gestes') || !currentEditGeste) return;
 
             const oldCode = currentEditGeste;
+            const g = catalogueGestes.find(x => x.code === oldCode);
+            if (!g) return;
+
+            const videoFile = document.getElementById('editGesteVideoFile')?.files?.[0];
+            const videoUrl = document.getElementById('editGesteVideo').value.trim();
+
+            // If file is selected, convert to base64; otherwise use URL
+            if (videoFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    finalizeSaveGeste(oldCode, e.target.result);
+                };
+                reader.readAsDataURL(videoFile);
+                return;
+            }
+
+            finalizeSaveGeste(oldCode, videoUrl);
+        }
+
+        function finalizeSaveGeste(oldCode, videoData) {
             const g = catalogueGestes.find(x => x.code === oldCode);
             if (!g) return;
 
@@ -5360,7 +5395,7 @@
             g.temps = parseFloat(document.getElementById('editGesteTemps').value) || g.temps;
             g.coef = parseFloat(document.getElementById('editGesteCoef').value) || g.coef;
             g.notes = document.getElementById('editGesteNotes').value || '';
-            g.videoUrl = document.getElementById('editGesteVideo').value.trim() || '';
+            g.videoUrl = videoData || '';
 
             catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
             saveToStorage();
