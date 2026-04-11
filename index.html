@@ -1177,14 +1177,14 @@
     </style>
 </head>
 <body>
-    <!-- PIN Modal -->
+    <!-- PIN Modal: Protection d'accès simple à l'application -->
     <div id="pinModal">
         <div id="pinModalBox">
             <h2>🔐 Accès protégé</h2>
-            <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Entrez votre code PIN pour continuer</p>
+            <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Code PIN pour déverrouiller l'application<br><small style="font-size:0.85em;color:#a8c5d3;">(Optionnel • Configurable en admin)</small></p>
             <input type="password" id="pinInput" placeholder="PIN" maxlength="8" onkeydown="if(event.key==='Enter') checkPin()">
             <div id="pinError"></div>
-            <button class="btn btn-success" onclick="checkPin()" style="width:100%;margin-top:4px;">Confirmer</button>
+            <button class="btn btn-success" onclick="checkPin()" style="width:100%;margin-top:4px;">✓ Confirmer</button>
         </div>
     </div>
 
@@ -11543,15 +11543,16 @@
     <!-- Auth : écran de connexion -->
     <div id="authOverlay" class="auth-overlay" style="display:none;">
         <div class="auth-overlay-wrapper">
-            <!-- Container 1: Connexion -->
+            <!-- Container 1: Connexion par rôle -->
             <div class="auth-box">
                 <div style="font-size:2.8em;margin-bottom:6px;">🏭</div>
                 <h2>Atelier La Pallanterie</h2>
-                <p class="auth-subtitle">Connectez-vous pour accéder à l'outil</p>
+                <p class="auth-subtitle">Connexion par rôle professionnel</p>
+                <p style="font-size:0.85em;color:#a8c5d3;margin-bottom:12px;">Sélectionnez votre groupe et entrez votre mot de passe</p>
                 <select id="authGroupSelect" onchange="document.getElementById('authPasswordInput').focus()">
                     <option value="">— Sélectionnez votre groupe —</option>
                 </select>
-                <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
+                <input type="password" id="authPasswordInput" placeholder="Mot de passe du groupe" onkeydown="if(event.key==='Enter')doLogin()">
                 <div class="auth-error" id="authError"></div>
                 <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
                 <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
