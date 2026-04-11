@@ -2856,12 +2856,12 @@
                     <h2>📋 Audit Trail - Tous les logs</h2>
                     <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
                         <input type="text" id="auditFilterSearch" placeholder="🔍 Rechercher..." onkeyup="filterAuditLog()" style="flex:1;min-width:200px;padding:10px;">
-                        <button class="btn btn-secondary btn-small" id="toggleLogsBtn" onclick="toggleAuditLogs()">👁️ Afficher</button>
+                        <button class="btn btn-secondary btn-small" onclick="renderAuditLog()">👁️ Rafraîchir</button>
                         <button class="btn btn-secondary btn-small" onclick="auditLog=[];saveAuditLog();renderAuditLog();toast('✅ Logs supprimés','success')">🗑️ Effacer</button>
                         <button class="btn btn-secondary btn-small" onclick="exportAuditLog()">💾 Exporter</button>
                     </div>
-                    <div id="auditLogContainer" style="display:none;"></div>
-                    <p id="noAuditMsg" style="color:#7a9db1;text-align:center;padding:20px;display:none;">Aucun log enregistré</p>
+                    <div id="auditLogContainer"></div>
+                    <p id="noAuditMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun log enregistré</p>
                 </div>
             </div>
 
