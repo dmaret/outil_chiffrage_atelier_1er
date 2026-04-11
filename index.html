@@ -2096,6 +2096,8 @@
                     <div id="stockMinTable"></div>
                     <div style="margin-top:12px;">
                         <button class="btn btn-success" onclick="exportStockCSV()">📥 Export CSV</button>
+                        <button class="btn btn-info" onclick="saveStockMinTemplate()">💾 Sauver comme modèle</button>
+                        <button class="btn btn-info" onclick="loadStockMinTemplate()" id="loadTemplateBtn" style="display:none;">📂 Charger modèle</button>
                     </div>
                 </div>
             </div>
@@ -4224,6 +4226,8 @@
                 }
             } catch(e) { console.error('Error loading stock:', e); }
             try { if (savedStockMins) stockMins = JSON.parse(savedStockMins); } catch(e) { console.error('Error loading stock minimums:', e); }
+            const savedStockMinTemplates = localStorage.getItem('stockMinTemplates');
+            try { if (savedStockMinTemplates) stockMinTemplates = JSON.parse(savedStockMinTemplates); } catch(e) { console.error('Error loading stock min templates:', e); }
             const savedEmplacements = localStorage.getItem('configEmplacements');
             const savedUnites = localStorage.getItem('configUnites');
             const savedTypesStock = localStorage.getItem('configTypesStock');
@@ -4255,6 +4259,7 @@
             localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
             localStorage.setItem('stockData', JSON.stringify({mouvements, stockActuel}));
             localStorage.setItem('stockMins', JSON.stringify(stockMins));
+            localStorage.setItem('stockMinTemplates', JSON.stringify(stockMinTemplates));
             localStorage.setItem('configEmplacements', JSON.stringify(configEmplacements));
             localStorage.setItem('configUnites', JSON.stringify(configUnites));
             localStorage.setItem('configTypesStock', JSON.stringify(configTypesStock));
@@ -4359,6 +4364,7 @@
                 renderMouvements();
                 renderValorisation();
                 renderStockMinTable();
+                updateTemplateButton();
                 checkAndShowAlerts();
             }
             else if (tabName === 'parametrage') loadConfig();
@@ -7476,6 +7482,75 @@
             saveToStorage();
             renderStockMinTable();
             toast('✅ Stocks minimums sauvegardés', 'success');
+        }
+
+        // ============================================================
+        // Templates for Stock Minimums
+        // ============================================================
+        let stockMinTemplates = {};
+
+        function saveStockMinTemplate() {
+            const templateName = prompt('Nom du modèle:', `Modèle ${new Date().toLocaleDateString('fr-FR')}`);
+            if (!templateName) return;
+
+            // Check if template already exists
+            if (stockMinTemplates[templateName]) {
+                if (!confirm(`Le modèle "${templateName}" existe déjà. Le remplacer?`)) return;
+            }
+
+            stockMinTemplates[templateName] = { ...stockMins };
+            saveToStorage();
+            updateTemplateButton();
+            toast(`✅ Modèle "${templateName}" sauvegardé`, 'success');
+        }
+
+        function loadStockMinTemplate() {
+            if (Object.keys(stockMinTemplates).length === 0) {
+                toast('⚠️ Aucun modèle disponible', 'warning');
+                return;
+            }
+
+            const templates = Object.keys(stockMinTemplates);
+            let html = '<div style="background:white;border-radius:8px;padding:16px;max-width:400px;">';
+            html += '<h3>Sélectionner un modèle</h3>';
+            templates.forEach(name => {
+                html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #eee;">`;
+                html += `<span onclick="applyStockMinTemplate('${name.replace(/'/g, "\\'")}'); closeAllModals();" style="flex:1;cursor:pointer;padding:8px;">${name}</span>`;
+                html += `<button class="btn btn-small" style="background:#ff6b6b;" onclick="deleteStockMinTemplate('${name.replace(/'/g, "\\'")}')">🗑️</button>`;
+                html += '</div>';
+            });
+            html += '</div>';
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;';
+            modal.onclick = function(e) { if (e.target === modal) closeAllModals(); };
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+            window.closeAllModals = function() { modal.remove(); };
+        }
+
+        function applyStockMinTemplate(templateName) {
+            if (!stockMinTemplates[templateName]) return;
+            stockMins = { ...stockMinTemplates[templateName] };
+            saveToStorage();
+            renderStockMinTable();
+            toast(`✅ Modèle "${templateName}" appliqué`, 'success');
+        }
+
+        function deleteStockMinTemplate(templateName) {
+            if (!confirm(`Supprimer le modèle "${templateName}"?`)) return;
+            delete stockMinTemplates[templateName];
+            saveToStorage();
+            updateTemplateButton();
+            toast(`✅ Modèle supprimé`, 'success');
+            loadStockMinTemplate();
+        }
+
+        function updateTemplateButton() {
+            const btn = document.getElementById('loadTemplateBtn');
+            if (btn) {
+                btn.style.display = Object.keys(stockMinTemplates).length > 0 ? 'inline-block' : 'none';
+            }
         }
 
         // ============================================================
