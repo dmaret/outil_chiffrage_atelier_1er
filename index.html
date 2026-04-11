@@ -3630,45 +3630,49 @@
             const savedStock = localStorage.getItem('stockData');
             const savedStockMins = localStorage.getItem('stockMins');
 
-            if (savedConfig) { const c = JSON.parse(savedConfig); config = Object.assign(config, c); }
-            if (savedCatalogue) {
-                catalogueGestes = JSON.parse(savedCatalogue);
-                // Migration : ajouter les gestes par défaut manquants
-                const codesDefaut = defaultCatalogueGestes.filter(d => !catalogueGestes.find(g => g.code === d.code));
-                if (codesDefaut.length > 0) {
-                    catalogueGestes = [...catalogueGestes, ...codesDefaut];
-                    catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
+            try { if (savedConfig) { const c = JSON.parse(savedConfig); config = Object.assign(config, c); } } catch(e) { console.error('Error loading config:', e); }
+            try {
+                if (savedCatalogue) {
+                    catalogueGestes = JSON.parse(savedCatalogue);
+                    // Migration : ajouter les gestes par défaut manquants
+                    const codesDefaut = defaultCatalogueGestes.filter(d => !catalogueGestes.find(g => g.code === d.code));
+                    if (codesDefaut.length > 0) {
+                        catalogueGestes = [...catalogueGestes, ...codesDefaut];
+                        catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
+                    }
                 }
-            }
-            if (savedConsommables) catalogueConsommables = JSON.parse(savedConsommables);
-            if (savedPrestations) prestationsSauvegardees = JSON.parse(savedPrestations);
-            if (savedStock) {
-                const data = JSON.parse(savedStock);
-                mouvements = data.mouvements || [];
-                stockActuel = data.stockActuel || {};
-            }
-            if (savedStockMins) stockMins = JSON.parse(savedStockMins);
+            } catch(e) { console.error('Error loading catalogue gestures:', e); catalogueGestes = defaultCatalogueGestes; }
+            try { if (savedConsommables) catalogueConsommables = JSON.parse(savedConsommables); } catch(e) { console.error('Error loading consumables:', e); }
+            try { if (savedPrestations) prestationsSauvegardees = JSON.parse(savedPrestations); } catch(e) { console.error('Error loading services:', e); }
+            try {
+                if (savedStock) {
+                    const data = JSON.parse(savedStock);
+                    mouvements = data.mouvements || [];
+                    stockActuel = data.stockActuel || {};
+                }
+            } catch(e) { console.error('Error loading stock:', e); }
+            try { if (savedStockMins) stockMins = JSON.parse(savedStockMins); } catch(e) { console.error('Error loading stock minimums:', e); }
             const savedEmplacements = localStorage.getItem('configEmplacements');
             const savedUnites = localStorage.getItem('configUnites');
             const savedTypesStock = localStorage.getItem('configTypesStock');
-            if (savedEmplacements) configEmplacements = JSON.parse(savedEmplacements);
-            if (savedUnites) configUnites = JSON.parse(savedUnites);
-            if (savedTypesStock) configTypesStock = JSON.parse(savedTypesStock);
+            try { if (savedEmplacements) configEmplacements = JSON.parse(savedEmplacements); } catch(e) { console.error('Error loading locations:', e); }
+            try { if (savedUnites) configUnites = JSON.parse(savedUnites); } catch(e) { console.error('Error loading units:', e); }
+            try { if (savedTypesStock) configTypesStock = JSON.parse(savedTypesStock); } catch(e) { console.error('Error loading stock types:', e); }
             const savedModeles = localStorage.getItem('configModeles');
-            if (savedModeles) configModeles = JSON.parse(savedModeles);
+            try { if (savedModeles) configModeles = JSON.parse(savedModeles); } catch(e) { console.error('Error loading templates:', e); }
             devisCounter = parseInt(localStorage.getItem('devisCounter') || '0');
             const savedDisplayPrefs = localStorage.getItem('displayPrefs');
-            if (savedDisplayPrefs) displayPrefs = Object.assign(displayPrefs, JSON.parse(savedDisplayPrefs));
+            try { if (savedDisplayPrefs) displayPrefs = Object.assign(displayPrefs, JSON.parse(savedDisplayPrefs)); } catch(e) { console.error('Error loading display preferences:', e); }
             const savedHistory = localStorage.getItem('actionHistory');
-            if (savedHistory) actionHistory = JSON.parse(savedHistory);
+            try { if (savedHistory) actionHistory = JSON.parse(savedHistory); } catch(e) { console.error('Error loading action history:', e); }
             const savedFav = localStorage.getItem('favoriteGestes');
-            if (savedFav) favoriteGestes = JSON.parse(savedFav);
+            try { if (savedFav) favoriteGestes = JSON.parse(savedFav); } catch(e) { console.error('Error loading favorites:', e); }
             const savedRecent = localStorage.getItem('recentGestes');
-            if (savedRecent) recentGestes = JSON.parse(savedRecent);
+            try { if (savedRecent) recentGestes = JSON.parse(savedRecent); } catch(e) { console.error('Error loading recent gestures:', e); }
             const savedClientsData = localStorage.getItem('clientsData');
-            if (savedClientsData) clientsData = JSON.parse(savedClientsData);
+            try { if (savedClientsData) clientsData = JSON.parse(savedClientsData); } catch(e) { console.error('Error loading clients data:', e); }
             const savedTheme = localStorage.getItem('themePrefs');
-            if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme));
+            try { if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme)); } catch(e) { console.error('Error loading theme preferences:', e); }
             loadConfig();
         }
 
@@ -4696,6 +4700,13 @@
                     currentAttachments.push(attachment);
                     renderAttachments();
                 };
+                reader.onerror = () => {
+                    toast(`Erreur lors de la lecture du fichier : ${file.name}`, 'error');
+                    console.error(`FileReader error for file: ${file.name}`);
+                };
+                reader.onabort = () => {
+                    toast(`Lecture du fichier annulée : ${file.name}`, 'warning');
+                };
                 reader.readAsDataURL(file);
             }
             input.value = '';
@@ -5544,6 +5555,13 @@
 
                     toast(`✅ Document "${title}" (${fileName}) ajouté avec succès!`, 'success');
                     logAction(`Ajout document référence: ${title} (fichier: ${fileName})`, 'CREATE');
+                };
+                reader.onerror = () => {
+                    toast(`❌ Erreur lors de la lecture du fichier : ${file.name}`, 'error');
+                    console.error('FileReader error for document:', file.name);
+                };
+                reader.onabort = () => {
+                    toast(`⚠️ Lecture du document annulée : ${file.name}`, 'warning');
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -10057,6 +10075,13 @@
                 renderCatalogue();
                 document.querySelectorAll('.geste-select').forEach(sel => { const v = sel.value; sel.innerHTML = buildGesteOptions(v); sel.value = v; });
                 toast(`✅ ${added} geste(s) importé(s), ${skipped} ignoré(s)`, 'success');
+            };
+            reader.onerror = () => {
+                toast(`❌ Erreur lors de la lecture du fichier CSV : ${file.name}`, 'error');
+                console.error('FileReader error for CSV:', file.name);
+            };
+            reader.onabort = () => {
+                toast(`⚠️ Lecture du fichier CSV annulée : ${file.name}`, 'warning');
             };
             reader.readAsText(file, 'UTF-8');
         }
