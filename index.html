@@ -2161,7 +2161,7 @@
                             <label>Date de début</label>
                             <input type="date" id="learnerStartDate">
                         </div>
-                        <button class="btn" onclick="addLearner()">➕ Ajouter apprenant</button>
+                        <button class="btn" onclick="try{addLearner()}catch(e){alert('ERREUR: '+e.message)}">➕ Ajouter apprenant</button>
                     </div>
                 </div>
 
@@ -2192,7 +2192,7 @@
                                 <option value="other">📦 Autre</option>
                             </select>
                         </div>
-                        <button class="btn" onclick="addReferenceDocument()">➕ Ajouter document</button>
+                        <button class="btn" onclick="try{addReferenceDocument()}catch(e){alert('ERREUR: '+e.message)}">➕ Ajouter document</button>
                     </div>
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
                     <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
