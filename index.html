@@ -12577,6 +12577,9 @@
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
 
+            // Définir closeGameMenu AVANT d'ajouter le modal au DOM
+            window.closeGameMenu = () => modal.remove();
+
             const trainingGames = [
                 { id: 'apprendre', emoji: '📚', nom: 'Apprentissage', desc: 'Règles de compatibilité' },
                 { id: 'quiz', emoji: '❓', nom: 'Quiz', desc: 'Testez vos connaissances' }
@@ -12689,7 +12692,6 @@
 
             modal.innerHTML = html;
             document.body.appendChild(modal);
-            window.closeGameMenu = () => modal.remove();
         }
 
         function startGame(gameType) {
@@ -12722,6 +12724,7 @@
         function startLearningMode() {
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
+            window.closeGameMenu = () => modal.remove();
 
             let html = `
                 <div class="game-menu-container" style="max-width:750px;">
@@ -12788,6 +12791,7 @@
             gameState.reglesActives = true;
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
+            window.closeGameMenu = () => modal.remove();
 
             let html = `
                 <div class="game-menu-container" style="max-width:600px;">
@@ -12845,6 +12849,7 @@
 
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
+            window.closeGameMenu = () => modal.remove();
 
             let html = `
                 <div class="game-menu-container" style="max-width:600px;">
@@ -12990,6 +12995,7 @@
             const q = QUESTIONS_LOGISTIQUE[quizState.currentQuestion];
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
+            window.closeGameMenu = () => modal.remove();
 
             const progressPercent = ((quizState.currentQuestion + 1) / QUESTIONS_LOGISTIQUE.length) * 100;
 
