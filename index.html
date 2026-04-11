@@ -2925,13 +2925,37 @@
                         <div style="display:flex;gap:10px;">
                             <button class="btn btn-small logistics-view-btn" id="btn2DView" onclick="switchLogisticsView('2d')" style="background:#6b8fa3;color:white;">📍 Vue 2D</button>
                             <button class="btn btn-small logistics-view-btn" id="btn3DView" onclick="switchLogisticsView('3d')" style="background:#c9b3d4;color:white;">🎬 Vue 3D</button>
-                            <button class="btn btn-small" id="btnChallenge" onclick="startLogisticsChallenge()" style="background:#a8d5e2;color:#333;">🎮 Mode Challenge</button>
+                            <button class="btn btn-small" id="btnChallenge" onclick="startLogisticsChallenge()" style="background:#a8d5e2;color:#333;">🎮 Challenge</button>
+                            <button class="btn btn-small" id="btnAnalytics" onclick="showLogisticsAnalytics()" style="background:#ffc107;color:#333;">📊 Analytics</button>
                         </div>
                     </div>
                     <p style="color:#666;margin-bottom:15px;" id="logisticsDesc">Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.</p>
 
                     <!-- Vue 3D Canvas -->
                     <div id="logistics3DContainer" style="display:none;width:100%;height:600px;border:1px solid #ddd;border-radius:8px;background:#f5f5f5;position:relative;margin-bottom:15px;"></div>
+
+                    <!-- Analytics Heatmap -->
+                    <div id="logisticsAnalyticsContainer" style="display:none;margin-bottom:20px;">
+                        <div style="background:#f5f9fc;padding:20px;border-radius:8px;border:1px solid #a8d5e2;">
+                            <h3 style="margin-bottom:15px;">📊 Heatmap d'Accès</h3>
+                            <div id="logisticsHeatmapCanvas" style="width:100%;height:300px;border:1px solid #ddd;border-radius:6px;background:#fff;position:relative;"></div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-top:15px;">
+                            <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #6b8fa3;">
+                                <div style="color:#999;font-size:0.9em;">Occupation Moyenne</div>
+                                <div id="statsOccupation" style="font-size:1.8em;font-weight:bold;color:#6b8fa3;">--</div>
+                            </div>
+                            <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #c9b3d4;">
+                                <div style="color:#999;font-size:0.9em;">Zone la Plus Chargée</div>
+                                <div id="statsMostUsed" style="font-size:1.8em;font-weight:bold;color:#c9b3d4;">--</div>
+                            </div>
+                            <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #a8d5e2;">
+                                <div style="color:#999;font-size:0.9em;">Espace Libre</div>
+                                <div id="statsFreeSpace" style="font-size:1.8em;font-weight:bold;color:#a8d5e2;">--</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-small" onclick="exportAnalyticsReport()" style="margin-top:15px;width:100%;">📥 Exporter Rapport</button>
+                    </div>
 
                     <!-- CONFIGURATION RACKS -->
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;">
@@ -11664,6 +11688,162 @@
             document.body.appendChild(modal);
         }
 
+        // ════════════════════════════════════════════════════════════
+        // ANALYTICS & HEATMAP
+        // ════════════════════════════════════════════════════════════
+        let logisticsMovementHistory = JSON.parse(localStorage.getItem('logisticsMovementHistory') || '[]');
+
+        function trackArticleMovement(articleId, fromRack, toRack) {
+            logisticsMovementHistory.push({
+                timestamp: Date.now(),
+                article: articleId,
+                from: fromRack,
+                to: toRack
+            });
+            if (logisticsMovementHistory.length > 1000) logisticsMovementHistory = logisticsMovementHistory.slice(-1000);
+            localStorage.setItem('logisticsMovementHistory', JSON.stringify(logisticsMovementHistory));
+        }
+
+        function showLogisticsAnalytics() {
+            const canvas2D = document.getElementById('logisticsCanvas');
+            const canvas3D = document.getElementById('logistics3DContainer');
+            const analyticsDiv = document.getElementById('logisticsAnalyticsContainer');
+
+            canvas2D.style.display = 'none';
+            canvas3D.style.display = 'none';
+            analyticsDiv.style.display = 'block';
+
+            updateAnalyticsStats();
+            drawHeatmap();
+        }
+
+        function updateAnalyticsStats() {
+            const racks = logisticState.racks || [];
+            const placements = logisticState.placements || {};
+
+            // Calcul occupation
+            let totalCapacity = 0, totalUsed = 0;
+            let rackUsage = {};
+
+            racks.forEach(rack => {
+                totalCapacity += rack.capacity;
+                const used = Object.keys(placements[rack.id] || {}).length;
+                totalUsed += used;
+                rackUsage[rack.name] = {
+                    used: used,
+                    capacity: rack.capacity,
+                    percent: (used / rack.capacity * 100).toFixed(1)
+                };
+            });
+
+            const occupationPercent = ((totalUsed / totalCapacity) * 100).toFixed(1);
+            document.getElementById('statsOccupation').textContent = occupationPercent + '%';
+
+            // Rack le plus utilisé
+            let mostUsedRack = 'N/A';
+            let maxUsage = 0;
+            Object.entries(rackUsage).forEach(([name, data]) => {
+                if (data.used > maxUsage) {
+                    maxUsage = data.used;
+                    mostUsedRack = name;
+                }
+            });
+            document.getElementById('statsMostUsed').textContent = mostUsedRack;
+
+            // Espace libre
+            const freeSpace = (totalCapacity - totalUsed);
+            document.getElementById('statsFreeSpace').textContent = freeSpace;
+        }
+
+        function drawHeatmap() {
+            const container = document.getElementById('logisticsHeatmapCanvas');
+            if (!container) return;
+
+            container.innerHTML = '';
+            const canvas = document.createElement('canvas');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            container.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            const racks = logisticState.racks || [];
+            const placements = logisticState.placements || {};
+
+            // Gradient colormap
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, '#4CAF50'); // Green - low usage
+            gradient.addColorStop(0.5, '#FFC107'); // Yellow - medium
+            gradient.addColorStop(1, '#F44336'); // Red - high usage
+
+            const rackWidth = (canvas.width - 60) / racks.length;
+            const barHeight = canvas.height - 60;
+
+            // Draw bars
+            racks.forEach((rack, idx) => {
+                const used = Object.keys(placements[rack.id] || {}).length;
+                const percent = (used / rack.capacity) * 100;
+                const barHeightPx = (percent / 100) * barHeight;
+
+                const x = 30 + idx * rackWidth;
+                const y = canvas.height - 30 - barHeightPx;
+
+                // Color based on usage
+                if (percent < 30) ctx.fillStyle = '#4CAF50';
+                else if (percent < 70) ctx.fillStyle = '#FFC107';
+                else ctx.fillStyle = '#F44336';
+
+                ctx.fillRect(x, y, rackWidth - 5, barHeightPx);
+
+                // Labels
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(rack.name, x + (rackWidth - 5) / 2, canvas.height - 10);
+                ctx.fillText(used + '/' + rack.capacity, x + (rackWidth - 5) / 2, y - 5);
+            });
+
+            // Legend
+            ctx.fillStyle = '#999';
+            ctx.font = '11px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('🟩 < 30%  🟨 30-70%  🟥 > 70%', 30, 20);
+        }
+
+        function exportAnalyticsReport() {
+            const racks = logisticState.racks || [];
+            const placements = logisticState.placements || {};
+
+            let report = '📊 RAPPORT ANALYTICS LOGISTIQUE\n';
+            report += '=' + '='.repeat(49) + '\n\n';
+            report += `Date: ${new Date().toLocaleString()}\n`;
+            report += `Total Racks: ${racks.length}\n`;
+            report += `Articles: ${logisticState.articles.length}\n\n`;
+
+            report += 'OCCUPATION PAR RACK:\n';
+            report += '-'.repeat(50) + '\n';
+            racks.forEach(rack => {
+                const used = Object.keys(placements[rack.id] || {}).length;
+                const percent = ((used / rack.capacity) * 100).toFixed(1);
+                report += `${rack.name}: ${used}/${rack.capacity} (${percent}%)\n`;
+            });
+
+            report += '\nMOUVEMENTS RÉCENTS:\n';
+            report += '-'.repeat(50) + '\n';
+            logisticsMovementHistory.slice(-10).reverse().forEach(move => {
+                const date = new Date(move.timestamp).toLocaleTimeString();
+                report += `${date} - ${move.article}: ${move.from} → ${move.to}\n`;
+            });
+
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `analytics_logistique_${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('✅ Rapport exporté!', 'success');
+        }
+
         function addRack() {
             const name = document.getElementById('rackName').value.trim();
             if (!name) {
@@ -11903,8 +12083,11 @@
             const location = findLocationAtCoords(x, y);
             if (location) {
                 if (!logisticState.placements[location.id]) logisticState.placements[location.id] = {};
-                logisticState.placements[location.id][articleId] = (logisticState.placements[location.id][articleId] || 0) + 1;
+                const previousCount = logisticState.placements[location.id][articleId] || 0;
+                logisticState.placements[location.id][articleId] = previousCount + 1;
                 saveLogisticState();
+                // Track movement for analytics
+                trackArticleMovement(articleId, 'depot', location.name);
                 renderLogisticRacks();
                 renderLogisticPalettes();
                 renderLogisticCanvas();
