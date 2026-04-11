@@ -3050,6 +3050,120 @@
                     </div>
                     <div id="logisticHistoryList" style="max-height:300px;overflow-y:auto;"></div>
                 </div>
+
+                <!-- RÉSERVATIONS ET BLOCAGES -->
+                <div class="section">
+                    <h2>🔒 Réservations & Blocages</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Bloquez des articles temporairement pour les réserver ou les prélever.</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Article à réserver</label>
+                            <select id="reserveArticle"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantité</label>
+                            <input type="number" id="reserveQty" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Raison</label>
+                            <select id="reserveReason">
+                                <option value="production">Production</option>
+                                <option value="inspection">Inspection</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addReservation()">🔒 Réserver</button>
+                    <div id="reservationsList" style="margin-top:15px;"></div>
+                </div>
+
+                <!-- OPTIMISATION AUTOMATIQUE -->
+                <div class="section">
+                    <h2>🤖 Optimisation Automatique</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">L'algorithme suggère le meilleur placement basé sur la proximité et la capacité.</p>
+                    <button class="btn btn-success" onclick="runAutoOptimization()">🚀 Lancer optimisation</button>
+                    <button class="btn btn-secondary btn-small" onclick="toggleOptimizationDetails()">📊 Détails</button>
+                    <div id="optimizationResult" style="margin-top:15px;"></div>
+                </div>
+
+                <!-- RAPPORTS ET STATISTIQUES -->
+                <div class="section">
+                    <h2>📊 Rapports d'Occupation</h2>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div id="occupationChart" style="background:#f9f9f9;padding:15px;border-radius:8px;"></div>
+                        <div id="occupationStats" style="background:#f9f9f9;padding:15px;border-radius:8px;"></div>
+                    </div>
+                    <button class="btn btn-secondary btn-small" onclick="exportOccupationReport()">📥 Exporter rapport</button>
+                </div>
+
+                <!-- QR CODES -->
+                <div class="section">
+                    <h2>📱 Codes QR</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Générez des QR codes pour racks, palettes et articles.</p>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px;">
+                        <div>
+                            <h4>Racks</h4>
+                            <div id="qrCodesRacks" style="display:flex;flex-direction:column;gap:10px;"></div>
+                        </div>
+                        <div>
+                            <h4>Palettes</h4>
+                            <div id="qrCodesPalettes" style="display:flex;flex-direction:column;gap:10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENTRAÎNEMENT ET JEUX -->
+                <div class="section">
+                    <h2>🎮 Modes d'Entraînement & Jeux</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Formez votre équipe avec des mini-jeux éducatifs et ludiques.</p>
+
+                    <!-- Sélecteur de jeu -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px;">
+                        <button class="btn" onclick="startGame('sorting')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#a8d5e2,#8fc4d6);border:none;border-radius:8px;cursor:pointer;">🎯 Tri Rapide</button>
+                        <button class="btn" onclick="startGame('quiz')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#c9b3d4,#b8a0c8);border:none;border-radius:8px;cursor:pointer;">🧠 Quiz</button>
+                        <button class="btn" onclick="startGame('picking')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#b8e5d0,#a3d9c2);border:none;border-radius:8px;cursor:pointer;">🕹️ Picking</button>
+                        <button class="btn" onclick="startGame('memory')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#f5d4a8,#f0c896);border:none;border-radius:8px;cursor:pointer;">🎲 Mémoire</button>
+                    </div>
+
+                    <!-- Zone de jeu -->
+                    <div id="gameContainer" style="display:none;background:linear-gradient(135deg,#e8f4f8,#f5e6f0);padding:20px;border-radius:12px;border:2px solid #a8d5e2;">
+                        <!-- Barre de score -->
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:15px;background:white;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div>
+                                <strong id="gameTitle" style="font-size:1.2em;color:#6b8fa3;"></strong>
+                                <div style="color:#999;font-size:0.9em;" id="gameTimer"></div>
+                            </div>
+                            <div style="display:flex;gap:20px;align-items:center;">
+                                <div style="text-align:center;">
+                                    <div style="font-size:2em;font-weight:bold;color:#6b8fa3;" id="gameScore">0</div>
+                                    <div style="color:#999;font-size:0.85em;">Points</div>
+                                </div>
+                                <div style="text-align:center;">
+                                    <div style="font-size:2em;font-weight:bold;color:#4caf50;" id="gameProgress">0%</div>
+                                    <div style="color:#999;font-size:0.85em;">Progrès</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contenu du jeu dynamique -->
+                        <div id="gameContent" style="min-height:300px;"></div>
+
+                        <!-- Boutons d'action -->
+                        <div style="display:flex;gap:10px;margin-top:20px;justify-content:center;flex-wrap:wrap;">
+                            <button class="btn btn-secondary" onclick="pauseGame()" id="pauseGameBtn">⏸️ Pause</button>
+                            <button class="btn btn-danger" onclick="endGame()">🛑 Arrêter</button>
+                            <button class="btn btn-success" onclick="submitGameAnswer()" id="submitBtn" style="display:none;">✅ Valider</button>
+                        </div>
+                    </div>
+
+                    <!-- Résultats de jeu -->
+                    <div id="gameResultsContainer" style="display:none;background:#f9f9f9;padding:20px;border-radius:12px;border-left:4px solid #4caf50;margin-top:15px;">
+                        <h3 style="color:#4caf50;margin-bottom:15px;">🏆 Résultats</h3>
+                        <div id="gameResultsContent"></div>
+                        <button class="btn btn-secondary" onclick="closeGameResults()" style="margin-top:15px;">Fermer</button>
+                    </div>
+                </div>
             </div>
 
             <!-- ONGLET DASHBOARD -->
@@ -11803,6 +11917,657 @@
             };
             input.click();
         }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RÉSERVATIONS
+        // ═══════════════════════════════════════════════════════════════
+
+        let reservations = [];
+
+        function loadReservations() {
+            try {
+                reservations = JSON.parse(localStorage.getItem('logisticReservations') || '[]');
+            } catch (e) {
+                reservations = [];
+            }
+        }
+
+        function saveReservations() {
+            localStorage.setItem('logisticReservations', JSON.stringify(reservations));
+        }
+
+        function addReservation() {
+            try {
+                const article = document.getElementById('reserveArticle').value;
+                const qty = parseInt(document.getElementById('reserveQty').value) || 1;
+                const reason = document.getElementById('reserveReason').value;
+
+                if (!article) {
+                    toast('❌ Sélectionnez un article', 'danger');
+                    return;
+                }
+
+                reservations.push({
+                    id: 'RES_' + Date.now(),
+                    article: article,
+                    qty: qty,
+                    reason: reason,
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'Davie Maret'
+                });
+
+                saveReservations();
+                renderReservations();
+                toast('✅ Réservation créée', 'success');
+            } catch (e) {
+                toast('❌ Erreur: ' + e.message, 'danger');
+            }
+        }
+
+        function removeReservation(resId) {
+            reservations = reservations.filter(r => r.id !== resId);
+            saveReservations();
+            renderReservations();
+            toast('✅ Réservation supprimée', 'success');
+        }
+
+        function renderReservations() {
+            try {
+                const list = document.getElementById('reservationsList');
+                if (reservations.length === 0) {
+                    list.innerHTML = '<p style="color:#999;text-align:center;padding:15px;">Aucune réservation</p>';
+                    return;
+                }
+
+                list.innerHTML = reservations.map(r => `
+                    <div style="padding:10px;background:#fff9e6;margin-bottom:8px;border-left:4px solid #ffa500;border-radius:6px;display:flex;justify-content:space-between;align-items:center;font-size:0.9em;">
+                        <div>
+                            <strong>${escapeHtml(r.article)}</strong> × ${r.qty}
+                            <br><span style="color:#666;">Raison: ${r.reason} | ${r.createdBy}</span>
+                        </div>
+                        <button class="delete-btn" onclick="removeReservation('${r.id}')">🗑️</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Erreur render réservations:', e);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // OPTIMISATION AUTOMATIQUE
+        // ═══════════════════════════════════════════════════════════════
+
+        function runAutoOptimization() {
+            try {
+                const suggestions = [];
+                const allItems = Object.entries(logisticState.placements).flatMap(([locId, items]) =>
+                    Object.entries(items).map(([artId, qty]) => ({
+                        article: artId,
+                        qty: qty,
+                        currentLoc: locId,
+                        currentLocName: [...logisticState.racks, ...logisticState.palettes].find(l => l.id === locId)?.name || locId
+                    }))
+                );
+
+                // Algorithme best-fit
+                allItems.forEach(item => {
+                    const allLocations = [...logisticState.racks, ...logisticState.palettes];
+                    let bestLoc = null;
+                    let bestScore = Infinity;
+
+                    allLocations.forEach(loc => {
+                        if (loc.id === item.currentLoc) return;
+                        const used = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
+                        const available = loc.capacity - used;
+
+                        if (available >= item.qty) {
+                            const score = Math.abs(available - item.qty); // Plus bas = meilleur fit
+                            if (score < bestScore) {
+                                bestScore = score;
+                                bestLoc = loc;
+                            }
+                        }
+                    });
+
+                    if (bestLoc && bestLoc.id !== item.currentLoc) {
+                        suggestions.push({
+                            article: item.article,
+                            qty: item.qty,
+                            from: item.currentLocName,
+                            to: bestLoc.name,
+                            saving: 'Meilleur espacement'
+                        });
+                    }
+                });
+
+                const result = document.getElementById('optimizationResult');
+                result.innerHTML = suggestions.length === 0
+                    ? '<p style="color:#4caf50;text-align:center;padding:15px;">✅ Emplacement déjà optimisé!</p>'
+                    : `<div style="background:#e8f5e9;padding:15px;border-radius:8px;">
+                        <strong style="color:#2e7d32;">✅ ${suggestions.length} suggestion(s) d'optimisation</strong>
+                        ${suggestions.map((s, i) => `
+                            <div style="padding:10px;background:white;margin-top:8px;border-radius:6px;border-left:4px solid #4caf50;">
+                                <span style="font-weight:bold;">${i+1}. ${escapeHtml(s.article)}</span> (×${s.qty})<br>
+                                📍 <strong>${escapeHtml(s.from)}</strong> → <strong>${escapeHtml(s.to)}</strong>
+                                <button class="btn btn-success btn-small" onclick="applyOptimizationSuggestion('${s.article}', '${s.from}', '${s.to}', ${s.qty})" style="float:right;padding:2px 8px;font-size:0.8em;">Appliquer</button>
+                            </div>
+                        `).join('')}
+                    </div>`;
+
+                toast(`🤖 ${suggestions.length} suggestions générées`, 'info');
+            } catch (e) {
+                toast('❌ Erreur optimisation', 'danger');
+            }
+        }
+
+        function applyOptimizationSuggestion(article, from, to, qty) {
+            const fromLoc = [...logisticState.racks, ...logisticState.palettes].find(l => l.name === from);
+            const toLoc = [...logisticState.racks, ...logisticState.palettes].find(l => l.name === to);
+
+            if (fromLoc && toLoc && logisticState.placements[fromLoc.id]?.[article]) {
+                logisticState.placements[fromLoc.id][article] -= qty;
+                if (logisticState.placements[fromLoc.id][article] <= 0) {
+                    delete logisticState.placements[fromLoc.id][article];
+                }
+                if (!logisticState.placements[toLoc.id]) logisticState.placements[toLoc.id] = {};
+                logisticState.placements[toLoc.id][article] = (logisticState.placements[toLoc.id][article] || 0) + qty;
+
+                saveLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                toast('✅ Optimisation appliquée', 'success');
+            }
+        }
+
+        function toggleOptimizationDetails() {
+            const el = document.getElementById('optimizationResult');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RAPPORTS D'OCCUPATION
+        // ═══════════════════════════════════════════════════════════════
+
+        function renderOccupationReports() {
+            try {
+                const allLocations = [...logisticState.racks, ...logisticState.palettes];
+                const stats = allLocations.map(loc => {
+                    const used = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
+                    const pct = (used / loc.capacity) * 100;
+                    return { name: loc.name, used: used, capacity: loc.capacity, pct: pct };
+                });
+
+                // Chart ASCII
+                const chart = document.getElementById('occupationChart');
+                chart.innerHTML = '<div style="font-family:monospace;font-size:0.85em;line-height:1.6;">' +
+                    stats.map(s => `
+                        <div style="margin-bottom:8px;">
+                            <span style="display:inline-block;width:100px;">${escapeHtml(s.name)}</span>
+                            <div style="display:inline-block;width:200px;height:20px;background:#e0e0e0;border-radius:4px;position:relative;overflow:hidden;">
+                                <div style="width:${s.pct}%;height:100%;background:${s.pct > 80 ? '#ff6b6b' : s.pct > 60 ? '#ffa500' : '#4caf50'};transition:width 0.3s;"></div>
+                            </div>
+                            <span style="margin-left:10px;color:#666;">${Math.round(s.pct)}%</span>
+                        </div>
+                    `).join('') +
+                    '</div>';
+
+                // Stats
+                const statsDiv = document.getElementById('occupationStats');
+                const totalCapacity = stats.reduce((a,b) => a + b.capacity, 0);
+                const totalUsed = stats.reduce((a,b) => a + b.used, 0);
+                const avgOccupancy = Math.round((totalUsed / totalCapacity) * 100);
+
+                statsDiv.innerHTML = `
+                    <div style="font-size:0.9em;">
+                        <strong>Capacité totale:</strong> ${totalCapacity} unités<br>
+                        <strong>Utilisation:</strong> ${totalUsed} unités<br>
+                        <strong>Occupancy moyen:</strong> ${avgOccupancy}%<br><br>
+                        <strong>Zones:</strong><br>
+                        ${stats.map(s => `<div style="padding:4px;color:#666;">• ${escapeHtml(s.name)}: ${s.used}/${s.capacity}</div>`).join('')}
+                    </div>
+                `;
+            } catch (e) {
+                console.error('Erreur rapports:', e);
+            }
+        }
+
+        function exportOccupationReport() {
+            try {
+                const allLocations = [...logisticState.racks, ...logisticState.palettes];
+                const report = {
+                    date: new Date().toISOString(),
+                    locations: allLocations.map(loc => {
+                        const used = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
+                        return {
+                            name: loc.name,
+                            capacity: loc.capacity,
+                            used: used,
+                            percentUsed: Math.round((used / loc.capacity) * 100)
+                        };
+                    })
+                };
+
+                const csv = 'Localisation,Utilisé,Capacité,Pourcentage\n' +
+                    report.locations.map(l => `${l.name},${l.used},${l.capacity},${l.percentUsed}%`).join('\n');
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'rapport_occupation_' + new Date().toISOString().split('T')[0] + '.csv';
+                a.click();
+                toast('📥 Rapport exporté', 'success');
+            } catch (e) {
+                toast('❌ Erreur export', 'danger');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // QR CODES
+        // ═══════════════════════════════════════════════════════════════
+
+        function generateQRCodes() {
+            try {
+                // Load QR library (QRCode.js from CDN or simple implementation)
+                if (typeof QRCode === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+                    script.onload = () => renderQRCodes();
+                    document.head.appendChild(script);
+                } else {
+                    renderQRCodes();
+                }
+            } catch (e) {
+                console.error('QR load error:', e);
+            }
+        }
+
+        function renderQRCodes() {
+            try {
+                const racksDiv = document.getElementById('qrCodesRacks');
+                const palettesDiv = document.getElementById('qrCodesPalettes');
+
+                racksDiv.innerHTML = logisticState.racks.map(rack => {
+                    const qrId = 'qr_rack_' + rack.id;
+                    setTimeout(() => {
+                        try {
+                            new QRCode(document.getElementById(qrId), {
+                                text: JSON.stringify({ type: 'rack', id: rack.id, name: rack.name }),
+                                width: 128,
+                                height: 128,
+                                colorDark: '#6b8fa3',
+                                colorLight: '#ffffff'
+                            });
+                        } catch (e) { /* QRCode not available */ }
+                    }, 100);
+                    return `<div style="text-align:center;border-radius:8px;background:#f9f9f9;padding:10px;">
+                        <div id="${qrId}" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
+                        <strong style="font-size:0.85em;">${escapeHtml(rack.name)}</strong><br>
+                        <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${rack.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
+                    </div>`;
+                }).join('');
+
+                palettesDiv.innerHTML = logisticState.palettes.map(palette => {
+                    const qrId = 'qr_palette_' + palette.id;
+                    setTimeout(() => {
+                        try {
+                            new QRCode(document.getElementById(qrId), {
+                                text: JSON.stringify({ type: 'palette', id: palette.id, name: palette.name }),
+                                width: 128,
+                                height: 128,
+                                colorDark: '#7a9db1',
+                                colorLight: '#ffffff'
+                            });
+                        } catch (e) { /* QRCode not available */ }
+                    }, 100);
+                    return `<div style="text-align:center;border-radius:8px;background:#f0f5f8;padding:10px;">
+                        <div id="${qrId}" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
+                        <strong style="font-size:0.85em;">${escapeHtml(palette.name)}</strong><br>
+                        <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${palette.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                console.error('Erreur QR render:', e);
+            }
+        }
+
+        function downloadQRCode(elementId, name) {
+            try {
+                const element = document.getElementById(elementId);
+                const canvas = element.querySelector('canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL();
+                    link.download = 'qr_' + name + '.png';
+                    link.click();
+                    toast('📥 QR téléchargé', 'success');
+                }
+            } catch (e) {
+                toast('❌ Erreur téléchargement', 'danger');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // MINI-JEUX D'ENTRAÎNEMENT
+        // ═══════════════════════════════════════════════════════════════
+
+        let currentGame = null;
+        let gameState = { score: 0, startTime: null, isPaused: false, items: [] };
+
+        function startGame(gameType) {
+            currentGame = gameType;
+            gameState = {
+                score: 0,
+                startTime: Date.now(),
+                isPaused: false,
+                items: [],
+                correctAnswers: 0,
+                totalQuestions: 0
+            };
+
+            document.getElementById('gameContainer').style.display = 'block';
+            document.getElementById('gameResultsContainer').style.display = 'none';
+
+            if (gameType === 'sorting') startSortingGame();
+            else if (gameType === 'quiz') startQuizGame();
+            else if (gameType === 'picking') startPickingGame();
+            else if (gameType === 'memory') startMemoryGame();
+
+            updateGameUI();
+        }
+
+        function startSortingGame() {
+            document.getElementById('gameTitle').textContent = '🎯 Tri Rapide — Placez les articles au bon endroit';
+            const allLocations = [...logisticState.racks, ...logisticState.palettes];
+            if (allLocations.length === 0) {
+                toast('❌ Créez d\'abord des racks/palettes', 'danger');
+                document.getElementById('gameContainer').style.display = 'none';
+                return;
+            }
+
+            const items = [
+                { name: 'Article A', correctLoc: allLocations[0].name },
+                { name: 'Article B', correctLoc: allLocations[Math.floor(Math.random() * allLocations.length)].name },
+                { name: 'Article C', correctLoc: allLocations[Math.floor(Math.random() * allLocations.length)].name }
+            ];
+
+            gameState.items = items;
+            let html = '<div style="padding:15px;">';
+            items.forEach((item, idx) => {
+                html += `<div style="margin-bottom:15px;padding:15px;background:white;border-radius:8px;border-left:4px solid #a8d5e2;">
+                    <strong>${item.name}</strong><br>
+                    <select id="sortSelect${idx}" style="width:200px;margin-top:8px;">
+                        <option value="">-- Choisir emplacement --</option>
+                        ${[...logisticState.racks, ...logisticState.palettes].map(l =>
+                            `<option value="${l.name}">${escapeHtml(l.name)}</option>`
+                        ).join('')}
+                    </select>
+                </div>`;
+            });
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('submitBtn').textContent = '✅ Valider réponses';
+        }
+
+        function startQuizGame() {
+            document.getElementById('gameTitle').textContent = '🧠 Quiz Logistique';
+            const questions = [
+                { q: 'FIFO signifie:', a: ['First In First Out', 'From In For Out', 'File In Free Out'], correct: 0 },
+                { q: 'La capacité d\'un rack se mesure en:', a: ['Unités/articles', 'Kilogrammes', 'Mètres carrés'], correct: 0 },
+                { q: 'Une réservation sert à:', a: ['Bloquer articles temporairement', 'Augmenter capacité', 'Réduire coûts'], correct: 0 },
+                { q: 'Priorité si emplacement plein à 90%:', a: ['Ajouter des articles', 'Transférer articles', 'Ignorer alerte'], correct: 1 }
+            ];
+
+            gameState.totalQuestions = questions.length;
+            gameState.items = questions.map((q, idx) => ({ ...q, answered: null }));
+
+            let html = '<div style="padding:15px;">';
+            gameState.items.forEach((item, qIdx) => {
+                html += `<div style="margin-bottom:20px;padding:15px;background:white;border-radius:8px;">
+                    <strong style="font-size:1.05em;">Q${qIdx+1}. ${escapeHtml(item.q)}</strong><br>
+                    ${item.a.map((ans, aIdx) => `
+                        <label style="display:block;margin-top:8px;padding:8px;cursor:pointer;">
+                            <input type="radio" name="q${qIdx}" value="${aIdx}" onchange="gameState.items[${qIdx}].answered = ${aIdx}" style="margin-right:8px;">
+                            ${escapeHtml(ans)}
+                        </label>
+                    `).join('')}
+                </div>`;
+            });
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('submitBtn').textContent = '✅ Soumettre quiz';
+        }
+
+        function startPickingGame() {
+            document.getElementById('gameTitle').textContent = '🕹️ Challenge Picking — Trouvez l\'article rapidement';
+            const allArticles = [];
+            Object.entries(logisticState.placements).forEach(([locId, items]) => {
+                const locName = [...logisticState.racks, ...logisticState.palettes].find(l => l.id === locId)?.name;
+                Object.entries(items).forEach(([artId, qty]) => {
+                    allArticles.push({ id: artId, location: locName });
+                });
+            });
+
+            if (allArticles.length === 0) {
+                toast('❌ Ajoutez d\'abord des articles aux emplacements', 'danger');
+                document.getElementById('gameContainer').style.display = 'none';
+                return;
+            }
+
+            const targets = allArticles.slice(0, 5);
+            gameState.items = targets.map((t, idx) => ({ ...t, found: false }));
+
+            let html = '<div style="padding:15px;"><strong>Trouvez ces articles rapidement:</strong><br>';
+            gameState.items.forEach((item, idx) => {
+                const found = item.found;
+                html += `<div style="padding:10px;margin:8px 0;background:${found ? '#e8f5e9' : '#fff3e0'};border-radius:6px;border-left:4px solid ${found ? '#4caf50' : '#ffa500'};cursor:pointer;opacity:${found ? 0.6 : 1};" onclick="gameState.items[${idx}].found = true; updateGameUI(); gameState.score += 10;">
+                    ${found ? '✅' : '❌'} ${escapeHtml(item.id)} (emplacement: <strong>${escapeHtml(item.location)}</strong>)
+                </div>`;
+            });
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'none';
+        }
+
+        function startMemoryGame() {
+            document.getElementById('gameTitle').textContent = '🎲 Jeu de Mémoire — Retournez les cartes';
+            const allLocations = [...logisticState.racks, ...logisticState.palettes].slice(0, 6);
+
+            if (allLocations.length < 2) {
+                toast('❌ Créez au moins 2 emplacements', 'danger');
+                document.getElementById('gameContainer').style.display = 'none';
+                return;
+            }
+
+            const pairs = [];
+            allLocations.forEach(loc => pairs.push({ id: loc.id, name: loc.name, flipped: false }));
+            allLocations.forEach(loc => pairs.push({ id: loc.id, name: loc.name, flipped: false }));
+            pairs.sort(() => Math.random() - 0.5);
+
+            gameState.items = pairs;
+            gameState.selectedCards = [];
+
+            let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:15px;">';
+            pairs.forEach((card, idx) => {
+                html += `<button onclick="flipMemoryCard(${idx})" style="padding:20px;background:${card.flipped ? 'linear-gradient(135deg,#e8f4f8,#f5e6f0)' : '#a8d5e2'};color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:0.9em;transition:all 0.2s;min-height:80px;">
+                    ${card.flipped ? escapeHtml(card.name) : '?'}
+                </button>`;
+            });
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'none';
+        }
+
+        function flipMemoryCard(idx) {
+            const card = gameState.items[idx];
+            if (card.matched) return;
+
+            gameState.items[idx].flipped = true;
+            gameState.selectedCards.push(idx);
+
+            if (gameState.selectedCards.length === 2) {
+                const [idx1, idx2] = gameState.selectedCards;
+                const match = gameState.items[idx1].id === gameState.items[idx2].id;
+
+                if (match) {
+                    gameState.items[idx1].matched = true;
+                    gameState.items[idx2].matched = true;
+                    gameState.score += 20;
+                } else {
+                    setTimeout(() => {
+                        gameState.items[idx1].flipped = false;
+                        gameState.items[idx2].flipped = false;
+                        renderGameMemory();
+                    }, 1000);
+                }
+
+                gameState.selectedCards = [];
+            }
+
+            if (gameState.items.every(c => c.matched)) {
+                finishGame();
+            } else {
+                renderGameMemory();
+            }
+
+            updateGameUI();
+        }
+
+        function renderGameMemory() {
+            let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:15px;">';
+            gameState.items.forEach((card, idx) => {
+                html += `<button onclick="flipMemoryCard(${idx})" style="padding:20px;background:${card.flipped ? 'linear-gradient(135deg,#e8f4f8,#f5e6f0)' : '#a8d5e2'};color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:0.9em;transition:all 0.2s;min-height:80px;opacity:${card.matched ? 0.5 : 1};">
+                    ${card.flipped ? escapeHtml(card.name) : '?'}
+                </button>`;
+            });
+            html += '</div>';
+            document.getElementById('gameContent').innerHTML = html;
+        }
+
+        function submitGameAnswer() {
+            if (currentGame === 'sorting') {
+                let correct = 0;
+                gameState.items.forEach((item, idx) => {
+                    const selected = document.getElementById('sortSelect' + idx).value;
+                    if (selected === item.correctLoc) correct++;
+                });
+                gameState.score = correct * 25;
+                gameState.correctAnswers = correct;
+                finishGame();
+            } else if (currentGame === 'quiz') {
+                gameState.items.forEach((item) => {
+                    if (item.answered === item.correct) {
+                        gameState.correctAnswers++;
+                        gameState.score += 20;
+                    }
+                });
+                finishGame();
+            }
+        }
+
+        function updateGameUI() {
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('gameTimer').textContent = `${minutes}:${String(seconds).padStart(2,'0')}`;
+            document.getElementById('gameScore').textContent = gameState.score;
+
+            let progress = 0;
+            if (currentGame === 'picking') {
+                progress = Math.round((gameState.items.filter(i => i.found).length / gameState.items.length) * 100);
+            } else if (currentGame === 'memory') {
+                progress = Math.round((gameState.items.filter(c => c.matched).length / gameState.items.length) * 100);
+            }
+            document.getElementById('gameProgress').textContent = progress + '%';
+        }
+
+        function pauseGame() {
+            gameState.isPaused = !gameState.isPaused;
+            document.getElementById('pauseGameBtn').textContent = gameState.isPaused ? '▶️ Reprendre' : '⏸️ Pause';
+        }
+
+        function endGame() {
+            if (confirm('Terminer le jeu?')) finishGame();
+        }
+
+        function finishGame() {
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('gameResultsContainer').style.display = 'block';
+
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            let resultText = '';
+
+            if (currentGame === 'sorting') {
+                resultText = `🎯 Tri: ${gameState.correctAnswers}/${gameState.items.length} correct<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            } else if (currentGame === 'quiz') {
+                resultText = `🧠 Quiz: ${gameState.correctAnswers}/${gameState.totalQuestions} correct<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            } else if (currentGame === 'picking') {
+                resultText = `🕹️ Picking: ${gameState.items.filter(i => i.found).length}/${gameState.items.length} trouvés<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            } else if (currentGame === 'memory') {
+                resultText = `🎲 Mémoire: Tous les appariements réussis!<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            }
+
+            document.getElementById('gameResultsContent').innerHTML = `
+                <div style="font-size:1.1em;line-height:1.8;color:#333;">
+                    ${resultText}
+                </div>
+                <div style="margin-top:15px;padding:12px;background:#e8f5e9;border-radius:8px;border-left:4px solid #4caf50;">
+                    <strong style="color:#2e7d32;">📊 Résultat sauvegardé</strong>
+                </div>
+            `;
+
+            // Sauvegarder le score
+            try {
+                const results = JSON.parse(localStorage.getItem('gameResults') || '[]');
+                results.push({
+                    game: currentGame,
+                    score: gameState.score,
+                    correctAnswers: gameState.correctAnswers,
+                    totalQuestions: gameState.totalQuestions,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('gameResults', JSON.stringify(results));
+            } catch (e) { /* ignore */ }
+
+            toast(`🏆 Score: ${gameState.score} points!`, 'success');
+        }
+
+        function closeGameResults() {
+            document.getElementById('gameResultsContainer').style.display = 'none';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                loadReservations();
+                renderReservations();
+                renderOccupationReports();
+                generateQRCodes();
+
+                // Refresh articles list for reservations
+                const articles = [];
+                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
+                conso.forEach(c => articles.push({ id: c.id, name: c.designation }));
+                document.getElementById('reserveArticle').innerHTML = articles.map(a =>
+                    `<option value="${a.id}">${escapeHtml(a.name)}</option>`
+                ).join('');
+            }, 1000);
+        });
 
     </script>
 
