@@ -766,104 +766,6 @@
         .devis-num { font-size:1.8em; font-weight:bold; color:#2d3e50; }
         .devis-footer { text-align:center; font-size:0.8em; color:#999; margin-top:30px; border-top:1px solid #eee; padding-top:15px; }
 
-        /* ── Footer Legal ─────────────────────────────────── */
-        .footer-legal {
-            margin-top: 40px;
-            padding: 20px;
-            background: #f9f9f9;
-            border-top: 1px solid #ddd;
-            font-size: 0.9em;
-            color: #666;
-            text-align: center;
-        }
-        .footer-legal strong { color: #333; }
-        .footer-legal a {
-            color: #6b8fa3;
-            text-decoration: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-        .footer-legal a:hover { color: #a8d5e2; text-decoration: underline; }
-
-        /* ── Modal Conditions ─────────────────────────────────── */
-        .modal-conditions {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s;
-        }
-        .modal-conditions.show { display: flex; }
-        .modal-conditions-content {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.3s;
-        }
-        .modal-conditions-header {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #2d3e50;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #a8d5e2;
-            padding-bottom: 10px;
-        }
-        .modal-conditions-body {
-            font-size: 0.95em;
-            line-height: 1.6;
-            color: #666;
-        }
-        .modal-conditions-body p {
-            margin-bottom: 15px;
-        }
-        .modal-conditions-body ul {
-            margin: 15px 0 15px 20px;
-            list-style-type: disc;
-        }
-        .modal-conditions-body li {
-            margin-bottom: 8px;
-        }
-        .modal-conditions-body strong {
-            color: #333;
-            font-weight: 600;
-        }
-        .modal-conditions-close {
-            margin-top: 20px;
-            text-align: right;
-        }
-        .modal-conditions-close button {
-            background: #a8d5e2;
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        .modal-conditions-close button:hover {
-            background: #6b8fa3;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
         /* Alert banner */
         .alert-banner { background: #fff3cd; border-left: 4px solid #f39c12; padding: 12px 20px; margin-bottom: 15px; border-radius: 6px; font-size: 0.88em; }
         .alert-banner.danger { background: #fde8e8; border-left-color: #e74c3c; }
@@ -1276,87 +1178,6 @@
         </div>
     </div>
 
-    <!-- Edit Gesture Modal -->
-    <div id="editGesteModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9990;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeEditGesteModal()">
-        <div style="background:white;border-radius:12px;padding:24px;max-width:600px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                <h2 style="margin:0;">✏️ Éditer geste</h2>
-                <button onclick="closeEditGesteModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;">✕</button>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Code</label>
-                    <input type="text" id="editGesteCode" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
-                </div>
-                <div class="form-group">
-                    <label>Catégorie</label>
-                    <select id="editGesteCategorie" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
-                        <option>Réception</option>
-                        <option>Contrôle</option>
-                        <option>Étiquetage</option>
-                        <option>Assemblage</option>
-                        <option>Stockage</option>
-                        <option>Expédition</option>
-                        <option>Préparation</option>
-                        <option>Administratif</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" id="editGesteDescription" style="padding:8px;border:1px solid #ddd;border-radius:4px;width:100%;">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Temps (secondes)</label>
-                    <input type="number" id="editGesteTemps" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
-                </div>
-                <div class="form-group">
-                    <label>Coefficient</label>
-                    <input type="number" id="editGesteCoef" step="0.05" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Notes</label>
-                    <input type="text" id="editGesteNotes" style="padding:8px;border:1px solid #ddd;border-radius:4px;width:100%;">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>🎥 URL Vidéo native</label>
-                    <input type="text" id="editGesteVideo" placeholder="https://example.com/video.mp4" style="padding:8px;border:1px solid #ddd;border-radius:4px;width:100%;font-size:0.9em;">
-                </div>
-            </div>
-            <div class="form-row" style="gap:12px;">
-                <div class="form-group" style="flex:1;">
-                    <label>Ou charger une vidéo locale</label>
-                    <input type="file" id="editGesteVideoFile" accept=".mp4,.webm,.mov,.avi,.mkv" style="padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9em;">
-                </div>
-            </div>
-            <p id="videoFileNameDisplay" style="color:#7a9db1;font-size:0.85em;margin-top:-8px;"></p>
-            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
-                <button class="btn btn-secondary" onclick="closeEditGesteModal()">Annuler</button>
-                <button class="btn btn-success" onclick="saveEditedGeste()">💾 Sauvegarder</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Link documents modal -->
-    <div id="linkDocsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10002;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeLinkDocsModal()">
-        <div style="background:white;border-radius:12px;padding:24px;max-width:500px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h3 style="margin:0;" id="linkDocsModalTitle">📎 Lier des documents</h3>
-                <button onclick="closeLinkDocsModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;">✕</button>
-            </div>
-            <input type="text" id="docSearchInput" placeholder="🔍 Rechercher..." style="margin-bottom:12px;padding:8px;border:1px solid #ddd;border-radius:4px;" oninput="filterDocsList()">
-            <div id="docsListContainer" style="overflow-y:auto;flex:1;border:1px solid #eee;border-radius:6px;padding:8px;margin-bottom:12px;"></div>
-            <button class="btn" onclick="closeLinkDocsModal()">Fermer</button>
-        </div>
-    </div>
-
     <!-- Global search overlay -->
     <div id="searchGlobalOverlay" onclick="if(event.target===this)closeGlobalSearch()">
         <div class="search-global-box">
@@ -1584,6 +1405,12 @@
                 </table>
 
                 <p style="margin-top:24px;color:#aaa;font-size:0.85em;text-align:center;">Documentation — Outil Complet Atelier - La Pallanterie • Avril 2026</p>
+                <div style="margin-top:16px;padding:12px 16px;background:#f8f9fa;border-radius:8px;border:1px solid #e8ecf0;text-align:center;">
+                    <p style="font-size:0.8em;color:#8a9db1;margin:0;line-height:1.6;">
+                        © 2025–2026 <strong>MARET Davie</strong> — Tous droits réservés.<br>
+                        Aucune reproduction, utilisation ou distribution de ce logiciel, de son code source ou de toute partie de celui-ci ne peut être effectuée sans l'accord écrit préalable de l'auteur.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -1636,6 +1463,7 @@
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
+                <button class="tab" onclick="switchTab('logistique')">🏭 Logistique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
@@ -2378,21 +2206,6 @@
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
                     <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
                 </div>
-
-                <div class="section">
-                    <h2>🎬 Films de formation</h2>
-                    <p style="color:#7a9db1;margin-bottom:12px;">Liez des vidéos aux gestes pour faciliter l'apprentissage</p>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Sélectionner un geste</label>
-                            <select id="filmGesteSelect">
-                                <option value="">-- Choisir un geste --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="filmGesteContainer" style="display:grid;gap:12px;margin-top:12px;"></div>
-                    <div id="noGesteSelectedMsg" style="color:#7a9db1;text-align:center;padding:20px;">Sélectionnez un geste pour voir et gérer ses vidéos</div>
-                </div>
             </div>
 
             <!-- ONGLET CONSOMMABLES -->
@@ -3103,6 +2916,256 @@
                 </div>
             </div>
 
+            <!-- ONGLET LOGISTIQUE -->
+            <div id="logistique" class="tab-content">
+                <div class="section">
+                    <h2>🏭 Gestion Logistique 2D</h2>
+                    <p style="color:#666;margin-bottom:15px;">Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.</p>
+
+                    <!-- CONFIGURATION RACKS -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;">
+                        <div>
+                            <h3>Configuration Racks</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Ajouter un rack</label>
+                                    <input type="text" id="rackName" placeholder="ex: RACK-A1" style="width:120px;">
+                                    <button class="btn btn-small" onclick="addRack()" style="margin-top:0;">➕ Ajouter</button>
+                                </div>
+                            </div>
+                            <div id="racksList" style="margin-top:10px;max-height:200px;overflow-y:auto;"></div>
+                        </div>
+                        <div>
+                            <h3>Configuration Palettes</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Ajouter une palette</label>
+                                    <input type="text" id="paletteName" placeholder="ex: PALETTE-01" style="width:140px;">
+                                    <button class="btn btn-small" onclick="addPalette()" style="margin-top:0;">➕ Ajouter</button>
+                                </div>
+                            </div>
+                            <div id="palettesList" style="margin-top:10px;max-height:200px;overflow-y:auto;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ZOOM ET CONTRÔLES -->
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+                        <label>Zoom : <input type="range" id="zoomRange" min="0.5" max="2" step="0.1" value="1" onchange="updateLogisticZoom()" style="width:120px;"></label>
+                        <span id="zoomLabel">100%</span>
+                        <button class="btn btn-secondary btn-small" onclick="resetLogisticView()">🔄 Réinitialiser vue</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportLogisticLayout()">💾 Sauver plan</button>
+                        <button class="btn btn-secondary btn-small" onclick="importLogisticLayout()">📂 Charger plan</button>
+                    </div>
+                </div>
+
+                <!-- CANVAS 2D PRINCIPAL -->
+                <div class="section" style="padding:0;border:none;background:#f9f9f9;">
+                    <canvas id="logisticCanvas" width="1200" height="600" style="border:2px solid #a8d5e2;background:white;cursor:move;display:block;margin:0 auto;border-radius:8px;"></canvas>
+                </div>
+
+                <!-- ZONE D'ARTICLES DISPONIBLES (DRAG SOURCE) -->
+                <div class="section">
+                    <h2>📦 Articles disponibles (Glissez-déposez sur le plan)</h2>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                        <input type="text" id="logisticSearchArticle" placeholder="Rechercher article..." style="flex:1;min-width:200px;">
+                        <button class="btn btn-small" onclick="refreshLogisticArticles()">🔄 Actualiser</button>
+                    </div>
+                    <div id="logisticArticlesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;"></div>
+                </div>
+
+                <!-- PANNEAU INFOS PLACEMENT -->
+                <div class="section">
+                    <h2>ℹ️ Infos Placement</h2>
+                    <div id="logisticInfoPanel" style="background:#e8f4f8;padding:15px;border-radius:8px;color:#555;min-height:100px;">
+                        <p style="color:#999;">Sélectionnez un article sur le plan pour voir ses détails</p>
+                    </div>
+                </div>
+
+                <!-- MOUVEMENTS STOCK -->
+                <div class="section">
+                    <h2>🔄 Mouvements Stock</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Type de mouvement</label>
+                            <select id="logisticMoveType" onchange="updateLogisticMoveForm()">
+                                <option value="entree">📥 Entrée</option>
+                                <option value="sortie">📤 Sortie</option>
+                                <option value="transfert">↔️ Transfert</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Article</label>
+                            <select id="logisticMoveArticle"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantité</label>
+                            <input type="number" id="logisticMoveQty" min="1" value="1">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" id="logisticMoveSourceGroup">
+                            <label>Emplacement source</label>
+                            <select id="logisticMoveSource"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Emplacement destination</label>
+                            <select id="logisticMoveDest"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="logisticMoveDate">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Responsable</label>
+                            <input type="text" id="logisticMoveResponsable" value="Davie Maret">
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <input type="text" id="logisticMoveNotes" placeholder="Notes...">
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="saveLogisticMove()">✅ Enregistrer mouvement</button>
+                </div>
+
+                <!-- ALERTES ET STATISTIQUES -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+                    <div class="section">
+                        <h2>⚠️ Alertes Stock</h2>
+                        <div id="logisticAlerts" style="min-height:100px;"></div>
+                    </div>
+                    <div class="section">
+                        <h2>📊 Statistiques</h2>
+                        <div id="logisticStats" style="min-height:100px;"></div>
+                    </div>
+                </div>
+
+                <!-- HISTORIQUE MOUVEMENTS -->
+                <div class="section">
+                    <h2>📝 Historique Mouvements</h2>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input type="text" id="logisticHistoryFilter" placeholder="Filtrer..." style="flex:1;">
+                        <button class="btn btn-small" onclick="logisticClearHistory()">🗑️ Effacer</button>
+                    </div>
+                    <div id="logisticHistoryList" style="max-height:300px;overflow-y:auto;"></div>
+                </div>
+
+                <!-- RÉSERVATIONS ET BLOCAGES -->
+                <div class="section">
+                    <h2>🔒 Réservations & Blocages</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Bloquez des articles temporairement pour les réserver ou les prélever.</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Article à réserver</label>
+                            <select id="reserveArticle"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantité</label>
+                            <input type="number" id="reserveQty" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Raison</label>
+                            <select id="reserveReason">
+                                <option value="production">Production</option>
+                                <option value="inspection">Inspection</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addReservation()">🔒 Réserver</button>
+                    <div id="reservationsList" style="margin-top:15px;"></div>
+                </div>
+
+                <!-- OPTIMISATION AUTOMATIQUE -->
+                <div class="section">
+                    <h2>🤖 Optimisation Automatique</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">L'algorithme suggère le meilleur placement basé sur la proximité et la capacité.</p>
+                    <button class="btn btn-success" onclick="runAutoOptimization()">🚀 Lancer optimisation</button>
+                    <button class="btn btn-secondary btn-small" onclick="toggleOptimizationDetails()">📊 Détails</button>
+                    <div id="optimizationResult" style="margin-top:15px;"></div>
+                </div>
+
+                <!-- RAPPORTS ET STATISTIQUES -->
+                <div class="section">
+                    <h2>📊 Rapports d'Occupation</h2>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div id="occupationChart" style="background:#f9f9f9;padding:15px;border-radius:8px;"></div>
+                        <div id="occupationStats" style="background:#f9f9f9;padding:15px;border-radius:8px;"></div>
+                    </div>
+                    <button class="btn btn-secondary btn-small" onclick="exportOccupationReport()">📥 Exporter rapport</button>
+                </div>
+
+                <!-- QR CODES -->
+                <div class="section">
+                    <h2>📱 Codes QR</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Générez des QR codes pour racks, palettes et articles.</p>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px;">
+                        <div>
+                            <h4>Racks</h4>
+                            <div id="qrCodesRacks" style="display:flex;flex-direction:column;gap:10px;"></div>
+                        </div>
+                        <div>
+                            <h4>Palettes</h4>
+                            <div id="qrCodesPalettes" style="display:flex;flex-direction:column;gap:10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENTRAÎNEMENT ET JEUX -->
+                <div class="section">
+                    <h2>🎮 Modes d'Entraînement & Jeux</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Formez votre équipe avec des mini-jeux éducatifs et ludiques.</p>
+
+                    <!-- Sélecteur de jeu -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px;">
+                        <button class="btn" onclick="startGame('sorting')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#a8d5e2,#8fc4d6);border:none;border-radius:8px;cursor:pointer;">🎯 Tri Rapide</button>
+                        <button class="btn" onclick="startGame('quiz')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#c9b3d4,#b8a0c8);border:none;border-radius:8px;cursor:pointer;">🧠 Quiz</button>
+                        <button class="btn" onclick="startGame('picking')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#b8e5d0,#a3d9c2);border:none;border-radius:8px;cursor:pointer;">🕹️ Picking</button>
+                        <button class="btn" onclick="startGame('memory')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#f5d4a8,#f0c896);border:none;border-radius:8px;cursor:pointer;">🎲 Mémoire</button>
+                    </div>
+
+                    <!-- Zone de jeu -->
+                    <div id="gameContainer" style="display:none;background:linear-gradient(135deg,#e8f4f8,#f5e6f0);padding:20px;border-radius:12px;border:2px solid #a8d5e2;">
+                        <!-- Barre de score -->
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:15px;background:white;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div>
+                                <strong id="gameTitle" style="font-size:1.2em;color:#6b8fa3;"></strong>
+                                <div style="color:#999;font-size:0.9em;" id="gameTimer"></div>
+                            </div>
+                            <div style="display:flex;gap:20px;align-items:center;">
+                                <div style="text-align:center;">
+                                    <div style="font-size:2em;font-weight:bold;color:#6b8fa3;" id="gameScore">0</div>
+                                    <div style="color:#999;font-size:0.85em;">Points</div>
+                                </div>
+                                <div style="text-align:center;">
+                                    <div style="font-size:2em;font-weight:bold;color:#4caf50;" id="gameProgress">0%</div>
+                                    <div style="color:#999;font-size:0.85em;">Progrès</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contenu du jeu dynamique -->
+                        <div id="gameContent" style="min-height:300px;"></div>
+
+                        <!-- Boutons d'action -->
+                        <div style="display:flex;gap:10px;margin-top:20px;justify-content:center;flex-wrap:wrap;">
+                            <button class="btn btn-secondary" onclick="pauseGame()" id="pauseGameBtn">⏸️ Pause</button>
+                            <button class="btn btn-danger" onclick="endGame()">🛑 Arrêter</button>
+                            <button class="btn btn-success" onclick="submitGameAnswer()" id="submitBtn" style="display:none;">✅ Valider</button>
+                        </div>
+                    </div>
+
+                    <!-- Résultats de jeu -->
+                    <div id="gameResultsContainer" style="display:none;background:#f9f9f9;padding:20px;border-radius:12px;border-left:4px solid #4caf50;margin-top:15px;">
+                        <h3 style="color:#4caf50;margin-bottom:15px;">🏆 Résultats</h3>
+                        <div id="gameResultsContent"></div>
+                        <button class="btn btn-secondary" onclick="closeGameResults()" style="margin-top:15px;">Fermer</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- ONGLET DASHBOARD -->
             <div id="dashboard" class="tab-content active">
               <div class="stats-grid" id="dashboardKpis"></div>
@@ -3127,6 +3190,12 @@
             </div>
 
         </div>
+    </div>
+
+    <!-- App footer copyright -->
+    <div style="text-align:center;font-size:0.72em;color:#9ab0be;padding:14px 20px 10px;border-top:1px solid #e8ecf0;background:#f8fafc;margin-top:8px;">
+        © 2025–2026 <strong>MARET Davie</strong> — Tous droits réservés.
+        Toute reproduction ou utilisation de ce logiciel sans accord préalable écrit est interdite.
     </div>
 
     <!-- Paiement Modal -->
@@ -5439,7 +5508,7 @@
 
             let html = `<table><thead><tr>
                 <th>Code</th><th>Catégorie</th><th>Description</th>
-                <th>Temps (sec)</th><th>Coef</th><th>Ajusté</th><th>Difficulté</th><th>Notes</th><th>🎥 Vidéo native</th><th>Actions</th>
+                <th>Temps (sec)</th><th>Coef</th><th>Ajusté</th><th>Difficulté</th><th>Notes</th><th>Actions</th>
             </tr></thead><tbody id="catalogueBody">`;
 
             catalogueGestes.forEach(g => {
@@ -5457,7 +5526,6 @@
                     <td><strong>${tempsAjuste}</strong></td>
                     <td><span class="badge-diff-${diff}">${diffLabel}</span></td>
                     <td style="font-size:0.8em;color:#7a9db1;font-style:italic;">${notes}</td>
-                    <td style="font-size:0.8em;color:#7a9db1;word-break:break-all;">${g.videoUrl ? `<a href="${g.videoUrl}" target="_blank" title="${g.videoUrl}">🎥 Ouvrir</a>` : '—'}</td>
                     <td style="white-space:nowrap;">
                         ${hasPermission('manage_gestes') ? `<button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>` : ''}
                         <button class="btn btn-small btn-secondary" onclick="imprimerFicheGeste('${codeEsc}')" title="Fiche PDF">🖨️</button>
@@ -5533,94 +5601,51 @@
             });
         }
 
-        let currentEditGeste = null;
-
         function editGesteInline(code) {
             // Check permission
             if (!checkPermission('manage_gestes')) {
                 return;
             }
             const g = catalogueGestes.find(x => x.code === code);
-            if (!g) return;
-
-            currentEditGeste = code;
-            document.getElementById('editGesteCode').value = g.code;
-            document.getElementById('editGesteCategorie').value = g.categorie;
-            document.getElementById('editGesteDescription').value = g.description;
-            document.getElementById('editGesteTemps').value = g.temps;
-            document.getElementById('editGesteCoef').value = g.coef;
-            document.getElementById('editGesteNotes').value = g.notes || '';
-            document.getElementById('editGesteVideo').value = g.videoUrl && !g.videoUrl.startsWith('data:') ? g.videoUrl : '';
-            document.getElementById('editGesteVideoFile').value = '';
-            document.getElementById('videoFileNameDisplay').textContent = g.videoUrl && g.videoUrl.startsWith('data:') ? '✅ Vidéo uploadée (fichier local)' : '';
-
-            // Add file input change handler
-            document.getElementById('editGesteVideoFile').onchange = function() {
-                const fileName = this.files?.[0]?.name;
-                document.getElementById('videoFileNameDisplay').textContent = fileName ? `📁 ${fileName}` : '';
-            };
-
-            document.getElementById('editGesteModal').style.display = 'flex';
-            document.getElementById('editGesteDescription').focus();
+            const tr = document.getElementById('tr-geste-' + code);
+            if (!g || !tr) return;
+            const cats = ['Réception','Contrôle','Étiquetage','Assemblage','Stockage','Expédition','Préparation','Administratif'];
+            tr.innerHTML = `
+                <td><input type="text" id="edit-code-${code}" value="${g.code}" style="width:80px;"></td>
+                <td><select id="edit-cat-${code}">${cats.map(c => `<option ${c===g.categorie?'selected':''}>${c}</option>`).join('')}<option ${!cats.includes(g.categorie)?'selected':''}>${g.categorie}</option></select></td>
+                <td><input type="text" id="edit-desc-${code}" value="${g.description.replace(/"/g,'&quot;')}" style="width:100%;min-width:160px;"></td>
+                <td><input type="number" id="edit-temps-${code}" value="${g.temps}" style="width:65px;"></td>
+                <td><input type="number" id="edit-coef-${code}" value="${g.coef}" step="0.05" style="width:55px;"></td>
+                <td style="color:#aaa;font-size:0.85em;">${Math.round(g.temps * g.coef)}</td>
+                <td><input type="text" id="edit-notes-${code}" value="${(g.notes||'').replace(/"/g,'&quot;')}" placeholder="Notes..." style="width:100%;"></td>
+                <td style="white-space:nowrap;">
+                    <button class="btn btn-success btn-small" onclick="saveGesteInline('${code}')">💾</button>
+                    <button class="btn btn-secondary btn-small" onclick="renderCatalogue()">✖</button>
+                </td>`;
+            document.getElementById('edit-desc-' + code)?.focus();
         }
 
-        function closeEditGesteModal() {
-            document.getElementById('editGesteModal').style.display = 'none';
-            currentEditGeste = null;
-        }
-
-        function saveEditedGeste() {
-            if (!checkPermission('manage_gestes') || !currentEditGeste) return;
-
-            const oldCode = currentEditGeste;
-            const g = catalogueGestes.find(x => x.code === oldCode);
-            if (!g) return;
-
-            const videoFile = document.getElementById('editGesteVideoFile')?.files?.[0];
-            const videoUrl = document.getElementById('editGesteVideo').value.trim();
-
-            // If file is selected, convert to base64; otherwise use URL
-            if (videoFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    finalizeSaveGeste(oldCode, e.target.result);
-                };
-                reader.readAsDataURL(videoFile);
+        function saveGesteInline(oldCode) {
+            // Check permission
+            if (!checkPermission('manage_gestes')) {
                 return;
             }
-
-            finalizeSaveGeste(oldCode, videoUrl);
-        }
-
-        function finalizeSaveGeste(oldCode, videoData) {
             const g = catalogueGestes.find(x => x.code === oldCode);
             if (!g) return;
-
             pushGesteHistoire(g.code, g);
-
-            const newCode = document.getElementById('editGesteCode').value.trim();
+            const newCode = document.getElementById('edit-code-' + oldCode)?.value.trim();
             if (!newCode) { toast('Le code ne peut pas être vide', 'warning'); return; }
-            if (newCode !== oldCode && catalogueGestes.find(x => x.code === newCode)) {
-                toast('Ce code existe déjà', 'warning');
-                return;
-            }
-
+            if (newCode !== oldCode && catalogueGestes.find(x => x.code === newCode)) { toast('Ce code existe déjà', 'warning'); return; }
             g.code = newCode;
-            g.categorie = document.getElementById('editGesteCategorie').value;
-            g.description = document.getElementById('editGesteDescription').value.trim();
-            g.temps = parseFloat(document.getElementById('editGesteTemps').value) || g.temps;
-            g.coef = parseFloat(document.getElementById('editGesteCoef').value) || g.coef;
-            g.notes = document.getElementById('editGesteNotes').value || '';
-            g.videoUrl = videoData || '';
-
+            g.categorie = document.getElementById('edit-cat-' + oldCode)?.value || g.categorie;
+            g.description = document.getElementById('edit-desc-' + oldCode)?.value.trim() || g.description;
+            g.temps = parseFloat(document.getElementById('edit-temps-' + oldCode)?.value) || g.temps;
+            g.coef = parseFloat(document.getElementById('edit-coef-' + oldCode)?.value) || g.coef;
+            g.notes = document.getElementById('edit-notes-' + oldCode)?.value || '';
             catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
             saveToStorage();
-            loadFormationFilms();
             logAction(`Modification geste : ${g.code} — ${g.description}`);
-
-            closeEditGesteModal();
             renderCatalogue();
-            toast(`✅ Geste ${g.code} modifié`, 'success');
         }
 
         function filterCatalogue() {
@@ -5689,9 +5714,6 @@
                 const completed = Object.values(learner.progress).filter(v => v).length;
                 const progress = gestesInCategory.length > 0 ? Math.round((completed / gestesInCategory.length) * 100) : 0;
 
-                const linkedDocs = (learner.linkedDocs || []).map(id => referenceDocuments.find(d => d.id === id)).filter(Boolean);
-                const availableDocs = referenceDocuments.filter(d => !(learner.linkedDocs || []).includes(d.id));
-
                 return `
                 <div class="learner-card" style="border:1px solid #ddd;padding:16px;border-radius:6px;background:#f9f9f9;">
                     <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
@@ -5712,23 +5734,7 @@
                             <div style="background:#4CAF50;height:100%;width:${progress}%;transition:width 0.3s;"></div>
                         </div>
                     </div>
-                    ${linkedDocs.length > 0 ? `
-                    <div style="margin-bottom:10px;">
-                        <p style="margin:0 0 6px;font-size:0.85em;color:#555;font-weight:bold;">📎 Documents liés :</p>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                            ${linkedDocs.map(d => `
-                                <span style="background:#e3f2fd;padding:3px 8px;border-radius:12px;font-size:0.8em;display:inline-flex;align-items:center;gap:4px;">
-                                    📄 ${d.title}
-                                    <button onclick="toggleDocLink(${learner.id},${d.id})" style="border:none;background:none;cursor:pointer;color:#c00;font-size:0.9em;padding:0 2px;" title="Retirer">✕</button>
-                                </span>
-                            `).join('')}
-                        </div>
-                    </div>
-                    ` : ''}
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                        <button class="btn btn-small" onclick="openLearnerProgress(${learner.id})">👁️ Voir progression</button>
-                        <button class="btn btn-small btn-secondary" onclick="openLinkDocsModal(${learner.id})">📎 Lier document</button>
-                    </div>
+                    <button class="btn btn-small" onclick="openLearnerProgress(${learner.id})">👁️ Voir progression</button>
                 </div>
                 `;
             }).join('');
@@ -5759,24 +5765,17 @@
                 const isCompleted = learner.progress[geste.code] || false;
                 const checkbox = `<input type="checkbox" ${isCompleted ? 'checked' : ''}
                     onchange="toggleGestureComplete(${learnerId}, '${geste.code}', this.checked)">`;
-                const linkedVideos = (geste.linkedDocs || []).map(id => referenceDocuments.find(d => d.id === id && (d.type === 'video' || d.isFile))).filter(Boolean);
 
                 html += `
-                    <div style="border:1px solid #e0e0e0;border-radius:4px;padding:12px;background:#fafafa;">
-                        <div style="display:flex;gap:8px;align-items:start;margin-bottom:8px;">
-                            <div>${checkbox}</div>
-                            <div style="flex:1;">
-                                <strong>${geste.code}</strong> — ${geste.description}
-                                <p style="margin:4px 0 0;font-size:0.85em;color:#7a9db1;">
-                                    ⏱️ ${Math.round(geste.temps / 60)}min • Coefficient: ${geste.coef}
-                                </p>
-                            </div>
+                    <div style="display:flex;gap:8px;padding:8px;border:1px solid #e0e0e0;border-radius:4px;align-items:start;">
+                        <div>${checkbox}</div>
+                        <div style="flex:1;">
+                            <strong>${geste.code}</strong> — ${geste.description}
+                            <p style="margin:4px 0 0;font-size:0.85em;color:#7a9db1;">
+                                ⏱️ ${Math.round(geste.temps / 60)}min • Coefficient: ${geste.coef}
+                            </p>
                         </div>
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-                            ${geste.videoUrl ? `<button class="btn btn-small btn-secondary" onclick="showGestureVideo('${geste.code}')">🎥 Vidéo native</button>` : ''}
-                            ${linkedVideos.length > 0 ? `<span style="font-size:0.8em;color:#666;">📎 ${linkedVideos.length} film(s) lié(s)</span>` : ''}
-                            <button class="btn btn-small" onclick="openLinkGesteDocsModal('${geste.code}', ${learnerId})">🎬 Lier film</button>
-                        </div>
+                        ${geste.videoUrl ? `<button class="btn btn-small btn-secondary" onclick="showGestureVideo('${geste.code}')">🎥</button>` : ''}
                     </div>
                 `;
             });
@@ -5862,78 +5861,13 @@
             const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
             referenceDocuments = saved;
             renderReferenceDocuments();
-            loadFormationFilms();
         }
-
-        function loadFormationFilms() {
-            const select = document.getElementById('filmGesteSelect');
-            if (!select) return;
-            select.innerHTML = '<option value="">-- Choisir un geste --</option>';
-            catalogueGestes.forEach(g => {
-                const opt = document.createElement('option');
-                opt.value = g.code;
-                opt.textContent = `${g.code} — ${g.description}`;
-                select.appendChild(opt);
-            });
-            select.onchange = () => renderFilmsForGeste(select.value);
-        }
-
-        function renderFilmsForGeste(gesteCode) {
-            const container = document.getElementById('filmGesteContainer');
-            const noMsg = document.getElementById('noGesteSelectedMsg');
-
-            if (!gesteCode) {
-                container.innerHTML = '';
-                noMsg.style.display = 'block';
-                return;
-            }
-
-            const geste = catalogueGestes.find(g => g.code === gesteCode);
-            if (!geste) return;
-
-            noMsg.style.display = 'none';
-            const linkedDocs = (geste.linkedDocs || []).map(id => referenceDocuments.find(d => d.id === id)).filter(Boolean);
-            const availableDocs = referenceDocuments.filter(d => !(geste.linkedDocs || []).includes(d.id) && (d.type === 'video' || d.fileName?.match(/\.(mp4|webm|mov)$/i)));
-
-            let html = `
-                <div>
-                    <h4 style="margin-top:0;">${geste.code} — ${geste.description}</h4>
-                    ${linkedDocs.length > 0 ? `
-                    <div style="margin-bottom:16px;">
-                        <p style="font-size:0.9em;color:#555;font-weight:bold;">📎 Vidéos liées :</p>
-                        <div style="display:grid;gap:8px;">
-                            ${linkedDocs.map(d => `
-                                <div style="background:#f0f8ff;padding:10px;border-radius:4px;display:flex;justify-content:space-between;align-items:center;">
-                                    <span>🎬 ${d.title}</span>
-                                    <button onclick="toggleGesteDocLink('${gesteCode}',${d.id}); renderFilmsForGeste('${gesteCode}');" style="border:none;background:none;cursor:pointer;color:#c00;font-size:0.9em;padding:0 2px;" title="Retirer">✕</button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    ` : '<p style="color:#999;font-size:0.9em;">Aucune vidéo liée pour le moment</p>'}
-                    ${availableDocs.length > 0 ? `
-                    <button class="btn btn-small" onclick="openFilmModal('${gesteCode}')">➕ Ajouter vidéo</button>
-                    ` : ''}
-                </div>
-            `;
-
-            container.innerHTML = html;
-        }
-
-        function openFilmModal(gesteCode) {
-            currentGesteCode = gesteCode;
-            document.getElementById('linkDocsModalTitle').textContent = `🎬 Ajouter film au geste ${gesteCode}`;
-            document.getElementById('docSearchInput').value = '';
-            filterFilmsList();
-            document.getElementById('linkDocsModal').style.display = 'flex';
-        }
-
 
         function addReferenceDocument() {
-            const title = document.getElementById('docTitle')?.value?.trim() || '';
-            const url = document.getElementById('docUrl')?.value?.trim() || '';
+            const title = document.getElementById('docTitle')?.value.trim();
+            const url = document.getElementById('docUrl')?.value.trim();
             const fileInput = document.getElementById('docFile');
-            const file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+            const file = fileInput?.files?.[0];
             const type = document.getElementById('docType')?.value || 'other';
 
             if (!title) {
@@ -6044,7 +5978,7 @@
                 ${referenceDocuments.map(doc => {
                     let actionBtn = '';
                     if (doc.isFile) {
-                        actionBtn = `<button class="btn btn-small btn-secondary" style="margin-right:8px;" onclick="openFileDocument(${doc.id})">👁️ Ouvrir</button>`;
+                        actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
                     } else {
                         actionBtn = `<a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>`;
                     }
@@ -6067,124 +6001,10 @@
         function deleteReferenceDocument(docId) {
             toastConfirm('Supprimer ce document?', () => {
                 referenceDocuments = referenceDocuments.filter(d => d.id !== docId);
-                // Remove document links from all learners
-                learnersList.forEach(l => {
-                    if (l.linkedDocs) l.linkedDocs = l.linkedDocs.filter(id => id !== docId);
-                });
-                saveFormationData();
                 saveReferenceDocuments();
                 renderReferenceDocuments();
-                renderLearners();
                 toast('✅ Document supprimé', 'success');
             });
-        }
-
-        function openFileDocument(docId) {
-            const doc = referenceDocuments.find(d => d.id === docId);
-            if (!doc || !doc.fileData) return;
-            const win = window.open('', '_blank');
-            if (win) {
-                win.document.write(`<html><head><title>${doc.title}</title></head><body style="margin:0;"><iframe src="${doc.fileData}" style="width:100%;height:100vh;border:none;"></iframe></body></html>`);
-                win.document.close();
-            } else {
-                toast('⚠️ Le navigateur a bloqué le popup. Autorisez les popups pour ce site.', 'warning');
-            }
-        }
-
-        function toggleDocLink(learnerId, docId) {
-            const learner = learnersList.find(l => l.id === learnerId);
-            if (!learner) return;
-            if (!learner.linkedDocs) learner.linkedDocs = [];
-            const idx = learner.linkedDocs.indexOf(docId);
-            if (idx >= 0) {
-                learner.linkedDocs.splice(idx, 1);
-            } else {
-                learner.linkedDocs.push(docId);
-            }
-            saveFormationData();
-            renderLearners();
-        }
-
-        let currentLearnerForDocs = null;
-        let currentGesteCode = null;
-
-        function openLinkDocsModal(learnerId) {
-            currentLearnerForDocs = learnerId;
-            currentGesteCode = null;
-            document.getElementById('linkDocsModalTitle').textContent = '📎 Lier des documents';
-            document.getElementById('docSearchInput').value = '';
-            filterDocsList();
-            document.getElementById('linkDocsModal').style.display = 'flex';
-        }
-
-        function openLinkGesteDocsModal(gesteCode, learnerId) {
-            currentGesteCode = gesteCode;
-            currentLearnerForDocs = learnerId;
-            document.getElementById('linkDocsModalTitle').textContent = `🎬 Lier film au geste ${gesteCode}`;
-            document.getElementById('docSearchInput').value = '';
-            filterDocsList();
-            document.getElementById('linkDocsModal').style.display = 'flex';
-        }
-
-        function closeLinkDocsModal() {
-            document.getElementById('linkDocsModal').style.display = 'none';
-            currentLearnerForDocs = null;
-            currentGesteCode = null;
-        }
-
-        function filterDocsList() {
-            const searchVal = document.getElementById('docSearchInput').value.toLowerCase();
-            const container = document.getElementById('docsListContainer');
-
-            if (currentGesteCode) {
-                // Mode: link documents to geste
-                const geste = catalogueGestes.find(g => g.code === currentGesteCode);
-                if (!geste) return;
-                const linkedIds = geste.linkedDocs || [];
-                const videoDocuments = referenceDocuments.filter(d => (d.type === 'video' || d.fileName?.endsWith('.mp4') || d.fileName?.endsWith('.webm')) && d.title.toLowerCase().includes(searchVal));
-
-                container.innerHTML = videoDocuments.length === 0 ? `<p style="text-align:center;color:#999;padding:16px;">Aucune vidéo trouvée</p>` : videoDocuments.map(doc => {
-                    const isLinked = linkedIds.includes(doc.id);
-                    return `
-                        <div style="padding:10px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
-                            <span>🎬 ${doc.title}</span>
-                            <input type="checkbox" ${isLinked ? 'checked' : ''} onchange="toggleGesteDocLink('${currentGesteCode}',${doc.id}); filterDocsList();">
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                // Mode: link documents to learner
-                const learner = learnersList.find(l => l.id === currentLearnerForDocs);
-                if (!learner) return;
-                const linkedIds = learner.linkedDocs || [];
-                const filtered = referenceDocuments.filter(d => d.title.toLowerCase().includes(searchVal));
-
-                container.innerHTML = filtered.length === 0 ? `<p style="text-align:center;color:#999;padding:16px;">Aucun document trouvé</p>` : filtered.map(doc => {
-                    const isLinked = linkedIds.includes(doc.id);
-                    return `
-                        <div style="padding:10px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
-                            <span>📄 ${doc.title}</span>
-                            <input type="checkbox" ${isLinked ? 'checked' : ''} onchange="toggleDocLink(${currentLearnerForDocs},${doc.id}); filterDocsList();">
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        function toggleGesteDocLink(gesteCode, docId) {
-            const geste = catalogueGestes.find(g => g.code === gesteCode);
-            if (!geste) return;
-            if (!geste.linkedDocs) geste.linkedDocs = [];
-            const idx = geste.linkedDocs.indexOf(docId);
-            if (idx >= 0) {
-                geste.linkedDocs.splice(idx, 1);
-            } else {
-                geste.linkedDocs.push(docId);
-            }
-            // Re-render the learner progress modal to show updated linked docs
-            if (currentLearnerForDocs) {
-                openLearnerProgress(currentLearnerForDocs);
-            }
         }
 
         function addConsommable() {
@@ -11523,37 +11343,1230 @@
             toast(`✅ Prestation importée! Référence: ${reportData.reference}`, 'success');
         }
 
-        /* ── Modal Conditions d'utilisation ─────────────────────────────────── */
-        function openConditionsModal(event) {
-            if (event) event.preventDefault();
-            const modal = document.getElementById('conditionsModal');
-            if (modal) {
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
+        // ═══════════════════════════════════════════════════════════════
+        // MODULE LOGISTIQUE 2D — GESTION RACKS ET PALETTES
+        // ═══════════════════════════════════════════════════════════════
+
+        let logisticState = {
+            racks: [],
+            palettes: [],
+            placements: {}, // { rackId: { articleId: qty, ... }, ... }
+            movements: [],
+            zoomLevel: 1,
+            selectedItem: null,
+            canvasOffsetX: 0,
+            canvasOffsetY: 0,
+            isDraggingCanvas: false,
+            dragStartX: 0,
+            dragStartY: 0
+        };
+
+        function loadLogisticState() {
+            try {
+                const saved = localStorage.getItem('logisticState');
+                if (saved) {
+                    logisticState = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Erreur chargement logistique:', e);
             }
         }
 
-        function closeConditionsModal() {
-            const modal = document.getElementById('conditionsModal');
-            if (modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = 'auto';
+        function saveLogisticState() {
+            try {
+                localStorage.setItem('logisticState', JSON.stringify(logisticState));
+            } catch (e) {
+                console.error('Erreur sauvegarde logistique:', e);
             }
         }
 
-        // Fermer la modale si on clique en dehors
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('conditionsModal');
-            if (event.target === modal) {
-                closeConditionsModal();
+        function addRack() {
+            const name = document.getElementById('rackName').value.trim();
+            if (!name) {
+                toast('❌ Veuillez entrer un nom de rack', 'danger');
+                return;
             }
+            const rackId = 'RACK_' + Date.now();
+            logisticState.racks.push({ id: rackId, name: name, capacity: 1000 });
+            logisticState.placements[rackId] = {};
+            saveLogisticState();
+            document.getElementById('rackName').value = '';
+            renderLogisticRacks();
+            renderLogisticCanvas();
+        }
+
+        function addPalette() {
+            const name = document.getElementById('paletteName').value.trim();
+            if (!name) {
+                toast('❌ Veuillez entrer un nom de palette', 'danger');
+                return;
+            }
+            const paletteId = 'PALETTE_' + Date.now();
+            logisticState.palettes.push({ id: paletteId, name: name, capacity: 500 });
+            logisticState.placements[paletteId] = {};
+            saveLogisticState();
+            document.getElementById('paletteName').value = '';
+            renderLogisticPalettes();
+            renderLogisticCanvas();
+        }
+
+        function deleteRack(rackId) {
+            if (!confirm('Supprimer ce rack?')) return;
+            logisticState.racks = logisticState.racks.filter(r => r.id !== rackId);
+            delete logisticState.placements[rackId];
+            saveLogisticState();
+            renderLogisticRacks();
+            renderLogisticCanvas();
+        }
+
+        function deletePalette(paletteId) {
+            if (!confirm('Supprimer cette palette?')) return;
+            logisticState.palettes = logisticState.palettes.filter(p => p.id !== paletteId);
+            delete logisticState.placements[paletteId];
+            saveLogisticState();
+            renderLogisticPalettes();
+            renderLogisticCanvas();
+        }
+
+        function renderLogisticRacks() {
+            const list = document.getElementById('racksList');
+            list.innerHTML = logisticState.racks.map(rack => {
+                const qty = Object.values(logisticState.placements[rack.id] || {}).reduce((a,b) => a+b, 0);
+                const used = Math.round((qty / rack.capacity) * 100);
+                return `<div style="padding:8px;background:#f5f9fc;margin-bottom:6px;border-radius:6px;border-left:4px solid #a8d5e2;display:flex;justify-content:space-between;align-items:center;font-size:0.85em;">
+                    <div><strong>${escapeHtml(rack.name)}</strong><br><span style="color:#999;">${qty}/${rack.capacity} (${used}%)</span></div>
+                    <button class="delete-btn" onclick="deleteRack('${rack.id}')">🗑️</button>
+                </div>`;
+            }).join('');
+        }
+
+        function renderLogisticPalettes() {
+            const list = document.getElementById('palettesList');
+            list.innerHTML = logisticState.palettes.map(palette => {
+                const qty = Object.values(logisticState.placements[palette.id] || {}).reduce((a,b) => a+b, 0);
+                const used = Math.round((qty / palette.capacity) * 100);
+                return `<div style="padding:8px;background:#f0f5f8;margin-bottom:6px;border-radius:6px;border-left:4px solid #b8d4e8;display:flex;justify-content:space-between;align-items:center;font-size:0.85em;">
+                    <div><strong>${escapeHtml(palette.name)}</strong><br><span style="color:#999;">${qty}/${palette.capacity} (${used}%)</span></div>
+                    <button class="delete-btn" onclick="deletePalette('${palette.id}')">🗑️</button>
+                </div>`;
+            }).join('');
+        }
+
+        function renderLogisticCanvas() {
+            const canvas = document.getElementById('logisticCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(logisticState.canvasOffsetX, logisticState.canvasOffsetY);
+            ctx.scale(logisticState.zoomLevel, logisticState.zoomLevel);
+
+            // Grille et repères
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < 1200; i += 100) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, 600);
+                ctx.stroke();
+            }
+            for (let i = 0; i < 600; i += 100) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(1200, i);
+                ctx.stroke();
+            }
+
+            // Racks et palettes
+            let x = 50, y = 50;
+            const boxWidth = 150, boxHeight = 120;
+            const spacing = 30;
+
+            logisticState.racks.forEach((rack, idx) => {
+                drawLocationBox(ctx, x + (idx % 4) * (boxWidth + spacing), y + Math.floor(idx / 4) * (boxHeight + spacing + 50),
+                               boxWidth, boxHeight, rack, '#a8d5e2');
+            });
+
+            logisticState.palettes.forEach((palette, idx) => {
+                const startY = y + Math.ceil(logisticState.racks.length / 4) * (boxHeight + spacing + 50);
+                drawLocationBox(ctx, x + (idx % 4) * (boxWidth + spacing), startY + Math.floor(idx / 4) * (boxHeight + spacing + 50),
+                               boxWidth, boxHeight, palette, '#b8d4e8');
+            });
+
+            ctx.restore();
+        }
+
+        function drawLocationBox(ctx, x, y, w, h, location, color) {
+            const isSelected = logisticState.selectedItem?.id === location.id;
+            ctx.fillStyle = isSelected ? '#fffacd' : 'white';
+            ctx.strokeStyle = isSelected ? '#ff9900' : color;
+            ctx.lineWidth = isSelected ? 3 : 2;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(location.name, x + 10, y + 20);
+
+            const qty = Object.values(logisticState.placements[location.id] || {}).reduce((a,b) => a+b, 0);
+            const pct = Math.round((qty / location.capacity) * 100);
+            ctx.font = '12px Arial';
+            ctx.fillText(`${qty}/${location.capacity} (${pct}%)`, x + 10, y + 40);
+
+            // Barre de capacité
+            ctx.fillStyle = pct > 80 ? '#ff6b6b' : pct > 60 ? '#ffa500' : '#4caf50';
+            ctx.fillRect(x + 10, y + 50, (w - 20) * (pct / 100), 15);
+            ctx.strokeStyle = '#999';
+            ctx.strokeRect(x + 10, y + 50, w - 20, 15);
+        }
+
+        function updateLogisticZoom() {
+            logisticState.zoomLevel = parseFloat(document.getElementById('zoomRange').value);
+            document.getElementById('zoomLabel').textContent = Math.round(logisticState.zoomLevel * 100) + '%';
+            renderLogisticCanvas();
+        }
+
+        function resetLogisticView() {
+            logisticState.zoomLevel = 1;
+            logisticState.canvasOffsetX = 0;
+            logisticState.canvasOffsetY = 0;
+            document.getElementById('zoomRange').value = 1;
+            document.getElementById('zoomLabel').textContent = '100%';
+            renderLogisticCanvas();
+        }
+
+        function refreshLogisticArticles() {
+            renderLogisticArticlesList();
+            renderLogisticMoveForm();
+        }
+
+        function renderLogisticArticlesList() {
+            try {
+                const searchVal = document.getElementById('logisticSearchArticle').value.toLowerCase();
+                const articles = [];
+
+                // Récupérer du catalogue de consommables
+                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
+                conso.forEach(c => {
+                    if (c.designation.toLowerCase().includes(searchVal) || c.reference.toLowerCase().includes(searchVal)) {
+                        articles.push({ id: 'CONSO_' + c.id, name: c.designation, type: 'Consommable', qty: 0 });
+                    }
+                });
+
+                // Récupérer du stock
+                const stock = JSON.parse(localStorage.getItem('stockActuel') || '{}');
+                Object.entries(stock).forEach(([artId, info]) => {
+                    if (info.designation.toLowerCase().includes(searchVal)) {
+                        articles.push({ id: artId, name: info.designation, type: 'Stock', qty: info.quantite || 0 });
+                    }
+                });
+
+                const list = document.getElementById('logisticArticlesList');
+                list.innerHTML = articles.length === 0
+                    ? '<p style="grid-column:1/-1;color:#999;text-align:center;padding:20px;">Aucun article trouvé</p>'
+                    : articles.map(a => `
+                        <div draggable="true" ondragstart="logisticDragStart(event, '${a.id}', '${a.name}')"
+                             style="padding:10px;background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border-radius:8px;cursor:move;border:2px solid #a8d5e2;transition:all 0.2s;"
+                             onmouseover="this.style.boxShadow='0 4px 12px rgba(168,213,226,0.3)'" onmouseout="this.style.boxShadow='none'">
+                            <strong style="display:block;font-size:0.9em;">${escapeHtml(a.name)}</strong>
+                            <span style="font-size:0.75em;color:#666;">${a.type} • Qty: ${a.qty}</span>
+                        </div>
+                    `).join('');
+            } catch (e) {
+                console.error('Erreur articles:', e);
+            }
+        }
+
+        function logisticDragStart(e, articleId, articleName) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('articleId', articleId);
+            e.dataTransfer.setData('articleName', articleName);
+        }
+
+        // Canvas drag & drop
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const canvas = document.getElementById('logisticCanvas');
+                if (canvas) {
+                    canvas.addEventListener('dragover', e => e.preventDefault());
+                    canvas.addEventListener('drop', logisticCanvasDrop);
+                    canvas.addEventListener('mousedown', logisticCanvasMouseDown);
+                    canvas.addEventListener('mousemove', logisticCanvasMouseMove);
+                    canvas.addEventListener('mouseup', logisticCanvasMouseUp);
+                    canvas.addEventListener('click', logisticCanvasClick);
+                }
+                loadLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                refreshLogisticArticles();
+                renderLogisticMoveForm();
+                renderLogisticHistory();
+            }, 500);
         });
 
-        // Fermer avec la touche Escape
-        window.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeConditionsModal();
+        function logisticCanvasDrop(e) {
+            e.preventDefault();
+            const canvas = e.target;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left - logisticState.canvasOffsetX) / logisticState.zoomLevel;
+            const y = (e.clientY - rect.top - logisticState.canvasOffsetY) / logisticState.zoomLevel;
+
+            const articleId = e.dataTransfer.getData('articleId');
+            const articleName = e.dataTransfer.getData('articleName');
+
+            // Trouver le rack/palette au clic
+            const location = findLocationAtCoords(x, y);
+            if (location) {
+                if (!logisticState.placements[location.id]) logisticState.placements[location.id] = {};
+                logisticState.placements[location.id][articleId] = (logisticState.placements[location.id][articleId] || 0) + 1;
+                saveLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                toast(`✅ ${articleName} ajouté à ${location.name}`, 'success');
             }
+        }
+
+        function findLocationAtCoords(x, y) {
+            // Chercher dans les racks et palettes
+            const allLocations = [...logisticState.racks, ...logisticState.palettes];
+            const boxWidth = 150, boxHeight = 120, spacing = 30;
+            let x_start = 50, y_start = 50;
+
+            for (let i = 0; i < logisticState.racks.length; i++) {
+                const rx = x_start + (i % 4) * (boxWidth + spacing);
+                const ry = y_start + Math.floor(i / 4) * (boxHeight + spacing + 50);
+                if (x >= rx && x < rx + boxWidth && y >= ry && y < ry + boxHeight) {
+                    return logisticState.racks[i];
+                }
+            }
+
+            const paletteStartY = y_start + Math.ceil(logisticState.racks.length / 4) * (boxHeight + spacing + 50);
+            for (let i = 0; i < logisticState.palettes.length; i++) {
+                const px = x_start + (i % 4) * (boxWidth + spacing);
+                const py = paletteStartY + Math.floor(i / 4) * (boxHeight + spacing + 50);
+                if (x >= px && x < px + boxWidth && y >= py && y < py + boxHeight) {
+                    return logisticState.palettes[i];
+                }
+            }
+            return null;
+        }
+
+        function logisticCanvasMouseDown(e) {
+            logisticState.isDraggingCanvas = true;
+            logisticState.dragStartX = e.clientX;
+            logisticState.dragStartY = e.clientY;
+        }
+
+        function logisticCanvasMouseMove(e) {
+            if (logisticState.isDraggingCanvas) {
+                const dx = e.clientX - logisticState.dragStartX;
+                const dy = e.clientY - logisticState.dragStartY;
+                logisticState.canvasOffsetX += dx;
+                logisticState.canvasOffsetY += dy;
+                logisticState.dragStartX = e.clientX;
+                logisticState.dragStartY = e.clientY;
+                renderLogisticCanvas();
+            }
+        }
+
+        function logisticCanvasMouseUp() {
+            logisticState.isDraggingCanvas = false;
+        }
+
+        function logisticCanvasClick(e) {
+            const canvas = e.target;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left - logisticState.canvasOffsetX) / logisticState.zoomLevel;
+            const y = (e.clientY - rect.top - logisticState.canvasOffsetY) / logisticState.zoomLevel;
+
+            const location = findLocationAtCoords(x, y);
+            logisticState.selectedItem = location;
+            if (location) {
+                updateLogisticInfo(location);
+            }
+            renderLogisticCanvas();
+        }
+
+        function updateLogisticInfo(location) {
+            const placements = logisticState.placements[location.id] || {};
+            const html = `
+                <strong>${escapeHtml(location.name)}</strong><br>
+                <span style="color:#666;">Capacité: ${location.capacity} unités</span><br><br>
+                <strong>Articles:</strong><br>
+                ${Object.entries(placements).map(([artId, qty]) => {
+                    const article = logisticState.racks.concat(logisticState.palettes).find(r => r.id === artId);
+                    return `<div style="padding:4px;background:#fff;margin:2px 0;border-radius:4px;">
+                        <span>${artId} × ${qty}</span>
+                        <button class="btn-small" onclick="removeArticleFromLocation('${location.id}', '${artId}')" style="float:right;padding:2px 6px;font-size:0.75em;">Remove</button>
+                    </div>`;
+                }).join('') || '<span style="color:#999;">Vide</span>'}
+            `;
+            document.getElementById('logisticInfoPanel').innerHTML = html;
+        }
+
+        function removeArticleFromLocation(locationId, articleId) {
+            if (logisticState.placements[locationId] && logisticState.placements[locationId][articleId]) {
+                logisticState.placements[locationId][articleId]--;
+                if (logisticState.placements[locationId][articleId] <= 0) {
+                    delete logisticState.placements[locationId][articleId];
+                }
+                saveLogisticState();
+                renderLogisticCanvas();
+                if (logisticState.selectedItem) {
+                    updateLogisticInfo(logisticState.selectedItem);
+                }
+                toast('✅ Article supprimé', 'success');
+            }
+        }
+
+        function renderLogisticMoveForm() {
+            try {
+                const articles = [];
+                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
+                conso.forEach(c => articles.push({ id: 'CONSO_' + c.id, name: c.designation }));
+                const stock = JSON.parse(localStorage.getItem('stockActuel') || '{}');
+                Object.entries(stock).forEach(([id, info]) => articles.push({ id: id, name: info.designation }));
+
+                const moveType = document.getElementById('logisticMoveType').value;
+                const sourceGroup = document.getElementById('logisticMoveSourceGroup');
+                sourceGroup.style.display = moveType === 'entree' ? 'none' : 'block';
+
+                document.getElementById('logisticMoveArticle').innerHTML = articles.map(a =>
+                    `<option value="${a.id}">${escapeHtml(a.name)}</option>`
+                ).join('');
+
+                const locations = [...logisticState.racks, ...logisticState.palettes].map(l =>
+                    `<option value="${l.id}">${escapeHtml(l.name)}</option>`
+                ).join('');
+
+                document.getElementById('logisticMoveSource').innerHTML = locations;
+                document.getElementById('logisticMoveDest').innerHTML = locations;
+
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('logisticMoveDate').value = today;
+            } catch (e) {
+                console.error('Erreur form:', e);
+            }
+        }
+
+        function updateLogisticMoveForm() {
+            renderLogisticMoveForm();
+        }
+
+        function saveLogisticMove() {
+            try {
+                const moveType = document.getElementById('logisticMoveType').value;
+                const articleId = document.getElementById('logisticMoveArticle').value;
+                const qty = parseInt(document.getElementById('logisticMoveQty').value) || 1;
+                const source = document.getElementById('logisticMoveSource').value;
+                const dest = document.getElementById('logisticMoveDest').value;
+                const date = document.getElementById('logisticMoveDate').value;
+                const resp = document.getElementById('logisticMoveResponsable').value;
+                const notes = document.getElementById('logisticMoveNotes').value;
+
+                if (!articleId || !dest) {
+                    toast('❌ Champs manquants', 'danger');
+                    return;
+                }
+
+                const movement = {
+                    id: 'MOV_' + Date.now(),
+                    type: moveType,
+                    article: articleId,
+                    qty: qty,
+                    source: source || null,
+                    dest: dest,
+                    date: date,
+                    responsable: resp,
+                    notes: notes,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Appliquer le mouvement
+                if (moveType === 'entree') {
+                    if (!logisticState.placements[dest]) logisticState.placements[dest] = {};
+                    logisticState.placements[dest][articleId] = (logisticState.placements[dest][articleId] || 0) + qty;
+                } else if (moveType === 'sortie' && source) {
+                    if (logisticState.placements[source] && logisticState.placements[source][articleId]) {
+                        logisticState.placements[source][articleId] -= qty;
+                        if (logisticState.placements[source][articleId] <= 0) {
+                            delete logisticState.placements[source][articleId];
+                        }
+                    }
+                } else if (moveType === 'transfert' && source) {
+                    if (logisticState.placements[source] && logisticState.placements[source][articleId]) {
+                        logisticState.placements[source][articleId] -= qty;
+                        if (logisticState.placements[source][articleId] <= 0) {
+                            delete logisticState.placements[source][articleId];
+                        }
+                        if (!logisticState.placements[dest]) logisticState.placements[dest] = {};
+                        logisticState.placements[dest][articleId] = (logisticState.placements[dest][articleId] || 0) + qty;
+                    }
+                }
+
+                logisticState.movements.push(movement);
+                saveLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                renderLogisticHistory();
+                renderLogisticAlerts();
+                toast('✅ Mouvement enregistré', 'success');
+                document.getElementById('logisticMoveQty').value = 1;
+                document.getElementById('logisticMoveNotes').value = '';
+            } catch (e) {
+                console.error('Erreur mouvement:', e);
+                toast('❌ Erreur: ' + e.message, 'danger');
+            }
+        }
+
+        function renderLogisticHistory() {
+            try {
+                const filter = (document.getElementById('logisticHistoryFilter')?.value || '').toLowerCase();
+                let filtered = logisticState.movements.filter(m =>
+                    m.article.toLowerCase().includes(filter) ||
+                    m.notes.toLowerCase().includes(filter)
+                );
+                filtered = filtered.reverse().slice(0, 50);
+
+                const list = document.getElementById('logisticHistoryList');
+                list.innerHTML = filtered.length === 0
+                    ? '<p style="color:#999;text-align:center;padding:20px;">Aucun mouvement</p>'
+                    : filtered.map(m => `
+                        <div style="padding:10px;background:#f9f9f9;margin-bottom:6px;border-left:4px solid #a8d5e2;border-radius:6px;font-size:0.85em;">
+                            <strong>${escapeHtml(m.type.toUpperCase())}</strong> — ${escapeHtml(m.article)}<br>
+                            <span style="color:#666;">Qty: ${m.qty} | ${m.date} | ${escapeHtml(m.responsable)}</span>
+                            ${m.notes ? `<div style="color:#999;margin-top:4px;">📝 ${escapeHtml(m.notes)}</div>` : ''}
+                        </div>
+                    `).join('');
+            } catch (e) {
+                console.error('Erreur historique:', e);
+            }
+        }
+
+        function logisticClearHistory() {
+            if (!confirm('Effacer TOUT l\'historique?')) return;
+            logisticState.movements = [];
+            saveLogisticState();
+            renderLogisticHistory();
+            toast('✅ Historique effacé', 'success');
+        }
+
+        function renderLogisticAlerts() {
+            const alerts = [];
+            const allLocations = [...logisticState.racks, ...logisticState.palettes];
+
+            allLocations.forEach(loc => {
+                const qty = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
+                const pct = (qty / loc.capacity) * 100;
+
+                if (pct > 90) {
+                    alerts.push({ level: 'danger', msg: `🔴 ${loc.name} presque plein (${Math.round(pct)}%)` });
+                } else if (pct > 70) {
+                    alerts.push({ level: 'warning', msg: `🟡 ${loc.name} à ${Math.round(pct)}%` });
+                }
+            });
+
+            const alertsDiv = document.getElementById('logisticAlerts');
+            alertsDiv.innerHTML = alerts.length === 0
+                ? '<p style="color:#4caf50;">✅ Tous les emplacements OK</p>'
+                : alerts.map(a => `<div style="padding:8px;background:${a.level === 'danger' ? '#ffe6e6' : '#fff9e6'};border-left:4px solid ${a.level === 'danger' ? '#ff6b6b' : '#ffa500'};margin-bottom:6px;border-radius:6px;font-size:0.9em;">${a.msg}</div>`).join('');
+        }
+
+        function exportLogisticLayout() {
+            try {
+                const data = JSON.stringify(logisticState, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'logistique_' + new Date().toISOString().split('T')[0] + '.json';
+                a.click();
+                toast('💾 Plan exporté', 'success');
+            } catch (e) {
+                toast('❌ Erreur export', 'danger');
+            }
+        }
+
+        function importLogisticLayout() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                try {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = event => {
+                        const imported = JSON.parse(event.target.result);
+                        logisticState = imported;
+                        saveLogisticState();
+                        renderLogisticRacks();
+                        renderLogisticPalettes();
+                        renderLogisticCanvas();
+                        renderLogisticHistory();
+                        renderLogisticAlerts();
+                        toast('📂 Plan importé', 'success');
+                    };
+                    reader.onerror = () => toast('❌ Erreur lecture fichier', 'danger');
+                    reader.readAsText(file);
+                } catch (err) {
+                    toast('❌ Fichier invalide', 'danger');
+                }
+            };
+            input.click();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RÉSERVATIONS
+        // ═══════════════════════════════════════════════════════════════
+
+        let reservations = [];
+
+        function loadReservations() {
+            try {
+                reservations = JSON.parse(localStorage.getItem('logisticReservations') || '[]');
+            } catch (e) {
+                reservations = [];
+            }
+        }
+
+        function saveReservations() {
+            localStorage.setItem('logisticReservations', JSON.stringify(reservations));
+        }
+
+        function addReservation() {
+            try {
+                const article = document.getElementById('reserveArticle').value;
+                const qty = parseInt(document.getElementById('reserveQty').value) || 1;
+                const reason = document.getElementById('reserveReason').value;
+
+                if (!article) {
+                    toast('❌ Sélectionnez un article', 'danger');
+                    return;
+                }
+
+                reservations.push({
+                    id: 'RES_' + Date.now(),
+                    article: article,
+                    qty: qty,
+                    reason: reason,
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'Davie Maret'
+                });
+
+                saveReservations();
+                renderReservations();
+                toast('✅ Réservation créée', 'success');
+            } catch (e) {
+                toast('❌ Erreur: ' + e.message, 'danger');
+            }
+        }
+
+        function removeReservation(resId) {
+            reservations = reservations.filter(r => r.id !== resId);
+            saveReservations();
+            renderReservations();
+            toast('✅ Réservation supprimée', 'success');
+        }
+
+        function renderReservations() {
+            try {
+                const list = document.getElementById('reservationsList');
+                if (reservations.length === 0) {
+                    list.innerHTML = '<p style="color:#999;text-align:center;padding:15px;">Aucune réservation</p>';
+                    return;
+                }
+
+                list.innerHTML = reservations.map(r => `
+                    <div style="padding:10px;background:#fff9e6;margin-bottom:8px;border-left:4px solid #ffa500;border-radius:6px;display:flex;justify-content:space-between;align-items:center;font-size:0.9em;">
+                        <div>
+                            <strong>${escapeHtml(r.article)}</strong> × ${r.qty}
+                            <br><span style="color:#666;">Raison: ${r.reason} | ${r.createdBy}</span>
+                        </div>
+                        <button class="delete-btn" onclick="removeReservation('${r.id}')">🗑️</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Erreur render réservations:', e);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // OPTIMISATION AUTOMATIQUE
+        // ═══════════════════════════════════════════════════════════════
+
+        function runAutoOptimization() {
+            try {
+                const suggestions = [];
+                const allItems = Object.entries(logisticState.placements).flatMap(([locId, items]) =>
+                    Object.entries(items).map(([artId, qty]) => ({
+                        article: artId,
+                        qty: qty,
+                        currentLoc: locId,
+                        currentLocName: [...logisticState.racks, ...logisticState.palettes].find(l => l.id === locId)?.name || locId
+                    }))
+                );
+
+                // Algorithme best-fit
+                allItems.forEach(item => {
+                    const allLocations = [...logisticState.racks, ...logisticState.palettes];
+                    let bestLoc = null;
+                    let bestScore = Infinity;
+
+                    allLocations.forEach(loc => {
+                        if (loc.id === item.currentLoc) return;
+                        const used = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
+                        const available = loc.capacity - used;
+
+                        if (available >= item.qty) {
+                            const score = Math.abs(available - item.qty); // Plus bas = meilleur fit
+                            if (score < bestScore) {
+                                bestScore = score;
+                                bestLoc = loc;
+                            }
+                        }
+                    });
+
+                    if (bestLoc && bestLoc.id !== item.currentLoc) {
+                        suggestions.push({
+                            article: item.article,
+                            qty: item.qty,
+                            from: item.currentLocName,
+                            to: bestLoc.name,
+                            saving: 'Meilleur espacement'
+                        });
+                    }
+                });
+
+                const result = document.getElementById('optimizationResult');
+                result.innerHTML = suggestions.length === 0
+                    ? '<p style="color:#4caf50;text-align:center;padding:15px;">✅ Emplacement déjà optimisé!</p>'
+                    : `<div style="background:#e8f5e9;padding:15px;border-radius:8px;">
+                        <strong style="color:#2e7d32;">✅ ${suggestions.length} suggestion(s) d'optimisation</strong>
+                        ${suggestions.map((s, i) => `
+                            <div style="padding:10px;background:white;margin-top:8px;border-radius:6px;border-left:4px solid #4caf50;">
+                                <span style="font-weight:bold;">${i+1}. ${escapeHtml(s.article)}</span> (×${s.qty})<br>
+                                📍 <strong>${escapeHtml(s.from)}</strong> → <strong>${escapeHtml(s.to)}</strong>
+                                <button class="btn btn-success btn-small" onclick="applyOptimizationSuggestion('${s.article}', '${s.from}', '${s.to}', ${s.qty})" style="float:right;padding:2px 8px;font-size:0.8em;">Appliquer</button>
+                            </div>
+                        `).join('')}
+                    </div>`;
+
+                toast(`🤖 ${suggestions.length} suggestions générées`, 'info');
+            } catch (e) {
+                toast('❌ Erreur optimisation', 'danger');
+            }
+        }
+
+        function applyOptimizationSuggestion(article, from, to, qty) {
+            const fromLoc = [...logisticState.racks, ...logisticState.palettes].find(l => l.name === from);
+            const toLoc = [...logisticState.racks, ...logisticState.palettes].find(l => l.name === to);
+
+            if (fromLoc && toLoc && logisticState.placements[fromLoc.id]?.[article]) {
+                logisticState.placements[fromLoc.id][article] -= qty;
+                if (logisticState.placements[fromLoc.id][article] <= 0) {
+                    delete logisticState.placements[fromLoc.id][article];
+                }
+                if (!logisticState.placements[toLoc.id]) logisticState.placements[toLoc.id] = {};
+                logisticState.placements[toLoc.id][article] = (logisticState.placements[toLoc.id][article] || 0) + qty;
+
+                saveLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                toast('✅ Optimisation appliquée', 'success');
+            }
+        }
+
+        function toggleOptimizationDetails() {
+            const el = document.getElementById('optimizationResult');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RAPPORTS D'OCCUPATION
+        // ═══════════════════════════════════════════════════════════════
+
+        function renderOccupationReports() {
+            try {
+                const allLocations = [...logisticState.racks, ...logisticState.palettes];
+                const stats = allLocations.map(loc => {
+                    const used = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
+                    const pct = (used / loc.capacity) * 100;
+                    return { name: loc.name, used: used, capacity: loc.capacity, pct: pct };
+                });
+
+                // Chart ASCII
+                const chart = document.getElementById('occupationChart');
+                chart.innerHTML = '<div style="font-family:monospace;font-size:0.85em;line-height:1.6;">' +
+                    stats.map(s => `
+                        <div style="margin-bottom:8px;">
+                            <span style="display:inline-block;width:100px;">${escapeHtml(s.name)}</span>
+                            <div style="display:inline-block;width:200px;height:20px;background:#e0e0e0;border-radius:4px;position:relative;overflow:hidden;">
+                                <div style="width:${s.pct}%;height:100%;background:${s.pct > 80 ? '#ff6b6b' : s.pct > 60 ? '#ffa500' : '#4caf50'};transition:width 0.3s;"></div>
+                            </div>
+                            <span style="margin-left:10px;color:#666;">${Math.round(s.pct)}%</span>
+                        </div>
+                    `).join('') +
+                    '</div>';
+
+                // Stats
+                const statsDiv = document.getElementById('occupationStats');
+                const totalCapacity = stats.reduce((a,b) => a + b.capacity, 0);
+                const totalUsed = stats.reduce((a,b) => a + b.used, 0);
+                const avgOccupancy = Math.round((totalUsed / totalCapacity) * 100);
+
+                statsDiv.innerHTML = `
+                    <div style="font-size:0.9em;">
+                        <strong>Capacité totale:</strong> ${totalCapacity} unités<br>
+                        <strong>Utilisation:</strong> ${totalUsed} unités<br>
+                        <strong>Occupancy moyen:</strong> ${avgOccupancy}%<br><br>
+                        <strong>Zones:</strong><br>
+                        ${stats.map(s => `<div style="padding:4px;color:#666;">• ${escapeHtml(s.name)}: ${s.used}/${s.capacity}</div>`).join('')}
+                    </div>
+                `;
+            } catch (e) {
+                console.error('Erreur rapports:', e);
+            }
+        }
+
+        function exportOccupationReport() {
+            try {
+                const allLocations = [...logisticState.racks, ...logisticState.palettes];
+                const report = {
+                    date: new Date().toISOString(),
+                    locations: allLocations.map(loc => {
+                        const used = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
+                        return {
+                            name: loc.name,
+                            capacity: loc.capacity,
+                            used: used,
+                            percentUsed: Math.round((used / loc.capacity) * 100)
+                        };
+                    })
+                };
+
+                const csv = 'Localisation,Utilisé,Capacité,Pourcentage\n' +
+                    report.locations.map(l => `${l.name},${l.used},${l.capacity},${l.percentUsed}%`).join('\n');
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'rapport_occupation_' + new Date().toISOString().split('T')[0] + '.csv';
+                a.click();
+                toast('📥 Rapport exporté', 'success');
+            } catch (e) {
+                toast('❌ Erreur export', 'danger');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // QR CODES
+        // ═══════════════════════════════════════════════════════════════
+
+        function generateQRCodes() {
+            try {
+                // Load QR library (QRCode.js from CDN or simple implementation)
+                if (typeof QRCode === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+                    script.onload = () => renderQRCodes();
+                    document.head.appendChild(script);
+                } else {
+                    renderQRCodes();
+                }
+            } catch (e) {
+                console.error('QR load error:', e);
+            }
+        }
+
+        function renderQRCodes() {
+            try {
+                const racksDiv = document.getElementById('qrCodesRacks');
+                const palettesDiv = document.getElementById('qrCodesPalettes');
+
+                racksDiv.innerHTML = logisticState.racks.map(rack => {
+                    const qrId = 'qr_rack_' + rack.id;
+                    setTimeout(() => {
+                        try {
+                            new QRCode(document.getElementById(qrId), {
+                                text: JSON.stringify({ type: 'rack', id: rack.id, name: rack.name }),
+                                width: 128,
+                                height: 128,
+                                colorDark: '#6b8fa3',
+                                colorLight: '#ffffff'
+                            });
+                        } catch (e) { /* QRCode not available */ }
+                    }, 100);
+                    return `<div style="text-align:center;border-radius:8px;background:#f9f9f9;padding:10px;">
+                        <div id="${qrId}" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
+                        <strong style="font-size:0.85em;">${escapeHtml(rack.name)}</strong><br>
+                        <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${rack.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
+                    </div>`;
+                }).join('');
+
+                palettesDiv.innerHTML = logisticState.palettes.map(palette => {
+                    const qrId = 'qr_palette_' + palette.id;
+                    setTimeout(() => {
+                        try {
+                            new QRCode(document.getElementById(qrId), {
+                                text: JSON.stringify({ type: 'palette', id: palette.id, name: palette.name }),
+                                width: 128,
+                                height: 128,
+                                colorDark: '#7a9db1',
+                                colorLight: '#ffffff'
+                            });
+                        } catch (e) { /* QRCode not available */ }
+                    }, 100);
+                    return `<div style="text-align:center;border-radius:8px;background:#f0f5f8;padding:10px;">
+                        <div id="${qrId}" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
+                        <strong style="font-size:0.85em;">${escapeHtml(palette.name)}</strong><br>
+                        <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${palette.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                console.error('Erreur QR render:', e);
+            }
+        }
+
+        function downloadQRCode(elementId, name) {
+            try {
+                const element = document.getElementById(elementId);
+                const canvas = element.querySelector('canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL();
+                    link.download = 'qr_' + name + '.png';
+                    link.click();
+                    toast('📥 QR téléchargé', 'success');
+                }
+            } catch (e) {
+                toast('❌ Erreur téléchargement', 'danger');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // MINI-JEUX D'ENTRAÎNEMENT
+        // ═══════════════════════════════════════════════════════════════
+
+        let currentGame = null;
+        let gameState = { score: 0, startTime: null, isPaused: false, items: [] };
+
+        function startGame(gameType) {
+            currentGame = gameType;
+            gameState = {
+                score: 0,
+                startTime: Date.now(),
+                isPaused: false,
+                items: [],
+                correctAnswers: 0,
+                totalQuestions: 0
+            };
+
+            document.getElementById('gameContainer').style.display = 'block';
+            document.getElementById('gameResultsContainer').style.display = 'none';
+
+            if (gameType === 'sorting') startSortingGame();
+            else if (gameType === 'quiz') startQuizGame();
+            else if (gameType === 'picking') startPickingGame();
+            else if (gameType === 'memory') startMemoryGame();
+
+            updateGameUI();
+        }
+
+        function startSortingGame() {
+            document.getElementById('gameTitle').textContent = '🎯 Tri Rapide — Placez les articles au bon endroit';
+            const allLocations = [...logisticState.racks, ...logisticState.palettes];
+            if (allLocations.length === 0) {
+                toast('❌ Créez d\'abord des racks/palettes', 'danger');
+                document.getElementById('gameContainer').style.display = 'none';
+                return;
+            }
+
+            const items = [
+                { name: 'Article A', correctLoc: allLocations[0].name },
+                { name: 'Article B', correctLoc: allLocations[Math.floor(Math.random() * allLocations.length)].name },
+                { name: 'Article C', correctLoc: allLocations[Math.floor(Math.random() * allLocations.length)].name }
+            ];
+
+            gameState.items = items;
+            let html = '<div style="padding:15px;">';
+            items.forEach((item, idx) => {
+                html += `<div style="margin-bottom:15px;padding:15px;background:white;border-radius:8px;border-left:4px solid #a8d5e2;">
+                    <strong>${item.name}</strong><br>
+                    <select id="sortSelect${idx}" style="width:200px;margin-top:8px;">
+                        <option value="">-- Choisir emplacement --</option>
+                        ${[...logisticState.racks, ...logisticState.palettes].map(l =>
+                            `<option value="${l.name}">${escapeHtml(l.name)}</option>`
+                        ).join('')}
+                    </select>
+                </div>`;
+            });
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('submitBtn').textContent = '✅ Valider réponses';
+        }
+
+        function startQuizGame() {
+            document.getElementById('gameTitle').textContent = '🧠 Quiz Logistique';
+            const questions = [
+                { q: 'FIFO signifie:', a: ['First In First Out', 'From In For Out', 'File In Free Out'], correct: 0 },
+                { q: 'La capacité d\'un rack se mesure en:', a: ['Unités/articles', 'Kilogrammes', 'Mètres carrés'], correct: 0 },
+                { q: 'Une réservation sert à:', a: ['Bloquer articles temporairement', 'Augmenter capacité', 'Réduire coûts'], correct: 0 },
+                { q: 'Priorité si emplacement plein à 90%:', a: ['Ajouter des articles', 'Transférer articles', 'Ignorer alerte'], correct: 1 }
+            ];
+
+            gameState.totalQuestions = questions.length;
+            gameState.items = questions.map((q, idx) => ({ ...q, answered: null }));
+
+            let html = '<div style="padding:15px;">';
+            gameState.items.forEach((item, qIdx) => {
+                html += `<div style="margin-bottom:20px;padding:15px;background:white;border-radius:8px;">
+                    <strong style="font-size:1.05em;">Q${qIdx+1}. ${escapeHtml(item.q)}</strong><br>
+                    ${item.a.map((ans, aIdx) => `
+                        <label style="display:block;margin-top:8px;padding:8px;cursor:pointer;">
+                            <input type="radio" name="q${qIdx}" value="${aIdx}" onchange="gameState.items[${qIdx}].answered = ${aIdx}" style="margin-right:8px;">
+                            ${escapeHtml(ans)}
+                        </label>
+                    `).join('')}
+                </div>`;
+            });
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('submitBtn').textContent = '✅ Soumettre quiz';
+        }
+
+        function startPickingGame() {
+            document.getElementById('gameTitle').textContent = '🕹️ Challenge Picking — Trouvez l\'article rapidement';
+            const allArticles = [];
+            Object.entries(logisticState.placements).forEach(([locId, items]) => {
+                const locName = [...logisticState.racks, ...logisticState.palettes].find(l => l.id === locId)?.name;
+                Object.entries(items).forEach(([artId, qty]) => {
+                    allArticles.push({ id: artId, location: locName });
+                });
+            });
+
+            if (allArticles.length === 0) {
+                toast('❌ Ajoutez d\'abord des articles aux emplacements', 'danger');
+                document.getElementById('gameContainer').style.display = 'none';
+                return;
+            }
+
+            const targets = allArticles.slice(0, 5);
+            gameState.items = targets.map((t, idx) => ({ ...t, found: false }));
+
+            let html = '<div style="padding:15px;"><strong>Trouvez ces articles rapidement:</strong><br>';
+            gameState.items.forEach((item, idx) => {
+                const found = item.found;
+                html += `<div style="padding:10px;margin:8px 0;background:${found ? '#e8f5e9' : '#fff3e0'};border-radius:6px;border-left:4px solid ${found ? '#4caf50' : '#ffa500'};cursor:pointer;opacity:${found ? 0.6 : 1};" onclick="gameState.items[${idx}].found = true; updateGameUI(); gameState.score += 10;">
+                    ${found ? '✅' : '❌'} ${escapeHtml(item.id)} (emplacement: <strong>${escapeHtml(item.location)}</strong>)
+                </div>`;
+            });
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'none';
+        }
+
+        function startMemoryGame() {
+            document.getElementById('gameTitle').textContent = '🎲 Jeu de Mémoire — Retournez les cartes';
+            const allLocations = [...logisticState.racks, ...logisticState.palettes].slice(0, 6);
+
+            if (allLocations.length < 2) {
+                toast('❌ Créez au moins 2 emplacements', 'danger');
+                document.getElementById('gameContainer').style.display = 'none';
+                return;
+            }
+
+            const pairs = [];
+            allLocations.forEach(loc => pairs.push({ id: loc.id, name: loc.name, flipped: false }));
+            allLocations.forEach(loc => pairs.push({ id: loc.id, name: loc.name, flipped: false }));
+            pairs.sort(() => Math.random() - 0.5);
+
+            gameState.items = pairs;
+            gameState.selectedCards = [];
+
+            let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:15px;">';
+            pairs.forEach((card, idx) => {
+                html += `<button onclick="flipMemoryCard(${idx})" style="padding:20px;background:${card.flipped ? 'linear-gradient(135deg,#e8f4f8,#f5e6f0)' : '#a8d5e2'};color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:0.9em;transition:all 0.2s;min-height:80px;">
+                    ${card.flipped ? escapeHtml(card.name) : '?'}
+                </button>`;
+            });
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'none';
+        }
+
+        function flipMemoryCard(idx) {
+            const card = gameState.items[idx];
+            if (card.matched) return;
+
+            gameState.items[idx].flipped = true;
+            gameState.selectedCards.push(idx);
+
+            if (gameState.selectedCards.length === 2) {
+                const [idx1, idx2] = gameState.selectedCards;
+                const match = gameState.items[idx1].id === gameState.items[idx2].id;
+
+                if (match) {
+                    gameState.items[idx1].matched = true;
+                    gameState.items[idx2].matched = true;
+                    gameState.score += 20;
+                } else {
+                    setTimeout(() => {
+                        gameState.items[idx1].flipped = false;
+                        gameState.items[idx2].flipped = false;
+                        renderGameMemory();
+                    }, 1000);
+                }
+
+                gameState.selectedCards = [];
+            }
+
+            if (gameState.items.every(c => c.matched)) {
+                finishGame();
+            } else {
+                renderGameMemory();
+            }
+
+            updateGameUI();
+        }
+
+        function renderGameMemory() {
+            let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:15px;">';
+            gameState.items.forEach((card, idx) => {
+                html += `<button onclick="flipMemoryCard(${idx})" style="padding:20px;background:${card.flipped ? 'linear-gradient(135deg,#e8f4f8,#f5e6f0)' : '#a8d5e2'};color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:0.9em;transition:all 0.2s;min-height:80px;opacity:${card.matched ? 0.5 : 1};">
+                    ${card.flipped ? escapeHtml(card.name) : '?'}
+                </button>`;
+            });
+            html += '</div>';
+            document.getElementById('gameContent').innerHTML = html;
+        }
+
+        function submitGameAnswer() {
+            if (currentGame === 'sorting') {
+                let correct = 0;
+                gameState.items.forEach((item, idx) => {
+                    const selected = document.getElementById('sortSelect' + idx).value;
+                    if (selected === item.correctLoc) correct++;
+                });
+                gameState.score = correct * 25;
+                gameState.correctAnswers = correct;
+                finishGame();
+            } else if (currentGame === 'quiz') {
+                gameState.items.forEach((item) => {
+                    if (item.answered === item.correct) {
+                        gameState.correctAnswers++;
+                        gameState.score += 20;
+                    }
+                });
+                finishGame();
+            }
+        }
+
+        function updateGameUI() {
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('gameTimer').textContent = `${minutes}:${String(seconds).padStart(2,'0')}`;
+            document.getElementById('gameScore').textContent = gameState.score;
+
+            let progress = 0;
+            if (currentGame === 'picking') {
+                progress = Math.round((gameState.items.filter(i => i.found).length / gameState.items.length) * 100);
+            } else if (currentGame === 'memory') {
+                progress = Math.round((gameState.items.filter(c => c.matched).length / gameState.items.length) * 100);
+            }
+            document.getElementById('gameProgress').textContent = progress + '%';
+        }
+
+        function pauseGame() {
+            gameState.isPaused = !gameState.isPaused;
+            document.getElementById('pauseGameBtn').textContent = gameState.isPaused ? '▶️ Reprendre' : '⏸️ Pause';
+        }
+
+        function endGame() {
+            if (confirm('Terminer le jeu?')) finishGame();
+        }
+
+        function finishGame() {
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('gameResultsContainer').style.display = 'block';
+
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            let resultText = '';
+
+            if (currentGame === 'sorting') {
+                resultText = `🎯 Tri: ${gameState.correctAnswers}/${gameState.items.length} correct<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            } else if (currentGame === 'quiz') {
+                resultText = `🧠 Quiz: ${gameState.correctAnswers}/${gameState.totalQuestions} correct<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            } else if (currentGame === 'picking') {
+                resultText = `🕹️ Picking: ${gameState.items.filter(i => i.found).length}/${gameState.items.length} trouvés<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            } else if (currentGame === 'memory') {
+                resultText = `🎲 Mémoire: Tous les appariements réussis!<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            }
+
+            document.getElementById('gameResultsContent').innerHTML = `
+                <div style="font-size:1.1em;line-height:1.8;color:#333;">
+                    ${resultText}
+                </div>
+                <div style="margin-top:15px;padding:12px;background:#e8f5e9;border-radius:8px;border-left:4px solid #4caf50;">
+                    <strong style="color:#2e7d32;">📊 Résultat sauvegardé</strong>
+                </div>
+            `;
+
+            // Sauvegarder le score
+            try {
+                const results = JSON.parse(localStorage.getItem('gameResults') || '[]');
+                results.push({
+                    game: currentGame,
+                    score: gameState.score,
+                    correctAnswers: gameState.correctAnswers,
+                    totalQuestions: gameState.totalQuestions,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('gameResults', JSON.stringify(results));
+            } catch (e) { /* ignore */ }
+
+            toast(`🏆 Score: ${gameState.score} points!`, 'success');
+        }
+
+        function closeGameResults() {
+            document.getElementById('gameResultsContainer').style.display = 'none';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                loadReservations();
+                renderReservations();
+                renderOccupationReports();
+                generateQRCodes();
+
+                // Refresh articles list for reservations
+                const articles = [];
+                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
+                conso.forEach(c => articles.push({ id: c.id, name: c.designation }));
+                document.getElementById('reserveArticle').innerHTML = articles.map(a =>
+                    `<option value="${a.id}">${escapeHtml(a.name)}</option>`
+                ).join('');
+            }, 1000);
         });
 
     </script>
@@ -11751,33 +12764,16 @@
     </div>
 <div class="toast-container" id="toast-container"></div>
 <!-- Legal notice and copyright -->
-<div class="footer-legal">
-  <strong>© 2025–2026 MARET Davie — Tous droits réservés.</strong> Toute reproduction ou utilisation de ce logiciel sans accord préalable écrit est interdite. <a onclick="openConditionsModal(event)">Voir les conditions d'utilisation</a>
-</div>
-
-<!-- Modal Conditions d'utilisation -->
-<div class="modal-conditions" id="conditionsModal">
-  <div class="modal-conditions-content">
-    <div class="modal-conditions-header">
-      Conditions d'utilisation
-    </div>
-    <div class="modal-conditions-body">
-      <p><strong style="font-size: 1.1em;">© 2025–2026 MARET Davie — Tous droits réservés</strong></p>
-
-      <p><strong>Conditions d'utilisation du code :</strong></p>
-      <ul>
-        <li>Le code source de ces projets est fourni à titre informatif et éducatif</li>
-        <li>Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite</li>
-        <li>Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur</li>
-        <li>Pour toute demande de réutilisation ou de collaboration, contactez l'auteur</li>
-      </ul>
-
-      <p><strong>Attribution :</strong> Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret © 2025–2026</p>
-    </div>
-    <div class="modal-conditions-close">
-      <button onclick="closeConditionsModal()">Fermer</button>
-    </div>
-  </div>
+<div class="footer-legal" style="margin-top:40px;padding:20px;background:#f9f9f9;border-top:1px solid #ddd;font-size:10px;color:#666;line-height:1.6;text-align:center;">
+  <strong style="color:#333;">© 2025–2026 MARET Davie — Tous droits réservés</strong><br>
+  <br>
+  <strong style="color:#555;">Conditions d'utilisation du code :</strong><br>
+  • Le code source de ces projets est fourni à titre informatif et éducatif<br>
+  • Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite<br>
+  • Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur<br>
+  • Pour toute demande de réutilisation ou de collaboration, contactez l'auteur<br>
+  <br>
+  <strong style="color:#555;">Attribution :</strong> Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret © 2025–2026
 </div>
 </body>
 </html>
