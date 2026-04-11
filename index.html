@@ -697,6 +697,224 @@
         /* Simulation volumes */
         #simulVolumesPanel { display:none; margin-top:12px; }
         #simulVolumesPanel table { margin-top:8px; }
+
+        /* ── Enhanced Game UI ─────────────────────────────────────── */
+        .game-menu-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7); display: flex; align-items: center;
+            justify-content: center; z-index: 9999; padding: 20px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .game-menu-container {
+            background: #fffef9; border-radius: 24px;
+            max-width: 900px; width: 100%; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-menu-header {
+            background: linear-gradient(135deg, #a8d5e2 0%, #c9b3d4 100%);
+            padding: 35px; text-align: center; border-radius: 24px 24px 0 0;
+            border-bottom: 3px solid #fff;
+        }
+
+        .game-menu-header h2 {
+            color: #2d3e50; font-size: 2em; margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-menu-subtitle {
+            color: #5a7b8f; font-size: 0.95em; margin-top: 8px;
+        }
+
+        .game-menu-content { padding: 30px; }
+
+        .game-category {
+            margin-bottom: 30px;
+        }
+
+        .game-category-title {
+            font-size: 1.15em; font-weight: 700; color: #6b8fa3;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
+            padding-bottom: 10px; border-bottom: 2px solid #e0e8f0;
+        }
+
+        .games-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px; margin-bottom: 25px;
+        }
+
+        .game-card {
+            background: linear-gradient(135deg, #fff 0%, #f7fcff 100%);
+            border: 2px solid #e0e8f0; border-radius: 14px; padding: 18px;
+            text-align: center; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(168, 213, 226, 0.1);
+            position: relative; overflow: hidden;
+        }
+
+        .game-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(168, 213, 226, 0.2) 0%, transparent 100%);
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px); box-shadow: 0 12px 24px rgba(168, 213, 226, 0.25);
+            border-color: #a8d5e2;
+        }
+
+        .game-card:hover::before { opacity: 1; }
+
+        .game-card-emoji {
+            font-size: 2.5em; margin-bottom: 12px; display: block;
+        }
+
+        .game-card-name {
+            font-weight: 700; color: #6b8fa3; margin-bottom: 6px; font-size: 0.95em;
+        }
+
+        .game-card-desc {
+            font-size: 0.8em; color: #7a9db1; line-height: 1.3;
+        }
+
+        .game-menu-footer {
+            padding: 20px 30px; border-top: 1px solid #e0e8f0;
+            display: flex; justify-content: center;
+        }
+
+        .game-menu-close-btn {
+            padding: 10px 24px; background: #d4c5e0; color: #2d3e50;
+            border: none; border-radius: 10px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; font-size: 0.95em;
+        }
+
+        .game-menu-close-btn:hover {
+            background: #c4b3d4; transform: scale(1.02);
+        }
+
+        /* Enhanced Quiz Styling */
+        .quiz-modal {
+            background: white; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .quiz-progress-bar {
+            background: #e0e8f0; height: 8px; border-radius: 4px;
+            overflow: hidden; margin: 20px 0;
+        }
+
+        .quiz-progress-fill {
+            background: linear-gradient(90deg, #a8d5e2, #6b8fa3);
+            height: 100%; transition: width 0.3s ease;
+        }
+
+        .quiz-question {
+            font-size: 1.25em; font-weight: 600; color: #2d3e50;
+            margin: 24px 0; line-height: 1.5;
+        }
+
+        .quiz-options {
+            display: grid; gap: 12px; margin: 20px 0;
+        }
+
+        .quiz-option {
+            padding: 16px; border: 2px solid #e0e8f0;
+            border-radius: 10px; text-align: left; cursor: pointer;
+            font-size: 0.95em; transition: all 0.2s;
+            background: white; color: #2d3e50;
+        }
+
+        .quiz-option:hover {
+            border-color: #a8d5e2; background: #f5f9fc;
+        }
+
+        .quiz-option.correct {
+            border-color: #27ae60; background: #d4edda;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #c0392b; background: #f8d7da;
+        }
+
+        /* Enhanced Badge Display */
+        .badge-showcase {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px; margin: 20px 0;
+        }
+
+        .badge-item {
+            padding: 16px; border-radius: 12px; text-align: center;
+            background: linear-gradient(135deg, #f5f9fc 0%, #f0eef5 100%);
+            border: 2px solid #e0e8f0; transition: all 0.3s;
+        }
+
+        .badge-item.unlocked {
+            border-color: #27ae60; background: linear-gradient(135deg, #d4edda 0%, #c8e6c9 100%);
+            transform: scale(1.05);
+        }
+
+        .badge-item:hover { transform: translateY(-4px); }
+
+        .badge-emoji { font-size: 2.5em; margin-bottom: 8px; }
+
+        .badge-name {
+            font-weight: 700; color: #6b8fa3; font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+
+        .badge-condition {
+            font-size: 0.75em; color: #7a9db1;
+        }
+
+        /* Enhanced Leaderboard */
+        .leaderboard-table {
+            width: 100%; border-collapse: collapse;
+        }
+
+        .leaderboard-row {
+            display: grid; grid-template-columns: 40px 1fr 100px 100px;
+            gap: 15px; padding: 14px 16px; border-bottom: 1px solid #e0e8f0;
+            align-items: center;
+        }
+
+        .leaderboard-rank {
+            font-weight: 700; font-size: 1.1em; text-align: center;
+        }
+
+        .leaderboard-rank.rank-1 { color: #ffd700; }
+        .leaderboard-rank.rank-2 { color: #c0c0c0; }
+        .leaderboard-rank.rank-3 { color: #cd7f32; }
+
+        .leaderboard-name {
+            color: #2d3e50; font-weight: 600;
+        }
+
+        .leaderboard-score {
+            text-align: right; font-weight: 700; color: #6b8fa3;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .game-card {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .game-card:nth-child(2) { animation-delay: 0.05s; }
+        .game-card:nth-child(3) { animation-delay: 0.1s; }
+        .game-card:nth-child(4) { animation-delay: 0.15s; }
+        .game-card:nth-child(5) { animation-delay: 0.2s; }
+        .game-card:nth-child(6) { animation-delay: 0.25s; }
+        .game-card:nth-child(7) { animation-delay: 0.3s; }
+        .game-card:nth-child(8) { animation-delay: 0.35s; }
+        .game-card:nth-child(9) { animation-delay: 0.4s; }
         .simul-economy { color:#27ae60; font-weight:bold; font-size:0.85em; }
 
         /* Badge statut prestation — pipeline 6 étapes */
@@ -12357,39 +12575,115 @@
 
         function openGameMenu() {
             const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+            modal.className = 'game-menu-overlay';
 
-            const games = [
-                { id: 'apprendre', emoji: '📚', nom: 'Mode Apprentissage', desc: 'Apprendre les règles de compatibilité' },
-                { id: 'challenge', emoji: '🎯', nom: 'Mode Challenge', desc: 'Placer les produits en respectant les contraintes' },
-                { id: 'puzzle', emoji: '🧩', nom: 'Mode Puzzle', desc: 'Résoudre des configurations complexes' },
-                { id: 'speed', emoji: '⚡', nom: 'Mode Speed', desc: 'Placer 10 produits en moins de 60 sec!' },
-                { id: 'quiz', emoji: '❓', nom: 'Quiz Logistique', desc: 'Testez vos connaissances sur les règles' },
-                { id: 'badges', emoji: '🏆', nom: 'Mes Badges', desc: 'Débloquez et collectionnez des badges!' },
-                { id: 'leaderboard', emoji: '🏅', nom: 'Classement', desc: 'Comparez vos scores avec les autres' },
-                { id: 'multiplayer', emoji: '👥', nom: 'Multijoueur', desc: 'Affrontez un ami sur le même PC!' },
-                { id: 'challenges', emoji: '📅', nom: 'Défis', desc: 'Défis quotidiens & hebdo avec bonus!' }
+            const trainingGames = [
+                { id: 'apprendre', emoji: '📚', nom: 'Apprentissage', desc: 'Règles de compatibilité' },
+                { id: 'quiz', emoji: '❓', nom: 'Quiz', desc: 'Testez vos connaissances' }
+            ];
+
+            const mainGames = [
+                { id: 'challenge', emoji: '🎯', nom: 'Challenge', desc: 'Avec contraintes' },
+                { id: 'puzzle', emoji: '🧩', nom: 'Puzzle', desc: 'Configurations complexes' },
+                { id: 'speed', emoji: '⚡', nom: 'Speed', desc: 'Contre le chrono!' }
+            ];
+
+            const progressGames = [
+                { id: 'badges', emoji: '🏆', nom: 'Badges', desc: 'À débloquer' },
+                { id: 'leaderboard', emoji: '🏅', nom: 'Classement', desc: 'Top 20' },
+                { id: 'challenges', emoji: '📅', nom: 'Défis', desc: 'Daily & Weekly' }
+            ];
+
+            const multiGames = [
+                { id: 'multiplayer', emoji: '👥', nom: 'Multijoueur', desc: '2 joueurs affrontement' }
             ];
 
             let html = `
-                <div style="background:white;padding:40px;border-radius:16px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;">
-                    <h2 style="color:#6b8fa3;text-align:center;margin-bottom:30px;">🎮 Jeux Logistiques</h2>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                <div class="game-menu-container">
+                    <div class="game-menu-header">
+                        <h2>🎮 Jeux Logistiques</h2>
+                        <div class="game-menu-subtitle">Entraînez-vous et débloquez des récompenses!</div>
+                    </div>
+                    <div class="game-menu-content">
+                        <div class="game-category">
+                            <div class="game-category-title">📚 Apprentissage</div>
+                            <div class="games-grid">
             `;
 
-            games.forEach(game => {
+            trainingGames.forEach(game => {
                 html += `
-                    <div style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);padding:20px;border-radius:12px;cursor:pointer;transition:transform 0.2s;" onclick="closeGameMenu();startGame('${game.id}')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                        <div style="font-size:2.5em;text-align:center;margin-bottom:10px;">${game.emoji}</div>
-                        <div style="font-weight:bold;color:#2d3e50;margin-bottom:8px;">${game.nom}</div>
-                        <div style="font-size:0.85em;color:#5a7b8f;">${game.desc}</div>
+                    <div class="game-card" onclick="closeGameMenu();startGame('${game.id}')">
+                        <span class="game-card-emoji">${game.emoji}</span>
+                        <div class="game-card-name">${game.nom}</div>
+                        <div class="game-card-desc">${game.desc}</div>
                     </div>
                 `;
             });
 
             html += `
+                            </div>
+                        </div>
+
+                        <div class="game-category">
+                            <div class="game-category-title">🎮 Jeux</div>
+                            <div class="games-grid">
+            `;
+
+            mainGames.forEach(game => {
+                html += `
+                    <div class="game-card" onclick="closeGameMenu();startGame('${game.id}')">
+                        <span class="game-card-emoji">${game.emoji}</span>
+                        <div class="game-card-name">${game.nom}</div>
+                        <div class="game-card-desc">${game.desc}</div>
                     </div>
-                    <button class="btn btn-secondary" onclick="closeGameMenu()" style="width:100%;margin-top:20px;">Retour</button>
+                `;
+            });
+
+            html += `
+                            </div>
+                        </div>
+
+                        <div class="game-category">
+                            <div class="game-category-title">🏆 Progression & Stats</div>
+                            <div class="games-grid">
+            `;
+
+            progressGames.forEach(game => {
+                html += `
+                    <div class="game-card" onclick="closeGameMenu();startGame('${game.id}')">
+                        <span class="game-card-emoji">${game.emoji}</span>
+                        <div class="game-card-name">${game.nom}</div>
+                        <div class="game-card-desc">${game.desc}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                            </div>
+                        </div>
+
+                        <div class="game-category">
+                            <div class="game-category-title">👥 Mode Compétitif</div>
+                            <div class="games-grid">
+            `;
+
+            multiGames.forEach(game => {
+                html += `
+                    <div class="game-card" onclick="closeGameMenu();startGame('${game.id}')">
+                        <span class="game-card-emoji">${game.emoji}</span>
+                        <div class="game-card-name">${game.nom}</div>
+                        <div class="game-card-desc">${game.desc}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-menu-footer">
+                        <button class="game-menu-close-btn" onclick="closeGameMenu()">← Retour</button>
+                    </div>
                 </div>
             `;
 
@@ -12427,23 +12721,29 @@
 
         function startLearningMode() {
             const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
+            modal.className = 'game-menu-overlay';
 
             let html = `
-                <div style="background:white;padding:30px;border-radius:16px;max-width:700px;width:90%;margin:20px auto;">
-                    <h2 style="color:#6b8fa3;margin-bottom:20px;">📚 Règles de Compatibilité</h2>
-                    <div style="background:#f5f9fc;padding:20px;border-radius:8px;margin-bottom:20px;">
+                <div class="game-menu-container" style="max-width:750px;">
+                    <div class="game-menu-header">
+                        <h2>📚 Règles de Compatibilité</h2>
+                        <div class="game-menu-subtitle">Apprenez comment placer correctement vos produits</div>
+                    </div>
+                    <div class="game-menu-content">
+                        <div style="margin-bottom:20px;">
+                            <div class="game-category-title">📦 Types de Produits</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             `;
 
             PRODUITS_BASE.forEach(prod => {
-                const typeRule = REGLES_PLACEMENT[prod.type];
                 html += `
-                    <div style="margin-bottom:15px;padding:12px;background:white;border-radius:6px;border-left:4px solid ${prod.couleur};">
-                        <div style="font-weight:bold;margin-bottom:8px;">${prod.emoji} ${prod.nom}</div>
-                        <div style="font-size:0.9em;color:#666;">
+                    <div style="padding:12px;background:${prod.couleur}20;border:2px solid ${prod.couleur};border-radius:10px;">
+                        <div style="font-size:1.8em;margin-bottom:6px;">${prod.emoji}</div>
+                        <div style="font-weight:700;color:#2d3e50;font-size:0.9em;margin-bottom:4px;">${prod.nom}</div>
+                        <div style="font-size:0.8em;color:#5a7b8f;">
                             <strong>Type:</strong> ${prod.type}<br>
                             <strong>Poids:</strong> ${prod.poids}<br>
-                            <strong>Température:</strong> ${prod.temp}<br>
+                            <strong>Temp:</strong> ${prod.temp}<br>
                             <strong>Fragile:</strong> ${prod.fragile ? '⚠️ Oui' : '✅ Non'}
                         </div>
                     </div>
@@ -12451,17 +12751,32 @@
             });
 
             html += `
+                            </div>
+                        </div>
+
+                        <div style="background:linear-gradient(135deg,#fff3cd,#fff8e1);padding:18px;border-radius:10px;border-left:5px solid #ffc107;margin-bottom:20px;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                                <span style="font-size:1.5em;">⚠️</span>
+                                <strong style="color:#856404;font-size:1.05em;">Règles Importantes</strong>
+                            </div>
+                            <ul style="margin:8px 0 0 20px;color:#856404;line-height:1.8;">
+                                <li><strong>Liquides ❌ Fragiles</strong> - Incompatibles!</li>
+                                <li><strong>Lourds ❌ Fragiles</strong> - Incompatibles!</li>
+                                <li><strong>Froid ❌ Chaud</strong> - À séparer absolument</li>
+                                <li><strong>Fragiles + Fragiles</strong> - ✅ Pas de problème</li>
+                            </ul>
+                        </div>
+
+                        <div style="background:linear-gradient(135deg,#d4edda,#c8e6c9);padding:18px;border-radius:10px;border-left:5px solid #27ae60;">
+                            <strong style="color:#27ae60;font-size:1.05em;">💡 Conseil:</strong>
+                            <p style="margin:8px 0 0 0;color:#155724;line-height:1.6;">
+                                Commencez par placer les articles lourds en bas, puis les solides au centre, et enfin les fragiles en haut. Faites attention à la température!
+                            </p>
+                        </div>
                     </div>
-                    <div style="background:#fff3cd;padding:15px;border-radius:8px;margin-bottom:20px;border-left:4px solid #ffc107;">
-                        <strong style="color:#856404;">⚠️ Règles importantes:</strong>
-                        <ul style="margin:10px 0 0 20px;color:#856404;">
-                            <li>Les liquides ne doivent PAS être sur les fragiles</li>
-                            <li>Les articles lourds ne doivent PAS être sur les fragiles</li>
-                            <li>Les produits froids et chauds doivent être séparés</li>
-                            <li>Les fragiles ensemble = OK</li>
-                        </ul>
+                    <div class="game-menu-footer">
+                        <button class="btn btn-success" onclick="this.closest('.game-menu-overlay').remove();toast('📚 Prêt à commencer!','success');">J'ai compris! ✅</button>
                     </div>
-                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();toast('📚 Vous êtes prêt!','success');" style="width:100%;">J'ai compris!</button>
                 </div>
             `;
 
@@ -12472,27 +12787,45 @@
         function startChallengeGame() {
             gameState.reglesActives = true;
             const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+            modal.className = 'game-menu-overlay';
 
             let html = `
-                <div style="background:white;padding:30px;border-radius:16px;max-width:500px;width:90%;">
-                    <h2 style="color:#6b8fa3;margin-bottom:20px;">🎯 Mode Challenge</h2>
-                    <p style="color:#666;margin-bottom:20px;">Placez les produits en respectant les règles de compatibilité!</p>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+                <div class="game-menu-container" style="max-width:600px;">
+                    <div class="game-menu-header">
+                        <h2>🎯 Mode Challenge</h2>
+                        <div class="game-menu-subtitle">Placez les produits en respectant les règles de compatibilité</div>
+                    </div>
+                    <div class="game-menu-content">
+                        <div style="margin-bottom:20px;">
+                            <h4 style="color:#6b8fa3;margin-bottom:12px;">📦 Produits à placer:</h4>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             `;
 
             gameState.produits.forEach(prod => {
                 html += `
-                    <div style="background:${prod.couleur};color:white;padding:15px;border-radius:8px;text-align:center;font-weight:bold;cursor:pointer;user-select:none;" draggable="true" ondragstart="event.dataTransfer.setData('prod','${prod.id}')">
-                        ${prod.emoji}<br><small>${prod.nom}</small>
+                    <div style="background:linear-gradient(135deg,${prod.couleur},${prod.couleur}dd);color:white;padding:14px;border-radius:10px;text-align:center;font-weight:600;cursor:move;user-select:none;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:transform 0.2s;" draggable="true" ondragstart="event.dataTransfer.setData('prod','${prod.id}')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="font-size:2em;margin-bottom:6px;">${prod.emoji}</div>
+                        <small style="font-size:0.9em;">${prod.nom}</small>
                     </div>
                 `;
             });
 
             html += `
+                            </div>
+                        </div>
+
+                        <div style="background:linear-gradient(135deg,#e3f2fd,#f3e5f5);padding:16px;border-radius:10px;border-left:4px solid #2196F3;">
+                            <strong style="color:#1976D2;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                💡 Comment jouer
+                            </strong>
+                            <p style="color:#555;font-size:0.9em;margin:0;line-height:1.6;">
+                                Glissez chaque produit sur vos racks en bas. Le système validera les compatibilités en temps réel. Respectez les règles pour gagner des points!
+                            </p>
+                        </div>
                     </div>
-                    <p style="color:#999;font-size:0.9em;">💡 Glissez les produits vers vos racks en bas. Attention aux incompatibilités!</p>
-                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();gameState.currentGame=null;" style="width:100%;">Fermer</button>
+                    <div class="game-menu-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();gameState.currentGame=null;">Fermer</button>
+                    </div>
                 </div>
             `;
 
@@ -12511,28 +12844,52 @@
             gameState.time = 60;
 
             const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+            modal.className = 'game-menu-overlay';
 
             let html = `
-                <div style="background:white;padding:30px;border-radius:16px;max-width:500px;width:90%;text-align:center;">
-                    <h2 style="color:#e74c3c;margin-bottom:20px;">⚡ Mode Speed!</h2>
-                    <div style="font-size:3em;font-weight:bold;color:#6b8fa3;margin-bottom:20px;font-family:monospace;border:3px solid #6b8fa3;padding:20px;border-radius:8px;">60s</div>
-                    <p style="color:#666;margin-bottom:20px;">Placez 10 produits au plus vite!<br>Les règles ne s'appliquent PAS - juste la vitesse!</p>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+                <div class="game-menu-container" style="max-width:600px;">
+                    <div class="game-menu-header" style="background:linear-gradient(135deg,#ff6b6b,#ff5252);">
+                        <h2>⚡ Mode Speed!</h2>
+                        <div class="game-menu-subtitle">Placez 10 produits contre la montre!</div>
+                    </div>
+                    <div class="game-menu-content">
+                        <div style="text-align:center;margin-bottom:24px;">
+                            <div style="font-size:4em;font-weight:bold;color:#ff6b6b;margin-bottom:12px;font-family:monospace;border:4px solid #ff6b6b;padding:20px;border-radius:12px;background:linear-gradient(135deg,#ffe5e5,#fff5f5);">
+                                60<span style="font-size:0.7em;">s</span>
+                            </div>
+                            <p style="color:#666;line-height:1.6;margin:0;">
+                                <strong>Placez 10 produits au plus vite!</strong><br>
+                                <span style="font-size:0.95em;">Les règles de compatibilité ne s'appliquent PAS - juste la vitesse!</span>
+                            </p>
+                        </div>
+
+                        <div style="margin-bottom:20px;">
+                            <h4 style="color:#6b8fa3;margin-bottom:12px;">📦 Produits:</h4>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             `;
 
             gameState.produits.forEach(prod => {
                 html += `
-                    <div style="background:${prod.couleur};color:white;padding:12px;border-radius:8px;text-align:center;font-weight:bold;">
-                        ${prod.emoji}<br><small>${prod.nom}</small>
+                    <div style="background:linear-gradient(135deg,${prod.couleur},${prod.couleur}dd);color:white;padding:14px;border-radius:10px;text-align:center;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                        <div style="font-size:2em;margin-bottom:4px;">${prod.emoji}</div>
+                        <small style="font-size:0.85em;">${prod.nom}</small>
                     </div>
                 `;
             });
 
             html += `
+                            </div>
+                        </div>
+
+                        <div style="background:linear-gradient(135deg,#fff3cd,#fff8e1);padding:14px;border-radius:10px;border-left:4px solid #ffc107;">
+                            <strong style="color:#856404;">⚠️ Attention:</strong>
+                            <p style="color:#856404;font-size:0.9em;margin:6px 0 0 0;">Vous devez placer TOUS les produits avant que le temps s'écoule!</p>
+                        </div>
                     </div>
-                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();startSpeedTimer();" style="width:100%;margin-bottom:10px;font-size:1.1em;">🚀 C'est parti!</button>
-                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();gameState.currentGame=null;">Annuler</button>
+                    <div class="game-menu-footer" style="flex-direction:column;gap:10px;">
+                        <button class="btn btn-success" onclick="this.closest('.game-menu-overlay').remove();startSpeedTimer();" style="width:100%;font-size:1.05em;font-weight:700;padding:13px;">🚀 C'est parti!</button>
+                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();gameState.currentGame=null;">Annuler</button>
+                    </div>
                 </div>
             `;
 
@@ -12632,31 +12989,40 @@
 
             const q = QUESTIONS_LOGISTIQUE[quizState.currentQuestion];
             const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+            modal.className = 'game-menu-overlay';
+
+            const progressPercent = ((quizState.currentQuestion + 1) / QUESTIONS_LOGISTIQUE.length) * 100;
 
             let html = `
-                <div style="background:white;padding:30px;border-radius:16px;max-width:600px;width:90%;">
-                    <div style="margin-bottom:20px;">
-                        <div style="font-size:0.9em;color:#999;">Question ${quizState.currentQuestion + 1}/${QUESTIONS_LOGISTIQUE.length}</div>
-                        <div style="background:#a8d5e2;height:6px;border-radius:3px;margin-top:8px;">
-                            <div style="background:#6b8fa3;height:6px;border-radius:3px;width:${((quizState.currentQuestion + 1) / QUESTIONS_LOGISTIQUE.length) * 100}%;"></div>
-                        </div>
+                <div class="game-menu-container" style="max-width:650px;">
+                    <div class="game-menu-header">
+                        <h2>❓ Quiz Logistique</h2>
+                        <div class="game-menu-subtitle">Question ${quizState.currentQuestion + 1} sur ${QUESTIONS_LOGISTIQUE.length}</div>
                     </div>
-                    <h3 style="color:#6b8fa3;margin-bottom:25px;line-height:1.4;">${q.question}</h3>
-                    <div style="display:grid;gap:12px;margin-bottom:20px;">
+                    <div class="game-menu-content">
+                        <div class="quiz-progress-bar">
+                            <div class="quiz-progress-fill" style="width:${progressPercent}%;"></div>
+                        </div>
+
+                        <div class="quiz-question">${q.question}</div>
+
+                        <div class="quiz-options">
             `;
 
             q.options.forEach((opt, idx) => {
                 html += `
-                    <button style="padding:15px;border:2px solid #ddd;border-radius:8px;text-align:left;cursor:pointer;font-size:0.95em;transition:all 0.2s;background:white;" onmouseover="this.style.borderColor='#6b8fa3';this.style.background='#f5f9fc';" onmouseout="this.style.borderColor='#ddd';this.style.background='white';" onclick="answerQuestion(${idx}, this, '${q.explication.replace(/'/g, "\\'")}')" id="opt${idx}">
+                    <button class="quiz-option" onclick="answerQuestion(${idx}, this, '${q.explication.replace(/'/g, "\\'")}')" id="opt${idx}">
                         ${opt.text}
                     </button>
                 `;
             });
 
             html += `
+                        </div>
                     </div>
-                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();quizState.currentQuestion++;showQuestion();" style="width:100%;">Suivant →</button>
+                    <div class="game-menu-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();quizState.currentQuestion++;showQuestion();">Suivant →</button>
+                    </div>
                 </div>
             `;
 
