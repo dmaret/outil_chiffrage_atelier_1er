@@ -11927,7 +11927,8 @@
             canvasOffsetY: 0,
             isDraggingCanvas: false,
             dragStartX: 0,
-            dragStartY: 0
+            dragStartY: 0,
+            dragMovementDistance: 0
         };
 
         function loadLogisticState() {
@@ -11962,10 +11963,31 @@
 
         function saveLogisticState() {
             try {
+                syncLogisticArticles();
                 localStorage.setItem('logisticState', JSON.stringify(logisticState));
             } catch (e) {
                 console.error('Erreur sauvegarde logistique:', e);
             }
+        }
+
+        function syncLogisticArticles() {
+            // Synchronize articles array with placements and freeArticles
+            const articleSet = new Set();
+
+            // Collect from placements
+            Object.values(logisticState.placements || {}).forEach(location => {
+                Object.keys(location || {}).forEach(articleId => {
+                    articleSet.add(articleId);
+                });
+            });
+
+            // Collect from freeArticles
+            Object.keys(logisticState.freeArticles || {}).forEach(articleId => {
+                articleSet.add(articleId);
+            });
+
+            // Update articles array with unique IDs
+            logisticState.articles = Array.from(articleSet);
         }
 
         // ════════════════════════════════════════════════════════════
@@ -13740,7 +13762,25 @@
             }, 1000);
         }
 
-        function trackArticleMovement(articleId, fromRack, toRack) {
+        function trackArticleMovement(articleId, fromRack, toRack, qty = 1) {
+            // Create unified movement object structure
+            const movement = {
+                id: 'MOV_' + Date.now(),
+                type: 'depot',
+                article: articleId,
+                qty: qty,
+                source: fromRack || null,
+                dest: toRack,
+                date: new Date().toLocaleDateString('fr-FR'),
+                responsable: 'Auto (Drag)',
+                notes: 'Placement automatique par glisser-déposer',
+                timestamp: new Date().toISOString()
+            };
+
+            if (!logisticState.movements) logisticState.movements = [];
+            logisticState.movements.push(movement);
+
+            // Keep legacy logisticsMovementHistory for backwards compatibility
             logisticsMovementHistory.push({
                 timestamp: Date.now(),
                 article: articleId,
@@ -14181,9 +14221,13 @@
             if (!articleId) return;
 
             // Enlever de tous les placements
+            let totalQty = 0;
+            let sourceLocation = null;
             Object.keys(logisticState.placements).forEach(locationId => {
                 if (logisticState.placements[locationId] && logisticState.placements[locationId][articleId]) {
                     const qty = logisticState.placements[locationId][articleId];
+                    totalQty += qty;
+                    if (!sourceLocation) sourceLocation = locationId;
                     delete logisticState.placements[locationId][articleId];
                     // Ajouter aux articles libres
                     if (!logisticState.freeArticles) logisticState.freeArticles = {};
@@ -14192,8 +14236,13 @@
             });
 
             saveLogisticState();
+            if (totalQty > 0) {
+                trackArticleMovement(articleId, sourceLocation || 'Placements', 'Articles Libres', totalQty);
+                saveLogisticState();
+            }
             renderLogisticCanvas();
             renderLogisticFreeArticles();
+            renderLogisticHistory();
             toast(`✅ ${articleName} déplacé vers les articles libres`, 'success');
         }
 
@@ -14225,11 +14274,13 @@
                 }
 
                 saveLogisticState();
-                trackArticleMovement(articleId, 'depot', location.name);
+                trackArticleMovement(articleId, 'Articles Libres', location.name, 1);
+                saveLogisticState();
                 renderLogisticRacks();
                 renderLogisticPalettes();
                 renderLogisticCanvas();
                 renderLogisticFreeArticles();
+                renderLogisticHistory();
                 toast(`✅ ${articleName} assigné à ${location.name}`, 'success');
             } else {
                 // Dropper sur une zone vide = article libre
@@ -14237,17 +14288,24 @@
                 logisticState.freeArticles[articleId] = (logisticState.freeArticles[articleId] || 0) + 1;
 
                 // Enlever de tous les placements si présent
+                let previousSource = null;
                 Object.keys(logisticState.placements).forEach(locationId => {
                     if (logisticState.placements[locationId][articleId]) {
+                        if (!previousSource) previousSource = locationId;
                         delete logisticState.placements[locationId][articleId];
                     }
                 });
 
                 saveLogisticState();
+                if (previousSource) {
+                    trackArticleMovement(articleId, previousSource, 'Articles Libres', 1);
+                    saveLogisticState();
+                }
                 renderLogisticRacks();
                 renderLogisticPalettes();
                 renderLogisticCanvas();
                 renderLogisticFreeArticles();
+                renderLogisticHistory();
                 toast(`📍 ${articleName} placé en zone libre (non assigné)`, 'info');
             }
         }
@@ -14281,12 +14339,14 @@
             logisticState.isDraggingCanvas = true;
             logisticState.dragStartX = e.clientX;
             logisticState.dragStartY = e.clientY;
+            logisticState.dragMovementDistance = 0;
         }
 
         function logisticCanvasMouseMove(e) {
             if (logisticState.isDraggingCanvas) {
                 const dx = e.clientX - logisticState.dragStartX;
                 const dy = e.clientY - logisticState.dragStartY;
+                logisticState.dragMovementDistance += Math.sqrt(dx*dx + dy*dy);
                 logisticState.canvasOffsetX += dx;
                 logisticState.canvasOffsetY += dy;
                 logisticState.dragStartX = e.clientX;
@@ -14300,6 +14360,14 @@
         }
 
         function logisticCanvasClick(e) {
+            // Only process click if movement distance was small (< 5px)
+            // This prevents click handlers from firing after canvas panning
+            if (logisticState.dragMovementDistance > 5) {
+                logisticState.dragMovementDistance = 0;
+                return;
+            }
+            logisticState.dragMovementDistance = 0;
+
             const canvas = e.target;
             const rect = canvas.getBoundingClientRect();
             const x = (e.clientX - rect.left - logisticState.canvasOffsetX) / logisticState.zoomLevel;
@@ -14309,6 +14377,9 @@
             logisticState.selectedItem = location;
             if (location) {
                 updateLogisticInfo(location);
+            } else {
+                // Click on empty area - deselect
+                logisticState.selectedItem = null;
             }
             renderLogisticCanvas();
         }
@@ -14464,22 +14535,26 @@
         function renderLogisticHistory() {
             try {
                 const filter = (document.getElementById('logisticHistoryFilter')?.value || '').toLowerCase();
-                let filtered = logisticState.movements.filter(m =>
-                    m.article.toLowerCase().includes(filter) ||
-                    m.notes.toLowerCase().includes(filter)
-                );
+                let filtered = (logisticState.movements || []).filter(m => {
+                    const articleName = (getLogisticArticleName(m.article) || m.article || '').toLowerCase();
+                    const notes = (m.notes || '').toLowerCase();
+                    return articleName.includes(filter) || notes.includes(filter);
+                });
                 filtered = filtered.reverse().slice(0, 50);
 
                 const list = document.getElementById('logisticHistoryList');
                 list.innerHTML = filtered.length === 0
                     ? '<p style="color:#999;text-align:center;padding:20px;">Aucun mouvement</p>'
-                    : filtered.map(m => `
-                        <div style="padding:10px;background:#f9f9f9;margin-bottom:6px;border-left:4px solid #a8d5e2;border-radius:6px;font-size:0.85em;">
-                            <strong>${escapeHtml(m.type.toUpperCase())}</strong> — ${escapeHtml(m.article)}<br>
-                            <span style="color:#666;">Qty: ${m.qty} | ${m.date} | ${escapeHtml(m.responsable)}</span>
-                            ${m.notes ? `<div style="color:#999;margin-top:4px;">📝 ${escapeHtml(m.notes)}</div>` : ''}
-                        </div>
-                    `).join('');
+                    : filtered.map(m => {
+                        const articleName = getLogisticArticleName(m.article) || m.article;
+                        return `
+                            <div style="padding:10px;background:#f9f9f9;margin-bottom:6px;border-left:4px solid #a8d5e2;border-radius:6px;font-size:0.85em;">
+                                <strong>${escapeHtml((m.type || 'MOUVEMENT').toUpperCase())}</strong> — ${escapeHtml(articleName)}<br>
+                                <span style="color:#666;">Qty: ${m.qty || 1} | ${m.date || 'N/A'} | ${escapeHtml(m.responsable || 'Auto')}</span>
+                                ${(m.notes || '').trim() ? `<div style="color:#999;margin-top:4px;">📝 ${escapeHtml(m.notes)}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('');
             } catch (e) {
                 console.error('Erreur historique:', e);
             }
