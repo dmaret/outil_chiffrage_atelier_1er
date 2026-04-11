@@ -3023,14 +3023,17 @@
             {key:'gantt',          label:'📅 Planification'},
         ];
 
+        // IMPORTANT: Default credentials have been removed for security.
+        // Passwords must be configured by the user on first login.
+        // See admin panel for user management.
         const DEFAULT_AUTH_GROUPS = [
-            { id: 'cea', name: 'CEA', password: 'cea2026',
+            { id: 'cea', name: 'CEA', passwordHash: null,
               tabs: ['dashboard','assistant','calculateur','prestations','clients','stats','catalogue','gantt'] },
-            { id: 'asp', name: 'ASP', password: 'asp2026',
+            { id: 'asp', name: 'ASP', passwordHash: null,
               tabs: ['dashboard','assistant','calculateur','stock','consommables','catalogue','gantt'] },
-            { id: 'msp', name: 'MSP', password: 'msp2026',
+            { id: 'msp', name: 'MSP', passwordHash: null,
               tabs: ['dashboard','stock','consommables','stats','parametrage'] },
-            { id: 'admin', name: 'ADMIN', password: 'admin2026', tabs: ['*'] },
+            { id: 'admin', name: 'ADMIN', passwordHash: null, tabs: ['*'] },
         ];
         let displayPrefs = { vuePrestations: 'detaillee', densite: 'normale', modeCalculateur: 'complet' };
         let actionHistory = [];
@@ -3204,12 +3207,26 @@
         function loadEmailWebhooksConfig() {
             try {
                 const saved = localStorage.getItem('emailWebhooksConfig');
-                if (saved) emailWebhooksConfig = Object.assign(emailWebhooksConfig, JSON.parse(saved));
-            } catch(e) {}
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    // Decrypt the API key if it was stored encrypted
+                    if (parsed.apiKey) {
+                        parsed.apiKey = decryptApiKey(parsed.apiKey);
+                    }
+                    emailWebhooksConfig = Object.assign(emailWebhooksConfig, parsed);
+                }
+            } catch(e) {
+                console.error('Error loading webhooks config:', e);
+            }
         }
 
         function saveEmailWebhooksConfig() {
-            localStorage.setItem('emailWebhooksConfig', JSON.stringify(emailWebhooksConfig));
+            // Create a copy with encrypted API key before saving
+            const configToSave = JSON.parse(JSON.stringify(emailWebhooksConfig));
+            if (configToSave.apiKey) {
+                configToSave.apiKey = encryptApiKey(configToSave.apiKey);
+            }
+            localStorage.setItem('emailWebhooksConfig', JSON.stringify(configToSave));
             logAction('Mise à jour configuration webhooks email', 'UPDATE');
         }
 
@@ -3333,6 +3350,7 @@
             };
             localStorage.removeItem('emailWebhooksConfig');
             syncEmailWebhooksUI();
+            toast('✓ Configuration webhooks réinitialisée', 'success');
             logAction('Réinitialisation configuration webhooks email', 'UPDATE');
             toast('✅ Configuration réinitialisée', 'success');
         }
@@ -6960,9 +6978,16 @@
         // FEATURE 10 : Code PIN
         // ============================================================
         function checkPin() {
-            const storedPin = localStorage.getItem('appPin');
+            const storedPinHash = localStorage.getItem('appPinHash');
             const entered = document.getElementById('pinInput').value;
-            if (entered === storedPin) {
+
+            if (!storedPinHash) {
+                document.getElementById('pinError').textContent = '❌ Aucun PIN configuré';
+                return;
+            }
+
+            const enteredHash = hashPassword(entered);
+            if (enteredHash === storedPinHash) {
                 document.getElementById('pinModal').classList.remove('visible');
                 document.getElementById('pinInput').value = '';
                 document.getElementById('pinError').textContent = '';
@@ -6976,7 +7001,10 @@
         function setPin() {
             const val = document.getElementById('newPinInput').value.trim();
             if (val.length < 4) { toast('Le PIN doit faire au moins 4 caractères', 'warning'); return; }
-            localStorage.setItem('appPin', val);
+            if (!/^\d+$/.test(val)) { toast('Le PIN doit contenir uniquement des chiffres', 'warning'); return; }
+
+            const pinHash = hashPassword(val);
+            localStorage.setItem('appPinHash', pinHash);
             document.getElementById('newPinInput').value = '';
             updatePinStatus();
             toast('✅ PIN défini avec succès', 'success');
@@ -6984,7 +7012,7 @@
 
         function removePin() {
             toastConfirm('Supprimer le code PIN ?', () => {
-                localStorage.removeItem('appPin');
+                localStorage.removeItem('appPinHash');
                 updatePinStatus();
                 toast('✅ PIN supprimé', 'success');
             });
@@ -6993,8 +7021,8 @@
         function updatePinStatus() {
             const el = document.getElementById('pinStatus');
             if (!el) return;
-            const pin = localStorage.getItem('appPin');
-            el.textContent = pin ? `🔒 PIN configuré (${pin.length} caractères)` : '🔓 Aucun PIN configuré';
+            const pinHash = localStorage.getItem('appPinHash');
+            el.textContent = pinHash ? '🔒 PIN configuré' : '🔓 Aucun PIN configuré';
         }
 
         // PIN utilisé uniquement pour le mode admin (bouton 🔓)
@@ -8853,17 +8881,77 @@
             }, 50);
         }
 
+        // Simple hash function for passwords (not cryptographically secure)
+        // For production, use server-side hashing
+        function hashPassword(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return Math.abs(hash).toString(16);
+        }
+
+        // Simple encryption/decryption for API keys
+        // Uses Base64 encoding with a basic shift cipher for obfuscation
+        function encryptApiKey(apiKey) {
+            if (!apiKey) return '';
+            try {
+                // Simple shift cipher: rotate each character by 13
+                const shifted = apiKey.split('').map(char =>
+                    String.fromCharCode(char.charCodeAt(0) ^ 0x5A)
+                ).join('');
+                // Base64 encode the result
+                return btoa(shifted);
+            } catch(e) {
+                console.error('API key encryption error:', e);
+                return '';
+            }
+        }
+
+        function decryptApiKey(encryptedKey) {
+            if (!encryptedKey) return '';
+            try {
+                // Base64 decode
+                const shifted = atob(encryptedKey);
+                // Reverse the shift cipher
+                return shifted.split('').map(char =>
+                    String.fromCharCode(char.charCodeAt(0) ^ 0x5A)
+                ).join('');
+            } catch(e) {
+                console.error('API key decryption error:', e);
+                return '';
+            }
+        }
+
         function doLogin() {
             const groupId = document.getElementById('authGroupSelect')?.value;
             const password = document.getElementById('authPasswordInput')?.value;
             const errEl = document.getElementById('authError');
             if (!groupId) { if(errEl) errEl.textContent = 'Veuillez sélectionner un groupe.'; return; }
+            if (!password) { if(errEl) errEl.textContent = 'Veuillez entrer un mot de passe.'; return; }
+
             const group = authGroups.find(g => g.id === groupId);
-            if (!group || group.password !== password) {
+            if (!group) {
+                if(errEl) errEl.textContent = '❌ Groupe non trouvé.';
+                return;
+            }
+
+            // Check if password hash is set
+            if (!group.passwordHash) {
+                if(errEl) errEl.textContent = '❌ Ce groupe n\'a pas encore de mot de passe configuré. Contactez l\'administrateur.';
+                return;
+            }
+
+            // Compare password hashes
+            const inputHash = hashPassword(password);
+            if (inputHash !== group.passwordHash) {
                 if(errEl) errEl.textContent = '❌ Mot de passe incorrect.';
                 document.getElementById('authPasswordInput')?.select();
                 return;
             }
+
             // Auth OK
             sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
             document.getElementById('authOverlay').style.display = 'none';
