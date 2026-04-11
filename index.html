@@ -5714,10 +5714,10 @@
 
 
         function addReferenceDocument() {
-            const title = document.getElementById('docTitle')?.value.trim();
-            const url = document.getElementById('docUrl')?.value.trim();
+            const title = document.getElementById('docTitle')?.value?.trim() || '';
+            const url = document.getElementById('docUrl')?.value?.trim() || '';
             const fileInput = document.getElementById('docFile');
-            const file = fileInput?.files?.[0];
+            const file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
             const type = document.getElementById('docType')?.value || 'other';
 
             if (!title) {
