@@ -14777,6 +14777,45 @@
             document.getElementById('gameResultsContainer').style.display = 'none';
         }
 
+        // Fonction pour afficher les conditions d'utilisation
+        function showUsageConditions() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;overflow-y:auto;';
+
+            let html = `
+                <div style="background:white;padding:40px;border-radius:12px;max-width:700px;width:90%;margin:20px auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;">
+                        <h2 style="color:#6b8fa3;margin:0;">📜 Conditions d'utilisation du code</h2>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove();" style="background:none;border:none;font-size:1.8em;cursor:pointer;color:#999;">✕</button>
+                    </div>
+
+                    <div style="max-height:400px;overflow-y:auto;color:#555;line-height:1.8;">
+                        <p style="margin-bottom:16px;font-weight:600;">Le code source de ces projets est fourni à titre informatif et éducatif</p>
+
+                        <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #a8d5e2;margin-bottom:20px;">
+                            <strong style="color:#6b8fa3;display:block;margin-bottom:10px;">🔒 Conditions principales :</strong>
+                            <ul style="margin:0;padding-left:20px;">
+                                <li style="margin-bottom:8px;">Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite</li>
+                                <li style="margin-bottom:8px;">Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur</li>
+                                <li style="margin-bottom:8px;">Pour toute demande de réutilisation ou de collaboration, contactez l'auteur</li>
+                            </ul>
+                        </div>
+
+                        <div style="background:#fffbf0;padding:15px;border-radius:8px;border-left:4px solid #ffc107;">
+                            <strong style="color:#856404;display:block;margin-bottom:10px;">📌 Attribution :</strong>
+                            <p style="margin:0;font-size:0.95em;">Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source :</p>
+                            <p style="margin:8px 0 0 0;font-family:monospace;background:white;padding:10px;border-radius:4px;color:#333;">dmaret © 2025–2026</p>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();" style="width:100%;margin-top:25px;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
@@ -15005,16 +15044,8 @@
     </div>
 <div class="toast-container" id="toast-container"></div>
 <!-- Legal notice and copyright -->
-<div class="footer-legal" style="margin-top:40px;padding:20px;background:#f9f9f9;border-top:1px solid #ddd;font-size:10px;color:#666;line-height:1.6;text-align:center;">
-  <strong style="color:#333;">© 2025–2026 MARET Davie — Tous droits réservés</strong><br>
-  <br>
-  <strong style="color:#555;">Conditions d'utilisation du code :</strong><br>
-  • Le code source de ces projets est fourni à titre informatif et éducatif<br>
-  • Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite<br>
-  • Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur<br>
-  • Pour toute demande de réutilisation ou de collaboration, contactez l'auteur<br>
-  <br>
-  <strong style="color:#555;">Attribution :</strong> Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret © 2025–2026
+<div class="footer-legal" style="margin-top:40px;padding:20px;background:#f9f9f9;border-top:1px solid #ddd;font-size:12px;color:#666;line-height:1.6;text-align:center;">
+  © 2025–2026 MARET Davie — <span style="cursor:pointer;color:#0066cc;text-decoration:underline;" onclick="showUsageConditions()">Tous droits réservés</span>. Toute reproduction ou utilisation de ce logiciel sans accord préalable écrit est interdite.
 </div>
 </body>
 </html>
