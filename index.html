@@ -3212,6 +3212,32 @@
             return String(text).replace(/[&<>"']/g, char => map[char]);
         }
 
+        // Loading indicator management for async operations
+        let loadingCounter = 0;
+        function showLoading(message = '⏳ Chargement...') {
+            loadingCounter++;
+            let overlay = document.getElementById('loadingOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'loadingOverlay';
+                overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9990;';
+                document.body.appendChild(overlay);
+            }
+            overlay.innerHTML = `<div style="background:white;padding:24px;border-radius:12px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                <div style="font-size:2em;margin-bottom:16px;">⏳</div>
+                <div style="color:#666;font-size:0.95em;">${escapeHtml(message)}</div>
+            </div>`;
+            overlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loadingCounter = Math.max(0, loadingCounter - 1);
+            if (loadingCounter === 0) {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.style.display = 'none';
+            }
+        }
+
         // IMPORTANT: Default credentials have been removed for security.
         // Passwords must be configured by the user on first login.
         // See admin panel for user management.
@@ -4873,11 +4899,25 @@
             const input = document.getElementById('attachmentInput');
             const files = input.files;
             if (!files.length) return;
+
+            let validFiles = [];
             for (let file of files) {
                 if (file.size > 20 * 1024 * 1024) {
                     toast(`Fichier trop volumineux : ${file.name} (max 20 MB)`, 'warning');
                     continue;
                 }
+                validFiles.push(file);
+            }
+
+            if (validFiles.length === 0) {
+                input.value = '';
+                return;
+            }
+
+            showLoading(`Chargement de ${validFiles.length} fichier${validFiles.length > 1 ? 's' : ''}...`);
+            let loadedCount = 0;
+
+            for (let file of validFiles) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const attachment = {
@@ -4888,14 +4928,22 @@
                         data: e.target.result
                     };
                     currentAttachments.push(attachment);
-                    renderAttachments();
+                    loadedCount++;
+                    if (loadedCount === validFiles.length) {
+                        renderAttachments();
+                        hideLoading();
+                    }
                 };
                 reader.onerror = () => {
                     toast(`Erreur lors de la lecture du fichier : ${file.name}`, 'error');
                     console.error(`FileReader error for file: ${file.name}`);
+                    loadedCount++;
+                    if (loadedCount === validFiles.length) hideLoading();
                 };
                 reader.onabort = () => {
                     toast(`Lecture du fichier annulée : ${file.name}`, 'warning');
+                    loadedCount++;
+                    if (loadedCount === validFiles.length) hideLoading();
                 };
                 reader.readAsDataURL(file);
             }
@@ -5226,7 +5274,7 @@
         }
 
         function printFicheClient(clientNom) {
-            if (typeof html2pdf === 'undefined') { toast('html2pdf non disponible','error'); return; }
+            if (typeof html2pdf === 'undefined') { toast('📄 Fonctionnalité PDF non disponible. Veuillez recharger la page.','error'); return; }
             const prests = prestationsSauvegardees.filter(p => p.client === clientNom).sort((a,b) => new Date(b.date)-new Date(a.date));
             const caTotal = prests.reduce((s,p)=>s+(p.prixVente||0),0);
             const heuresTotal = prests.reduce((s,p)=>s+(p.heures||0),0);
@@ -5854,39 +5902,49 @@
 
             if (file) {
                 // Handle file upload
+                showLoading(`Chargement du document "${title}"...`);
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const fileData = e.target.result;
-                    const fileName = file.name;
+                    try {
+                        const fileData = e.target.result;
+                        const fileName = file.name;
 
-                    const doc = {
-                        id: Date.now(),
-                        title: title,
-                        fileData: fileData,
-                        fileName: fileName,
-                        type: type,
-                        isFile: true,
-                        createdAt: new Date().toISOString().split('T')[0]
-                    };
+                        const doc = {
+                            id: Date.now(),
+                            title: title,
+                            fileData: fileData,
+                            fileName: fileName,
+                            type: type,
+                            isFile: true,
+                            createdAt: new Date().toISOString().split('T')[0]
+                        };
 
-                    referenceDocuments.push(doc);
-                    saveReferenceDocuments();
-                    renderReferenceDocuments();
+                        referenceDocuments.push(doc);
+                        saveReferenceDocuments();
+                        renderReferenceDocuments();
 
-                    document.getElementById('docTitle').value = '';
-                    document.getElementById('docUrl').value = '';
-                    document.getElementById('docType').value = 'pdf';
-                    fileInput.value = '';
+                        document.getElementById('docTitle').value = '';
+                        document.getElementById('docUrl').value = '';
+                        document.getElementById('docType').value = 'pdf';
+                        fileInput.value = '';
 
-                    toast(`✅ Document "${title}" (${fileName}) ajouté avec succès!`, 'success');
-                    logAction(`Ajout document référence: ${title} (fichier: ${fileName})`, 'CREATE');
+                        toast(`✅ Document "${title}" (${fileName}) ajouté avec succès!`, 'success');
+                        logAction(`Ajout document référence: ${title} (fichier: ${fileName})`, 'CREATE');
+                    } catch(err) {
+                        toast(`Erreur lors du traitement du document: ${err.message}`, 'error');
+                        console.error('Error processing document:', err);
+                    } finally {
+                        hideLoading();
+                    }
                 };
                 reader.onerror = () => {
                     toast(`❌ Erreur lors de la lecture du fichier : ${file.name}`, 'error');
                     console.error('FileReader error for document:', file.name);
+                    hideLoading();
                 };
                 reader.onabort = () => {
                     toast(`⚠️ Lecture du document annulée : ${file.name}`, 'warning');
+                    hideLoading();
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -7345,28 +7403,41 @@
         function importJSON(input) {
             const file = input.files[0];
             if (!file) return;
+            showLoading('Lecture du fichier de sauvegarde...');
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
+                    hideLoading();
                     toastConfirm('Importer ces données ? Cela remplacera toutes les données actuelles.', () => {
-                        if (data.config) config = Object.assign(config, data.config);
-                        if (data.catalogueGestes) catalogueGestes = data.catalogueGestes;
-                        if (data.catalogueConsommables) catalogueConsommables = data.catalogueConsommables;
-                        if (data.prestationsSauvegardees) prestationsSauvegardees = data.prestationsSauvegardees;
-                        if (data.mouvements) mouvements = data.mouvements;
-                        if (data.stockActuel) stockActuel = data.stockActuel;
-                        if (data.stockMins) stockMins = data.stockMins;
+                        showLoading('Importation en cours...');
+                        setTimeout(() => {
+                            try {
+                                if (data.config) config = Object.assign(config, data.config);
+                                if (data.catalogueGestes) catalogueGestes = data.catalogueGestes;
+                                if (data.catalogueConsommables) catalogueConsommables = data.catalogueConsommables;
+                                if (data.prestationsSauvegardees) prestationsSauvegardees = data.prestationsSauvegardees;
+                                if (data.mouvements) mouvements = data.mouvements;
+                                if (data.stockActuel) stockActuel = data.stockActuel;
+                                if (data.stockMins) stockMins = data.stockMins;
 
-                        saveToStorage();
-                        loadConfig();
-                        renderCatalogue();
-                        renderConsommablesTable();
-                        renderPrestations();
-                        updateStockStats();
-                        renderMouvements();
-                        renderValorisation();
-                        updateStats();
+                                saveToStorage();
+                                loadConfig();
+                                renderCatalogue();
+                                renderConsommablesTable();
+                                renderPrestations();
+                                updateStockStats();
+                                renderMouvements();
+                                renderValorisation();
+                                updateStats();
+                                hideLoading();
+                                toast('✅ Importation réussie!', 'success');
+                            } catch(err) {
+                                hideLoading();
+                                toast(`Erreur lors de l'importation: ${err.message}`, 'error');
+                            }
+                        }, 100);
+                    }, () => hideLoading());
                         toast('✅ Données importées avec succès !', 'success');
                     });
                 } catch(err) {
@@ -8026,7 +8097,7 @@
             if (!checkPermission('export_data')) {
                 return;
             }
-            if (typeof XLSX === 'undefined') { toast('SheetJS non disponible', 'error'); return; }
+            if (typeof XLSX === 'undefined') { toast('📊 Export Excel non disponible. Veuillez recharger la page.', 'error'); return; }
             const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
             const statut = document.getElementById('filtreStatut')?.value || '';
             const client = document.getElementById('filtreClient')?.value || '';
