@@ -3174,7 +3174,10 @@
                                 <div id="statsFreeSpace" style="font-size:1.8em;font-weight:bold;color:#a8d5e2;">--</div>
                             </div>
                         </div>
-                        <button class="btn btn-small" onclick="exportAnalyticsReport()" style="margin-top:15px;width:100%;">📥 Exporter Rapport</button>
+                        <div style="display:flex;gap:10px;margin-top:15px;">
+                            <button class="btn btn-small" onclick="exportAnalyticsReport()" style="flex:1;">📥 Exporter Rapport</button>
+                            <button class="btn btn-small" onclick="switchLogisticsView('2d')" style="flex:1;background:#6b8fa3;color:white;">📍 Retour à la vue 2D</button>
+                        </div>
                     </div>
 
                     <!-- CONFIGURATION RACKS -->
@@ -11079,17 +11082,17 @@
             // Afficher le type de réponse approprié
             if (q.type === 'confirm') {
                 html += `
-                    <button class="btn btn-success" onclick="answerQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui, c'est juste</button>
-                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non, corriger</button>
+                    <button class="btn btn-success" onclick="answerConversationQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui, c'est juste</button>
+                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerConversationQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non, corriger</button>
                 `;
             } else if (q.type === 'yesno') {
                 html += `
-                    <button class="btn btn-success" onclick="answerQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui</button>
-                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non</button>
+                    <button class="btn btn-success" onclick="answerConversationQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui</button>
+                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerConversationQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non</button>
                 `;
             } else if (q.type === 'number') {
                 html += `<input type="number" id="q_${q.id}" value="${q.value}" min="1" max="100" style="width:100px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:1em;margin-right:8px;">
-                    <button class="btn btn-success" onclick="answerQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
+                    <button class="btn btn-success" onclick="answerConversationQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
                 `;
             } else if (q.type === 'select') {
                 html += `<select id="q_${q.id}" style="width:200px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:1em;margin-right:8px;">`;
@@ -11097,7 +11100,7 @@
                     html += `<option ${opt === q.value ? 'selected' : ''}>${opt}</option>`;
                 });
                 html += `</select>
-                    <button class="btn btn-success" onclick="answerQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
+                    <button class="btn btn-success" onclick="answerConversationQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
                 `;
             }
 
@@ -11105,7 +11108,7 @@
             section.innerHTML = html;
         }
 
-        function answerQuestion(index, answer, questions) {
+        function answerConversationQuestion(index, answer, questions) {
             const q = questions[index];
             conversationAnswers[q.id] = answer;
             displayQuestion(questions, index + 1);
@@ -11680,6 +11683,7 @@
         function switchLogisticsView(view) {
             const canvas2D = document.getElementById('logisticsCanvas');
             const canvas3D = document.getElementById('logistics3DContainer');
+            const analyticsDiv = document.getElementById('logisticsAnalyticsContainer');
             const btn2D = document.getElementById('btn2DView');
             const btn3D = document.getElementById('btn3DView');
             const desc = document.getElementById('logisticsDesc');
@@ -11687,6 +11691,7 @@
             if (view === '2d') {
                 canvas2D.style.display = 'block';
                 canvas3D.style.display = 'none';
+                if (analyticsDiv) analyticsDiv.style.display = 'none';
                 btn2D.style.background = '#6b8fa3';
                 btn3D.style.background = '#c9b3d4';
                 desc.textContent = 'Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.';
@@ -11694,6 +11699,7 @@
             } else {
                 canvas2D.style.display = 'none';
                 canvas3D.style.display = 'block';
+                if (analyticsDiv) analyticsDiv.style.display = 'none';
                 btn2D.style.background = '#c9b3d4';
                 btn3D.style.background = '#6b8fa3';
                 desc.textContent = 'Vue 3D interactive de votre entrepôt. Utilisez la souris pour pivoter (clic gauche), zoomer (molette), et déplacer (clic droit).';
@@ -11877,6 +11883,13 @@
                 toast('❌ Ajoutez d\'abord des articles', 'warning');
                 return;
             }
+
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             challengeMode = true;
             challengeStartTime = Date.now();
@@ -12195,6 +12208,13 @@
         }
 
         function showDailyChallenges() {
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
 
@@ -12346,6 +12366,13 @@
         }
 
         function showPlayerStats() {
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const currentCert = CERTIFICATION_LEVELS.find(c => c.minXP <= (playerStats.level - 1) * 500 + playerStats.xp);
             const nextCert = CERTIFICATION_LEVELS.find(c => c.minXP > (playerStats.level - 1) * 500 + playerStats.xp);
             const xpPercent = (playerStats.xp / playerStats.xpNextLevel) * 100;
@@ -12469,6 +12496,13 @@
         }
 
         function showBadges() {
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
 
@@ -12501,6 +12535,13 @@
         }
 
         function showLeaderboard() {
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
 
@@ -12718,8 +12759,14 @@
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
 
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
+
             let html = `
-                <div class="game-menu-container" style="max-width:700px;">
+                <div class="game-menu-container" style="max-width:700px;position:relative;">
+                    <button class="btn btn-icon" onclick="closeGameMenu()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.5em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">✕</button>
                     <div class="game-menu-header">
                         <h2>${info.titre}</h2>
                         <div class="game-menu-subtitle">${info.description}</div>
@@ -12744,7 +12791,7 @@
                         </div>
                     </div>
                     <div class="game-menu-footer">
-                        <button class="btn btn-success" onclick="closeGameMenu();startGame('${gameId}');" style="width:100%;font-size:1.05em;font-weight:700;">▶️ Jouer maintenant!</button>
+                        <button class="btn btn-success" onclick="closeGameMenu();startLogisticsGame('${gameId}');" style="width:100%;font-size:1.05em;font-weight:700;">▶️ Jouer maintenant!</button>
                         <button class="btn btn-secondary" onclick="closeGameMenu();">← Retour</button>
                     </div>
                 </div>
@@ -12760,6 +12807,13 @@
 
             // Définir closeGameMenu AVANT d'ajouter le modal au DOM
             window.closeGameMenu = () => modal.remove();
+
+            // Fermer quand on clique sur le fond (en dehors du conteneur)
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeGameMenu();
+                }
+            });
 
             const trainingGames = [
                 { id: 'apprendre', emoji: '📚', nom: 'Apprentissage', desc: 'Règles de compatibilité' },
@@ -12783,7 +12837,9 @@
             ];
 
             let html = `
-                <div class="game-menu-container">
+                <div class="game-menu-container" style="position:relative;">
+                    <button class="btn btn-icon" onclick="closeGameMenu()" style="position:absolute;top:15px;left:15px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.95em;display:flex;align-items:center;gap:6px;transition:all 0.2s;z-index:10;font-weight:600;color:#333;" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">← Retour</button>
+                    <button class="btn btn-icon" onclick="closeGameMenu()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.5em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">✕</button>
                     <div class="game-menu-header">
                         <h2>🎮 Jeux Logistiques</h2>
                         <div class="game-menu-subtitle">Entraînez-vous et débloquez des récompenses!</div>
@@ -12798,7 +12854,7 @@
                 html += `
                     <div class="game-card" style="position:relative;">
                         <div style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="showGameInfo('${game.id}');event.stopPropagation();" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">ℹ️</div>
-                        <div onclick="closeGameMenu();startGame('${game.id}')" style="cursor:pointer;">
+                        <div onclick="closeGameMenu();startLogisticsGame('${game.id}')" style="cursor:pointer;">
                             <span class="game-card-emoji">${game.emoji}</span>
                             <div class="game-card-name">${game.nom}</div>
                             <div class="game-card-desc">${game.desc}</div>
@@ -12820,7 +12876,7 @@
                 html += `
                     <div class="game-card" style="position:relative;">
                         <div style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="showGameInfo('${game.id}');event.stopPropagation();" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">ℹ️</div>
-                        <div onclick="closeGameMenu();startGame('${game.id}')" style="cursor:pointer;">
+                        <div onclick="closeGameMenu();startLogisticsGame('${game.id}')" style="cursor:pointer;">
                             <span class="game-card-emoji">${game.emoji}</span>
                             <div class="game-card-name">${game.nom}</div>
                             <div class="game-card-desc">${game.desc}</div>
@@ -12842,7 +12898,7 @@
                 html += `
                     <div class="game-card" style="position:relative;">
                         <div style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="showGameInfo('${game.id}');event.stopPropagation();" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">ℹ️</div>
-                        <div onclick="closeGameMenu();startGame('${game.id}')" style="cursor:pointer;">
+                        <div onclick="closeGameMenu();startLogisticsGame('${game.id}')" style="cursor:pointer;">
                             <span class="game-card-emoji">${game.emoji}</span>
                             <div class="game-card-name">${game.nom}</div>
                             <div class="game-card-desc">${game.desc}</div>
@@ -12864,7 +12920,7 @@
                 html += `
                     <div class="game-card" style="position:relative;">
                         <div style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="showGameInfo('${game.id}');event.stopPropagation();" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">ℹ️</div>
-                        <div onclick="closeGameMenu();startGame('${game.id}')" style="cursor:pointer;">
+                        <div onclick="closeGameMenu();startLogisticsGame('${game.id}')" style="cursor:pointer;">
                             <span class="game-card-emoji">${game.emoji}</span>
                             <div class="game-card-name">${game.nom}</div>
                             <div class="game-card-desc">${game.desc}</div>
@@ -12887,7 +12943,7 @@
             document.body.appendChild(modal);
         }
 
-        function startGame(gameType) {
+        function startLogisticsGame(gameType) {
             logisticsGameState.currentGame = gameType;
             logisticsGameState.score = 0;
             logisticsGameState.time = 0;
@@ -12914,13 +12970,45 @@
             }
         }
 
+        function launchLogisticsGame() {
+            // Charger l'état logistique existant
+            loadLogisticState();
+
+            // S'assurer qu'on a des racks/palettes
+            if (logisticState.racks.length === 0 && logisticState.palettes.length === 0) {
+                toast('❌ Vous devez d\'abord créer des racks ou des palettes!', 'danger');
+                return;
+            }
+
+            // Afficher le canvas 2D
+            const canvas = document.getElementById('logisticsCanvas');
+            if (canvas) canvas.style.display = 'block';
+
+            const canvas3D = document.getElementById('logistics3DContainer');
+            if (canvas3D) canvas3D.style.display = 'none';
+
+            // Initialiser les articles disponibles
+            renderLogisticArticlesList();
+
+            // Dessiner le canvas
+            renderLogisticCanvas();
+
+            toast('🎮 Jeu lancé! Glissez les articles sur les racks!', 'success');
+        }
+
         function startLearningMode() {
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
 
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
+
             let html = `
-                <div class="game-menu-container" style="max-width:750px;">
+                <div class="game-menu-container" style="max-width:750px;position:relative;">
+                    <button onclick="closeGameMenu()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.5em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">✕</button>
                     <div class="game-menu-header">
                         <h2>📚 Règles de Compatibilité</h2>
                         <div class="game-menu-subtitle">Apprenez comment placer correctement vos produits</div>
@@ -12971,7 +13059,7 @@
                         </div>
                     </div>
                     <div class="game-menu-footer">
-                        <button class="btn btn-success" onclick="this.closest('.game-menu-overlay').remove();toast('📚 Prêt à commencer!','success');">J'ai compris! ✅</button>
+                        <button class="btn btn-success" onclick="closeGameMenu();launchLogisticsGame();">Commencer! 🚀</button>
                     </div>
                 </div>
             `;
@@ -12986,8 +13074,14 @@
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
 
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
+
             let html = `
-                <div class="game-menu-container" style="max-width:600px;">
+                <div class="game-menu-container" style="max-width:600px;position:relative;">
+                    <button onclick="closeGameMenu()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.5em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">✕</button>
                     <div class="game-menu-header">
                         <h2>🎯 Mode Challenge</h2>
                         <div class="game-menu-subtitle">Placez les produits en respectant les règles de compatibilité</div>
@@ -13021,18 +13115,20 @@
                         </div>
                     </div>
                     <div class="game-menu-footer">
-                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();logisticsGameState.currentGame=null;">Fermer</button>
+                        <button class="btn btn-success" onclick="closeGameMenu();launchLogisticsGame();">Lancer le Challenge! 🚀</button>
+                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();logisticsGameState.currentGame=null;">Annuler</button>
                     </div>
                 </div>
             `;
 
             modal.innerHTML = html;
             document.body.appendChild(modal);
-            toast('🎯 Mode Challenge lancé! Respectez les règles!', 'success');
         }
 
         function startPuzzleGame() {
-            gameState.reglesActives = true;
+            logisticsGameState.reglesActives = true;
+            if (window.closeGameMenu) closeGameMenu();
+            launchLogisticsGame();
             toast('🧩 Mode Puzzle: Résolvez la configuration optimale!', 'info');
         }
 
@@ -13044,8 +13140,14 @@
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
 
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
+
             let html = `
-                <div class="game-menu-container" style="max-width:600px;">
+                <div class="game-menu-container" style="max-width:600px;position:relative;">
+                    <button onclick="closeGameMenu()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.5em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">✕</button>
                     <div class="game-menu-header" style="background:linear-gradient(135deg,#ff6b6b,#ff5252);">
                         <h2>⚡ Mode Speed!</h2>
                         <div class="game-menu-subtitle">Placez 10 produits contre la montre!</div>
@@ -13085,7 +13187,7 @@
                         </div>
                     </div>
                     <div class="game-menu-footer" style="flex-direction:column;gap:10px;">
-                        <button class="btn btn-success" onclick="this.closest('.game-menu-overlay').remove();startSpeedTimer();" style="width:100%;font-size:1.05em;font-weight:700;padding:13px;">🚀 C'est parti!</button>
+                        <button class="btn btn-success" onclick="closeGameMenu();launchLogisticsGame();startSpeedTimer();" style="width:100%;font-size:1.05em;font-weight:700;padding:13px;">🚀 C'est parti!</button>
                         <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();logisticsGameState.currentGame=null;">Annuler</button>
                     </div>
                 </div>
@@ -13190,10 +13292,16 @@
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
 
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
+
             const progressPercent = ((quizState.currentQuestion + 1) / QUESTIONS_LOGISTIQUE.length) * 100;
 
             let html = `
-                <div class="game-menu-container" style="max-width:650px;">
+                <div class="game-menu-container" style="max-width:650px;position:relative;">
+                    <button onclick="closeGameMenu()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.5em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;" onmouseover="this.style.background='white';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.9)';this.style.boxShadow='none';">✕</button>
                     <div class="game-menu-header">
                         <h2>❓ Quiz Logistique</h2>
                         <div class="game-menu-subtitle">Question ${quizState.currentQuestion + 1} sur ${QUESTIONS_LOGISTIQUE.length}</div>
@@ -13351,6 +13459,10 @@
         }
 
         function showLogisticsAnalytics() {
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const canvas2D = document.getElementById('logisticsCanvas');
             const canvas3D = document.getElementById('logistics3DContainer');
             const analyticsDiv = document.getElementById('logisticsAnalyticsContainer');
