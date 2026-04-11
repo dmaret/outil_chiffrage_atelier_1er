@@ -2218,6 +2218,21 @@
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
                     <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
                 </div>
+
+                <div class="section">
+                    <h2>🎬 Films de formation</h2>
+                    <p style="color:#7a9db1;margin-bottom:12px;">Liez des vidéos aux gestes pour faciliter l'apprentissage</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Sélectionner un geste</label>
+                            <select id="filmGesteSelect">
+                                <option value="">-- Choisir un geste --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="filmGesteContainer" style="display:grid;gap:12px;margin-top:12px;"></div>
+                    <div id="noGesteSelectedMsg" style="color:#7a9db1;text-align:center;padding:20px;">Sélectionnez un geste pour voir et gérer ses vidéos</div>
+                </div>
             </div>
 
             <!-- ONGLET CONSOMMABLES -->
@@ -5519,7 +5534,72 @@
             const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
             referenceDocuments = saved;
             renderReferenceDocuments();
+            loadFormationFilms();
         }
+
+        function loadFormationFilms() {
+            const select = document.getElementById('filmGesteSelect');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Choisir un geste --</option>';
+            catalogueGestes.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g.code;
+                opt.textContent = `${g.code} — ${g.description}`;
+                select.appendChild(opt);
+            });
+            select.onchange = () => renderFilmsForGeste(select.value);
+        }
+
+        function renderFilmsForGeste(gesteCode) {
+            const container = document.getElementById('filmGesteContainer');
+            const noMsg = document.getElementById('noGesteSelectedMsg');
+
+            if (!gesteCode) {
+                container.innerHTML = '';
+                noMsg.style.display = 'block';
+                return;
+            }
+
+            const geste = catalogueGestes.find(g => g.code === gesteCode);
+            if (!geste) return;
+
+            noMsg.style.display = 'none';
+            const linkedDocs = (geste.linkedDocs || []).map(id => referenceDocuments.find(d => d.id === id)).filter(Boolean);
+            const availableDocs = referenceDocuments.filter(d => !(geste.linkedDocs || []).includes(d.id) && (d.type === 'video' || d.fileName?.match(/\.(mp4|webm|mov)$/i)));
+
+            let html = `
+                <div>
+                    <h4 style="margin-top:0;">${geste.code} — ${geste.description}</h4>
+                    ${linkedDocs.length > 0 ? `
+                    <div style="margin-bottom:16px;">
+                        <p style="font-size:0.9em;color:#555;font-weight:bold;">📎 Vidéos liées :</p>
+                        <div style="display:grid;gap:8px;">
+                            ${linkedDocs.map(d => `
+                                <div style="background:#f0f8ff;padding:10px;border-radius:4px;display:flex;justify-content:space-between;align-items:center;">
+                                    <span>🎬 ${d.title}</span>
+                                    <button onclick="toggleGesteDocLink('${gesteCode}',${d.id}); renderFilmsForGeste('${gesteCode}');" style="border:none;background:none;cursor:pointer;color:#c00;font-size:0.9em;padding:0 2px;" title="Retirer">✕</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : '<p style="color:#999;font-size:0.9em;">Aucune vidéo liée pour le moment</p>'}
+                    ${availableDocs.length > 0 ? `
+                    <button class="btn btn-small" onclick="openFilmModal('${gesteCode}')">➕ Ajouter vidéo</button>
+                    ` : ''}
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function openFilmModal(gesteCode) {
+            currentGesteCode = gesteCode;
+            document.getElementById('linkDocsModalTitle').textContent = `🎬 Ajouter film au geste ${gesteCode}`;
+            document.getElementById('docSearchInput').value = '';
+            filterFilmsList();
+            document.getElementById('linkDocsModal').style.display = 'flex';
+        }
+
 
         function addReferenceDocument() {
             const title = document.getElementById('docTitle')?.value.trim();
