@@ -9340,6 +9340,24 @@
             }
         }
 
+        function accessLogisticsDemo() {
+            // Access logistics module without login (guest mode)
+            sessionStorage.setItem('authSession', JSON.stringify({ id: 'guest', name: 'Invité' }));
+            currentUserSession = { id: 'guest', name: 'Invité' };
+
+            // Create a guest auth group with access to logistics only
+            const guestGroup = {
+                id: 'guest',
+                name: 'Invité',
+                tabs: ['logistique']
+            };
+
+            document.getElementById('authOverlay').style.display = 'none';
+            applyAuthGroup(guestGroup);
+            switchTab('logistique');
+            toast('🚀 Mode logistique - Accès rapide', 'success');
+        }
+
         function doLogin() {
             const groupId = document.getElementById('authGroupSelect')?.value;
             const password = document.getElementById('authPasswordInput')?.value;
@@ -12621,6 +12639,18 @@
                     ✏️ Démarrer l'assistant
                 </button>
                 <p class="training-footer">Outil d'entraînement parallèle • Intégrable à l'outil complet</p>
+            </div>
+
+            <!-- Container 3: Module Logistique - Accès rapide -->
+            <div class="logistics-box" style="background:linear-gradient(135deg,#a8d5e2 0%,#c4b5fd 100%);padding:28px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.1);display:flex;flex-direction:column;align-items:center;text-align:center;min-width:280px;">
+                <div style="font-size:2.8em;margin-bottom:6px;">🏭</div>
+                <h2 style="color:#2d3e50;margin:8px 0;">Gestion Logistique</h2>
+                <h3 style="font-size: 1.1em; color: #5a7b8f; margin-bottom: 12px;">Entrepôt 2D</h3>
+                <p class="training-subtitle" style="color:#5a7b8f;font-size:0.9em;">Visualisez et gérez vos racks, palettes, entrées/sorties en temps réel</p>
+                <button class="btn-training" onclick="accessLogisticsDemo()" style="background:linear-gradient(135deg,#6b8fa3 0%,#4a6fa5 100%);color:white;margin-top:12px;">
+                    🚀 Accès rapide
+                </button>
+                <p class="training-footer" style="color:#5a7b8f;font-size:0.85em;">Mode lecture • Démo interactive</p>
             </div>
         </div>
     </div>
