@@ -766,6 +766,104 @@
         .devis-num { font-size:1.8em; font-weight:bold; color:#2d3e50; }
         .devis-footer { text-align:center; font-size:0.8em; color:#999; margin-top:30px; border-top:1px solid #eee; padding-top:15px; }
 
+        /* ── Footer Legal ─────────────────────────────────── */
+        .footer-legal {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+        .footer-legal strong { color: #333; }
+        .footer-legal a {
+            color: #6b8fa3;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .footer-legal a:hover { color: #a8d5e2; text-decoration: underline; }
+
+        /* ── Modal Conditions ─────────────────────────────────── */
+        .modal-conditions {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal-conditions.show { display: flex; }
+        .modal-conditions-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s;
+        }
+        .modal-conditions-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2d3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #a8d5e2;
+            padding-bottom: 10px;
+        }
+        .modal-conditions-body {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #666;
+        }
+        .modal-conditions-body p {
+            margin-bottom: 15px;
+        }
+        .modal-conditions-body ul {
+            margin: 15px 0 15px 20px;
+            list-style-type: disc;
+        }
+        .modal-conditions-body li {
+            margin-bottom: 8px;
+        }
+        .modal-conditions-body strong {
+            color: #333;
+            font-weight: 600;
+        }
+        .modal-conditions-close {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .modal-conditions-close button {
+            background: #a8d5e2;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .modal-conditions-close button:hover {
+            background: #6b8fa3;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
         /* Alert banner */
         .alert-banner { background: #fff3cd; border-left: 4px solid #f39c12; padding: 12px 20px; margin-bottom: 15px; border-radius: 6px; font-size: 0.88em; }
         .alert-banner.danger { background: #fde8e8; border-left-color: #e74c3c; }
@@ -11178,6 +11276,39 @@
             toast(`✅ Prestation importée! Référence: ${reportData.reference}`, 'success');
         }
 
+        /* ── Modal Conditions d'utilisation ─────────────────────────────────── */
+        function openConditionsModal(event) {
+            if (event) event.preventDefault();
+            const modal = document.getElementById('conditionsModal');
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeConditionsModal() {
+            const modal = document.getElementById('conditionsModal');
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Fermer la modale si on clique en dehors
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('conditionsModal');
+            if (event.target === modal) {
+                closeConditionsModal();
+            }
+        });
+
+        // Fermer avec la touche Escape
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeConditionsModal();
+            }
+        });
+
     </script>
 
     <!-- Auth : écran de connexion -->
@@ -11372,16 +11503,33 @@
     </div>
 <div class="toast-container" id="toast-container"></div>
 <!-- Legal notice and copyright -->
-<div class="footer-legal" style="margin-top:40px;padding:20px;background:#f9f9f9;border-top:1px solid #ddd;font-size:10px;color:#666;line-height:1.6;text-align:center;">
-  <strong style="color:#333;">© 2025–2026 MARET Davie — Tous droits réservés</strong><br>
-  <br>
-  <strong style="color:#555;">Conditions d'utilisation du code :</strong><br>
-  • Le code source de ces projets est fourni à titre informatif et éducatif<br>
-  • Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite<br>
-  • Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur<br>
-  • Pour toute demande de réutilisation ou de collaboration, contactez l'auteur<br>
-  <br>
-  <strong style="color:#555;">Attribution :</strong> Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret © 2025–2026
+<div class="footer-legal">
+  <strong>© 2025–2026 MARET Davie — Tous droits réservés.</strong> Toute reproduction ou utilisation de ce logiciel sans accord préalable écrit est interdite. <a onclick="openConditionsModal(event)">Voir les conditions d'utilisation</a>
+</div>
+
+<!-- Modal Conditions d'utilisation -->
+<div class="modal-conditions" id="conditionsModal">
+  <div class="modal-conditions-content">
+    <div class="modal-conditions-header">
+      Conditions d'utilisation
+    </div>
+    <div class="modal-conditions-body">
+      <p><strong style="font-size: 1.1em;">© 2025–2026 MARET Davie — Tous droits réservés</strong></p>
+
+      <p><strong>Conditions d'utilisation du code :</strong></p>
+      <ul>
+        <li>Le code source de ces projets est fourni à titre informatif et éducatif</li>
+        <li>Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite</li>
+        <li>Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur</li>
+        <li>Pour toute demande de réutilisation ou de collaboration, contactez l'auteur</li>
+      </ul>
+
+      <p><strong>Attribution :</strong> Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret © 2025–2026</p>
+    </div>
+    <div class="modal-conditions-close">
+      <button onclick="closeConditionsModal()">Fermer</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>
