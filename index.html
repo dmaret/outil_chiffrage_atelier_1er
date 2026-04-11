@@ -1463,6 +1463,7 @@
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
+                <button class="tab" onclick="switchTab('logistique')">🏭 Logistique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
@@ -2912,6 +2913,142 @@
                         </div>
                     </div>
                     <button class="btn btn-success" onclick="saveGanttDates()">💾 Enregistrer les dates</button>
+                </div>
+            </div>
+
+            <!-- ONGLET LOGISTIQUE -->
+            <div id="logistique" class="tab-content">
+                <div class="section">
+                    <h2>🏭 Gestion Logistique 2D</h2>
+                    <p style="color:#666;margin-bottom:15px;">Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.</p>
+
+                    <!-- CONFIGURATION RACKS -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;">
+                        <div>
+                            <h3>Configuration Racks</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Ajouter un rack</label>
+                                    <input type="text" id="rackName" placeholder="ex: RACK-A1" style="width:120px;">
+                                    <button class="btn btn-small" onclick="addRack()" style="margin-top:0;">➕ Ajouter</button>
+                                </div>
+                            </div>
+                            <div id="racksList" style="margin-top:10px;max-height:200px;overflow-y:auto;"></div>
+                        </div>
+                        <div>
+                            <h3>Configuration Palettes</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Ajouter une palette</label>
+                                    <input type="text" id="paletteName" placeholder="ex: PALETTE-01" style="width:140px;">
+                                    <button class="btn btn-small" onclick="addPalette()" style="margin-top:0;">➕ Ajouter</button>
+                                </div>
+                            </div>
+                            <div id="palettesList" style="margin-top:10px;max-height:200px;overflow-y:auto;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ZOOM ET CONTRÔLES -->
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+                        <label>Zoom : <input type="range" id="zoomRange" min="0.5" max="2" step="0.1" value="1" onchange="updateLogisticZoom()" style="width:120px;"></label>
+                        <span id="zoomLabel">100%</span>
+                        <button class="btn btn-secondary btn-small" onclick="resetLogisticView()">🔄 Réinitialiser vue</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportLogisticLayout()">💾 Sauver plan</button>
+                        <button class="btn btn-secondary btn-small" onclick="importLogisticLayout()">📂 Charger plan</button>
+                    </div>
+                </div>
+
+                <!-- CANVAS 2D PRINCIPAL -->
+                <div class="section" style="padding:0;border:none;background:#f9f9f9;">
+                    <canvas id="logisticCanvas" width="1200" height="600" style="border:2px solid #a8d5e2;background:white;cursor:move;display:block;margin:0 auto;border-radius:8px;"></canvas>
+                </div>
+
+                <!-- ZONE D'ARTICLES DISPONIBLES (DRAG SOURCE) -->
+                <div class="section">
+                    <h2>📦 Articles disponibles (Glissez-déposez sur le plan)</h2>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                        <input type="text" id="logisticSearchArticle" placeholder="Rechercher article..." style="flex:1;min-width:200px;">
+                        <button class="btn btn-small" onclick="refreshLogisticArticles()">🔄 Actualiser</button>
+                    </div>
+                    <div id="logisticArticlesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;"></div>
+                </div>
+
+                <!-- PANNEAU INFOS PLACEMENT -->
+                <div class="section">
+                    <h2>ℹ️ Infos Placement</h2>
+                    <div id="logisticInfoPanel" style="background:#e8f4f8;padding:15px;border-radius:8px;color:#555;min-height:100px;">
+                        <p style="color:#999;">Sélectionnez un article sur le plan pour voir ses détails</p>
+                    </div>
+                </div>
+
+                <!-- MOUVEMENTS STOCK -->
+                <div class="section">
+                    <h2>🔄 Mouvements Stock</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Type de mouvement</label>
+                            <select id="logisticMoveType" onchange="updateLogisticMoveForm()">
+                                <option value="entree">📥 Entrée</option>
+                                <option value="sortie">📤 Sortie</option>
+                                <option value="transfert">↔️ Transfert</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Article</label>
+                            <select id="logisticMoveArticle"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantité</label>
+                            <input type="number" id="logisticMoveQty" min="1" value="1">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" id="logisticMoveSourceGroup">
+                            <label>Emplacement source</label>
+                            <select id="logisticMoveSource"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Emplacement destination</label>
+                            <select id="logisticMoveDest"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="logisticMoveDate">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Responsable</label>
+                            <input type="text" id="logisticMoveResponsable" value="Davie Maret">
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <input type="text" id="logisticMoveNotes" placeholder="Notes...">
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="saveLogisticMove()">✅ Enregistrer mouvement</button>
+                </div>
+
+                <!-- ALERTES ET STATISTIQUES -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+                    <div class="section">
+                        <h2>⚠️ Alertes Stock</h2>
+                        <div id="logisticAlerts" style="min-height:100px;"></div>
+                    </div>
+                    <div class="section">
+                        <h2>📊 Statistiques</h2>
+                        <div id="logisticStats" style="min-height:100px;"></div>
+                    </div>
+                </div>
+
+                <!-- HISTORIQUE MOUVEMENTS -->
+                <div class="section">
+                    <h2>📝 Historique Mouvements</h2>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input type="text" id="logisticHistoryFilter" placeholder="Filtrer..." style="flex:1;">
+                        <button class="btn btn-small" onclick="logisticClearHistory()">🗑️ Effacer</button>
+                    </div>
+                    <div id="logisticHistoryList" style="max-height:300px;overflow-y:auto;"></div>
                 </div>
             </div>
 
@@ -11090,6 +11227,581 @@
 
             // Message de confirmation
             toast(`✅ Prestation importée! Référence: ${reportData.reference}`, 'success');
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // MODULE LOGISTIQUE 2D — GESTION RACKS ET PALETTES
+        // ═══════════════════════════════════════════════════════════════
+
+        let logisticState = {
+            racks: [],
+            palettes: [],
+            placements: {}, // { rackId: { articleId: qty, ... }, ... }
+            movements: [],
+            zoomLevel: 1,
+            selectedItem: null,
+            canvasOffsetX: 0,
+            canvasOffsetY: 0,
+            isDraggingCanvas: false,
+            dragStartX: 0,
+            dragStartY: 0
+        };
+
+        function loadLogisticState() {
+            try {
+                const saved = localStorage.getItem('logisticState');
+                if (saved) {
+                    logisticState = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Erreur chargement logistique:', e);
+            }
+        }
+
+        function saveLogisticState() {
+            try {
+                localStorage.setItem('logisticState', JSON.stringify(logisticState));
+            } catch (e) {
+                console.error('Erreur sauvegarde logistique:', e);
+            }
+        }
+
+        function addRack() {
+            const name = document.getElementById('rackName').value.trim();
+            if (!name) {
+                toast('❌ Veuillez entrer un nom de rack', 'danger');
+                return;
+            }
+            const rackId = 'RACK_' + Date.now();
+            logisticState.racks.push({ id: rackId, name: name, capacity: 1000 });
+            logisticState.placements[rackId] = {};
+            saveLogisticState();
+            document.getElementById('rackName').value = '';
+            renderLogisticRacks();
+            renderLogisticCanvas();
+        }
+
+        function addPalette() {
+            const name = document.getElementById('paletteName').value.trim();
+            if (!name) {
+                toast('❌ Veuillez entrer un nom de palette', 'danger');
+                return;
+            }
+            const paletteId = 'PALETTE_' + Date.now();
+            logisticState.palettes.push({ id: paletteId, name: name, capacity: 500 });
+            logisticState.placements[paletteId] = {};
+            saveLogisticState();
+            document.getElementById('paletteName').value = '';
+            renderLogisticPalettes();
+            renderLogisticCanvas();
+        }
+
+        function deleteRack(rackId) {
+            if (!confirm('Supprimer ce rack?')) return;
+            logisticState.racks = logisticState.racks.filter(r => r.id !== rackId);
+            delete logisticState.placements[rackId];
+            saveLogisticState();
+            renderLogisticRacks();
+            renderLogisticCanvas();
+        }
+
+        function deletePalette(paletteId) {
+            if (!confirm('Supprimer cette palette?')) return;
+            logisticState.palettes = logisticState.palettes.filter(p => p.id !== paletteId);
+            delete logisticState.placements[paletteId];
+            saveLogisticState();
+            renderLogisticPalettes();
+            renderLogisticCanvas();
+        }
+
+        function renderLogisticRacks() {
+            const list = document.getElementById('racksList');
+            list.innerHTML = logisticState.racks.map(rack => {
+                const qty = Object.values(logisticState.placements[rack.id] || {}).reduce((a,b) => a+b, 0);
+                const used = Math.round((qty / rack.capacity) * 100);
+                return `<div style="padding:8px;background:#f5f9fc;margin-bottom:6px;border-radius:6px;border-left:4px solid #a8d5e2;display:flex;justify-content:space-between;align-items:center;font-size:0.85em;">
+                    <div><strong>${escapeHtml(rack.name)}</strong><br><span style="color:#999;">${qty}/${rack.capacity} (${used}%)</span></div>
+                    <button class="delete-btn" onclick="deleteRack('${rack.id}')">🗑️</button>
+                </div>`;
+            }).join('');
+        }
+
+        function renderLogisticPalettes() {
+            const list = document.getElementById('palettesList');
+            list.innerHTML = logisticState.palettes.map(palette => {
+                const qty = Object.values(logisticState.placements[palette.id] || {}).reduce((a,b) => a+b, 0);
+                const used = Math.round((qty / palette.capacity) * 100);
+                return `<div style="padding:8px;background:#f0f5f8;margin-bottom:6px;border-radius:6px;border-left:4px solid #b8d4e8;display:flex;justify-content:space-between;align-items:center;font-size:0.85em;">
+                    <div><strong>${escapeHtml(palette.name)}</strong><br><span style="color:#999;">${qty}/${palette.capacity} (${used}%)</span></div>
+                    <button class="delete-btn" onclick="deletePalette('${palette.id}')">🗑️</button>
+                </div>`;
+            }).join('');
+        }
+
+        function renderLogisticCanvas() {
+            const canvas = document.getElementById('logisticCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(logisticState.canvasOffsetX, logisticState.canvasOffsetY);
+            ctx.scale(logisticState.zoomLevel, logisticState.zoomLevel);
+
+            // Grille et repères
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < 1200; i += 100) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, 600);
+                ctx.stroke();
+            }
+            for (let i = 0; i < 600; i += 100) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(1200, i);
+                ctx.stroke();
+            }
+
+            // Racks et palettes
+            let x = 50, y = 50;
+            const boxWidth = 150, boxHeight = 120;
+            const spacing = 30;
+
+            logisticState.racks.forEach((rack, idx) => {
+                drawLocationBox(ctx, x + (idx % 4) * (boxWidth + spacing), y + Math.floor(idx / 4) * (boxHeight + spacing + 50),
+                               boxWidth, boxHeight, rack, '#a8d5e2');
+            });
+
+            logisticState.palettes.forEach((palette, idx) => {
+                const startY = y + Math.ceil(logisticState.racks.length / 4) * (boxHeight + spacing + 50);
+                drawLocationBox(ctx, x + (idx % 4) * (boxWidth + spacing), startY + Math.floor(idx / 4) * (boxHeight + spacing + 50),
+                               boxWidth, boxHeight, palette, '#b8d4e8');
+            });
+
+            ctx.restore();
+        }
+
+        function drawLocationBox(ctx, x, y, w, h, location, color) {
+            const isSelected = logisticState.selectedItem?.id === location.id;
+            ctx.fillStyle = isSelected ? '#fffacd' : 'white';
+            ctx.strokeStyle = isSelected ? '#ff9900' : color;
+            ctx.lineWidth = isSelected ? 3 : 2;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(location.name, x + 10, y + 20);
+
+            const qty = Object.values(logisticState.placements[location.id] || {}).reduce((a,b) => a+b, 0);
+            const pct = Math.round((qty / location.capacity) * 100);
+            ctx.font = '12px Arial';
+            ctx.fillText(`${qty}/${location.capacity} (${pct}%)`, x + 10, y + 40);
+
+            // Barre de capacité
+            ctx.fillStyle = pct > 80 ? '#ff6b6b' : pct > 60 ? '#ffa500' : '#4caf50';
+            ctx.fillRect(x + 10, y + 50, (w - 20) * (pct / 100), 15);
+            ctx.strokeStyle = '#999';
+            ctx.strokeRect(x + 10, y + 50, w - 20, 15);
+        }
+
+        function updateLogisticZoom() {
+            logisticState.zoomLevel = parseFloat(document.getElementById('zoomRange').value);
+            document.getElementById('zoomLabel').textContent = Math.round(logisticState.zoomLevel * 100) + '%';
+            renderLogisticCanvas();
+        }
+
+        function resetLogisticView() {
+            logisticState.zoomLevel = 1;
+            logisticState.canvasOffsetX = 0;
+            logisticState.canvasOffsetY = 0;
+            document.getElementById('zoomRange').value = 1;
+            document.getElementById('zoomLabel').textContent = '100%';
+            renderLogisticCanvas();
+        }
+
+        function refreshLogisticArticles() {
+            renderLogisticArticlesList();
+            renderLogisticMoveForm();
+        }
+
+        function renderLogisticArticlesList() {
+            try {
+                const searchVal = document.getElementById('logisticSearchArticle').value.toLowerCase();
+                const articles = [];
+
+                // Récupérer du catalogue de consommables
+                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
+                conso.forEach(c => {
+                    if (c.designation.toLowerCase().includes(searchVal) || c.reference.toLowerCase().includes(searchVal)) {
+                        articles.push({ id: 'CONSO_' + c.id, name: c.designation, type: 'Consommable', qty: 0 });
+                    }
+                });
+
+                // Récupérer du stock
+                const stock = JSON.parse(localStorage.getItem('stockActuel') || '{}');
+                Object.entries(stock).forEach(([artId, info]) => {
+                    if (info.designation.toLowerCase().includes(searchVal)) {
+                        articles.push({ id: artId, name: info.designation, type: 'Stock', qty: info.quantite || 0 });
+                    }
+                });
+
+                const list = document.getElementById('logisticArticlesList');
+                list.innerHTML = articles.length === 0
+                    ? '<p style="grid-column:1/-1;color:#999;text-align:center;padding:20px;">Aucun article trouvé</p>'
+                    : articles.map(a => `
+                        <div draggable="true" ondragstart="logisticDragStart(event, '${a.id}', '${a.name}')"
+                             style="padding:10px;background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border-radius:8px;cursor:move;border:2px solid #a8d5e2;transition:all 0.2s;"
+                             onmouseover="this.style.boxShadow='0 4px 12px rgba(168,213,226,0.3)'" onmouseout="this.style.boxShadow='none'">
+                            <strong style="display:block;font-size:0.9em;">${escapeHtml(a.name)}</strong>
+                            <span style="font-size:0.75em;color:#666;">${a.type} • Qty: ${a.qty}</span>
+                        </div>
+                    `).join('');
+            } catch (e) {
+                console.error('Erreur articles:', e);
+            }
+        }
+
+        function logisticDragStart(e, articleId, articleName) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('articleId', articleId);
+            e.dataTransfer.setData('articleName', articleName);
+        }
+
+        // Canvas drag & drop
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const canvas = document.getElementById('logisticCanvas');
+                if (canvas) {
+                    canvas.addEventListener('dragover', e => e.preventDefault());
+                    canvas.addEventListener('drop', logisticCanvasDrop);
+                    canvas.addEventListener('mousedown', logisticCanvasMouseDown);
+                    canvas.addEventListener('mousemove', logisticCanvasMouseMove);
+                    canvas.addEventListener('mouseup', logisticCanvasMouseUp);
+                    canvas.addEventListener('click', logisticCanvasClick);
+                }
+                loadLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                refreshLogisticArticles();
+                renderLogisticMoveForm();
+                renderLogisticHistory();
+            }, 500);
+        });
+
+        function logisticCanvasDrop(e) {
+            e.preventDefault();
+            const canvas = e.target;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left - logisticState.canvasOffsetX) / logisticState.zoomLevel;
+            const y = (e.clientY - rect.top - logisticState.canvasOffsetY) / logisticState.zoomLevel;
+
+            const articleId = e.dataTransfer.getData('articleId');
+            const articleName = e.dataTransfer.getData('articleName');
+
+            // Trouver le rack/palette au clic
+            const location = findLocationAtCoords(x, y);
+            if (location) {
+                if (!logisticState.placements[location.id]) logisticState.placements[location.id] = {};
+                logisticState.placements[location.id][articleId] = (logisticState.placements[location.id][articleId] || 0) + 1;
+                saveLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                toast(`✅ ${articleName} ajouté à ${location.name}`, 'success');
+            }
+        }
+
+        function findLocationAtCoords(x, y) {
+            // Chercher dans les racks et palettes
+            const allLocations = [...logisticState.racks, ...logisticState.palettes];
+            const boxWidth = 150, boxHeight = 120, spacing = 30;
+            let x_start = 50, y_start = 50;
+
+            for (let i = 0; i < logisticState.racks.length; i++) {
+                const rx = x_start + (i % 4) * (boxWidth + spacing);
+                const ry = y_start + Math.floor(i / 4) * (boxHeight + spacing + 50);
+                if (x >= rx && x < rx + boxWidth && y >= ry && y < ry + boxHeight) {
+                    return logisticState.racks[i];
+                }
+            }
+
+            const paletteStartY = y_start + Math.ceil(logisticState.racks.length / 4) * (boxHeight + spacing + 50);
+            for (let i = 0; i < logisticState.palettes.length; i++) {
+                const px = x_start + (i % 4) * (boxWidth + spacing);
+                const py = paletteStartY + Math.floor(i / 4) * (boxHeight + spacing + 50);
+                if (x >= px && x < px + boxWidth && y >= py && y < py + boxHeight) {
+                    return logisticState.palettes[i];
+                }
+            }
+            return null;
+        }
+
+        function logisticCanvasMouseDown(e) {
+            logisticState.isDraggingCanvas = true;
+            logisticState.dragStartX = e.clientX;
+            logisticState.dragStartY = e.clientY;
+        }
+
+        function logisticCanvasMouseMove(e) {
+            if (logisticState.isDraggingCanvas) {
+                const dx = e.clientX - logisticState.dragStartX;
+                const dy = e.clientY - logisticState.dragStartY;
+                logisticState.canvasOffsetX += dx;
+                logisticState.canvasOffsetY += dy;
+                logisticState.dragStartX = e.clientX;
+                logisticState.dragStartY = e.clientY;
+                renderLogisticCanvas();
+            }
+        }
+
+        function logisticCanvasMouseUp() {
+            logisticState.isDraggingCanvas = false;
+        }
+
+        function logisticCanvasClick(e) {
+            const canvas = e.target;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left - logisticState.canvasOffsetX) / logisticState.zoomLevel;
+            const y = (e.clientY - rect.top - logisticState.canvasOffsetY) / logisticState.zoomLevel;
+
+            const location = findLocationAtCoords(x, y);
+            logisticState.selectedItem = location;
+            if (location) {
+                updateLogisticInfo(location);
+            }
+            renderLogisticCanvas();
+        }
+
+        function updateLogisticInfo(location) {
+            const placements = logisticState.placements[location.id] || {};
+            const html = `
+                <strong>${escapeHtml(location.name)}</strong><br>
+                <span style="color:#666;">Capacité: ${location.capacity} unités</span><br><br>
+                <strong>Articles:</strong><br>
+                ${Object.entries(placements).map(([artId, qty]) => {
+                    const article = logisticState.racks.concat(logisticState.palettes).find(r => r.id === artId);
+                    return `<div style="padding:4px;background:#fff;margin:2px 0;border-radius:4px;">
+                        <span>${artId} × ${qty}</span>
+                        <button class="btn-small" onclick="removeArticleFromLocation('${location.id}', '${artId}')" style="float:right;padding:2px 6px;font-size:0.75em;">Remove</button>
+                    </div>`;
+                }).join('') || '<span style="color:#999;">Vide</span>'}
+            `;
+            document.getElementById('logisticInfoPanel').innerHTML = html;
+        }
+
+        function removeArticleFromLocation(locationId, articleId) {
+            if (logisticState.placements[locationId] && logisticState.placements[locationId][articleId]) {
+                logisticState.placements[locationId][articleId]--;
+                if (logisticState.placements[locationId][articleId] <= 0) {
+                    delete logisticState.placements[locationId][articleId];
+                }
+                saveLogisticState();
+                renderLogisticCanvas();
+                if (logisticState.selectedItem) {
+                    updateLogisticInfo(logisticState.selectedItem);
+                }
+                toast('✅ Article supprimé', 'success');
+            }
+        }
+
+        function renderLogisticMoveForm() {
+            try {
+                const articles = [];
+                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
+                conso.forEach(c => articles.push({ id: 'CONSO_' + c.id, name: c.designation }));
+                const stock = JSON.parse(localStorage.getItem('stockActuel') || '{}');
+                Object.entries(stock).forEach(([id, info]) => articles.push({ id: id, name: info.designation }));
+
+                const moveType = document.getElementById('logisticMoveType').value;
+                const sourceGroup = document.getElementById('logisticMoveSourceGroup');
+                sourceGroup.style.display = moveType === 'entree' ? 'none' : 'block';
+
+                document.getElementById('logisticMoveArticle').innerHTML = articles.map(a =>
+                    `<option value="${a.id}">${escapeHtml(a.name)}</option>`
+                ).join('');
+
+                const locations = [...logisticState.racks, ...logisticState.palettes].map(l =>
+                    `<option value="${l.id}">${escapeHtml(l.name)}</option>`
+                ).join('');
+
+                document.getElementById('logisticMoveSource').innerHTML = locations;
+                document.getElementById('logisticMoveDest').innerHTML = locations;
+
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('logisticMoveDate').value = today;
+            } catch (e) {
+                console.error('Erreur form:', e);
+            }
+        }
+
+        function updateLogisticMoveForm() {
+            renderLogisticMoveForm();
+        }
+
+        function saveLogisticMove() {
+            try {
+                const moveType = document.getElementById('logisticMoveType').value;
+                const articleId = document.getElementById('logisticMoveArticle').value;
+                const qty = parseInt(document.getElementById('logisticMoveQty').value) || 1;
+                const source = document.getElementById('logisticMoveSource').value;
+                const dest = document.getElementById('logisticMoveDest').value;
+                const date = document.getElementById('logisticMoveDate').value;
+                const resp = document.getElementById('logisticMoveResponsable').value;
+                const notes = document.getElementById('logisticMoveNotes').value;
+
+                if (!articleId || !dest) {
+                    toast('❌ Champs manquants', 'danger');
+                    return;
+                }
+
+                const movement = {
+                    id: 'MOV_' + Date.now(),
+                    type: moveType,
+                    article: articleId,
+                    qty: qty,
+                    source: source || null,
+                    dest: dest,
+                    date: date,
+                    responsable: resp,
+                    notes: notes,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Appliquer le mouvement
+                if (moveType === 'entree') {
+                    if (!logisticState.placements[dest]) logisticState.placements[dest] = {};
+                    logisticState.placements[dest][articleId] = (logisticState.placements[dest][articleId] || 0) + qty;
+                } else if (moveType === 'sortie' && source) {
+                    if (logisticState.placements[source] && logisticState.placements[source][articleId]) {
+                        logisticState.placements[source][articleId] -= qty;
+                        if (logisticState.placements[source][articleId] <= 0) {
+                            delete logisticState.placements[source][articleId];
+                        }
+                    }
+                } else if (moveType === 'transfert' && source) {
+                    if (logisticState.placements[source] && logisticState.placements[source][articleId]) {
+                        logisticState.placements[source][articleId] -= qty;
+                        if (logisticState.placements[source][articleId] <= 0) {
+                            delete logisticState.placements[source][articleId];
+                        }
+                        if (!logisticState.placements[dest]) logisticState.placements[dest] = {};
+                        logisticState.placements[dest][articleId] = (logisticState.placements[dest][articleId] || 0) + qty;
+                    }
+                }
+
+                logisticState.movements.push(movement);
+                saveLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                renderLogisticHistory();
+                renderLogisticAlerts();
+                toast('✅ Mouvement enregistré', 'success');
+                document.getElementById('logisticMoveQty').value = 1;
+                document.getElementById('logisticMoveNotes').value = '';
+            } catch (e) {
+                console.error('Erreur mouvement:', e);
+                toast('❌ Erreur: ' + e.message, 'danger');
+            }
+        }
+
+        function renderLogisticHistory() {
+            try {
+                const filter = (document.getElementById('logisticHistoryFilter')?.value || '').toLowerCase();
+                let filtered = logisticState.movements.filter(m =>
+                    m.article.toLowerCase().includes(filter) ||
+                    m.notes.toLowerCase().includes(filter)
+                );
+                filtered = filtered.reverse().slice(0, 50);
+
+                const list = document.getElementById('logisticHistoryList');
+                list.innerHTML = filtered.length === 0
+                    ? '<p style="color:#999;text-align:center;padding:20px;">Aucun mouvement</p>'
+                    : filtered.map(m => `
+                        <div style="padding:10px;background:#f9f9f9;margin-bottom:6px;border-left:4px solid #a8d5e2;border-radius:6px;font-size:0.85em;">
+                            <strong>${escapeHtml(m.type.toUpperCase())}</strong> — ${escapeHtml(m.article)}<br>
+                            <span style="color:#666;">Qty: ${m.qty} | ${m.date} | ${escapeHtml(m.responsable)}</span>
+                            ${m.notes ? `<div style="color:#999;margin-top:4px;">📝 ${escapeHtml(m.notes)}</div>` : ''}
+                        </div>
+                    `).join('');
+            } catch (e) {
+                console.error('Erreur historique:', e);
+            }
+        }
+
+        function logisticClearHistory() {
+            if (!confirm('Effacer TOUT l\'historique?')) return;
+            logisticState.movements = [];
+            saveLogisticState();
+            renderLogisticHistory();
+            toast('✅ Historique effacé', 'success');
+        }
+
+        function renderLogisticAlerts() {
+            const alerts = [];
+            const allLocations = [...logisticState.racks, ...logisticState.palettes];
+
+            allLocations.forEach(loc => {
+                const qty = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
+                const pct = (qty / loc.capacity) * 100;
+
+                if (pct > 90) {
+                    alerts.push({ level: 'danger', msg: `🔴 ${loc.name} presque plein (${Math.round(pct)}%)` });
+                } else if (pct > 70) {
+                    alerts.push({ level: 'warning', msg: `🟡 ${loc.name} à ${Math.round(pct)}%` });
+                }
+            });
+
+            const alertsDiv = document.getElementById('logisticAlerts');
+            alertsDiv.innerHTML = alerts.length === 0
+                ? '<p style="color:#4caf50;">✅ Tous les emplacements OK</p>'
+                : alerts.map(a => `<div style="padding:8px;background:${a.level === 'danger' ? '#ffe6e6' : '#fff9e6'};border-left:4px solid ${a.level === 'danger' ? '#ff6b6b' : '#ffa500'};margin-bottom:6px;border-radius:6px;font-size:0.9em;">${a.msg}</div>`).join('');
+        }
+
+        function exportLogisticLayout() {
+            try {
+                const data = JSON.stringify(logisticState, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'logistique_' + new Date().toISOString().split('T')[0] + '.json';
+                a.click();
+                toast('💾 Plan exporté', 'success');
+            } catch (e) {
+                toast('❌ Erreur export', 'danger');
+            }
+        }
+
+        function importLogisticLayout() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                try {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = event => {
+                        const imported = JSON.parse(event.target.result);
+                        logisticState = imported;
+                        saveLogisticState();
+                        renderLogisticRacks();
+                        renderLogisticPalettes();
+                        renderLogisticCanvas();
+                        renderLogisticHistory();
+                        renderLogisticAlerts();
+                        toast('📂 Plan importé', 'success');
+                    };
+                    reader.onerror = () => toast('❌ Erreur lecture fichier', 'danger');
+                    reader.readAsText(file);
+                } catch (err) {
+                    toast('❌ Fichier invalide', 'danger');
+                }
+            };
+            input.click();
         }
 
     </script>
