@@ -9331,6 +9331,15 @@
             }
         }
 
+        function togglePasswordVisibility() {
+            const input = document.getElementById('authPasswordInput');
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
         function doLogin() {
             const groupId = document.getElementById('authGroupSelect')?.value;
             const password = document.getElementById('authPasswordInput')?.value;
@@ -9344,9 +9353,17 @@
                 return;
             }
 
-            // Check if password hash is set
+            // Check if password hash is set - if not, SET IT on first login
             if (!group.passwordHash) {
-                if(errEl) errEl.textContent = '❌ Ce groupe n\'a pas encore de mot de passe configuré. Contactez l\'administrateur.';
+                group.passwordHash = hashPassword(password);
+                // Save to localStorage
+                localStorage.setItem('authGroups', JSON.stringify(authGroups));
+                // Proceed with login
+                sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
+                document.getElementById('authOverlay').style.display = 'none';
+                applyAuthGroup(group);
+                toast(`✅ Mot de passe configuré! Bienvenue, groupe ${group.name} !`, 'success');
+                logAction(`Connexion groupe ${group.name}`);
                 return;
             }
 
@@ -12585,7 +12602,10 @@
                 <select id="authGroupSelect" onchange="document.getElementById('authPasswordInput').focus()">
                     <option value="">— Sélectionnez votre groupe —</option>
                 </select>
-                <input type="password" id="authPasswordInput" placeholder="Mot de passe du groupe" onkeydown="if(event.key==='Enter')doLogin()">
+                <div style="position:relative;display:flex;align-items:center;">
+                    <input type="password" id="authPasswordInput" placeholder="Mot de passe du groupe" onkeydown="if(event.key==='Enter')doLogin()" style="flex:1;">
+                    <button type="button" onclick="togglePasswordVisibility()" style="position:absolute;right:12px;background:none;border:none;cursor:pointer;font-size:1.2em;padding:4px;color:#6b8fa3;">👁️</button>
+                </div>
                 <div class="auth-error" id="authError"></div>
                 <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
                 <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
