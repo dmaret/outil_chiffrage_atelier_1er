@@ -3174,7 +3174,10 @@
                                 <div id="statsFreeSpace" style="font-size:1.8em;font-weight:bold;color:#a8d5e2;">--</div>
                             </div>
                         </div>
-                        <button class="btn btn-small" onclick="exportAnalyticsReport()" style="margin-top:15px;width:100%;">📥 Exporter Rapport</button>
+                        <div style="display:flex;gap:10px;margin-top:15px;">
+                            <button class="btn btn-small" onclick="exportAnalyticsReport()" style="flex:1;">📥 Exporter Rapport</button>
+                            <button class="btn btn-small" onclick="switchLogisticsView('2d')" style="flex:1;background:#6b8fa3;color:white;">📍 Retour à la vue 2D</button>
+                        </div>
                     </div>
 
                     <!-- CONFIGURATION RACKS -->
@@ -11680,6 +11683,7 @@
         function switchLogisticsView(view) {
             const canvas2D = document.getElementById('logisticsCanvas');
             const canvas3D = document.getElementById('logistics3DContainer');
+            const analyticsDiv = document.getElementById('logisticsAnalyticsContainer');
             const btn2D = document.getElementById('btn2DView');
             const btn3D = document.getElementById('btn3DView');
             const desc = document.getElementById('logisticsDesc');
@@ -11687,6 +11691,7 @@
             if (view === '2d') {
                 canvas2D.style.display = 'block';
                 canvas3D.style.display = 'none';
+                if (analyticsDiv) analyticsDiv.style.display = 'none';
                 btn2D.style.background = '#6b8fa3';
                 btn3D.style.background = '#c9b3d4';
                 desc.textContent = 'Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.';
@@ -11694,6 +11699,7 @@
             } else {
                 canvas2D.style.display = 'none';
                 canvas3D.style.display = 'block';
+                if (analyticsDiv) analyticsDiv.style.display = 'none';
                 btn2D.style.background = '#c9b3d4';
                 btn3D.style.background = '#6b8fa3';
                 desc.textContent = 'Vue 3D interactive de votre entrepôt. Utilisez la souris pour pivoter (clic gauche), zoomer (molette), et déplacer (clic droit).';
@@ -11877,6 +11883,13 @@
                 toast('❌ Ajoutez d\'abord des articles', 'warning');
                 return;
             }
+
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             challengeMode = true;
             challengeStartTime = Date.now();
@@ -12195,6 +12208,13 @@
         }
 
         function showDailyChallenges() {
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
 
@@ -12346,6 +12366,13 @@
         }
 
         function showPlayerStats() {
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const currentCert = CERTIFICATION_LEVELS.find(c => c.minXP <= (playerStats.level - 1) * 500 + playerStats.xp);
             const nextCert = CERTIFICATION_LEVELS.find(c => c.minXP > (playerStats.level - 1) * 500 + playerStats.xp);
             const xpPercent = (playerStats.xp / playerStats.xpNextLevel) * 100;
@@ -12469,6 +12496,13 @@
         }
 
         function showBadges() {
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
 
@@ -12501,6 +12535,13 @@
         }
 
         function showLeaderboard() {
+            // Afficher la vue 2D
+            switchLogisticsView('2d');
+
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
 
@@ -13417,6 +13458,10 @@
         }
 
         function showLogisticsAnalytics() {
+            // Scroll vers la section logistique
+            const logisticsSection = document.querySelector('.section');
+            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+
             const canvas2D = document.getElementById('logisticsCanvas');
             const canvas3D = document.getElementById('logistics3DContainer');
             const analyticsDiv = document.getElementById('logisticsAnalyticsContainer');
