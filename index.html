@@ -2180,10 +2180,6 @@
                             <input type="text" id="docTitle" placeholder="Ex: Manuel de sécurité">
                         </div>
                         <div class="form-group">
-                            <label>URL ou lien</label>
-                            <input type="text" id="docUrl" placeholder="https://exemple.com/document.pdf">
-                        </div>
-                        <div class="form-group">
                             <label>Type</label>
                             <select id="docType">
                                 <option value="pdf">📄 PDF</option>
@@ -2192,6 +2188,18 @@
                                 <option value="other">📦 Autre</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="form-row" style="gap:12px;">
+                        <div class="form-group" style="flex:1;">
+                            <label>URL ou lien (optionnel)</label>
+                            <input type="text" id="docUrl" placeholder="https://exemple.com/document.pdf">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>Ou charger un fichier local</label>
+                            <input type="file" id="docFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style="padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9em;">
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
                         <button class="btn" onclick="addReferenceDocument()">➕ Ajouter document</button>
                     </div>
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
@@ -5477,39 +5485,71 @@
         function addReferenceDocument() {
             const title = document.getElementById('docTitle')?.value.trim();
             const url = document.getElementById('docUrl')?.value.trim();
+            const fileInput = document.getElementById('docFile');
+            const file = fileInput?.files?.[0];
             const type = document.getElementById('docType')?.value || 'other';
 
-            if (!title && !url) {
-                toast('⚠️ Merci de remplir le titre et l\'URL du document', 'warning');
-                return;
-            }
             if (!title) {
                 toast('⚠️ Merci de remplir le titre du document', 'warning');
                 return;
             }
-            if (!url) {
-                toast('⚠️ Merci de remplir l\'URL du document', 'warning');
+            if (!url && !file) {
+                toast('⚠️ Veuillez entrer une URL ou charger un fichier', 'warning');
                 return;
             }
 
-            const doc = {
-                id: Date.now(),
-                title: title,
-                url: url,
-                type: type,
-                createdAt: new Date().toISOString().split('T')[0]
-            };
+            if (file) {
+                // Handle file upload
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileData = e.target.result;
+                    const fileName = file.name;
 
-            referenceDocuments.push(doc);
-            saveReferenceDocuments();
-            renderReferenceDocuments();
+                    const doc = {
+                        id: Date.now(),
+                        title: title,
+                        fileData: fileData,
+                        fileName: fileName,
+                        type: type,
+                        isFile: true,
+                        createdAt: new Date().toISOString().split('T')[0]
+                    };
 
-            document.getElementById('docTitle').value = '';
-            document.getElementById('docUrl').value = '';
-            document.getElementById('docType').value = 'pdf';
+                    referenceDocuments.push(doc);
+                    saveReferenceDocuments();
+                    renderReferenceDocuments();
 
-            toast(`✅ Document "${title}" ajouté avec succès!`, 'success');
-            logAction(`Ajout document référence: ${title} (${type})`, 'CREATE');
+                    document.getElementById('docTitle').value = '';
+                    document.getElementById('docUrl').value = '';
+                    document.getElementById('docType').value = 'pdf';
+                    fileInput.value = '';
+
+                    toast(`✅ Document "${title}" (${fileName}) ajouté avec succès!`, 'success');
+                    logAction(`Ajout document référence: ${title} (fichier: ${fileName})`, 'CREATE');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Handle URL
+                const doc = {
+                    id: Date.now(),
+                    title: title,
+                    url: url,
+                    type: type,
+                    isFile: false,
+                    createdAt: new Date().toISOString().split('T')[0]
+                };
+
+                referenceDocuments.push(doc);
+                saveReferenceDocuments();
+                renderReferenceDocuments();
+
+                document.getElementById('docTitle').value = '';
+                document.getElementById('docUrl').value = '';
+                document.getElementById('docType').value = 'pdf';
+
+                toast(`✅ Document "${title}" ajouté avec succès!`, 'success');
+                logAction(`Ajout document référence: ${title} (URL)`, 'CREATE');
+            }
         }
 
         function saveReferenceDocuments() {
@@ -5537,17 +5577,25 @@
                     <th style="text-align:right;padding:10px;border-bottom:2px solid #ddd;">Actions</th>
                 </tr></thead>
                 <tbody>
-                ${referenceDocuments.map(doc => `
+                ${referenceDocuments.map(doc => {
+                    let actionBtn = '';
+                    if (doc.isFile) {
+                        actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
+                    } else {
+                        actionBtn = `<a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>`;
+                    }
+                    return `
                     <tr style="border-bottom:1px solid #eee;">
                         <td style="padding:12px;"><strong>${icons[doc.type] || '📦'} ${doc.type.toUpperCase()}</strong></td>
-                        <td style="padding:12px;">${doc.title}</td>
+                        <td style="padding:12px;">${doc.title}${doc.isFile ? ` <span style="color:#7a9db1;font-size:0.85em;">(${doc.fileName})</span>` : ''}</td>
                         <td style="padding:12px;color:#7a9db1;font-size:0.9em;">${doc.createdAt}</td>
                         <td style="padding:12px;text-align:right;white-space:nowrap;">
-                            <a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>
+                            ${actionBtn}
                             <button class="delete-btn btn-small" onclick="deleteReferenceDocument(${doc.id})">🗑️</button>
                         </td>
                     </tr>
-                `).join('')}
+                `;
+                }).join('')}
                 </tbody>
             </table>`;
         }
