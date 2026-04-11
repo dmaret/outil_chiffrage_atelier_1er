@@ -799,9 +799,11 @@
             z-index: 9999;
             align-items: center;
             justify-content: center;
+        }
+        .modal-conditions.show {
+            display: flex;
             animation: fadeIn 0.3s;
         }
-        .modal-conditions.show { display: flex; }
         .modal-conditions-content {
             background: white;
             border-radius: 12px;
@@ -11314,7 +11316,6 @@
                 <input type="password" id="authPasswordInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
                 <div class="auth-error" id="authError"></div>
                 <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
-                <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
             </div>
 
             <!-- Container 2: Offre de prix assistant gestes -->
