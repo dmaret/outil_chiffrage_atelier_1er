@@ -32,6 +32,8 @@
 10. [Données et persistance](#10-données-et-persistance)
 11. [Technologies utilisées](#11-technologies-utilisées)
 12. [Glossaire](#12-glossaire)
+16. [Gestion Logistique (Phase 4)](#16-gestion-logistique-phase-4)
+17. [Conditions d'utilisation](#17-conditions-dutilisation)
 
 ---
 
@@ -224,6 +226,21 @@ La méthode **FIFO** (First In, First Out — Premier Entré, Premier Sorti) est
 #### Alertes de stock
 
 Notifications automatiques lorsqu'un article passe en dessous de son seuil minimum défini.
+
+#### Stocks minimums & alertes
+
+Tableau interactif permettant de définir un **stock minimum** par référence article :
+- Colonne **Stock min** : champ éditable pour chaque article
+- **Statut** : badge "✅ OK" ou "⚠️ Stock bas" automatique
+- **Export CSV** : export de l'inventaire complet avec alertes
+
+#### Modèles de stock minimum
+
+Fonctionnalité de sauvegarde et chargement de configurations de stock minimum :
+- **💾 Sauver comme modèle** : sauvegarde la configuration actuelle avec un nom personnalisé
+- **📂 Charger modèle** : liste des modèles sauvegardés, application en un clic
+- **Suppression** : possibilité de supprimer les modèles obsolètes
+- Les modèles sont persistés dans le `localStorage`
 
 ---
 
@@ -867,17 +884,25 @@ Système optionnel de **contraintes de placement** pour sensibiliser à la sécu
 - Visualisation graphique de l'occupation par emplacement
 - Codes couleur : vert (faible), jaune (moyen), rouge (saturation)
 
-**Statistiques**
-- Occupation moyenne
+**Statistiques (panneau dédié)**
+- Nombre total d'emplacements (racks + palettes)
+- Taux d'occupation global (%)
+- Nombre de mouvements enregistrés
+- Nombre d'articles en zone libre
+- Occupation moyenne par emplacement
 - Zone la plus chargée
 - Espace libre disponible
 - Export du rapport
+
+**Recherche et filtres**
+- Champ de recherche en temps réel pour les articles disponibles
+- Filtre en temps réel sur l'historique des mouvements
 
 ---
 
 ## 17. Conditions d'utilisation
 
-Les conditions d'utilisation détaillées sont accessibles depuis le **footer** de l'application en cliquant sur "Tous droits réservés".
+Les conditions d'utilisation détaillées sont accessibles depuis le **footer** de l'application en cliquant sur le lien **"Conditions d'utilisation"**. Le footer est simplifié en une seule ligne : `© 2025–2026 MARET Davie — Conditions d'utilisation` avec un modal détaillé au clic.
 
 ### 17.1 Résumé
 
