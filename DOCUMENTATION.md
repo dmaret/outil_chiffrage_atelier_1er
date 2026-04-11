@@ -589,6 +589,7 @@ L'absence de framework garantit la pérennité de l'outil : aucune dépendance �
 
 | Terme | Définition |
 |-------|-----------|
+| **outil_chiffrage_atelier_1er** | Outil complet de chiffrage financier, gestion de stock et prestations pour ateliers de travail adapté — application monopage (SPA) autonome en JavaScript |
 | **CEA** | Collaborateurs en Emploi Adapté — travailleurs de l'atelier |
 | **MSP** | Maître SocioProfessionnel — encadrant |
 | **Geste** | Étape élémentaire et mesurable d'une prestation (ex. : contrôle, emballage) |
