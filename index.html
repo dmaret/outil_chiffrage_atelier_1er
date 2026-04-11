@@ -3215,7 +3215,7 @@
 
                 <!-- CANVAS 2D PRINCIPAL -->
                 <div class="section" style="padding:0;border:none;background:#f9f9f9;">
-                    <canvas id="logisticCanvas" width="1200" height="600" style="border:2px solid #a8d5e2;background:white;cursor:move;display:block;margin:0 auto;border-radius:8px;"></canvas>
+                    <canvas id="logisticsCanvas" width="1200" height="600" style="border:2px solid #a8d5e2;background:white;cursor:move;display:block;margin:0 auto;border-radius:8px;"></canvas>
                 </div>
 
                 <!-- ZONE D'ARTICLES DISPONIBLES (DRAG SOURCE) -->
@@ -11690,7 +11690,7 @@
                 btn2D.style.background = '#6b8fa3';
                 btn3D.style.background = '#c9b3d4';
                 desc.textContent = 'Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.';
-                redrawLogisticsCanvas();
+                renderLogisticCanvas();
             } else {
                 canvas2D.style.display = 'none';
                 canvas3D.style.display = 'block';
@@ -13563,7 +13563,7 @@
         }
 
         function renderLogisticCanvas() {
-            const canvas = document.getElementById('logisticCanvas');
+            const canvas = document.getElementById('logisticsCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -13696,7 +13696,7 @@
         // Canvas drag & drop
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-                const canvas = document.getElementById('logisticCanvas');
+                const canvas = document.getElementById('logisticsCanvas');
                 if (canvas) {
                     canvas.addEventListener('dragover', e => e.preventDefault());
                     canvas.addEventListener('drop', logisticCanvasDrop);
