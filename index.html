@@ -5475,12 +5475,19 @@
         }
 
         function addReferenceDocument() {
-            const title = document.getElementById('docTitle')?.value.trim();
-            const url = document.getElementById('docUrl')?.value.trim();
-            const type = document.getElementById('docType')?.value || 'other';
+            console.log('>>> addReferenceDocument APPELÉE');
+            const titleEl = document.getElementById('docTitle');
+            const urlEl = document.getElementById('docUrl');
+            const typeEl = document.getElementById('docType');
+            console.log('>>> Elements:', titleEl, urlEl, typeEl);
+            const title = titleEl ? titleEl.value.trim() : '';
+            const url = urlEl ? urlEl.value.trim() : '';
+            const type = typeEl ? typeEl.value : 'other';
+            console.log('>>> Valeurs: title="'+title+'" url="'+url+'" type="'+type+'"');
 
             if (!title || !url) {
-                toast('Merci de remplir titre et URL', 'warning');
+                console.log('>>> Validation échouée - champs vides');
+                alert('Merci de remplir titre ET URL');
                 return;
             }
 
