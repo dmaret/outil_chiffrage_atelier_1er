@@ -990,6 +990,16 @@
         }
         .prof-checklist label:hover { background:#f0f8ff; }
         .prof-checklist input[type=checkbox] { width:15px; height:15px; accent-color:#6b8fa3; }
+
+        /* ── Formation Module Styles ── */
+        .learner-card {
+            background: white;
+            border-left: 4px solid #4CAF50;
+        }
+        .learner-card h3 {
+            color: #34495e;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -1369,6 +1379,7 @@
                 <button class="tab" onclick="switchTab('stock')">📦 Gestion Stock</button>
                 <button class="tab" onclick="switchTab('parametrage')">⚙️ Paramétrage</button>
                 <button class="tab" onclick="switchTab('catalogue')">📚 Gestes</button>
+                <button class="tab" onclick="switchTab('formation')">🎓 Formation</button>
                 <button class="tab" onclick="switchTab('consommables')">🛒 Consommables</button>
                 <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
                 <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
@@ -2045,6 +2056,43 @@
                         <button class="btn btn-secondary btn-small" onclick="imprimerToutCatalogue()">🖨️ Imprimer tout le catalogue</button>
                     </div>
                     <div id="catalogueTable"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET FORMATION -->
+            <div id="formation" class="tab-content">
+                <div class="section">
+                    <h2>👨‍🎓 Gestion des apprenants</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nom de l'apprenant</label>
+                            <input type="text" id="learnerName" placeholder="Ex: Jean Dupont">
+                        </div>
+                        <div class="form-group">
+                            <label>Catégorie de formation</label>
+                            <select id="learnerCategory">
+                                <option value="">-- Sélectionner --</option>
+                                <option value="Réception">Réception</option>
+                                <option value="Contrôle">Contrôle</option>
+                                <option value="Étiquetage">Étiquetage</option>
+                                <option value="Assemblage">Assemblage</option>
+                                <option value="Stockage">Stockage</option>
+                                <option value="Préparation">Préparation</option>
+                                <option value="Expédition">Expédition</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date de début</label>
+                            <input type="date" id="learnerStartDate">
+                        </div>
+                        <button class="btn" onclick="addLearner()">➕ Ajouter apprenant</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>📋 Liste des apprenants</h2>
+                    <div id="learnersContainer" style="display:grid;gap:12px;"></div>
+                    <p id="noLearnersMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun apprenant enregistré</p>
                 </div>
             </div>
 
@@ -3335,6 +3383,12 @@
         renderDashboard();
         initTheme();
         initMatrice();
+        loadFormationData();
+        // Initialize learner date field with today's date
+        const learnerStartDateField = document.getElementById('learnerStartDate');
+        if (learnerStartDateField) {
+            learnerStartDateField.valueAsDate = new Date();
+        }
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
             initAuthGroups();
@@ -5047,6 +5101,206 @@
             rows.forEach(row => {
                 row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
             });
+        }
+
+        // ── Formation Module Functions ─────────────────────────
+        function loadFormationData() {
+            const saved = JSON.parse(localStorage.getItem('learnersList') || '[]');
+            learnersList = saved;
+            renderLearners();
+        }
+
+        function addLearner() {
+            const name = document.getElementById('learnerName').value.trim();
+            const category = document.getElementById('learnerCategory').value;
+            const startDate = document.getElementById('learnerStartDate').value;
+
+            if (!name || !category || !startDate) {
+                toast('Merci de remplir tous les champs', 'warning');
+                return;
+            }
+
+            const learner = {
+                id: Date.now(),
+                name: name,
+                category: category,
+                startDate: startDate,
+                progress: {}
+            };
+
+            learnersList.push(learner);
+            saveFormationData();
+            renderLearners();
+
+            document.getElementById('learnerName').value = '';
+            document.getElementById('learnerCategory').value = '';
+            document.getElementById('learnerStartDate').value = '';
+
+            toast(`✅ ${name} ajouté à la formation`, 'success');
+            logAction(`Ajout apprenant formation: ${name} (${category})`, 'CREATE');
+        }
+
+        function saveFormationData() {
+            localStorage.setItem('learnersList', JSON.stringify(learnersList));
+            localStorage.setItem('formationProgress', JSON.stringify(formationProgress));
+        }
+
+        function renderLearners() {
+            const container = document.getElementById('learnersContainer');
+            const noMsg = document.getElementById('noLearnersMsg');
+
+            if (learnersList.length === 0) {
+                container.innerHTML = '';
+                noMsg.style.display = 'block';
+                return;
+            }
+
+            noMsg.style.display = 'none';
+            container.innerHTML = learnersList.map(learner => {
+                const gestesInCategory = catalogueGestes.filter(g => g.categorie === learner.category);
+                const completed = Object.values(learner.progress).filter(v => v).length;
+                const progress = gestesInCategory.length > 0 ? Math.round((completed / gestesInCategory.length) * 100) : 0;
+
+                return `
+                <div class="learner-card" style="border:1px solid #ddd;padding:16px;border-radius:6px;background:#f9f9f9;">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
+                        <div>
+                            <h3 style="margin:0 0 4px;">${learner.name}</h3>
+                            <p style="margin:0;color:#7a9db1;font-size:0.9em;">
+                                📚 ${learner.category} • 📅 ${learner.startDate}
+                            </p>
+                        </div>
+                        <button class="delete-btn btn-small" onclick="deleteLearner(${learner.id})" title="Supprimer">🗑️</button>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.9em;">
+                            <span>Progression</span>
+                            <strong>${completed}/${gestesInCategory.length}</strong>
+                        </div>
+                        <div style="background:#e0e0e0;height:8px;border-radius:4px;overflow:hidden;">
+                            <div style="background:#4CAF50;height:100%;width:${progress}%;transition:width 0.3s;"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-small" onclick="openLearnerProgress(${learner.id})">👁️ Voir progression</button>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function deleteLearner(learnerId) {
+            toastConfirm('Supprimer cet apprenant?', () => {
+                learnersList = learnersList.filter(l => l.id !== learnerId);
+                delete formationProgress[learnerId];
+                saveFormationData();
+                renderLearners();
+                toast('✅ Apprenant supprimé', 'success');
+            });
+        }
+
+        function openLearnerProgress(learnerId) {
+            const learner = learnersList.find(l => l.id === learnerId);
+            if (!learner) return;
+
+            const gestesInCategory = catalogueGestes.filter(g => g.categorie === learner.category);
+            let html = `
+                <div style="max-height:600px;overflow-y:auto;">
+                <h3>${learner.name} — ${learner.category}</h3>
+                <div style="display:grid;gap:8px;">
+            `;
+
+            gestesInCategory.forEach(geste => {
+                const isCompleted = learner.progress[geste.code] || false;
+                const checkbox = `<input type="checkbox" ${isCompleted ? 'checked' : ''}
+                    onchange="toggleGestureComplete(${learnerId}, '${geste.code}', this.checked)">`;
+
+                html += `
+                    <div style="display:flex;gap:8px;padding:8px;border:1px solid #e0e0e0;border-radius:4px;align-items:start;">
+                        <div>${checkbox}</div>
+                        <div style="flex:1;">
+                            <strong>${geste.code}</strong> — ${geste.description}
+                            <p style="margin:4px 0 0;font-size:0.85em;color:#7a9db1;">
+                                ⏱️ ${Math.round(geste.temps / 60)}min • Coefficient: ${geste.coef}
+                            </p>
+                        </div>
+                        ${geste.videoUrl ? `<button class="btn btn-small btn-secondary" onclick="showGestureVideo('${geste.code}')">🎥</button>` : ''}
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+                </div>
+            `;
+
+            const modal = document.getElementById('learnerProgressModal');
+            if (!modal) {
+                const newModal = document.createElement('div');
+                newModal.id = 'learnerProgressModal';
+                newModal.className = 'modal';
+                document.body.appendChild(newModal);
+            }
+
+            const m = document.getElementById('learnerProgressModal');
+            m.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Suivi formation</h2>
+                        <button class="modal-close" onclick="this.closest('.modal').classList.remove('open')">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        ${html}
+                    </div>
+                </div>
+            `;
+            m.classList.add('open');
+        }
+
+        function toggleGestureComplete(learnerId, code, completed) {
+            const learner = learnersList.find(l => l.id === learnerId);
+            if (!learner) return;
+
+            learner.progress[code] = completed;
+            saveFormationData();
+            renderLearners();
+
+            if (completed) {
+                logAction(`Validation geste formation: ${code} par ${learner.name}`, 'UPDATE');
+            }
+        }
+
+        function showGestureVideo(code) {
+            const geste = catalogueGestes.find(g => g.code === code);
+            if (!geste || !geste.videoUrl) {
+                toast('Vidéo non disponible', 'warning');
+                return;
+            }
+
+            let modal = document.getElementById('gestureVideoModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'gestureVideoModal';
+                modal.className = 'modal';
+                document.body.appendChild(modal);
+            }
+
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>${geste.code} — ${geste.description}</h2>
+                        <button class="modal-close" onclick="this.closest('.modal').classList.remove('open')">✕</button>
+                    </div>
+                    <div class="modal-body" style="padding:16px;">
+                        <video src="${geste.videoUrl}" controls style="width:100%;max-width:600px;border-radius:6px;background:#000;"></video>
+                        <div style="margin-top:16px;padding:12px;background:#f0f8ff;border-radius:6px;">
+                            <p><strong>Description:</strong> ${geste.description}</p>
+                            <p><strong>Catégorie:</strong> ${geste.categorie}</p>
+                            <p><strong>Temps estimé:</strong> ${Math.round(geste.temps / 60)} min</p>
+                            ${geste.notes ? `<p><strong>Notes:</strong> ${geste.notes}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.classList.add('open');
         }
 
         function addConsommable() {
