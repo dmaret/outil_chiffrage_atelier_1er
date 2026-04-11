@@ -3329,7 +3329,7 @@
                 <div class="section">
                     <h2>📦 Articles disponibles (Glissez-déposez sur le plan)</h2>
                     <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                        <input type="text" id="logisticSearchArticle" placeholder="Rechercher article..." style="flex:1;min-width:200px;">
+                        <input type="text" id="logisticSearchArticle" placeholder="Rechercher article..." style="flex:1;min-width:200px;" oninput="refreshLogisticArticles()">
                         <button class="btn btn-small" onclick="refreshLogisticArticles()">🔄 Actualiser</button>
                     </div>
                     <div id="logisticArticlesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;"></div>
@@ -3407,7 +3407,7 @@
                 <div class="section">
                     <h2>📝 Historique Mouvements</h2>
                     <div style="display:flex;gap:8px;margin-bottom:10px;">
-                        <input type="text" id="logisticHistoryFilter" placeholder="Filtrer..." style="flex:1;">
+                        <input type="text" id="logisticHistoryFilter" placeholder="Filtrer..." style="flex:1;" oninput="renderLogisticHistory()">
                         <button class="btn btn-small" onclick="logisticClearHistory()">🗑️ Effacer</button>
                     </div>
                     <div id="logisticHistoryList" style="max-height:300px;overflow-y:auto;"></div>
@@ -4464,6 +4464,18 @@
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
+            else if (tabName === 'logistique') {
+                loadLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                renderLogisticFreeArticles();
+                refreshLogisticArticles();
+                renderLogisticMoveForm();
+                renderLogisticHistory();
+                renderLogisticAlerts();
+                renderLogisticStats();
+            }
         }
 
         function buildGesteOptions(selCode) {
@@ -14082,6 +14094,8 @@
                 refreshLogisticArticles();
                 renderLogisticMoveForm();
                 renderLogisticHistory();
+                renderLogisticAlerts();
+                renderLogisticStats();
             }, 500);
         });
 
@@ -14094,7 +14108,7 @@
 
             // Enlever de tous les placements
             Object.keys(logisticState.placements).forEach(locationId => {
-                if (logisticState.placements[locationId][articleId]) {
+                if (logisticState.placements[locationId] && logisticState.placements[locationId][articleId]) {
                     const qty = logisticState.placements[locationId][articleId];
                     delete logisticState.placements[locationId][articleId];
                     // Ajouter aux articles libres
@@ -14227,15 +14241,17 @@
 
         function updateLogisticInfo(location) {
             const placements = logisticState.placements[location.id] || {};
+            const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
             const html = `
                 <strong>${escapeHtml(location.name)}</strong><br>
                 <span style="color:#666;">Capacité: ${location.capacity} unités</span><br><br>
                 <strong>Articles:</strong><br>
                 ${Object.entries(placements).map(([artId, qty]) => {
-                    const article = logisticState.racks.concat(logisticState.palettes).find(r => r.id === artId);
+                    const article = conso.find(c => c.id === artId);
+                    const articleName = article ? article.designation : artId;
                     return `<div style="padding:4px;background:#fff;margin:2px 0;border-radius:4px;">
-                        <span>${artId} × ${qty}</span>
-                        <button class="btn-small" onclick="removeArticleFromLocation('${location.id}', '${artId}')" style="float:right;padding:2px 6px;font-size:0.75em;">Remove</button>
+                        <span>${escapeHtml(articleName)} × ${qty}</span>
+                        <button class="btn-small" onclick="removeArticleFromLocation('${location.id}', '${artId}')" style="float:right;padding:2px 6px;font-size:0.75em;">Retirer</button>
                     </div>`;
                 }).join('') || '<span style="color:#999;">Vide</span>'}
             `;
@@ -14409,6 +14425,41 @@
             alertsDiv.innerHTML = alerts.length === 0
                 ? '<p style="color:#4caf50;">✅ Tous les emplacements OK</p>'
                 : alerts.map(a => `<div style="padding:8px;background:${a.level === 'danger' ? '#ffe6e6' : '#fff9e6'};border-left:4px solid ${a.level === 'danger' ? '#ff6b6b' : '#ffa500'};margin-bottom:6px;border-radius:6px;font-size:0.9em;">${a.msg}</div>`).join('');
+        }
+
+        function renderLogisticStats() {
+            const statsDiv = document.getElementById('logisticStats');
+            if (!statsDiv) return;
+
+            const allLocations = [...logisticState.racks, ...logisticState.palettes];
+            const totalCapacity = allLocations.reduce((s, l) => s + (l.capacity || 0), 0);
+            const totalUsed = allLocations.reduce((s, l) => {
+                return s + Object.values(logisticState.placements[l.id] || {}).reduce((a, b) => a + b, 0);
+            }, 0);
+            const occupationPct = totalCapacity > 0 ? Math.round((totalUsed / totalCapacity) * 100) : 0;
+            const totalMoves = (logisticState.movements || []).length;
+            const freeCount = Object.keys(logisticState.freeArticles || {}).length;
+
+            statsDiv.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
+                    <div style="background:#e8f5e9;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.5em;font-weight:bold;color:#2e7d32;">${allLocations.length}</div>
+                        <div style="font-size:0.8em;color:#666;">Emplacements</div>
+                    </div>
+                    <div style="background:#e3f2fd;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.5em;font-weight:bold;color:#1565c0;">${occupationPct}%</div>
+                        <div style="font-size:0.8em;color:#666;">Occupation</div>
+                    </div>
+                    <div style="background:#fff3e0;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.5em;font-weight:bold;color:#e65100;">${totalMoves}</div>
+                        <div style="font-size:0.8em;color:#666;">Mouvements</div>
+                    </div>
+                    <div style="background:#fce4ec;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.5em;font-weight:bold;color:#c62828;">${freeCount}</div>
+                        <div style="font-size:0.8em;color:#666;">Articles libres</div>
+                    </div>
+                </div>
+            `;
         }
 
         function exportLogisticLayout() {
