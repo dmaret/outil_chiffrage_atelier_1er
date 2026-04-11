@@ -2161,7 +2161,7 @@
                             <label>Date de début</label>
                             <input type="date" id="learnerStartDate">
                         </div>
-                        <button class="btn" onclick="try{addLearner()}catch(e){alert('ERREUR: '+e.message)}">➕ Ajouter apprenant</button>
+                        <button class="btn" onclick="addLearner()">➕ Ajouter apprenant</button>
                     </div>
                 </div>
 
@@ -2192,7 +2192,7 @@
                                 <option value="other">📦 Autre</option>
                             </select>
                         </div>
-                        <button class="btn" onclick="try{addReferenceDocument()}catch(e){alert('ERREUR: '+e.message)}">➕ Ajouter document</button>
+                        <button class="btn" onclick="addReferenceDocument()">➕ Ajouter document</button>
                     </div>
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
                     <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
@@ -2970,8 +2970,6 @@
     </div>
 
     <script>
-        console.log('=== SCRIPT START ===');
-        window.addEventListener('error', function(e) { console.error('ERREUR GLOBALE:', e.message, 'ligne:', e.lineno); });
         // Configuration
         let config = {
             coutHoraireCEA: 35,
@@ -3481,6 +3479,7 @@
         let devisCounter = parseInt(localStorage.getItem('devisCounter') || '0');
 
         // Chargement
+        try {
         loadFromStorage();
         loadEmailWebhooksConfig();
         renderStockSelects();
@@ -3519,6 +3518,7 @@
         }
         // Initialize tab drag-drop functionality
         setTimeout(() => initTabDrag(), 100);
+        } catch(initErr) { console.error('Erreur initialisation:', initErr); }
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
             initAuthGroups();
@@ -4277,7 +4277,7 @@
                 </div>
                 <div class="form-group">
                     <label>Quantité</label>
-                    <input type="number" id="qte-stock-${lineId}" min="0" step="1" value="1" onchange="validateStockQuantity(this, ${lineId}); calculateTotal()")
+                    <input type="number" id="qte-stock-${lineId}" min="0" step="1" value="1" onchange="validateStockQuantity(this, ${lineId}); calculateTotal()">
                 </div>
                 <div class="form-group">
                     <label>Durée (j)</label>
@@ -5475,19 +5475,12 @@
         }
 
         function addReferenceDocument() {
-            console.log('>>> addReferenceDocument APPELÉE');
-            const titleEl = document.getElementById('docTitle');
-            const urlEl = document.getElementById('docUrl');
-            const typeEl = document.getElementById('docType');
-            console.log('>>> Elements:', titleEl, urlEl, typeEl);
-            const title = titleEl ? titleEl.value.trim() : '';
-            const url = urlEl ? urlEl.value.trim() : '';
-            const type = typeEl ? typeEl.value : 'other';
-            console.log('>>> Valeurs: title="'+title+'" url="'+url+'" type="'+type+'"');
+            const title = document.getElementById('docTitle')?.value.trim();
+            const url = document.getElementById('docUrl')?.value.trim();
+            const type = document.getElementById('docType')?.value || 'other';
 
             if (!title || !url) {
-                console.log('>>> Validation échouée - champs vides');
-                alert('Merci de remplir titre ET URL');
+                toast('Merci de remplir titre et URL', 'warning');
                 return;
             }
 
@@ -10779,7 +10772,6 @@
             toast(`✅ Prestation importée! Référence: ${reportData.reference}`, 'success');
         }
 
-        console.log('=== SCRIPT END === addReferenceDocument défini:', typeof addReferenceDocument);
     </script>
 
     <!-- Auth : écran de connexion -->
