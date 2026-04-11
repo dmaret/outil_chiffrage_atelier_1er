@@ -3137,7 +3137,7 @@
 
             <!-- ONGLET LOGISTIQUE -->
             <div id="logistique" class="tab-content">
-                <div class="section">
+                <div class="section" id="logisticsManagementSection">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
                         <h2>🏭 Gestion Logistique</h2>
                         <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -11645,6 +11645,7 @@
         let logisticState = {
             racks: [],
             palettes: [],
+            articles: [],
             placements: {}, // { rackId: { articleId: qty, ... }, ... }
             movements: [],
             zoomLevel: 1,
@@ -11888,7 +11889,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             challengeMode = true;
@@ -12212,7 +12213,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
@@ -12370,7 +12371,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const currentCert = CERTIFICATION_LEVELS.find(c => c.minXP <= (playerStats.level - 1) * 500 + playerStats.xp);
@@ -12500,7 +12501,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
@@ -12539,7 +12540,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
@@ -13460,7 +13461,7 @@
 
         function showLogisticsAnalytics() {
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const canvas2D = document.getElementById('logisticsCanvas');
