@@ -3238,6 +3238,25 @@
             }
         }
 
+        // Real-time form field validation
+        function validateField(fieldId, validator, errorMessage) {
+            const field = document.getElementById(fieldId);
+            if (!field) return;
+
+            field.addEventListener('input', function() {
+                const isValid = validator(this.value);
+                this.style.borderColor = isValid ? '' : '#e74c3c';
+                this.style.backgroundColor = isValid ? '' : 'rgba(231, 76, 60, 0.05)';
+            });
+
+            field.addEventListener('blur', function() {
+                const isValid = validator(this.value);
+                if (!isValid && this.value) {
+                    toast(`⚠️ ${errorMessage}`, 'warning');
+                }
+            });
+        }
+
         // IMPORTANT: Default credentials have been removed for security.
         // Passwords must be configured by the user on first login.
         // See admin panel for user management.
@@ -4236,8 +4255,22 @@
         function saveQuickGeste() {
             const code = document.getElementById('qg-code').value.trim().toUpperCase();
             const desc = document.getElementById('qg-desc').value.trim();
-            if (!code || !desc) { toast('Code et description requis', 'warning'); return; }
-            if (catalogueGestes.find(g => g.code === code)) { toast('Ce code existe déjà', 'warning'); return; }
+
+            if (!code) {
+                toast('⚠️ Veuillez entrer un code de geste (ex: ABC-01)', 'warning');
+                document.getElementById('qg-code').focus();
+                return;
+            }
+            if (!desc) {
+                toast('⚠️ Veuillez entrer une description du geste', 'warning');
+                document.getElementById('qg-desc').focus();
+                return;
+            }
+            if (catalogueGestes.find(g => g.code === code)) {
+                toast(`⚠️ Le code "${code}" existe déjà dans le catalogue`, 'warning');
+                document.getElementById('qg-code').focus();
+                return;
+            }
             const newGeste = {
                 code, categorie: document.getElementById('qg-cat').value,
                 description: desc,
@@ -4734,12 +4767,24 @@
         }
 
         function savePrestation() {
-            const client = document.getElementById('client').value;
-            const prestation = document.getElementById('prestation').value;
-            const reference = document.getElementById('reference').value;
+            const client = document.getElementById('client').value.trim();
+            const prestation = document.getElementById('prestation').value.trim();
+            const reference = document.getElementById('reference').value.trim();
 
-            if (!client || !prestation || !reference) {
-                toast('Merci de remplir Client, Prestation et Référence', 'warning');
+            // Validate required fields with specific error messages
+            if (!client) {
+                toast('⚠️ Veuillez sélectionner ou créer un client', 'warning');
+                document.getElementById('client').focus();
+                return;
+            }
+            if (!prestation) {
+                toast('⚠️ Veuillez entrer une description de prestation', 'warning');
+                document.getElementById('prestation').focus();
+                return;
+            }
+            if (!reference) {
+                toast('⚠️ Veuillez entrer une référence unique', 'warning');
+                document.getElementById('reference').focus();
                 return;
             }
 
