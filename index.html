@@ -2113,6 +2113,20 @@
                                 <span class="unit">unités</span>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label>Seuil d'alerte (avertissement)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="alertThresholdWarning" step="1" value="70" min="0" max="100" onchange="saveStockConfig(); config.alertThresholdWarning = parseInt(this.value);">
+                                <span class="unit">%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Seuil d'alerte (danger)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="alertThresholdDanger" step="1" value="90" min="0" max="100" onchange="saveStockConfig(); config.alertThresholdDanger = parseInt(this.value);">
+                                <span class="unit">%</span>
+                            </div>
+                        </div>
                     </div>
 
                     <h3>Ratio palette vs rack</h3>
@@ -3634,7 +3648,9 @@
             capacitePalettes: 100,
             nbPalettesAtelier: 45,
             capaciteParPalette: 500,
-            capaciteParRack: 1000
+            capaciteParRack: 1000,
+            alertThresholdWarning: 70,
+            alertThresholdDanger: 90
         };
         let stockMins = {}; // {ref: minQte}
         let configEmplacements = ['Zone palette', 'Rack A', 'Rack B', 'Rack C', 'Picking'];
@@ -4412,6 +4428,8 @@
             document.getElementById('nbPalettesAtelier').value = config.nbPalettesAtelier || 45;
             document.getElementById('capaciteParPalette').value = config.capaciteParPalette || 500;
             document.getElementById('capaciteParRack').value = config.capaciteParRack || 1000;
+            document.getElementById('alertThresholdWarning').value = config.alertThresholdWarning || 70;
+            document.getElementById('alertThresholdDanger').value = config.alertThresholdDanger || 90;
             updatePinStatus();
         }
 
@@ -4440,6 +4458,8 @@
             config.nbPalettesAtelier = parseInt(document.getElementById('nbPalettesAtelier').value) || 45;
             config.capaciteParPalette = parseInt(document.getElementById('capaciteParPalette').value) || 500;
             config.capaciteParRack = parseInt(document.getElementById('capaciteParRack').value) || 1000;
+            config.alertThresholdWarning = Math.min(100, Math.max(0, parseInt(document.getElementById('alertThresholdWarning').value) || 70));
+            config.alertThresholdDanger = Math.min(100, Math.max(0, parseInt(document.getElementById('alertThresholdDanger').value) || 90));
             logAction('Mise à jour configuration stock', 'UPDATE');
             saveToStorage();
             toast('✅ Configuration logistique sauvegardée', 'success');
@@ -4463,7 +4483,12 @@
                     coutPalette: 2.5,
                     coutRack: 1.2,
                     surfaceRack: 0.8,
-                    capacitePalettes: 100
+                    capacitePalettes: 100,
+                    nbPalettesAtelier: 45,
+                    capaciteParPalette: 500,
+                    capaciteParRack: 1000,
+                    alertThresholdWarning: 70,
+                    alertThresholdDanger: 90
                 };
                 loadConfig();
                 saveToStorage();
@@ -14607,9 +14632,12 @@
                 const qty = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
                 const pct = (qty / loc.capacity) * 100;
 
-                if (pct > 90) {
+                const thresholdDanger = config.alertThresholdDanger || 90;
+                const thresholdWarning = config.alertThresholdWarning || 70;
+
+                if (pct > thresholdDanger) {
                     alerts.push({ level: 'danger', msg: `🔴 ${loc.name} presque plein (${Math.round(pct)}%)` });
-                } else if (pct > 70) {
+                } else if (pct > thresholdWarning) {
                     alerts.push({ level: 'warning', msg: `🟡 ${loc.name} à ${Math.round(pct)}%` });
                 }
             });
