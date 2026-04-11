@@ -2970,6 +2970,8 @@
     </div>
 
     <script>
+        console.log('=== SCRIPT START ===');
+        window.addEventListener('error', function(e) { console.error('ERREUR GLOBALE:', e.message, 'ligne:', e.lineno); });
         // Configuration
         let config = {
             coutHoraireCEA: 35,
@@ -5473,7 +5475,6 @@
         }
 
         function addReferenceDocument() {
-            alert('Fonction appelée! docTitle=' + document.getElementById('docTitle')?.value + ' docUrl=' + document.getElementById('docUrl')?.value);
             const title = document.getElementById('docTitle')?.value.trim();
             const url = document.getElementById('docUrl')?.value.trim();
             const type = document.getElementById('docType')?.value || 'other';
@@ -10771,6 +10772,7 @@
             toast(`✅ Prestation importée! Référence: ${reportData.reference}`, 'success');
         }
 
+        console.log('=== SCRIPT END === addReferenceDocument défini:', typeof addReferenceDocument);
     </script>
 
     <!-- Auth : écran de connexion -->
