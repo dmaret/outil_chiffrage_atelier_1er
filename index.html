@@ -14004,22 +14004,26 @@
 
         function renderLogisticArticlesList() {
             try {
-                const searchVal = document.getElementById('logisticSearchArticle').value.toLowerCase();
+                const searchEl = document.getElementById('logisticSearchArticle');
+                const searchVal = searchEl ? searchEl.value.toLowerCase() : '';
                 const articles = [];
 
                 // Récupérer du catalogue de consommables
                 const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
                 conso.forEach(c => {
-                    if (c.designation.toLowerCase().includes(searchVal) || c.reference.toLowerCase().includes(searchVal)) {
-                        articles.push({ id: 'CONSO_' + c.id, name: c.designation, type: 'Consommable', qty: 0 });
+                    const designation = (c.designation || '').toLowerCase();
+                    const reference = (c.reference || '').toLowerCase();
+                    if (designation.includes(searchVal) || reference.includes(searchVal)) {
+                        articles.push({ id: 'CONSO_' + c.id, name: c.designation || 'Sans nom', type: 'Consommable', qty: 0 });
                     }
                 });
 
                 // Récupérer du stock
-                const stock = JSON.parse(localStorage.getItem('stockActuel') || '{}');
-                Object.entries(stock).forEach(([artId, info]) => {
-                    if (info.designation.toLowerCase().includes(searchVal)) {
-                        articles.push({ id: artId, name: info.designation, type: 'Stock', qty: info.quantite || 0 });
+                const stockData = JSON.parse(localStorage.getItem('stockData') || '{}');
+                const stock = stockData.stockActuel || {};
+                Object.entries(stock).forEach(([ref, data]) => {
+                    if (ref.toLowerCase().includes(searchVal)) {
+                        articles.push({ id: ref, name: ref, type: 'Stock', qty: data.total || 0 });
                     }
                 });
 
