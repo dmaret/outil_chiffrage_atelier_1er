@@ -2855,11 +2855,12 @@
                     <h2>📋 Audit Trail - Tous les logs</h2>
                     <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
                         <input type="text" id="auditFilterSearch" placeholder="🔍 Rechercher..." onkeyup="filterAuditLog()" style="flex:1;min-width:200px;padding:10px;">
+                        <button class="btn btn-secondary btn-small" onclick="toggleAuditLogVisibility()">👁️ Afficher logs</button>
                         <button class="btn btn-secondary btn-small" onclick="auditLog=[];saveAuditLog();renderAuditLog();toast('✅ Logs supprimés','success')">🗑️ Effacer logs</button>
                         <button class="btn btn-secondary btn-small" onclick="exportAuditLog()">💾 Exporter CSV</button>
                     </div>
-                    <div id="auditLogContainer"></div>
-                    <p id="noAuditMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun log enregistré</p>
+                    <div id="auditLogContainer" style="display:none;"></div>
+                    <p id="noAuditMsg" style="color:#7a9db1;text-align:center;padding:20px;display:none;">Aucun log enregistré</p>
                 </div>
             </div>
 
@@ -7980,6 +7981,20 @@
             const saved = JSON.parse(localStorage.getItem('auditLog') || '[]');
             auditLog = saved;
             renderAuditLog();
+        }
+
+        function toggleAuditLogVisibility() {
+            const container = document.getElementById('auditLogContainer');
+            const btn = event.target;
+
+            if (container.style.display === 'none' || !container.style.display) {
+                container.style.display = 'block';
+                renderAuditLog();
+                btn.textContent = '👁️ Masquer logs';
+            } else {
+                container.style.display = 'none';
+                btn.textContent = '👁️ Afficher logs';
+            }
         }
 
         function saveAuditLog() {
