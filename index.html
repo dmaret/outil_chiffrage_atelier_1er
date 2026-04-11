@@ -2170,6 +2170,33 @@
                     <div id="learnersContainer" style="display:grid;gap:12px;"></div>
                     <p id="noLearnersMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun apprenant enregistré</p>
                 </div>
+
+                <div class="section">
+                    <h2>📚 Documents de référence</h2>
+                    <p style="color:#7a9db1;margin-bottom:12px;">Ajoutez des PDFs, liens ou autres documents pour la formation</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Titre du document</label>
+                            <input type="text" id="docTitle" placeholder="Ex: Manuel de sécurité">
+                        </div>
+                        <div class="form-group">
+                            <label>URL ou lien</label>
+                            <input type="text" id="docUrl" placeholder="https://exemple.com/document.pdf">
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="docType">
+                                <option value="pdf">📄 PDF</option>
+                                <option value="link">🔗 Lien web</option>
+                                <option value="video">🎥 Vidéo</option>
+                                <option value="other">📦 Autre</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="addReferenceDocument()">➕ Ajouter document</button>
+                    </div>
+                    <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
+                    <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
+                </div>
             </div>
 
             <!-- ONGLET CONSOMMABLES -->
@@ -3353,48 +3380,48 @@
 
         // Bases de données
         const defaultCatalogueGestes = [
-            {code: "REC-01", categorie: "Réception", description: "Décharger palette", temps: 180, coef: 1.2, notes: "Avec transpalette électrique", videoUrl: "https://dmaret.github.io/videos/REC-01.mp4"},
-            {code: "REC-02", categorie: "Réception", description: "Contrôle visuel", temps: 60, coef: 1.0, notes: "État général palette et emballages", videoUrl: "https://dmaret.github.io/videos/REC-02.mp4"},
-            {code: "REC-04", categorie: "Réception", description: "Ouvrir carton", temps: 20, coef: 1.0, notes: "Avec cutter sécurisé", videoUrl: "https://dmaret.github.io/videos/REC-04.mp4"},
-            {code: "REC-05", categorie: "Réception", description: "Compter articles", temps: 30, coef: 1.1, notes: "Par tranche de 10 unités", videoUrl: "https://dmaret.github.io/videos/REC-05.mp4"},
-            {code: "CTR-01", categorie: "Contrôle", description: "Contrôle visuel unitaire", temps: 10, coef: 1.0, notes: "Vérification état produit", videoUrl: "https://dmaret.github.io/videos/CTR-01.mp4"},
-            {code: "ETI-01", categorie: "Étiquetage", description: "Imprimer étiquette", temps: 10, coef: 1.0, notes: "Imprimante thermique", videoUrl: "https://dmaret.github.io/videos/ETI-01.mp4"},
-            {code: "ETI-02", categorie: "Étiquetage", description: "Coller étiquette", temps: 12, coef: 1.0, notes: "Position selon consignes client", videoUrl: "https://dmaret.github.io/videos/ETI-02.mp4"},
-            {code: "ETI-03", categorie: "Étiquetage", description: "Retirer étiquette", temps: 25, coef: 1.2, notes: "Avec décapeur thermique si nécessaire", videoUrl: "https://dmaret.github.io/videos/ETI-03.mp4"},
-            {code: "ASS-01", categorie: "Assemblage", description: "Kit 2 pièces", temps: 40, coef: 1.2, notes: "Assemblage simple, contrôle visuel final", videoUrl: "https://dmaret.github.io/videos/ASS-01.mp4"},
-            {code: "ASS-02", categorie: "Assemblage", description: "Kit 3-5 pièces", temps: 90, coef: 1.3, notes: "Assemblage complexe selon fiche technique", videoUrl: "https://dmaret.github.io/videos/ASS-02.mp4"},
-            {code: "ASS-03", categorie: "Assemblage", description: "Emballer film bulles", temps: 30, coef: 1.1, notes: "Protection renforcée produits fragiles", videoUrl: "https://dmaret.github.io/videos/ASS-03.mp4"},
-            {code: "STO-01", categorie: "Stockage", description: "Déplacer palette", temps: 120, coef: 1.2, notes: "Vers zone stockage désignée", videoUrl: "https://dmaret.github.io/videos/STO-01.mp4"},
-            {code: "STO-02", categorie: "Stockage", description: "Ranger rayonnage", temps: 25, coef: 1.1, notes: "Respecter plan de rangement FIFO", videoUrl: "https://dmaret.github.io/videos/STO-02.mp4"},
-            {code: "STO-03", categorie: "Stockage", description: "Prélever stock", temps: 30, coef: 1.1, notes: "Vérifier référence et quantité", videoUrl: "https://dmaret.github.io/videos/STO-03.mp4"},
-            {code: "STO-04", categorie: "Stockage", description: "Inventaire", temps: 180, coef: 1.2, notes: "Comptage physique et saisie informatique", videoUrl: "https://dmaret.github.io/videos/STO-04.mp4"},
-            {code: "PRE-01", categorie: "Préparation", description: "Imprimer bon", temps: 30, coef: 1.0, notes: "Bon de préparation commande", videoUrl: "https://dmaret.github.io/videos/PRE-01.mp4"},
-            {code: "PRE-02", categorie: "Préparation", description: "Picking", temps: 20, coef: 1.1, notes: "Prélèvement article selon bon", videoUrl: "https://dmaret.github.io/videos/PRE-02.mp4"},
-            {code: "EXP-01", categorie: "Expédition", description: "Peser colis", temps: 15, coef: 1.0, notes: "Balance de précision", videoUrl: "https://dmaret.github.io/videos/EXP-01.mp4"},
-            {code: "EXP-02", categorie: "Expédition", description: "Filmer palette", temps: 180, coef: 1.2, notes: "Film étirable machine ou manuel", videoUrl: "https://dmaret.github.io/videos/EXP-02.mp4"},
-            {code: "ASS-04", categorie: "Assemblage", description: "Calage (carton / caisse)", temps: 3, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-04.mp4"},
-            {code: "ASS-05", categorie: "Assemblage", description: "Fermeture d'un sachet mini-grip", temps: 3, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-05.mp4"},
-            {code: "ASS-06", categorie: "Assemblage", description: "Filmage (élément unitaire)", temps: 12, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-06.mp4"},
-            {code: "ASS-07", categorie: "Assemblage", description: "Banderolage produit", temps: 12, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-07.mp4"},
-            {code: "ASS-08", categorie: "Assemblage", description: "Formage + fermeture d'un étui carton complexe", temps: 10, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-08.mp4"},
-            {code: "ASS-09", categorie: "Assemblage", description: "Formage + fermeture d'un étui carton simple", temps: 5, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/ASS-09.mp4"},
-            {code: "ASS-10", categorie: "Assemblage", description: "Formage et mise en place d'un fourreau orienté", temps: 10, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-10.mp4"},
-            {code: "ASS-11", categorie: "Assemblage", description: "Groupage de plusieurs éléments avec un élastique", temps: 10, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-11.mp4"},
-            {code: "ASS-12", categorie: "Assemblage", description: "Insertion d'un élément complexe (orienté/insertion difficile)", temps: 5, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-12.mp4"},
-            {code: "ASS-13", categorie: "Assemblage", description: "Insertion d'un élément (comptage par balance)", temps: 0.5, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-13.mp4"},
-            {code: "ASS-14", categorie: "Assemblage", description: "Insertion d'un élément simple (orienté)", temps: 2, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/ASS-14.mp4"},
-            {code: "ASS-15", categorie: "Assemblage", description: "Pliage complexe", temps: 6, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-15.mp4"},
-            {code: "ASS-16", categorie: "Assemblage", description: "Pliage simple (par rainure)", temps: 3, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/ASS-16.mp4"},
-            {code: "CTR-02", categorie: "Contrôle", description: "Contrôle d'un élément fini (par élément)", temps: 1.5, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/CTR-02.mp4"},
-            {code: "CTR-03", categorie: "Contrôle", description: "Mise en conformité avant envoi (caisse/carton)", temps: 10, coef: 1.5, notes: "Contrôle fin - Niveau 3", videoUrl: "https://dmaret.github.io/videos/CTR-03.mp4"},
-            {code: "CTR-04", categorie: "Contrôle", description: "Mise en conformité avant envoi palette", temps: 60, coef: 1.5, notes: "Contrôle fin - Niveau 3", videoUrl: "https://dmaret.github.io/videos/CTR-04.mp4"},
-            {code: "ETI-04", categorie: "Étiquetage", description: "Collage d'une étiquette orientée (complexe/précise)", temps: 5, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ETI-04.mp4"},
-            {code: "ETI-05", categorie: "Étiquetage", description: "Collage d'une étiquette orientée (simple)", temps: 3, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/ETI-05.mp4"},
-            {code: "ETI-06", categorie: "Étiquetage", description: "Impression Inkjet ou caractère manuscrit", temps: 3, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ETI-06.mp4"},
-            {code: "PRE-03", categorie: "Préparation", description: "Reconditionnement d'un élément (comptage/orientation)", temps: 3, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/PRE-03.mp4"},
-            {code: "REC-03", categorie: "Réception", description: "Déballage d'un élément", temps: 5, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/REC-03.mp4"},
-            {code: "EXP-03", categorie: "Expédition", description: "Livraison par la Poste", temps: 15, coef: 1.0, notes: "Dépôt en bureau de poste", videoUrl: "https://dmaret.github.io/videos/EXP-03.mp4"},
-            {code: "EXP-04", categorie: "Expédition", description: "Mise à disposition transports EPI", temps: 10, coef: 1.0, notes: "Préparation et remise au transporteur EPI", videoUrl: "https://dmaret.github.io/videos/EXP-04.mp4"},
+            {code: "REC-01", categorie: "Réception", description: "Décharger palette", temps: 180, coef: 1.2, notes: "Avec transpalette électrique", videoUrl: "https://dmaret.github.io/videos/REC-01.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "REC-02", categorie: "Réception", description: "Contrôle visuel", temps: 60, coef: 1.0, notes: "État général palette et emballages", videoUrl: "https://dmaret.github.io/videos/REC-02.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "REC-04", categorie: "Réception", description: "Ouvrir carton", temps: 20, coef: 1.0, notes: "Avec cutter sécurisé", videoUrl: "https://dmaret.github.io/videos/REC-04.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "REC-05", categorie: "Réception", description: "Compter articles", temps: 30, coef: 1.1, notes: "Par tranche de 10 unités", videoUrl: "https://dmaret.github.io/videos/REC-05.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "CTR-01", categorie: "Contrôle", description: "Contrôle visuel unitaire", temps: 10, coef: 1.0, notes: "Vérification état produit", videoUrl: "https://dmaret.github.io/videos/CTR-01.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ETI-01", categorie: "Étiquetage", description: "Imprimer étiquette", temps: 10, coef: 1.0, notes: "Imprimante thermique", videoUrl: "https://dmaret.github.io/videos/ETI-01.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ETI-02", categorie: "Étiquetage", description: "Coller étiquette", temps: 12, coef: 1.0, notes: "Position selon consignes client", videoUrl: "https://dmaret.github.io/videos/ETI-02.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ETI-03", categorie: "Étiquetage", description: "Retirer étiquette", temps: 25, coef: 1.2, notes: "Avec décapeur thermique si nécessaire", videoUrl: "https://dmaret.github.io/videos/ETI-03.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-01", categorie: "Assemblage", description: "Kit 2 pièces", temps: 40, coef: 1.2, notes: "Assemblage simple, contrôle visuel final", videoUrl: "https://dmaret.github.io/videos/ASS-01.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-02", categorie: "Assemblage", description: "Kit 3-5 pièces", temps: 90, coef: 1.3, notes: "Assemblage complexe selon fiche technique", videoUrl: "https://dmaret.github.io/videos/ASS-02.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-03", categorie: "Assemblage", description: "Emballer film bulles", temps: 30, coef: 1.1, notes: "Protection renforcée produits fragiles", videoUrl: "https://dmaret.github.io/videos/ASS-03.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "STO-01", categorie: "Stockage", description: "Déplacer palette", temps: 120, coef: 1.2, notes: "Vers zone stockage désignée", videoUrl: "https://dmaret.github.io/videos/STO-01.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "STO-02", categorie: "Stockage", description: "Ranger rayonnage", temps: 25, coef: 1.1, notes: "Respecter plan de rangement FIFO", videoUrl: "https://dmaret.github.io/videos/STO-02.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "STO-03", categorie: "Stockage", description: "Prélever stock", temps: 30, coef: 1.1, notes: "Vérifier référence et quantité", videoUrl: "https://dmaret.github.io/videos/STO-03.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "STO-04", categorie: "Stockage", description: "Inventaire", temps: 180, coef: 1.2, notes: "Comptage physique et saisie informatique", videoUrl: "https://dmaret.github.io/videos/STO-04.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "PRE-01", categorie: "Préparation", description: "Imprimer bon", temps: 30, coef: 1.0, notes: "Bon de préparation commande", videoUrl: "https://dmaret.github.io/videos/PRE-01.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "PRE-02", categorie: "Préparation", description: "Picking", temps: 20, coef: 1.1, notes: "Prélèvement article selon bon", videoUrl: "https://dmaret.github.io/videos/PRE-02.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "EXP-01", categorie: "Expédition", description: "Peser colis", temps: 15, coef: 1.0, notes: "Balance de précision", videoUrl: "https://dmaret.github.io/videos/EXP-01.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "EXP-02", categorie: "Expédition", description: "Filmer palette", temps: 180, coef: 1.2, notes: "Film étirable machine ou manuel", videoUrl: "https://dmaret.github.io/videos/EXP-02.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-04", categorie: "Assemblage", description: "Calage (carton / caisse)", temps: 3, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-04.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-05", categorie: "Assemblage", description: "Fermeture d'un sachet mini-grip", temps: 3, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-05.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-06", categorie: "Assemblage", description: "Filmage (élément unitaire)", temps: 12, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-06.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-07", categorie: "Assemblage", description: "Banderolage produit", temps: 12, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-07.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-08", categorie: "Assemblage", description: "Formage + fermeture d'un étui carton complexe", temps: 10, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-08.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-09", categorie: "Assemblage", description: "Formage + fermeture d'un étui carton simple", temps: 5, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/ASS-09.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-10", categorie: "Assemblage", description: "Formage et mise en place d'un fourreau orienté", temps: 10, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-10.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-11", categorie: "Assemblage", description: "Groupage de plusieurs éléments avec un élastique", temps: 10, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-11.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-12", categorie: "Assemblage", description: "Insertion d'un élément complexe (orienté/insertion difficile)", temps: 5, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-12.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-13", categorie: "Assemblage", description: "Insertion d'un élément (comptage par balance)", temps: 0.5, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-13.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-14", categorie: "Assemblage", description: "Insertion d'un élément simple (orienté)", temps: 2, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/ASS-14.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-15", categorie: "Assemblage", description: "Pliage complexe", temps: 6, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ASS-15.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ASS-16", categorie: "Assemblage", description: "Pliage simple (par rainure)", temps: 3, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/ASS-16.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "CTR-02", categorie: "Contrôle", description: "Contrôle d'un élément fini (par élément)", temps: 1.5, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/CTR-02.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "CTR-03", categorie: "Contrôle", description: "Mise en conformité avant envoi (caisse/carton)", temps: 10, coef: 1.5, notes: "Contrôle fin - Niveau 3", videoUrl: "https://dmaret.github.io/videos/CTR-03.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "CTR-04", categorie: "Contrôle", description: "Mise en conformité avant envoi palette", temps: 60, coef: 1.5, notes: "Contrôle fin - Niveau 3", videoUrl: "https://dmaret.github.io/videos/CTR-04.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ETI-04", categorie: "Étiquetage", description: "Collage d'une étiquette orientée (complexe/précise)", temps: 5, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ETI-04.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ETI-05", categorie: "Étiquetage", description: "Collage d'une étiquette orientée (simple)", temps: 3, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/ETI-05.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "ETI-06", categorie: "Étiquetage", description: "Impression Inkjet ou caractère manuscrit", temps: 3, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/ETI-06.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "PRE-03", categorie: "Préparation", description: "Reconditionnement d'un élément (comptage/orientation)", temps: 3, coef: 1.2, notes: "Niveau 2", videoUrl: "https://dmaret.github.io/videos/PRE-03.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "REC-03", categorie: "Réception", description: "Déballage d'un élément", temps: 5, coef: 1.0, notes: "Niveau 1", videoUrl: "https://dmaret.github.io/videos/REC-03.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "EXP-03", categorie: "Expédition", description: "Livraison par la Poste", temps: 15, coef: 1.0, notes: "Dépôt en bureau de poste", videoUrl: "https://dmaret.github.io/videos/EXP-03.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
+            {code: "EXP-04", categorie: "Expédition", description: "Mise à disposition transports EPI", temps: 10, coef: 1.0, notes: "Préparation et remise au transporteur EPI", videoUrl: "https://dmaret.github.io/videos/EXP-04.mp4", pdfUrl: "https://dmaret.github.io/pdfs/([A-Z]*-[0-9]*).pdf"},
         ];
         let catalogueGestes = [...defaultCatalogueGestes];
 
@@ -3467,6 +3494,7 @@
         initTheme();
         initMatrice();
         loadFormationData();
+        loadReferenceDocuments();
         // Initialize learner date field with today's date
         const learnerStartDateField = document.getElementById('learnerStartDate');
         if (learnerStartDateField) {
@@ -5411,6 +5439,89 @@
                 </div>
             `;
             modal.classList.add('open');
+        }
+
+        // ── Reference Documents Management ─────────────────────
+        let referenceDocuments = [];
+
+        function loadReferenceDocuments() {
+            const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+            referenceDocuments = saved;
+            renderReferenceDocuments();
+        }
+
+        function addReferenceDocument() {
+            const title = document.getElementById('docTitle')?.value.trim();
+            const url = document.getElementById('docUrl')?.value.trim();
+            const type = document.getElementById('docType')?.value || 'other';
+
+            if (!title || !url) {
+                toast('Merci de remplir titre et URL', 'warning');
+                return;
+            }
+
+            const doc = {
+                id: Date.now(),
+                title: title,
+                url: url,
+                type: type,
+                createdAt: new Date().toISOString().split('T')[0]
+            };
+
+            referenceDocuments.push(doc);
+            saveReferenceDocuments();
+            renderReferenceDocuments();
+
+            document.getElementById('docTitle').value = '';
+            document.getElementById('docUrl').value = '';
+            document.getElementById('docType').value = 'pdf';
+
+            toast(`✅ Document "${title}" ajouté`, 'success');
+            logAction(`Ajout document référence: ${title} (${type})`, 'CREATE');
+        }
+
+        function saveReferenceDocuments() {
+            localStorage.setItem('referenceDocuments', JSON.stringify(referenceDocuments));
+        }
+
+        function renderReferenceDocuments() {
+            const container = document.getElementById('referenceDocumentsContainer');
+            const noMsg = document.getElementById('noDocsMsg');
+
+            if (referenceDocuments.length === 0) {
+                container.innerHTML = '';
+                noMsg.style.display = 'block';
+                return;
+            }
+
+            noMsg.style.display = 'none';
+            const icons = { pdf: '📄', link: '🔗', video: '🎥', other: '📦' };
+
+            container.innerHTML = referenceDocuments.map(doc => `
+                <div style="border:1px solid #ddd;padding:12px;border-radius:6px;background:#f9f9f9;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h4 style="margin:0 0 4px;color:#34495e;">
+                            ${icons[doc.type] || '📦'} ${doc.title}
+                        </h4>
+                        <p style="margin:0;color:#7a9db1;font-size:0.85em;">
+                            ${doc.type.toUpperCase()} • ${doc.createdAt}
+                        </p>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary">🔗 Ouvrir</a>
+                        <button class="delete-btn btn-small" onclick="deleteReferenceDocument(${doc.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteReferenceDocument(docId) {
+            toastConfirm('Supprimer ce document?', () => {
+                referenceDocuments = referenceDocuments.filter(d => d.id !== docId);
+                saveReferenceDocuments();
+                renderReferenceDocuments();
+                toast('✅ Document supprimé', 'success');
+            });
         }
 
         function addConsommable() {
