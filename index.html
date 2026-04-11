@@ -12026,6 +12026,20 @@
             }
         }
 
+        function cleanup3DLogistics() {
+            if (!logistics3DRenderer) return;
+            // Dispose of renderer resources
+            try {
+                logistics3DRenderer.dispose();
+            } catch (e) {
+                console.warn('Error disposing 3D renderer:', e);
+            }
+            // Clear references
+            logistics3DScene = null;
+            logistics3DCamera = null;
+            logistics3DRenderer = null;
+        }
+
         function init3DLogistics() {
             const container = document.getElementById('logistics3DContainer');
             const width = container.clientWidth;
@@ -14193,6 +14207,19 @@
                     canvas.addEventListener('mousemove', logisticCanvasMouseMove);
                     canvas.addEventListener('mouseup', logisticCanvasMouseUp);
                     canvas.addEventListener('click', logisticCanvasClick);
+
+                    // Handle canvas resize for responsive design
+                    const container = canvas.parentElement;
+                    if (container && typeof ResizeObserver !== 'undefined') {
+                        const resizeObserver = new ResizeObserver(() => {
+                            const maxWidth = container.clientWidth - 20;
+                            if (maxWidth > 0 && canvas.width !== maxWidth) {
+                                canvas.width = Math.min(maxWidth, 1200);
+                                renderLogisticCanvas();
+                            }
+                        });
+                        resizeObserver.observe(container);
+                    }
                 }
 
                 if (freeZone) {
@@ -14378,8 +14405,12 @@
             if (location) {
                 updateLogisticInfo(location);
             } else {
-                // Click on empty area - deselect
+                // Click on empty area - deselect and clear info panel
                 logisticState.selectedItem = null;
+                const infoPanel = document.getElementById('logisticInfoPanel');
+                if (infoPanel) {
+                    infoPanel.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">Aucun emplacement sélectionné</p>';
+                }
             }
             renderLogisticCanvas();
         }
