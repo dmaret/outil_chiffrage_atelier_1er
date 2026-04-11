@@ -10386,11 +10386,13 @@
                 }
             });
             // Stock
-            (JSON.parse(localStorage.getItem('atelier_stock')||'[]')).forEach(s => {
-                if ((s.reference||'').toLowerCase().includes(ql) || (s.description||'').toLowerCase().includes(ql)) {
-                    items.push({ icon:'📦', label: s.reference, sub: s.description, action: ()=>{ closeGlobalSearch(); switchTab('stock'); } });
-                }
-            });
+            try {
+                (JSON.parse(localStorage.getItem('atelier_stock')||'[]')).forEach(s => {
+                    if ((s.reference||'').toLowerCase().includes(ql) || (s.description||'').toLowerCase().includes(ql)) {
+                        items.push({ icon:'📦', label: s.reference, sub: s.description, action: ()=>{ closeGlobalSearch(); switchTab('stock'); } });
+                    }
+                });
+            } catch(e) { console.error('Error parsing stock data in search:', e); }
             if (items.length === 0) { res.innerHTML = '<div style="padding:12px;color:#7a9db1;font-style:italic;">Aucun résultat</div>'; return; }
             res.innerHTML = items.slice(0,20).map((it,i) =>
                 `<div class="search-result-item" onclick="searchResultActions[${i}]()">
