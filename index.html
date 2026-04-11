@@ -1178,6 +1178,19 @@
         </div>
     </div>
 
+    <!-- Link documents modal -->
+    <div id="linkDocsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:5000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeLinkDocsModal()">
+        <div style="background:white;border-radius:12px;padding:24px;max-width:500px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="margin:0;">📎 Lier des documents</h3>
+                <button onclick="closeLinkDocsModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;">✕</button>
+            </div>
+            <input type="text" id="docSearchInput" placeholder="🔍 Rechercher un document..." style="margin-bottom:12px;padding:8px;border:1px solid #ddd;border-radius:4px;" oninput="filterDocsList()">
+            <div id="docsListContainer" style="overflow-y:auto;flex:1;border:1px solid #eee;border-radius:6px;padding:8px;margin-bottom:12px;"></div>
+            <button class="btn" onclick="closeLinkDocsModal()">Fermer</button>
+        </div>
+    </div>
+
     <!-- Global search overlay -->
     <div id="searchGlobalOverlay" onclick="if(event.target===this)closeGlobalSearch()">
         <div class="search-global-box">
@@ -5371,12 +5384,7 @@
                     ` : ''}
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                         <button class="btn btn-small" onclick="openLearnerProgress(${learner.id})">👁️ Voir progression</button>
-                        ${availableDocs.length > 0 ? `
-                        <select onchange="if(this.value){toggleDocLink(${learner.id},Number(this.value));this.value='';}" style="padding:4px 8px;border-radius:4px;border:1px solid #ccc;font-size:0.85em;">
-                            <option value="">📎 Lier un document...</option>
-                            ${availableDocs.map(d => `<option value="${d.id}">📄 ${d.title}</option>`).join('')}
-                        </select>
-                        ` : ''}
+                        <button class="btn btn-small btn-secondary" onclick="openLinkDocsModal(${learner.id})">📎 Lier document</button>
                     </div>
                 </div>
                 `;
@@ -5663,6 +5671,39 @@
             }
             saveFormationData();
             renderLearners();
+        }
+
+        let currentLearnerForDocs = null;
+
+        function openLinkDocsModal(learnerId) {
+            currentLearnerForDocs = learnerId;
+            document.getElementById('docSearchInput').value = '';
+            filterDocsList();
+            document.getElementById('linkDocsModal').style.display = 'flex';
+        }
+
+        function closeLinkDocsModal() {
+            document.getElementById('linkDocsModal').style.display = 'none';
+            currentLearnerForDocs = null;
+        }
+
+        function filterDocsList() {
+            const searchVal = document.getElementById('docSearchInput').value.toLowerCase();
+            const learner = learnersList.find(l => l.id === currentLearnerForDocs);
+            if (!learner) return;
+            const linkedIds = learner.linkedDocs || [];
+            const container = document.getElementById('docsListContainer');
+            const filtered = referenceDocuments.filter(d => d.title.toLowerCase().includes(searchVal));
+
+            container.innerHTML = filtered.length === 0 ? `<p style="text-align:center;color:#999;padding:16px;">Aucun document trouvé</p>` : filtered.map(doc => {
+                const isLinked = linkedIds.includes(doc.id);
+                return `
+                    <div style="padding:10px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
+                        <span>📄 ${doc.title}</span>
+                        <input type="checkbox" ${isLinked ? 'checked' : ''} onchange="toggleDocLink(${currentLearnerForDocs},${doc.id}); filterDocsList();">
+                    </div>
+                `;
+            }).join('');
         }
 
         function addConsommable() {
