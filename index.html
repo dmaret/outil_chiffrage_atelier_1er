@@ -1178,6 +1178,67 @@
         </div>
     </div>
 
+    <!-- Edit Gesture Modal -->
+    <div id="editGesteModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeEditGesteModal()">
+        <div style="background:white;border-radius:12px;padding:24px;max-width:600px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2 style="margin:0;">✏️ Éditer geste</h2>
+                <button onclick="closeEditGesteModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;">✕</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Code</label>
+                    <input type="text" id="editGesteCode" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
+                </div>
+                <div class="form-group">
+                    <label>Catégorie</label>
+                    <select id="editGesteCategorie" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        <option>Réception</option>
+                        <option>Contrôle</option>
+                        <option>Étiquetage</option>
+                        <option>Assemblage</option>
+                        <option>Stockage</option>
+                        <option>Expédition</option>
+                        <option>Préparation</option>
+                        <option>Administratif</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="editGesteDescription" style="padding:8px;border:1px solid #ddd;border-radius:4px;width:100%;">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Temps (secondes)</label>
+                    <input type="number" id="editGesteTemps" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
+                </div>
+                <div class="form-group">
+                    <label>Coefficient</label>
+                    <input type="number" id="editGesteCoef" step="0.05" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Notes</label>
+                    <input type="text" id="editGesteNotes" style="padding:8px;border:1px solid #ddd;border-radius:4px;width:100%;">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🎥 URL Vidéo native</label>
+                    <input type="text" id="editGesteVideo" placeholder="https://example.com/video.mp4" style="padding:8px;border:1px solid #ddd;border-radius:4px;width:100%;font-size:0.9em;">
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+                <button class="btn btn-secondary" onclick="closeEditGesteModal()">Annuler</button>
+                <button class="btn btn-success" onclick="saveEditedGeste()">💾 Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Link documents modal -->
     <div id="linkDocsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeLinkDocsModal()">
         <div style="background:white;border-radius:12px;padding:24px;max-width:500px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
@@ -5249,56 +5310,66 @@
             });
         }
 
+        let currentEditGeste = null;
+
         function editGesteInline(code) {
             // Check permission
             if (!checkPermission('manage_gestes')) {
                 return;
             }
             const g = catalogueGestes.find(x => x.code === code);
-            const tr = document.getElementById('tr-geste-' + code);
-            if (!g || !tr) return;
-            const cats = ['Réception','Contrôle','Étiquetage','Assemblage','Stockage','Expédition','Préparation','Administratif'];
-            tr.innerHTML = `
-                <td><input type="text" id="edit-code-${code}" value="${g.code}" style="width:80px;"></td>
-                <td><select id="edit-cat-${code}">${cats.map(c => `<option ${c===g.categorie?'selected':''}>${c}</option>`).join('')}<option ${!cats.includes(g.categorie)?'selected':''}>${g.categorie}</option></select></td>
-                <td><input type="text" id="edit-desc-${code}" value="${g.description.replace(/"/g,'&quot;')}" style="width:100%;min-width:160px;"></td>
-                <td><input type="number" id="edit-temps-${code}" value="${g.temps}" style="width:65px;"></td>
-                <td><input type="number" id="edit-coef-${code}" value="${g.coef}" step="0.05" style="width:55px;"></td>
-                <td style="color:#aaa;font-size:0.85em;">${Math.round(g.temps * g.coef)}</td>
-                <td colspan="2" style="white-space:nowrap;padding:0;"><input type="text" id="edit-notes-${code}" value="${(g.notes||'').replace(/"/g,'&quot;')}" placeholder="Notes..." style="width:100%;padding:4px;"></td>
-                <td style="white-space:nowrap;padding:0;">
-                    <input type="text" id="edit-video-${code}" value="${(g.videoUrl||'').replace(/"/g,'&quot;')}" placeholder="URL vidéo..." style="width:100%;padding:4px;font-size:0.8em;">
-                </td>
-                <td style="white-space:nowrap;">
-                    <button class="btn btn-success btn-small" onclick="saveGesteInline('${code}')">💾</button>
-                    <button class="btn btn-secondary btn-small" onclick="renderCatalogue()">✖</button>
-                </td>`;
-            document.getElementById('edit-desc-' + code)?.focus();
+            if (!g) return;
+
+            currentEditGeste = code;
+            document.getElementById('editGesteCode').value = g.code;
+            document.getElementById('editGesteCategorie').value = g.categorie;
+            document.getElementById('editGesteDescription').value = g.description;
+            document.getElementById('editGesteTemps').value = g.temps;
+            document.getElementById('editGesteCoef').value = g.coef;
+            document.getElementById('editGesteNotes').value = g.notes || '';
+            document.getElementById('editGesteVideo').value = g.videoUrl || '';
+
+            document.getElementById('editGesteModal').style.display = 'flex';
+            document.getElementById('editGesteDescription').focus();
         }
 
-        function saveGesteInline(oldCode) {
-            // Check permission
-            if (!checkPermission('manage_gestes')) {
-                return;
-            }
+        function closeEditGesteModal() {
+            document.getElementById('editGesteModal').style.display = 'none';
+            currentEditGeste = null;
+        }
+
+        function saveEditedGeste() {
+            if (!checkPermission('manage_gestes') || !currentEditGeste) return;
+
+            const oldCode = currentEditGeste;
             const g = catalogueGestes.find(x => x.code === oldCode);
             if (!g) return;
+
             pushGesteHistoire(g.code, g);
-            const newCode = document.getElementById('edit-code-' + oldCode)?.value.trim();
+
+            const newCode = document.getElementById('editGesteCode').value.trim();
             if (!newCode) { toast('Le code ne peut pas être vide', 'warning'); return; }
-            if (newCode !== oldCode && catalogueGestes.find(x => x.code === newCode)) { toast('Ce code existe déjà', 'warning'); return; }
+            if (newCode !== oldCode && catalogueGestes.find(x => x.code === newCode)) {
+                toast('Ce code existe déjà', 'warning');
+                return;
+            }
+
             g.code = newCode;
-            g.categorie = document.getElementById('edit-cat-' + oldCode)?.value || g.categorie;
-            g.description = document.getElementById('edit-desc-' + oldCode)?.value.trim() || g.description;
-            g.temps = parseFloat(document.getElementById('edit-temps-' + oldCode)?.value) || g.temps;
-            g.coef = parseFloat(document.getElementById('edit-coef-' + oldCode)?.value) || g.coef;
-            g.notes = document.getElementById('edit-notes-' + oldCode)?.value || '';
-            g.videoUrl = document.getElementById('edit-video-' + oldCode)?.value.trim() || '';
+            g.categorie = document.getElementById('editGesteCategorie').value;
+            g.description = document.getElementById('editGesteDescription').value.trim();
+            g.temps = parseFloat(document.getElementById('editGesteTemps').value) || g.temps;
+            g.coef = parseFloat(document.getElementById('editGesteCoef').value) || g.coef;
+            g.notes = document.getElementById('editGesteNotes').value || '';
+            g.videoUrl = document.getElementById('editGesteVideo').value.trim() || '';
+
             catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
             saveToStorage();
             loadFormationFilms();
             logAction(`Modification geste : ${g.code} — ${g.description}`);
+
+            closeEditGesteModal();
             renderCatalogue();
+            toast(`✅ Geste ${g.code} modifié`, 'success');
         }
 
         function filterCatalogue() {
