@@ -7490,6 +7490,15 @@
                 }
                 input.value = '';
             };
+            reader.onerror = () => {
+                hideLoading();
+                toast(`❌ Erreur lors de la lecture du fichier : ${file.name}`, 'error');
+                console.error('FileReader error for JSON import:', file.name);
+            };
+            reader.onabort = () => {
+                hideLoading();
+                toast(`⚠️ Lecture du fichier annulée : ${file.name}`, 'warning');
+            };
             reader.readAsText(file);
         }
 
@@ -11397,6 +11406,15 @@
                 } catch (err) {
                     toast('Erreur lors de la lecture du fichier JSON: ' + err.message, 'error');
                 }
+            };
+
+            reader.onerror = () => {
+                toast(`❌ Erreur lors de la lecture du fichier : ${file.name}`, 'error');
+                console.error('FileReader error for JSON:', file.name);
+            };
+
+            reader.onabort = () => {
+                toast(`⚠️ Lecture du fichier annulée : ${file.name}`, 'warning');
             };
 
             reader.readAsText(file);
