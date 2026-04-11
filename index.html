@@ -5473,6 +5473,7 @@
         }
 
         function addReferenceDocument() {
+            alert('Fonction appelée! docTitle=' + document.getElementById('docTitle')?.value + ' docUrl=' + document.getElementById('docUrl')?.value);
             const title = document.getElementById('docTitle')?.value.trim();
             const url = document.getElementById('docUrl')?.value.trim();
             const type = document.getElementById('docType')?.value || 'other';
