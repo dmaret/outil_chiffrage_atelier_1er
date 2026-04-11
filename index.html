@@ -2192,7 +2192,7 @@
                                 <option value="other">📦 Autre</option>
                             </select>
                         </div>
-                        <button class="btn" onclick="alert('Début fonction'); addReferenceDocument(); alert('Fin fonction');">➕ Ajouter document</button>
+                        <button class="btn" onclick="addReferenceDocument()">➕ Ajouter document</button>
                     </div>
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
                     <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
@@ -5479,8 +5479,16 @@
             const url = document.getElementById('docUrl')?.value.trim();
             const type = document.getElementById('docType')?.value || 'other';
 
-            if (!title || !url) {
-                toast('Merci de remplir titre et URL', 'warning');
+            if (!title && !url) {
+                toast('⚠️ Merci de remplir le titre et l\'URL du document', 'warning');
+                return;
+            }
+            if (!title) {
+                toast('⚠️ Merci de remplir le titre du document', 'warning');
+                return;
+            }
+            if (!url) {
+                toast('⚠️ Merci de remplir l\'URL du document', 'warning');
                 return;
             }
 
@@ -5500,7 +5508,7 @@
             document.getElementById('docUrl').value = '';
             document.getElementById('docType').value = 'pdf';
 
-            toast(`✅ Document "${title}" ajouté`, 'success');
+            toast(`✅ Document "${title}" ajouté avec succès!`, 'success');
             logAction(`Ajout document référence: ${title} (${type})`, 'CREATE');
         }
 
@@ -9705,6 +9713,11 @@
             t.style.pointerEvents = 'auto';
             t.onclick = () => t.remove();
             tc.appendChild(t);
+            // Animate in
+            requestAnimationFrame(() => {
+                t.style.opacity = '1';
+                t.style.transform = 'translateX(0)';
+            });
             setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(110%)'; setTimeout(()=>t.remove(), 350); }, duration);
         }
 
