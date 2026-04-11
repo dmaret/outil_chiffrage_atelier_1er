@@ -5155,7 +5155,7 @@
 
             let html = `<table><thead><tr>
                 <th>Code</th><th>Catégorie</th><th>Description</th>
-                <th>Temps (sec)</th><th>Coef</th><th>Ajusté</th><th>Difficulté</th><th>Notes</th><th>Actions</th>
+                <th>Temps (sec)</th><th>Coef</th><th>Ajusté</th><th>Difficulté</th><th>Notes</th><th>🎥 Vidéo native</th><th>Actions</th>
             </tr></thead><tbody id="catalogueBody">`;
 
             catalogueGestes.forEach(g => {
@@ -5173,6 +5173,7 @@
                     <td><strong>${tempsAjuste}</strong></td>
                     <td><span class="badge-diff-${diff}">${diffLabel}</span></td>
                     <td style="font-size:0.8em;color:#7a9db1;font-style:italic;">${notes}</td>
+                    <td style="font-size:0.8em;color:#7a9db1;word-break:break-all;">${g.videoUrl ? `<a href="${g.videoUrl}" target="_blank" title="${g.videoUrl}">🎥 Ouvrir</a>` : '—'}</td>
                     <td style="white-space:nowrap;">
                         ${hasPermission('manage_gestes') ? `<button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>` : ''}
                         <button class="btn btn-small btn-secondary" onclick="imprimerFicheGeste('${codeEsc}')" title="Fiche PDF">🖨️</button>
@@ -5264,7 +5265,10 @@
                 <td><input type="number" id="edit-temps-${code}" value="${g.temps}" style="width:65px;"></td>
                 <td><input type="number" id="edit-coef-${code}" value="${g.coef}" step="0.05" style="width:55px;"></td>
                 <td style="color:#aaa;font-size:0.85em;">${Math.round(g.temps * g.coef)}</td>
-                <td><input type="text" id="edit-notes-${code}" value="${(g.notes||'').replace(/"/g,'&quot;')}" placeholder="Notes..." style="width:100%;"></td>
+                <td colspan="2" style="white-space:nowrap;padding:0;"><input type="text" id="edit-notes-${code}" value="${(g.notes||'').replace(/"/g,'&quot;')}" placeholder="Notes..." style="width:100%;padding:4px;"></td>
+                <td style="white-space:nowrap;padding:0;">
+                    <input type="text" id="edit-video-${code}" value="${(g.videoUrl||'').replace(/"/g,'&quot;')}" placeholder="URL vidéo..." style="width:100%;padding:4px;font-size:0.8em;">
+                </td>
                 <td style="white-space:nowrap;">
                     <button class="btn btn-success btn-small" onclick="saveGesteInline('${code}')">💾</button>
                     <button class="btn btn-secondary btn-small" onclick="renderCatalogue()">✖</button>
@@ -5289,8 +5293,10 @@
             g.temps = parseFloat(document.getElementById('edit-temps-' + oldCode)?.value) || g.temps;
             g.coef = parseFloat(document.getElementById('edit-coef-' + oldCode)?.value) || g.coef;
             g.notes = document.getElementById('edit-notes-' + oldCode)?.value || '';
+            g.videoUrl = document.getElementById('edit-video-' + oldCode)?.value.trim() || '';
             catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
             saveToStorage();
+            loadFormationFilms();
             logAction(`Modification geste : ${g.code} — ${g.description}`);
             renderCatalogue();
         }
