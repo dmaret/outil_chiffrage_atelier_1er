@@ -12551,7 +12551,7 @@
         }
 
         function validatePlacement(produit, rackId) {
-            if (!gameState.reglesActives) return { valid: true, message: '✅ Placement OK' };
+            if (!logisticsGameState.reglesActives) return { valid: true, message: '✅ Placement OK' };
 
             const placements = logisticState.placements[rackId] || {};
             const otherTypes = Object.values(placements).map(artId =>
@@ -12788,7 +12788,7 @@
         }
 
         function startChallengeGame() {
-            gameState.reglesActives = true;
+            logisticsGameState.reglesActives = true;
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
@@ -12805,7 +12805,7 @@
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             `;
 
-            gameState.produits.forEach(prod => {
+            logisticsGameState.produits.forEach(prod => {
                 html += `
                     <div style="background:linear-gradient(135deg,${prod.couleur},${prod.couleur}dd);color:white;padding:14px;border-radius:10px;text-align:center;font-weight:600;cursor:move;user-select:none;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:transform 0.2s;" draggable="true" ondragstart="event.dataTransfer.setData('prod','${prod.id}')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                         <div style="font-size:2em;margin-bottom:6px;">${prod.emoji}</div>
@@ -12828,7 +12828,7 @@
                         </div>
                     </div>
                     <div class="game-menu-footer">
-                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();gameState.currentGame=null;">Fermer</button>
+                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();logisticsGameState.currentGame=null;">Fermer</button>
                     </div>
                 </div>
             `;
@@ -12844,8 +12844,8 @@
         }
 
         function startSpeedGame() {
-            gameState.reglesActives = false;
-            gameState.time = 60;
+            logisticsGameState.reglesActives = false;
+            logisticsGameState.time = 60;
 
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
@@ -12873,7 +12873,7 @@
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             `;
 
-            gameState.produits.forEach(prod => {
+            logisticsGameState.produits.forEach(prod => {
                 html += `
                     <div style="background:linear-gradient(135deg,${prod.couleur},${prod.couleur}dd);color:white;padding:14px;border-radius:10px;text-align:center;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
                         <div style="font-size:2em;margin-bottom:4px;">${prod.emoji}</div>
@@ -12893,7 +12893,7 @@
                     </div>
                     <div class="game-menu-footer" style="flex-direction:column;gap:10px;">
                         <button class="btn btn-success" onclick="this.closest('.game-menu-overlay').remove();startSpeedTimer();" style="width:100%;font-size:1.05em;font-weight:700;padding:13px;">🚀 C'est parti!</button>
-                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();gameState.currentGame=null;">Annuler</button>
+                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();logisticsGameState.currentGame=null;">Annuler</button>
                     </div>
                 </div>
             `;
@@ -13141,7 +13141,7 @@
                     timerEl.remove();
                     const placed = Object.values(logisticState.placements).reduce((sum, rack) => sum + Object.keys(rack).length, 0);
                     toast(`⏰ Temps! Vous avez placé ${placed}/10 produits!`, 'warning');
-                    gameState.currentGame = null;
+                    logisticsGameState.currentGame = null;
                 }
             }, 1000);
         }
