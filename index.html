@@ -2922,10 +2922,11 @@
                 <div class="section">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
                         <h2>🏭 Gestion Logistique</h2>
-                        <div style="display:flex;gap:10px;">
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
                             <button class="btn btn-small logistics-view-btn" id="btn2DView" onclick="switchLogisticsView('2d')" style="background:#6b8fa3;color:white;">📍 Vue 2D</button>
                             <button class="btn btn-small logistics-view-btn" id="btn3DView" onclick="switchLogisticsView('3d')" style="background:#c9b3d4;color:white;">🎬 Vue 3D</button>
-                            <button class="btn btn-small" id="btnChallenge" onclick="startLogisticsChallenge()" style="background:#a8d5e2;color:#333;">🎮 Challenge</button>
+                            <button class="btn btn-small" id="btnGames" onclick="openGameMenu()" style="background:#ff6b6b;color:white;">🎮 Jeux</button>
+                            <button class="btn btn-small" id="btnChallenge" onclick="startLogisticsChallenge()" style="background:#a8d5e2;color:#333;">⏱️ Chrono</button>
                             <button class="btn btn-small" id="btnAnalytics" onclick="showLogisticsAnalytics()" style="background:#ffc107;color:#333;">📊 Analytics</button>
                         </div>
                     </div>
@@ -11692,6 +11693,295 @@
         // ANALYTICS & HEATMAP
         // ════════════════════════════════════════════════════════════
         let logisticsMovementHistory = JSON.parse(localStorage.getItem('logisticsMovementHistory') || '[]');
+
+        // ════════════════════════════════════════════════════════════
+        // PRODUITS AVANCÉS & JEUX LOGISTIQUES
+        // ════════════════════════════════════════════════════════════
+        const PRODUITS_BASE = [
+            // Liquides
+            { id: 'eau', nom: '💧 Eau', type: 'liquide', emoji: '💧', couleur: '#3498db', poids: 'lourd', fragile: true, temp: 'froid' },
+            { id: 'huile', nom: '🫒 Huile', type: 'liquide', emoji: '🫒', couleur: '#f39c12', poids: 'lourd', fragile: true, temp: 'normal' },
+            { id: 'jus', nom: '🧃 Jus', type: 'liquide', emoji: '🧃', couleur: '#e74c3c', poids: 'moyen', fragile: true, temp: 'froid' },
+
+            // Solides
+            { id: 'bois', nom: '🪵 Bois', type: 'solide', emoji: '🪵', couleur: '#8b4513', poids: 'lourd', fragile: false, temp: 'normal' },
+            { id: 'metal', nom: '⚙️ Métal', type: 'solide', emoji: '⚙️', couleur: '#95a5a6', poids: 'lourd', fragile: false, temp: 'normal' },
+            { id: 'verre', nom: '🥛 Verre', type: 'solide', emoji: '🥛', couleur: '#ecf0f1', poids: 'moyen', fragile: true, temp: 'normal' },
+
+            // Fragiles
+            { id: 'ceramique', nom: '🏺 Céramique', type: 'fragile', emoji: '🏺', couleur: '#d4af37', poids: 'moyen', fragile: true, temp: 'normal' },
+            { id: 'porcelaine', nom: '🍷 Porcelaine', type: 'fragile', emoji: '🍷', couleur: '#e8e8e8', poids: 'leger', fragile: true, temp: 'normal' },
+
+            // Lourds
+            { id: 'beton', nom: '🪨 Béton', type: 'lourd', emoji: '🪨', couleur: '#7f8c8d', poids: 'lourd', fragile: false, temp: 'normal' },
+            { id: 'pierre', nom: '⛏️ Pierre', type: 'lourd', emoji: '⛏️', couleur: '#666666', poids: 'lourd', fragile: false, temp: 'normal' },
+
+            // Thermosensibles
+            { id: 'glace', nom: '🍦 Glace', type: 'froid', emoji: '🍦', couleur: '#87ceeb', poids: 'moyen', fragile: true, temp: 'froid' },
+            { id: 'chocolat', nom: '🍫 Chocolat', type: 'froid', emoji: '🍫', couleur: '#795548', poids: 'moyen', fragile: true, temp: 'froid' },
+            { id: 'bougie', nom: '🕯️ Bougie', type: 'chaud', emoji: '🕯️', couleur: '#fff8dc', poids: 'leger', fragile: true, temp: 'chaud' },
+        ];
+
+        // Règles de compatibilité
+        const REGLES_PLACEMENT = {
+            liquide: {
+                incompatible: ['fragile', 'solide'], // liquides ne vont pas sur fragiles
+                compatible: ['lourd'],
+                message: '⚠️ Les liquides ne doivent pas être sur les articles fragiles!'
+            },
+            fragile: {
+                incompatible: ['lourd', 'liquide'],
+                compatible: ['fragile'],
+                message: '⚠️ Pas d\'articles lourds sur les fragiles!'
+            },
+            froid: {
+                incompatible: ['chaud'],
+                compatible: ['froid', 'normal'],
+                message: '❄️ Isolez les produits froids des chauds!'
+            },
+            chaud: {
+                incompatible: ['froid'],
+                compatible: ['chaud', 'normal'],
+                message: '🔥 Isolez les produits chauds des froids!'
+            },
+            lourd: {
+                incompatible: ['fragile'],
+                compatible: ['solide', 'lourd'],
+                message: '💪 Les lourds doivent être en bas!'
+            }
+        };
+
+        let logisticsGameState = {
+            currentGame: null,
+            score: 0,
+            time: 0,
+            produits: [],
+            niveau: 1,
+            reglesActives: true
+        };
+
+        function getRandomProduits(count = 5) {
+            const shuffled = [...PRODUITS_BASE].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, count);
+        }
+
+        function canPlaceProduit(produitType, surProduitType) {
+            if (!REGLES_PLACEMENT[produitType]) return true;
+            return !REGLES_PLACEMENT[produitType].incompatible.includes(surProduitType);
+        }
+
+        function validatePlacement(produit, rackId) {
+            if (!gameState.reglesActives) return { valid: true, message: '✅ Placement OK' };
+
+            const placements = logisticState.placements[rackId] || {};
+            const otherTypes = Object.values(placements).map(artId =>
+                PRODUITS_BASE.find(p => p.id === artId)?.type
+            ).filter(t => t);
+
+            for (let otherType of otherTypes) {
+                if (!canPlaceProduit(produit.type, otherType)) {
+                    return {
+                        valid: false,
+                        message: REGLES_PLACEMENT[produit.type].message
+                    };
+                }
+            }
+            return { valid: true, message: '✅ Placement autorisé!' };
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // MINI-JEUX LOGISTIQUES AVANCÉS
+        // ════════════════════════════════════════════════════════════
+
+        function openGameMenu() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            const games = [
+                { id: 'apprendre', emoji: '📚', nom: 'Mode Apprentissage', desc: 'Apprendre les règles de compatibilité' },
+                { id: 'challenge', emoji: '🎯', nom: 'Mode Challenge', desc: 'Placer les produits en respectant les contraintes' },
+                { id: 'puzzle', emoji: '🧩', nom: 'Mode Puzzle', desc: 'Résoudre des configurations complexes' },
+                { id: 'speed', emoji: '⚡', nom: 'Mode Speed', desc: 'Placer 10 produits en moins de 60 sec!' }
+            ];
+
+            let html = `
+                <div style="background:white;padding:40px;border-radius:16px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;">
+                    <h2 style="color:#6b8fa3;text-align:center;margin-bottom:30px;">🎮 Jeux Logistiques</h2>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            `;
+
+            games.forEach(game => {
+                html += `
+                    <div style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);padding:20px;border-radius:12px;cursor:pointer;transition:transform 0.2s;" onclick="closeGameMenu();startGame('${game.id}')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="font-size:2.5em;text-align:center;margin-bottom:10px;">${game.emoji}</div>
+                        <div style="font-weight:bold;color:#2d3e50;margin-bottom:8px;">${game.nom}</div>
+                        <div style="font-size:0.85em;color:#5a7b8f;">${game.desc}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <button class="btn btn-secondary" onclick="closeGameMenu()" style="width:100%;margin-top:20px;">Retour</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+            window.closeGameMenu = () => modal.remove();
+        }
+
+        function startGame(gameType) {
+            gameState.currentGame = gameType;
+            gameState.score = 0;
+            gameState.time = 0;
+            gameState.produits = getRandomProduits(gameType === 'speed' ? 10 : 5);
+
+            if (gameType === 'apprendre') {
+                startLearningMode();
+            } else if (gameType === 'challenge') {
+                startChallengeGame();
+            } else if (gameType === 'puzzle') {
+                startPuzzleGame();
+            } else if (gameType === 'speed') {
+                startSpeedGame();
+            }
+        }
+
+        function startLearningMode() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
+
+            let html = `
+                <div style="background:white;padding:30px;border-radius:16px;max-width:700px;width:90%;margin:20px auto;">
+                    <h2 style="color:#6b8fa3;margin-bottom:20px;">📚 Règles de Compatibilité</h2>
+                    <div style="background:#f5f9fc;padding:20px;border-radius:8px;margin-bottom:20px;">
+            `;
+
+            PRODUITS_BASE.forEach(prod => {
+                const typeRule = REGLES_PLACEMENT[prod.type];
+                html += `
+                    <div style="margin-bottom:15px;padding:12px;background:white;border-radius:6px;border-left:4px solid ${prod.couleur};">
+                        <div style="font-weight:bold;margin-bottom:8px;">${prod.emoji} ${prod.nom}</div>
+                        <div style="font-size:0.9em;color:#666;">
+                            <strong>Type:</strong> ${prod.type}<br>
+                            <strong>Poids:</strong> ${prod.poids}<br>
+                            <strong>Température:</strong> ${prod.temp}<br>
+                            <strong>Fragile:</strong> ${prod.fragile ? '⚠️ Oui' : '✅ Non'}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <div style="background:#fff3cd;padding:15px;border-radius:8px;margin-bottom:20px;border-left:4px solid #ffc107;">
+                        <strong style="color:#856404;">⚠️ Règles importantes:</strong>
+                        <ul style="margin:10px 0 0 20px;color:#856404;">
+                            <li>Les liquides ne doivent PAS être sur les fragiles</li>
+                            <li>Les articles lourds ne doivent PAS être sur les fragiles</li>
+                            <li>Les produits froids et chauds doivent être séparés</li>
+                            <li>Les fragiles ensemble = OK</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();toast('📚 Vous êtes prêt!','success');" style="width:100%;">J'ai compris!</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function startChallengeGame() {
+            gameState.reglesActives = true;
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:30px;border-radius:16px;max-width:500px;width:90%;">
+                    <h2 style="color:#6b8fa3;margin-bottom:20px;">🎯 Mode Challenge</h2>
+                    <p style="color:#666;margin-bottom:20px;">Placez les produits en respectant les règles de compatibilité!</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+            `;
+
+            gameState.produits.forEach(prod => {
+                html += `
+                    <div style="background:${prod.couleur};color:white;padding:15px;border-radius:8px;text-align:center;font-weight:bold;cursor:pointer;user-select:none;" draggable="true" ondragstart="event.dataTransfer.setData('prod','${prod.id}')">
+                        ${prod.emoji}<br><small>${prod.nom}</small>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <p style="color:#999;font-size:0.9em;">💡 Glissez les produits vers vos racks en bas. Attention aux incompatibilités!</p>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();gameState.currentGame=null;" style="width:100%;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+            toast('🎯 Mode Challenge lancé! Respectez les règles!', 'success');
+        }
+
+        function startPuzzleGame() {
+            gameState.reglesActives = true;
+            toast('🧩 Mode Puzzle: Résolvez la configuration optimale!', 'info');
+        }
+
+        function startSpeedGame() {
+            gameState.reglesActives = false;
+            gameState.time = 60;
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:30px;border-radius:16px;max-width:500px;width:90%;text-align:center;">
+                    <h2 style="color:#e74c3c;margin-bottom:20px;">⚡ Mode Speed!</h2>
+                    <div style="font-size:3em;font-weight:bold;color:#6b8fa3;margin-bottom:20px;font-family:monospace;border:3px solid #6b8fa3;padding:20px;border-radius:8px;">60s</div>
+                    <p style="color:#666;margin-bottom:20px;">Placez 10 produits au plus vite!<br>Les règles ne s'appliquent PAS - juste la vitesse!</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+            `;
+
+            gameState.produits.forEach(prod => {
+                html += `
+                    <div style="background:${prod.couleur};color:white;padding:12px;border-radius:8px;text-align:center;font-weight:bold;">
+                        ${prod.emoji}<br><small>${prod.nom}</small>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();startSpeedTimer();" style="width:100%;margin-bottom:10px;font-size:1.1em;">🚀 C'est parti!</button>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();gameState.currentGame=null;">Annuler</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function startSpeedTimer() {
+            let timeLeft = 60;
+            const timerEl = document.createElement('div');
+            timerEl.style.cssText = 'position:fixed;top:20px;right:20px;background:#e74c3c;color:white;padding:20px;border-radius:8px;font-size:2em;font-weight:bold;z-index:9998;font-family:monospace;';
+            timerEl.textContent = '60s';
+            document.body.appendChild(timerEl);
+
+            const timer = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft + 's';
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timerEl.remove();
+                    const placed = Object.values(logisticState.placements).reduce((sum, rack) => sum + Object.keys(rack).length, 0);
+                    toast(`⏰ Temps! Vous avez placé ${placed}/10 produits!`, 'warning');
+                    gameState.currentGame = null;
+                }
+            }, 1000);
+        }
 
         function trackArticleMovement(articleId, fromRack, toRack) {
             logisticsMovementHistory.push({
