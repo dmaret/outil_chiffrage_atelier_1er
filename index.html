@@ -11079,17 +11079,17 @@
             // Afficher le type de réponse approprié
             if (q.type === 'confirm') {
                 html += `
-                    <button class="btn btn-success" onclick="answerQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui, c'est juste</button>
-                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non, corriger</button>
+                    <button class="btn btn-success" onclick="answerConversationQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui, c'est juste</button>
+                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerConversationQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non, corriger</button>
                 `;
             } else if (q.type === 'yesno') {
                 html += `
-                    <button class="btn btn-success" onclick="answerQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui</button>
-                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non</button>
+                    <button class="btn btn-success" onclick="answerConversationQuestion(${index}, true, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">✅ Oui</button>
+                    <button class="btn btn-secondary" style="margin-left:8px;" onclick="answerConversationQuestion(${index}, false, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">❌ Non</button>
                 `;
             } else if (q.type === 'number') {
                 html += `<input type="number" id="q_${q.id}" value="${q.value}" min="1" max="100" style="width:100px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:1em;margin-right:8px;">
-                    <button class="btn btn-success" onclick="answerQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
+                    <button class="btn btn-success" onclick="answerConversationQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
                 `;
             } else if (q.type === 'select') {
                 html += `<select id="q_${q.id}" style="width:200px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:1em;margin-right:8px;">`;
@@ -11097,7 +11097,7 @@
                     html += `<option ${opt === q.value ? 'selected' : ''}>${opt}</option>`;
                 });
                 html += `</select>
-                    <button class="btn btn-success" onclick="answerQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
+                    <button class="btn btn-success" onclick="answerConversationQuestion(${index}, document.getElementById('q_${q.id}').value, ${JSON.stringify(questions).replace(/"/g, '&quot;')})">Continuer →</button>
                 `;
             }
 
@@ -11105,7 +11105,7 @@
             section.innerHTML = html;
         }
 
-        function answerQuestion(index, answer, questions) {
+        function answerConversationQuestion(index, answer, questions) {
             const q = questions[index];
             conversationAnswers[q.id] = answer;
             displayQuestion(questions, index + 1);
@@ -13059,7 +13059,7 @@
 
         function startPuzzleGame() {
             logisticsGameState.reglesActives = true;
-            closeGameMenu();
+            if (window.closeGameMenu) closeGameMenu();
             launchLogisticsGame();
             toast('🧩 Mode Puzzle: Résolvez la configuration optimale!', 'info');
         }
