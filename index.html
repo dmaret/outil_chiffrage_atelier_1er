@@ -2850,6 +2850,17 @@
                     <div class="info-box">Chaque fois qu'une prestation est modifiée, l'ancienne version est archivée ici. Permet de tracer l'évolution des prix et des conditions.</div>
                     <div id="historyTableContainer"></div>
                 </div>
+
+                <div class="section admin-section" style="display:none;">
+                    <h2>📋 Audit Trail - Tous les logs</h2>
+                    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
+                        <input type="text" id="auditFilterSearch" placeholder="🔍 Rechercher..." onkeyup="filterAuditLog()" style="flex:1;min-width:200px;padding:10px;">
+                        <button class="btn btn-secondary btn-small" onclick="auditLog=[];saveAuditLog();renderAuditLog();toast('✅ Logs supprimés','success')">🗑️ Effacer logs</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportAuditLog()">💾 Exporter CSV</button>
+                    </div>
+                    <div id="auditLogContainer"></div>
+                    <p id="noAuditMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun log enregistré</p>
+                </div>
             </div>
 
             <!-- ONGLET GANTT / PLANIFICATION -->
@@ -3450,6 +3461,7 @@
         let activeTabProfileId = null;
         let learnersList = [];
         let formationProgress = {};
+        let auditLog = [];
         let _presentationMode = false;
         let _presentationConfig = (() => {
             try {
@@ -3495,6 +3507,7 @@
         initMatrice();
         loadFormationData();
         loadReferenceDocuments();
+        loadAuditLog();
         // Initialize learner date field with today's date
         const learnerStartDateField = document.getElementById('learnerStartDate');
         if (learnerStartDateField) {
@@ -7941,6 +7954,95 @@
         // ============================================================
         // AUDIT LOG (Historique)
         // ============================================================
+        function loadAuditLog() {
+            const saved = JSON.parse(localStorage.getItem('auditLog') || '[]');
+            auditLog = saved;
+            renderAuditLog();
+        }
+
+        function saveAuditLog() {
+            localStorage.setItem('auditLog', JSON.stringify(auditLog.slice(-5000))); // Keep last 5000 entries
+        }
+
+        function renderAuditLog() {
+            const container = document.getElementById('auditLogContainer');
+            const noMsg = document.getElementById('noAuditMsg');
+
+            if (auditLog.length === 0) {
+                container.innerHTML = '';
+                noMsg.style.display = 'block';
+                return;
+            }
+
+            noMsg.style.display = 'none';
+            const icons = { 'CREATE': '✨', 'UPDATE': '✏️', 'DELETE': '🗑️', 'INFO': 'ℹ️', 'ERROR': '❌' };
+
+            container.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+                <thead><tr style="background:#f5f5f5;">
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Heure</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Type</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Action</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Utilisateur</th>
+                </tr></thead>
+                <tbody>
+                ${[...auditLog].reverse().slice(0, 100).map(log => `
+                    <tr style="border-bottom:1px solid #eee;">
+                        <td style="padding:10px;font-size:0.85em;color:#7a9db1;">${log.time || ''}</td>
+                        <td style="padding:10px;"><strong>${icons[log.type] || 'ℹ️'} ${log.type}</strong></td>
+                        <td style="padding:10px;">${log.desc || ''}</td>
+                        <td style="padding:10px;color:#7a9db1;font-size:0.9em;">${log.user || 'Anonyme'}</td>
+                    </tr>
+                `).join('')}
+                </tbody>
+            </table>`;
+        }
+
+        function filterAuditLog() {
+            const search = document.getElementById('auditFilterSearch')?.value.toLowerCase() || '';
+            const filtered = auditLog.filter(log =>
+                (log.desc && log.desc.toLowerCase().includes(search)) ||
+                (log.user && log.user.toLowerCase().includes(search)) ||
+                (log.type && log.type.toLowerCase().includes(search))
+            );
+
+            const container = document.getElementById('auditLogContainer');
+            const icons = { 'CREATE': '✨', 'UPDATE': '✏️', 'DELETE': '🗑️', 'INFO': 'ℹ️', 'ERROR': '❌' };
+
+            container.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+                <thead><tr style="background:#f5f5f5;">
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Heure</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Type</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Action</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Utilisateur</th>
+                </tr></thead>
+                <tbody>
+                ${[...filtered].reverse().slice(0, 100).map(log => `
+                    <tr style="border-bottom:1px solid #eee;">
+                        <td style="padding:10px;font-size:0.85em;color:#7a9db1;">${log.time || ''}</td>
+                        <td style="padding:10px;"><strong>${icons[log.type] || 'ℹ️'} ${log.type}</strong></td>
+                        <td style="padding:10px;">${log.desc || ''}</td>
+                        <td style="padding:10px;color:#7a9db1;font-size:0.9em;">${log.user || 'Anonyme'}</td>
+                    </tr>
+                `).join('')}
+                </tbody>
+            </table>`;
+        }
+
+        function exportAuditLog() {
+            const csv = [['Heure', 'Type', 'Action', 'Utilisateur']];
+            auditLog.forEach(log => {
+                csv.push([log.time || '', log.type || '', log.desc || '', log.user || 'Anonyme']);
+            });
+
+            let csvContent = csv.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `audit_log_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            toast('✅ Logs exportés en CSV', 'success');
+        }
+
         function logAction(desc, actionType = 'INFO') {
             const now = new Date();
             const dateStr = now.toLocaleDateString('fr-FR') + ' ' + now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
@@ -7951,6 +8053,11 @@
             if (actionHistory.length > 500) actionHistory.pop();
             // Sauvegarde légère sans déclencher updateSaveIndicator
             localStorage.setItem('actionHistory', JSON.stringify(actionHistory.slice(0, 500)));
+
+            // Add to audit log
+            auditLog.push({ time: dateStr, desc: desc, user: user, type: actionType, timestamp: timestamp });
+            if (auditLog.length > 5000) auditLog.shift();
+            saveAuditLog();
         }
 
         function renderHistory() {
