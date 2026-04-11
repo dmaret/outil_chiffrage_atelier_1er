@@ -2089,7 +2089,32 @@
                             </div>
                         </div>
                     </div>
-                    
+
+                    <h3>Configuration Logistique</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre de palettes atelier</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="nbPalettesAtelier" step="1" value="45" onchange="saveStockConfig(); config.nbPalettesAtelier = parseInt(this.value);">
+                                <span class="unit">pal.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Capacité par palette</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="capaciteParPalette" step="1" value="500" onchange="saveStockConfig(); config.capaciteParPalette = parseInt(this.value);">
+                                <span class="unit">unités</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Capacité par rack</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="capaciteParRack" step="1" value="1000" onchange="saveStockConfig(); config.capaciteParRack = parseInt(this.value);">
+                                <span class="unit">unités</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <h3>Ratio palette vs rack</h3>
                     <div style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 14px; border-radius: 8px; margin-top: 10px; border: 1px solid #e8f0f5;">
                         <p><strong>Palette/jour:</strong> <span id="coutJourPalette">2.50</span> CHF</p>
@@ -3606,7 +3631,10 @@
             coutPalette: 2.5,
             coutRack: 1.2,
             surfaceRack: 0.8,
-            capacitePalettes: 100
+            capacitePalettes: 100,
+            nbPalettesAtelier: 45,
+            capaciteParPalette: 500,
+            capaciteParRack: 1000
         };
         let stockMins = {}; // {ref: minQte}
         let configEmplacements = ['Zone palette', 'Rack A', 'Rack B', 'Rack C', 'Picking'];
@@ -4381,6 +4409,9 @@
             document.getElementById('coutRack').value = config.coutRack;
             document.getElementById('surfaceRack').value = config.surfaceRack;
             document.getElementById('capacitePalettes').value = config.capacitePalettes;
+            document.getElementById('nbPalettesAtelier').value = config.nbPalettesAtelier || 45;
+            document.getElementById('capaciteParPalette').value = config.capaciteParPalette || 500;
+            document.getElementById('capaciteParRack').value = config.capaciteParRack || 1000;
             updatePinStatus();
         }
 
@@ -4406,8 +4437,12 @@
             config.coutRack = parseFloat(document.getElementById('coutRack').value);
             config.surfaceRack = parseFloat(document.getElementById('surfaceRack').value);
             config.capacitePalettes = parseFloat(document.getElementById('capacitePalettes').value);
+            config.nbPalettesAtelier = parseInt(document.getElementById('nbPalettesAtelier').value) || 45;
+            config.capaciteParPalette = parseInt(document.getElementById('capaciteParPalette').value) || 500;
+            config.capaciteParRack = parseInt(document.getElementById('capaciteParRack').value) || 1000;
             logAction('Mise à jour configuration stock', 'UPDATE');
             saveToStorage();
+            toast('✅ Configuration logistique sauvegardée', 'success');
         }
 
         function resetConfig() {
@@ -11904,6 +11939,25 @@
             } catch (e) {
                 console.error('Erreur chargement logistique:', e);
             }
+            // Initialiser les palettes par défaut si aucune n'existe
+            initLogisticPalettes();
+        }
+
+        function initLogisticPalettes() {
+            // Si aucune palette n'existe, créer les 45 palettes par défaut
+            if (logisticState.palettes.length === 0) {
+                const nbPalettes = config.nbPalettesAtelier || 45;
+                for (let i = 1; i <= nbPalettes; i++) {
+                    const paletteId = 'PALETTE_' + (i < 10 ? '0' + i : i);
+                    logisticState.palettes.push({
+                        id: paletteId,
+                        name: 'Palette ' + i,
+                        capacity: config.capaciteParPalette || 500
+                    });
+                    logisticState.placements[paletteId] = {};
+                }
+                saveLogisticState();
+            }
         }
 
         function saveLogisticState() {
@@ -13848,12 +13902,13 @@
                 return;
             }
             const rackId = 'RACK_' + Date.now();
-            logisticState.racks.push({ id: rackId, name: name, capacity: 1000 });
+            logisticState.racks.push({ id: rackId, name: name, capacity: config.capaciteParRack || 1000 });
             logisticState.placements[rackId] = {};
             saveLogisticState();
             document.getElementById('rackName').value = '';
             renderLogisticRacks();
             renderLogisticCanvas();
+            toast('✅ Rack ajouté', 'success');
         }
 
         function addPalette() {
@@ -13863,12 +13918,13 @@
                 return;
             }
             const paletteId = 'PALETTE_' + Date.now();
-            logisticState.palettes.push({ id: paletteId, name: name, capacity: 500 });
+            logisticState.palettes.push({ id: paletteId, name: name, capacity: config.capaciteParPalette || 500 });
             logisticState.placements[paletteId] = {};
             saveLogisticState();
             document.getElementById('paletteName').value = '';
             renderLogisticPalettes();
             renderLogisticCanvas();
+            toast('✅ Palette ajoutée', 'success');
         }
 
         function deleteRack(rackId) {
