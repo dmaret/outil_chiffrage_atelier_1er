@@ -7307,8 +7307,6 @@
                             }
                         }, 100);
                     }, () => hideLoading());
-                        toast('✅ Données importées avec succès !', 'success');
-                    });
                 } catch(err) {
                     toast('❌ Erreur lors de l\'importation : ' + err.message, 'error');
                 }
