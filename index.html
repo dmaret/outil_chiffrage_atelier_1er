@@ -3023,6 +3023,13 @@
             {key:'gantt',          label:'📅 Planification'},
         ];
 
+        // Utility function to escape HTML special characters (prevent XSS)
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+            return String(text).replace(/[&<>"']/g, char => map[char]);
+        }
+
         // IMPORTANT: Default credentials have been removed for security.
         // Passwords must be configured by the user on first login.
         // See admin panel for user management.
@@ -4921,7 +4928,7 @@
                 const contactLine = [ci.tel, ci.email].filter(Boolean).join(' · ');
                 return `<div class="client-card" onclick="openClientDetail('${nom.replace(/'/g,"\\'")}')">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                        <div style="font-size:1.05em;font-weight:bold;color:#6b8fa3;">🏢 ${nom}</div>
+                        <div style="font-size:1.05em;font-weight:bold;color:#6b8fa3;">🏢 ${escapeHtml(nom)}</div>
                         <span style="background:${scoreBg};color:${scoreColor};padding:2px 8px;border-radius:12px;font-size:0.72em;font-weight:600;">${scoreTxt}</span>
                     </div>
                     ${contactLine ? `<div style="font-size:0.78em;color:#9ab8c8;margin-bottom:4px;">📞 ${contactLine}</div>` : ''}
