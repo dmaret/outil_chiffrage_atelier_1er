@@ -20,6 +20,7 @@
     <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -2919,8 +2920,18 @@
             <!-- ONGLET LOGISTIQUE -->
             <div id="logistique" class="tab-content">
                 <div class="section">
-                    <h2>🏭 Gestion Logistique 2D</h2>
-                    <p style="color:#666;margin-bottom:15px;">Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.</p>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                        <h2>🏭 Gestion Logistique</h2>
+                        <div style="display:flex;gap:10px;">
+                            <button class="btn btn-small logistics-view-btn" id="btn2DView" onclick="switchLogisticsView('2d')" style="background:#6b8fa3;color:white;">📍 Vue 2D</button>
+                            <button class="btn btn-small logistics-view-btn" id="btn3DView" onclick="switchLogisticsView('3d')" style="background:#c9b3d4;color:white;">🎬 Vue 3D</button>
+                            <button class="btn btn-small" id="btnChallenge" onclick="startLogisticsChallenge()" style="background:#a8d5e2;color:#333;">🎮 Mode Challenge</button>
+                        </div>
+                    </div>
+                    <p style="color:#666;margin-bottom:15px;" id="logisticsDesc">Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.</p>
+
+                    <!-- Vue 3D Canvas -->
+                    <div id="logistics3DContainer" style="display:none;width:100%;height:600px;border:1px solid #ddd;border-radius:8px;background:#f5f5f5;position:relative;margin-bottom:15px;"></div>
 
                     <!-- CONFIGURATION RACKS -->
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;">
@@ -11415,6 +11426,242 @@
             } catch (e) {
                 console.error('Erreur sauvegarde logistique:', e);
             }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // VUE 3D AVEC THREE.JS
+        // ════════════════════════════════════════════════════════════
+        let logistics3DScene = null, logistics3DCamera = null, logistics3DRenderer = null;
+
+        function switchLogisticsView(view) {
+            const canvas2D = document.getElementById('logisticsCanvas');
+            const canvas3D = document.getElementById('logistics3DContainer');
+            const btn2D = document.getElementById('btn2DView');
+            const btn3D = document.getElementById('btn3DView');
+            const desc = document.getElementById('logisticsDesc');
+
+            if (view === '2d') {
+                canvas2D.style.display = 'block';
+                canvas3D.style.display = 'none';
+                btn2D.style.background = '#6b8fa3';
+                btn3D.style.background = '#c9b3d4';
+                desc.textContent = 'Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.';
+                redrawLogisticsCanvas();
+            } else {
+                canvas2D.style.display = 'none';
+                canvas3D.style.display = 'block';
+                btn2D.style.background = '#c9b3d4';
+                btn3D.style.background = '#6b8fa3';
+                desc.textContent = 'Vue 3D interactive de votre entrepôt. Utilisez la souris pour pivoter (clic gauche), zoomer (molette), et déplacer (clic droit).';
+                if (!logistics3DScene) {
+                    init3DLogistics();
+                } else {
+                    animate3DLogistics();
+                }
+            }
+        }
+
+        function init3DLogistics() {
+            const container = document.getElementById('logistics3DContainer');
+            const width = container.clientWidth;
+            const height = 600;
+
+            // Scene
+            logistics3DScene = new THREE.Scene();
+            logistics3DScene.background = new THREE.Color(0xf5f5f5);
+            logistics3DScene.fog = new THREE.Fog(0xf5f5f5, 200, 500);
+
+            // Camera
+            logistics3DCamera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            logistics3DCamera.position.set(50, 40, 50);
+            logistics3DCamera.lookAt(0, 0, 0);
+
+            // Renderer
+            logistics3DRenderer = new THREE.WebGLRenderer({ antialias: true });
+            logistics3DRenderer.setSize(width, height);
+            logistics3DRenderer.shadowMap.enabled = true;
+            container.appendChild(logistics3DRenderer.domElement);
+
+            // Lighting
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+            logistics3DScene.add(ambLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(100, 100, 100);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            logistics3DScene.add(dirLight);
+
+            // Ground
+            const groundGeom = new THREE.PlaneGeometry(200, 200);
+            const groundMat = new THREE.MeshLambertMaterial({ color: 0xe8e8e8 });
+            const ground = new THREE.Mesh(groundGeom, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            logistics3DScene.add(ground);
+
+            // Grid
+            const gridHelper = new THREE.GridHelper(200, 20, 0xcccccc, 0xdddddd);
+            gridHelper.position.y = 0.01;
+            logistics3DScene.add(gridHelper);
+
+            // Render racks en 3D
+            render3DRacks();
+
+            // Controls
+            setupLogistics3DControls();
+
+            // Animation loop
+            animate3DLogistics();
+        }
+
+        function render3DRacks() {
+            if (!logistics3DScene) return;
+
+            // Remove old racks
+            const oldRacks = logistics3DScene.getObjectByName('racksGroup');
+            if (oldRacks) logistics3DScene.remove(oldRacks);
+
+            const racksGroup = new THREE.Group();
+            racksGroup.name = 'racksGroup';
+
+            const rackSpacing = 30;
+            const racks = logisticState.racks || [];
+
+            racks.forEach((rack, idx) => {
+                const x = (idx % 3) * rackSpacing - 30;
+                const z = Math.floor(idx / 3) * rackSpacing - 30;
+
+                // Rack box
+                const rackGeom = new THREE.BoxGeometry(20, 40, 15);
+                const rackMat = new THREE.MeshPhongMaterial({ color: 0x6b8fa3 });
+                const rackMesh = new THREE.Mesh(rackGeom, rackMat);
+                rackMesh.position.set(x, 20, z);
+                rackMesh.castShadow = true;
+                rackMesh.receiveShadow = true;
+                rackMesh.userData = { type: 'rack', id: rack.id, name: rack.name };
+
+                // Shelves
+                for (let shelf = 0; shelf < 4; shelf++) {
+                    const shelfGeom = new THREE.BoxGeometry(22, 1, 17);
+                    const shelfMat = new THREE.MeshPhongMaterial({ color: 0xc9b3d4 });
+                    const shelfMesh = new THREE.Mesh(shelfGeom, shelfMat);
+                    shelfMesh.position.set(x, 10 + shelf * 8, z);
+                    shelfMesh.castShadow = true;
+                    racksGroup.add(shelfMesh);
+                }
+
+                racksGroup.add(rackMesh);
+
+                // Label
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 256, 128);
+                ctx.fillStyle = '#333333';
+                ctx.font = 'bold 32px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(rack.name, 128, 64);
+
+                const texture = new THREE.CanvasTexture(canvas);
+                const labelGeom = new THREE.PlaneGeometry(22, 11);
+                const labelMat = new THREE.MeshBasicMaterial({ map: texture });
+                const label = new THREE.Mesh(labelGeom, labelMat);
+                label.position.set(x, 38, z + 8.5);
+                racksGroup.add(label);
+            });
+
+            logistics3DScene.add(racksGroup);
+        }
+
+        function setupLogistics3DControls() {
+            const container = document.getElementById('logistics3DContainer');
+            let isDragging = false, previousMousePosition = { x: 0, y: 0 };
+            let rotationX = 0, rotationY = 0;
+
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                rotationY += deltaX * 0.01;
+                rotationX += deltaY * 0.01;
+
+                const distance = logistics3DCamera.position.length();
+                logistics3DCamera.position.x = distance * Math.sin(rotationY) * Math.cos(rotationX);
+                logistics3DCamera.position.y = distance * Math.sin(rotationX) + 20;
+                logistics3DCamera.position.z = distance * Math.cos(rotationY) * Math.cos(rotationX);
+                logistics3DCamera.lookAt(0, 20, 0);
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            container.addEventListener('mouseup', () => { isDragging = false; });
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const distance = logistics3DCamera.position.length();
+                const newDistance = Math.max(30, Math.min(200, distance + e.deltaY * 0.1));
+                logistics3DCamera.position.multiplyScalar(newDistance / distance);
+            }, { passive: false });
+        }
+
+        function animate3DLogistics() {
+            requestAnimationFrame(animate3DLogistics);
+            if (logistics3DRenderer) {
+                logistics3DRenderer.render(logistics3DScene, logistics3DCamera);
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // MODE CHALLENGE / GAMIFICATION
+        // ════════════════════════════════════════════════════════════
+        let challengeMode = false;
+        let challengeStartTime = 0;
+        let challengeScore = 0;
+
+        function startLogisticsChallenge() {
+            if (logisticState.articles.length === 0) {
+                toast('❌ Ajoutez d\'abord des articles', 'warning');
+                return;
+            }
+
+            challengeMode = true;
+            challengeStartTime = Date.now();
+            challengeScore = 0;
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+            modal.innerHTML = `
+                <div style="background:white;padding:30px;border-radius:12px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+                    <h2 style="color:#6b8fa3;margin-bottom:15px;">🎮 Mode Challenge</h2>
+                    <p style="color:#666;margin-bottom:20px;font-size:0.95em;">
+                        Rangez tous les articles au bon endroit dans le <strong>temps limite!</strong><br>
+                        <span style="color:#a8d5e2;font-weight:bold;">Chrono : 5 minutes</span>
+                    </p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+                        <div style="background:#f5f5f5;padding:10px;border-radius:6px;">
+                            <div style="color:#999;font-size:0.9em;">Articles à ranger</div>
+                            <div style="font-size:1.8em;font-weight:bold;color:#6b8fa3;">${logisticState.articles.length}</div>
+                        </div>
+                        <div style="background:#f5f5f5;padding:10px;border-radius:6px;">
+                            <div style="color:#999;font-size:0.9em;">Temps</div>
+                            <div style="font-size:1.8em;font-weight:bold;color:#c9b3d4;">5:00</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="this.parentElement.parentElement.remove();challengeMode=false;toast('🎮 Challenge lancé! Bonne chance!','success');" style="width:100%;">🚀 C'est parti!</button>
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();challengeMode=false;" style="width:100%;margin-top:10px;">Annuler</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         function addRack() {
