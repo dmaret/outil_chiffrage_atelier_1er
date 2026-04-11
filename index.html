@@ -12914,6 +12914,32 @@
             }
         }
 
+        function launchLogisticsGame() {
+            // Charger l'état logistique existant
+            loadLogisticState();
+
+            // S'assurer qu'on a des racks/palettes
+            if (logisticState.racks.length === 0 && logisticState.palettes.length === 0) {
+                toast('❌ Vous devez d\'abord créer des racks ou des palettes!', 'danger');
+                return;
+            }
+
+            // Afficher le canvas 2D
+            const canvas = document.getElementById('logisticsCanvas');
+            if (canvas) canvas.style.display = 'block';
+
+            const canvas3D = document.getElementById('logistics3DContainer');
+            if (canvas3D) canvas3D.style.display = 'none';
+
+            // Initialiser les articles disponibles
+            renderLogisticArticlesList();
+
+            // Dessiner le canvas
+            renderLogisticCanvas();
+
+            toast('🎮 Jeu lancé! Glissez les articles sur les racks!', 'success');
+        }
+
         function startLearningMode() {
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
@@ -12971,7 +12997,7 @@
                         </div>
                     </div>
                     <div class="game-menu-footer">
-                        <button class="btn btn-success" onclick="this.closest('.game-menu-overlay').remove();toast('📚 Prêt à commencer!','success');">J'ai compris! ✅</button>
+                        <button class="btn btn-success" onclick="closeGameMenu();launchLogisticsGame();">Commencer! 🚀</button>
                     </div>
                 </div>
             `;
@@ -13021,18 +13047,20 @@
                         </div>
                     </div>
                     <div class="game-menu-footer">
-                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();logisticsGameState.currentGame=null;">Fermer</button>
+                        <button class="btn btn-success" onclick="closeGameMenu();launchLogisticsGame();">Lancer le Challenge! 🚀</button>
+                        <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();logisticsGameState.currentGame=null;">Annuler</button>
                     </div>
                 </div>
             `;
 
             modal.innerHTML = html;
             document.body.appendChild(modal);
-            toast('🎯 Mode Challenge lancé! Respectez les règles!', 'success');
         }
 
         function startPuzzleGame() {
-            gameState.reglesActives = true;
+            logisticsGameState.reglesActives = true;
+            closeGameMenu();
+            launchLogisticsGame();
             toast('🧩 Mode Puzzle: Résolvez la configuration optimale!', 'info');
         }
 
@@ -13085,7 +13113,7 @@
                         </div>
                     </div>
                     <div class="game-menu-footer" style="flex-direction:column;gap:10px;">
-                        <button class="btn btn-success" onclick="this.closest('.game-menu-overlay').remove();startSpeedTimer();" style="width:100%;font-size:1.05em;font-weight:700;padding:13px;">🚀 C'est parti!</button>
+                        <button class="btn btn-success" onclick="closeGameMenu();launchLogisticsGame();startSpeedTimer();" style="width:100%;font-size:1.05em;font-weight:700;padding:13px;">🚀 C'est parti!</button>
                         <button class="btn btn-secondary" onclick="this.closest('.game-menu-overlay').remove();logisticsGameState.currentGame=null;">Annuler</button>
                     </div>
                 </div>
