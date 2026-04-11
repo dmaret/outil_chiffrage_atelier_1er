@@ -985,6 +985,107 @@
         .devis-num { font-size:1.8em; font-weight:bold; color:#2d3e50; }
         .devis-footer { text-align:center; font-size:0.8em; color:#999; margin-top:30px; border-top:1px solid #eee; padding-top:15px; }
 
+        /* ── Footer Legal ─────────────────────────────────── */
+        .footer-legal {
+            margin-top: 40px;
+            padding: 20px;
+            background: transparent;
+            border-top: 1px solid rgba(0, 0, 0, 0.2);
+            font-size: 0.9em;
+            color: inherit;
+            opacity: 0.85;
+            text-align: center;
+        }
+        .footer-legal strong { color: inherit; }
+        .footer-legal a {
+            color: #6b8fa3;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .footer-legal a:hover { color: #a8d5e2; text-decoration: underline; }
+
+        /* ── Modal Conditions ─────────────────────────────────── */
+        .modal-conditions {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-conditions.show {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        .modal-conditions-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s;
+        }
+        .modal-conditions-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2d3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #a8d5e2;
+            padding-bottom: 10px;
+        }
+        .modal-conditions-body {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #666;
+        }
+        .modal-conditions-body p {
+            margin-bottom: 15px;
+        }
+        .modal-conditions-body ul {
+            margin: 15px 0 15px 20px;
+            list-style-type: disc;
+        }
+        .modal-conditions-body li {
+            margin-bottom: 8px;
+        }
+        .modal-conditions-body strong {
+            color: #333;
+            font-weight: 600;
+        }
+        .modal-conditions-close {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .modal-conditions-close button {
+            background: #a8d5e2;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .modal-conditions-close button:hover {
+            background: #6b8fa3;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
         /* Alert banner */
         .alert-banner { background: #fff3cd; border-left: 4px solid #f39c12; padding: 12px 20px; margin-bottom: 15px; border-radius: 6px; font-size: 0.88em; }
         .alert-banner.danger { background: #fde8e8; border-left-color: #e74c3c; }
@@ -1624,12 +1725,6 @@
                 </table>
 
                 <p style="margin-top:24px;color:#aaa;font-size:0.85em;text-align:center;">Documentation — Outil Complet Atelier - La Pallanterie • Avril 2026</p>
-                <div style="margin-top:16px;padding:12px 16px;background:#f8f9fa;border-radius:8px;border:1px solid #e8ecf0;text-align:center;">
-                    <p style="font-size:0.8em;color:#8a9db1;margin:0;line-height:1.6;">
-                        © 2025–2026 <strong>MARET Davie</strong> — Tous droits réservés.<br>
-                        Aucune reproduction, utilisation ou distribution de ce logiciel, de son code source ou de toute partie de celui-ci ne peut être effectuée sans l'accord écrit préalable de l'auteur.
-                    </p>
-                </div>
             </div>
         </div>
     </div>
@@ -2096,6 +2191,8 @@
                     <div id="stockMinTable"></div>
                     <div style="margin-top:12px;">
                         <button class="btn btn-success" onclick="exportStockCSV()">📥 Export CSV</button>
+                        <button class="btn btn-info" onclick="saveStockMinTemplate()">💾 Sauver comme modèle</button>
+                        <button class="btn btn-info" onclick="loadStockMinTemplate()" id="loadTemplateBtn" style="display:none;">📂 Charger modèle</button>
                     </div>
                 </div>
             </div>
@@ -3137,7 +3234,7 @@
 
             <!-- ONGLET LOGISTIQUE -->
             <div id="logistique" class="tab-content">
-                <div class="section">
+                <div class="section" id="logisticsManagementSection">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
                         <h2>🏭 Gestion Logistique</h2>
                         <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -3221,11 +3318,18 @@
                     <canvas id="logisticsCanvas" width="1200" height="600" style="border:2px solid #a8d5e2;background:white;cursor:move;display:block;margin:0 auto;border-radius:8px;"></canvas>
                 </div>
 
+                <!-- ZONE D'ARTICLES LIBRES (NON PLACÉS) -->
+                <div class="section" style="border-left:4px solid #ff9800;background:linear-gradient(135deg,#fff8e1,#fff3cd);">
+                    <h2>📍 Articles Libres (Non placés)</h2>
+                    <p style="color:#856404;font-size:0.95em;margin-bottom:15px;">Glissez-déposez les articles ici pour les placer librement, ou sur un rack/palette. Ces articles ne sont pas encore assignés à un emplacement spécifique.</p>
+                    <div id="logisticFreeArticlesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;min-height:80px;padding:15px;background:rgba(255,255,255,0.6);border-radius:8px;border:2px dashed #ff9800;"></div>
+                </div>
+
                 <!-- ZONE D'ARTICLES DISPONIBLES (DRAG SOURCE) -->
                 <div class="section">
                     <h2>📦 Articles disponibles (Glissez-déposez sur le plan)</h2>
                     <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                        <input type="text" id="logisticSearchArticle" placeholder="Rechercher article..." style="flex:1;min-width:200px;">
+                        <input type="text" id="logisticSearchArticle" placeholder="Rechercher article..." style="flex:1;min-width:200px;" oninput="refreshLogisticArticles()">
                         <button class="btn btn-small" onclick="refreshLogisticArticles()">🔄 Actualiser</button>
                     </div>
                     <div id="logisticArticlesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;"></div>
@@ -3303,7 +3407,7 @@
                 <div class="section">
                     <h2>📝 Historique Mouvements</h2>
                     <div style="display:flex;gap:8px;margin-bottom:10px;">
-                        <input type="text" id="logisticHistoryFilter" placeholder="Filtrer..." style="flex:1;">
+                        <input type="text" id="logisticHistoryFilter" placeholder="Filtrer..." style="flex:1;" oninput="renderLogisticHistory()">
                         <button class="btn btn-small" onclick="logisticClearHistory()">🗑️ Effacer</button>
                     </div>
                     <div id="logisticHistoryList" style="max-height:300px;overflow-y:auto;"></div>
@@ -3456,10 +3560,8 @@
 
     <!-- App footer copyright -->
     <div style="text-align:center;font-size:0.72em;color:#9ab0be;padding:14px 20px 10px;border-top:1px solid #e8ecf0;background:#f8fafc;margin-top:8px;">
-        © 2025–2026 <strong>MARET Davie</strong> — Tous droits réservés.
-        Toute reproduction ou utilisation de ce logiciel sans accord préalable écrit est interdite.
+        © 2025–2026 <strong>MARET Davie</strong> — <span style="cursor:pointer;text-decoration:underline;" onclick="showUsageConditions()">Conditions d'utilisation</span>
     </div>
-
     <!-- Paiement Modal -->
     <!-- Comparateur de prestations -->
     <div id="compareModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:5000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeCompareModal()">
@@ -4217,6 +4319,8 @@
                 }
             } catch(e) { console.error('Error loading stock:', e); }
             try { if (savedStockMins) stockMins = JSON.parse(savedStockMins); } catch(e) { console.error('Error loading stock minimums:', e); }
+            const savedStockMinTemplates = localStorage.getItem('stockMinTemplates');
+            try { if (savedStockMinTemplates) stockMinTemplates = JSON.parse(savedStockMinTemplates); } catch(e) { console.error('Error loading stock min templates:', e); }
             const savedEmplacements = localStorage.getItem('configEmplacements');
             const savedUnites = localStorage.getItem('configUnites');
             const savedTypesStock = localStorage.getItem('configTypesStock');
@@ -4248,6 +4352,7 @@
             localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
             localStorage.setItem('stockData', JSON.stringify({mouvements, stockActuel}));
             localStorage.setItem('stockMins', JSON.stringify(stockMins));
+            localStorage.setItem('stockMinTemplates', JSON.stringify(stockMinTemplates));
             localStorage.setItem('configEmplacements', JSON.stringify(configEmplacements));
             localStorage.setItem('configUnites', JSON.stringify(configUnites));
             localStorage.setItem('configTypesStock', JSON.stringify(configTypesStock));
@@ -4352,12 +4457,25 @@
                 renderMouvements();
                 renderValorisation();
                 renderStockMinTable();
+                updateTemplateButton();
                 checkAndShowAlerts();
             }
             else if (tabName === 'parametrage') loadConfig();
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
+            else if (tabName === 'logistique') {
+                loadLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                renderLogisticFreeArticles();
+                refreshLogisticArticles();
+                renderLogisticMoveForm();
+                renderLogisticHistory();
+                renderLogisticAlerts();
+                renderLogisticStats();
+            }
         }
 
         function buildGesteOptions(selCode) {
@@ -7469,6 +7587,75 @@
             saveToStorage();
             renderStockMinTable();
             toast('✅ Stocks minimums sauvegardés', 'success');
+        }
+
+        // ============================================================
+        // Templates for Stock Minimums
+        // ============================================================
+        let stockMinTemplates = {};
+
+        function saveStockMinTemplate() {
+            const templateName = prompt('Nom du modèle:', `Modèle ${new Date().toLocaleDateString('fr-FR')}`);
+            if (!templateName) return;
+
+            // Check if template already exists
+            if (stockMinTemplates[templateName]) {
+                if (!confirm(`Le modèle "${templateName}" existe déjà. Le remplacer?`)) return;
+            }
+
+            stockMinTemplates[templateName] = { ...stockMins };
+            saveToStorage();
+            updateTemplateButton();
+            toast(`✅ Modèle "${templateName}" sauvegardé`, 'success');
+        }
+
+        function loadStockMinTemplate() {
+            if (Object.keys(stockMinTemplates).length === 0) {
+                toast('⚠️ Aucun modèle disponible', 'warning');
+                return;
+            }
+
+            const templates = Object.keys(stockMinTemplates);
+            let html = '<div style="background:white;border-radius:8px;padding:16px;max-width:400px;">';
+            html += '<h3>Sélectionner un modèle</h3>';
+            templates.forEach(name => {
+                html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #eee;">`;
+                html += `<span onclick="applyStockMinTemplate('${name.replace(/'/g, "\\'")}'); closeAllModals();" style="flex:1;cursor:pointer;padding:8px;">${name}</span>`;
+                html += `<button class="btn btn-small" style="background:#ff6b6b;" onclick="deleteStockMinTemplate('${name.replace(/'/g, "\\'")}')">🗑️</button>`;
+                html += '</div>';
+            });
+            html += '</div>';
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;';
+            modal.onclick = function(e) { if (e.target === modal) closeAllModals(); };
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+            window.closeAllModals = function() { modal.remove(); };
+        }
+
+        function applyStockMinTemplate(templateName) {
+            if (!stockMinTemplates[templateName]) return;
+            stockMins = { ...stockMinTemplates[templateName] };
+            saveToStorage();
+            renderStockMinTable();
+            toast(`✅ Modèle "${templateName}" appliqué`, 'success');
+        }
+
+        function deleteStockMinTemplate(templateName) {
+            if (!confirm(`Supprimer le modèle "${templateName}"?`)) return;
+            delete stockMinTemplates[templateName];
+            saveToStorage();
+            updateTemplateButton();
+            toast(`✅ Modèle supprimé`, 'success');
+            loadStockMinTemplate();
+        }
+
+        function updateTemplateButton() {
+            const btn = document.getElementById('loadTemplateBtn');
+            if (btn) {
+                btn.style.display = Object.keys(stockMinTemplates).length > 0 ? 'inline-block' : 'none';
+            }
         }
 
         // ============================================================
@@ -11638,6 +11825,56 @@
             toast(`✅ Prestation importée! Référence: ${reportData.reference}`, 'success');
         }
 
+        /* ── Modal Conditions d'utilisation ─────────────────────────────────── */
+        function openConditionsModal(event) {
+            if (event) event.preventDefault();
+            const modal = document.getElementById('conditionsModal');
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeConditionsModal() {
+            const modal = document.getElementById('conditionsModal');
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Event listeners for modal
+        document.addEventListener('DOMContentLoaded', function() {
+            // Link to open modal
+            const conditionsLink = document.querySelector('.footer-legal a');
+            if (conditionsLink) {
+                conditionsLink.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    openConditionsModal(event);
+                });
+            }
+
+            // Button to close modal
+            const closeButton = document.querySelector('.modal-conditions-close button');
+            if (closeButton) {
+                closeButton.addEventListener('click', closeConditionsModal);
+            }
+
+            // Close modal if clicking outside
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('conditionsModal');
+                if (event.target === modal) {
+                    closeConditionsModal();
+                }
+            });
+        });
+
+        // Fermer avec la touche Escape
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeConditionsModal();
+            }
+        });
         // ═══════════════════════════════════════════════════════════════
         // MODULE LOGISTIQUE 2D — GESTION RACKS ET PALETTES
         // ═══════════════════════════════════════════════════════════════
@@ -11645,7 +11882,9 @@
         let logisticState = {
             racks: [],
             palettes: [],
+            articles: [],
             placements: {}, // { rackId: { articleId: qty, ... }, ... }
+            freeArticles: {}, // { articleId: qty, ... } - articles non assignés
             movements: [],
             zoomLevel: 1,
             selectedItem: null,
@@ -11888,7 +12127,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             challengeMode = true;
@@ -12212,7 +12451,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
@@ -12370,7 +12609,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const currentCert = CERTIFICATION_LEVELS.find(c => c.minXP <= (playerStats.level - 1) * 500 + playerStats.xp);
@@ -12500,7 +12739,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
@@ -12539,7 +12778,7 @@
             switchLogisticsView('2d');
 
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
@@ -13460,7 +13699,7 @@
 
         function showLogisticsAnalytics() {
             // Scroll vers la section logistique
-            const logisticsSection = document.querySelector('.section');
+            const logisticsSection = document.getElementById('logisticsManagementSection');
             if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const canvas2D = document.getElementById('logisticsCanvas');
@@ -13759,27 +13998,32 @@
 
         function refreshLogisticArticles() {
             renderLogisticArticlesList();
+            renderLogisticFreeArticles();
             renderLogisticMoveForm();
         }
 
         function renderLogisticArticlesList() {
             try {
-                const searchVal = document.getElementById('logisticSearchArticle').value.toLowerCase();
+                const searchEl = document.getElementById('logisticSearchArticle');
+                const searchVal = searchEl ? searchEl.value.toLowerCase() : '';
                 const articles = [];
 
                 // Récupérer du catalogue de consommables
                 const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
                 conso.forEach(c => {
-                    if (c.designation.toLowerCase().includes(searchVal) || c.reference.toLowerCase().includes(searchVal)) {
-                        articles.push({ id: 'CONSO_' + c.id, name: c.designation, type: 'Consommable', qty: 0 });
+                    const designation = (c.designation || '').toLowerCase();
+                    const reference = (c.reference || '').toLowerCase();
+                    if (designation.includes(searchVal) || reference.includes(searchVal)) {
+                        articles.push({ id: 'CONSO_' + c.id, name: c.designation || 'Sans nom', type: 'Consommable', qty: 0 });
                     }
                 });
 
                 // Récupérer du stock
-                const stock = JSON.parse(localStorage.getItem('stockActuel') || '{}');
-                Object.entries(stock).forEach(([artId, info]) => {
-                    if (info.designation.toLowerCase().includes(searchVal)) {
-                        articles.push({ id: artId, name: info.designation, type: 'Stock', qty: info.quantite || 0 });
+                const stockData = JSON.parse(localStorage.getItem('stockData') || '{}');
+                const stock = stockData.stockActuel || {};
+                Object.entries(stock).forEach(([ref, data]) => {
+                    if (ref.toLowerCase().includes(searchVal)) {
+                        articles.push({ id: ref, name: ref, type: 'Stock', qty: data.total || 0 });
                     }
                 });
 
@@ -13805,10 +14049,33 @@
             e.dataTransfer.setData('articleName', articleName);
         }
 
+        function renderLogisticFreeArticles() {
+            const freeList = document.getElementById('logisticFreeArticlesList');
+            const freeArticles = logisticState.freeArticles || {};
+
+            if (Object.keys(freeArticles).length === 0) {
+                freeList.innerHTML = '<p style="grid-column:1/-1;color:#999;text-align:center;padding:20px;">Aucun article libre (tous sont assignés)</p>';
+                return;
+            }
+
+            freeList.innerHTML = Object.entries(freeArticles).map(([articleId, qty]) => {
+                return `
+                    <div draggable="true" ondragstart="logisticDragStart(event, '${articleId}', '${articleId}')"
+                         style="padding:10px;background:linear-gradient(135deg,#fff9e6,#ffecb3);border-radius:8px;cursor:move;border:2px solid #ff9800;transition:all 0.2s;text-align:center;"
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(255,152,0,0.3)'" onmouseout="this.style.boxShadow='none'">
+                        <strong style="display:block;font-size:0.85em;">${articleId}</strong>
+                        <span style="font-size:0.75em;color:#666;">Qty: ${qty} • Libre</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
         // Canvas drag & drop
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 const canvas = document.getElementById('logisticsCanvas');
+                const freeZone = document.getElementById('logisticFreeArticlesList');
+
                 if (canvas) {
                     canvas.addEventListener('dragover', e => e.preventDefault());
                     canvas.addEventListener('drop', logisticCanvasDrop);
@@ -13817,15 +14084,48 @@
                     canvas.addEventListener('mouseup', logisticCanvasMouseUp);
                     canvas.addEventListener('click', logisticCanvasClick);
                 }
+
+                if (freeZone) {
+                    freeZone.addEventListener('dragover', e => e.preventDefault());
+                    freeZone.addEventListener('drop', logisticFreeZoneDrop);
+                }
+
                 loadLogisticState();
                 renderLogisticRacks();
                 renderLogisticPalettes();
                 renderLogisticCanvas();
+                renderLogisticFreeArticles();
                 refreshLogisticArticles();
                 renderLogisticMoveForm();
                 renderLogisticHistory();
+                renderLogisticAlerts();
+                renderLogisticStats();
             }, 500);
         });
+
+        function logisticFreeZoneDrop(e) {
+            e.preventDefault();
+            const articleId = e.dataTransfer.getData('articleId');
+            const articleName = e.dataTransfer.getData('articleName');
+
+            if (!articleId) return;
+
+            // Enlever de tous les placements
+            Object.keys(logisticState.placements).forEach(locationId => {
+                if (logisticState.placements[locationId] && logisticState.placements[locationId][articleId]) {
+                    const qty = logisticState.placements[locationId][articleId];
+                    delete logisticState.placements[locationId][articleId];
+                    // Ajouter aux articles libres
+                    if (!logisticState.freeArticles) logisticState.freeArticles = {};
+                    logisticState.freeArticles[articleId] = (logisticState.freeArticles[articleId] || 0) + qty;
+                }
+            });
+
+            saveLogisticState();
+            renderLogisticCanvas();
+            renderLogisticFreeArticles();
+            toast(`✅ ${articleName} déplacé vers les articles libres`, 'success');
+        }
 
         function logisticCanvasDrop(e) {
             e.preventDefault();
@@ -13839,17 +14139,46 @@
 
             // Trouver le rack/palette au clic
             const location = findLocationAtCoords(x, y);
+
             if (location) {
+                // Dropper sur un emplacement spécifique
                 if (!logisticState.placements[location.id]) logisticState.placements[location.id] = {};
                 const previousCount = logisticState.placements[location.id][articleId] || 0;
                 logisticState.placements[location.id][articleId] = previousCount + 1;
+
+                // Enlever de la zone libre si présent
+                if (logisticState.freeArticles && logisticState.freeArticles[articleId]) {
+                    logisticState.freeArticles[articleId]--;
+                    if (logisticState.freeArticles[articleId] <= 0) {
+                        delete logisticState.freeArticles[articleId];
+                    }
+                }
+
                 saveLogisticState();
-                // Track movement for analytics
                 trackArticleMovement(articleId, 'depot', location.name);
                 renderLogisticRacks();
                 renderLogisticPalettes();
                 renderLogisticCanvas();
-                toast(`✅ ${articleName} ajouté à ${location.name}`, 'success');
+                renderLogisticFreeArticles();
+                toast(`✅ ${articleName} assigné à ${location.name}`, 'success');
+            } else {
+                // Dropper sur une zone vide = article libre
+                if (!logisticState.freeArticles) logisticState.freeArticles = {};
+                logisticState.freeArticles[articleId] = (logisticState.freeArticles[articleId] || 0) + 1;
+
+                // Enlever de tous les placements si présent
+                Object.keys(logisticState.placements).forEach(locationId => {
+                    if (logisticState.placements[locationId][articleId]) {
+                        delete logisticState.placements[locationId][articleId];
+                    }
+                });
+
+                saveLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                renderLogisticFreeArticles();
+                toast(`📍 ${articleName} placé en zone libre (non assigné)`, 'info');
             }
         }
 
@@ -13916,15 +14245,17 @@
 
         function updateLogisticInfo(location) {
             const placements = logisticState.placements[location.id] || {};
+            const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
             const html = `
                 <strong>${escapeHtml(location.name)}</strong><br>
                 <span style="color:#666;">Capacité: ${location.capacity} unités</span><br><br>
                 <strong>Articles:</strong><br>
                 ${Object.entries(placements).map(([artId, qty]) => {
-                    const article = logisticState.racks.concat(logisticState.palettes).find(r => r.id === artId);
+                    const article = conso.find(c => c.id === artId);
+                    const articleName = article ? article.designation : artId;
                     return `<div style="padding:4px;background:#fff;margin:2px 0;border-radius:4px;">
-                        <span>${artId} × ${qty}</span>
-                        <button class="btn-small" onclick="removeArticleFromLocation('${location.id}', '${artId}')" style="float:right;padding:2px 6px;font-size:0.75em;">Remove</button>
+                        <span>${escapeHtml(articleName)} × ${qty}</span>
+                        <button class="btn-small" onclick="removeArticleFromLocation('${location.id}', '${artId}')" style="float:right;padding:2px 6px;font-size:0.75em;">Retirer</button>
                     </div>`;
                 }).join('') || '<span style="color:#999;">Vide</span>'}
             `;
@@ -14098,6 +14429,41 @@
             alertsDiv.innerHTML = alerts.length === 0
                 ? '<p style="color:#4caf50;">✅ Tous les emplacements OK</p>'
                 : alerts.map(a => `<div style="padding:8px;background:${a.level === 'danger' ? '#ffe6e6' : '#fff9e6'};border-left:4px solid ${a.level === 'danger' ? '#ff6b6b' : '#ffa500'};margin-bottom:6px;border-radius:6px;font-size:0.9em;">${a.msg}</div>`).join('');
+        }
+
+        function renderLogisticStats() {
+            const statsDiv = document.getElementById('logisticStats');
+            if (!statsDiv) return;
+
+            const allLocations = [...logisticState.racks, ...logisticState.palettes];
+            const totalCapacity = allLocations.reduce((s, l) => s + (l.capacity || 0), 0);
+            const totalUsed = allLocations.reduce((s, l) => {
+                return s + Object.values(logisticState.placements[l.id] || {}).reduce((a, b) => a + b, 0);
+            }, 0);
+            const occupationPct = totalCapacity > 0 ? Math.round((totalUsed / totalCapacity) * 100) : 0;
+            const totalMoves = (logisticState.movements || []).length;
+            const freeCount = Object.keys(logisticState.freeArticles || {}).length;
+
+            statsDiv.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
+                    <div style="background:#e8f5e9;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.5em;font-weight:bold;color:#2e7d32;">${allLocations.length}</div>
+                        <div style="font-size:0.8em;color:#666;">Emplacements</div>
+                    </div>
+                    <div style="background:#e3f2fd;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.5em;font-weight:bold;color:#1565c0;">${occupationPct}%</div>
+                        <div style="font-size:0.8em;color:#666;">Occupation</div>
+                    </div>
+                    <div style="background:#fff3e0;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.5em;font-weight:bold;color:#e65100;">${totalMoves}</div>
+                        <div style="font-size:0.8em;color:#666;">Mouvements</div>
+                    </div>
+                    <div style="background:#fce4ec;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.5em;font-weight:bold;color:#c62828;">${freeCount}</div>
+                        <div style="font-size:0.8em;color:#666;">Articles libres</div>
+                    </div>
+                </div>
+            `;
         }
 
         function exportLogisticLayout() {
@@ -14776,6 +15142,45 @@
             document.getElementById('gameResultsContainer').style.display = 'none';
         }
 
+        // Fonction pour afficher les conditions d'utilisation
+        function showUsageConditions() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;overflow-y:auto;';
+
+            let html = `
+                <div style="background:white;padding:40px;border-radius:12px;max-width:700px;width:90%;margin:20px auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;">
+                        <h2 style="color:#6b8fa3;margin:0;">📜 Conditions d'utilisation du code</h2>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove();" style="background:none;border:none;font-size:1.8em;cursor:pointer;color:#999;">✕</button>
+                    </div>
+
+                    <div style="max-height:400px;overflow-y:auto;color:#555;line-height:1.8;">
+                        <p style="margin-bottom:16px;font-weight:600;">Le code source de ces projets est fourni à titre informatif et éducatif</p>
+
+                        <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #a8d5e2;margin-bottom:20px;">
+                            <strong style="color:#6b8fa3;display:block;margin-bottom:10px;">🔒 Conditions principales :</strong>
+                            <ul style="margin:0;padding-left:20px;">
+                                <li style="margin-bottom:8px;">Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite</li>
+                                <li style="margin-bottom:8px;">Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur</li>
+                                <li style="margin-bottom:8px;">Pour toute demande de réutilisation ou de collaboration, contactez l'auteur</li>
+                            </ul>
+                        </div>
+
+                        <div style="background:#fffbf0;padding:15px;border-radius:8px;border-left:4px solid #ffc107;">
+                            <strong style="color:#856404;display:block;margin-bottom:10px;">📌 Attribution :</strong>
+                            <p style="margin:0;font-size:0.95em;">Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source :</p>
+                            <p style="margin:8px 0 0 0;font-family:monospace;background:white;padding:10px;border-radius:4px;color:#333;">dmaret © 2025–2026</p>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove();" style="width:100%;margin-top:25px;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
@@ -14814,7 +15219,6 @@
                 </div>
                 <div class="auth-error" id="authError"></div>
                 <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
-                <p class="auth-footer">© 2025–2026 MARET Davie — Tous droits réservés</p>
             </div>
 
             <!-- Container 2: Offre de prix assistant gestes -->
@@ -15003,17 +15407,5 @@
         </div>
     </div>
 <div class="toast-container" id="toast-container"></div>
-<!-- Legal notice and copyright -->
-<div class="footer-legal" style="margin-top:40px;padding:20px;background:#f9f9f9;border-top:1px solid #ddd;font-size:10px;color:#666;line-height:1.6;text-align:center;">
-  <strong style="color:#333;">© 2025–2026 MARET Davie — Tous droits réservés</strong><br>
-  <br>
-  <strong style="color:#555;">Conditions d'utilisation du code :</strong><br>
-  • Le code source de ces projets est fourni à titre informatif et éducatif<br>
-  • Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite<br>
-  • Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur<br>
-  • Pour toute demande de réutilisation ou de collaboration, contactez l'auteur<br>
-  <br>
-  <strong style="color:#555;">Attribution :</strong> Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret © 2025–2026
-</div>
 </body>
 </html>
