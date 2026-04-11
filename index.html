@@ -12718,6 +12718,11 @@
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
 
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
+
             let html = `
                 <div class="game-menu-container" style="max-width:700px;">
                     <div class="game-menu-header">
@@ -12760,6 +12765,13 @@
 
             // Définir closeGameMenu AVANT d'ajouter le modal au DOM
             window.closeGameMenu = () => modal.remove();
+
+            // Fermer quand on clique sur le fond (en dehors du conteneur)
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeGameMenu();
+                }
+            });
 
             const trainingGames = [
                 { id: 'apprendre', emoji: '📚', nom: 'Apprentissage', desc: 'Règles de compatibilité' },
@@ -12945,6 +12957,11 @@
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
 
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
+
             let html = `
                 <div class="game-menu-container" style="max-width:750px;">
                     <div class="game-menu-header">
@@ -13012,6 +13029,11 @@
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
 
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
+
             let html = `
                 <div class="game-menu-container" style="max-width:600px;">
                     <div class="game-menu-header">
@@ -13071,6 +13093,11 @@
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
+
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
 
             let html = `
                 <div class="game-menu-container" style="max-width:600px;">
@@ -13217,6 +13244,11 @@
             const modal = document.createElement('div');
             modal.className = 'game-menu-overlay';
             window.closeGameMenu = () => modal.remove();
+
+            // Fermer quand on clique sur le fond
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeGameMenu();
+            });
 
             const progressPercent = ((quizState.currentQuestion + 1) / QUESTIONS_LOGISTIQUE.length) * 100;
 
