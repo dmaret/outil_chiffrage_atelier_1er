@@ -4074,6 +4074,7 @@
         let recentGestes = [];     // 10 derniers codes utilisés
         let clientsData = {};      // {nom: {tel, email, adresse, notes, tarifSpecial}}
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
+        let stockMinTemplates = {};  // Stock min templates
         const THEMES = {
             classique:   { primary:'#a8d5e2', primaryDark:'#6b8fa3', secondary:'#c9b3d4', secondaryDark:'#9a70b8', bgFrom:'#e8f4f8', bgTo:'#f5e6f0', hFrom:'#a8d5e2', hTo:'#c9b3d4', container:'#fffef9' },
             corporate:   { primary:'#2e6da4', primaryDark:'#1a3a5c', secondary:'#4a90d9', secondaryDark:'#1a3a5c', bgFrom:'#eaf1f8', bgTo:'#dde8f2', hFrom:'#1a3a5c', hTo:'#2e6da4', container:'#ffffff' },
@@ -7654,8 +7655,6 @@
         // ============================================================
         // Templates for Stock Minimums
         // ============================================================
-        let stockMinTemplates = {};
-
         function saveStockMinTemplate() {
             const templateName = prompt('Nom du modèle:', `Modèle ${new Date().toLocaleDateString('fr-FR')}`);
             if (!templateName) return;
