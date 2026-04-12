@@ -12309,7 +12309,15 @@
         // ════════════════════════════════════════════════════════════
         // SYSTÈME DE PROGRESSION, STATS & CERTIFICATS
         // ════════════════════════════════════════════════════════════
-        let playerStats = JSON.parse(localStorage.getItem('playerStats') || '{}')||(
+        let playerStats;
+        try {
+            const saved = localStorage.getItem('playerStats');
+            playerStats = saved ? JSON.parse(saved) : null;
+        } catch(e) {
+            playerStats = null;
+        }
+
+        if (!playerStats || typeof playerStats !== 'object') {
             playerStats = {
                 username: 'Joueur ' + Math.floor(Math.random()*1000),
                 level: 1,
@@ -12324,8 +12332,8 @@
                 achievements: [],
                 certifications: [],
                 createdAt: new Date().toLocaleString()
-            }
-        );
+            };
+        }
 
         const ACHIEVEMENTS = {
             'first_game': { emoji: '🎮', nom: 'Premier Jeu', desc: 'Jouez votre 1er jeu' },
