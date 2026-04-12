@@ -9897,6 +9897,28 @@
             showLoginModal();
         }
 
+        function openThemeSelector() {
+            const overlay = document.getElementById('themeSelectorOverlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+        }
+
+        function closeThemeSelector() {
+            const overlay = document.getElementById('themeSelectorOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+
+        function selectTheme(theme) {
+            // Save theme preference to localStorage
+            localStorage.setItem('formationTheme', theme);
+            // Close theme selector and open formation
+            closeThemeSelector();
+            accessFormationLogistique();
+        }
+
         function accessFormationLogistique() {
             const overlay = document.getElementById('formationLogistiqueOverlay');
             if (overlay) {
@@ -9909,6 +9931,86 @@
             const overlay = document.getElementById('formationLogistiqueOverlay');
             if (overlay) {
                 overlay.style.display = 'none';
+            }
+        }
+
+        function getTheme() {
+            return localStorage.getItem('formationTheme') || 'moderne';
+        }
+
+        function applyTheme(theme) {
+            const modal = document.querySelector('.training-modal');
+            const themeStyles = {
+                'moderne': {
+                    headerBg: 'linear-gradient(135deg,#a8d5e2,#c9b3d4)',
+                    headerColor: 'white',
+                    bgColor: '#f9fbfc',
+                    textColor: '#333',
+                    accentColor: '#6b8fa3',
+                    sectionBg: 'white',
+                    linkColor: '#6b8fa3'
+                },
+                'as400': {
+                    headerBg: '#0a0e27',
+                    headerColor: '#00c864',
+                    bgColor: '#0a0e27',
+                    textColor: '#00c864',
+                    accentColor: '#00ff00',
+                    sectionBg: '#1a1f3a',
+                    linkColor: '#00ff00',
+                    fontFamily: "'Courier New', monospace"
+                },
+                'sap': {
+                    headerBg: '#003f87',
+                    headerColor: 'white',
+                    bgColor: '#f0f2f5',
+                    textColor: '#333',
+                    accentColor: '#003f87',
+                    sectionBg: 'white',
+                    linkColor: '#003f87'
+                },
+                'minimaliste': {
+                    headerBg: '#f5f5f5',
+                    headerColor: '#333',
+                    bgColor: '#ffffff',
+                    textColor: '#333',
+                    accentColor: '#666',
+                    sectionBg: '#f9f9f9',
+                    linkColor: '#666'
+                }
+            };
+
+            const style = themeStyles[theme] || themeStyles['moderne'];
+
+            if (modal) {
+                modal.style.backgroundColor = style.bgColor;
+                modal.style.color = style.textColor;
+                if (style.fontFamily) modal.style.fontFamily = style.fontFamily;
+
+                const header = modal.querySelector('.training-header');
+                if (header) {
+                    header.style.background = style.headerBg;
+                    header.style.color = style.headerColor;
+                }
+
+                const sections = modal.querySelectorAll('.training-section');
+                sections.forEach(section => {
+                    section.style.color = style.textColor;
+                });
+
+                const cards = modal.querySelectorAll('[style*="background:white"], [style*="background:#f5f9fc"], [style*="background:#fffaed"], [style*="background:#fff9e6"]');
+                cards.forEach(card => {
+                    if (!card.querySelector('ul')) {
+                        card.style.backgroundColor = style.sectionBg;
+                        card.style.color = style.textColor;
+                    }
+                });
+
+                // Apply to links
+                const links = modal.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.color = style.linkColor;
+                });
             }
         }
 
@@ -10119,6 +10221,12 @@
             `;
 
             contentContainer.innerHTML = html;
+
+            // Apply selected theme
+            setTimeout(() => {
+                const theme = getTheme();
+                applyTheme(theme);
+            }, 100);
         }
 
         function applyAuthGroup(group) {
@@ -16024,7 +16132,7 @@
                 <h2>Formation Logistique</h2>
                 <h3 style="font-size: 1.1em; color: #6b8fa3; margin-bottom: 12px;">Systèmes & Concepts</h3>
                 <p class="training-subtitle">Maîtrisez les systèmes logistiques (WMS, ERP, Kanban, 5S) et testez vos connaissances</p>
-                <button class="btn-training" onclick="accessFormationLogistique()">
+                <button class="btn-training" onclick="openThemeSelector()">
                     📚 Accéder à la formation
                 </button>
                 <p class="training-footer">Formation interactive • Quiz & Glossaire • Accès libre</p>
@@ -16155,6 +16263,67 @@
                 <div style="display:flex;gap:10px;justify-content:space-between;margin-top:20px;border-top:1px solid #e0e8f0;padding-top:14px;">
                     <button class="btn btn-secondary" onclick="resetTraining()" style="flex:1;">🔄 Recommencer</button>
                     <button class="btn btn-secondary" onclick="closeTrainingModule()" style="flex:1;">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Selector Modal -->
+    <div id="themeSelectorOverlay" class="training-overlay" style="display:none;">
+        <div class="training-modal" style="max-width:600px;">
+            <div class="training-header">
+                <h2>🎨 Choisir un Thème Visuel</h2>
+                <button onclick="closeThemeSelector()" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:1.5em;cursor:pointer;color:#7a9db1;">×</button>
+            </div>
+            <div class="training-content">
+                <p style="color:#666;margin-bottom:25px;text-align:center;font-size:0.95em;">Sélectionnez le style visuel qui vous plaît pour la formation :</p>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:25px;">
+
+                    <!-- Modern Theme -->
+                    <div onclick="selectTheme('moderne')" style="padding:20px;border:2px solid #a8d5e2;border-radius:10px;cursor:pointer;transition:0.3s;background:white;"
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(107,143,163,0.3)'"
+                         onmouseout="this.style.boxShadow='none'">
+                        <div style="font-size:2em;margin-bottom:8px;text-align:center;">🎨</div>
+                        <h4 style="color:#6b8fa3;margin:0 0 8px;text-align:center;">Moderne</h4>
+                        <p style="color:#666;font-size:0.85em;margin:0;text-align:center;">Coloré, actuel, design moderne</p>
+                        <div style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4,#e0d4ed);height:40px;border-radius:6px;margin-top:10px;"></div>
+                    </div>
+
+                    <!-- AS-400 Theme -->
+                    <div onclick="selectTheme('as400')" style="padding:20px;border:2px solid #333;border-radius:10px;cursor:pointer;transition:0.3s;background:#0a0e27;"
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,200,100,0.3)'"
+                         onmouseout="this.style.boxShadow='none'">
+                        <div style="font-size:2em;margin-bottom:8px;text-align:center;">🖥️</div>
+                        <h4 style="color:#00c864;margin:0 0 8px;text-align:center;font-family:'Courier New',monospace;">AS-400</h4>
+                        <p style="color:#888;font-size:0.85em;margin:0;text-align:center;">Rétro terminal, classique</p>
+                        <div style="background:#00c864;height:40px;border-radius:6px;margin-top:10px;border:2px solid #00ff00;"></div>
+                    </div>
+
+                    <!-- SAP Theme -->
+                    <div onclick="selectTheme('sap')" style="padding:20px;border:2px solid #003f87;border-radius:10px;cursor:pointer;transition:0.3s;background:#f0f2f5;"
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,63,135,0.3)'"
+                         onmouseout="this.style.boxShadow='none'">
+                        <div style="font-size:2em;margin-bottom:8px;text-align:center;">💼</div>
+                        <h4 style="color:#003f87;margin:0 0 8px;text-align:center;">SAP</h4>
+                        <p style="color:#666;font-size:0.85em;margin:0;text-align:center;">Corporate, ERP professionnel</p>
+                        <div style="background:linear-gradient(135deg,#003f87,#6b9bc3);height:40px;border-radius:6px;margin-top:10px;"></div>
+                    </div>
+
+                    <!-- Minimaliste Theme -->
+                    <div onclick="selectTheme('minimaliste')" style="padding:20px;border:2px solid #999;border-radius:10px;cursor:pointer;transition:0.3s;background:#ffffff;"
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(100,100,100,0.3)'"
+                         onmouseout="this.style.boxShadow='none'">
+                        <div style="font-size:2em;margin-bottom:8px;text-align:center;">✨</div>
+                        <h4 style="color:#333;margin:0 0 8px;text-align:center;">Minimaliste</h4>
+                        <p style="color:#666;font-size:0.85em;margin:0;text-align:center;">Épuré, sobre et clean</p>
+                        <div style="background:linear-gradient(135deg,#f5f5f5,#cccccc);height:40px;border-radius:6px;margin-top:10px;border:1px solid #999;"></div>
+                    </div>
+
+                </div>
+
+                <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+                    <button class="btn btn-secondary" onclick="closeThemeSelector()" style="flex:1;max-width:150px;">Annuler</button>
                 </div>
             </div>
         </div>
