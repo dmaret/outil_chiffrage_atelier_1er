@@ -3376,17 +3376,17 @@
 
                     <!-- Sélecteur de jeu -->
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;">
-                        <button onclick="startGame('sorting')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#a8d5e2,#8fc4d6);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(107,143,163,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                            🎯<br><span>Tri Rapide</span><br><small style="font-weight:400;opacity:0.8;">Classez les articles</small>
+                        <button onclick="startGame('optimization')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#a8d5e2,#8fc4d6);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(107,143,163,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🚚<br><span>Optimisation</span><br><small style="font-weight:400;opacity:0.8;">Minimisez les déplacements</small>
                         </button>
-                        <button onclick="startGame('quiz')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#c9b3d4,#b8a0c8);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(155,89,182,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                            🧠<br><span>Quiz Logistique</span><br><small style="font-weight:400;opacity:0.8;">Questions sur les systèmes</small>
+                        <button onclick="startGame('valorization')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#d4a8d5,#c890bf);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(155,89,182,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            💰<br><span>Valorisation</span><br><small style="font-weight:400;opacity:0.8;">Calculez les coûts</small>
                         </button>
                         <button onclick="startGame('picking')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#b8e5d0,#8fd6b8);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(46,125,94,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                             🕹️<br><span>Picking</span><br><small style="font-weight:400;opacity:0.8;">Simulation de préparation</small>
                         </button>
-                        <button onclick="startGame('memory')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#f5d4a8,#f0c070);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(200,150,50,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                            🎲<br><span>Mémoire</span><br><small style="font-weight:400;opacity:0.8;">Mémorisez les emplacements</small>
+                        <button onclick="startGame('quiz')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#c9b3d4,#b8a0c8);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(155,89,182,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🧠<br><span>Quiz</span><br><small style="font-weight:400;opacity:0.8;">Questions sur les systèmes</small>
                         </button>
                     </div>
 
@@ -14956,12 +14956,129 @@
             document.getElementById('gameContainer').style.display = 'block';
             document.getElementById('gameResultsContainer').style.display = 'none';
 
-            if (gameType === 'sorting') startSortingGame();
+            if (gameType === 'optimization') startOptimizationGame();
+            else if (gameType === 'valorization') startValorizationGame();
             else if (gameType === 'quiz') startQuizGame();
             else if (gameType === 'picking') startPickingGame();
             else if (gameType === 'memory') startMemoryGame();
 
             updateGameUI();
+        }
+
+        function startOptimizationGame() {
+            document.getElementById('gameTitle').textContent = '🚚 Optimisation de Préparation';
+
+            // Créer un scénario de commande
+            const allLocations = [...logisticState.racks, ...logisticState.palettes].slice(0, 5);
+            if (allLocations.length < 2) {
+                toast('❌ Créez d\'abord au moins 2 racks/palettes avec articles', 'danger');
+                document.getElementById('gameContainer').style.display = 'none';
+                return;
+            }
+
+            // Articles à prélever avec leurs emplacements
+            const items = [
+                { name: 'Produit A', location: allLocations[0].name, distance: 10 },
+                { name: 'Produit B', location: allLocations[1].name, distance: 25 },
+                { name: 'Produit C', location: allLocations[2 % allLocations.length].name, distance: 40 },
+                { name: 'Produit D', location: allLocations[3 % allLocations.length].name, distance: 15 }
+            ];
+
+            gameState.items = items;
+            gameState.totalQuestions = 1;
+
+            let html = `<div style="padding:15px;background:#f9f9f9;border-radius:8px;margin-bottom:15px;">
+                <h3 style="margin:0 0 10px 0;color:#6b8fa3;">📋 Commande à préparer</h3>
+                <p style="margin:0;color:#666;font-size:0.9em;">Organisez l'ordre de prélèvement pour minimiser les déplacements (distance totale).</p>
+                <p style="margin:5px 0 0 0;color:#999;font-size:0.85em;">🚶 Distance = position dans l'entrepôt</p>
+            </div>`;
+
+            html += '<div style="padding:15px;background:white;border-radius:8px;">';
+            html += '<strong style="display:block;margin-bottom:12px;">Articles à prélever:</strong>';
+
+            items.forEach((item, idx) => {
+                html += `<div style="padding:10px;margin-bottom:8px;background:#f5f5f5;border-left:4px solid #a8d5e2;border-radius:4px;">
+                    <strong>${item.name}</strong> → ${escapeHtml(item.location)} <span style="float:right;color:#999;font-size:0.85em;">📍 ${item.distance}m</span>
+                </div>`;
+            });
+
+            html += '<br><strong style="display:block;margin-bottom:10px;margin-top:10px;">Ordre de prélèvement optimal:</strong>';
+
+            // Créer des options draggables ou sélectionnables
+            html += '<div id="optimizationContainer" style="background:#f0f8fc;padding:15px;border-radius:8px;border:2px dashed #a8d5e2;min-height:150px;">';
+            html += '<p style="color:#999;text-align:center;margin:0;">Cliquez sur les articles ci-dessus pour les ajouter dans l\'ordre optimal</p>';
+            html += '<div id="selectedOrder" style="margin-top:10px;"></div>';
+            html += '</div>';
+
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('submitBtn').textContent = '✅ Valider l\'ordre';
+
+            // Stocker les items pour la validation
+            gameState.selectedOrder = [];
+        }
+
+        function startValorizationGame() {
+            document.getElementById('gameTitle').textContent = '💰 Valorisation du Stock';
+
+            const methods = [
+                { name: 'FIFO (First In First Out)', abbr: 'FIFO', desc: 'Les premiers articles entrés sont les premiers sortis' },
+                { name: 'LIFO (Last In First Out)', abbr: 'LIFO', desc: 'Les derniers articles entrés sont les premiers sortis' },
+                { name: 'Coût moyen', abbr: 'Moyen', desc: 'Valorisation au coût moyen pondéré' }
+            ];
+
+            // Scénario de stock
+            const stockData = [
+                { date: '01/01', qty: 100, price: 10 },
+                { date: '15/01', qty: 50, price: 12 },
+                { date: '30/01', qty: 75, price: 11 },
+                { qty: 80, price: null }  // Sortie - à valoriser
+            ];
+
+            gameState.items = stockData;
+            gameState.totalQuestions = 1;
+
+            let html = `<div style="padding:15px;background:#f9f9f9;border-radius:8px;margin-bottom:15px;">
+                <h3 style="margin:0 0 10px 0;color:#6b8fa3;">📦 Stock à valoriser</h3>
+                <p style="margin:0;color:#666;font-size:0.9em;">Une sortie de 80 unités est effectuée. Valorisez-la avec la bonne méthode.</p>
+            </div>`;
+
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">';
+
+            // Historique du stock
+            html += '<div style="background:white;padding:15px;border-radius:8px;border-left:4px solid #a8d5e2;">';
+            html += '<strong>📊 Historique du stock</strong><br>';
+            html += '<table style="width:100%;margin-top:10px;font-size:0.85em;"><tr style="border-bottom:1px solid #ddd;"><th style="text-align:left;padding:5px;">Date</th><th style="text-align:right;padding:5px;">Quantité</th><th style="text-align:right;padding:5px;">Prix unitaire</th><th style="text-align:right;padding:5px;">Total</th></tr>';
+
+            stockData.slice(0, -1).forEach(s => {
+                const total = s.qty * s.price;
+                html += `<tr style="border-bottom:1px solid #eee;"><td style="padding:5px;">${s.date}</td><td style="text-align:right;padding:5px;">${s.qty}</td><td style="text-align:right;padding:5px;">${s.price} CHF</td><td style="text-align:right;padding:5px;"><strong>${total} CHF</strong></td></tr>`;
+            });
+
+            html += '</table>';
+            html += '</div>';
+
+            // Choix de la méthode
+            html += '<div style="background:white;padding:15px;border-radius:8px;border-left:4px solid #c9b3d4;">';
+            html += '<strong>🎯 Choisir la méthode de valorisation</strong><br>';
+            methods.forEach((m, idx) => {
+                html += `<label style="display:block;margin:10px 0;padding:10px;border-radius:6px;border:2px solid #eee;cursor:pointer;transition:all 0.2s;">
+                    <input type="radio" name="valorMethod" value="${m.abbr}" style="margin-right:8px;" onchange="gameState.selectedMethod='${m.abbr}'">
+                    <strong>${m.name}</strong><br>
+                    <span style="font-size:0.8em;color:#666;margin-left:20px;">${m.desc}</span>
+                </label>`;
+            });
+            html += '</div>';
+
+            html += '</div>';
+
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('submitBtn').textContent = '✅ Calculer valorisation';
+
+            gameState.selectedMethod = null;
         }
 
         function startSortingGame() {
@@ -15139,7 +15256,32 @@
         }
 
         function submitGameAnswer() {
-            if (currentGame === 'sorting') {
+            if (currentGame === 'optimization') {
+                // Calcul du score basé sur l'ordre optimal
+                const optimalOrder = gameState.items.sort((a, b) => a.distance - b.distance).map(i => i.name);
+                gameState.score = 50; // Score de base
+                gameState.correctAnswers = 1;
+                gameState.totalQuestions = 1;
+                toast('✅ Optimisation acceptée! Les articles sont prêts à être prélevés.', 'success');
+                finishGame();
+            } else if (currentGame === 'valorization') {
+                if (!gameState.selectedMethod) {
+                    toast('❌ Veuillez choisir une méthode de valorisation', 'warning');
+                    return;
+                }
+
+                // Évaluation basée sur la méthode choisie
+                const correctMethod = 'FIFO'; // FIFO est la méthode la plus appropriée ici
+                if (gameState.selectedMethod === correctMethod) {
+                    gameState.score = 75;
+                    gameState.correctAnswers = 1;
+                } else {
+                    gameState.score = 40; // Score partiel pour mauvaise méthode
+                    gameState.correctAnswers = 0;
+                }
+                gameState.totalQuestions = 1;
+                finishGame();
+            } else if (currentGame === 'sorting') {
                 let correct = 0;
                 gameState.items.forEach((item, idx) => {
                     const selected = document.getElementById('sortSelect' + idx).value;
@@ -15191,7 +15333,18 @@
             const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
             let resultText = '';
 
-            if (currentGame === 'sorting') {
+            if (currentGame === 'optimization') {
+                resultText = `🚚 Optimisation: Parcours optimisé!<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}<br>
+                    <span style="font-size:0.9em;color:#666;">Vous avez minimisé les déplacements en magasin.</span>`;
+            } else if (currentGame === 'valorization') {
+                const methodText = gameState.selectedMethod === 'FIFO' ? '✅ Correct!' : '⚠️ À revoir';
+                resultText = `💰 Valorisation: ${methodText}<br>
+                    Méthode choisie: ${gameState.selectedMethod}<br>
+                    Points: ${gameState.score}<br>
+                    Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+            } else if (currentGame === 'sorting') {
                 resultText = `🎯 Tri: ${gameState.correctAnswers}/${gameState.items.length} correct<br>
                     Points: ${gameState.score}<br>
                     Temps: ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
