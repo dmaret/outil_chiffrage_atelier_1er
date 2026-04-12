@@ -14638,9 +14638,15 @@
 
         function addReservation() {
             try {
-                const article = document.getElementById('reserveArticle').value;
-                const qty = parseInt(document.getElementById('reserveQty').value) || 1;
-                const reason = document.getElementById('reserveReason').value;
+                const articleEl = document.getElementById('reserveArticle');
+                const qtyEl = document.getElementById('reserveQty');
+                const reasonEl = document.getElementById('reserveReason');
+
+                if (!articleEl || !qtyEl || !reasonEl) return; // Exit safely if elements don't exist
+
+                const article = articleEl.value;
+                const qty = parseInt(qtyEl.value) || 1;
+                const reason = reasonEl.value;
 
                 if (!article) {
                     toast('❌ Sélectionnez un article', 'danger');
@@ -14674,6 +14680,8 @@
         function renderReservations() {
             try {
                 const list = document.getElementById('reservationsList');
+                if (!list) return; // Exit safely if element doesn't exist
+
                 if (reservations.length === 0) {
                     list.innerHTML = '<p style="color:#999;text-align:center;padding:15px;">Aucune réservation</p>';
                     return;
@@ -14791,6 +14799,10 @@
 
         function renderOccupationReports() {
             try {
+                const chart = document.getElementById('occupationChart');
+                const statsDiv = document.getElementById('occupationStats');
+                if (!chart && !statsDiv) return; // Exit safely if elements don't exist
+
                 const allLocations = [...logisticState.racks, ...logisticState.palettes];
                 const stats = allLocations.map(loc => {
                     const used = Object.values(logisticState.placements[loc.id] || {}).reduce((a,b) => a+b, 0);
@@ -14799,34 +14811,36 @@
                 });
 
                 // Chart ASCII
-                const chart = document.getElementById('occupationChart');
-                chart.innerHTML = '<div style="font-family:monospace;font-size:0.85em;line-height:1.6;">' +
-                    stats.map(s => `
-                        <div style="margin-bottom:8px;">
-                            <span style="display:inline-block;width:100px;">${escapeHtml(s.name)}</span>
-                            <div style="display:inline-block;width:200px;height:20px;background:#e0e0e0;border-radius:4px;position:relative;overflow:hidden;">
-                                <div style="width:${s.pct}%;height:100%;background:${s.pct > 80 ? '#ff6b6b' : s.pct > 60 ? '#ffa500' : '#4caf50'};transition:width 0.3s;"></div>
+                if (chart) {
+                    chart.innerHTML = '<div style="font-family:monospace;font-size:0.85em;line-height:1.6;">' +
+                        stats.map(s => `
+                            <div style="margin-bottom:8px;">
+                                <span style="display:inline-block;width:100px;">${escapeHtml(s.name)}</span>
+                                <div style="display:inline-block;width:200px;height:20px;background:#e0e0e0;border-radius:4px;position:relative;overflow:hidden;">
+                                    <div style="width:${s.pct}%;height:100%;background:${s.pct > 80 ? '#ff6b6b' : s.pct > 60 ? '#ffa500' : '#4caf50'};transition:width 0.3s;"></div>
+                                </div>
+                                <span style="margin-left:10px;color:#666;">${Math.round(s.pct)}%</span>
                             </div>
-                            <span style="margin-left:10px;color:#666;">${Math.round(s.pct)}%</span>
-                        </div>
-                    `).join('') +
-                    '</div>';
+                        `).join('') +
+                        '</div>';
+                }
 
                 // Stats
-                const statsDiv = document.getElementById('occupationStats');
-                const totalCapacity = stats.reduce((a,b) => a + b.capacity, 0);
-                const totalUsed = stats.reduce((a,b) => a + b.used, 0);
-                const avgOccupancy = Math.round((totalUsed / totalCapacity) * 100);
+                if (statsDiv) {
+                    const totalCapacity = stats.reduce((a,b) => a + b.capacity, 0);
+                    const totalUsed = stats.reduce((a,b) => a + b.used, 0);
+                    const avgOccupancy = Math.round((totalUsed / totalCapacity) * 100);
 
-                statsDiv.innerHTML = `
-                    <div style="font-size:0.9em;">
-                        <strong>Capacité totale:</strong> ${totalCapacity} unités<br>
-                        <strong>Utilisation:</strong> ${totalUsed} unités<br>
-                        <strong>Occupancy moyen:</strong> ${avgOccupancy}%<br><br>
-                        <strong>Zones:</strong><br>
-                        ${stats.map(s => `<div style="padding:4px;color:#666;">• ${escapeHtml(s.name)}: ${s.used}/${s.capacity}</div>`).join('')}
-                    </div>
-                `;
+                    statsDiv.innerHTML = `
+                        <div style="font-size:0.9em;">
+                            <strong>Capacité totale:</strong> ${totalCapacity} unités<br>
+                            <strong>Utilisation:</strong> ${totalUsed} unités<br>
+                            <strong>Occupancy moyen:</strong> ${avgOccupancy}%<br><br>
+                            <strong>Zones:</strong><br>
+                            ${stats.map(s => `<div style="padding:4px;color:#666;">• ${escapeHtml(s.name)}: ${s.used}/${s.capacity}</div>`).join('')}
+                        </div>
+                    `;
+                }
             } catch (e) {
                 console.error('Erreur rapports:', e);
             }
@@ -14887,28 +14901,32 @@
             try {
                 const racksDiv = document.getElementById('qrCodesRacks');
                 const palettesDiv = document.getElementById('qrCodesPalettes');
+                if (!racksDiv && !palettesDiv) return; // Exit safely if elements don't exist
 
-                racksDiv.innerHTML = logisticState.racks.map(rack => {
-                    const qrId = 'qr_rack_' + rack.id;
-                    setTimeout(() => {
-                        try {
-                            new QRCode(document.getElementById(qrId), {
-                                text: JSON.stringify({ type: 'rack', id: rack.id, name: rack.name }),
-                                width: 128,
-                                height: 128,
-                                colorDark: '#6b8fa3',
-                                colorLight: '#ffffff'
-                            });
-                        } catch (e) { /* QRCode not available */ }
-                    }, 100);
-                    return `<div style="text-align:center;border-radius:8px;background:#f9f9f9;padding:10px;">
-                        <div id="${qrId}" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
-                        <strong style="font-size:0.85em;">${escapeHtml(rack.name)}</strong><br>
-                        <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${rack.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
-                    </div>`;
-                }).join('');
+                if (racksDiv) {
+                    racksDiv.innerHTML = logisticState.racks.map(rack => {
+                        const qrId = 'qr_rack_' + rack.id;
+                        setTimeout(() => {
+                            try {
+                                new QRCode(document.getElementById(qrId), {
+                                    text: JSON.stringify({ type: 'rack', id: rack.id, name: rack.name }),
+                                    width: 128,
+                                    height: 128,
+                                    colorDark: '#6b8fa3',
+                                    colorLight: '#ffffff'
+                                });
+                            } catch (e) { /* QRCode not available */ }
+                        }, 100);
+                        return `<div style="text-align:center;border-radius:8px;background:#f9f9f9;padding:10px;">
+                            <div id="${qrId}" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
+                            <strong style="font-size:0.85em;">${escapeHtml(rack.name)}</strong><br>
+                            <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${rack.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
+                        </div>`;
+                    }).join('');
+                }
 
-                palettesDiv.innerHTML = logisticState.palettes.map(palette => {
+                if (palettesDiv) {
+                    palettesDiv.innerHTML = logisticState.palettes.map(palette => {
                     const qrId = 'qr_palette_' + palette.id;
                     setTimeout(() => {
                         try {
@@ -14926,7 +14944,8 @@
                         <strong style="font-size:0.85em;">${escapeHtml(palette.name)}</strong><br>
                         <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${palette.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
                     </div>`;
-                }).join('');
+                    }).join('');
+                }
             } catch (e) {
                 console.error('Erreur QR render:', e);
             }
@@ -15452,12 +15471,15 @@
                 generateQRCodes();
 
                 // Refresh articles list for reservations
-                const articles = [];
-                const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
-                conso.forEach(c => articles.push({ id: c.id, name: c.designation }));
-                document.getElementById('reserveArticle').innerHTML = articles.map(a =>
-                    `<option value="${a.id}">${escapeHtml(a.name)}</option>`
-                ).join('');
+                const reserveArticleSelect = document.getElementById('reserveArticle');
+                if (reserveArticleSelect) {
+                    const articles = [];
+                    const conso = JSON.parse(localStorage.getItem('catalogueConsommables') || '[]');
+                    conso.forEach(c => articles.push({ id: c.id, name: c.designation }));
+                    reserveArticleSelect.innerHTML = articles.map(a =>
+                        `<option value="${a.id}">${escapeHtml(a.name)}</option>`
+                    ).join('');
+                }
             }, 1000);
         });
 
