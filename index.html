@@ -4405,8 +4405,16 @@
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
             else if (tabName === 'logistique') {
-                // Formation logistique - systèmes, jeux et défis
                 loadLogisticState();
+                renderLogisticRacks();
+                renderLogisticPalettes();
+                renderLogisticCanvas();
+                renderLogisticFreeArticles();
+                refreshLogisticArticles();
+                renderLogisticMoveForm();
+                renderLogisticHistory();
+                renderLogisticAlerts();
+                renderLogisticStats();
             }
         }
 
@@ -14630,9 +14638,15 @@
 
         function addReservation() {
             try {
-                const article = document.getElementById('reserveArticle').value;
-                const qty = parseInt(document.getElementById('reserveQty').value) || 1;
-                const reason = document.getElementById('reserveReason').value;
+                const articleEl = document.getElementById('reserveArticle');
+                const qtyEl = document.getElementById('reserveQty');
+                const reasonEl = document.getElementById('reserveReason');
+
+                if (!articleEl || !qtyEl || !reasonEl) return; // Exit safely if elements don't exist
+
+                const article = articleEl.value;
+                const qty = parseInt(qtyEl.value) || 1;
+                const reason = reasonEl.value;
 
                 if (!article) {
                     toast('❌ Sélectionnez un article', 'danger');
@@ -14813,9 +14827,9 @@
 
                 // Stats
                 if (statsDiv) {
-                const totalCapacity = stats.reduce((a,b) => a + b.capacity, 0);
-                const totalUsed = stats.reduce((a,b) => a + b.used, 0);
-                const avgOccupancy = Math.round((totalUsed / totalCapacity) * 100);
+                    const totalCapacity = stats.reduce((a,b) => a + b.capacity, 0);
+                    const totalUsed = stats.reduce((a,b) => a + b.used, 0);
+                    const avgOccupancy = Math.round((totalUsed / totalCapacity) * 100);
 
                     statsDiv.innerHTML = `
                         <div style="font-size:0.9em;">
@@ -14925,11 +14939,11 @@
                             });
                         } catch (e) { /* QRCode not available */ }
                     }, 100);
-                        return `<div style="text-align:center;border-radius:8px;background:#f0f5f8;padding:10px;">
-                            <div id="${qrId}" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
-                            <strong style="font-size:0.85em;">${escapeHtml(palette.name)}</strong><br>
-                            <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${palette.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
-                        </div>`;
+                    return `<div style="text-align:center;border-radius:8px;background:#f0f5f8;padding:10px;">
+                        <div id="${qrId}" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
+                        <strong style="font-size:0.85em;">${escapeHtml(palette.name)}</strong><br>
+                        <button class="btn btn-small" onclick="downloadQRCode('${qrId}', '${palette.name}')" style="font-size:0.75em;padding:4px 8px;margin-top:6px;">📥 Télécharger</button>
+                    </div>`;
                     }).join('');
                 }
             } catch (e) {
