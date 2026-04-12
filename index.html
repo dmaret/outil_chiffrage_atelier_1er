@@ -4405,16 +4405,8 @@
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
             else if (tabName === 'logistique') {
+                // Formation logistique - systèmes, jeux et défis
                 loadLogisticState();
-                renderLogisticRacks();
-                renderLogisticPalettes();
-                renderLogisticCanvas();
-                renderLogisticFreeArticles();
-                refreshLogisticArticles();
-                renderLogisticMoveForm();
-                renderLogisticHistory();
-                renderLogisticAlerts();
-                renderLogisticStats();
             }
         }
 
