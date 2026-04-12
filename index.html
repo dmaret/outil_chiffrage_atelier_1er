@@ -13952,6 +13952,7 @@
 
         function renderLogisticRacks() {
             const list = document.getElementById('racksList');
+            if (!list) return; // Exit safely if element doesn't exist
             list.innerHTML = logisticState.racks.map(rack => {
                 const qty = Object.values(logisticState.placements[rack.id] || {}).reduce((a,b) => a+b, 0);
                 const used = Math.round((qty / rack.capacity) * 100);
@@ -13964,6 +13965,7 @@
 
         function renderLogisticPalettes() {
             const list = document.getElementById('palettesList');
+            if (!list) return; // Exit safely if element doesn't exist
             list.innerHTML = logisticState.palettes.map(palette => {
                 const qty = Object.values(logisticState.placements[palette.id] || {}).reduce((a,b) => a+b, 0);
                 const used = Math.round((qty / palette.capacity) * 100);
@@ -14125,6 +14127,7 @@
 
         function renderLogisticFreeArticles() {
             const freeList = document.getElementById('logisticFreeArticlesList');
+            if (!freeList) return; // Exit safely if element doesn't exist
             const freeArticles = logisticState.freeArticles || {};
 
             if (Object.keys(freeArticles).length === 0) {
@@ -14477,6 +14480,9 @@
 
         function renderLogisticHistory() {
             try {
+                const list = document.getElementById('logisticHistoryList');
+                if (!list) return; // Exit safely if element doesn't exist
+
                 const filter = (document.getElementById('logisticHistoryFilter')?.value || '').toLowerCase();
                 let filtered = (logisticState.movements || []).filter(m => {
                     const articleName = (getLogisticArticleName(m.article) || m.article || '').toLowerCase();
@@ -14485,7 +14491,6 @@
                 });
                 filtered = filtered.reverse().slice(0, 50);
 
-                const list = document.getElementById('logisticHistoryList');
                 list.innerHTML = filtered.length === 0
                     ? '<p style="color:#999;text-align:center;padding:20px;">Aucun mouvement</p>'
                     : filtered.map(m => {
