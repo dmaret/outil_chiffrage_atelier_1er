@@ -6808,7 +6808,9 @@
             if (mode === 'selection' && sourcePrestations.length === 2) {
                 sourcePrestations.forEach(p => {
                     const slices = buildSlices([p]);
+                    if (slices.length === 0) return;  // Skip if no data to render
                     const div = document.createElement('div');
+                    div.style.cssText = 'flex:1 1 300px;min-width:260px;';
                     container.appendChild(div);
                     renderOnePie(div, slices, `${p.prestation} (${p.client})`);
                 });
@@ -6849,21 +6851,24 @@
                 // Camemberts individuels en grille responsive (max 4 par ligne)
                 sourcePrestations.forEach(p => {
                     const slices = buildSlices([p]);
+                    if (slices.length === 0) return;  // Skip if no data to render
                     const div = document.createElement('div');
-                    div.style.cssText = 'flex:1 1 220px;max-width:calc(25% - 24px);min-width:200px;';
+                    div.style.cssText = 'flex:1 1 220px;min-width:200px;';
                     container.appendChild(div);
                     renderOnePie(div, slices, `${p.prestation} (${p.client})`);
                 });
             } else {
                 // Camembert unique (toutes ou sélection 1)
                 const slices = buildSlices(sourcePrestations);
-                const div = document.createElement('div');
-                div.style.cssText = 'display:flex;flex-wrap:wrap;gap:30px;align-items:center;justify-content:center;width:100%;';
-                container.appendChild(div);
-                const title = mode === 'selection' && sourcePrestations.length === 1
-                    ? `${sourcePrestations[0].prestation} (${sourcePrestations[0].client})`
-                    : mode === 'selection' ? `Sélection (${sourcePrestations.length} prestations)` : null;
-                renderOnePie(div, slices, title);
+                if (slices.length > 0) {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'width:100%;display:flex;justify-content:center;';
+                    container.appendChild(div);
+                    const title = mode === 'selection' && sourcePrestations.length === 1
+                        ? `${sourcePrestations[0].prestation} (${sourcePrestations[0].client})`
+                        : mode === 'selection' ? `Sélection (${sourcePrestations.length} prestations)` : null;
+                    renderOnePie(div, slices, title);
+                }
             }
         }
 
