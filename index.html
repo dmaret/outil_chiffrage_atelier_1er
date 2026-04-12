@@ -15133,10 +15133,10 @@
             }
         ];
 
-        let quizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
+        let formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
 
         function startFormationQuiz() {
-            quizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
+            formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
             document.getElementById('quizContainer').style.display = 'none';
             document.getElementById('quizResults').style.display = 'none';
             renderQuizQuestion();
@@ -15144,38 +15144,38 @@
 
         function renderQuizQuestion() {
             const container = document.getElementById('quizQuestions');
-            const q = formationQuizQuestions[quizState.currentQuestion];
+            const q = formationQuizQuestions[formationQuizState.currentQuestion];
 
             let html = `<div style="background:white;padding:20px;border-radius:10px;border:2px solid #e67e22;margin-bottom:20px;">
-                <h3 style="color:#e67e22;margin-top:0;">Question ${quizState.currentQuestion + 1}/${formationQuizQuestions.length}</h3>
+                <h3 style="color:#e67e22;margin-top:0;">Question ${formationQuizState.currentQuestion + 1}/${formationQuizQuestions.length}</h3>
                 <p style="font-size:1.1em;color:#333;margin:15px 0;font-weight:600;">${q.question}</p>
                 <div style="display:flex;flex-direction:column;gap:10px;margin:20px 0;">`;
 
             q.options.forEach((option, idx) => {
-                const isSelected = quizState.selectedAnswer === idx;
+                const isSelected = formationQuizState.selectedAnswer === idx;
                 const isCorrect = idx === q.correct;
                 let style = 'background:white;border:2px solid #ddd;';
 
-                if (quizState.answered) {
+                if (formationQuizState.answered) {
                     if (isCorrect) style = 'background:#d4edda;border:2px solid #27ae60;';
                     else if (isSelected && !isCorrect) style = 'background:#f8d7da;border:2px solid #c0392b;';
                 }
 
                 html += `<button onclick="selectQuizAnswer(${idx})" style="padding:14px;border-radius:8px;cursor:pointer;text-align:left;font-weight:600;color:#333;transition:0.2s;${style}"
-                    ${quizState.answered ? 'disabled' : ''}>
+                    ${formationQuizState.answered ? 'disabled' : ''}>
                     ${String.fromCharCode(65 + idx)}. ${option}
                 </button>`;
             });
 
             html += `</div>`;
 
-            if (quizState.answered) {
+            if (formationQuizState.answered) {
                 html += `<div style="background:#f0f8ff;padding:15px;border-radius:8px;border-left:4px solid #2980b9;margin:15px 0;">
                     <strong style="color:#2980b9;">Explication :</strong>
                     <p style="color:#666;margin:8px 0;">${q.explanation}</p>
                 </div>`;
 
-                if (quizState.currentQuestion < formationQuizQuestions.length - 1) {
+                if (formationQuizState.currentQuestion < formationQuizQuestions.length - 1) {
                     html += `<button class="btn btn-primary" onclick="nextQuizQuestion()" style="background:#e67e22;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;width:100%;margin-top:15px;">Suivant →</button>`;
                 } else {
                     html += `<button class="btn btn-primary" onclick="finishFormationQuiz()" style="background:#27ae60;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;width:100%;margin-top:15px;">Voir Résultats 📊</button>`;
@@ -15189,30 +15189,30 @@
         }
 
         function selectQuizAnswer(idx) {
-            if (!quizState.answered) {
-                quizState.selectedAnswer = idx;
+            if (!formationQuizState.answered) {
+                formationQuizState.selectedAnswer = idx;
                 renderQuizQuestion();
             }
         }
 
         function submitQuizAnswer() {
-            if (quizState.selectedAnswer === null) {
+            if (formationQuizState.selectedAnswer === null) {
                 alert('Veuillez sélectionner une réponse');
                 return;
             }
 
-            const q = formationQuizQuestions[quizState.currentQuestion];
-            if (quizState.selectedAnswer === q.correct) {
-                quizState.score++;
+            const q = formationQuizQuestions[formationQuizState.currentQuestion];
+            if (formationQuizState.selectedAnswer === q.correct) {
+                formationQuizState.score++;
             }
-            quizState.answered = true;
+            formationQuizState.answered = true;
             renderQuizQuestion();
         }
 
         function nextQuizQuestion() {
-            quizState.currentQuestion++;
-            quizState.answered = false;
-            quizState.selectedAnswer = null;
+            formationQuizState.currentQuestion++;
+            formationQuizState.answered = false;
+            formationQuizState.selectedAnswer = null;
             renderQuizQuestion();
         }
 
@@ -15220,8 +15220,8 @@
             document.getElementById('quizQuestions').innerHTML = '';
             document.getElementById('quizResults').style.display = 'block';
 
-            const percent = Math.round((quizState.score / formationQuizQuestions.length) * 100);
-            document.getElementById('quizScoreDisplay').textContent = `${quizState.score}/${formationQuizQuestions.length}`;
+            const percent = Math.round((formationQuizState.score / formationQuizQuestions.length) * 100);
+            document.getElementById('quizScoreDisplay').textContent = `${formationQuizState.score}/${formationQuizQuestions.length}`;
             document.getElementById('quizPercentDisplay').textContent = `${percent}%`;
 
             let feedback = '';
@@ -15239,7 +15239,7 @@
         }
 
         function resetFormationQuiz() {
-            quizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
+            formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
             document.getElementById('quizContainer').style.display = 'block';
             document.getElementById('quizResults').style.display = 'none';
             document.getElementById('quizQuestions').innerHTML = '';
