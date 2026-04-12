@@ -561,7 +561,7 @@
         /* ── Auth login overlay ──────────────────────────────────────── */
         .auth-overlay {
             position: fixed; inset: 0; z-index: 9999;
-            background: linear-gradient(135deg, #e8f4f8 0%, #f5e6f0 100%);
+            background: linear-gradient(135deg, var(--color-bg-from) 0%, var(--color-bg-to) 100%);
             display: flex; align-items: center; justify-content: center;
             padding: 20px;
         }
@@ -590,7 +590,7 @@
         .auth-error { color: #e74c3c; font-size: 0.88em; margin-bottom: 12px; min-height: 20px; }
         .btn-login {
             width: 100%; padding: 13px;
-            background: linear-gradient(135deg, #a8d5e2, #c9b3d4);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
             color: #2d3e50; border: none; border-radius: 12px; font-size: 1.05em;
             font-weight: 700; cursor: pointer; transition: opacity 0.2s;
         }
@@ -607,7 +607,7 @@
         .training-subtitle { font-size: 0.88em; color: #7a9db1; margin-bottom: 24px; }
         .btn-training {
             width: 100%; padding: 13px;
-            background: linear-gradient(135deg, #c9b3d4, #a8d5e2);
+            background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
             color: #2d3e50; border: none; border-radius: 12px; font-size: 1.05em;
             font-weight: 700; cursor: pointer; transition: opacity 0.2s;
         }
