@@ -4405,16 +4405,8 @@
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
             else if (tabName === 'logistique') {
+                // Formation Logistique - systèmes, jeux et défis (no legacy rendering needed)
                 loadLogisticState();
-                renderLogisticRacks();
-                renderLogisticPalettes();
-                renderLogisticCanvas();
-                renderLogisticFreeArticles();
-                refreshLogisticArticles();
-                renderLogisticMoveForm();
-                renderLogisticHistory();
-                renderLogisticAlerts();
-                renderLogisticStats();
             }
         }
 
@@ -14377,6 +14369,14 @@
 
         function renderLogisticMoveForm() {
             try {
+                const moveTypeEl = document.getElementById('logisticMoveType');
+                const sourceGroupEl = document.getElementById('logisticMoveSourceGroup');
+                const moveArticleEl = document.getElementById('logisticMoveArticle');
+                const moveSourceEl = document.getElementById('logisticMoveSource');
+                const moveDestEl = document.getElementById('logisticMoveDest');
+
+                if (!moveTypeEl || !sourceGroupEl || !moveArticleEl || !moveSourceEl || !moveDestEl) return; // Exit safely if elements don't exist
+
                 const articles = [];
                 catalogueConsommables.forEach((c, idx) => {
                     articles.push({ id: 'CONSO_' + idx, name: c.nom || 'Sans nom' });
@@ -14385,11 +14385,10 @@
                     articles.push({ id: ref, name: ref });
                 });
 
-                const moveType = document.getElementById('logisticMoveType').value;
-                const sourceGroup = document.getElementById('logisticMoveSourceGroup');
-                sourceGroup.style.display = moveType === 'entree' ? 'none' : 'block';
+                const moveType = moveTypeEl.value;
+                sourceGroupEl.style.display = moveType === 'entree' ? 'none' : 'block';
 
-                document.getElementById('logisticMoveArticle').innerHTML = articles.map(a =>
+                moveArticleEl.innerHTML = articles.map(a =>
                     `<option value="${a.id}">${escapeHtml(a.name)}</option>`
                 ).join('');
 
@@ -14397,8 +14396,8 @@
                     `<option value="${l.id}">${escapeHtml(l.name)}</option>`
                 ).join('');
 
-                document.getElementById('logisticMoveSource').innerHTML = locations;
-                document.getElementById('logisticMoveDest').innerHTML = locations;
+                moveSourceEl.innerHTML = locations;
+                moveDestEl.innerHTML = locations;
 
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('logisticMoveDate').value = today;
@@ -14517,6 +14516,9 @@
         }
 
         function renderLogisticAlerts() {
+            const alertsDiv = document.getElementById('logisticAlerts');
+            if (!alertsDiv) return; // Exit safely if element doesn't exist
+
             const alerts = [];
             const allLocations = [...logisticState.racks, ...logisticState.palettes];
 
@@ -14534,7 +14536,6 @@
                 }
             });
 
-            const alertsDiv = document.getElementById('logisticAlerts');
             alertsDiv.innerHTML = alerts.length === 0
                 ? '<p style="color:#4caf50;">✅ Tous les emplacements OK</p>'
                 : alerts.map(a => `<div style="padding:8px;background:${a.level === 'danger' ? '#ffe6e6' : '#fff9e6'};border-left:4px solid ${a.level === 'danger' ? '#ff6b6b' : '#ffa500'};margin-bottom:6px;border-radius:6px;font-size:0.9em;">${a.msg}</div>`).join('');
