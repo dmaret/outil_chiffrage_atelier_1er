@@ -1778,6 +1778,7 @@
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
+                <button class="tab" onclick="switchTab('formation-logistique')">🏭 Formation</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
             <div class="tab-profile-badge" id="tabProfileBadge">
@@ -3270,6 +3271,126 @@
                 </div>
             </div>
 
+            <!-- ONGLET FORMATION LOGISTIQUE -->
+            <div id="formation-logistique" class="tab-content">
+                <!-- HERO INTRO -->
+                <div class="section" style="background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border-left:4px solid #6b8fa3;">
+                    <h2 style="margin-bottom:8px;">🏭 Formation Logistique</h2>
+                    <p style="color:#666;margin:0;max-width:700px;">Découvrez les différents systèmes logistiques et technologies utilisés en industrie. Maîtrisez les concepts clés de la supply chain et de la gestion d'entrepôt.</p>
+                </div>
+
+                <!-- SYSTÈMES LOGISTIQUES -->
+                <div class="section">
+                    <h2>📦 Systèmes Logistiques Clés</h2>
+                    <p style="color:#666;margin-bottom:20px;font-size:0.95em;">Les technologies et méthodes essentielles de la logistique moderne :</p>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
+
+                        <!-- WMS -->
+                        <div style="background:white;border-radius:12px;padding:20px;border-left:4px solid #a8d5e2;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size:2.5em;margin-bottom:10px;">📦</div>
+                            <h3 style="color:#6b8fa3;margin:0 0 8px;">WMS - Warehouse Management System</h3>
+                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.6;">
+                                Système de gestion d'entrepôt qui optimise les stocks, les emplacements, les mouvements et le picking.
+                                <br><strong style="color:#333;">Exemples :</strong> SAP WM, Manhattan, Reflex
+                            </p>
+                        </div>
+
+                        <!-- ERP -->
+                        <div style="background:white;border-radius:12px;padding:20px;border-left:4px solid #c9b3d4;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size:2.5em;margin-bottom:10px;">🏢</div>
+                            <h3 style="color:#9b59b6;margin:0 0 8px;">ERP - Enterprise Resource Planning</h3>
+                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.6;">
+                                Système intégré couvrant logistique, finance, production et ressources humaines.
+                                <br><strong style="color:#333;">Exemples :</strong> SAP, Sage, Oracle, Odoo
+                            </p>
+                        </div>
+
+                        <!-- TMS -->
+                        <div style="background:white;border-radius:12px;padding:20px;border-left:4px solid #b8e5d0;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size:2.5em;margin-bottom:10px;">🚚</div>
+                            <h3 style="color:#2e7d5e;margin:0 0 8px;">TMS - Transport Management System</h3>
+                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.6;">
+                                Gestion des transports, planification des livraisons et optimisation des tournées.
+                                <br><strong style="color:#333;">Fonction :</strong> Réduire les coûts de transport
+                            </p>
+                        </div>
+
+                        <!-- Automatisation -->
+                        <div style="background:white;border-radius:12px;padding:20px;border-left:4px solid #f5d4a8;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size:2.5em;margin-bottom:10px;">⚙️</div>
+                            <h3 style="color:#e67e22;margin:0 0 8px;">Automatisation - Convoyeurs & AGV</h3>
+                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.6;">
+                                Systèmes automatisés pour manutention : convoyeurs, robots AGV/AMR, bras robotisés.
+                                <br><strong style="color:#333;">Avantage :</strong> Augmente la productivité
+                            </p>
+                        </div>
+
+                        <!-- RFID -->
+                        <div style="background:white;border-radius:12px;padding:20px;border-left:4px solid #ffd6d6;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size:2.5em;margin-bottom:10px;">📡</div>
+                            <h3 style="color:#c0392b;margin:0 0 8px;">RFID & Traçabilité</h3>
+                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.6;">
+                                Identification automatique par RFID, QR codes et datamatrix. Traçabilité en temps réel.
+                                <br><strong style="color:#333;">Gain :</strong> Visibilité totale des flux
+                            </p>
+                        </div>
+
+                        <!-- Méthodes de gestion -->
+                        <div style="background:white;border-radius:12px;padding:20px;border-left:4px solid #d4e8ff;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size:2.5em;margin-bottom:10px;">🔄</div>
+                            <h3 style="color:#2980b9;margin:0 0 8px;">FIFO / FEFO / LIFO</h3>
+                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.6;">
+                                Méthodes de gestion des stocks : Premier Entré/Premier Sorti, FEFO, Dernier Entré/Premier Sorti.
+                                <br><strong style="color:#333;">Contexte :</strong> Secteur alimentaire, pharmaceutique
+                            </p>
+                        </div>
+
+                        <!-- Kanban -->
+                        <div style="background:white;border-radius:12px;padding:20px;border-left:4px solid #e0ffe0;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size:2.5em;margin-bottom:10px;">📋</div>
+                            <h3 style="color:#27ae60;margin:0 0 8px;">Kanban & Lean</h3>
+                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.6;">
+                                Gestion en flux tirés par cartes visuelles. Élimination du gaspillage en logistique.
+                                <br><strong style="color:#333;">Bénéfice :</strong> Fluidité des flux
+                            </p>
+                        </div>
+
+                        <!-- 5S -->
+                        <div style="background:white;border-radius:12px;padding:20px;border-left:4px solid #fff0d4;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size:2.5em;margin-bottom:10px;">🧹</div>
+                            <h3 style="color:#d4a017;margin:0 0 8px;">5S - Organisation du Poste</h3>
+                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.6;">
+                                Seiri, Seiton, Seiso, Seiketsu, Shitsuke : Trier, Ranger, Nettoyer, Standardiser, Maintenir.
+                                <br><strong style="color:#333;">Résultat :</strong> Poste de travail optimisé
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- CONCEPTS CLÉS -->
+                <div class="section" style="background:#f0f8ff;border-left:4px solid #2980b9;">
+                    <h2>💡 Concepts Clés à Retenir</h2>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;">
+                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                            <h4 style="color:#2980b9;margin-top:0;">Supply Chain</h4>
+                            <p style="color:#666;font-size:0.9em;margin:5px 0;">Ensemble des flux (matières, informations, finances) du fournisseur au client final.</p>
+                        </div>
+                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                            <h4 style="color:#2980b9;margin-top:0;">KPI Logistique</h4>
+                            <p style="color:#666;font-size:0.9em;margin:5px 0;">Indicateurs : délai, coût, qualité, taux de service, rotation des stocks.</p>
+                        </div>
+                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                            <h4 style="color:#2980b9;margin-top:0;">Flux Tendu</h4>
+                            <p style="color:#666;font-size:0.9em;margin:5px 0;">Production et livraison juste-à-temps pour minimiser les stocks et les coûts.</p>
+                        </div>
+                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                            <h4 style="color:#2980b9;margin-top:0;">Traçabilité</h4>
+                            <p style="color:#666;font-size:0.9em;margin:5px 0;">Capacité à suivre un article/palette tout au long de son parcours logistique.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ONGLET DASHBOARD -->
             <div id="dashboard" class="tab-content active">
@@ -4247,6 +4368,10 @@
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
+            else if (tabName === 'formation-logistique') {
+                // Formation Logistique - contenu théorique statique
+                // Rien à charger dynamiquement pour l'instant
+            }
         }
 
         function buildGesteOptions(selCode) {
