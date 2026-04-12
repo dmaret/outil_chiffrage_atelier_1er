@@ -613,6 +613,32 @@
         .btn-training:hover { opacity: 0.88; }
         .training-footer { font-size: 0.72em; color: #bbb; margin-top: 20px; }
 
+        /* ── Theme Selector Box ─────────────────────────────────── */
+        .theme-selector-box {
+            background: #fffef9; border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(100,120,150,0.25);
+            padding: 40px; text-align: center;
+        }
+        .theme-selector-box h2 { font-size: 1.5em; margin-bottom: 6px; color: #2d3e50; }
+        .theme-card-login {
+            border: 3px solid transparent; border-radius: 12px;
+            overflow: hidden; transition: all 0.3s;
+            background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .theme-card-login:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .theme-card-login.selected {
+            border-color: #6b8fa3;
+            box-shadow: 0 0 0 2px #a8d5e2, 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .theme-preview-login { height: 48px; }
+        .theme-label-login {
+            padding: 8px; font-size: 0.85em; font-weight: 600;
+            color: #2d3e50; background: #f5f5f5;
+        }
+
         /* ── Training Module Overlay ─────────────────────────────────── */
         .training-overlay {
             position: fixed; inset: 0; z-index: 10000;
@@ -16136,6 +16162,40 @@
                     📚 Accéder à la formation
                 </button>
                 <p class="training-footer">Formation interactive • Quiz & Glossaire • Accès libre</p>
+            </div>
+
+            <!-- Container 4: Sélecteur de thèmes -->
+            <div class="theme-selector-box" style="grid-column: 1 / -1;">
+                <div style="font-size:2.8em;margin-bottom:6px;">🎨</div>
+                <h2>Personnalisation</h2>
+                <h3 style="font-size: 1.1em; color: #7a9db1; margin-bottom: 12px;">Thèmes visuels</h3>
+                <p class="training-subtitle" style="margin-bottom:16px;">Choisissez votre thème préféré pour l'interface</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;">
+                    <div class="theme-card-login" onclick="applyTheme('classique')" id="theme-classique-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);"></div>
+                        <div class="theme-label-login">🌊 Classique</div>
+                    </div>
+                    <div class="theme-card-login" onclick="applyTheme('corporate')" id="theme-corporate-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#1a3a5c,#2e6da4);"></div>
+                        <div class="theme-label-login">🏢 Corporate</div>
+                    </div>
+                    <div class="theme-card-login" onclick="applyTheme('minimaliste')" id="theme-minimaliste-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#6c757d,#adb5bd);"></div>
+                        <div class="theme-label-login">⬜ Minimaliste</div>
+                    </div>
+                    <div class="theme-card-login" onclick="applyTheme('chaleureux')" id="theme-chaleureux-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#c0392b,#e67e22);"></div>
+                        <div class="theme-label-login">🌿 Chaleureux</div>
+                    </div>
+                    <div class="theme-card-login" onclick="applyTheme('nature')" id="theme-nature-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#1e8449,#1abc9c);"></div>
+                        <div class="theme-label-login">🌱 Nature</div>
+                    </div>
+                    <div class="theme-card-login" onclick="applyTheme('nuit')" id="theme-nuit-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#2c3e50,#8e44ad);"></div>
+                        <div class="theme-label-login">🌙 Nuit</div>
+                    </div>
+                </div>
             </div>
 
         </div>
