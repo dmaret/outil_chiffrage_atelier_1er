@@ -3273,261 +3273,125 @@
 
             <!-- ONGLET LOGISTIQUE -->
             <div id="logistique" class="tab-content">
-                <div class="section" id="logisticsManagementSection">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-                        <h2>🏭 Gestion Logistique</h2>
-                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                            <button class="btn btn-small logistics-view-btn" id="btn2DView" onclick="switchLogisticsView('2d')" style="background:#6b8fa3;color:white;">📍 Vue 2D</button>
-                            <button class="btn btn-small logistics-view-btn" id="btn3DView" onclick="switchLogisticsView('3d')" style="background:#c9b3d4;color:white;">🎬 Vue 3D</button>
-                            <button class="btn btn-small" id="btnGames" onclick="openGameMenu()" style="background:#ff6b6b;color:white;">🎮 Jeux</button>
-                            <button class="btn btn-small" id="btnChallenge" onclick="startLogisticsChallenge()" style="background:#a8d5e2;color:#333;">⏱️ Chrono</button>
-                            <button class="btn btn-small" id="btnAnalytics" onclick="showLogisticsAnalytics()" style="background:#ffc107;color:#333;">📊 Analytics</button>
-                            <button class="btn btn-small" id="btnStats" onclick="showPlayerStats()" style="background:#9b59b6;color:white;">👤 Profil</button>
-                        </div>
-                    </div>
-                    <p style="color:#666;margin-bottom:15px;" id="logisticsDesc">Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.</p>
 
-                    <!-- Vue 3D Canvas -->
-                    <div id="logistics3DContainer" style="display:none;width:100%;height:600px;border:1px solid #ddd;border-radius:8px;background:#f5f5f5;position:relative;margin-bottom:15px;"></div>
-
-                    <!-- Analytics Heatmap -->
-                    <div id="logisticsAnalyticsContainer" style="display:none;margin-bottom:20px;">
-                        <div style="background:#f5f9fc;padding:20px;border-radius:8px;border:1px solid #a8d5e2;">
-                            <h3 style="margin-bottom:15px;">📊 Heatmap d'Accès</h3>
-                            <div id="logisticsHeatmapCanvas" style="width:100%;height:300px;border:1px solid #ddd;border-radius:6px;background:#fff;position:relative;"></div>
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-top:15px;">
-                            <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #6b8fa3;">
-                                <div style="color:#999;font-size:0.9em;">Occupation Moyenne</div>
-                                <div id="statsOccupation" style="font-size:1.8em;font-weight:bold;color:#6b8fa3;">--</div>
-                            </div>
-                            <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #c9b3d4;">
-                                <div style="color:#999;font-size:0.9em;">Zone la Plus Chargée</div>
-                                <div id="statsMostUsed" style="font-size:1.8em;font-weight:bold;color:#c9b3d4;">--</div>
-                            </div>
-                            <div style="background:#f5f9fc;padding:15px;border-radius:8px;border-left:4px solid #a8d5e2;">
-                                <div style="color:#999;font-size:0.9em;">Espace Libre</div>
-                                <div id="statsFreeSpace" style="font-size:1.8em;font-weight:bold;color:#a8d5e2;">--</div>
-                            </div>
-                        </div>
-                        <div style="display:flex;gap:10px;margin-top:15px;">
-                            <button class="btn btn-small" onclick="exportAnalyticsReport()" style="flex:1;">📥 Exporter Rapport</button>
-                            <button class="btn btn-small" onclick="switchLogisticsView('2d')" style="flex:1;background:#6b8fa3;color:white;">📍 Retour à la vue 2D</button>
-                        </div>
-                    </div>
-
-                    <!-- CONFIGURATION RACKS -->
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;">
+                <!-- HERO INTRO -->
+                <div class="section" style="background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border-left:4px solid #6b8fa3;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:15px;">
                         <div>
-                            <h3>Configuration Racks</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Ajouter un rack</label>
-                                    <input type="text" id="rackName" placeholder="ex: RACK-A1" style="width:120px;">
-                                    <button class="btn btn-small" onclick="addRack()" style="margin-top:0;">➕ Ajouter</button>
-                                </div>
-                            </div>
-                            <div id="racksList" style="margin-top:10px;max-height:200px;overflow-y:auto;"></div>
+                            <h2 style="margin-bottom:8px;">🏭 Formation Logistique</h2>
+                            <p style="color:#666;margin:0;max-width:700px;">Découvrez les différents systèmes logistiques utilisés en industrie. Testez vos connaissances avec les mini-jeux et comparez vos scores avec votre équipe.</p>
                         </div>
-                        <div>
-                            <h3>Configuration Palettes</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Ajouter une palette</label>
-                                    <input type="text" id="paletteName" placeholder="ex: PALETTE-01" style="width:140px;">
-                                    <button class="btn btn-small" onclick="addPalette()" style="margin-top:0;">➕ Ajouter</button>
-                                </div>
-                            </div>
-                            <div id="palettesList" style="margin-top:10px;max-height:200px;overflow-y:auto;"></div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                            <button class="btn btn-small" onclick="startLogisticsChallenge()" style="background:#a8d5e2;color:#333;">⏱️ Challenge Chrono</button>
+                            <button class="btn btn-small" onclick="showPlayerStats()" style="background:#9b59b6;color:white;">👤 Mon Profil</button>
                         </div>
                     </div>
-
-                    <!-- ZOOM ET CONTRÔLES -->
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
-                        <label>Zoom : <input type="range" id="zoomRange" min="0.5" max="2" step="0.1" value="1" onchange="updateLogisticZoom()" style="width:120px;"></label>
-                        <span id="zoomLabel">100%</span>
-                        <button class="btn btn-secondary btn-small" onclick="resetLogisticView()">🔄 Réinitialiser vue</button>
-                        <button class="btn btn-secondary btn-small" onclick="exportLogisticLayout()">💾 Sauver plan</button>
-                        <button class="btn btn-secondary btn-small" onclick="importLogisticLayout()">📂 Charger plan</button>
-                    </div>
                 </div>
 
-                <!-- CANVAS 2D PRINCIPAL -->
-                <div class="section" style="padding:0;border:none;background:#f9f9f9;">
-                    <canvas id="logisticsCanvas" width="1200" height="600" style="border:2px solid #a8d5e2;background:white;cursor:move;display:block;margin:0 auto;border-radius:8px;"></canvas>
-                </div>
-
-                <!-- ZONE D'ARTICLES LIBRES (NON PLACÉS) -->
-                <div class="section" style="border-left:4px solid #ff9800;background:linear-gradient(135deg,#fff8e1,#fff3cd);">
-                    <h2>📍 Articles Libres (Non placés)</h2>
-                    <p style="color:#856404;font-size:0.95em;margin-bottom:15px;">Glissez-déposez les articles ici pour les placer librement, ou sur un rack/palette. Ces articles ne sont pas encore assignés à un emplacement spécifique.</p>
-                    <div id="logisticFreeArticlesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;min-height:80px;padding:15px;background:rgba(255,255,255,0.6);border-radius:8px;border:2px dashed #ff9800;"></div>
-                </div>
-
-                <!-- ZONE D'ARTICLES DISPONIBLES (DRAG SOURCE) -->
+                <!-- SYSTÈMES LOGISTIQUES DU MARCHÉ -->
                 <div class="section">
-                    <h2>📦 Articles disponibles (Glissez-déposez sur le plan)</h2>
-                    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                        <input type="text" id="logisticSearchArticle" placeholder="Rechercher article..." style="flex:1;min-width:200px;" oninput="refreshLogisticArticles()">
-                        <button class="btn btn-small" onclick="refreshLogisticArticles()">🔄 Actualiser</button>
+                    <h2>🏪 Systèmes Logistiques sur le Marché</h2>
+                    <p style="color:#666;margin-bottom:20px;font-size:0.95em;">Les systèmes et technologies clés que vous rencontrerez en entreprise :</p>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+
+                        <!-- WMS -->
+                        <div style="background:white;border-radius:12px;padding:18px;border:1px solid #a8d5e2;box-shadow:0 2px 8px rgba(107,143,163,0.1);cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showSystemInfo('wms')">
+                            <div style="font-size:2em;margin-bottom:8px;">📦</div>
+                            <h3 style="color:#6b8fa3;margin:0 0 6px;">WMS</h3>
+                            <p style="font-weight:600;font-size:0.9em;color:#333;margin:0 0 6px;">Warehouse Management System</p>
+                            <p style="color:#666;font-size:0.85em;margin:0;">Gestion d'entrepôt : stocks, emplacements, mouvements, picking. Ex : SAP WM, Manhattan, Reflex.</p>
+                        </div>
+
+                        <!-- ERP -->
+                        <div style="background:white;border-radius:12px;padding:18px;border:1px solid #c9b3d4;box-shadow:0 2px 8px rgba(201,179,212,0.1);cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showSystemInfo('erp')">
+                            <div style="font-size:2em;margin-bottom:8px;">🏢</div>
+                            <h3 style="color:#9b59b6;margin:0 0 6px;">ERP</h3>
+                            <p style="font-weight:600;font-size:0.9em;color:#333;margin:0 0 6px;">Enterprise Resource Planning</p>
+                            <p style="color:#666;font-size:0.85em;margin:0;">Système intégré couvrant logistique, finance, production, RH. Ex : SAP, Sage, Oracle, Odoo.</p>
+                        </div>
+
+                        <!-- TMS -->
+                        <div style="background:white;border-radius:12px;padding:18px;border:1px solid #b8e5d0;box-shadow:0 2px 8px rgba(107,163,130,0.1);cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showSystemInfo('tms')">
+                            <div style="font-size:2em;margin-bottom:8px;">🚚</div>
+                            <h3 style="color:#2e7d5e;margin:0 0 6px;">TMS</h3>
+                            <p style="font-weight:600;font-size:0.9em;color:#333;margin:0 0 6px;">Transport Management System</p>
+                            <p style="color:#666;font-size:0.85em;margin:0;">Gestion des transports : planification, suivi livraisons, optimisation des tournées.</p>
+                        </div>
+
+                        <!-- Convoyeurs & Automatisation -->
+                        <div style="background:white;border-radius:12px;padding:18px;border:1px solid #f5d4a8;box-shadow:0 2px 8px rgba(200,150,80,0.1);cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showSystemInfo('convoyeur')">
+                            <div style="font-size:2em;margin-bottom:8px;">⚙️</div>
+                            <h3 style="color:#e67e22;margin:0 0 6px;">Convoyeurs & AGV</h3>
+                            <p style="font-weight:600;font-size:0.9em;color:#333;margin:0 0 6px;">Automatisation des flux</p>
+                            <p style="color:#666;font-size:0.85em;margin:0;">Convoyeurs, robots AGV/AMR, bras robotisés pour la manutention automatisée des palettes et cartons.</p>
+                        </div>
+
+                        <!-- RFID & Codes-barres -->
+                        <div style="background:white;border-radius:12px;padding:18px;border:1px solid #ffd6d6;box-shadow:0 2px 8px rgba(200,80,80,0.1);cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showSystemInfo('rfid')">
+                            <div style="font-size:2em;margin-bottom:8px;">📡</div>
+                            <h3 style="color:#c0392b;margin:0 0 6px;">RFID & Codes-barres</h3>
+                            <p style="font-weight:600;font-size:0.9em;color:#333;margin:0 0 6px;">Traçabilité & identification</p>
+                            <p style="color:#666;font-size:0.85em;margin:0;">Identification automatique : RFID, QR codes, datamatrix. Traçabilité en temps réel des articles et palettes.</p>
+                        </div>
+
+                        <!-- FIFO / FEFO / LIFO -->
+                        <div style="background:white;border-radius:12px;padding:18px;border:1px solid #d4e8ff;box-shadow:0 2px 8px rgba(80,130,200,0.1);cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showSystemInfo('methodes')">
+                            <div style="font-size:2em;margin-bottom:8px;">🔄</div>
+                            <h3 style="color:#2980b9;margin:0 0 6px;">FIFO / FEFO / LIFO</h3>
+                            <p style="font-weight:600;font-size:0.9em;color:#333;margin:0 0 6px;">Méthodes de gestion des stocks</p>
+                            <p style="color:#666;font-size:0.85em;margin:0;">FIFO : premier entré/premier sorti. FEFO : première date d'expiration. LIFO : dernier entré/premier sorti.</p>
+                        </div>
+
+                        <!-- VMI / Kanban -->
+                        <div style="background:white;border-radius:12px;padding:18px;border:1px solid #e0ffe0;box-shadow:0 2px 8px rgba(80,180,80,0.1);cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showSystemInfo('kanban')">
+                            <div style="font-size:2em;margin-bottom:8px;">📋</div>
+                            <h3 style="color:#27ae60;margin:0 0 6px;">Kanban & Lean</h3>
+                            <p style="font-weight:600;font-size:0.9em;color:#333;margin:0 0 6px;">Gestion en flux tirés</p>
+                            <p style="color:#666;font-size:0.85em;margin:0;">Kanban : réapprovisionnement visuel par cartes/bacs. Lean logistique : supprimer le gaspillage dans les flux.</p>
+                        </div>
+
+                        <!-- 5S Logistique -->
+                        <div style="background:white;border-radius:12px;padding:18px;border:1px solid #fff0d4;box-shadow:0 2px 8px rgba(200,160,50,0.1);cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showSystemInfo('5s')">
+                            <div style="font-size:2em;margin-bottom:8px;">🧹</div>
+                            <h3 style="color:#d4a017;margin:0 0 6px;">5S</h3>
+                            <p style="font-weight:600;font-size:0.9em;color:#333;margin:0 0 6px;">Organisation du poste logistique</p>
+                            <p style="color:#666;font-size:0.85em;margin:0;">Seiri, Seiton, Seiso, Seiketsu, Shitsuke : trier, ranger, nettoyer, standardiser, maintenir.</p>
+                        </div>
+
                     </div>
-                    <div id="logisticArticlesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;"></div>
+
+                    <!-- Panneau info système (affiché au clic) -->
+                    <div id="systemInfoPanel" style="display:none;margin-top:20px;background:linear-gradient(135deg,#f5f9fc,#fff);border:2px solid #a8d5e2;border-radius:12px;padding:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                            <h3 id="systemInfoTitle" style="margin:0;color:#6b8fa3;"></h3>
+                            <button class="btn btn-small btn-secondary" onclick="document.getElementById('systemInfoPanel').style.display='none'">✕ Fermer</button>
+                        </div>
+                        <div id="systemInfoContent"></div>
+                    </div>
                 </div>
 
-                <!-- PANNEAU INFOS PLACEMENT -->
+                <!-- JEUX DE FORMATION -->
                 <div class="section">
-                    <h2>ℹ️ Infos Placement</h2>
-                    <div id="logisticInfoPanel" style="background:#e8f4f8;padding:15px;border-radius:8px;color:#555;min-height:100px;">
-                        <p style="color:#999;">Sélectionnez un article sur le plan pour voir ses détails</p>
-                    </div>
-                </div>
-
-                <!-- MOUVEMENTS STOCK -->
-                <div class="section">
-                    <h2>🔄 Mouvements Stock</h2>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Type de mouvement</label>
-                            <select id="logisticMoveType" onchange="updateLogisticMoveForm()">
-                                <option value="entree">📥 Entrée</option>
-                                <option value="sortie">📤 Sortie</option>
-                                <option value="transfert">↔️ Transfert</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Article</label>
-                            <select id="logisticMoveArticle"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Quantité</label>
-                            <input type="number" id="logisticMoveQty" min="1" value="1">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group" id="logisticMoveSourceGroup">
-                            <label>Emplacement source</label>
-                            <select id="logisticMoveSource"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Emplacement destination</label>
-                            <select id="logisticMoveDest"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="logisticMoveDate">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Responsable</label>
-                            <input type="text" id="logisticMoveResponsable" value="Davie Maret">
-                        </div>
-                        <div class="form-group">
-                            <label>Notes</label>
-                            <input type="text" id="logisticMoveNotes" placeholder="Notes...">
-                        </div>
-                    </div>
-                    <button class="btn btn-success" onclick="saveLogisticMove()">✅ Enregistrer mouvement</button>
-                </div>
-
-                <!-- ALERTES ET STATISTIQUES -->
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
-                    <div class="section">
-                        <h2>⚠️ Alertes Stock</h2>
-                        <div id="logisticAlerts" style="min-height:100px;"></div>
-                    </div>
-                    <div class="section">
-                        <h2>📊 Statistiques</h2>
-                        <div id="logisticStats" style="min-height:100px;"></div>
-                    </div>
-                </div>
-
-                <!-- HISTORIQUE MOUVEMENTS -->
-                <div class="section">
-                    <h2>📝 Historique Mouvements</h2>
-                    <div style="display:flex;gap:8px;margin-bottom:10px;">
-                        <input type="text" id="logisticHistoryFilter" placeholder="Filtrer..." style="flex:1;" oninput="renderLogisticHistory()">
-                        <button class="btn btn-small" onclick="logisticClearHistory()">🗑️ Effacer</button>
-                    </div>
-                    <div id="logisticHistoryList" style="max-height:300px;overflow-y:auto;"></div>
-                </div>
-
-                <!-- RÉSERVATIONS ET BLOCAGES -->
-                <div class="section">
-                    <h2>🔒 Réservations & Blocages</h2>
-                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Bloquez des articles temporairement pour les réserver ou les prélever.</p>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Article à réserver</label>
-                            <select id="reserveArticle"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Quantité</label>
-                            <input type="number" id="reserveQty" min="1" value="1">
-                        </div>
-                        <div class="form-group">
-                            <label>Raison</label>
-                            <select id="reserveReason">
-                                <option value="production">Production</option>
-                                <option value="inspection">Inspection</option>
-                                <option value="maintenance">Maintenance</option>
-                                <option value="autre">Autre</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button class="btn btn-secondary" onclick="addReservation()">🔒 Réserver</button>
-                    <div id="reservationsList" style="margin-top:15px;"></div>
-                </div>
-
-                <!-- OPTIMISATION AUTOMATIQUE -->
-                <div class="section">
-                    <h2>🤖 Optimisation Automatique</h2>
-                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">L'algorithme suggère le meilleur placement basé sur la proximité et la capacité.</p>
-                    <button class="btn btn-success" onclick="runAutoOptimization()">🚀 Lancer optimisation</button>
-                    <button class="btn btn-secondary btn-small" onclick="toggleOptimizationDetails()">📊 Détails</button>
-                    <div id="optimizationResult" style="margin-top:15px;"></div>
-                </div>
-
-                <!-- RAPPORTS ET STATISTIQUES -->
-                <div class="section">
-                    <h2>📊 Rapports d'Occupation</h2>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
-                        <div id="occupationChart" style="background:#f9f9f9;padding:15px;border-radius:8px;"></div>
-                        <div id="occupationStats" style="background:#f9f9f9;padding:15px;border-radius:8px;"></div>
-                    </div>
-                    <button class="btn btn-secondary btn-small" onclick="exportOccupationReport()">📥 Exporter rapport</button>
-                </div>
-
-                <!-- QR CODES -->
-                <div class="section">
-                    <h2>📱 Codes QR</h2>
-                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Générez des QR codes pour racks, palettes et articles.</p>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px;">
-                        <div>
-                            <h4>Racks</h4>
-                            <div id="qrCodesRacks" style="display:flex;flex-direction:column;gap:10px;"></div>
-                        </div>
-                        <div>
-                            <h4>Palettes</h4>
-                            <div id="qrCodesPalettes" style="display:flex;flex-direction:column;gap:10px;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ENTRAÎNEMENT ET JEUX -->
-                <div class="section">
-                    <h2>🎮 Modes d'Entraînement & Jeux</h2>
-                    <p style="color:#666;margin-bottom:15px;font-size:0.9em;">Formez votre équipe avec des mini-jeux éducatifs et ludiques.</p>
+                    <h2>🎮 Jeux de Formation</h2>
+                    <p style="color:#666;margin-bottom:20px;font-size:0.95em;">Testez vos connaissances sur la logistique avec ces mini-jeux. Plus vous jouez, plus votre score s'améliore !</p>
 
                     <!-- Sélecteur de jeu -->
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px;">
-                        <button class="btn" onclick="startGame('sorting')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#a8d5e2,#8fc4d6);border:none;border-radius:8px;cursor:pointer;">🎯 Tri Rapide</button>
-                        <button class="btn" onclick="startGame('quiz')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#c9b3d4,#b8a0c8);border:none;border-radius:8px;cursor:pointer;">🧠 Quiz</button>
-                        <button class="btn" onclick="startGame('picking')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#b8e5d0,#a3d9c2);border:none;border-radius:8px;cursor:pointer;">🕹️ Picking</button>
-                        <button class="btn" onclick="startGame('memory')" style="padding:15px;font-size:1em;background:linear-gradient(135deg,#f5d4a8,#f0c896);border:none;border-radius:8px;cursor:pointer;">🎲 Mémoire</button>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;">
+                        <button onclick="startGame('sorting')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#a8d5e2,#8fc4d6);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(107,143,163,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🎯<br><span>Tri Rapide</span><br><small style="font-weight:400;opacity:0.8;">Classez les articles</small>
+                        </button>
+                        <button onclick="startGame('quiz')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#c9b3d4,#b8a0c8);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(155,89,182,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🧠<br><span>Quiz Logistique</span><br><small style="font-weight:400;opacity:0.8;">Questions sur les systèmes</small>
+                        </button>
+                        <button onclick="startGame('picking')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#b8e5d0,#8fd6b8);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(46,125,94,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🕹️<br><span>Picking</span><br><small style="font-weight:400;opacity:0.8;">Simulation de préparation</small>
+                        </button>
+                        <button onclick="startGame('memory')" style="padding:18px 12px;font-size:0.95em;font-weight:600;background:linear-gradient(135deg,#f5d4a8,#f0c070);border:none;border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(200,150,50,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🎲<br><span>Mémoire</span><br><small style="font-weight:400;opacity:0.8;">Mémorisez les emplacements</small>
+                        </button>
                     </div>
 
-                    <!-- Zone de jeu -->
+                    <!-- Zone de jeu active -->
                     <div id="gameContainer" style="display:none;background:linear-gradient(135deg,#e8f4f8,#f5e6f0);padding:20px;border-radius:12px;border:2px solid #a8d5e2;">
                         <!-- Barre de score -->
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:15px;background:white;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
@@ -3546,11 +3410,9 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Contenu du jeu dynamique -->
+                        <!-- Contenu dynamique du jeu -->
                         <div id="gameContent" style="min-height:300px;"></div>
-
-                        <!-- Boutons d'action -->
+                        <!-- Contrôles -->
                         <div style="display:flex;gap:10px;margin-top:20px;justify-content:center;flex-wrap:wrap;">
                             <button class="btn btn-secondary" onclick="pauseGame()" id="pauseGameBtn">⏸️ Pause</button>
                             <button class="btn btn-danger" onclick="endGame()">🛑 Arrêter</button>
@@ -3558,7 +3420,7 @@
                         </div>
                     </div>
 
-                    <!-- Résultats de jeu -->
+                    <!-- Résultats -->
                     <div id="gameResultsContainer" style="display:none;background:#f9f9f9;padding:20px;border-radius:12px;border-left:4px solid #4caf50;margin-top:15px;">
                         <h3 style="color:#4caf50;margin-bottom:15px;">🏆 Résultats</h3>
                         <div id="gameResultsContent"></div>
@@ -12020,35 +11882,109 @@
         // ════════════════════════════════════════════════════════════
         let logistics3DScene = null, logistics3DCamera = null, logistics3DRenderer = null;
 
+        // Stub — Vue 2D/3D supprimée, scroll simple vers la section formation
         function switchLogisticsView(view) {
-            const canvas2D = document.getElementById('logisticsCanvas');
-            const canvas3D = document.getElementById('logistics3DContainer');
-            const analyticsDiv = document.getElementById('logisticsAnalyticsContainer');
-            const btn2D = document.getElementById('btn2DView');
-            const btn3D = document.getElementById('btn3DView');
-            const desc = document.getElementById('logisticsDesc');
+            const section = document.getElementById('logistique');
+            if (section) section.scrollIntoView({ behavior: 'smooth' });
+        }
 
-            if (view === '2d') {
-                canvas2D.style.display = 'block';
-                canvas3D.style.display = 'none';
-                if (analyticsDiv) analyticsDiv.style.display = 'none';
-                btn2D.style.background = '#6b8fa3';
-                btn3D.style.background = '#c9b3d4';
-                desc.textContent = 'Visualisez et organisez vos emplacements de stockage (racks, palettes) en vue 2D. Déplacez les articles par glisser-déposer pour les ranger.';
-                renderLogisticCanvas();
-            } else {
-                canvas2D.style.display = 'none';
-                canvas3D.style.display = 'block';
-                if (analyticsDiv) analyticsDiv.style.display = 'none';
-                btn2D.style.background = '#c9b3d4';
-                btn3D.style.background = '#6b8fa3';
-                desc.textContent = 'Vue 3D interactive de votre entrepôt. Utilisez la souris pour pivoter (clic gauche), zoomer (molette), et déplacer (clic droit).';
-                if (!logistics3DScene) {
-                    init3DLogistics();
-                } else {
-                    animate3DLogistics();
-                }
+        // ─── Fiche détaillée d'un système logistique ───────────────────────
+        const LOGISTIC_SYSTEMS = {
+            wms: {
+                title: '📦 WMS — Warehouse Management System',
+                content: `
+                    <p><strong>Rôle :</strong> Piloter en temps réel toutes les opérations d'un entrepôt — réception, stockage, préparation de commandes, expédition.</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
+                        <div style="background:#e8f4f8;padding:12px;border-radius:8px;"><strong>Fonctions principales</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Gestion des emplacements</li><li>Optimisation du picking</li><li>Traçabilité des lots</li><li>Tableaux de bord temps réel</li></ul></div>
+                        <div style="background:#f5e6f0;padding:12px;border-radius:8px;"><strong>Exemples du marché</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>SAP Extended Warehouse</li><li>Manhattan WMS</li><li>Reflex WMS (FR)</li><li>Generix Group</li></ul></div>
+                    </div>
+                    <p style="color:#666;font-size:0.9em;">💡 <em>Dans notre atelier : le WMS permet de savoir exactement où se trouve chaque consommable, combien il en reste, et qui l'a utilisé.</em></p>`
+            },
+            erp: {
+                title: '🏢 ERP — Enterprise Resource Planning',
+                content: `
+                    <p><strong>Rôle :</strong> Centraliser toutes les données de l'entreprise dans un seul système — finance, achats, production, logistique, RH.</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
+                        <div style="background:#e8f4f8;padding:12px;border-radius:8px;"><strong>Modules logistiques</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Gestion des commandes</li><li>MRP (planification besoins)</li><li>Suivi fournisseurs</li><li>Inventaire valorisé</li></ul></div>
+                        <div style="background:#f5e6f0;padding:12px;border-radius:8px;"><strong>Exemples</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>SAP S/4HANA</li><li>Sage X3</li><li>Oracle NetSuite</li><li>Odoo (open source)</li></ul></div>
+                    </div>
+                    <p style="color:#666;font-size:0.9em;">💡 <em>L'ERP est le "cerveau" de l'entreprise ; le WMS lui est souvent connecté pour la partie entrepôt.</em></p>`
+            },
+            tms: {
+                title: '🚚 TMS — Transport Management System',
+                content: `
+                    <p><strong>Rôle :</strong> Optimiser, planifier et suivre les expéditions et les transports de marchandises.</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
+                        <div style="background:#e8f4f8;padding:12px;border-radius:8px;"><strong>Fonctions</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Calcul des tournées</li><li>Suivi GPS temps réel</li><li>Gestion des transporteurs</li><li>Coûts de transport</li></ul></div>
+                        <div style="background:#f5e6f0;padding:12px;border-radius:8px;"><strong>Exemples</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>TourSolver</li><li>Shippeo (tracking)</li><li>Transporeon</li><li>SAP TM</li></ul></div>
+                    </div>
+                    <p style="color:#666;font-size:0.9em;">💡 <em>Moins utilisé en atelier, mais indispensable pour les livraisons clients et les réapprovisionnements.</em></p>`
+            },
+            convoyeur: {
+                title: '⚙️ Convoyeurs & AGV — Automatisation des flux',
+                content: `
+                    <p><strong>Rôle :</strong> Déplacer automatiquement les marchandises dans l'entrepôt sans intervention humaine.</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
+                        <div style="background:#e8f4f8;padding:12px;border-radius:8px;"><strong>Types</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Convoyeurs à bandes/rouleaux</li><li>AGV (véhicule guidé auto)</li><li>AMR (robot mobile autonome)</li><li>Bras robotisés (Kuka, Fanuc)</li></ul></div>
+                        <div style="background:#f5e6f0;padding:12px;border-radius:8px;"><strong>Avantages</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Rapidité et régularité</li><li>Réduction TMS</li><li>Traçabilité automatique</li><li>Travail 24h/24</li></ul></div>
+                    </div>
+                    <p style="color:#666;font-size:0.9em;">💡 <em>Dans les grands entrepôts Amazon, Décathlon, etc. : 80% des déplacements sont automatisés.</em></p>`
+            },
+            rfid: {
+                title: '📡 RFID & Codes-barres — Traçabilité',
+                content: `
+                    <p><strong>Rôle :</strong> Identifier et localiser les articles sans contact, automatiquement.</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
+                        <div style="background:#e8f4f8;padding:12px;border-radius:8px;"><strong>Technologies</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Code-barres 1D (EAN, Code128)</li><li>QR Code / Datamatrix 2D</li><li>Puce RFID (radio-fréquence)</li><li>NFC (courte portée)</li></ul></div>
+                        <div style="background:#f5e6f0;padding:12px;border-radius:8px;"><strong>Applications</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Inventaire instantané</li><li>Anti-vol</li><li>Suivi pièces en production</li><li>Étiquetage palette</li></ul></div>
+                    </div>
+                    <p style="color:#666;font-size:0.9em;">💡 <em>Le RFID permet de lire plusieurs dizaines d'étiquettes par seconde sans les voir — idéal pour les inventaires rapides.</em></p>`
+            },
+            methodes: {
+                title: '🔄 FIFO / FEFO / LIFO — Méthodes de valorisation et rotation',
+                content: `
+                    <p><strong>Rôle :</strong> Définir dans quel ordre sortir les articles du stock.</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0;">
+                        <div style="background:#e8f4f8;padding:12px;border-radius:8px;text-align:center;"><strong>FIFO</strong><br><small style="color:#666;">First In, First Out<br>Premier entré = premier sorti</small><br><span style="color:#4caf50;font-size:1.5em;margin-top:6px;display:block;">✅</span><small style="color:#4caf50;">Standard industrie</small></div>
+                        <div style="background:#fff0d4;padding:12px;border-radius:8px;text-align:center;"><strong>FEFO</strong><br><small style="color:#666;">First Expired, First Out<br>Date limite la plus proche</small><br><span style="color:#ff9800;font-size:1.5em;margin-top:6px;display:block;">⚠️</span><small style="color:#e67e22;">Pharma / alimentaire</small></div>
+                        <div style="background:#fde8e8;padding:12px;border-radius:8px;text-align:center;"><strong>LIFO</strong><br><small style="color:#666;">Last In, First Out<br>Dernier entré = premier sorti</small><br><span style="color:#e74c3c;font-size:1.5em;margin-top:6px;display:block;">❌</span><small style="color:#e74c3c;">Rare en logistique physique</small></div>
+                    </div>
+                    <p style="color:#666;font-size:0.9em;">💡 <em>Dans notre atelier : on applique le FIFO pour que les consommables anciens soient utilisés en premier et éviter les périmés.</em></p>`
+            },
+            kanban: {
+                title: '📋 Kanban & Lean Logistique',
+                content: `
+                    <p><strong>Rôle :</strong> Produire et réapprovisionner exactement ce qui est nécessaire, au bon moment, en évitant le gaspillage.</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
+                        <div style="background:#e8f4f8;padding:12px;border-radius:8px;"><strong>Kanban</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Cartes visuelles de signal</li><li>Bacs bicolores (plein/vide)</li><li>Réapprovisionnement déclenché par la consommation</li><li>Zéro surstock</li></ul></div>
+                        <div style="background:#f5e6f0;padding:12px;border-radius:8px;"><strong>Lean Logistique</strong><ul style="margin:6px 0;padding-left:18px;font-size:0.9em;"><li>Éliminer les 7 gaspillages (MUDA)</li><li>Flux tirés vs flux poussés</li><li>Juste-à-temps (JIT)</li><li>Value Stream Mapping</li></ul></div>
+                    </div>
+                    <p style="color:#666;font-size:0.9em;">💡 <em>Toyota a inventé le Kanban dans les années 1950. Aujourd'hui, c'est la base de la logistique industrielle.</em></p>`
+            },
+            '5s': {
+                title: '🧹 5S — Organisation du poste logistique',
+                content: `
+                    <p><strong>Rôle :</strong> Méthode japonaise pour organiser et maintenir un poste de travail efficace et sécurisé.</p>
+                    <div style="display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0;">
+                        ${[['🔴','Seiri','Trier','Garder uniquement ce qui est utile. Éliminer le superflu.'],
+                           ['🟠','Seiton','Ranger','Une place pour chaque chose, chaque chose à sa place.'],
+                           ['🟡','Seiso','Nettoyer','Nettoyer pour détecter les anomalies.'],
+                           ['🟢','Seiketsu','Standardiser','Formaliser les bonnes pratiques.'],
+                           ['🔵','Shitsuke','Maintenir','Respecter et améliorer les standards en permanence.']
+                        ].map(([c,jp,fr,desc]) => `<div style="display:flex;align-items:center;gap:12px;background:#f5f9fc;padding:10px;border-radius:6px;"><span style="font-size:1.4em;">${c}</span><div><strong>${jp} — ${fr}</strong><br><span style="font-size:0.85em;color:#666;">${desc}</span></div></div>`).join('')}
+                    </div>
+                    <p style="color:#666;font-size:0.9em;">💡 <em>Un atelier bien organisé en 5S réduit le temps de recherche d'outils de 30% et améliore la sécurité.</em></p>`
             }
+        };
+
+        function showSystemInfo(systemKey) {
+            const sys = LOGISTIC_SYSTEMS[systemKey];
+            if (!sys) return;
+            const panel = document.getElementById('systemInfoPanel');
+            document.getElementById('systemInfoTitle').textContent = sys.title;
+            document.getElementById('systemInfoContent').innerHTML = sys.content;
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function cleanup3DLogistics() {
@@ -12233,17 +12169,12 @@
         let challengeScore = 0;
 
         function startLogisticsChallenge() {
-            if (logisticState.articles.length === 0) {
-                toast('❌ Ajoutez d\'abord des articles', 'warning');
-                return;
-            }
-
-            // Afficher la vue 2D
-            switchLogisticsView('2d');
-
-            // Scroll vers la section logistique
-            const logisticsSection = document.getElementById('logisticsManagementSection');
-            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
+            // Challenge Chrono = quiz en mode speed (5 minutes)
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('gameResultsContainer').style.display = 'none';
+            // Scroll vers la section jeux
+            const gamesSection = document.querySelector('#logistique .section:last-of-type');
+            if (gamesSection) gamesSection.scrollIntoView({ behavior: 'smooth' });
 
             challengeMode = true;
             challengeStartTime = Date.now();
@@ -12562,12 +12493,6 @@
         }
 
         function showDailyChallenges() {
-            // Afficher la vue 2D
-            switchLogisticsView('2d');
-
-            // Scroll vers la section logistique
-            const logisticsSection = document.getElementById('logisticsManagementSection');
-            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
@@ -12720,12 +12645,6 @@
         }
 
         function showPlayerStats() {
-            // Afficher la vue 2D
-            switchLogisticsView('2d');
-
-            // Scroll vers la section logistique
-            const logisticsSection = document.getElementById('logisticsManagementSection');
-            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const currentCert = CERTIFICATION_LEVELS.find(c => c.minXP <= (playerStats.level - 1) * 500 + playerStats.xp);
             const nextCert = CERTIFICATION_LEVELS.find(c => c.minXP > (playerStats.level - 1) * 500 + playerStats.xp);
@@ -12850,12 +12769,6 @@
         }
 
         function showBadges() {
-            // Afficher la vue 2D
-            switchLogisticsView('2d');
-
-            // Scroll vers la section logistique
-            const logisticsSection = document.getElementById('logisticsManagementSection');
-            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;';
@@ -12889,12 +12802,6 @@
         }
 
         function showLeaderboard() {
-            // Afficher la vue 2D
-            switchLogisticsView('2d');
-
-            // Scroll vers la section logistique
-            const logisticsSection = document.getElementById('logisticsManagementSection');
-            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
 
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
@@ -13831,20 +13738,8 @@
         }
 
         function showLogisticsAnalytics() {
-            // Scroll vers la section logistique
-            const logisticsSection = document.getElementById('logisticsManagementSection');
-            if (logisticsSection) logisticsSection.scrollIntoView({ behavior: 'smooth' });
-
-            const canvas2D = document.getElementById('logisticsCanvas');
-            const canvas3D = document.getElementById('logistics3DContainer');
-            const analyticsDiv = document.getElementById('logisticsAnalyticsContainer');
-
-            canvas2D.style.display = 'none';
-            canvas3D.style.display = 'none';
-            analyticsDiv.style.display = 'block';
-
-            updateAnalyticsStats();
-            drawHeatmap();
+            // Analytics supprimé dans la version simplifiée
+            toast('Analytics disponible prochainement', 'info');
         }
 
         function updateAnalyticsStats() {
@@ -14219,50 +14114,11 @@
             }).join('');
         }
 
-        // Canvas drag & drop
+        // Initialisation logistique — vue simplifiée (formation + jeux uniquement)
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-                const canvas = document.getElementById('logisticsCanvas');
-                const freeZone = document.getElementById('logisticFreeArticlesList');
-
-                if (canvas) {
-                    canvas.addEventListener('dragover', e => e.preventDefault());
-                    canvas.addEventListener('drop', logisticCanvasDrop);
-                    canvas.addEventListener('mousedown', logisticCanvasMouseDown);
-                    canvas.addEventListener('mousemove', logisticCanvasMouseMove);
-                    canvas.addEventListener('mouseup', logisticCanvasMouseUp);
-                    canvas.addEventListener('click', logisticCanvasClick);
-
-                    // Handle canvas resize for responsive design
-                    const container = canvas.parentElement;
-                    if (container && typeof ResizeObserver !== 'undefined') {
-                        const resizeObserver = new ResizeObserver(() => {
-                            const maxWidth = container.clientWidth - 20;
-                            if (maxWidth > 0 && canvas.width !== maxWidth) {
-                                canvas.width = Math.min(maxWidth, 1200);
-                                renderLogisticCanvas();
-                            }
-                        });
-                        resizeObserver.observe(container);
-                    }
-                }
-
-                if (freeZone) {
-                    freeZone.addEventListener('dragover', e => e.preventDefault());
-                    freeZone.addEventListener('drop', logisticFreeZoneDrop);
-                }
-
-                loadLogisticState();
-                renderLogisticRacks();
-                renderLogisticPalettes();
-                renderLogisticCanvas();
-                renderLogisticFreeArticles();
-                refreshLogisticArticles();
-                renderLogisticMoveForm();
-                renderLogisticHistory();
-                renderLogisticAlerts();
-                renderLogisticStats();
-            }, 500);
+                loadLogisticState(); // charge les stats joueur sauvegardées
+            }, 300);
         });
 
         function logisticFreeZoneDrop(e) {
