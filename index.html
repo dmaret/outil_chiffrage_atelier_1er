@@ -9966,7 +9966,7 @@
             return localStorage.getItem('formationTheme') || 'moderne';
         }
 
-        function applyTheme(theme) {
+        function applyTrainingTheme(theme) {
             const modal = document.querySelector('.training-modal');
             const themeStyles = {
                 'moderne': {
@@ -10253,7 +10253,7 @@
             // Apply selected theme
             setTimeout(() => {
                 const theme = getTheme();
-                applyTheme(theme);
+                applyTrainingTheme(theme);
             }, 100);
         }
 
