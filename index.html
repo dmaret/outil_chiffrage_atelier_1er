@@ -617,9 +617,9 @@
         .theme-selector-box {
             background: #fffef9; border-radius: 20px;
             box-shadow: 0 20px 60px rgba(100,120,150,0.25);
-            padding: 40px; text-align: center;
+            padding: 30px 25px; text-align: center;
         }
-        .theme-selector-box h2 { font-size: 1.5em; margin-bottom: 6px; color: #2d3e50; }
+        .theme-selector-box h2 { font-size: 1.2em; margin-bottom: 4px; color: #2d3e50; }
         .theme-card-login {
             border: 3px solid transparent; border-radius: 12px;
             overflow: hidden; transition: all 0.3s;
@@ -16165,12 +16165,11 @@
             </div>
 
             <!-- Container 4: Sélecteur de thèmes -->
-            <div class="theme-selector-box" style="grid-column: 1 / -1;">
+            <div class="theme-selector-box">
                 <div style="font-size:2.8em;margin-bottom:6px;">🎨</div>
-                <h2>Personnalisation</h2>
-                <h3 style="font-size: 1.1em; color: #7a9db1; margin-bottom: 12px;">Thèmes visuels</h3>
-                <p class="training-subtitle" style="margin-bottom:16px;">Choisissez votre thème préféré pour l'interface</p>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;">
+                <h2>Thèmes</h2>
+                <p class="training-subtitle" style="margin-bottom:14px;">Choisissez votre thème</p>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
                     <div class="theme-card-login" onclick="applyTheme('classique')" id="theme-classique-login" style="cursor:pointer;">
                         <div class="theme-preview-login" style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);"></div>
                         <div class="theme-label-login">🌊 Classique</div>
