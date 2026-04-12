@@ -618,26 +618,26 @@
         .theme-selector-box {
             background: #fffef9; border-radius: 20px;
             box-shadow: 0 20px 60px rgba(100,120,150,0.25);
-            padding: 30px 25px; text-align: center;
+            padding: 32px 28px; text-align: center;
         }
-        .theme-selector-box h2 { font-size: 1.2em; margin-bottom: 4px; color: #2d3e50; }
+        .theme-selector-box h2 { font-size: 1.3em; margin-bottom: 6px; color: #2d3e50; font-weight: 700; }
         .theme-card-login {
-            border: 3px solid transparent; border-radius: 12px;
+            border: none; border-radius: 14px;
             overflow: hidden; transition: all 0.3s;
-            background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
         .theme-card-login:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         .theme-card-login.selected {
-            border-color: #6b8fa3;
-            box-shadow: 0 0 0 2px #a8d5e2, 0 8px 16px rgba(0,0,0,0.15);
+            box-shadow: 0 0 0 3px #a8d5e2, 0 8px 20px rgba(0,0,0,0.15);
         }
-        .theme-preview-login { height: 48px; }
+        .theme-preview-login { height: 60px; }
         .theme-label-login {
-            padding: 8px; font-size: 0.85em; font-weight: 600;
-            color: #2d3e50; background: #f5f5f5;
+            padding: 12px 10px; font-size: 0.9em; font-weight: 600;
+            color: #2d3e50; background: #fafafa;
         }
 
         /* ── Training Module Overlay ─────────────────────────────────── */
@@ -16167,17 +16167,17 @@
 
             <!-- Container 4: Sélecteur de thèmes -->
             <div class="theme-selector-box">
-                <div style="font-size:2.8em;margin-bottom:6px;">🎨</div>
+                <div style="font-size:2.2em;margin-bottom:8px;">🎨</div>
                 <h2>Thèmes</h2>
-                <p class="training-subtitle" style="margin-bottom:14px;">Choisissez votre thème</p>
-                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+                <p class="training-subtitle" style="margin-bottom:16px;font-size:0.9em;">Choisissez votre thème</p>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
                     <div class="theme-card-login" onclick="applyTheme('classique')" id="theme-classique-login" style="cursor:pointer;">
                         <div class="theme-preview-login" style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);"></div>
                         <div class="theme-label-login">🌊 Classique</div>
                     </div>
                     <div class="theme-card-login" onclick="applyTheme('corporate')" id="theme-corporate-login" style="cursor:pointer;">
                         <div class="theme-preview-login" style="background:linear-gradient(135deg,#1a3a5c,#2e6da4);"></div>
-                        <div class="theme-label-login">🏢 Corporate</div>
+                        <div class="theme-label-login">▣ Corporate</div>
                     </div>
                     <div class="theme-card-login" onclick="applyTheme('minimaliste')" id="theme-minimaliste-login" style="cursor:pointer;">
                         <div class="theme-preview-login" style="background:linear-gradient(135deg,#6c757d,#adb5bd);"></div>
