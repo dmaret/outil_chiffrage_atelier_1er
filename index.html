@@ -1777,7 +1777,6 @@
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
-                <button class="tab" onclick="switchTab('logistique')">🏭 Logistique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
@@ -3453,6 +3452,25 @@
               <div class="section" style="margin-top:20px;">
                 <h2>🏆 Top clients — CA 12 mois</h2>
                 <div id="dashClientChart"></div>
+              </div>
+
+              <!-- MODULE FORMATION LOGISTIQUE -->
+              <div class="section" style="margin-top:20px;background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border:none;padding:0;overflow:hidden;border-radius:12px;">
+                <div style="padding:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                  <div>
+                    <h2 style="margin:0 0 6px;">🏭 Formation Logistique</h2>
+                    <p style="color:#666;margin:0;font-size:0.95em;">Découvrez les systèmes logistiques du marché (WMS, ERP, Kanban, 5S…) et entraînez-vous avec les jeux de formation.</p>
+                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                      <span style="background:rgba(107,143,163,0.15);color:#6b8fa3;padding:4px 10px;border-radius:12px;font-size:0.82em;font-weight:600;">📦 WMS / ERP</span>
+                      <span style="background:rgba(155,89,182,0.15);color:#9b59b6;padding:4px 10px;border-radius:12px;font-size:0.82em;font-weight:600;">🔄 FIFO / Kanban</span>
+                      <span style="background:rgba(46,125,94,0.15);color:#2e7d5e;padding:4px 10px;border-radius:12px;font-size:0.82em;font-weight:600;">🎮 Jeux &amp; Quiz</span>
+                      <span style="background:rgba(212,160,23,0.15);color:#d4a017;padding:4px 10px;border-radius:12px;font-size:0.82em;font-weight:600;">🧹 5S</span>
+                    </div>
+                  </div>
+                  <button onclick="switchTab('logistique')" style="background:linear-gradient(135deg,#6b8fa3,#5a7b8f);color:white;border:none;padding:14px 28px;border-radius:10px;font-size:1em;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(107,143,163,0.4);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                    Accéder au module →
+                  </button>
+                </div>
               </div>
             </div>
 
