@@ -15481,6 +15481,15 @@
                         `<option value="${a.id}">${escapeHtml(a.name)}</option>`
                     ).join('');
                 }
+
+                // Attach click handler for Formation Logistique button
+                const logistiqueBtn = document.getElementById('logistiqueAccessBtn');
+                if (logistiqueBtn) {
+                    logistiqueBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        switchTab('logistique');
+                    });
+                }
             }, 1000);
         });
 
@@ -15523,7 +15532,7 @@
                 <div style="font-size:2.8em;margin-bottom:6px;">🏭</div>
                 <h2 style="color:#2d3e50;margin:8px 0;">Formation Logistique</h2>
                 <p class="training-subtitle" style="color:#5a7b8f;font-size:0.9em;">Systèmes logistiques du marché, jeux de formation et défis</p>
-                <button class="btn-training" onclick="switchTab('logistique')" style="background:linear-gradient(135deg,#6b8fa3 0%,#4a6fa5 100%);color:white;margin-top:12px;">
+                <button class="btn-training" id="logistiqueAccessBtn" style="background:linear-gradient(135deg,#6b8fa3 0%,#4a6fa5 100%);color:white;margin-top:12px;">
                     🚀 Accès au module
                 </button>
                 <p class="training-footer" style="color:#5a7b8f;font-size:0.85em;">Découvrez et entraînez-vous</p>
