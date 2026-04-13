@@ -3610,6 +3610,10 @@
                 </div>
               </div>
               <div class="section" style="margin-top:20px;">
+                <h2>📚 Demandes de Formation</h2>
+                <div id="dashFormationRequestsList"></div>
+              </div>
+              <div class="section" style="margin-top:20px;">
                 <h2>📈 Pipeline CA (3 prochains mois)</h2>
                 <div id="dashPipelineChart"></div>
               </div>
@@ -6486,11 +6490,6 @@
             saveFormationData();
             toast(`✅ Formation "${request.category}" approuvée et assignée à ${learnerName}`, 'success');
             logAction(`Approbation formation: ${request.category} → ${learnerName}`, 'UPDATE');
-
-            // Mettre à jour le dashboard
-            if (typeof updateDashboard === 'function') {
-                updateDashboard();
-            }
         }
 
         function rejectTrainingRequest(requestId) {
@@ -6501,6 +6500,65 @@
             saveFormationData();
             toast(`❌ Demande de formation rejetée`, 'warning');
             logAction(`Rejet formation: ${request.category}`, 'DELETE');
+        }
+
+        function openApproveTrainingDialog(requestId, category) {
+            const request = trainingRequests.find(r => r.id === requestId);
+            if (!request) return;
+
+            if (learnersList.length === 0) {
+                toast('Aucun apprenant disponible. Créez-en d\'abord.', 'warning');
+                return;
+            }
+
+            // Create a simple dialog for selecting learner
+            const learnerOptions = learnersList.map(l => `<option value="${l.name}">${l.name} (${l.category})</option>`).join('');
+
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            dialog.id = 'approveTrainingDialog';
+
+            dialog.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <h3 style="margin-top: 0;">Approuver la formation</h3>
+                    <p style="color: #7a9db1; margin-bottom: 16px;">Catégorie: <strong>${category}</strong></p>
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold;">Assigné à:</label>
+                    <select id="approveTrainingSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 16px;">
+                        ${learnerOptions}
+                    </select>
+                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                        <button onclick="document.getElementById('approveTrainingDialog').remove();" style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; background: #f5f5f5; cursor: pointer;">Annuler</button>
+                        <button onclick="confirmApproveTraining(${requestId}, '${category.replace(/'/g, "\\'")}')" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Approuver</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(dialog);
+        }
+
+        function confirmApproveTraining(requestId, category) {
+            const select = document.getElementById('approveTrainingSelect');
+            const learnerName = select?.value;
+
+            if (!learnerName) {
+                toast('Sélectionnez un apprenant', 'warning');
+                return;
+            }
+
+            approveTrainingRequest(requestId, learnerName);
+            document.getElementById('approveTrainingDialog').remove();
+            renderDashboard();
         }
 
         function renderLearners() {
@@ -11485,6 +11543,34 @@
                     alertesEl.innerHTML = '<div style="padding:16px;color:#5a9a6a;font-size:0.9em;">✅ Aucune alerte</div>';
                 } else {
                     alertesEl.innerHTML = alertes.map(a => `<div style="padding:8px 12px;margin-bottom:6px;border-radius:6px;background:${a.type==='danger'?'#fde8e8':'#fff3cd'};border-left:3px solid ${a.type==='danger'?'#e74c3c':'#f39c12'};font-size:0.85em;">${a.msg}</div>`).join('');
+                }
+            }
+
+            // Formation requests
+            const formationReqEl = document.getElementById('dashFormationRequestsList');
+            if (formationReqEl) {
+                const pendingRequests = trainingRequests.filter(r => r.status === 'pending');
+                if (pendingRequests.length === 0) {
+                    formationReqEl.innerHTML = '<div class="empty-state" style="padding:20px;">Aucune demande en attente</div>';
+                } else {
+                    formationReqEl.innerHTML = pendingRequests.map(req => {
+                        const statusColor = req.status === 'approved' ? '#27ae60' : req.status === 'rejected' ? '#e74c3c' : '#f39c12';
+                        const statusLabel = req.status === 'approved' ? 'Approuvée' : req.status === 'rejected' ? 'Rejetée' : 'En attente';
+
+                        return `<div style="padding:12px;border:1px solid #e0e0e0;border-radius:6px;margin-bottom:10px;background:#fafafa;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                            <div style="flex:1;min-width:200px;">
+                                <div style="font-weight:bold;color:#2d3e50;margin-bottom:4px;">📚 ${req.category}</div>
+                                <div style="font-size:0.85em;color:#7a9db1;">
+                                    Demandée le ${new Date(req.requestedAt).toLocaleDateString('fr-FR')}
+                                    ${req.assignedTo ? ` • Assignée à <strong>${req.assignedTo}</strong>` : ''}
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <button class="btn btn-small" onclick="openApproveTrainingDialog(${req.id}, '${req.category.replace(/'/g, "\\'")}')" style="background:#4CAF50;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.9em;">✅ Approuver</button>
+                                <button class="btn btn-small delete-btn" onclick="rejectTrainingRequest(${req.id}); renderDashboard();" style="background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.9em;">❌ Rejeter</button>
+                            </div>
+                        </div>`;
+                    }).join('');
                 }
             }
 
