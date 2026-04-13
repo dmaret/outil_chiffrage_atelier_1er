@@ -7248,11 +7248,17 @@
                 };
                 reader.readAsDataURL(file);
             } else {
-                // Handle URL
+                // Handle URL - normalize it
+                let normalizedUrl = url;
+                // Add https:// if no protocol is specified
+                if (!url.match(/^https?:\/\//i)) {
+                    normalizedUrl = 'https://' + url;
+                }
+
                 const doc = {
                     id: Date.now(),
                     title: title,
-                    url: url,
+                    url: normalizedUrl,
                     type: type,
                     isFile: false,
                     createdAt: new Date().toISOString().split('T')[0]
@@ -7327,6 +7333,7 @@
                         <td style="padding:12px;color:#7a9db1;font-size:0.9em;">${doc.createdAt}</td>
                         <td style="padding:12px;text-align:right;white-space:nowrap;">
                             ${actionBtn}
+                            <button class="btn btn-small btn-secondary" onclick="editReferenceDocument(${doc.id})" style="margin-right:8px;">✏️ Éditer</button>
                             <button class="delete-btn btn-small" onclick="deleteReferenceDocument(${doc.id})">🗑️</button>
                         </td>
                     </tr>
@@ -7334,6 +7341,74 @@
                 }).join('')}
                 </tbody>
             </table>`;
+        }
+
+        function editReferenceDocument(docId) {
+            const doc = referenceDocuments.find(d => d.id === docId);
+            if (!doc) return;
+
+            // Create edit modal
+            let modal = document.getElementById('editDocModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'editDocModal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:20000;display:flex;align-items:center;justify-content:center;padding:16px;';
+                document.body.appendChild(modal);
+            }
+
+            modal.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:24px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                    <h3 style="margin:0 0 20px;color:#333;">✏️ Éditer le document</h3>
+
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;font-weight:600;margin-bottom:8px;color:#555;">Titre</label>
+                        <input type="text" id="editDocTitle" value="${doc.title}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
+                    </div>
+
+                    ${!doc.isFile ? `
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;font-weight:600;margin-bottom:8px;color:#555;">URL ou lien (optionnel)</label>
+                        <input type="text" id="editDocUrl" value="${doc.url}" placeholder="www.exemple.com ou https://..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
+                        <p style="font-size:0.85em;color:#7a9db1;margin:6px 0 0;">💡 Vous pouvez entrer juste www.exemple.com, https:// sera ajouté automatiquement</p>
+                    </div>
+                    ` : ''}
+
+                    <div style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button onclick="document.getElementById('editDocModal').style.display='none'" style="padding:10px 20px;background:#ddd;color:#333;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Annuler</button>
+                        <button onclick="saveEditedDocument(${docId})" style="padding:10px 20px;background:#27ae60;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">✓ Enregistrer</button>
+                    </div>
+                </div>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function saveEditedDocument(docId) {
+            const doc = referenceDocuments.find(d => d.id === docId);
+            if (!doc) return;
+
+            const newTitle = document.getElementById('editDocTitle')?.value.trim();
+            const newUrl = document.getElementById('editDocUrl')?.value.trim();
+
+            if (!newTitle) {
+                toast('⚠️ Le titre ne peut pas être vide', 'warning');
+                return;
+            }
+
+            doc.title = newTitle;
+
+            if (!doc.isFile && newUrl) {
+                // Normalize URL
+                let normalizedUrl = newUrl;
+                if (!newUrl.match(/^https?:\/\//i)) {
+                    normalizedUrl = 'https://' + newUrl;
+                }
+                doc.url = normalizedUrl;
+            }
+
+            saveReferenceDocuments();
+            renderReferenceDocuments();
+            document.getElementById('editDocModal').style.display = 'none';
+            toast('✅ Document modifié avec succès', 'success');
         }
 
         function deleteReferenceDocument(docId) {
