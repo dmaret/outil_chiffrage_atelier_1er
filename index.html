@@ -4084,6 +4084,9 @@
             nuit:        { primary:'#8e44ad', primaryDark:'#2c3e50', secondary:'#9b59b6', secondaryDark:'#1a252f', bgFrom:'#eae0f0', bgTo:'#dde8f5', hFrom:'#2c3e50', hTo:'#8e44ad', container:'#fffef9' },
             as400:       { primary:'#00c864', primaryDark:'#00a04d', secondary:'#00ff00', secondaryDark:'#00c864', bgFrom:'#0a0e27', bgTo:'#0f1432', hFrom:'#0a0e27', hTo:'#00c864', container:'#1a1f3a' },
             sap:         { primary:'#003f87', primaryDark:'#002147', secondary:'#005daa', secondaryDark:'#003f87', bgFrom:'#f0f2f5', bgTo:'#e8eef7', hFrom:'#003f87', hTo:'#005daa', container:'#ffffff' },
+            oracle:      { primary:'#f80000', primaryDark:'#b20000', secondary:'#ff6600', secondaryDark:'#cc3300', bgFrom:'#fff5f5', bgTo:'#ffe8e8', hFrom:'#b20000', hTo:'#f80000', container:'#ffffff' },
+            navision:    { primary:'#0078d4', primaryDark:'#0063b1', secondary:'#107c10', secondaryDark:'#0a6f08', bgFrom:'#f3f2f1', bgTo:'#e1dfdd', hFrom:'#0063b1', hTo:'#0078d4', container:'#ffffff' },
+            c64:         { primary:'#3668ff', primaryDark:'#0047ab', secondary:'#ffff00', secondaryDark:'#ff9900', bgFrom:'#4d4dff', bgTo:'#2d2daa', hFrom:'#0047ab', hTo:'#3668ff', container:'#1a1a4d' },
         };
         const RADIUS_SETS = {
             square: { lg:'4px',  md:'4px',  sm:'3px'  },
@@ -16166,43 +16169,39 @@
                 <p class="training-footer">Formation interactive • Quiz & Glossaire • Accès libre</p>
             </div>
 
-            <!-- Container 4: Sélecteur de thèmes -->
+            <!-- Container 4: Sélecteur de systèmes -->
             <div class="theme-selector-box">
-                <div style="font-size:2.2em;margin-bottom:8px;">🎨</div>
-                <h2>Thèmes</h2>
-                <p class="training-subtitle" style="margin-bottom:16px;font-size:0.9em;">Choisissez votre thème</p>
+                <div style="font-size:2.2em;margin-bottom:8px;">💻</div>
+                <h2>Systèmes</h2>
+                <p class="training-subtitle" style="margin-bottom:16px;font-size:0.9em;">Choisissez votre système</p>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
-                    <div class="theme-card-login" onclick="applyTheme('classique')" id="theme-classique-login" style="cursor:pointer;">
-                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#a8d5e2,#c9b3d4);"></div>
-                        <div class="theme-label-login">🌊 Classique</div>
+                    <div class="theme-card-login" onclick="applyTheme('sap')" id="theme-sap-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#003f87,#005daa);"></div>
+                        <div class="theme-label-login">💙 SAP</div>
+                    </div>
+                    <div class="theme-card-login" onclick="applyTheme('as400')" id="theme-as400-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#0a0e27,#00c864);"></div>
+                        <div class="theme-label-login">📟 AS-400/BPCS</div>
+                    </div>
+                    <div class="theme-card-login" onclick="applyTheme('oracle')" id="theme-oracle-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#b20000,#f80000);"></div>
+                        <div class="theme-label-login">🔴 Oracle</div>
+                    </div>
+                    <div class="theme-card-login" onclick="applyTheme('navision')" id="theme-navision-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#0063b1,#0078d4);"></div>
+                        <div class="theme-label-login">🟦 Navision</div>
                     </div>
                     <div class="theme-card-login" onclick="applyTheme('corporate')" id="theme-corporate-login" style="cursor:pointer;">
                         <div class="theme-preview-login" style="background:linear-gradient(135deg,#1a3a5c,#2e6da4);"></div>
-                        <div class="theme-label-login">▣ Corporate</div>
+                        <div class="theme-label-login">🏢 Corporate</div>
                     </div>
                     <div class="theme-card-login" onclick="applyTheme('minimaliste')" id="theme-minimaliste-login" style="cursor:pointer;">
                         <div class="theme-preview-login" style="background:linear-gradient(135deg,#6c757d,#adb5bd);"></div>
                         <div class="theme-label-login">⬜ Minimaliste</div>
                     </div>
-                    <div class="theme-card-login" onclick="applyTheme('chaleureux')" id="theme-chaleureux-login" style="cursor:pointer;">
-                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#c0392b,#e67e22);"></div>
-                        <div class="theme-label-login">🌿 Chaleureux</div>
-                    </div>
-                    <div class="theme-card-login" onclick="applyTheme('nature')" id="theme-nature-login" style="cursor:pointer;">
-                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#1e8449,#1abc9c);"></div>
-                        <div class="theme-label-login">🌱 Nature</div>
-                    </div>
-                    <div class="theme-card-login" onclick="applyTheme('nuit')" id="theme-nuit-login" style="cursor:pointer;">
-                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#2c3e50,#8e44ad);"></div>
-                        <div class="theme-label-login">🌙 Nuit</div>
-                    </div>
-                    <div class="theme-card-login" onclick="applyTheme('as400')" id="theme-as400-login" style="cursor:pointer;">
-                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#0a0e27,#00c864);"></div>
-                        <div class="theme-label-login">📟 AS-400</div>
-                    </div>
-                    <div class="theme-card-login" onclick="applyTheme('sap')" id="theme-sap-login" style="cursor:pointer;">
-                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#003f87,#005daa);"></div>
-                        <div class="theme-label-login">💙 SAP</div>
+                    <div class="theme-card-login" onclick="applyTheme('c64')" id="theme-c64-login" style="cursor:pointer;">
+                        <div class="theme-preview-login" style="background:linear-gradient(135deg,#0047ab,#3668ff);"></div>
+                        <div class="theme-label-login">🎮 Commodore 64</div>
                     </div>
                 </div>
             </div>
