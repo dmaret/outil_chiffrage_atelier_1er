@@ -7831,7 +7831,19 @@
             saveToStorage();
             applyDisplayPrefs();
             // Refresh la vue prestations si on change la vue
-            if (key === 'vuePrestations') renderPrestations();
+            if (key === 'vuePrestations') {
+                renderPrestations();
+                // Notify user and offer to switch tabs
+                const viewLabels = { detaillee: 'Détaillée', compacte: 'Compacte', tableau: 'Tableau' };
+                const msg = `Vue ${viewLabels[value]} activée. Allez à l'onglet Prestations pour voir le changement.`;
+                toast(msg, 'info', 3000);
+            } else if (key === 'densite') {
+                const densityLabel = value === 'compacte' ? 'Compacte' : 'Normale';
+                toast(`Densité ${densityLabel} appliquée.`, 'success', 2000);
+            } else if (key === 'modeCalculateur') {
+                const modeLabel = value === 'simplifie' ? 'Simplifié' : 'Complet';
+                toast(`Mode calculateur ${modeLabel} appliqué.`, 'success', 2000);
+            }
         }
 
         function applyDisplayPrefs() {
