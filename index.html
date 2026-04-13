@@ -7859,6 +7859,115 @@
         applyDisplayPrefs();
 
         // ============================================================
+        // DIAGNOSTIC: Test display modes
+        // ============================================================
+        function testDisplayModes() {
+            console.log('%c=== Display Modes Diagnostic ===', 'color: #6b8fa3; font-weight: bold; font-size: 1.2em;');
+
+            // Check 1: displayPrefs object
+            console.log('%cCurrent displayPrefs:', 'color: #6b8fa3; font-weight: bold;');
+            console.log(displayPrefs);
+
+            // Check 2: Button states
+            console.log('%cButton states:', 'color: #6b8fa3; font-weight: bold;');
+            const buttons = [
+                'btn-vue-detaillee', 'btn-vue-compacte', 'btn-vue-tableau',
+                'btn-densite-normale', 'btn-densite-compacte',
+                'btn-calc-complet', 'btn-calc-simplifie'
+            ];
+            buttons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    console.log(`${btnId}: exists=${true}, active=${btn.classList.contains('active')}`);
+                } else {
+                    console.warn(`${btnId}: NOT FOUND`);
+                }
+            });
+
+            // Check 3: CSS classes on body
+            console.log('%cBody CSS classes:', 'color: #6b8fa3; font-weight: bold;');
+            console.log('density-compact applied:', document.body.classList.contains('density-compact'));
+            console.log('Current densite setting:', displayPrefs.densite);
+
+            // Check 4: Calculator mode sections
+            console.log('%cCalculator mode sections:', 'color: #6b8fa3; font-weight: bold;');
+            const consom = document.getElementById('sectionConsommables');
+            const stock = document.getElementById('sectionStockage');
+            console.log(`sectionConsommables: exists=${!!consom}, display=${consom?.style.display || 'auto'}`);
+            console.log(`sectionStockage: exists=${!!stock}, display=${stock?.style.display || 'auto'}`);
+            console.log(`modeCalculateur: ${displayPrefs.modeCalculateur}`);
+
+            // Check 5: Prestations list container
+            const container = document.getElementById('prestationsList');
+            console.log('%cPrestations list container:', 'color: #6b8fa3; font-weight: bold;');
+            console.log(`Container exists: ${!!container}`);
+            if (container) {
+                console.log(`Container HTML length: ${container.innerHTML.length} chars`);
+                console.log(`Contains prest-compact-row: ${container.innerHTML.includes('prest-compact-row')}`);
+                console.log(`Contains prest-table-wrap: ${container.innerHTML.includes('prest-table-wrap')}`);
+                console.log(`Number of prestations visible: ${container.querySelectorAll('[class*="prest"]').length}`);
+            }
+
+            console.log('%cTest complete', 'color: #27ae60; font-weight: bold;');
+        }
+
+        function testDisplayModesInteractive() {
+            console.log('%c=== Testing Display Mode Changes ===', 'color: #6b8fa3; font-weight: bold; font-size: 1.2em;');
+
+            // Check if there are any prestations to render
+            if (prestationsSauvegardees.length === 0) {
+                console.warn('%c⚠️ No prestations found! Add at least one prestation to test display modes.', 'color: #e67e22; font-size: 1.1em;');
+                return;
+            }
+
+            console.log(`✓ Found ${prestationsSauvegardees.length} prestation(s)`);
+
+            // Test each vue mode
+            const vueModes = ['detaillee', 'compacte', 'tableau'];
+            console.log('%cTesting Vue Modes:', 'color: #6b8fa3; font-weight: bold;');
+            vueModes.forEach(mode => {
+                const before = prestationsSauvegardees.length;
+                setDisplayPref('vuePrestations', mode);
+                const container = document.getElementById('prestationsList');
+                const classNames = {
+                    'detaillee': 'detailed cards',
+                    'compacte': 'prest-compact-row',
+                    'tableau': 'prest-table-wrap'
+                };
+                const hasCorrectLayout = mode === 'detaillee' ?
+                    !container.innerHTML.includes('prest-compact-row') && !container.innerHTML.includes('prest-table-wrap') :
+                    container.innerHTML.includes(classNames[mode]);
+                console.log(`  ${mode}: ✓ displayPrefs updated, layout=${hasCorrectLayout ? '✓' : '✗'}`);
+            });
+
+            // Test density modes
+            console.log('%cTesting Density Modes:', 'color: #6b8fa3; font-weight: bold;');
+            const densityModes = ['normale', 'compacte'];
+            densityModes.forEach(mode => {
+                setDisplayPref('densite', mode);
+                const hasClass = document.body.classList.contains('density-compact');
+                const expectedClass = mode === 'compacte';
+                const correct = hasClass === expectedClass;
+                console.log(`  ${mode}: CSS class present=${hasClass}, expected=${expectedClass}, ${correct ? '✓' : '✗'}`);
+            });
+
+            // Test calculator modes
+            console.log('%cTesting Calculator Modes:', 'color: #6b8fa3; font-weight: bold;');
+            const calcModes = ['complet', 'simplifie'];
+            calcModes.forEach(mode => {
+                setDisplayPref('modeCalculateur', mode);
+                const consom = document.getElementById('sectionConsommables');
+                const stock = document.getElementById('sectionStockage');
+                const hidden = consom?.style.display === 'none' || stock?.style.display === 'none';
+                const expectedHidden = mode === 'simplifie';
+                const correct = hidden === expectedHidden;
+                console.log(`  ${mode}: sections hidden=${hidden}, expected=${expectedHidden}, ${correct ? '✓' : '✗'}`);
+            });
+
+            console.log('%cAll tests complete!', 'color: #27ae60; font-weight: bold; font-size: 1.1em;');
+        }
+
+        // ============================================================
         // FEATURE 10 : Code PIN
         // ============================================================
         function checkPin() {
