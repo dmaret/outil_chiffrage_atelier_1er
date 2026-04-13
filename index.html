@@ -5060,7 +5060,75 @@
             root.style.setProperty('--font-family',         fontBody);
             root.style.setProperty('--font-family-heading', fontHeading);
             root.style.setProperty('--font-family-mono',    fontMono);
+            
+            // Apply fonts to DOM elements
             document.body.style.fontFamily = fontBody;
+            
+            // Apply heading fonts to h1-h6 and header elements
+            const headingElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, .header');
+            headingElements.forEach(el => {
+                el.style.fontFamily = fontHeading;
+            });
+            
+            // Apply mono font to code, pre, and monospace elements
+            const monoElements = document.querySelectorAll('code, pre, .code, .monospace, .terminal');
+            monoElements.forEach(el => {
+                el.style.fontFamily = fontMono;
+            });
+        }
+
+
+        function removeEmojisForSystemTheme(themeName) {
+            // List of system themes that should have emojis removed
+            const systemThemes = ['as400', 'sap', 'oracle', 'navision', 'c64'];
+            
+            if (!systemThemes.includes(themeName)) {
+                return; // Only remove emojis for system themes
+            }
+            
+            // Comprehensive emoji regex that matches most Unicode emoji characters
+            // This includes: emoticons, symbols, pictographs, and other emoji ranges
+            const emojiRegex = /[\p{Emoji}]/gu;
+            
+            // Fallback regex if Unicode property classes are not supported
+            const fallbackEmojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{27BF}]|[\u{1F680}-\u{1F6FF}]|[\u{2300}-\u{23FF}]|[\u{1F900}-\u{1F999}]|[\u{1FAA0}-\u{1FAFF}]|[\u{2700}-\u{27BF}]|[✅❌⬜🟡🟠🔵🟣🟢💙📥📦🚚]/gu;
+            
+            // Choose which regex to use
+            let finalRegex = emojiRegex;
+            try {
+                // Test if Unicode property classes work
+                "test".match(emojiRegex);
+            } catch (e) {
+                // Fall back to manual regex if Unicode properties aren't supported
+                finalRegex = fallbackEmojiRegex;
+            }
+            
+            // Process all text nodes in the DOM
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            const nodesToProcess = [];
+            while (node = walker.nextNode()) {
+                if (node.textContent.match(finalRegex)) {
+                    nodesToProcess.push(node);
+                }
+            }
+            
+            // Update the text content of collected nodes
+            nodesToProcess.forEach(node => {
+                const cleaned = node.textContent
+                    .replace(finalRegex, '') // Remove all emoji
+                    .replace(/\s+/g, ' ')    // Normalize spaces
+                    .trim();                  // Trim edges
+                if (cleaned) {
+                    node.textContent = cleaned;
+                }
+            });
         }
 
         function applyTheme(name) {
@@ -5068,6 +5136,8 @@
             if (!t) return;
             themePrefs.theme = name;
             applyThemeCss(t, RADIUS_SETS[themePrefs.radius], themePrefs.font);
+            // Remove emojis for system themes
+            removeEmojisForSystemTheme(name);
             saveToStorage();
             // Sync color pickers
             const cp = document.getElementById('colorPrimary');
