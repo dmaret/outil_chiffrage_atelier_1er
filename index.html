@@ -6428,7 +6428,8 @@
                 name: name,
                 category: category,
                 startDate: startDate,
-                progress: {}
+                progress: {},
+                assignedDocuments: [] // Liste des IDs de documents assignés
             };
 
             learnersList.push(learner);
@@ -6473,7 +6474,10 @@
                                 📚 ${learner.category} • 📅 ${learner.startDate}
                             </p>
                         </div>
-                        <button class="delete-btn btn-small" onclick="deleteLearner(${learner.id})" title="Supprimer">🗑️</button>
+                        <div style="display:flex;gap:4px;">
+                            <button class="btn btn-small" onclick="openEditLearner(${learner.id})" title="Éditer">✏️ Éditer</button>
+                            <button class="delete-btn btn-small" onclick="deleteLearner(${learner.id})" title="Supprimer">🗑️</button>
+                        </div>
                     </div>
                     <div style="margin-bottom:12px;">
                         <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.9em;">
@@ -6556,6 +6560,163 @@
                 </div>
             `;
             m.classList.add('open');
+        }
+
+        function openEditLearner(learnerId) {
+            const learner = learnersList.find(l => l.id === learnerId);
+            if (!learner) return;
+
+            // Ensure assignedDocuments exists (for backward compatibility)
+            if (!learner.assignedDocuments) learner.assignedDocuments = [];
+
+            const categories = [...new Set(catalogueGestes.map(g => g.categorie))].sort();
+            const gestesInCategory = catalogueGestes.filter(g => g.categorie === learner.category);
+            const completed = Object.values(learner.progress).filter(v => v).length;
+            const progress = gestesInCategory.length > 0 ? Math.round((completed / gestesInCategory.length) * 100) : 0;
+
+            // Create document sections
+            let docsHtml = '';
+            if (referenceDocuments.length > 0) {
+                const icons = { pdf: '📄', link: '🔗', video: '🎥', other: '📦' };
+                docsHtml = `
+                    <div style="max-height:400px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;padding:12px;background:#f9f9f9;">
+                        ${referenceDocuments.map(doc => {
+                            const isAssigned = learner.assignedDocuments.includes(doc.id);
+                            return `
+                                <label style="display:flex;gap:10px;align-items:start;padding:10px;border:1px solid #e8e8e8;border-radius:6px;margin-bottom:8px;cursor:pointer;background:#fff;transition:background 0.2s;">
+                                    <input type="checkbox"
+                                           ${isAssigned ? 'checked' : ''}
+                                           onchange="toggleDocumentAssignment(${learnerId}, ${doc.id}, this.checked)"
+                                           style="margin-top:4px;cursor:pointer;">
+                                    <span style="flex:1;">
+                                        <strong>${icons[doc.type] || '📦'} ${doc.type.toUpperCase()}</strong><br>
+                                        <span style="color:#6b8fa3;font-weight:600;">${doc.title}</span>
+                                        ${doc.isFile ? `<br><span style="color:#7a9db1;font-size:0.85em;">${doc.fileName}</span>` : `<br><span style="color:#7a9db1;font-size:0.85em;word-break:break-all;">${doc.url}</span>`}
+                                    </span>
+                                    <span style="color:#7a9db1;font-size:0.85em;white-space:nowrap;">${doc.createdAt}</span>
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                docsHtml = '<p style="color:#7a9db1;font-size:0.9em;padding:20px;text-align:center;background:#f0f4f8;border-radius:6px;">📭 Aucun document disponible. Ajoutez des documents de référence d\'abord.</p>';
+            }
+
+            const modal = document.getElementById('editLearnerModal');
+            const container = modal ? modal : document.createElement('div');
+
+            if (!modal) {
+                container.id = 'editLearnerModal';
+                container.className = 'modal';
+                document.body.appendChild(container);
+            }
+
+            container.innerHTML = `
+                <div class="modal-content" style="max-width:900px;max-height:90vh;overflow-y:auto;">
+                    <div class="modal-header" style="position:sticky;top:0;background:#fff;z-index:10;border-bottom:2px solid #e0e0e0;padding:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <h2 style="margin:0 0 8px;">✏️ Éditer Apprenant</h2>
+                                <p style="margin:0;color:#7a9db1;font-size:0.9em;">Modifiez les informations et assignez des documents de référence</p>
+                            </div>
+                            <button class="modal-close" onclick="this.closest('.modal').classList.remove('open')" style="font-size:1.5em;">✕</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-body" style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                        <!-- Colonne gauche : Informations apprenant -->
+                        <div>
+                            <h3 style="margin:0 0 16px;color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;">👤 Informations</h3>
+
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="display:block;margin-bottom:6px;font-weight:600;color:#5a7b8f;">Nom de l'apprenant</label>
+                                <input type="text" id="edit-learner-name" value="${learner.name}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="display:block;margin-bottom:6px;font-weight:600;color:#5a7b8f;">Catégorie de formation</label>
+                                <select id="edit-learner-category" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+                                    ${categories.map(cat => `<option value="${cat}" ${cat === learner.category ? 'selected' : ''}>${cat}</option>`).join('')}
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="display:block;margin-bottom:6px;font-weight:600;color:#5a7b8f;">Date de début</label>
+                                <input type="date" id="edit-learner-date" value="${learner.startDate}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+                            </div>
+
+                            <div style="margin-top:24px;padding:16px;background:#f0f8ff;border-radius:6px;border-left:4px solid #a8d5e2;">
+                                <h4 style="margin:0 0 12px;color:#6b8fa3;">📊 Progression</h4>
+                                <div style="margin-bottom:8px;">
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.9em;">
+                                        <span>Gestes validés</span>
+                                        <strong>${completed}/${gestesInCategory.length}</strong>
+                                    </div>
+                                    <div style="background:#e0e0e0;height:8px;border-radius:4px;overflow:hidden;">
+                                        <div style="background:#4CAF50;height:100%;width:${progress}%;transition:width 0.3s;"></div>
+                                    </div>
+                                </div>
+                                <p style="margin:8px 0 0;font-size:0.85em;color:#7a9db1;">${progress}% complété</p>
+                            </div>
+                        </div>
+
+                        <!-- Colonne droite : Documents -->
+                        <div>
+                            <h3 style="margin:0 0 16px;color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;">📚 Documents de Référence</h3>
+                            <p style="color:#7a9db1;font-size:0.85em;margin-bottom:12px;">Cochez les documents à assigner à cet apprenant</p>
+                            ${docsHtml}
+                        </div>
+                    </div>
+
+                    <div style="position:sticky;bottom:0;background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;display:flex;gap:10px;justify-content:flex-end;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').classList.remove('open')" style="padding:10px 24px;">❌ Annuler</button>
+                        <button class="btn btn-success" onclick="saveLearnerEdits(${learnerId})" style="padding:10px 24px;">✅ Enregistrer les modifications</button>
+                    </div>
+                </div>
+            `;
+            container.classList.add('open');
+        }
+
+        function saveLearnerEdits(learnerId) {
+            const learner = learnersList.find(l => l.id === learnerId);
+            if (!learner) return;
+
+            const name = document.getElementById('edit-learner-name').value.trim();
+            const category = document.getElementById('edit-learner-category').value;
+            const startDate = document.getElementById('edit-learner-date').value;
+
+            if (!name || !category || !startDate) {
+                toast('Merci de remplir tous les champs', 'warning');
+                return;
+            }
+
+            learner.name = name;
+            learner.category = category;
+            learner.startDate = startDate;
+
+            saveFormationData();
+            renderLearners();
+            document.getElementById('editLearnerModal').classList.remove('open');
+            toast('✅ Apprenant modifié', 'success');
+            logAction(`Modification apprenant: ${name}`, 'UPDATE');
+        }
+
+        function toggleDocumentAssignment(learnerId, docId, isAssigned) {
+            const learner = learnersList.find(l => l.id === learnerId);
+            if (!learner) return;
+
+            if (!learner.assignedDocuments) learner.assignedDocuments = [];
+
+            if (isAssigned) {
+                if (!learner.assignedDocuments.includes(docId)) {
+                    learner.assignedDocuments.push(docId);
+                }
+            } else {
+                learner.assignedDocuments = learner.assignedDocuments.filter(id => id !== docId);
+            }
+
+            saveFormationData();
         }
 
         function toggleGestureComplete(learnerId, code, completed) {
@@ -6721,21 +6882,34 @@
                 <thead><tr>
                     <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Type</th>
                     <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Titre</th>
+                    <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Assigné à</th>
                     <th style="text-align:left;padding:10px;border-bottom:2px solid #ddd;">Date</th>
                     <th style="text-align:right;padding:10px;border-bottom:2px solid #ddd;">Actions</th>
                 </tr></thead>
                 <tbody>
                 ${referenceDocuments.map(doc => {
+                    // Find learners that have this document assigned
+                    const assignedLearners = learnersList.filter(l => {
+                        if (!l.assignedDocuments) return false;
+                        return l.assignedDocuments.includes(doc.id);
+                    }).map(l => l.name);
+
                     let actionBtn = '';
                     if (doc.isFile) {
                         actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
                     } else {
                         actionBtn = `<a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>`;
                     }
+
+                    const assignedDisplay = assignedLearners.length > 0
+                        ? `<span style="background:#e3f2fd;padding:4px 8px;border-radius:4px;font-size:0.85em;">${assignedLearners.join(', ')}</span>`
+                        : `<span style="color:#999;font-style:italic;font-size:0.85em;">Non assigné</span>`;
+
                     return `
                     <tr style="border-bottom:1px solid #eee;">
                         <td style="padding:12px;"><strong>${icons[doc.type] || '📦'} ${doc.type.toUpperCase()}</strong></td>
                         <td style="padding:12px;">${doc.title}${doc.isFile ? ` <span style="color:#7a9db1;font-size:0.85em;">(${doc.fileName})</span>` : ''}</td>
+                        <td style="padding:12px;">${assignedDisplay}</td>
                         <td style="padding:12px;color:#7a9db1;font-size:0.9em;">${doc.createdAt}</td>
                         <td style="padding:12px;text-align:right;white-space:nowrap;">
                             ${actionBtn}
@@ -8169,7 +8343,19 @@
             saveToStorage();
             applyDisplayPrefs();
             // Refresh la vue prestations si on change la vue
-            if (key === 'vuePrestations') renderPrestations();
+            if (key === 'vuePrestations') {
+                renderPrestations();
+                // Notify user and offer to switch tabs
+                const viewLabels = { detaillee: 'Détaillée', compacte: 'Compacte', tableau: 'Tableau' };
+                const msg = `Vue ${viewLabels[value]} activée. Allez à l'onglet Prestations pour voir le changement.`;
+                toast(msg, 'info', 3000);
+            } else if (key === 'densite') {
+                const densityLabel = value === 'compacte' ? 'Compacte' : 'Normale';
+                toast(`Densité ${densityLabel} appliquée.`, 'success', 2000);
+            } else if (key === 'modeCalculateur') {
+                const modeLabel = value === 'simplifie' ? 'Simplifié' : 'Complet';
+                toast(`Mode calculateur ${modeLabel} appliqué.`, 'success', 2000);
+            }
         }
 
         function applyDisplayPrefs() {
@@ -8195,6 +8381,139 @@
 
         // Appliquer au chargement
         applyDisplayPrefs();
+
+        // ============================================================
+        // DIAGNOSTIC: Test display modes
+        // ============================================================
+        // HOW TO USE: Open browser console (F12) and run:
+        // testDisplayModes() - to check current state
+        // testDisplayModesInteractive() - to test mode switching (requires at least 1 prestation)
+        function testDisplayModes() {
+            console.log('%c=== Display Modes Diagnostic ===', 'color: #6b8fa3; font-weight: bold; font-size: 1.2em;');
+
+            // Check 1: displayPrefs object
+            console.log('%cCurrent displayPrefs:', 'color: #6b8fa3; font-weight: bold;');
+            console.log(displayPrefs);
+
+            // Check 2: Button states
+            console.log('%cButton states:', 'color: #6b8fa3; font-weight: bold;');
+            const buttons = [
+                'btn-vue-detaillee', 'btn-vue-compacte', 'btn-vue-tableau',
+                'btn-densite-normale', 'btn-densite-compacte',
+                'btn-calc-complet', 'btn-calc-simplifie'
+            ];
+            buttons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    console.log(`${btnId}: exists=${true}, active=${btn.classList.contains('active')}`);
+                } else {
+                    console.warn(`${btnId}: NOT FOUND`);
+                }
+            });
+
+            // Check 3: CSS classes on body
+            console.log('%cBody CSS classes:', 'color: #6b8fa3; font-weight: bold;');
+            console.log('density-compact applied:', document.body.classList.contains('density-compact'));
+            console.log('Current densite setting:', displayPrefs.densite);
+
+            // Check 4: Calculator mode sections
+            console.log('%cCalculator mode sections:', 'color: #6b8fa3; font-weight: bold;');
+            const consom = document.getElementById('sectionConsommables');
+            const stock = document.getElementById('sectionStockage');
+            console.log(`sectionConsommables: exists=${!!consom}, display=${consom?.style.display || 'auto'}`);
+            console.log(`sectionStockage: exists=${!!stock}, display=${stock?.style.display || 'auto'}`);
+            console.log(`modeCalculateur: ${displayPrefs.modeCalculateur}`);
+
+            // Check 5: Prestations list container
+            const container = document.getElementById('prestationsList');
+            console.log('%cPrestations list container:', 'color: #6b8fa3; font-weight: bold;');
+            console.log(`Container exists: ${!!container}`);
+            if (container) {
+                console.log(`Container HTML length: ${container.innerHTML.length} chars`);
+                console.log(`Contains prest-compact-row: ${container.innerHTML.includes('prest-compact-row')}`);
+                console.log(`Contains prest-table-wrap: ${container.innerHTML.includes('prest-table-wrap')}`);
+                console.log(`Number of prestations visible: ${container.querySelectorAll('[class*="prest"]').length}`);
+            }
+
+            console.log('%cTest complete', 'color: #27ae60; font-weight: bold;');
+        }
+
+        function testDisplayModesInteractive() {
+            console.log('%c=== Testing Display Mode Changes ===', 'color: #6b8fa3; font-weight: bold; font-size: 1.2em;');
+
+            // Check if there are any prestations to render
+            if (prestationsSauvegardees.length === 0) {
+                console.warn('%c⚠️ No prestations found! Add at least one prestation to test display modes.', 'color: #e67e22; font-size: 1.1em;');
+                return;
+            }
+
+            console.log(`✓ Found ${prestationsSauvegardees.length} prestation(s)`);
+
+            // Test each vue mode
+            const vueModes = ['detaillee', 'compacte', 'tableau'];
+            console.log('%cTesting Vue Modes:', 'color: #6b8fa3; font-weight: bold;');
+            vueModes.forEach(mode => {
+                const before = prestationsSauvegardees.length;
+                setDisplayPref('vuePrestations', mode);
+                const container = document.getElementById('prestationsList');
+                const classNames = {
+                    'detaillee': 'detailed cards',
+                    'compacte': 'prest-compact-row',
+                    'tableau': 'prest-table-wrap'
+                };
+                const hasCorrectLayout = mode === 'detaillee' ?
+                    !container.innerHTML.includes('prest-compact-row') && !container.innerHTML.includes('prest-table-wrap') :
+                    container.innerHTML.includes(classNames[mode]);
+                console.log(`  ${mode}: ✓ displayPrefs updated, layout=${hasCorrectLayout ? '✓' : '✗'}`);
+            });
+
+            // Test density modes
+            console.log('%cTesting Density Modes:', 'color: #6b8fa3; font-weight: bold;');
+            const densityModes = ['normale', 'compacte'];
+            densityModes.forEach(mode => {
+                setDisplayPref('densite', mode);
+                const hasClass = document.body.classList.contains('density-compact');
+                const expectedClass = mode === 'compacte';
+                const correct = hasClass === expectedClass;
+                console.log(`  ${mode}: CSS class present=${hasClass}, expected=${expectedClass}, ${correct ? '✓' : '✗'}`);
+            });
+
+            // Test calculator modes
+            console.log('%cTesting Calculator Modes:', 'color: #6b8fa3; font-weight: bold;');
+            const calcModes = ['complet', 'simplifie'];
+            calcModes.forEach(mode => {
+                setDisplayPref('modeCalculateur', mode);
+                const consom = document.getElementById('sectionConsommables');
+                const stock = document.getElementById('sectionStockage');
+                const hidden = consom?.style.display === 'none' || stock?.style.display === 'none';
+                const expectedHidden = mode === 'simplifie';
+                const correct = hidden === expectedHidden;
+                console.log(`  ${mode}: sections hidden=${hidden}, expected=${expectedHidden}, ${correct ? '✓' : '✗'}`);
+            });
+
+            console.log('%cAll tests complete!', 'color: #27ae60; font-weight: bold; font-size: 1.1em;');
+        }
+
+        function quickTestDisplayModes() {
+            console.log('%c=== Quick Display Mode Test ===', 'color: #6b8fa3; font-weight: bold; font-size: 1.2em;');
+
+            if (prestationsSauvegardees.length === 0) {
+                console.warn('⚠️ Add at least one prestation first');
+                return;
+            }
+
+            // Quick test: cycle through all modes
+            console.log('Testing: Détaillée → Compacte → Tableau');
+            ['detaillee', 'compacte', 'tableau'].forEach((mode, i) => {
+                setTimeout(() => {
+                    setDisplayPref('vuePrestations', mode);
+                    console.log(`✓ Switched to ${mode}`);
+                }, i * 1500);
+            });
+
+            console.log('Switching to each mode every 1.5 seconds...');
+            console.log('Watch the Prestations tab to see the view change!');
+        }
 
         // ============================================================
         // FEATURE 10 : Code PIN
