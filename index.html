@@ -16370,11 +16370,18 @@
         let formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
 
         function startFormationQuiz() {
+            console.log('startFormationQuiz called');
+            console.log('formationQuizQuestions length:', formationQuizQuestions?.length);
+            console.log('formationQuizState:', formationQuizState);
+
             formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
             document.getElementById('quizQuestionsWrapper').style.display = 'block';
             document.getElementById('quizResults').style.display = 'none';
             document.getElementById('quizStartButtons').style.display = 'none';
+
+            console.log('Before renderQuizQuestion');
             renderQuizQuestion();
+            console.log('After renderQuizQuestion');
         }
 
         function renderQuizQuestion() {
