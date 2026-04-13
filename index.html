@@ -3354,6 +3354,12 @@
                     <p style="color:#666;margin:0;max-width:700px;">Découvrez les différents systèmes logistiques et technologies utilisés en industrie. Maîtrisez les concepts clés de la supply chain et de la gestion d'entrepôt.</p>
                 </div>
 
+                <!-- APPRENANTS ASSIGNÉS -->
+                <div class="section" style="background:#e8f5e9;border-left:4px solid #27ae60;">
+                    <h3 style="margin-top:0;color:#27ae60;">👥 Apprenants assignés à cette formation</h3>
+                    <div id="assignedLearnersContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;"></div>
+                </div>
+
                 <!-- QUIZ INTERACTIF -->
                 <div class="section" style="background:#fffaed;border-left:4px solid #e67e22;">
                     <h2>🧠 Quiz - Testez vos Connaissances</h2>
@@ -4778,7 +4784,7 @@
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
             else if (tabName === 'formation-logistique') {
                 // Formation Logistique - contenu théorique statique
-                // Rien à charger dynamiquement pour l'instant
+                renderFormationLogistiqueApprenants();
             }
         }
 
@@ -6667,6 +6673,102 @@
             }).join('');
         }
 
+        function getFormationTimeline(formation) {
+            // Determine timeline stages
+            const stages = [
+                { label: 'Demandée', emoji: '⏳', completed: true },
+                { label: 'Approuvée', emoji: '✅', completed: formation.status === 'approved' },
+                { label: 'Quiz commencé', emoji: '🎯', completed: formation.quizCompletedAt !== undefined && formation.quizCompletedAt !== null },
+                { label: 'Quiz réussi', emoji: '🏆', completed: formation.quizScore !== undefined && formation.quizScore >= (formation.quizTotal / 2) }
+            ];
+
+            return `
+                <div style="margin-top:12px;padding:12px;background:#f5f9fb;border-radius:8px;border-left:4px solid #6b8fa3;">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;font-size:0.85em;position:relative;">
+                        ${stages.map((stage, idx) => `
+                            <div style="flex:1;text-align:center;z-index:1;">
+                                <div style="font-size:1.8em;margin-bottom:4px;opacity:${stage.completed ? '1' : '0.3'};transition:opacity 0.3s;">
+                                    ${stage.emoji}
+                                </div>
+                                <div style="font-size:0.7em;color:${stage.completed ? '#2d5f7f' : '#bbb'};font-weight:${stage.completed ? '600' : '400'};line-height:1.2;">
+                                    ${stage.label}
+                                </div>
+                            </div>
+                            ${idx < stages.length - 1 ? `<div style="position:absolute;top:22px;left:${(idx+1)*25-2}%;width:${25-4}%;height:2px;background:${stages[idx+1].completed ? '#27ae60' : '#ddd'};z-index:0;"></div>` : ''}
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFormationLogistiqueApprenants() {
+            const container = document.getElementById('assignedLearnersContainer');
+            if (!container) return;
+
+            // Get all learners assigned to Formation Logistique
+            const apprenants = learnersList.filter(learner => {
+                // Check if this learner has any Logistique formation assigned
+                const hasLogistiqueFormation = trainingRequests.some(req =>
+                    req.assignedTo === learner.name &&
+                    req.status === 'approved' &&
+                    (req.category.includes('Logistique') || req.category.includes('logistique') ||
+                     req.category.includes('Automatisation') || req.category.includes('RFID') ||
+                     req.category.includes('Kanban') || req.category.includes('5S') || req.category.includes('Organisation'))
+                );
+                return hasLogistiqueFormation;
+            });
+
+            if (apprenants.length === 0) {
+                container.innerHTML = '<p style="color:#999;font-style:italic;padding:16px;grid-column:1/-1;">Aucun apprenant assigné à la formation Logistique pour le moment.</p>';
+                return;
+            }
+
+            container.innerHTML = apprenants.map(learner => {
+                const formations = trainingRequests.filter(r =>
+                    r.assignedTo === learner.name &&
+                    r.status === 'approved' &&
+                    (r.category.includes('Logistique') || r.category.includes('Automatisation') ||
+                     r.category.includes('RFID') || r.category.includes('Kanban') ||
+                     r.category.includes('5S') || r.category.includes('Organisation'))
+                );
+
+                return `
+                    <div style="background:white;border-radius:8px;padding:16px;border-left:4px solid #27ae60;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
+                            <div>
+                                <h4 style="margin:0 0 4px;color:#27ae60;">${learner.name}</h4>
+                                <p style="margin:0;font-size:0.85em;color:#666;">📚 ${learner.category}</p>
+                            </div>
+                            <div style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:0.8em;font-weight:600;">
+                                ${formations.length} formation(s)
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid #eee;padding-top:10px;">
+                            ${formations.map(f => {
+                                const stages = [
+                                    { label: 'Demandée', emoji: '⏳', completed: true },
+                                    { label: 'Approuvée', emoji: '✅', completed: f.status === 'approved' },
+                                    { label: 'Quiz', emoji: '🎯', completed: f.quizCompletedAt !== undefined && f.quizCompletedAt !== null }
+                                ];
+                                return `
+                                    <div style="margin-bottom:8px;padding:8px;background:#f5f5f5;border-radius:6px;">
+                                        <div style="font-size:0.9em;font-weight:600;color:#333;margin-bottom:6px;">📖 ${f.category}</div>
+                                        <div style="display:flex;gap:6px;font-size:1.2em;">
+                                            ${stages.map((s, idx) => `
+                                                <span title="${s.label}" style="opacity:${s.completed ? '1' : '0.3'};cursor:help;">
+                                                    ${s.emoji}
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function renderLearners() {
             const container = document.getElementById('learnersContainer');
             const noMsg = document.getElementById('noLearnersMsg');
@@ -6687,16 +6789,19 @@
                 const assignedFormations = trainingRequests.filter(r => r.assignedTo === learner.name && r.status === 'approved');
                 const formationsHtml = assignedFormations.length > 0
                     ? `<div style="margin-top:14px;border-top:1px solid #e0e0e0;padding-top:12px;">
-                        <p style="margin:0 0 8px;font-size:0.85em;font-weight:600;color:#5a7b8f;">📚 Formations à suivre :</p>
-                        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                            ${assignedFormations.map(f => `
-                                <button onclick="openFormationContent('${f.id}')"
-                                    style="padding:8px 14px;background:linear-gradient(135deg,#6b8fa3,#5a7b8f);color:white;border:none;border-radius:20px;cursor:pointer;font-size:0.85em;font-weight:600;transition:transform 0.15s;"
-                                    onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                    📖 ${f.category}
-                                </button>
-                            `).join('')}
-                        </div>
+                        <p style="margin:0 0 12px;font-size:0.85em;font-weight:600;color:#5a7b8f;">📚 Formations à suivre :</p>
+                        ${assignedFormations.map(f => `
+                            <div style="margin-bottom:12px;">
+                                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                    <button onclick="openFormationContent('${f.id}')"
+                                        style="flex:1;padding:8px 14px;background:linear-gradient(135deg,#6b8fa3,#5a7b8f);color:white;border:none;border-radius:20px;cursor:pointer;font-size:0.85em;font-weight:600;transition:transform 0.15s;"
+                                        onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                        📖 ${f.category}
+                                    </button>
+                                </div>
+                                ${getFormationTimeline(f)}
+                            </div>
+                        `).join('')}
                        </div>`
                     : `<div style="margin-top:14px;border-top:1px solid #e0e0e0;padding-top:10px;">
                         <p style="margin:0;font-size:0.82em;color:#aaa;font-style:italic;">Aucune formation assignée</p>
@@ -6735,6 +6840,9 @@
         function openFormationContent(requestId) {
             const request = trainingRequests.find(r => r.id == requestId);
             if (!request) return;
+
+            // Track which formation is being studied
+            currentFormationId = requestId;
 
             // Créer une modal avec le contenu de la formation
             let modal = document.getElementById('formationContentModal');
@@ -16453,6 +16561,7 @@
         ];
 
         let formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
+        let currentFormationId = null; // Track which formation the user is studying
 
         function startFormationQuiz() {
             formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
@@ -16633,6 +16742,20 @@
                       : percent >= 80 ? 'Très bien! Excellente compréhension des concepts.'
                       : percent >= 60 ? 'Correct! Quelques points à revoir.'
                       : 'À revoir. Relisez les sections avant de réessayer.';
+
+            // Save quiz completion to trainingRequests
+            if (currentFormationId) {
+                const formation = trainingRequests.find(r => r.id === currentFormationId);
+                if (formation && !formation.quizCompletedAt) {
+                    formation.quizCompletedAt = new Date().toISOString().split('T')[0];
+                    formation.quizScore = formationQuizState.score;
+                    formation.quizTotal = formationQuizQuestions.length;
+                    saveFormationData();
+                    renderLearners(); // Refresh learner cards to show updated timeline
+                    renderFormationLogistiqueApprenants(); // Refresh apprenants list in Formation tab
+                }
+            }
+
             inner.innerHTML = `
                 <div style="text-align:center;padding:20px;">
                     <div style="font-size:4em;margin-bottom:16px;">${emoji}</div>
