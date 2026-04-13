@@ -16370,20 +16370,101 @@
         let formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
 
         function startFormationQuiz() {
-            console.log('startFormationQuiz called');
-            console.log('formationQuizQuestions length:', formationQuizQuestions?.length);
-            console.log('formationQuizState:', formationQuizState);
-
             formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
-            document.getElementById('quizQuestionsWrapper').style.display = 'block';
-            document.getElementById('quizResults').style.display = 'none';
-            document.getElementById('quizStartButtons').style.display = 'none';
 
-            console.log('Before renderQuizQuestion');
-            renderQuizQuestion();
-            console.log('After renderQuizQuestion');
+            // Ouvrir dans une modal flottante pour éviter les problèmes de DOM
+            let modal = document.getElementById('formationQuizModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'formationQuizModal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:20000;display:flex;align-items:center;justify-content:center;padding:16px;';
+                modal.innerHTML = '<div id="formationQuizInner" style="background:white;border-radius:16px;padding:28px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);"></div>';
+                document.body.appendChild(modal);
+            }
+            modal.style.display = 'flex';
+            renderFormationQuizQuestion();
         }
 
+        function closeFormationQuizModal() {
+            const modal = document.getElementById('formationQuizModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function renderFormationQuizQuestion() {
+            const inner = document.getElementById('formationQuizInner');
+            if (!inner) return;
+            const q = formationQuizQuestions[formationQuizState.currentQuestion];
+            const prog = Math.round(((formationQuizState.currentQuestion + 1) / formationQuizQuestions.length) * 100);
+
+            let optionsHtml = '';
+            q.options.forEach((option, idx) => {
+                const isSelected = formationQuizState.selectedAnswer === idx;
+                const isCorrect = idx === q.correct;
+                let bg = 'background:#f8f9fa;border:2px solid #dee2e6;';
+                if (formationQuizState.answered) {
+                    if (isCorrect) bg = 'background:#d4edda;border:2px solid #27ae60;';
+                    else if (isSelected) bg = 'background:#f8d7da;border:2px solid #e74c3c;';
+                } else if (isSelected) {
+                    bg = 'background:#e8f4fb;border:2px solid #2980b9;';
+                }
+                optionsHtml += `<button onclick="selectFormationQuizAnswer(${idx})" ${formationQuizState.answered ? 'disabled' : ''}
+                    style="width:100%;text-align:left;padding:14px 16px;border-radius:8px;cursor:pointer;font-size:0.95em;font-weight:500;color:#333;margin-bottom:8px;${bg}">
+                    <strong>${String.fromCharCode(65+idx)}.</strong> ${option}
+                </button>`;
+            });
+
+            inner.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <h3 style="margin:0;color:#e67e22;">🧠 Quiz Formation</h3>
+                    <button onclick="closeFormationQuizModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#999;line-height:1;">✕</button>
+                </div>
+                <div style="background:#eee;border-radius:10px;height:8px;margin-bottom:16px;">
+                    <div style="background:#e67e22;height:8px;border-radius:10px;width:${prog}%;transition:width 0.3s;"></div>
+                </div>
+                <p style="color:#999;font-size:0.85em;margin:0 0 8px;">Question ${formationQuizState.currentQuestion + 1} / ${formationQuizQuestions.length}</p>
+                <p style="font-size:1.1em;font-weight:600;color:#2d3e50;margin:0 0 20px;">${q.question}</p>
+                ${optionsHtml}
+                ${formationQuizState.answered ? `
+                    <div style="background:#f0f8ff;padding:14px;border-radius:8px;border-left:4px solid #2980b9;margin:12px 0;">
+                        <strong style="color:#2980b9;">Explication :</strong>
+                        <p style="color:#555;margin:6px 0 0;">${q.explanation}</p>
+                    </div>
+                    <button onclick="${formationQuizState.currentQuestion < formationQuizQuestions.length-1 ? 'nextFormationQuizQuestion()' : 'finishFormationQuiz()'}"
+                        style="width:100%;padding:14px;background:${formationQuizState.currentQuestion < formationQuizQuestions.length-1 ? '#e67e22':'#27ae60'};color:white;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:1em;margin-top:8px;">
+                        ${formationQuizState.currentQuestion < formationQuizQuestions.length-1 ? 'Suivant →' : '📊 Voir Résultats'}
+                    </button>
+                ` : `
+                    <button onclick="submitFormationQuizAnswer()"
+                        style="width:100%;padding:14px;background:#e67e22;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:1em;margin-top:8px;">
+                        ✅ Valider
+                    </button>
+                `}
+            `;
+        }
+
+        function selectFormationQuizAnswer(idx) {
+            if (!formationQuizState.answered) {
+                formationQuizState.selectedAnswer = idx;
+                renderFormationQuizQuestion();
+            }
+        }
+
+        function submitFormationQuizAnswer() {
+            if (formationQuizState.selectedAnswer === null) { toast('Sélectionnez une réponse', 'warning'); return; }
+            const q = formationQuizQuestions[formationQuizState.currentQuestion];
+            if (formationQuizState.selectedAnswer === q.correct) formationQuizState.score++;
+            formationQuizState.answered = true;
+            renderFormationQuizQuestion();
+        }
+
+        function nextFormationQuizQuestion() {
+            formationQuizState.currentQuestion++;
+            formationQuizState.answered = false;
+            formationQuizState.selectedAnswer = null;
+            renderFormationQuizQuestion();
+        }
+
+        // Stub: ancienne fonction maintenant remplacée mais conservée pour le compilateur
         function renderQuizQuestion() {
             const container = document.getElementById('quizQuestions');
             const q = formationQuizQuestions[formationQuizState.currentQuestion];
@@ -16459,34 +16540,32 @@
         }
 
         function finishFormationQuiz() {
-            document.getElementById('quizQuestions').innerHTML = '';
-            document.getElementById('quizResults').style.display = 'block';
-
+            const inner = document.getElementById('formationQuizInner');
+            if (!inner) return;
             const percent = Math.round((formationQuizState.score / formationQuizQuestions.length) * 100);
-            document.getElementById('quizScoreDisplay').textContent = `${formationQuizState.score}/${formationQuizQuestions.length}`;
-            document.getElementById('quizPercentDisplay').textContent = `${percent}%`;
-
-            let feedback = '';
-            if (percent === 100) {
-                feedback = '🏆 Excellent! Vous maîtrisez parfaitement les systèmes logistiques!';
-            } else if (percent >= 80) {
-                feedback = '⭐ Très bien! Vous avez une très bonne compréhension des concepts.';
-            } else if (percent >= 60) {
-                feedback = '👍 Correct! Vous avez compris les points essentiels. Révoyez les concepts non acquis.';
-            } else {
-                feedback = '📚 À revoir. Je vous recommande de relire les sections pertinentes avant de réessayer.';
-            }
-
-            document.getElementById('quizFeedback').innerHTML = `<p style="font-size:1.05em;color:#e67e22;">${feedback}</p>`;
+            const emoji = percent === 100 ? '🏆' : percent >= 80 ? '⭐' : percent >= 60 ? '👍' : '📚';
+            const msg = percent === 100 ? 'Parfait! Vous maîtrisez les systèmes logistiques!'
+                      : percent >= 80 ? 'Très bien! Excellente compréhension des concepts.'
+                      : percent >= 60 ? 'Correct! Quelques points à revoir.'
+                      : 'À revoir. Relisez les sections avant de réessayer.';
+            inner.innerHTML = `
+                <div style="text-align:center;padding:20px;">
+                    <div style="font-size:4em;margin-bottom:16px;">${emoji}</div>
+                    <h2 style="color:#e67e22;margin-bottom:8px;">Résultats du Quiz</h2>
+                    <div style="font-size:3em;font-weight:bold;color:#e67e22;margin:16px 0;">${formationQuizState.score}/${formationQuizQuestions.length}</div>
+                    <div style="font-size:1.4em;color:#555;margin-bottom:16px;">${percent}% de réussite</div>
+                    <p style="color:#666;margin-bottom:24px;">${msg}</p>
+                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                        <button onclick="startFormationQuiz()" style="padding:12px 24px;background:#e67e22;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">↻ Recommencer</button>
+                        <button onclick="closeFormationQuizModal()" style="padding:12px 24px;background:#6b8fa3;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">✕ Fermer</button>
+                    </div>
+                </div>
+            `;
         }
 
         function resetFormationQuiz() {
             formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
-            document.getElementById('quizContainer').style.display = 'block';
-            document.getElementById('quizQuestionsWrapper').style.display = 'none';
-            document.getElementById('quizResults').style.display = 'none';
-            document.getElementById('quizStartButtons').style.display = 'flex';
-            document.getElementById('quizQuestions').innerHTML = '';
+            closeFormationQuizModal();
             toast('✅ Quiz réinitialisé', 'success');
         }
 
