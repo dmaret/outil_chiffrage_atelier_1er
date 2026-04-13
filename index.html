@@ -3565,8 +3565,10 @@
                     <p style="color:#666;margin-bottom:20px;font-size:0.95em;">Testez votre compréhension des systèmes logistiques :</p>
 
                     <div id="quizContainer" style="display:block;">
-                        <div id="quizQuestions"></div>
-                        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                        <div id="quizQuestionsWrapper" style="display:none;">
+                            <div id="quizQuestions"></div>
+                        </div>
+                        <div id="quizStartButtons" style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
                             <button class="btn btn-primary" onclick="startFormationQuiz()" style="background:#e67e22;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🎯 Démarrer Quiz</button>
                             <button class="btn btn-secondary" onclick="resetFormationQuiz()" style="background:#bdc3c7;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">↻ Réinitialiser</button>
                         </div>
@@ -4414,6 +4416,7 @@
         let formationProgress = {};
         let auditLog = [];
         let referenceDocuments = [];
+        let trainingRequests = []; // Demandes de formation en attente
         let _presentationMode = false;
         let _presentationConfig = (() => {
             try {
@@ -4459,6 +4462,7 @@
         initTheme();
         initMatrice();
         loadFormationData();
+        loadTrainingRequests();
         loadReferenceDocuments();
         loadAuditLog();
         // Initialize learner date field with today's date
@@ -6447,6 +6451,56 @@
         function saveFormationData() {
             localStorage.setItem('learnersList', JSON.stringify(learnersList));
             localStorage.setItem('formationProgress', JSON.stringify(formationProgress));
+            localStorage.setItem('trainingRequests', JSON.stringify(trainingRequests));
+        }
+
+        function loadTrainingRequests() {
+            const saved = JSON.parse(localStorage.getItem('trainingRequests') || '[]');
+            trainingRequests = saved;
+        }
+
+        function requestTraining(trainingCategory) {
+            const request = {
+                id: Date.now(),
+                category: trainingCategory,
+                requestedAt: new Date().toISOString().split('T')[0],
+                status: 'pending', // pending, approved, rejected
+                approvedAt: null,
+                assignedTo: null
+            };
+
+            trainingRequests.push(request);
+            saveFormationData();
+            toast(`📚 Demande de formation "${trainingCategory}" envoyée!`, 'success');
+            logAction(`Demande formation: ${trainingCategory}`, 'CREATE');
+        }
+
+        function approveTrainingRequest(requestId, learnerName) {
+            const request = trainingRequests.find(r => r.id === requestId);
+            if (!request) return;
+
+            request.status = 'approved';
+            request.approvedAt = new Date().toISOString().split('T')[0];
+            request.assignedTo = learnerName;
+
+            saveFormationData();
+            toast(`✅ Formation "${request.category}" approuvée et assignée à ${learnerName}`, 'success');
+            logAction(`Approbation formation: ${request.category} → ${learnerName}`, 'UPDATE');
+
+            // Mettre à jour le dashboard
+            if (typeof updateDashboard === 'function') {
+                updateDashboard();
+            }
+        }
+
+        function rejectTrainingRequest(requestId) {
+            const request = trainingRequests.find(r => r.id === requestId);
+            if (!request) return;
+
+            request.status = 'rejected';
+            saveFormationData();
+            toast(`❌ Demande de formation rejetée`, 'warning');
+            logAction(`Rejet formation: ${request.category}`, 'DELETE');
         }
 
         function renderLearners() {
@@ -16126,8 +16180,9 @@
 
         function startFormationQuiz() {
             formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
-            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('quizQuestionsWrapper').style.display = 'block';
             document.getElementById('quizResults').style.display = 'none';
+            document.getElementById('quizStartButtons').style.display = 'none';
             renderQuizQuestion();
         }
 
@@ -16230,8 +16285,11 @@
         function resetFormationQuiz() {
             formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
             document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('quizQuestionsWrapper').style.display = 'none';
             document.getElementById('quizResults').style.display = 'none';
+            document.getElementById('quizStartButtons').style.display = 'flex';
             document.getElementById('quizQuestions').innerHTML = '';
+            toast('✅ Quiz réinitialisé', 'success');
         }
 
         // MINI-JEUX D'ENTRAÎNEMENT
