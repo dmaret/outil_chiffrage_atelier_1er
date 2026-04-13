@@ -6230,15 +6230,38 @@
             if (!learner.assignedDocuments) learner.assignedDocuments = [];
 
             const categories = [...new Set(catalogueGestes.map(g => g.categorie))].sort();
-            const docsCheckboxes = referenceDocuments.map(doc => {
-                const isAssigned = learner.assignedDocuments.includes(doc.id);
-                return `
-                    <label style="display:flex;gap:8px;align-items:center;padding:8px;border:1px solid #e0e0e0;border-radius:4px;margin-bottom:8px;cursor:pointer;">
-                        <input type="checkbox" ${isAssigned ? 'checked' : ''} onchange="toggleDocumentAssignment(${learnerId}, ${doc.id}, this.checked)">
-                        <span>${doc.type.toUpperCase()}: <strong>${doc.title}</strong></span>
-                    </label>
+            const gestesInCategory = catalogueGestes.filter(g => g.categorie === learner.category);
+            const completed = Object.values(learner.progress).filter(v => v).length;
+            const progress = gestesInCategory.length > 0 ? Math.round((completed / gestesInCategory.length) * 100) : 0;
+
+            // Create document sections
+            let docsHtml = '';
+            if (referenceDocuments.length > 0) {
+                const icons = { pdf: '📄', link: '🔗', video: '🎥', other: '📦' };
+                docsHtml = `
+                    <div style="max-height:400px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;padding:12px;background:#f9f9f9;">
+                        ${referenceDocuments.map(doc => {
+                            const isAssigned = learner.assignedDocuments.includes(doc.id);
+                            return `
+                                <label style="display:flex;gap:10px;align-items:start;padding:10px;border:1px solid #e8e8e8;border-radius:6px;margin-bottom:8px;cursor:pointer;background:#fff;transition:background 0.2s;">
+                                    <input type="checkbox"
+                                           ${isAssigned ? 'checked' : ''}
+                                           onchange="toggleDocumentAssignment(${learnerId}, ${doc.id}, this.checked)"
+                                           style="margin-top:4px;cursor:pointer;">
+                                    <span style="flex:1;">
+                                        <strong>${icons[doc.type] || '📦'} ${doc.type.toUpperCase()}</strong><br>
+                                        <span style="color:#6b8fa3;font-weight:600;">${doc.title}</span>
+                                        ${doc.isFile ? `<br><span style="color:#7a9db1;font-size:0.85em;">${doc.fileName}</span>` : `<br><span style="color:#7a9db1;font-size:0.85em;word-break:break-all;">${doc.url}</span>`}
+                                    </span>
+                                    <span style="color:#7a9db1;font-size:0.85em;white-space:nowrap;">${doc.createdAt}</span>
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
                 `;
-            }).join('');
+            } else {
+                docsHtml = '<p style="color:#7a9db1;font-size:0.9em;padding:20px;text-align:center;background:#f0f4f8;border-radius:6px;">📭 Aucun document disponible. Ajoutez des documents de référence d\'abord.</p>';
+            }
 
             const modal = document.getElementById('editLearnerModal');
             const container = modal ? modal : document.createElement('div');
@@ -6250,38 +6273,65 @@
             }
 
             container.innerHTML = `
-                <div class="modal-content" style="max-width:600px;">
-                    <div class="modal-header">
-                        <h2>✏️ Éditer apprenant</h2>
-                        <button class="modal-close" onclick="this.closest('.modal').classList.remove('open')">✕</button>
+                <div class="modal-content" style="max-width:900px;max-height:90vh;overflow-y:auto;">
+                    <div class="modal-header" style="position:sticky;top:0;background:#fff;z-index:10;border-bottom:2px solid #e0e0e0;padding:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <h2 style="margin:0 0 8px;">✏️ Éditer Apprenant</h2>
+                                <p style="margin:0;color:#7a9db1;font-size:0.9em;">Modifiez les informations et assignez des documents de référence</p>
+                            </div>
+                            <button class="modal-close" onclick="this.closest('.modal').classList.remove('open')" style="font-size:1.5em;">✕</button>
+                        </div>
                     </div>
-                    <div class="modal-body" style="padding:20px;">
-                        <div class="form-group" style="margin-bottom:16px;">
-                            <label style="display:block;margin-bottom:6px;font-weight:600;">Nom</label>
-                            <input type="text" id="edit-learner-name" value="${learner.name}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;">
+
+                    <div class="modal-body" style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                        <!-- Colonne gauche : Informations apprenant -->
+                        <div>
+                            <h3 style="margin:0 0 16px;color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;">👤 Informations</h3>
+
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="display:block;margin-bottom:6px;font-weight:600;color:#5a7b8f;">Nom de l'apprenant</label>
+                                <input type="text" id="edit-learner-name" value="${learner.name}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="display:block;margin-bottom:6px;font-weight:600;color:#5a7b8f;">Catégorie de formation</label>
+                                <select id="edit-learner-category" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+                                    ${categories.map(cat => `<option value="${cat}" ${cat === learner.category ? 'selected' : ''}>${cat}</option>`).join('')}
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="display:block;margin-bottom:6px;font-weight:600;color:#5a7b8f;">Date de début</label>
+                                <input type="date" id="edit-learner-date" value="${learner.startDate}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+                            </div>
+
+                            <div style="margin-top:24px;padding:16px;background:#f0f8ff;border-radius:6px;border-left:4px solid #a8d5e2;">
+                                <h4 style="margin:0 0 12px;color:#6b8fa3;">📊 Progression</h4>
+                                <div style="margin-bottom:8px;">
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.9em;">
+                                        <span>Gestes validés</span>
+                                        <strong>${completed}/${gestesInCategory.length}</strong>
+                                    </div>
+                                    <div style="background:#e0e0e0;height:8px;border-radius:4px;overflow:hidden;">
+                                        <div style="background:#4CAF50;height:100%;width:${progress}%;transition:width 0.3s;"></div>
+                                    </div>
+                                </div>
+                                <p style="margin:8px 0 0;font-size:0.85em;color:#7a9db1;">${progress}% complété</p>
+                            </div>
                         </div>
 
-                        <div class="form-group" style="margin-bottom:16px;">
-                            <label style="display:block;margin-bottom:6px;font-weight:600;">Catégorie</label>
-                            <select id="edit-learner-category" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;">
-                                ${categories.map(cat => `<option value="${cat}" ${cat === learner.category ? 'selected' : ''}>${cat}</option>`).join('')}
-                            </select>
+                        <!-- Colonne droite : Documents -->
+                        <div>
+                            <h3 style="margin:0 0 16px;color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;">📚 Documents de Référence</h3>
+                            <p style="color:#7a9db1;font-size:0.85em;margin-bottom:12px;">Cochez les documents à assigner à cet apprenant</p>
+                            ${docsHtml}
                         </div>
+                    </div>
 
-                        <div class="form-group" style="margin-bottom:16px;">
-                            <label style="display:block;margin-bottom:6px;font-weight:600;">Date de début</label>
-                            <input type="date" id="edit-learner-date" value="${learner.startDate}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;">
-                        </div>
-
-                        <div style="margin-top:24px;padding-top:16px;border-top:2px solid #e0e0e0;">
-                            <h3 style="margin-top:0;margin-bottom:12px;font-size:1em;">📚 Documents de référence assignés</h3>
-                            ${referenceDocuments.length > 0 ? docsCheckboxes : '<p style="color:#7a9db1;font-size:0.9em;">Aucun document disponible. Ajoutez des documents dans la section "Documents de référence".</p>'}
-                        </div>
-
-                        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-                            <button class="btn btn-secondary" onclick="this.closest('.modal').classList.remove('open')">Annuler</button>
-                            <button class="btn btn-success" onclick="saveLearnerEdits(${learnerId})">✅ Enregistrer</button>
-                        </div>
+                    <div style="position:sticky;bottom:0;background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;display:flex;gap:10px;justify-content:flex-end;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').classList.remove('open')" style="padding:10px 24px;">❌ Annuler</button>
+                        <button class="btn btn-success" onclick="saveLearnerEdits(${learnerId})" style="padding:10px 24px;">✅ Enregistrer les modifications</button>
                     </div>
                 </div>
             `;
