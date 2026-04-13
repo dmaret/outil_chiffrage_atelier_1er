@@ -26,18 +26,55 @@
 
         /* ── CSS Variables (thème) ─────────────────────────────────── */
         :root {
+            /* Typography */
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-family-heading: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-family-mono: 'Courier New', monospace;
+
+            /* Core Palette */
             --color-primary: #a8d5e2;
+            --color-primary-light: #d4e8f2;
             --color-primary-dark: #6b8fa3;
             --color-secondary: #c9b3d4;
+            --color-secondary-light: #dcc9e3;
             --color-secondary-dark: #9a70b8;
+
+            /* Backgrounds */
             --color-bg-from: #e8f4f8;
             --color-bg-to: #f5e6f0;
+            --color-bg-alt: #f0f4f8;
             --color-container: #fffef9;
+            --color-surface: #ffffff;
+
+            /* Headers & Sections */
             --color-header-from: #a8d5e2;
             --color-header-to: #c9b3d4;
+            --color-section-bg: #f8f9fa;
+            --color-section-border: #e0e8ed;
+
+            /* Text Colors */
             --color-text: #2d3e50;
+            --color-text-secondary: #4a5f73;
             --color-text-muted: #5a7b8f;
+            --color-text-light: #8a99a8;
+
+            /* Semantic Colors */
+            --color-success: #27ae60;
+            --color-success-dark: #1e8449;
+            --color-danger: #e74c3c;
+            --color-danger-dark: #c0392b;
+            --color-warning: #f39c12;
+            --color-warning-bg: #fdf3e7;
+            --color-info: #3498db;
+            --color-info-dark: #2980b9;
+
+            /* Borders & Shadows */
+            --color-border: #d5e3ed;
+            --color-border-light: #e8f0f6;
+            --color-border-focus: #a8d5e2;
+            --color-shadow: rgba(150,150,180,0.15);
+
+            /* Border Radius (existing, kept for compatibility) */
             --border-radius-lg: 20px;
             --border-radius-md: 12px;
             --border-radius-sm: 8px;
@@ -4076,17 +4113,182 @@
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
         let stockMinTemplates = {};  // Stock min templates
         const THEMES = {
-            classique:   { primary:'#a8d5e2', primaryDark:'#6b8fa3', secondary:'#c9b3d4', secondaryDark:'#9a70b8', bgFrom:'#e8f4f8', bgTo:'#f5e6f0', hFrom:'#a8d5e2', hTo:'#c9b3d4', container:'#fffef9' },
-            corporate:   { primary:'#2e6da4', primaryDark:'#1a3a5c', secondary:'#4a90d9', secondaryDark:'#1a3a5c', bgFrom:'#eaf1f8', bgTo:'#dde8f2', hFrom:'#1a3a5c', hTo:'#2e6da4', container:'#ffffff' },
-            minimaliste: { primary:'#adb5bd', primaryDark:'#6c757d', secondary:'#ced4da', secondaryDark:'#495057', bgFrom:'#f4f4f4', bgTo:'#e9ecef', hFrom:'#6c757d', hTo:'#adb5bd', container:'#ffffff' },
-            chaleureux:  { primary:'#e67e22', primaryDark:'#c0392b', secondary:'#f39c12', secondaryDark:'#e74c3c', bgFrom:'#fdf3e7', bgTo:'#fce8e8', hFrom:'#c0392b', hTo:'#e67e22', container:'#fffcf8' },
-            nature:      { primary:'#27ae60', primaryDark:'#1e8449', secondary:'#1abc9c', secondaryDark:'#148f77', bgFrom:'#e8f8f1', bgTo:'#e0f7f2', hFrom:'#1e8449', hTo:'#1abc9c', container:'#f8fffc' },
-            nuit:        { primary:'#8e44ad', primaryDark:'#2c3e50', secondary:'#9b59b6', secondaryDark:'#1a252f', bgFrom:'#eae0f0', bgTo:'#dde8f5', hFrom:'#2c3e50', hTo:'#8e44ad', container:'#fffef9' },
-            as400:       { primary:'#00c864', primaryDark:'#00a04d', secondary:'#00ff00', secondaryDark:'#00c864', bgFrom:'#0a0e27', bgTo:'#0f1432', hFrom:'#0a0e27', hTo:'#00c864', container:'#1a1f3a' },
-            sap:         { primary:'#003f87', primaryDark:'#002147', secondary:'#005daa', secondaryDark:'#003f87', bgFrom:'#f0f2f5', bgTo:'#e8eef7', hFrom:'#003f87', hTo:'#005daa', container:'#ffffff' },
-            oracle:      { primary:'#f80000', primaryDark:'#b20000', secondary:'#ff6600', secondaryDark:'#cc3300', bgFrom:'#fff5f5', bgTo:'#ffe8e8', hFrom:'#b20000', hTo:'#f80000', container:'#ffffff' },
-            navision:    { primary:'#0078d4', primaryDark:'#0063b1', secondary:'#107c10', secondaryDark:'#0a6f08', bgFrom:'#f3f2f1', bgTo:'#e1dfdd', hFrom:'#0063b1', hTo:'#0078d4', container:'#ffffff' },
-            c64:         { primary:'#3668ff', primaryDark:'#0047ab', secondary:'#ffff00', secondaryDark:'#ff9900', bgFrom:'#4d4dff', bgTo:'#2d2daa', hFrom:'#0047ab', hTo:'#3668ff', container:'#1a1a4d' },
+            classique: {
+                primary: '#a8d5e2', primaryLight: '#d4e8f2', primaryDark: '#6b8fa3',
+                secondary: '#c9b3d4', secondaryLight: '#dcc9e3', secondaryDark: '#9a70b8',
+                bgFrom: '#e8f4f8', bgTo: '#f5e6f0', bgAlt: '#f0f4f8',
+                container: '#fffef9', surface: '#ffffff',
+                headerFrom: '#a8d5e2', headerTo: '#c9b3d4',
+                sectionBg: '#f8f9fa', sectionBorder: '#e0e8ed',
+                text: '#2d3e50', textSecondary: '#4a5f73', textMuted: '#5a7b8f', textLight: '#8a99a8',
+                success: '#27ae60', successDark: '#1e8449',
+                danger: '#e74c3c', dangerDark: '#c0392b',
+                warning: '#f39c12', warningBg: '#fdf3e7',
+                info: '#3498db', infoDark: '#2980b9',
+                border: '#d5e3ed', borderLight: '#e8f0f6', borderFocus: '#a8d5e2',
+                shadow: 'rgba(150,150,180,0.15)',
+                fontBody: 'Segoe UI', fontHeading: 'Segoe UI', fontMono: 'Courier New'
+            },
+            corporate: {
+                primary: '#2e6da4', primaryLight: '#5f8ec7', primaryDark: '#1a3a5c',
+                secondary: '#4a90d9', secondaryLight: '#7db0e8', secondaryDark: '#1a3a5c',
+                bgFrom: '#eaf1f8', bgTo: '#dde8f2', bgAlt: '#f0f4f8',
+                container: '#ffffff', surface: '#ffffff',
+                headerFrom: '#1a3a5c', headerTo: '#2e6da4',
+                sectionBg: '#f5f8fb', sectionBorder: '#d0dce8',
+                text: '#1a3a5c', textSecondary: '#3d5a80', textMuted: '#6b8fb8', textLight: '#9bb0cd',
+                success: '#27ae60', successDark: '#1e8449',
+                danger: '#e74c3c', dangerDark: '#c0392b',
+                warning: '#f39c12', warningBg: '#fdf3e7',
+                info: '#2e6da4', infoDark: '#1a3a5c',
+                border: '#cde0f0', borderLight: '#e0ecf5', borderFocus: '#2e6da4',
+                shadow: 'rgba(26,58,92,0.12)',
+                fontBody: 'Arial', fontHeading: 'Arial', fontMono: 'Courier New'
+            },
+            minimaliste: {
+                primary: '#adb5bd', primaryLight: '#cdd4db', primaryDark: '#6c757d',
+                secondary: '#ced4da', secondaryLight: '#dde2e8', secondaryDark: '#495057',
+                bgFrom: '#f4f4f4', bgTo: '#e9ecef', bgAlt: '#f8f9fa',
+                container: '#ffffff', surface: '#ffffff',
+                headerFrom: '#6c757d', headerTo: '#adb5bd',
+                sectionBg: '#f9f9f9', sectionBorder: '#e0e0e0',
+                text: '#212529', textSecondary: '#495057', textMuted: '#6c757d', textLight: '#999999',
+                success: '#27ae60', successDark: '#1e8449',
+                danger: '#e74c3c', dangerDark: '#c0392b',
+                warning: '#f39c12', warningBg: '#fdf3e7',
+                info: '#5cb3cc', infoDark: '#3d8fa3',
+                border: '#dee2e6', borderLight: '#e9ecef', borderFocus: '#adb5bd',
+                shadow: 'rgba(0,0,0,0.08)',
+                fontBody: 'Arial', fontHeading: 'Arial', fontMono: 'Courier New'
+            },
+            chaleureux: {
+                primary: '#e67e22', primaryLight: '#f0a859', primaryDark: '#c0392b',
+                secondary: '#f39c12', secondaryLight: '#f8c149', secondaryDark: '#e74c3c',
+                bgFrom: '#fdf3e7', bgTo: '#fce8e8', bgAlt: '#fff5f0',
+                container: '#fffcf8', surface: '#ffffff',
+                headerFrom: '#c0392b', headerTo: '#e67e22',
+                sectionBg: '#fff8f3', sectionBorder: '#f5dcc9',
+                text: '#5c3d1f', textSecondary: '#8b5a2b', textMuted: '#a86f38', textLight: '#c9915d',
+                success: '#27ae60', successDark: '#1e8449',
+                danger: '#e74c3c', dangerDark: '#c0392b',
+                warning: '#f39c12', warningBg: '#fdf3e7',
+                info: '#3498db', infoDark: '#2980b9',
+                border: '#f5dcc9', borderLight: '#fce8e0', borderFocus: '#e67e22',
+                shadow: 'rgba(192,57,43,0.12)',
+                fontBody: 'Georgia', fontHeading: 'Georgia', fontMono: 'Courier New'
+            },
+            nature: {
+                primary: '#27ae60', primaryLight: '#56c97e', primaryDark: '#1e8449',
+                secondary: '#1abc9c', secondaryLight: '#48d1cc', secondaryDark: '#148f77',
+                bgFrom: '#e8f8f1', bgTo: '#e0f7f2', bgAlt: '#f0fbf8',
+                container: '#f8fffc', surface: '#ffffff',
+                headerFrom: '#1e8449', headerTo: '#1abc9c',
+                sectionBg: '#f5fdf9', sectionBorder: '#c7e9d8',
+                text: '#1a4d2e', textSecondary: '#2d7a4a', textMuted: '#3d9d5d', textLight: '#6fb88f',
+                success: '#27ae60', successDark: '#1e8449',
+                danger: '#e74c3c', dangerDark: '#c0392b',
+                warning: '#f39c12', warningBg: '#fdf3e7',
+                info: '#1abc9c', infoDark: '#148f77',
+                border: '#c7e9d8', borderLight: '#e0f5ed', borderFocus: '#27ae60',
+                shadow: 'rgba(26,172,156,0.12)',
+                fontBody: 'Trebuchet MS', fontHeading: 'Trebuchet MS', fontMono: 'Courier New'
+            },
+            nuit: {
+                primary: '#8e44ad', primaryLight: '#a95fc9', primaryDark: '#2c3e50',
+                secondary: '#9b59b6', secondaryLight: '#b573d4', secondaryDark: '#1a252f',
+                bgFrom: '#eae0f0', bgTo: '#dde8f5', bgAlt: '#f5f0fa',
+                container: '#fffef9', surface: '#ffffff',
+                headerFrom: '#2c3e50', headerTo: '#8e44ad',
+                sectionBg: '#f8f5fc', sectionBorder: '#e0d5ed',
+                text: '#2c3e50', textSecondary: '#5d4a7b', textMuted: '#8e7fa8', textLight: '#b0a4c7',
+                success: '#27ae60', successDark: '#1e8449',
+                danger: '#e74c3c', dangerDark: '#c0392b',
+                warning: '#f39c12', warningBg: '#fdf3e7',
+                info: '#3498db', infoDark: '#2980b9',
+                border: '#e0d5ed', borderLight: '#f0ebf7', borderFocus: '#8e44ad',
+                shadow: 'rgba(44,62,80,0.15)',
+                fontBody: 'Palatino', fontHeading: 'Palatino', fontMono: 'Courier New'
+            },
+            sap: {
+                primary: '#003f87', primaryLight: '#0066cc', primaryDark: '#002147',
+                secondary: '#005daa', secondaryLight: '#0078d4', secondaryDark: '#003f87',
+                bgFrom: '#f0f2f5', bgTo: '#e8eef7', bgAlt: '#f5f6f9',
+                container: '#ffffff', surface: '#ffffff',
+                headerFrom: '#003f87', headerTo: '#005daa',
+                sectionBg: '#f8f9fb', sectionBorder: '#d9e1ed',
+                text: '#003f87', textSecondary: '#1a5fb8', textMuted: '#4a7fc9', textLight: '#7fa3d9',
+                success: '#27ae60', successDark: '#1e8449',
+                danger: '#e74c3c', dangerDark: '#c0392b',
+                warning: '#f39c12', warningBg: '#fdf3e7',
+                info: '#003f87', infoDark: '#002147',
+                border: '#d9e1ed', borderLight: '#eef2f9', borderFocus: '#003f87',
+                shadow: 'rgba(0,63,135,0.12)',
+                fontBody: 'Arial', fontHeading: 'Arial', fontMono: 'Courier New'
+            },
+            as400: {
+                primary: '#00c864', primaryLight: '#33ff99', primaryDark: '#00a04d',
+                secondary: '#00ff00', secondaryLight: '#66ff66', secondaryDark: '#00c864',
+                bgFrom: '#0a0e27', bgTo: '#0f1432', bgAlt: '#1a1f3a',
+                container: '#1a1f3a', surface: '#0f1432',
+                headerFrom: '#0a0e27', headerTo: '#00c864',
+                sectionBg: '#121829', sectionBorder: '#2a3850',
+                text: '#00ff00', textSecondary: '#33ff99', textMuted: '#66cc66', textLight: '#99ff99',
+                success: '#00ff00', successDark: '#00c864',
+                danger: '#ff3333', dangerDark: '#cc0000',
+                warning: '#ffff00', warningBg: '#1f1f00',
+                info: '#00c864', infoDark: '#00a04d',
+                border: '#2a3850', borderLight: '#3d5066', borderFocus: '#00c864',
+                shadow: 'rgba(0,200,100,0.2)',
+                fontBody: 'Courier New', fontHeading: 'Courier New', fontMono: 'Courier New'
+            },
+            oracle: {
+                primary: '#f80000', primaryLight: '#ff4444', primaryDark: '#b20000',
+                secondary: '#ff6600', secondaryLight: '#ff8833', secondaryDark: '#cc3300',
+                bgFrom: '#fff5f5', bgTo: '#ffe8e8', bgAlt: '#fff9f9',
+                container: '#ffffff', surface: '#ffffff',
+                headerFrom: '#b20000', headerTo: '#f80000',
+                sectionBg: '#fff8f8', sectionBorder: '#f5cccc',
+                text: '#b20000', textSecondary: '#d93333', textMuted: '#e86666', textLight: '#f39999',
+                success: '#27ae60', successDark: '#1e8449',
+                danger: '#f80000', dangerDark: '#b20000',
+                warning: '#f39c12', warningBg: '#fdf3e7',
+                info: '#f80000', infoDark: '#b20000',
+                border: '#f5cccc', borderLight: '#fde6e6', borderFocus: '#f80000',
+                shadow: 'rgba(248,0,0,0.12)',
+                fontBody: 'Arial', fontHeading: 'Arial', fontMono: 'Courier New'
+            },
+            navision: {
+                primary: '#0078d4', primaryLight: '#40a9ff', primaryDark: '#0063b1',
+                secondary: '#107c10', secondaryLight: '#4c9c5c', secondaryDark: '#0a6f08',
+                bgFrom: '#f3f2f1', bgTo: '#e1dfdd', bgAlt: '#f8f7f6',
+                container: '#ffffff', surface: '#ffffff',
+                headerFrom: '#0063b1', headerTo: '#0078d4',
+                sectionBg: '#faf9f8', sectionBorder: '#d2ccc8',
+                text: '#323130', textSecondary: '#605e5c', textMuted: '#8a8886', textLight: '#a19f9d',
+                success: '#107c10', successDark: '#0a6f08',
+                danger: '#d13438', dangerDark: '#a4373a',
+                warning: '#ffb900', warningBg: '#fffae5',
+                info: '#0078d4', infoDark: '#0063b1',
+                border: '#e1dfdd', borderLight: '#f3f2f1', borderFocus: '#0078d4',
+                shadow: 'rgba(0,0,0,0.1)',
+                fontBody: 'Segoe UI', fontHeading: 'Segoe UI', fontMono: 'Courier New'
+            },
+            c64: {
+                primary: '#3668ff', primaryLight: '#6699ff', primaryDark: '#0047ab',
+                secondary: '#ffff00', secondaryLight: '#ffff66', secondaryDark: '#ff9900',
+                bgFrom: '#4d4dff', bgTo: '#2d2daa', bgAlt: '#3d3dcc',
+                container: '#1a1a4d', surface: '#0a0a26',
+                headerFrom: '#0047ab', headerTo: '#3668ff',
+                sectionBg: '#2a2a66', sectionBorder: '#5555dd',
+                text: '#ffff00', textSecondary: '#ffff99', textMuted: '#9999ff', textLight: '#ccccff',
+                success: '#00ff00', successDark: '#00cc00',
+                danger: '#ff0000', dangerDark: '#cc0000',
+                warning: '#ffff00', warningBg: '#1a1a00',
+                info: '#3668ff', infoDark: '#0047ab',
+                border: '#5555dd', borderLight: '#6666ff', borderFocus: '#3668ff',
+                shadow: 'rgba(54,104,255,0.3)',
+                fontBody: 'Courier New', fontHeading: 'Courier New', fontMono: 'Courier New'
+            }
         };
         const RADIUS_SETS = {
             square: { lg:'4px',  md:'4px',  sm:'3px'  },
@@ -4810,20 +5012,55 @@
         // ── Fonctions Thème ─────────────────────────────────────────
         function applyThemeCss(t, r, f) {
             const root = document.documentElement;
-            root.style.setProperty('--color-primary',       t.primary);
-            root.style.setProperty('--color-primary-dark',  t.primaryDark);
-            root.style.setProperty('--color-secondary',     t.secondary);
-            root.style.setProperty('--color-secondary-dark',t.secondaryDark);
-            root.style.setProperty('--color-bg-from',       t.bgFrom);
-            root.style.setProperty('--color-bg-to',         t.bgTo);
-            root.style.setProperty('--color-header-from',   t.hFrom);
-            root.style.setProperty('--color-header-to',     t.hTo);
-            root.style.setProperty('--color-container',     t.container);
+            // Core colors
+            root.style.setProperty('--color-primary',       t.primary || '#a8d5e2');
+            root.style.setProperty('--color-primary-light', t.primaryLight || '#d4e8f2');
+            root.style.setProperty('--color-primary-dark',  t.primaryDark || '#6b8fa3');
+            root.style.setProperty('--color-secondary',     t.secondary || '#c9b3d4');
+            root.style.setProperty('--color-secondary-light', t.secondaryLight || '#dcc9e3');
+            root.style.setProperty('--color-secondary-dark', t.secondaryDark || '#9a70b8');
+            // Backgrounds
+            root.style.setProperty('--color-bg-from',       t.bgFrom || '#e8f4f8');
+            root.style.setProperty('--color-bg-to',         t.bgTo || '#f5e6f0');
+            root.style.setProperty('--color-bg-alt',        t.bgAlt || '#f0f4f8');
+            root.style.setProperty('--color-container',     t.container || '#fffef9');
+            root.style.setProperty('--color-surface',       t.surface || '#ffffff');
+            // Headers & Sections
+            root.style.setProperty('--color-header-from',   t.headerFrom || t.hFrom || '#a8d5e2');
+            root.style.setProperty('--color-header-to',     t.headerTo || t.hTo || '#c9b3d4');
+            root.style.setProperty('--color-section-bg',    t.sectionBg || '#f8f9fa');
+            root.style.setProperty('--color-section-border', t.sectionBorder || '#e0e8ed');
+            // Text Colors
+            root.style.setProperty('--color-text',          t.text || '#2d3e50');
+            root.style.setProperty('--color-text-secondary', t.textSecondary || '#4a5f73');
+            root.style.setProperty('--color-text-muted',    t.textMuted || '#5a7b8f');
+            root.style.setProperty('--color-text-light',    t.textLight || '#8a99a8');
+            // Semantic Colors
+            root.style.setProperty('--color-success',       t.success || '#27ae60');
+            root.style.setProperty('--color-success-dark',  t.successDark || '#1e8449');
+            root.style.setProperty('--color-danger',        t.danger || '#e74c3c');
+            root.style.setProperty('--color-danger-dark',   t.dangerDark || '#c0392b');
+            root.style.setProperty('--color-warning',       t.warning || '#f39c12');
+            root.style.setProperty('--color-warning-bg',    t.warningBg || '#fdf3e7');
+            root.style.setProperty('--color-info',          t.info || '#3498db');
+            root.style.setProperty('--color-info-dark',     t.infoDark || '#2980b9');
+            // Borders & Shadows
+            root.style.setProperty('--color-border',        t.border || '#d5e3ed');
+            root.style.setProperty('--color-border-light',  t.borderLight || '#e8f0f6');
+            root.style.setProperty('--color-border-focus',  t.borderFocus || '#a8d5e2');
+            root.style.setProperty('--color-shadow',        t.shadow || 'rgba(150,150,180,0.15)');
+            // Border Radius
             root.style.setProperty('--border-radius-lg',    r.lg);
             root.style.setProperty('--border-radius-md',    r.md);
             root.style.setProperty('--border-radius-sm',    r.sm);
-            root.style.setProperty('--font-family',         `'${f}', sans-serif`);
-            document.body.style.fontFamily = `'${f}', sans-serif`;
+            // Typography (font families)
+            const fontBody = `'${f}', sans-serif`;
+            const fontHeading = t.fontHeading ? `'${t.fontHeading}', sans-serif` : fontBody;
+            const fontMono = t.fontMono ? `'${t.fontMono}', monospace` : "'Courier New', monospace";
+            root.style.setProperty('--font-family',         fontBody);
+            root.style.setProperty('--font-family-heading', fontHeading);
+            root.style.setProperty('--font-family-mono',    fontMono);
+            document.body.style.fontFamily = fontBody;
         }
 
         function applyTheme(name) {
