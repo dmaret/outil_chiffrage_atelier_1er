@@ -7982,6 +7982,27 @@
             console.log('%cAll tests complete!', 'color: #27ae60; font-weight: bold; font-size: 1.1em;');
         }
 
+        function quickTestDisplayModes() {
+            console.log('%c=== Quick Display Mode Test ===', 'color: #6b8fa3; font-weight: bold; font-size: 1.2em;');
+
+            if (prestationsSauvegardees.length === 0) {
+                console.warn('⚠️ Add at least one prestation first');
+                return;
+            }
+
+            // Quick test: cycle through all modes
+            console.log('Testing: Détaillée → Compacte → Tableau');
+            ['detaillee', 'compacte', 'tableau'].forEach((mode, i) => {
+                setTimeout(() => {
+                    setDisplayPref('vuePrestations', mode);
+                    console.log(`✓ Switched to ${mode}`);
+                }, i * 1500);
+            });
+
+            console.log('Switching to each mode every 1.5 seconds...');
+            console.log('Watch the Prestations tab to see the view change!');
+        }
+
         // ============================================================
         // FEATURE 10 : Code PIN
         // ============================================================
