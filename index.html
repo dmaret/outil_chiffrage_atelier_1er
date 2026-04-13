@@ -3354,6 +3354,12 @@
                     <p style="color:#666;margin:0;max-width:700px;">Découvrez les différents systèmes logistiques et technologies utilisés en industrie. Maîtrisez les concepts clés de la supply chain et de la gestion d'entrepôt.</p>
                 </div>
 
+                <!-- APPRENANTS ASSIGNÉS -->
+                <div class="section" style="background:#e8f5e9;border-left:4px solid #27ae60;">
+                    <h3 style="margin-top:0;color:#27ae60;">👥 Apprenants assignés à cette formation</h3>
+                    <div id="assignedLearnersContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;"></div>
+                </div>
+
                 <!-- QUIZ INTERACTIF -->
                 <div class="section" style="background:#fffaed;border-left:4px solid #e67e22;">
                     <h2>🧠 Quiz - Testez vos Connaissances</h2>
@@ -4778,7 +4784,7 @@
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
             else if (tabName === 'formation-logistique') {
                 // Formation Logistique - contenu théorique statique
-                // Rien à charger dynamiquement pour l'instant
+                renderFormationLogistiqueApprenants();
             }
         }
 
@@ -6693,6 +6699,74 @@
                     </div>
                 </div>
             `;
+        }
+
+        function renderFormationLogistiqueApprenants() {
+            const container = document.getElementById('assignedLearnersContainer');
+            if (!container) return;
+
+            // Get all learners assigned to Formation Logistique
+            const apprenants = learnersList.filter(learner => {
+                // Check if this learner has any Logistique formation assigned
+                const hasLogistiqueFormation = trainingRequests.some(req =>
+                    req.assignedTo === learner.name &&
+                    req.status === 'approved' &&
+                    (req.category.includes('Logistique') || req.category.includes('logistique') ||
+                     req.category.includes('Automatisation') || req.category.includes('RFID') ||
+                     req.category.includes('Kanban') || req.category.includes('5S') || req.category.includes('Organisation'))
+                );
+                return hasLogistiqueFormation;
+            });
+
+            if (apprenants.length === 0) {
+                container.innerHTML = '<p style="color:#999;font-style:italic;padding:16px;grid-column:1/-1;">Aucun apprenant assigné à la formation Logistique pour le moment.</p>';
+                return;
+            }
+
+            container.innerHTML = apprenants.map(learner => {
+                const formations = trainingRequests.filter(r =>
+                    r.assignedTo === learner.name &&
+                    r.status === 'approved' &&
+                    (r.category.includes('Logistique') || r.category.includes('Automatisation') ||
+                     r.category.includes('RFID') || r.category.includes('Kanban') ||
+                     r.category.includes('5S') || r.category.includes('Organisation'))
+                );
+
+                return `
+                    <div style="background:white;border-radius:8px;padding:16px;border-left:4px solid #27ae60;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
+                            <div>
+                                <h4 style="margin:0 0 4px;color:#27ae60;">${learner.name}</h4>
+                                <p style="margin:0;font-size:0.85em;color:#666;">📚 ${learner.category}</p>
+                            </div>
+                            <div style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:0.8em;font-weight:600;">
+                                ${formations.length} formation(s)
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid #eee;padding-top:10px;">
+                            ${formations.map(f => {
+                                const stages = [
+                                    { label: 'Demandée', emoji: '⏳', completed: true },
+                                    { label: 'Approuvée', emoji: '✅', completed: f.status === 'approved' },
+                                    { label: 'Quiz', emoji: '🎯', completed: f.quizCompletedAt !== undefined && f.quizCompletedAt !== null }
+                                ];
+                                return `
+                                    <div style="margin-bottom:8px;padding:8px;background:#f5f5f5;border-radius:6px;">
+                                        <div style="font-size:0.9em;font-weight:600;color:#333;margin-bottom:6px;">📖 ${f.category}</div>
+                                        <div style="display:flex;gap:6px;font-size:1.2em;">
+                                            ${stages.map((s, idx) => `
+                                                <span title="${s.label}" style="opacity:${s.completed ? '1' : '0.3'};cursor:help;">
+                                                    ${s.emoji}
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         function renderLearners() {
@@ -16678,6 +16752,7 @@
                     formation.quizTotal = formationQuizQuestions.length;
                     saveFormationData();
                     renderLearners(); // Refresh learner cards to show updated timeline
+                    renderFormationLogistiqueApprenants(); // Refresh apprenants list in Formation tab
                 }
             }
 
