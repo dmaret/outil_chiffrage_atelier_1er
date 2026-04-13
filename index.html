@@ -7307,8 +7307,12 @@
                     let actionBtn = '';
                     if (doc.isFile) {
                         actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
-                    } else {
+                    } else if (doc.url && !doc.url.includes('([A-Z]')) {
+                        // Only show link if URL is valid (doesn't contain regex patterns)
                         actionBtn = `<a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>`;
+                    } else {
+                        // URL is invalid or contains patterns
+                        actionBtn = `<span class="btn btn-small" style="background:#ddd;color:#999;cursor:not-allowed;margin-right:8px;">⚠️ URL invalide</span>`;
                     }
 
                     const assignedDisplay = assignedLearners.length > 0
