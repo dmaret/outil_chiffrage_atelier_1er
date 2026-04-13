@@ -3354,6 +3354,25 @@
                     <p style="color:#666;margin:0;max-width:700px;">Découvrez les différents systèmes logistiques et technologies utilisés en industrie. Maîtrisez les concepts clés de la supply chain et de la gestion d'entrepôt.</p>
                 </div>
 
+                <!-- DEMANDE DE FORMATION -->
+                <div class="section" style="background:#f0f8f5;border-left:4px solid #27ae60;">
+                    <h2>📚 Demander une formation</h2>
+                    <p style="color:#7a9db1;margin-bottom:12px;">Vous souhaitez vous former? Demandez une formation en sélectionnant le domaine qui vous intéresse</p>
+                    <div class="form-row">
+                        <select id="trainingCategoryRequest" style="padding:8px;border:1px solid #ddd;border-radius:4px;flex:1;">
+                            <option value="">-- Sélectionner un domaine de formation --</option>
+                            <option value="Logistique - WMS">📦 Logistique - WMS (Warehouse Management System)</option>
+                            <option value="Logistique - ERP">🏢 Logistique - ERP (Enterprise Resource Planning)</option>
+                            <option value="Logistique - TMS">🚚 Logistique - TMS (Transport Management System)</option>
+                            <option value="Automatisation - Convoyeurs">⚙️ Automatisation - Convoyeurs & AGV</option>
+                            <option value="RFID & Traçabilité">📡 RFID & Traçabilité</option>
+                            <option value="Méthodes - Kanban">📋 Méthodes - Kanban & Lean</option>
+                            <option value="Organisation - 5S">🧹 Organisation - 5S (Poste de travail)</option>
+                        </select>
+                        <button class="btn" onclick="requestFormationTraining()" style="background:#27ae60;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;">✉️ Demander</button>
+                    </div>
+                </div>
+
                 <!-- SYSTÈMES LOGISTIQUES -->
                 <div class="section">
                     <h2>📦 Systèmes Logistiques Clés</h2>
@@ -6489,6 +6508,20 @@
             saveFormationData();
             toast(`📚 Demande de formation "${trainingCategory}" envoyée!`, 'success');
             logAction(`Demande formation: ${trainingCategory}`, 'CREATE');
+        }
+
+        function requestFormationTraining() {
+            const select = document.getElementById('trainingCategoryRequest');
+            const category = select?.value?.trim();
+
+            if (!category) {
+                toast('Veuillez sélectionner un domaine de formation', 'warning');
+                return;
+            }
+
+            requestTraining(category);
+            select.value = '';
+            renderDashboard(); // Refresh dashboard to show new request
         }
 
         function approveTrainingRequest(requestId, learnerName) {
