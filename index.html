@@ -6865,6 +6865,13 @@
             }).join('');
         }
 
+        let selectedLearnerId = null;
+
+        function selectLearner(learnerId) {
+            selectedLearnerId = learnerId;
+            renderLearners();
+        }
+
         function renderLearners() {
             const container = document.getElementById('learnersContainer');
             const noMsg = document.getElementById('noLearnersMsg');
@@ -6876,13 +6883,41 @@
             }
 
             noMsg.style.display = 'none';
-            container.innerHTML = learnersList.map(learner => {
-                const gestesInCategory = catalogueGestes.filter(g => g.categorie === learner.category);
-                const completed = Object.values(learner.progress).filter(v => v).length;
+
+            // Set first learner as selected if none selected
+            if (!selectedLearnerId && learnersList.length > 0) {
+                selectedLearnerId = learnersList[0].id;
+            }
+
+            // Display learner selector buttons + selected learner's card
+            let html = `
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:20px;border-bottom:2px solid #ddd;">
+            `;
+
+            learnersList.forEach(learner => {
+                const isSelected = selectedLearnerId === learner.id;
+                html += `
+                    <button onclick="selectLearner(${learner.id})"
+                        style="padding:10px 16px;border-radius:20px;border:none;cursor:pointer;font-weight:600;transition:all 0.2s;
+                            background:${isSelected ? '#6b8fa3' : '#e8f0f6'};
+                            color:${isSelected ? 'white' : '#6b8fa3'};
+                            box-shadow:${isSelected ? '0 2px 8px rgba(107,143,163,0.3)' : '0 1px 3px rgba(0,0,0,0.1)'};">
+                        ${learner.name}
+                    </button>
+                `;
+            });
+
+            html += `</div>`;
+
+            // Display selected learner's card
+            const selectedLearner = learnersList.find(l => l.id === selectedLearnerId);
+            if (selectedLearner) {
+                const gestesInCategory = catalogueGestes.filter(g => g.categorie === selectedLearner.category);
+                const completed = Object.values(selectedLearner.progress).filter(v => v).length;
                 const progress = gestesInCategory.length > 0 ? Math.round((completed / gestesInCategory.length) * 100) : 0;
 
                 // Formations assignées à cet apprenant
-                const assignedFormations = trainingRequests.filter(r => r.assignedTo === learner.name && r.status === 'approved');
+                const assignedFormations = trainingRequests.filter(r => r.assignedTo === selectedLearner.name && r.status === 'approved');
                 const formationsHtml = assignedFormations.length > 0
                     ? `<div style="margin-top:14px;border-top:1px solid #e0e0e0;padding-top:12px;">
                         <p style="margin:0 0 12px;font-size:0.85em;font-weight:600;color:#5a7b8f;">📚 Formations à suivre :</p>
@@ -6903,34 +6938,36 @@
                         <p style="margin:0;font-size:0.82em;color:#aaa;font-style:italic;">Aucune formation assignée</p>
                        </div>`;
 
-                return `
-                <div class="learner-card" style="border:1px solid #ddd;padding:16px;border-radius:6px;background:#f9f9f9;">
-                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
-                        <div>
-                            <h3 style="margin:0 0 4px;">${learner.name}</h3>
-                            <p style="margin:0;color:#7a9db1;font-size:0.9em;">
-                                📚 ${learner.category} • 📅 ${learner.startDate}
-                            </p>
+                html += `
+                    <div class="learner-card" style="border:1px solid #ddd;padding:16px;border-radius:6px;background:#f9f9f9;">
+                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
+                            <div>
+                                <h3 style="margin:0 0 4px;">${selectedLearner.name}</h3>
+                                <p style="margin:0;color:#7a9db1;font-size:0.9em;">
+                                    📚 ${selectedLearner.category} • 📅 ${selectedLearner.startDate}
+                                </p>
+                            </div>
+                            <div style="display:flex;gap:4px;">
+                                <button class="btn btn-small" onclick="openEditLearner(${selectedLearner.id})" title="Éditer">✏️ Éditer</button>
+                                <button class="delete-btn btn-small" onclick="deleteLearner(${selectedLearner.id})" title="Supprimer">🗑️</button>
+                            </div>
                         </div>
-                        <div style="display:flex;gap:4px;">
-                            <button class="btn btn-small" onclick="openEditLearner(${learner.id})" title="Éditer">✏️ Éditer</button>
-                            <button class="delete-btn btn-small" onclick="deleteLearner(${learner.id})" title="Supprimer">🗑️</button>
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.9em;">
+                                <span>Progression</span>
+                                <strong>${completed}/${gestesInCategory.length}</strong>
+                            </div>
+                            <div style="background:#e0e0e0;height:8px;border-radius:4px;overflow:hidden;">
+                                <div style="background:#4CAF50;height:100%;width:${progress}%;transition:width 0.3s;"></div>
+                            </div>
                         </div>
+                        <button class="btn btn-small" onclick="openLearnerProgress(${selectedLearner.id})">👁️ Voir progression</button>
+                        ${formationsHtml}
                     </div>
-                    <div style="margin-bottom:12px;">
-                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.9em;">
-                            <span>Progression</span>
-                            <strong>${completed}/${gestesInCategory.length}</strong>
-                        </div>
-                        <div style="background:#e0e0e0;height:8px;border-radius:4px;overflow:hidden;">
-                            <div style="background:#4CAF50;height:100%;width:${progress}%;transition:width 0.3s;"></div>
-                        </div>
-                    </div>
-                    <button class="btn btn-small" onclick="openLearnerProgress(${learner.id})">👁️ Voir progression</button>
-                    ${formationsHtml}
-                </div>
                 `;
-            }).join('');
+            }
+
+            container.innerHTML = html;
         }
 
         function openFormationContent(requestId) {
