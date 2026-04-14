@@ -4795,60 +4795,75 @@
         }
 
         let draggedSection = null;
-        let draggedTab = null;
-
-        let tabDragging = false;
-        let tabDragStart = null;
+        let _tabDragEl = null;
+        let _tabDragStartX = 0;
+        let _tabDragActive = false;
+        let _tabDragInitialized = false;
 
         function initTabDragAndDropMode() {
-            if (!document.body.classList.contains('admin-mode')) {
-                // Disable dragging when leaving admin mode
-                return;
-            }
-
             const tabsBar = document.getElementById('tabsBar');
             if (!tabsBar) return;
 
-            const tabs = Array.from(tabsBar.querySelectorAll('.tab'));
+            if (!document.body.classList.contains('admin-mode')) {
+                tabsBar.style.cursor = '';
+                return;
+            }
 
-            tabs.forEach(tab => {
-                // Mousedown - commence le drag
-                tab.addEventListener('mousedown', function(e) {
-                    if (e.button !== 0) return; // Seulement bouton gauche
-                    tabDragging = true;
-                    tabDragStart = this;
-                    this.style.opacity = '0.5';
-                    this.style.cursor = 'grabbing';
-                }, { once: false });
+            tabsBar.style.cursor = 'grab';
+
+            if (_tabDragInitialized) return;
+            _tabDragInitialized = true;
+
+            tabsBar.addEventListener('mousedown', function(e) {
+                if (!document.body.classList.contains('admin-mode')) return;
+                const tab = e.target.closest('.tab');
+                if (!tab) return;
+                _tabDragEl = tab;
+                _tabDragStartX = e.clientX;
+                _tabDragActive = false;
             });
 
-            // Mouseover - pendant le drag
-            tabs.forEach(tab => {
-                tab.addEventListener('mouseover', function(e) {
-                    if (!tabDragging || !tabDragStart || tabDragStart === this) return;
+            document.addEventListener('mousemove', function(e) {
+                if (!_tabDragEl) return;
 
-                    const rect = this.getBoundingClientRect();
-                    const startRect = tabDragStart.getBoundingClientRect();
+                // Commence le drag seulement après 5px de mouvement
+                if (!_tabDragActive) {
+                    if (Math.abs(e.clientX - _tabDragStartX) < 5) return;
+                    _tabDragActive = true;
+                    _tabDragEl.style.opacity = '0.4';
+                    _tabDragEl.style.cursor = 'grabbing';
+                    document.body.style.cursor = 'grabbing';
+                    document.body.style.userSelect = 'none';
+                }
 
-                    // Échange les positions
-                    if (startRect.left > rect.left) {
-                        this.parentNode.insertBefore(tabDragStart, this);
-                    } else {
-                        this.parentNode.insertBefore(tabDragStart, this.nextSibling);
-                    }
-                }, { once: false });
+                e.preventDefault();
+                const el = document.elementFromPoint(e.clientX, e.clientY);
+                if (!el) return;
+                const overTab = el.closest('.tab');
+                if (!overTab || overTab === _tabDragEl) return;
+                const overRect = overTab.getBoundingClientRect();
+                const mid = overRect.left + overRect.width / 2;
+                if (e.clientX < mid) {
+                    tabsBar.insertBefore(_tabDragEl, overTab);
+                } else {
+                    tabsBar.insertBefore(_tabDragEl, overTab.nextSibling);
+                }
             });
 
-            // Mouseup - fin du drag
             document.addEventListener('mouseup', function(e) {
-                if (tabDragging && tabDragStart) {
-                    tabDragStart.style.opacity = '1';
-                    tabDragStart.style.cursor = 'move';
-                    tabDragging = false;
-                    tabDragStart = null;
+                if (!_tabDragEl) return;
+                if (_tabDragActive) {
+                    // C'était un drag - pas un clic
+                    _tabDragEl.style.opacity = '';
+                    _tabDragEl.style.cursor = '';
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
                     saveTabOrder();
                 }
-            }, { once: false });
+                // Si pas active, c'est un simple clic - le onclick s'exécute normalement
+                _tabDragEl = null;
+                _tabDragActive = false;
+            });
         }
 
         function initSectionDragAndDrop() {
