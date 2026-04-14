@@ -32,6 +32,8 @@
 10. [Données et persistance](#10-données-et-persistance)
 11. [Technologies utilisées](#11-technologies-utilisées)
 12. [Glossaire](#12-glossaire)
+16. [Gestion Logistique (Phase 4)](#16-gestion-logistique-phase-4)
+17. [Conditions d'utilisation](#17-conditions-dutilisation)
 
 ---
 
@@ -224,6 +226,21 @@ La méthode **FIFO** (First In, First Out — Premier Entré, Premier Sorti) est
 #### Alertes de stock
 
 Notifications automatiques lorsqu'un article passe en dessous de son seuil minimum défini.
+
+#### Stocks minimums & alertes
+
+Tableau interactif permettant de définir un **stock minimum** par référence article :
+- Colonne **Stock min** : champ éditable pour chaque article
+- **Statut** : badge "✅ OK" ou "⚠️ Stock bas" automatique
+- **Export CSV** : export de l'inventaire complet avec alertes
+
+#### Modèles de stock minimum
+
+Fonctionnalité de sauvegarde et chargement de configurations de stock minimum :
+- **💾 Sauver comme modèle** : sauvegarde la configuration actuelle avec un nom personnalisé
+- **📂 Charger modèle** : liste des modèles sauvegardés, application en un clic
+- **Suppression** : possibilité de supprimer les modèles obsolètes
+- Les modèles sont persistés dans le `localStorage`
 
 ---
 
@@ -750,6 +767,154 @@ Chaque apprenant a une **checklist de gestes** :
 - ✓ Geste maîtrisé
 - ◯ Geste en cours d'apprentissage
 - Vidéo de formation intégrée
+
+---
+
+## 16. Gestion Logistique (Phase 4)
+
+### 16.1 Module Gestion Logistique 🏭
+
+Nouvel onglet dédié à l'**organisation optimale du stockage** en atelier avec visualisation 2D/3D.
+
+**Fonction principale :** Organiser les articles (consommables, produits) sur des racks et palettes avec un système de placement flexible sans contraintes d'assignement forcé.
+
+#### 16.1.1 Configuration de l'entrepôt
+
+Création et gestion des emplacements de stockage :
+
+| Élément | Description |
+|--------|------------|
+| **Racks** | Mobiliers de rangement avec capacité définie |
+| **Palettes** | Zones de stockage temporaire ou permanent |
+| **Articles libres** | Articles non assignés à un emplacement spécifique |
+
+#### 16.1.2 Système de placement flexible
+
+**Trois modes de placement :**
+
+1. **Placement assigné** : Article droppe sur un rack/palette → assigné à cet emplacement
+2. **Placement libre** : Article droppe sur une zone vide → reste en "zone libre" (non assigné)
+3. **Déplacement** : Réorganisation des articles entre racks, palettes ou zone libre
+
+**Zone "Articles Libres"**
+- Affichée en bas de page (bandeau orange/jaune)
+- Liste tous les articles non assignés
+- Les articles de cette zone peuvent être réassignés à tout moment
+- Utile pour le stockage temporaire ou flexibilité de placement
+
+#### 16.1.3 Visualisation
+
+**Vue 2D** (par défaut)
+- Représentation en plan des racks et palettes
+- Affichage des articles placés avec quantités
+- Indicateur de capacité (% rempli)
+- Zoom et panoramique pour navigation
+
+**Vue 3D** (optionnel)
+- Visualisation isométrique de l'entrepôt
+- Interaction à la souris (rotation, zoom)
+- Utile pour planification spatiale complexe
+
+#### 16.1.4 Gestion des articles
+
+**Ajouter des articles**
+1. Accédez à la section "Articles disponibles"
+2. Les articles proviennent du catalogue de **Consommables**
+3. Dragguez-les sur le canvas pour les placer
+
+**Glisser-déposer (drag & drop)**
+- Dropper sur un emplacement → assigné
+- Dropper sur zone vide → article libre
+- Dropper en zone "Articles Libres" → retrait d'assignement
+
+**Gestion des quantités**
+- Chaque dépôt additionne la quantité
+- Possibilité de retirer des articles en les redéplaçant
+
+#### 16.1.5 Jeux logistiques 🎮
+
+**Deux modes d'entraînement pédagogiques :**
+
+1. **Mode Apprentissage** (📚)
+   - Explication des règles de compatibilité
+   - Guide des types de produits
+   - Affichage des contraintes
+
+2. **Mode Challenge** (🎯)
+   - Placer les articles en respectant les règles
+   - Contraintes de compatibilité activées
+   - Notation et feedback
+
+3. **Mode Speed** (⚡)
+   - 60 secondes pour placer 10 articles
+   - Aucune contrainte de compatibilité
+   - Test de vitesse et réactivité
+
+4. **Mode Quiz** (❓)
+   - Questions sur les règles de placement
+   - Feedback pédagogique
+   - Score et progression
+
+#### 16.1.6 Règles de compatibilité
+
+Système optionnel de **contraintes de placement** pour sensibiliser à la sécurité et conformité :
+
+| Produit | Incompatible avec | Raison |
+|---------|------------------|--------|
+| Liquides | Fragiles, Solides | Risque de dégâts |
+| Lourds | Fragiles | Écrasement |
+| Chaud | Froid | Dégâts thermiques |
+
+**Note :** Les règles sont activables/désactivables selon le mode de jeu.
+
+#### 16.1.7 Contrôles
+
+| Bouton | Action |
+|--------|--------|
+| 📍 Vue 2D | Basculer vers la visualisation 2D (défaut) |
+| 🎬 Vue 3D | Basculer vers la visualisation 3D |
+| 🎮 Jeux | Accéder aux modes d'entraînement gamifiés |
+| ⏱️ Chrono | Mode chronométré de placement (challenge) |
+| 📊 Analytics | Analyse de l'occupation et heatmap |
+| 👤 Profil | Voir les statistiques personnelles |
+
+#### 16.1.8 Analytics et reporting
+
+**Heatmap d'accès**
+- Visualisation graphique de l'occupation par emplacement
+- Codes couleur : vert (faible), jaune (moyen), rouge (saturation)
+
+**Statistiques (panneau dédié)**
+- Nombre total d'emplacements (racks + palettes)
+- Taux d'occupation global (%)
+- Nombre de mouvements enregistrés
+- Nombre d'articles en zone libre
+- Occupation moyenne par emplacement
+- Zone la plus chargée
+- Espace libre disponible
+- Export du rapport
+
+**Recherche et filtres**
+- Champ de recherche en temps réel pour les articles disponibles
+- Filtre en temps réel sur l'historique des mouvements
+
+---
+
+## 17. Conditions d'utilisation
+
+Les conditions d'utilisation détaillées sont accessibles depuis le **footer** de l'application en cliquant sur le lien **"Conditions d'utilisation"**. Le footer est simplifié en une seule ligne : `© 2025–2026 MARET Davie — Conditions d'utilisation` avec un modal détaillé au clic.
+
+### 17.1 Résumé
+
+- © 2025–2026 **MARET Davie** — Tous droits réservés
+- Toute reproduction ou utilisation sans accord préalable écrit est **interdite**
+- Code fourni à titre **informatif et éducatif**
+- Designs et contenus créatifs **protégés par le droit d'auteur**
+- Pour collaborations : contactez l'auteur
+
+### 17.2 Attribution
+
+Si vous utilisez ou vous inspirez de ces projets, veuillez citer : **dmaret © 2025–2026**
 
 ---
 
