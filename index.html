@@ -4552,7 +4552,7 @@
             learnerStartDateField.valueAsDate = new Date();
         }
         // Initialize tab drag-drop functionality
-        setTimeout(() => initTabDrag(), 100);
+        setTimeout(() => initTabDragAndDropMode(), 100);
         } catch(initErr) { console.error('Erreur initialisation:', initErr); }
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
@@ -9343,7 +9343,7 @@
                     renderAdminList('emplacements');
                     renderAdminList('unites');
                     logAction('Connexion mode administrateur');
-                    setTimeout(() => { updateTabScrollBtns(); initTabDrag(); initTabDragAndDropMode(); }, 50);
+                    setTimeout(() => { updateTabScrollBtns(); initTabDragAndDropMode(); }, 50);
                 } else {
                     toast('❌ PIN incorrect', 'error');
                     logAction('Tentative connexion admin échouée');
