@@ -4493,6 +4493,7 @@
         let tabProfiles = [];
         let activeTabProfileId = null;
         let learnersList = [];
+        let selectedLearnerId = null;
         let formationProgress = {};
         let auditLog = [];
         let referenceDocuments = [];
@@ -6947,8 +6948,6 @@
                 `;
             }).join('');
         }
-
-        let selectedLearnerId = null;
 
         function selectLearner(learnerId) {
             selectedLearnerId = learnerId;
