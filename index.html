@@ -595,6 +595,46 @@
         .tabs-drag-hint { display:none; font-size:0.7em; color:#8aacbc; padding:0 8px; line-height:1; white-space:nowrap; }
         body.admin-mode .tabs-drag-hint { display:inline; }
 
+        /* ── Sections drag-and-drop in admin mode ──────────────────────── */
+        body.admin-mode .section {
+            cursor: grab;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        body.admin-mode .section:hover {
+            box-shadow: 0 8px 24px rgba(150,150,180,0.25) !important;
+        }
+        body.admin-mode .section:active { cursor: grabbing; }
+        .section.section-drag-over {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+        .section.section-drop-indicator::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6b8fa3, #a8d5e2);
+            border-radius: 2px;
+        }
+        .section-drag-hint {
+            display: none;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.75em;
+            color: #8aacbc;
+            background: rgba(107, 143, 163, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 10;
+        }
+        body.admin-mode .section-drag-hint { display: block; }
+
         /* ── Auth login overlay ──────────────────────────────────────── */
         .auth-overlay {
             position: fixed; inset: 0; z-index: 9999;
@@ -4762,6 +4802,104 @@
             });
         }
 
+        let draggedSection = null;
+
+        function initSectionDragAndDrop() {
+            const tabContent = document.querySelector('.tab-content.active');
+            if (!tabContent || !document.body.classList.contains('admin-mode')) return;
+
+            const sections = tabContent.querySelectorAll('.section');
+
+            sections.forEach((section, index) => {
+                // Add drag hint
+                if (!section.querySelector('.section-drag-hint')) {
+                    const hint = document.createElement('div');
+                    hint.className = 'section-drag-hint';
+                    hint.textContent = '[DÉPLACER]';
+                    section.appendChild(hint);
+                }
+
+                section.draggable = true;
+
+                section.addEventListener('dragstart', (e) => {
+                    draggedSection = section;
+                    section.classList.add('section-drag-over');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                section.addEventListener('dragend', (e) => {
+                    section.classList.remove('section-drag-over');
+                    sections.forEach(s => s.classList.remove('section-drop-indicator'));
+                    draggedSection = null;
+                });
+
+                section.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+
+                    if (section !== draggedSection && draggedSection) {
+                        const rect = section.getBoundingClientRect();
+                        const midpoint = rect.top + rect.height / 2;
+
+                        if (e.clientY < midpoint) {
+                            section.classList.add('section-drop-indicator');
+                            section.parentNode.insertBefore(draggedSection, section);
+                        } else {
+                            section.classList.remove('section-drop-indicator');
+                            section.parentNode.insertBefore(draggedSection, section.nextSibling);
+                        }
+                    }
+                });
+
+                section.addEventListener('dragleave', (e) => {
+                    if (e.target === section) {
+                        section.classList.remove('section-drop-indicator');
+                    }
+                });
+
+                section.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    section.classList.remove('section-drop-indicator');
+                    saveSectionOrder();
+                });
+            });
+        }
+
+        function saveSectionOrder() {
+            const tabContent = document.querySelector('.tab-content.active');
+            if (!tabContent) return;
+
+            // Find current tab name from class or data attribute
+            let tabName = null;
+            for (let el of tabContent.classList) {
+                if (el !== 'tab-content' && el !== 'active') {
+                    tabName = el;
+                    break;
+                }
+            }
+            if (!tabName) {
+                // Fallback: try to get from id
+                tabName = tabContent.id;
+            }
+
+            if (!tabName) return;
+
+            const sections = tabContent.querySelectorAll('.section');
+            const order = Array.from(sections).map((s, idx) => idx);
+            localStorage.setItem(`sectionOrder_${tabName}`, JSON.stringify(order));
+        }
+
+        function restoreSectionOrder(tabName) {
+            const saved = localStorage.getItem(`sectionOrder_${tabName}`);
+            if (!saved) return;
+
+            try {
+                setTimeout(() => initSectionDragAndDrop(), 100);
+            } catch (e) {
+                console.error('Error restoring section order:', e);
+            }
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -4793,6 +4931,9 @@
                 // Formation Logistique - contenu théorique statique
                 renderFormationLogistiqueApprenants();
             }
+
+            // Initialize drag-and-drop for sections in admin mode
+            setTimeout(() => initSectionDragAndDrop(), 50);
         }
 
         function buildGesteOptions(selCode) {
