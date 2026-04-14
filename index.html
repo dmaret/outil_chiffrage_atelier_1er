@@ -4551,14 +4551,14 @@
         if (learnerStartDateField) {
             learnerStartDateField.valueAsDate = new Date();
         }
-        // Initialize tab drag-drop functionality
-        setTimeout(() => initTabDragAndDropMode(), 100);
         } catch(initErr) { console.error('Erreur initialisation:', initErr); }
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
             initAuthGroups();
             checkAuthSession();
             syncEmailWebhooksUI();  // Synchronize email webhooks config UI
+            // Initialize tab drag-drop functionality
+            initTabDragAndDropMode();
         });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
@@ -4797,37 +4797,57 @@
 
         let draggedSection = null;
         let _tabDragSrc = null;
+        let _tabDragJustEnded = false;
 
         function initTabDragAndDropMode() {
             const bar = document.getElementById('tabsBar');
-            if (!bar || bar._tabDragReady) return;
+            if (!bar) return;
+
+            // Toujours mettre draggable sur les tabs
+            bar.querySelectorAll('.tab').forEach(t => t.setAttribute('draggable', 'true'));
+
+            // Listeners déjà en place ? On sort
+            if (bar._tabDragReady) return;
             bar._tabDragReady = true;
+
             bar.addEventListener('dragstart', e => {
                 const tab = e.target.closest('.tab');
                 if (!tab || !isSuperUser) { e.preventDefault(); return; }
                 _tabDragSrc = tab;
-                tab.classList.add('tab-drag-over');
+                tab.style.opacity = '0.4';
                 e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', '');
             });
+
             bar.addEventListener('dragend', () => {
-                bar.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-drag-over','tab-drop-before','tab-drop-after'));
+                if (_tabDragSrc) _tabDragSrc.style.opacity = '';
+                bar.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('tab-drag-over','tab-drop-before','tab-drop-after');
+                });
                 _tabDragSrc = null;
                 saveTabOrder();
                 updateTabScrollBtns();
+                // Empêche switchTab de se déclencher après un drag
+                _tabDragJustEnded = true;
+                setTimeout(() => { _tabDragJustEnded = false; }, 100);
             });
+
             bar.addEventListener('dragover', e => {
                 if (!_tabDragSrc || !isSuperUser) return;
                 e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
                 const tab = e.target.closest('.tab');
                 if (!tab || tab === _tabDragSrc) return;
                 bar.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-drop-before','tab-drop-after'));
                 const rect = tab.getBoundingClientRect();
                 tab.classList.add(e.clientX < rect.left + rect.width / 2 ? 'tab-drop-before' : 'tab-drop-after');
             });
+
             bar.addEventListener('dragleave', e => {
                 const tab = e.target.closest('.tab');
                 if (tab) tab.classList.remove('tab-drop-before','tab-drop-after');
             });
+
             bar.addEventListener('drop', e => {
                 if (!_tabDragSrc || !isSuperUser) return;
                 e.preventDefault();
@@ -4838,8 +4858,6 @@
                 if (e.clientX < rect.left + rect.width / 2) bar.insertBefore(_tabDragSrc, tab);
                 else bar.insertBefore(_tabDragSrc, tab.nextSibling);
             });
-            // Set draggable on all tabs
-            bar.querySelectorAll('.tab').forEach(t => t.setAttribute('draggable', 'true'));
         }
 
         function initSectionDragAndDrop() {
@@ -4903,10 +4921,17 @@
         }
 
         function switchTab(tabName) {
+            // Ignore le clic si on vient de terminer un drag d'onglet
+            if (_tabDragJustEnded) return;
+
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            if (event?.target) event.target.classList.add('active');
+            // Trouve le bon bouton onglet par son attribut onclick
+            const tabBtn = [...document.querySelectorAll('.tab')].find(t =>
+                t.getAttribute('onclick')?.includes("'" + tabName + "'")
+            );
+            if (tabBtn) tabBtn.classList.add('active');
             const tabEl = document.getElementById(tabName);
             if (tabEl) tabEl.classList.add('active');
 
@@ -7879,9 +7904,9 @@
                         <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
                         <td>${p.client}</td><td><strong>${p.prestation}</strong><br><span style="font-size:0.78em;color:#aaa;">${p.reference}</span></td>
                         <td>${badge}</td>
-                        <td style="font-weight:bold;">${p.prixVente.toFixed(2)} CHF</td>
-                        <td style="color:${(p.prixVente-p.prixRevient)>=0?'#27ae60':'#e74c3c'}">${p.marge}%</td>
-                        <td>${p.heures.toFixed(1)}h</td>
+                        <td style="font-weight:bold;">${(p.prixVente||0).toFixed(2)} CHF</td>
+                        <td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${p.marge||0}%</td>
+                        <td>${(p.heures||0).toFixed(1)}h</td>
                         <td style="white-space:nowrap;">
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})">🔄</button>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
@@ -9893,14 +9918,6 @@
         }
 
         // ── Tab drag-to-reorder (admin mode) ────────────────────────
-        let _tabDragSrc = null;
-
-        // DEPRECATED: Use initTabDragAndDropMode() instead
-        function initTabDrag() {
-            // Disabled - conflicts with initTabDragAndDropMode()
-            return;
-        }
-
         function saveTabOrder() {
             const bar = document.getElementById('tabsBar');
             if (!bar) return;
