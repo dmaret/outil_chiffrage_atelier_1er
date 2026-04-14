@@ -1968,8 +1968,36 @@
                             <input type="date" id="dateValidite">
                         </div>
                     </div>
-                    <div style="margin-top:8px;">
+                    <!-- Options avancées calculateur -->
+                    <div class="form-row" style="margin-top:12px;padding-top:12px;border-top:1px dashed #d5e3ed;">
+                        <div class="form-group">
+                            <label>🚨 Urgence / Priorité</label>
+                            <select id="multiplicateurUrgence" onchange="calculateTotal()" style="font-weight:600;">
+                                <option value="1">Normal (×1)</option>
+                                <option value="1.15">Prioritaire +15%</option>
+                                <option value="1.25">Urgent +25%</option>
+                                <option value="1.50">Express +50%</option>
+                            </select>
+                            <span class="help-text">Majoration appliquée sur le prix de vente</span>
+                        </div>
+                        <div class="form-group">
+                            <label>♻️ Perte / Déchet consommables (%)</label>
+                            <input type="number" id="facteurPerte" value="0" min="0" max="50" step="1" onchange="calculateTotal()" style="font-weight:600;">
+                            <span class="help-text">% supplémentaire ajouté aux consommables</span>
+                        </div>
+                        <div class="form-group">
+                            <label>⏸️ Temps non-facturable (min)</label>
+                            <input type="number" id="tempsNonFacturable" value="0" min="0" step="5" onchange="calculateTotal()">
+                            <span class="help-text">Pauses, attentes, transitions — absorbé par l'atelier</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
                         <button class="btn btn-secondary btn-small" onclick="toggleSimulVolumes()">⚡ Simuler volumes</button>
+                        <button class="btn btn-secondary btn-small" onclick="toggleSensibilite()">📊 Analyse sensibilité</button>
+                    </div>
+                    <div id="sensibilitePanel" style="display:none;margin-top:14px;padding:16px;background:#f8f4ff;border:1px solid #d4c8e8;border-radius:8px;">
+                        <h3 style="margin:0 0 12px;color:#8e44ad;">📊 Analyse de sensibilité — Impact sur le prix de vente</h3>
+                        <div id="sensibiliteResult"></div>
                     </div>
                     <div id="simulVolumesPanel">
                         <h3 style="margin-top:14px;">Simulation tarification dégressive</h3>
@@ -2076,6 +2104,7 @@
                     </div>
                 </div>
 
+                <div id="calcBadges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
                 <div class="total-box">
                     <h3>Valorisation financière</h3>
                     <div class="total-grid">
@@ -5720,12 +5749,15 @@
             const coutEncadrementBrut = totalHeures * nbMSP * config.coutHoraireMSP;
             const coutEncadrement = mspActif ? coutEncadrementBrut : 0;
 
-            // Consommables × nb pièces
+            // Facteur perte consommables
+            const facteurPerte = 1 + (parseFloat(document.getElementById('facteurPerte')?.value || 0) / 100);
+
+            // Consommables × nb pièces × facteur perte
             let coutConsommables = 0;
             consommableLines.forEach(lineId => {
                 const prix = parseFloat(document.getElementById('prix-consom-' + lineId)?.value || 0);
                 const qte = parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 0);
-                const total = prix * qte * nbPieces;
+                const total = prix * qte * nbPieces * facteurPerte;
                 if (document.getElementById('total-consom-' + lineId)) {
                     document.getElementById('total-consom-' + lineId).value = total.toFixed(2);
                 }
@@ -5763,8 +5795,16 @@
             
             const margePourcent = parseFloat(document.getElementById('margePercent')?.value || 0);
             const margeChf = prixRevient * margePourcent / 100;
-            const prixVente = prixRevient + margeChf;
-            
+            const prixVenteBase = prixRevient + margeChf;
+
+            // Multiplicateur urgence
+            const multUrgence = parseFloat(document.getElementById('multiplicateurUrgence')?.value || 1);
+            const prixVente = prixVenteBase * multUrgence;
+
+            // Temps non-facturable (info uniquement)
+            const tempsNonFact = parseFloat(document.getElementById('tempsNonFacturable')?.value || 0);
+            const heuresReellesTotal = totalHeures + (tempsNonFact / 60);
+
             const prixVentePiece = nbPieces > 1 ? prixVente / nbPieces : null;
 
             document.getElementById('totalHeures').textContent = totalHeures.toFixed(2);
@@ -5779,17 +5819,26 @@
             document.getElementById('margeChf').textContent = margeChf.toFixed(2);
             document.getElementById('prixVente').textContent = prixVente.toFixed(2);
 
+            // Indicateurs urgence, perte, temps non-facturable
+            let badgesHtml = '';
+            if (multUrgence > 1) badgesHtml += `<span style="background:#e74c3c;color:white;padding:3px 8px;border-radius:10px;font-size:0.78em;font-weight:bold;">🚨 Urgence ×${multUrgence} (+${((multUrgence-1)*100).toFixed(0)}%)</span> `;
+            if (facteurPerte > 1) badgesHtml += `<span style="background:#f39c12;color:white;padding:3px 8px;border-radius:10px;font-size:0.78em;font-weight:bold;">♻️ Perte +${((facteurPerte-1)*100).toFixed(0)}%</span> `;
+            if (tempsNonFact > 0) badgesHtml += `<span style="background:#8e44ad;color:white;padding:3px 8px;border-radius:10px;font-size:0.78em;font-weight:bold;">⏸️ ${tempsNonFact}min non-fact. (total réel: ${heuresReellesTotal.toFixed(2)}h)</span> `;
+            const badgesEl = document.getElementById('calcBadges');
+            if (badgesEl) badgesEl.innerHTML = badgesHtml;
+
             // Affichage prix unitaire si nb pièces > 1
             const boxUnitaire = document.getElementById('prixUnitaireBox');
             const boxTotal = document.getElementById('prixTotalBox');
             const labelTotal = document.getElementById('prixVenteTotalLabel');
             if (nbPieces > 1) {
-                boxUnitaire.style.display = 'block';
-                boxTotal.style.cssText = '';
-                document.getElementById('prixVentePiece').textContent = prixVentePiece.toFixed(2);
+                if (boxUnitaire) boxUnitaire.style.display = 'block';
+                if (boxTotal) boxTotal.style.cssText = '';
+                const pvpEl = document.getElementById('prixVentePiece');
+                if (pvpEl && prixVentePiece !== null) pvpEl.textContent = prixVentePiece.toFixed(2);
                 if (labelTotal) labelTotal.textContent = `(× ${nbPieces} pièces)`;
             } else {
-                boxUnitaire.style.display = 'none';
+                if (boxUnitaire) boxUnitaire.style.display = 'none';
                 if (boxTotal) boxTotal.style.gridColumn = '1 / -1';
                 if (labelTotal) labelTotal.textContent = '';
             }
@@ -9699,6 +9748,98 @@
         // ============================================================
         // FEATURE 2 : Simulation volumes
         // ============================================================
+        function toggleSensibilite() {
+            const panel = document.getElementById('sensibilitePanel');
+            const isVisible = panel.style.display === 'block';
+            panel.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) renderSensibilite();
+        }
+
+        function renderSensibilite() {
+            const container = document.getElementById('sensibiliteResult');
+            if (!container) return;
+
+            // Récupérer les valeurs actuelles
+            const nbPieces = Math.max(1, parseFloat(document.getElementById('nbPieces')?.value || 1));
+            const nbCEA = parseFloat(document.getElementById('nbCEA')?.value || 0);
+            const margePct = parseFloat(document.getElementById('margePercent')?.value || 0);
+
+            // Calculer le prix de base actuel
+            const currentPrix = parseFloat(document.getElementById('prixVente')?.textContent || 0);
+            const currentRevient = parseFloat(document.getElementById('totalRevient')?.textContent || 0);
+            if (currentRevient <= 0) {
+                container.innerHTML = '<p style="color:#7a9db1;font-style:italic;">Remplissez le calculateur pour lancer l\'analyse</p>';
+                return;
+            }
+
+            // Scénarios what-if
+            const scenarios = [
+                { label: 'Coût horaire CEA +10%', factor: 'coutCEA', delta: 0.10 },
+                { label: 'Coût horaire CEA +20%', factor: 'coutCEA', delta: 0.20 },
+                { label: 'Coût horaire MSP +10%', factor: 'coutMSP', delta: 0.10 },
+                { label: 'Consommables +15%', factor: 'conso', delta: 0.15 },
+                { label: 'Consommables +30%', factor: 'conso', delta: 0.30 },
+                { label: 'Volume ×2 (nb pièces)', factor: 'volume', delta: 2 },
+                { label: 'Volume ×5 (nb pièces)', factor: 'volume', delta: 5 },
+                { label: '1 CEA en plus', factor: 'addCEA', delta: 1 },
+                { label: 'Marge réduite à 10%', factor: 'marge', value: 10 },
+                { label: 'Marge augmentée à 30%', factor: 'marge', value: 30 },
+            ];
+
+            // Calculer chaque scénario via une simulation simplifiée
+            let html = `<table style="width:100%;border-collapse:collapse;font-size:0.88em;">
+                <thead><tr style="background:#e8d8f4;">
+                    <th style="padding:8px;text-align:left;">Scénario</th>
+                    <th style="padding:8px;text-align:right;">Prix vente</th>
+                    <th style="padding:8px;text-align:right;">Écart</th>
+                    <th style="padding:8px;text-align:right;">Impact</th>
+                </tr></thead><tbody>`;
+
+            // Recalcul simplifié pour chaque scénario
+            scenarios.forEach(sc => {
+                let newPrix = currentPrix;
+                const coutMO = parseFloat(document.getElementById('coutMO')?.textContent || 0);
+                const coutEnc = parseFloat(document.getElementById('coutEncadrement')?.textContent || 0);
+                const coutConso = parseFloat(document.getElementById('coutConsommables')?.textContent || 0);
+                const coutStock = parseFloat(document.getElementById('coutStockage')?.textContent || 0);
+                const coutFrais = parseFloat(document.getElementById('coutFraisGeneraux')?.textContent || 0);
+
+                if (sc.factor === 'coutCEA') {
+                    const delta = coutMO * sc.delta;
+                    newPrix = currentPrix + delta * (1 + margePct / 100);
+                } else if (sc.factor === 'coutMSP') {
+                    const delta = coutEnc * sc.delta;
+                    newPrix = currentPrix + delta * (1 + margePct / 100);
+                } else if (sc.factor === 'conso') {
+                    const delta = coutConso * sc.delta;
+                    newPrix = currentPrix + delta * (1 + margePct / 100);
+                } else if (sc.factor === 'volume') {
+                    newPrix = calcPrixForQty(nbPieces * sc.delta);
+                } else if (sc.factor === 'addCEA') {
+                    const heureCEA = coutMO / Math.max(nbCEA, 1);
+                    newPrix = currentPrix + heureCEA * sc.delta * (1 + margePct / 100);
+                } else if (sc.factor === 'marge') {
+                    newPrix = currentRevient * (1 + sc.value / 100);
+                }
+
+                const ecart = newPrix - currentPrix;
+                const pctImpact = currentPrix > 0 ? (ecart / currentPrix * 100) : 0;
+                const color = ecart > 0 ? '#e74c3c' : ecart < 0 ? '#27ae60' : '#8a99a8';
+                const arrow = ecart > 0 ? '▲' : ecart < 0 ? '▼' : '—';
+
+                html += `<tr style="border-bottom:1px solid #e8e0f0;">
+                    <td style="padding:6px 8px;">${sc.label}</td>
+                    <td style="padding:6px 8px;text-align:right;font-weight:600;">${newPrix.toFixed(2)} CHF</td>
+                    <td style="padding:6px 8px;text-align:right;color:${color};font-weight:600;">${ecart >= 0 ? '+' : ''}${ecart.toFixed(2)} CHF</td>
+                    <td style="padding:6px 8px;text-align:right;color:${color};font-weight:bold;">${arrow} ${Math.abs(pctImpact).toFixed(1)}%</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            html += `<p style="font-size:0.78em;color:#8a99a8;margin-top:8px;">Base: prix actuel ${currentPrix.toFixed(2)} CHF — marge ${margePct}%</p>`;
+            container.innerHTML = html;
+        }
+
         function toggleSimulVolumes() {
             const panel = document.getElementById('simulVolumesPanel');
             const isVisible = panel.style.display === 'block';
@@ -9731,11 +9872,12 @@
             const coutMO = totalHeures * nbCEA * config.coutHoraireCEA;
             const coutEncadrement = totalHeures * nbMSP * config.coutHoraireMSP;
 
+            const facteurPerte = 1 + (parseFloat(document.getElementById('facteurPerte')?.value || 0) / 100);
             let coutConsommables = 0;
             consommableLines.forEach(lineId => {
                 const prix = parseFloat(document.getElementById('prix-consom-' + lineId)?.value || 0);
                 const qte = parseFloat(document.getElementById('qte-consom-' + lineId)?.value || 0);
-                coutConsommables += prix * qte * qty;
+                coutConsommables += prix * qte * qty * facteurPerte;
             });
 
             let coutStockage = 0;
@@ -9758,7 +9900,8 @@
 
             const prixRevient = coutMO + coutEncadrement + coutConsommables + coutStockage + fraisGeneraux;
             const marge = parseFloat(document.getElementById('margePercent')?.value || 0);
-            const prixVente = prixRevient * (1 + marge / 100);
+            const multUrgence = parseFloat(document.getElementById('multiplicateurUrgence')?.value || 1);
+            const prixVente = prixRevient * (1 + marge / 100) * multUrgence;
             return prixVente;
         }
 
