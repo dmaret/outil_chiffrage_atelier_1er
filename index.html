@@ -6838,7 +6838,9 @@
                 return;
             }
 
-            container.innerHTML = assignedTrainings.map(training => {
+            container.innerHTML = `<div style="text-align:right;margin-bottom:12px;">
+                <button class="btn btn-secondary btn-small" onclick="printLearnerTrainings('${learner.id}')" title="Version imprimable PDF">🖨️ Imprimer la fiche formation</button>
+            </div>` + assignedTrainings.map(training => {
                 const assignedDocs = learner.assignedDocuments ? learner.assignedDocuments.filter(d => d) : [];
                 return `<div style="padding:16px;border:1px solid #2980b9;border-radius:6px;background:#ecf2f7;margin-bottom:12px;">
                     <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
@@ -6865,6 +6867,83 @@
                     ` : '<p style="color:#7a9db1;font-style:italic;margin:12px 0 0;">Aucun document assigné</p>'}
                 </div>`;
             }).join('');
+        }
+
+        function printLearnerTrainings(learnerId) {
+            const learner = learnersList.find(l => l.id == learnerId);
+            if (!learner) return;
+
+            const assignedTrainings = trainingRequests.filter(r => r.assignedTo === learner.name && r.status === 'approved');
+            const assignedDocs = learner.assignedDocuments ? learner.assignedDocuments.filter(d => d) : [];
+
+            // Progression gestes
+            const totalGestes = (catalogueGestes || []).length;
+            const gestesValides = learner.progress ? Object.values(learner.progress).filter(v => v).length : 0;
+            const pctGestes = totalGestes > 0 ? Math.round(gestesValides / totalGestes * 100) : 0;
+
+            let formationsHtml = '';
+            assignedTrainings.forEach((t, i) => {
+                const dateApproval = t.approvedAt ? new Date(t.approvedAt).toLocaleDateString('fr-FR') : '-';
+                const dateRequest = t.requestedAt ? new Date(t.requestedAt).toLocaleDateString('fr-FR') : '-';
+                // Quiz info
+                let quizHtml = '';
+                if (t.quizScore !== undefined && t.quizTotal) {
+                    const passed = t.quizScore >= (t.quizTotal / 2);
+                    quizHtml = `<tr><td style="padding:6px 10px;font-weight:600;">Quiz</td><td style="padding:6px 10px;">${t.quizScore}/${t.quizTotal} — ${passed ? '✅ Réussi' : '❌ À refaire'}</td></tr>`;
+                }
+                // Docs for this training
+                let docsHtml = '';
+                if (assignedDocs.length > 0) {
+                    const docItems = assignedDocs.map(docId => {
+                        const doc = referenceDocuments.find(d => d.id == docId);
+                        return doc ? `<li style="margin-bottom:4px;">${doc.title} ${doc.type === 'link' ? '(🔗 lien)' : '(📄 fichier)'}${doc.url ? ' — ' + doc.url : ''}</li>` : '';
+                    }).filter(Boolean).join('');
+                    if (docItems) docsHtml = `<tr><td style="padding:6px 10px;font-weight:600;vertical-align:top;">Documents</td><td style="padding:6px 10px;"><ul style="margin:0;padding-left:18px;">${docItems}</ul></td></tr>`;
+                }
+
+                formationsHtml += `
+                    <div style="border:1px solid #c8d8e4;border-radius:8px;padding:16px;margin-bottom:14px;background:#f8fbfd;">
+                        <h3 style="margin:0 0 10px;color:#2980b9;">📚 ${i+1}. ${t.category}</h3>
+                        <table style="width:100%;border-collapse:collapse;">
+                            <tr><td style="padding:6px 10px;font-weight:600;width:140px;">Demandée le</td><td style="padding:6px 10px;">${dateRequest}</td></tr>
+                            <tr><td style="padding:6px 10px;font-weight:600;">Approuvée le</td><td style="padding:6px 10px;">${dateApproval}</td></tr>
+                            <tr><td style="padding:6px 10px;font-weight:600;">Statut</td><td style="padding:6px 10px;color:#27ae60;font-weight:bold;">✅ Approuvée</td></tr>
+                            ${quizHtml}
+                            ${docsHtml}
+                        </table>
+                    </div>`;
+            });
+
+            const html = `
+                <div style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:30px;color:#2d3e50;">
+                    <div style="background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%);padding:25px;border-radius:12px;margin-bottom:25px;text-align:center;">
+                        <h1 style="margin:0;font-size:1.6em;color:#2d3e50;">🏭 Atelier La Pallanterie</h1>
+                        <p style="margin:5px 0 0;opacity:0.8;">Fiche de formation — Apprenant</p>
+                    </div>
+
+                    <h2 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;">👤 Informations apprenant</h2>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:25px;">
+                        <tr><td style="padding:8px 10px;font-weight:bold;width:180px;">Nom</td><td style="padding:8px 10px;font-size:1.1em;">${learner.name}</td></tr>
+                        <tr><td style="padding:8px 10px;font-weight:bold;">Catégorie</td><td style="padding:8px 10px;">${learner.category || '-'}</td></tr>
+                        <tr><td style="padding:8px 10px;font-weight:bold;">Date de début</td><td style="padding:8px 10px;">${learner.startDate ? new Date(learner.startDate).toLocaleDateString('fr-FR') : '-'}</td></tr>
+                        <tr><td style="padding:8px 10px;font-weight:bold;">Progression gestes</td><td style="padding:8px 10px;">${gestesValides}/${totalGestes} (${pctGestes}%)</td></tr>
+                        <tr><td style="padding:8px 10px;font-weight:bold;">Formations assignées</td><td style="padding:8px 10px;font-weight:bold;color:#2980b9;">${assignedTrainings.length}</td></tr>
+                    </table>
+
+                    <h2 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;">📚 Formations à suivre</h2>
+                    ${assignedTrainings.length > 0 ? formationsHtml : '<p style="color:#7a9db1;font-style:italic;">Aucune formation assignée</p>'}
+
+                    <p style="text-align:center;font-size:0.75em;color:#aaa;margin-top:30px;border-top:1px solid #e0e0e0;padding-top:12px;">
+                        Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})} — Outil Atelier La Pallanterie
+                    </p>
+                </div>`;
+
+            const printZone = document.getElementById('printZone');
+            printZone.innerHTML = html;
+            printZone.style.display = 'block';
+            window.print();
+            printZone.style.display = 'none';
+            printZone.innerHTML = '';
         }
 
         function getFormationTimeline(formation) {
