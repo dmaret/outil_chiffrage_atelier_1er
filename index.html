@@ -4796,7 +4796,6 @@
 
         let draggedSection = null;
         let draggedTab = null;
-        let tabDragListenerAttached = false;
 
         function initTabDragAndDropMode() {
             if (!document.body.classList.contains('admin-mode')) {
@@ -4808,68 +4807,71 @@
             const tabsBar = document.getElementById('tabsBar');
             if (!tabsBar) return;
 
-            const tabs = tabsBar.querySelectorAll('.tab');
-            tabs.forEach(t => t.draggable = true);
+            const tabs = Array.from(tabsBar.querySelectorAll('.tab'));
+            tabs.forEach(tab => {
+                tab.draggable = true;
 
-            // Attach listeners once using event delegation on the container
-            if (!tabDragListenerAttached) {
-                tabsBar.addEventListener('dragstart', (e) => {
-                    if (e.target.classList.contains('tab')) {
-                        draggedTab = e.target;
-                        e.target.style.opacity = '0.5';
-                        e.dataTransfer.effectAllowed = 'move';
-                    }
+                // Remove old listeners by cloning (clean approach)
+                const newTab = tab.cloneNode(true);
+                tab.parentNode.replaceChild(newTab, tab);
+                tabs[tabs.indexOf(tab)] = newTab;
+            });
+
+            // Re-query tabs after cloning
+            const freshTabs = Array.from(tabsBar.querySelectorAll('.tab'));
+
+            freshTabs.forEach(tab => {
+                tab.draggable = true;
+
+                tab.addEventListener('dragstart', (e) => {
+                    draggedTab = tab;
+                    tab.style.opacity = '0.5';
+                    e.dataTransfer.effectAllowed = 'move';
                 });
 
-                tabsBar.addEventListener('dragend', (e) => {
-                    if (e.target.classList.contains('tab')) {
-                        e.target.style.opacity = '1';
-                        tabs.forEach(t => {
-                            t.style.borderLeft = 'none';
-                            t.style.borderRight = 'none';
-                        });
-                        draggedTab = null;
-                    }
+                tab.addEventListener('dragend', (e) => {
+                    tab.style.opacity = '1';
+                    freshTabs.forEach(t => {
+                        t.style.borderLeft = 'none';
+                        t.style.borderRight = 'none';
+                    });
+                    draggedTab = null;
                 });
 
-                tabsBar.addEventListener('dragover', (e) => {
-                    if (!draggedTab || !e.target.classList.contains('tab') || draggedTab === e.target) return;
+                tab.addEventListener('dragover', (e) => {
+                    if (!draggedTab || draggedTab === tab) return;
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
 
-                    const rect = e.target.getBoundingClientRect();
+                    const rect = tab.getBoundingClientRect();
                     if (e.clientX < rect.left + rect.width / 2) {
-                        e.target.style.borderLeft = '3px solid #6b8fa3';
-                        e.target.style.borderRight = 'none';
-                        e.target.parentNode.insertBefore(draggedTab, e.target);
+                        tab.style.borderLeft = '3px solid #6b8fa3';
+                        tab.style.borderRight = 'none';
+                        tab.parentNode.insertBefore(draggedTab, tab);
                     } else {
-                        e.target.style.borderLeft = 'none';
-                        e.target.style.borderRight = '3px solid #6b8fa3';
-                        if (e.target.nextSibling) {
-                            e.target.parentNode.insertBefore(draggedTab, e.target.nextSibling);
+                        tab.style.borderLeft = 'none';
+                        tab.style.borderRight = '3px solid #6b8fa3';
+                        if (tab.nextSibling) {
+                            tab.parentNode.insertBefore(draggedTab, tab.nextSibling);
                         } else {
-                            e.target.parentNode.appendChild(draggedTab);
+                            tab.parentNode.appendChild(draggedTab);
                         }
                     }
                 });
 
-                tabsBar.addEventListener('dragleave', (e) => {
-                    if (e.target.classList.contains('tab')) {
-                        e.target.style.borderLeft = 'none';
-                        e.target.style.borderRight = 'none';
-                    }
+                tab.addEventListener('dragleave', (e) => {
+                    tab.style.borderLeft = 'none';
+                    tab.style.borderRight = 'none';
                 });
 
-                tabsBar.addEventListener('drop', (e) => {
+                tab.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    tabs.forEach(t => {
+                    freshTabs.forEach(t => {
                         t.style.borderLeft = 'none';
                         t.style.borderRight = 'none';
                     });
                 });
-
-                tabDragListenerAttached = true;
-            }
+            });
         }
 
         function initSectionDragAndDrop() {
