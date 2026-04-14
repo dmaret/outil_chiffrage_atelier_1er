@@ -145,10 +145,6 @@
             border-bottom: 3px solid var(--color-primary);
         }
 
-        body.admin-mode .tab {
-            cursor: move;
-        }
-
         body.admin-mode .tab:hover {
             background: linear-gradient(135deg, var(--color-border-light) 0%, var(--color-bg-from) 100%);
         }
@@ -4799,42 +4795,29 @@
         let _tabDragEl = null;
         let _tabDragStartX = 0;
         let _tabDragActive = false;
+        let _tabDragJustEnded = false;
 
         function initTabDragAndDropMode() {
-            console.log('=== initTabDragAndDropMode CALLED ===');
             const tabsBar = document.getElementById('tabsBar');
-            if (!tabsBar) {
-                console.log('tabsBar not found');
-                return;
-            }
-
-            console.log('initTabDragAndDropMode called, admin-mode:', document.body.classList.contains('admin-mode'));
+            if (!tabsBar) return;
 
             if (!document.body.classList.contains('admin-mode')) {
                 tabsBar.style.cursor = '';
-                console.log('not admin mode, returning');
                 return;
             }
 
             tabsBar.style.cursor = 'grab';
 
             // Si déjà initialisé, ne refait rien
-            if (tabsBar._dragInit) {
-                console.log('already initialized');
-                return;
-            }
-            console.log('setting up drag listeners');
+            if (tabsBar._dragInit) return;
             tabsBar._dragInit = true;
 
             tabsBar.addEventListener('mousedown', function(e) {
-                console.log('mousedown on tabsBar', e.target);
                 const tab = e.target.closest('.tab');
-                console.log('closest tab:', tab);
                 if (!tab || !document.body.classList.contains('admin-mode')) return;
                 _tabDragEl = tab;
                 _tabDragStartX = e.clientX;
                 _tabDragActive = false;
-                console.log('drag started on:', tab.textContent);
             });
 
             document.addEventListener('mousemove', function(e) {
@@ -4867,6 +4850,9 @@
                     _tabDragEl.style.opacity = '';
                     _tabDragEl.style.cursor = '';
                     saveTabOrder();
+                    // Empêche le onclick de déclencher switchTab après un drag
+                    _tabDragJustEnded = true;
+                    setTimeout(() => { _tabDragJustEnded = false; }, 50);
                 }
                 _tabDragEl = null;
                 _tabDragActive = false;
@@ -4934,10 +4920,17 @@
         }
 
         function switchTab(tabName) {
+            // Ignore le clic si on vient de terminer un drag
+            if (_tabDragJustEnded) return;
+
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            if (event?.target) event.target.classList.add('active');
+            // Trouve le bon bouton onglet par son attribut onclick
+            const tabBtn = [...document.querySelectorAll('.tab')].find(t =>
+                t.getAttribute('onclick')?.includes("'" + tabName + "'")
+            );
+            if (tabBtn) tabBtn.classList.add('active');
             const tabEl = document.getElementById(tabName);
             if (tabEl) tabEl.classList.add('active');
 
@@ -9343,7 +9336,7 @@
                     renderAdminList('emplacements');
                     renderAdminList('unites');
                     logAction('Connexion mode administrateur');
-                    setTimeout(() => { updateTabScrollBtns(); initTabDrag(); initTabDragAndDropMode(); }, 50);
+                    setTimeout(() => { updateTabScrollBtns(); initTabDragAndDropMode(); }, 50);
                 } else {
                     toast('❌ PIN incorrect', 'error');
                     logAction('Tentative connexion admin échouée');
@@ -9924,13 +9917,6 @@
         }
 
         // ── Tab drag-to-reorder (admin mode) ────────────────────────
-        let _tabDragSrc = null;
-
-        // DEPRECATED: Use initTabDragAndDropMode() instead
-        function initTabDrag() {
-            // Disabled - conflicts with initTabDragAndDropMode()
-            return;
-        }
 
         function saveTabOrder() {
             const bar = document.getElementById('tabsBar');
