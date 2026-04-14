@@ -4808,69 +4808,58 @@
             if (!tabsBar) return;
 
             const tabs = Array.from(tabsBar.querySelectorAll('.tab'));
+
             tabs.forEach(tab => {
                 tab.draggable = true;
 
-                // Remove old listeners by cloning (clean approach)
-                const newTab = tab.cloneNode(true);
-                tab.parentNode.replaceChild(newTab, tab);
-                tabs[tabs.indexOf(tab)] = newTab;
-            });
-
-            // Re-query tabs after cloning
-            const freshTabs = Array.from(tabsBar.querySelectorAll('.tab'));
-
-            freshTabs.forEach(tab => {
-                tab.draggable = true;
-
-                tab.addEventListener('dragstart', (e) => {
-                    draggedTab = tab;
-                    tab.style.opacity = '0.5';
+                tab.addEventListener('dragstart', function(e) {
+                    draggedTab = this;
+                    this.style.opacity = '0.5';
                     e.dataTransfer.effectAllowed = 'move';
-                });
+                }, { once: false });
 
-                tab.addEventListener('dragend', (e) => {
-                    tab.style.opacity = '1';
-                    freshTabs.forEach(t => {
+                tab.addEventListener('dragend', function(e) {
+                    this.style.opacity = '1';
+                    tabs.forEach(t => {
                         t.style.borderLeft = 'none';
                         t.style.borderRight = 'none';
                     });
                     draggedTab = null;
-                });
+                }, { once: false });
 
-                tab.addEventListener('dragover', (e) => {
-                    if (!draggedTab || draggedTab === tab) return;
+                tab.addEventListener('dragover', function(e) {
+                    if (!draggedTab || draggedTab === this) return;
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
 
-                    const rect = tab.getBoundingClientRect();
+                    const rect = this.getBoundingClientRect();
                     if (e.clientX < rect.left + rect.width / 2) {
-                        tab.style.borderLeft = '3px solid #6b8fa3';
-                        tab.style.borderRight = 'none';
-                        tab.parentNode.insertBefore(draggedTab, tab);
+                        this.style.borderLeft = '3px solid #6b8fa3';
+                        this.style.borderRight = 'none';
+                        this.parentNode.insertBefore(draggedTab, this);
                     } else {
-                        tab.style.borderLeft = 'none';
-                        tab.style.borderRight = '3px solid #6b8fa3';
-                        if (tab.nextSibling) {
-                            tab.parentNode.insertBefore(draggedTab, tab.nextSibling);
+                        this.style.borderLeft = 'none';
+                        this.style.borderRight = '3px solid #6b8fa3';
+                        if (this.nextSibling) {
+                            this.parentNode.insertBefore(draggedTab, this.nextSibling);
                         } else {
-                            tab.parentNode.appendChild(draggedTab);
+                            this.parentNode.appendChild(draggedTab);
                         }
                     }
-                });
+                }, { once: false });
 
-                tab.addEventListener('dragleave', (e) => {
-                    tab.style.borderLeft = 'none';
-                    tab.style.borderRight = 'none';
-                });
+                tab.addEventListener('dragleave', function(e) {
+                    this.style.borderLeft = 'none';
+                    this.style.borderRight = 'none';
+                }, { once: false });
 
-                tab.addEventListener('drop', (e) => {
+                tab.addEventListener('drop', function(e) {
                     e.preventDefault();
-                    freshTabs.forEach(t => {
+                    tabs.forEach(t => {
                         t.style.borderLeft = 'none';
                         t.style.borderRight = 'none';
                     });
-                });
+                }, { once: false });
             });
         }
 
