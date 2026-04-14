@@ -7827,11 +7827,11 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Temps</div>
-                            <div style="font-weight: bold; color: #6b8fa3;">${p.heures.toFixed(1)}h</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${(p.heures || 0).toFixed(1)}h</div>
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Revient</div>
-                            <div style="font-weight: bold; color: #6b8fa3;">${p.prixRevient.toFixed(2)} CHF</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${(p.prixRevient || 0).toFixed(2)} CHF</div>
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Marge</div>
