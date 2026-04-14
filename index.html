@@ -4787,6 +4787,62 @@
         }
 
         let draggedSection = null;
+        let draggedTab = null;
+
+        function initTabDragAndDropMode() {
+            if (!document.body.classList.contains('admin-mode')) {
+                // Disable dragging when leaving admin mode
+                document.querySelectorAll('.tab').forEach(t => t.draggable = false);
+                return;
+            }
+
+            const tabsBar = document.querySelector('.tabs');
+            if (!tabsBar) return;
+
+            const tabs = tabsBar.querySelectorAll('.tab');
+
+            tabs.forEach(tab => {
+                tab.draggable = true;
+
+                tab.addEventListener('dragstart', (e) => {
+                    draggedTab = tab;
+                    tab.style.opacity = '0.5';
+                    e.dataTransfer.effectAllowed = 'move';
+                }, { once: false });
+
+                tab.addEventListener('dragend', (e) => {
+                    tab.style.opacity = '1';
+                    tabs.forEach(t => t.style.borderTop = 'none');
+                    draggedTab = null;
+                }, { once: false });
+
+                tab.addEventListener('dragover', (e) => {
+                    if (!draggedTab || draggedTab === tab) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+
+                    const rect = tab.getBoundingClientRect();
+                    if (e.clientX < rect.left + rect.width / 2) {
+                        tab.style.borderLeft = '3px solid #6b8fa3';
+                        tab.parentNode.insertBefore(draggedTab, tab);
+                    } else {
+                        tab.style.borderLeft = 'none';
+                        if (tab.nextSibling) {
+                            tab.parentNode.insertBefore(draggedTab, tab.nextSibling);
+                        }
+                    }
+                }, { once: false });
+
+                tab.addEventListener('dragleave', (e) => {
+                    tab.style.borderLeft = 'none';
+                }, { once: false });
+
+                tab.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    tabs.forEach(t => t.style.borderLeft = 'none');
+                }, { once: false });
+            });
+        }
 
         function initSectionDragAndDrop() {
             if (!document.body.classList.contains('admin-mode')) return;
@@ -9240,6 +9296,7 @@
                 btn.textContent = '🔓';
                 document.body.classList.remove('admin-mode');
                 hideAdminSections();
+                initTabDragAndDropMode();
                 logAction('Déconnexion mode administrateur');
             } else {
                 const pin = localStorage.getItem('appPin');
@@ -9259,7 +9316,7 @@
                     renderAdminList('emplacements');
                     renderAdminList('unites');
                     logAction('Connexion mode administrateur');
-                    setTimeout(() => { updateTabScrollBtns(); initTabDrag(); }, 50);
+                    setTimeout(() => { updateTabScrollBtns(); initTabDrag(); initTabDragAndDropMode(); }, 50);
                 } else {
                     toast('❌ PIN incorrect', 'error');
                     logAction('Tentative connexion admin échouée');
