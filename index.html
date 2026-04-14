@@ -595,6 +595,37 @@
         .tabs-drag-hint { display:none; font-size:0.7em; color:#8aacbc; padding:0 8px; line-height:1; white-space:nowrap; }
         body.admin-mode .tabs-drag-hint { display:inline; }
 
+        /* ── Sections drag-and-drop in admin mode ──────────────────────── */
+        body.admin-mode .section {
+            cursor: grab;
+            transition: opacity 0.2s ease;
+        }
+        body.admin-mode .section:hover {
+            box-shadow: 0 8px 24px rgba(150,150,180,0.3) !important;
+        }
+        body.admin-mode .section.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+        .section.section-drag-over {
+            border-top: 3px solid #6b8fa3;
+        }
+        .section-drag-hint {
+            display: none;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.75em;
+            color: #8aacbc;
+            background: rgba(107, 143, 163, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 10;
+        }
+        body.admin-mode .section-drag-hint { display: block; }
+
         /* ── Auth login overlay ──────────────────────────────────────── */
         .auth-overlay {
             position: fixed; inset: 0; z-index: 9999;
@@ -4755,6 +4786,68 @@
             });
         }
 
+        let draggedSection = null;
+
+        function initSectionDragAndDrop() {
+            if (!document.body.classList.contains('admin-mode')) return;
+
+            const tabContent = document.querySelector('.tab-content.active');
+            if (!tabContent) return;
+
+            const sections = tabContent.querySelectorAll(':scope > .section');
+
+            sections.forEach(section => {
+                // Add hint if not exists
+                if (!section.querySelector('.section-drag-hint')) {
+                    const hint = document.createElement('div');
+                    hint.className = 'section-drag-hint';
+                    hint.textContent = '[DÉPLACER]';
+                    section.style.position = 'relative';
+                    section.appendChild(hint);
+                }
+
+                // Only enable drag on the section itself
+                section.draggable = true;
+
+                section.addEventListener('dragstart', (e) => {
+                    draggedSection = section;
+                    section.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/html', section.innerHTML);
+                }, { once: false });
+
+                section.addEventListener('dragend', (e) => {
+                    section.classList.remove('dragging');
+                    sections.forEach(s => s.classList.remove('section-drag-over'));
+                    draggedSection = null;
+                }, { once: false });
+
+                section.addEventListener('dragover', (e) => {
+                    if (!draggedSection || draggedSection === section) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+
+                    const rect = section.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+
+                    if (e.clientY < midpoint) {
+                        section.parentNode.insertBefore(draggedSection, section);
+                    } else {
+                        if (section.nextSibling) {
+                            section.parentNode.insertBefore(draggedSection, section.nextSibling);
+                        } else {
+                            section.parentNode.appendChild(draggedSection);
+                        }
+                    }
+                }, { once: false });
+
+                section.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    sections.forEach(s => s.classList.remove('section-drag-over'));
+                }, { once: false });
+            });
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -4786,6 +4879,9 @@
                 // Formation Logistique - contenu théorique statique
                 renderFormationLogistiqueApprenants();
             }
+
+            // Initialize drag-and-drop for sections in admin mode
+            setTimeout(() => initSectionDragAndDrop(), 100);
         }
 
         function buildGesteOptions(selCode) {
