@@ -4547,14 +4547,13 @@
         if (learnerStartDateField) {
             learnerStartDateField.valueAsDate = new Date();
         }
-        // Initialize tab drag-drop functionality
-        setTimeout(() => initTabDrag(), 100);
         } catch(initErr) { console.error('Erreur initialisation:', initErr); }
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
             initAuthGroups();
             checkAuthSession();
             syncEmailWebhooksUI();  // Synchronize email webhooks config UI
+            initTabDragAndDropMode();
         });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
@@ -7903,9 +7902,9 @@
                         <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
                         <td>${p.client}</td><td><strong>${p.prestation}</strong><br><span style="font-size:0.78em;color:#aaa;">${p.reference}</span></td>
                         <td>${badge}</td>
-                        <td style="font-weight:bold;">${p.prixVente.toFixed(2)} CHF</td>
-                        <td style="color:${(p.prixVente-p.prixRevient)>=0?'#27ae60':'#e74c3c'}">${p.marge}%</td>
-                        <td>${p.heures.toFixed(1)}h</td>
+                        <td style="font-weight:bold;">${(p.prixVente||0).toFixed(2)} CHF</td>
+                        <td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${p.marge||0}%</td>
+                        <td>${(p.heures||0).toFixed(1)}h</td>
                         <td style="white-space:nowrap;">
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})">🔄</button>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
