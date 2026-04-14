@@ -4801,25 +4801,38 @@
 
         function initTabDragAndDropMode() {
             const tabsBar = document.getElementById('tabsBar');
-            if (!tabsBar) return;
+            if (!tabsBar) {
+                console.log('tabsBar not found');
+                return;
+            }
+
+            console.log('initTabDragAndDropMode called, admin-mode:', document.body.classList.contains('admin-mode'));
 
             if (!document.body.classList.contains('admin-mode')) {
                 tabsBar.style.cursor = '';
+                console.log('not admin mode, returning');
                 return;
             }
 
             tabsBar.style.cursor = 'grab';
 
             // Si déjà initialisé, ne refait rien
-            if (tabsBar._dragInit) return;
+            if (tabsBar._dragInit) {
+                console.log('already initialized');
+                return;
+            }
+            console.log('setting up drag listeners');
             tabsBar._dragInit = true;
 
             tabsBar.addEventListener('mousedown', function(e) {
+                console.log('mousedown on tabsBar', e.target);
                 const tab = e.target.closest('.tab');
+                console.log('closest tab:', tab);
                 if (!tab || !document.body.classList.contains('admin-mode')) return;
                 _tabDragEl = tab;
                 _tabDragStartX = e.clientX;
                 _tabDragActive = false;
+                console.log('drag started on:', tab.textContent);
             });
 
             document.addEventListener('mousemove', function(e) {
