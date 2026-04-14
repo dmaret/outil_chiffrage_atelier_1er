@@ -2603,6 +2603,13 @@
                 </div>
 
                 <div class="section">
+                    <h2>[FORMATION] Formations à suivre</h2>
+                    <p style="color:#7a9db1;margin-bottom:12px;">Vue des formations assignées aux apprenants</p>
+                    <div id="trainingsContainer" style="display:grid;gap:12px;"></div>
+                    <p id="noTrainingsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucune formation assignée</p>
+                </div>
+
+                <div class="section">
                     <h2>[FORMATION] Documents de référence</h2>
                     <p style="color:#7a9db1;margin-bottom:12px;">Ajoutez des PDFs, liens ou autres documents pour la formation</p>
                     <div class="form-row">
@@ -4765,7 +4772,7 @@
 
             if (tabName === 'dashboard') renderDashboard();
             else if (tabName === 'catalogue') renderCatalogue();
-            else if (tabName === 'formation') { updateLearnerTrainingSelector(); renderLearners(); renderReferenceDocuments(); }
+            else if (tabName === 'formation') { updateLearnerTrainingSelector(); renderLearners(); renderTrainings(); renderReferenceDocuments(); }
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
             else if (tabName === 'clients') renderClients();
@@ -6540,6 +6547,9 @@
             request.assignedTo = learnerName;
 
             saveFormationData();
+            renderLearners();
+            renderTrainings();
+            renderFormationLogistiqueApprenants();
             toast(`[OK] Formation "${request.category}" approuvée et assignée à ${learnerName}`, 'success');
             logAction(`Approbation formation: ${request.category} [SUIVANT] ${learnerName}`, 'UPDATE');
         }
@@ -6882,6 +6892,53 @@
                     <button class="btn btn-small" onclick="openLearnerProgress(${learner.id})">👁️ Voir progression</button>
                     ${formationsHtml}
                 </div>
+                `;
+            }).join('');
+        }
+
+        function renderTrainings() {
+            const container = document.getElementById('trainingsContainer');
+            const noMsg = document.getElementById('noTrainingsMsg');
+
+            if (!container) return;
+
+            // Get all approved training requests
+            const trainings = trainingRequests.filter(r => r.status === 'approved');
+
+            if (trainings.length === 0) {
+                container.innerHTML = '';
+                if (noMsg) noMsg.style.display = 'block';
+                return;
+            }
+
+            if (noMsg) noMsg.style.display = 'none';
+
+            container.innerHTML = trainings.map(training => {
+                const learner = learnersList.find(l => l.name === training.assignedTo);
+                const stages = [
+                    { label: 'Demandée', emoji: '[ATTENTE]', completed: true },
+                    { label: 'Approuvée', emoji: '[OK]', completed: true },
+                    { label: 'Quiz', emoji: '[QUIZ]', completed: training.quizCompletedAt !== undefined && training.quizCompletedAt !== null }
+                ];
+
+                return `
+                    <div style="background:white;border-radius:8px;padding:16px;border-left:4px solid #6b8fa3;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
+                            <div>
+                                <h4 style="margin:0 0 4px;color:#6b8fa3;">[DOCUMENT] ${training.category}</h4>
+                                <p style="margin:0;font-size:0.9em;color:#666;">[APPRENANT] ${training.assignedTo}${learner ? ' • ' + learner.category : ''}</p>
+                            </div>
+                            <span style="background:#6b8fa3;color:white;padding:4px 12px;border-radius:20px;font-size:0.8em;font-weight:600;">${training.status === 'approved' ? '[OK] Approuvée' : '[ATTENTE] En attente'}</span>
+                        </div>
+                        <div style="display:flex;gap:6px;font-size:1.2em;margin-bottom:12px;">
+                            ${stages.map((s, idx) => `
+                                <span title="${s.label}" style="opacity:${s.completed ? '1' : '0.3'};cursor:help;">
+                                    ${s.emoji}
+                                </span>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-small" onclick="openFormationContent('${training.id}')" style="background:#6b8fa3;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;">[DOCUMENT] Voir détails</button>
+                    </div>
                 `;
             }).join('');
         }
