@@ -144,7 +144,15 @@
             color: var(--color-primary-dark);
             border-bottom: 3px solid var(--color-primary);
         }
-        
+
+        body.admin-mode .tab {
+            cursor: move;
+        }
+
+        body.admin-mode .tab:hover {
+            background: linear-gradient(135deg, var(--color-border-light) 0%, var(--color-bg-from) 100%);
+        }
+
         .content {
             padding: 25px;
             max-height: calc(100vh - 230px);
@@ -4788,6 +4796,7 @@
 
         let draggedSection = null;
         let draggedTab = null;
+        let tabDragListenerAttached = false;
 
         function initTabDragAndDropMode() {
             if (!document.body.classList.contains('admin-mode')) {
@@ -4800,48 +4809,67 @@
             if (!tabsBar) return;
 
             const tabs = tabsBar.querySelectorAll('.tab');
+            tabs.forEach(t => t.draggable = true);
 
-            tabs.forEach(tab => {
-                tab.draggable = true;
+            // Attach listeners once using event delegation on the container
+            if (!tabDragListenerAttached) {
+                tabsBar.addEventListener('dragstart', (e) => {
+                    if (e.target.classList.contains('tab')) {
+                        draggedTab = e.target;
+                        e.target.style.opacity = '0.5';
+                        e.dataTransfer.effectAllowed = 'move';
+                    }
+                });
 
-                tab.addEventListener('dragstart', (e) => {
-                    draggedTab = tab;
-                    tab.style.opacity = '0.5';
-                    e.dataTransfer.effectAllowed = 'move';
-                }, { once: false });
+                tabsBar.addEventListener('dragend', (e) => {
+                    if (e.target.classList.contains('tab')) {
+                        e.target.style.opacity = '1';
+                        tabs.forEach(t => {
+                            t.style.borderLeft = 'none';
+                            t.style.borderRight = 'none';
+                        });
+                        draggedTab = null;
+                    }
+                });
 
-                tab.addEventListener('dragend', (e) => {
-                    tab.style.opacity = '1';
-                    tabs.forEach(t => t.style.borderTop = 'none');
-                    draggedTab = null;
-                }, { once: false });
-
-                tab.addEventListener('dragover', (e) => {
-                    if (!draggedTab || draggedTab === tab) return;
+                tabsBar.addEventListener('dragover', (e) => {
+                    if (!draggedTab || !e.target.classList.contains('tab') || draggedTab === e.target) return;
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
 
-                    const rect = tab.getBoundingClientRect();
+                    const rect = e.target.getBoundingClientRect();
                     if (e.clientX < rect.left + rect.width / 2) {
-                        tab.style.borderLeft = '3px solid #6b8fa3';
-                        tab.parentNode.insertBefore(draggedTab, tab);
+                        e.target.style.borderLeft = '3px solid #6b8fa3';
+                        e.target.style.borderRight = 'none';
+                        e.target.parentNode.insertBefore(draggedTab, e.target);
                     } else {
-                        tab.style.borderLeft = 'none';
-                        if (tab.nextSibling) {
-                            tab.parentNode.insertBefore(draggedTab, tab.nextSibling);
+                        e.target.style.borderLeft = 'none';
+                        e.target.style.borderRight = '3px solid #6b8fa3';
+                        if (e.target.nextSibling) {
+                            e.target.parentNode.insertBefore(draggedTab, e.target.nextSibling);
+                        } else {
+                            e.target.parentNode.appendChild(draggedTab);
                         }
                     }
-                }, { once: false });
+                });
 
-                tab.addEventListener('dragleave', (e) => {
-                    tab.style.borderLeft = 'none';
-                }, { once: false });
+                tabsBar.addEventListener('dragleave', (e) => {
+                    if (e.target.classList.contains('tab')) {
+                        e.target.style.borderLeft = 'none';
+                        e.target.style.borderRight = 'none';
+                    }
+                });
 
-                tab.addEventListener('drop', (e) => {
+                tabsBar.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    tabs.forEach(t => t.style.borderLeft = 'none');
-                }, { once: false });
-            });
+                    tabs.forEach(t => {
+                        t.style.borderLeft = 'none';
+                        t.style.borderRight = 'none';
+                    });
+                });
+
+                tabDragListenerAttached = true;
+            }
         }
 
         function initSectionDragAndDrop() {
