@@ -9899,48 +9899,10 @@
         // ── Tab drag-to-reorder (admin mode) ────────────────────────
         let _tabDragSrc = null;
 
+        // DEPRECATED: Use initTabDragAndDropMode() instead
         function initTabDrag() {
-            const bar = document.getElementById('tabsBar');
-            if (!bar || bar._tabDragReady) return;
-            bar._tabDragReady = true;
-            bar.addEventListener('dragstart', e => {
-                const tab = e.target.closest('.tab');
-                if (!tab || !isSuperUser) { e.preventDefault(); return; }
-                _tabDragSrc = tab;
-                tab.classList.add('tab-drag-over');
-                e.dataTransfer.effectAllowed = 'move';
-            });
-            bar.addEventListener('dragend', () => {
-                bar.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-drag-over','tab-drop-before','tab-drop-after'));
-                _tabDragSrc = null;
-                saveTabOrder();
-                updateTabScrollBtns();
-            });
-            bar.addEventListener('dragover', e => {
-                if (!_tabDragSrc || !isSuperUser) return;
-                e.preventDefault();
-                const tab = e.target.closest('.tab');
-                if (!tab || tab === _tabDragSrc) return;
-                bar.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-drop-before','tab-drop-after'));
-                const rect = tab.getBoundingClientRect();
-                tab.classList.add(e.clientX < rect.left + rect.width / 2 ? 'tab-drop-before' : 'tab-drop-after');
-            });
-            bar.addEventListener('dragleave', e => {
-                const tab = e.target.closest('.tab');
-                if (tab) tab.classList.remove('tab-drop-before','tab-drop-after');
-            });
-            bar.addEventListener('drop', e => {
-                if (!_tabDragSrc || !isSuperUser) return;
-                e.preventDefault();
-                const tab = e.target.closest('.tab');
-                if (!tab || tab === _tabDragSrc) return;
-                tab.classList.remove('tab-drop-before','tab-drop-after');
-                const rect = tab.getBoundingClientRect();
-                if (e.clientX < rect.left + rect.width / 2) bar.insertBefore(_tabDragSrc, tab);
-                else bar.insertBefore(_tabDragSrc, tab.nextSibling);
-            });
-            // Set draggable on all tabs
-            bar.querySelectorAll('.tab').forEach(t => t.setAttribute('draggable', 'true'));
+            // Disabled - conflicts with initTabDragAndDropMode()
+            return;
         }
 
         function saveTabOrder() {
