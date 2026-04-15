@@ -1670,7 +1670,7 @@
                 <p style="margin-bottom:10px;">L'interface est organisée en <strong>14 onglets</strong> accessibles via la barre de navigation. Selon le profil actif, certains onglets peuvent être masqués.</p>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.1 🏠 Tableau de bord</h4>
-                <ul style="margin:0 0 8px 20px;"><li>Devis en attente (alertes et actions rapides)</li><li>Pipeline de chiffre d'affaires sur 3 mois</li><li>Top clients par CA sur 12 mois</li><li>Indicateurs d'alerte (stock, devis expirés)</li><li>Cadres théoriques recommandés</li></ul>
+                <ul style="margin:0 0 8px 20px;"><li>KPIs : prestations totales, CA du mois, devis en attente, heures engagées, taux d'occupation CEA</li><li>Devis en attente avec ancienneté et alertes (&gt; 30 jours)</li><li>Pipeline de chiffre d'affaires sur 3 mois (confirmé vs potentiel)</li><li>Top clients par CA sur 12 mois</li><li><strong>Évolution CA sur 12 mois</strong> (graphique barres + moyenne mensuelle)</li><li><strong>Top prestations par rentabilité</strong> (marge %)</li><li><strong>Répartition par statut</strong> (devis/soumis/validé/facturé/annulé)</li><li><strong>Tendance marge moyenne sur 6 mois</strong> (courbe + indicateur ↑↓)</li><li>Alertes (stock bas, devis expirés, capacité dépassée)</li><li>Demandes de formation en attente</li></ul>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.2 🧙 Assistant <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
                 <ul style="margin:0 0 8px 20px;"><li>Assistant pas-à-pas pour construire une prestation</li><li>Modèles de services pré-configurés</li><li>Analyse de situations et recommandations théoriques</li><li>Support à la formation des encadrants</li></ul>
@@ -1680,8 +1680,15 @@
                 <p style="margin:0 0 6px;"><em>Personnel :</em> <strong>CEA</strong> (travailleurs) et <strong>MSP</strong> (encadrants).</p>
                 <p style="margin:0 0 4px;"><em>Gestion des gestes :</em></p>
                 <ul style="margin:0 0 6px 20px;"><li>Ajouter depuis le catalogue ou créer à la volée</li><li>Durée (minutes) et quantité par pièce</li><li>Réorganiser par glisser-déposer, favoris, annuler/refaire (Ctrl+Z)</li><li><strong>Bundles</strong> : raccourcis de combinaisons de gestes</li><li><strong>Chronomètre</strong> intégré pour mesurer le temps réel</li></ul>
-                <p style="margin:0 0 4px;"><em>Valorisation financière :</em> coût MO CEA + MSP, consommables, stockage, frais généraux, coût de revient, marge, prix de vente.</p>
+                <p style="margin:0 0 4px;"><em>Options avancées :</em></p>
+                <ul style="margin:0 0 6px 20px;">
+                    <li><strong>🚨 Urgence / Priorité</strong> : multiplicateur Normal, +15%, +25%, +50% sur le prix de vente</li>
+                    <li><strong>♻️ Perte / Déchet</strong> : pourcentage ajouté aux consommables (casse, chutes…)</li>
+                    <li><strong>⏸️ Temps non-facturable</strong> : pauses, attentes — suivi du temps réel vs facturé</li>
+                </ul>
+                <p style="margin:0 0 4px;"><em>Valorisation financière :</em> coût MO CEA + MSP, consommables (× facteur perte), stockage, frais généraux, coût de revient, marge, prix de vente (× urgence). Badges visuels colorés si urgence, perte ou temps non-facturable actifs.</p>
                 <p style="margin:0 0 4px;"><em>Simulation de volumes :</em> coût unitaire pour 100, 250, 500, 1 000 et 2 500 unités.</p>
+                <p style="margin:0 0 4px;"><em>📊 Analyse de sensibilité :</em> 10 scénarios what-if (hausse coûts CEA/MSP, hausse consommables, variation volume ×2/×5, ajout CEA, changement marge) avec impact en CHF et %.</p>
                 <p style="margin:0 0 8px;"><em>Export PDF :</em> version client (sans coûts) ou version interne (détail complet).</p>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.4 📦 Gestion de stock</h4>
@@ -1732,8 +1739,9 @@
                 <div style="background:#f9fbfc;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:0.88em;border:1px solid #e0eaf0;margin-bottom:10px;">
                     Coût de revient = Coût MO CEA + Coût MO MSP + Consommables + Stockage + Frais généraux<br>
                     Coût MO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= (Temps en h) × Nb agents × Taux horaire chargé<br>
+                    Consommables &nbsp;= Σ(prix × qté × nb pièces) × (1 + facteur perte %)<br>
                     Frais stockage = Nb jours × Taux journalier<br>
-                    Prix de vente &nbsp;= Coût de revient × (1 + Taux marge / 100)<br>
+                    Prix de vente &nbsp;= Coût de revient × (1 + Taux marge / 100) × Mult. urgence<br>
                     Valeur sortie &nbsp;= Σ (Quantité lot × Prix unitaire lot) &nbsp;[FIFO]
                 </div>
                 <p>Le temps total intègre la somme des gestes × coefficient × quantité par pièce × nombre de pièces, plus le temps administratif additionnel. La simulation de volumes identifie les seuils de rentabilité pour 100, 250, 500, 1 000 et 2 500 unités.</p>
@@ -1771,11 +1779,16 @@
                 <!-- 9 -->
                 <h3 style="color:#6b8fa3;margin:0 0 8px;">9. Gestion des accès et profils</h3>
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:10px;">
-                    <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Niveau</th><th style="padding:6px 10px;text-align:left;">Accès</th></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Utilisateur standard</td><td style="padding:5px 10px;">Onglets opérationnels — par défaut</td></tr>
-                    <tr style="background:#f9fbfc;"><td style="padding:5px 10px;">Administrateur</td><td style="padding:5px 10px;">Tous les onglets — après saisie du code PIN (bouton 🔓)</td></tr>
+                    <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Groupe</th><th style="padding:6px 10px;text-align:left;">Accès</th></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><strong>CEA</strong></td><td style="padding:5px 10px;">Formation, Dashboard, Calculateur — accès de base</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><strong>ASP</strong></td><td style="padding:5px 10px;">Formation, Dashboard — accès restreint</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><strong>MSP</strong></td><td style="padding:5px 10px;">Formation, Dashboard, Calculateur, Stock, Prestations — encadrant</td></tr>
+                    <tr style="background:#f9fbfc;"><td style="padding:5px 10px;"><strong>ADMIN</strong></td><td style="padding:5px 10px;">Tous les onglets — accès complet + mode admin (PIN)</td></tr>
                 </table>
-                <p><strong>Profils d'onglets</strong> (admin — Paramétrage) : créer des groupes nommés (ex. « Encadrant », « Direction ») avec des sélections d'onglets personnalisées. Permet d'adapter l'interface sans supprimer de données.</p>
+                <p><strong>Authentification :</strong> sélection du groupe à l'écran d'accueil avec mot de passe. Le badge du groupe connecté s'affiche dans le header.</p>
+                <p><strong>Mode admin :</strong> accessible uniquement au groupe ADMIN via le bouton 🔓 + code PIN. Active le drag-and-drop des onglets, la gestion des sections, les onglets Assistant/Accompagnement/Historique.</p>
+                <p><strong>Profils d'onglets</strong> (admin — Paramétrage) : créer des groupes personnalisés avec des sélections d'onglets adaptées.</p>
+                <p><strong>🎓 Gestion de formation :</strong> assigner des formations aux apprenants, suivre la progression (demande → approbation → quiz). Fiche formation <strong>imprimable</strong> par apprenant (bouton 🖨️).</p>
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 10 -->
