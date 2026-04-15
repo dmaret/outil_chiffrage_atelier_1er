@@ -1666,8 +1666,8 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 4 -->
-                <h3 style="color:#6b8fa3;margin:0 0 12px;">4. Modules fonctionnels (14 onglets)</h3>
-                <p style="margin-bottom:10px;">L'interface est organisée en <strong>14 onglets</strong> accessibles via la barre de navigation. Selon le profil actif, certains onglets peuvent être masqués.</p>
+                <h3 style="color:#6b8fa3;margin:0 0 12px;">4. Modules fonctionnels (16 onglets)</h3>
+                <p style="margin-bottom:10px;">L'interface est organisée en <strong>16 onglets</strong> accessibles via la barre de navigation. Selon le profil actif, certains onglets peuvent être masqués. En mode admin, les onglets sont réorganisables par glisser-déposer.</p>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.1 🏠 Tableau de bord</h4>
                 <ul style="margin:0 0 8px 20px;"><li>KPIs : prestations totales, CA du mois, devis en attente, heures engagées, taux d'occupation CEA</li><li>Devis en attente avec ancienneté et alertes (&gt; 30 jours)</li><li>Pipeline de chiffre d'affaires sur 3 mois (confirmé vs potentiel)</li><li>Top clients par CA sur 12 mois</li><li><strong>Évolution CA sur 12 mois</strong> (graphique barres + moyenne mensuelle)</li><li><strong>Top prestations par rentabilité</strong> (marge %)</li><li><strong>Répartition par statut</strong> (devis/soumis/validé/facturé/annulé)</li><li><strong>Tendance marge moyenne sur 6 mois</strong> (courbe + indicateur ↑↓)</li><li>Alertes (stock bas, devis expirés, capacité dépassée)</li><li>Demandes de formation en attente</li></ul>
@@ -1731,6 +1731,12 @@
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.14 📅 Planification</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Diagramme de Gantt, vues mois/semaine</li><li>Codage couleur par projet/client, duplication de blocs</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.15 🎓 Formation Admin</h4>
+                <ul style="margin:0 0 8px 20px;"><li>Gestion des apprenants (ajout, assignation, suivi)</li><li>Documents de formation et vidéos par geste</li><li>Checklist de progression par apprenant</li><li>Export / import des rapports de formation</li></ul>
+
+                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.16 🏭 Formation Logistique</h4>
+                <ul style="margin:0 0 8px 20px;"><li>Fiches systèmes logistiques : WMS, ERP, TMS, Automatisation, RFID, Kanban, 5S</li><li>Quiz interactif (10 questions, score, feedback)</li><li>Demande de formation par domaine</li><li>Cas d'études réels (Amazon, Decathlon…)</li><li>Concepts clés : Supply Chain, KPI, Flux Tendu, Traçabilité</li></ul>
 
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
@@ -1893,6 +1899,7 @@
                 <button class="tab" onclick="switchTab('formation-logistique')">🏭 Formation</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
+            <button class="btn btn-secondary btn-small" onclick="resetTabOrder()" title="Remettre les onglets dans leur ordre d'origine" style="margin-left:12px;">↺ Réinitialiser</button>
             <div class="tab-profile-badge" id="tabProfileBadge">
                 🔐 <span id="tabProfileBadgeName"></span>
                 <span class="badge-close" onclick="doLogout()" title="Se déconnecter">🚪</span>
@@ -3121,9 +3128,8 @@
 
             <!-- ONGLET ASSISTANT (admin) -->
             <div id="assistant" class="tab-content">
-                <div class="info-box" style="border-left-color:#4e9af1;background:#edf5ff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div class="info-box" style="border-left-color:#4e9af1;background:#edf5ff;">
                     <span><strong>Assistant de composition de prestation.</strong> Créez rapidement une prestation en sélectionnant un type et en cochant les gestes habituels — pré-remplis selon les séquencements typiques de l'atelier.</span>
-                    <button class="btn btn-secondary btn-small" onclick="resetTabOrder()" title="Remettre les onglets dans leur ordre d'origine">↺ Réinitialiser l'ordre des onglets</button>
                 </div>
                 <div class="section" style="border-left-color:#4e9af1;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
@@ -4627,6 +4633,7 @@
             initAuthGroups();
             checkAuthSession();
             syncEmailWebhooksUI();  // Synchronize email webhooks config UI
+            // Initialize tab drag-drop functionality
             initTabDragAndDropMode();
         });
 
@@ -4865,70 +4872,67 @@
         }
 
         let draggedSection = null;
-        let _tabDragEl = null;
-        let _tabDragStartX = 0;
-        let _tabDragActive = false;
+        let _tabDragSrc = null;
         let _tabDragJustEnded = false;
 
         function initTabDragAndDropMode() {
-            const tabsBar = document.getElementById('tabsBar');
-            if (!tabsBar) return;
+            const bar = document.getElementById('tabsBar');
+            if (!bar) return;
 
-            if (!document.body.classList.contains('admin-mode')) {
-                tabsBar.style.cursor = '';
-                return;
-            }
+            // Toujours mettre draggable sur les tabs
+            bar.querySelectorAll('.tab').forEach(t => t.setAttribute('draggable', 'true'));
 
-            tabsBar.style.cursor = 'grab';
+            // Listeners déjà en place ? On sort
+            if (bar._tabDragReady) return;
+            bar._tabDragReady = true;
 
-            // Si déjà initialisé, ne refait rien
-            if (tabsBar._dragInit) return;
-            tabsBar._dragInit = true;
-
-            tabsBar.addEventListener('mousedown', function(e) {
+            bar.addEventListener('dragstart', e => {
                 const tab = e.target.closest('.tab');
-                if (!tab || !document.body.classList.contains('admin-mode')) return;
-                _tabDragEl = tab;
-                _tabDragStartX = e.clientX;
-                _tabDragActive = false;
+                if (!tab || !isSuperUser) { e.preventDefault(); return; }
+                _tabDragSrc = tab;
+                tab.style.opacity = '0.4';
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', '');
             });
 
-            document.addEventListener('mousemove', function(e) {
-                if (!_tabDragEl || !document.body.classList.contains('admin-mode')) return;
-
-                // Commence le drag seulement après 5px de mouvement
-                if (!_tabDragActive) {
-                    if (Math.abs(e.clientX - _tabDragStartX) < 5) return;
-                    _tabDragActive = true;
-                    _tabDragEl.style.opacity = '0.4';
-                    _tabDragEl.style.cursor = 'grabbing';
-                }
-
-                const el = document.elementFromPoint(e.clientX, e.clientY);
-                if (!el) return;
-                const overTab = el.closest('.tab');
-                if (!overTab || overTab === _tabDragEl) return;
-                const overRect = overTab.getBoundingClientRect();
-                const mid = overRect.left + overRect.width / 2;
-                if (e.clientX < mid) {
-                    tabsBar.insertBefore(_tabDragEl, overTab);
-                } else {
-                    tabsBar.insertBefore(_tabDragEl, overTab.nextSibling);
-                }
+            bar.addEventListener('dragend', () => {
+                if (_tabDragSrc) _tabDragSrc.style.opacity = '';
+                bar.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('tab-drag-over','tab-drop-before','tab-drop-after');
+                });
+                _tabDragSrc = null;
+                saveTabOrder();
+                updateTabScrollBtns();
+                // Empêche switchTab de se déclencher après un drag
+                _tabDragJustEnded = true;
+                setTimeout(() => { _tabDragJustEnded = false; }, 100);
             });
 
-            document.addEventListener('mouseup', function(e) {
-                if (!_tabDragEl) return;
-                if (_tabDragActive) {
-                    _tabDragEl.style.opacity = '';
-                    _tabDragEl.style.cursor = '';
-                    saveTabOrder();
-                    // Empêche le onclick de déclencher switchTab après un drag
-                    _tabDragJustEnded = true;
-                    setTimeout(() => { _tabDragJustEnded = false; }, 50);
-                }
-                _tabDragEl = null;
-                _tabDragActive = false;
+            bar.addEventListener('dragover', e => {
+                if (!_tabDragSrc || !isSuperUser) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const tab = e.target.closest('.tab');
+                if (!tab || tab === _tabDragSrc) return;
+                bar.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-drop-before','tab-drop-after'));
+                const rect = tab.getBoundingClientRect();
+                tab.classList.add(e.clientX < rect.left + rect.width / 2 ? 'tab-drop-before' : 'tab-drop-after');
+            });
+
+            bar.addEventListener('dragleave', e => {
+                const tab = e.target.closest('.tab');
+                if (tab) tab.classList.remove('tab-drop-before','tab-drop-after');
+            });
+
+            bar.addEventListener('drop', e => {
+                if (!_tabDragSrc || !isSuperUser) return;
+                e.preventDefault();
+                const tab = e.target.closest('.tab');
+                if (!tab || tab === _tabDragSrc) return;
+                tab.classList.remove('tab-drop-before','tab-drop-after');
+                const rect = tab.getBoundingClientRect();
+                if (e.clientX < rect.left + rect.width / 2) bar.insertBefore(_tabDragSrc, tab);
+                else bar.insertBefore(_tabDragSrc, tab.nextSibling);
             });
         }
 
@@ -4993,7 +4997,7 @@
         }
 
         function switchTab(tabName) {
-            // Ignore le clic si on vient de terminer un drag
+            // Ignore le clic si on vient de terminer un drag d'onglet
             if (_tabDragJustEnded) return;
 
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -10309,7 +10313,6 @@
         }
 
         // ── Tab drag-to-reorder (admin mode) ────────────────────────
-
         function saveTabOrder() {
             const bar = document.getElementById('tabsBar');
             if (!bar) return;
