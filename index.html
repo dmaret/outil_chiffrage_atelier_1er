@@ -6148,13 +6148,16 @@
         }
 
         function editPrestation(id) {
+            try {
             const p = prestationsSauvegardees.find(x => x.id === id);
-            if (!p) return;
+            if (!p) { toast('⚠️ Prestation introuvable (id=' + id + ')', 'warning'); return; }
             editingPrestationId = id;
 
-            // Basculer sur l'onglet calculateur via switchTab
+            // Basculer vers calculateur
+            _tabDragJustEnded = false;
             switchTab('calculateur');
             window.scrollTo({top: 0, behavior: 'smooth'});
+            toast('✏️ Édition : ' + p.prestation, 'info');
 
             // Mettre le bouton en mode "Mettre à jour"
             const btnSave = document.getElementById('btnSavePrestation');
@@ -6271,6 +6274,7 @@
 
             calculateTotal();
             document.getElementById('calculateur')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+            } catch(err) { toast('❌ Erreur édition : ' + err.message, 'error'); console.error('editPrestation error:', err); }
         }
 
         function cancelEditPrestation() {
