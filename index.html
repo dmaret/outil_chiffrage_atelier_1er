@@ -175,7 +175,7 @@
             margin-bottom: 25px;
             padding: 20px;
             background: var(--color-section-bg);
-            border-radius: 12px;
+            border-radius: var(--border-radius-lg);
             border-left: 4px solid var(--color-primary);
         }
         
@@ -214,7 +214,7 @@
         input, select, textarea {
             padding: 9px;
             border: 1px solid var(--color-border);
-            border-radius: 5px;
+            border-radius: var(--border-radius-sm);
             font-size: 0.95em;
             transition: border 0.3s;
         }
@@ -244,7 +244,7 @@
             background: var(--color-primary);
             color: var(--color-text);
             border: none;
-            border-radius: 8px;
+            border-radius: var(--border-radius-sm);
             cursor: pointer;
             font-size: 0.95em;
             font-weight: 600;
@@ -304,7 +304,7 @@
         .stat-card {
             background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-section-bg) 100%);
             padding: 18px;
-            border-radius: 12px;
+            border-radius: var(--border-radius-md);
             box-shadow: 0 2px 10px var(--color-shadow);
             text-align: center;
             border-top: 4px solid var(--color-primary);
@@ -327,7 +327,7 @@
             border-left: 4px solid var(--color-primary);
             padding: 14px;
             margin-bottom: 18px;
-            border-radius: 8px;
+            border-radius: var(--border-radius-sm);
             font-size: 0.9em;
             color: var(--color-text-muted);
         }
@@ -5358,10 +5358,20 @@
             root.style.setProperty('--color-border-light',  t.borderLight || '#e8f0f6');
             root.style.setProperty('--color-border-focus',  t.borderFocus || '#a8d5e2');
             root.style.setProperty('--color-shadow',        t.shadow || 'rgba(150,150,180,0.15)');
-            // Border Radius
+            // Border Radius — variables + application directe sur les éléments
             root.style.setProperty('--border-radius-lg',    r.lg);
             root.style.setProperty('--border-radius-md',    r.md);
             root.style.setProperty('--border-radius-sm',    r.sm);
+            // Appliquer le rayon sur tous les éléments visibles
+            document.querySelectorAll('.section, .info-box, .stat-card, .container').forEach(el => {
+                el.style.borderRadius = r.lg;
+            });
+            document.querySelectorAll('.btn, select, .tab, .badge, .theme-card, .font-btn, .radius-btn, .modeles-bar select').forEach(el => {
+                el.style.borderRadius = r.sm;
+            });
+            document.querySelectorAll('input, textarea').forEach(el => {
+                el.style.borderRadius = r.sm;
+            });
             // Typography (font families)
             const fontBody = `'${f}', sans-serif`;
             const fontHeading = t.fontHeading ? `'${t.fontHeading}', sans-serif` : fontBody;
