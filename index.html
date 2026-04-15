@@ -11,6 +11,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Outil Complet Atelier - La Pallanterie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -85,6 +88,11 @@
             background: linear-gradient(135deg, var(--color-bg-from) 0%, var(--color-bg-to) 100%);
             min-height: 100vh;
             padding: 20px;
+        }
+
+        /* Force tous les éléments à hériter la police du thème */
+        button, input, select, textarea, label, td, th, a, span, p, div, li {
+            font-family: inherit;
         }
         
         .container {
@@ -5362,20 +5370,8 @@
             root.style.setProperty('--font-family-heading', fontHeading);
             root.style.setProperty('--font-family-mono',    fontMono);
             
-            // Apply fonts to DOM elements
+            // Apply font — body hérite à tous les enfants via CSS inherit
             document.body.style.fontFamily = fontBody;
-            
-            // Apply heading fonts to h1-h6 and header elements
-            const headingElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, .header');
-            headingElements.forEach(el => {
-                el.style.fontFamily = fontHeading;
-            });
-            
-            // Apply mono font to code, pre, and monospace elements
-            const monoElements = document.querySelectorAll('code, pre, .code, .monospace, .terminal');
-            monoElements.forEach(el => {
-                el.style.fontFamily = fontMono;
-            });
         }
 
 
