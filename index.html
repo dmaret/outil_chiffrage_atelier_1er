@@ -4180,17 +4180,17 @@
                 prestation_created: (d) => `
                     <h2>Nouvelle prestation créée</h2>
                     <p><strong>${d.prestation}</strong> pour ${d.client}</p>
-                    <p>Montant: <strong>${d.prixVente.toFixed(2)} CHF</strong></p>
+                    <p>Montant: <strong>${(d.prixVente||0).toFixed(2)} CHF</strong></p>
                 `,
                 prestation_updated: (d) => `
                     <h2>Prestation mise à jour</h2>
                     <p><strong>${d.prestation}</strong> pour ${d.client}</p>
-                    <p>Nouveau montant: <strong>${d.prixVente.toFixed(2)} CHF</strong></p>
+                    <p>Nouveau montant: <strong>${(d.prixVente||0).toFixed(2)} CHF</strong></p>
                 `,
                 devis_sent: (d) => `
                     <h2>Votre devis</h2>
                     <p>Prestation: <strong>${d.prestation}</strong></p>
-                    <p>Montant: <strong>${d.prixVente.toFixed(2)} CHF</strong></p>
+                    <p>Montant: <strong>${(d.prixVente||0).toFixed(2)} CHF</strong></p>
                     <p>Référence: <em>${d.reference}</em></p>
                 `,
                 report_ready: (d) => `
@@ -6025,7 +6025,7 @@
                 toast('✅ Prestation mise à jour', 'success');
             } else {
                 prestationsSauvegardees.push(prest);
-                logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${prest.prixVente.toFixed(2)} CHF`, 'CREATE');
+                logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${(prest.prixVente||0).toFixed(2)} CHF`, 'CREATE');
                 saveToStorage();
                 triggerWebhookEmail('prestation_created', prest);
                 toast('✅ Prestation enregistrée', 'success');
@@ -6310,7 +6310,7 @@
             grid.innerHTML = '<div class="clients-grid">' + clients.map(([nom, d]) => {
                 const marge = d.ca - d.revient;
                 const margePct = d.ca > 0 ? (marge / d.ca * 100).toFixed(1) : '0';
-                const derniere = d.prestations.reduce((a, b) => a.date > b.date ? a : b);
+                const derniere = d.prestations.length ? d.prestations.reduce((a, b) => a.date > b.date ? a : b) : {};
 
                 // Délai paiement moyen
                 const paid = d.prestations.filter(p => p.dateFacturation && p.dateEncaissement);
@@ -6345,9 +6345,9 @@
                     <div style="font-size:0.8em;color:#7a9db1;margin-bottom:10px;">Dernière : ${new Date(derniere.date).toLocaleDateString('fr-FR')}</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.82em;">
                         <div><span style="color:#999;">Prestations</span><br><strong>${d.prestations.length}</strong></div>
-                        <div><span style="color:#999;">CA total</span><br><strong>${d.ca.toFixed(0)} CHF</strong></div>
+                        <div><span style="color:#999;">CA total</span><br><strong>${(d.ca||0).toFixed(0)} CHF</strong></div>
                         <div><span style="color:#999;">Marge</span><br><strong style="color:${marge>=0?'#27ae60':'#e74c3c'}">${margePct}%</strong></div>
-                        <div><span style="color:#999;">Heures</span><br><strong>${d.heures.toFixed(1)} h</strong></div>
+                        <div><span style="color:#999;">Heures</span><br><strong>${(d.heures||0).toFixed(1)} h</strong></div>
                         <div><span style="color:#999;">Délai paiement</span><br><strong>${delaiMoy !== null ? delaiMoy + ' j' : '—'}</strong></div>
                         <div><span style="color:#999;">Rév. moy.</span><br><strong>${revMoy}</strong></div>
                         <div style="grid-column:span 2;"><span style="color:#999;">Conversion devis→validé</span><br><strong>${tauxConv}%</strong></div>
@@ -7976,7 +7976,7 @@
             let html = '';
             filtered.forEach(p => {
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
-                const margeChfVal = (p.prixVente - p.prixRevient).toFixed(2);
+                const margeChfVal = ((p.prixVente||0) - (p.prixRevient||0)).toFixed(2);
                 const statutBadge = getStatutBadgeHtml(p.statut || 'devis');
                 const _dv = p.dateValidite ? new Date(p.dateValidite) : null;
                 const _daysLeft = _dv ? Math.ceil((_dv - _today) / 86400000) : null;
@@ -8027,16 +8027,16 @@
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Vente ${p.nbPieces > 1 ? 'total' : ''}</div>
-                            <div style="font-weight: bold; color: #6b8fa3;">${p.prixVente.toFixed(2)} CHF</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</div>
                         </div>
                         ${p.nbPieces > 1 ? `<div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Prix / pièce</div>
-                            <div style="font-weight: bold; color: #6b8fa3;">${(p.prixVente / p.nbPieces).toFixed(2)} CHF</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${((p.prixVente||0) / (p.nbPieces||1)).toFixed(2)} CHF</div>
                         </div>` : ''}
                         ${p.heuresReelles != null ? `<div style="text-align:center;">
                             <div style="font-size:0.75em;color:#3a7a4a;">Temps réel</div>
-                            <div style="font-weight:bold;color:${p.heuresReelles <= p.heures ? '#27ae60' : '#e74c3c'};">${p.heuresReelles.toFixed(2)} h
-                                <span style="font-size:0.78em;color:#aaa;">(${p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(0)+'%' : '—'})</span>
+                            <div style="font-weight:bold;color:${p.heuresReelles <= p.heures ? '#27ae60' : '#e74c3c'};">${(p.heuresReelles||0).toFixed(2)} h
+                                <span style="font-size:0.78em;color:#aaa;">(${p.heures > 0 ? (((p.heuresReelles||0)/p.heures-1)*100).toFixed(0)+'%' : '—'})</span>
                             </div>
                         </div>` : ''}
                     </div>
@@ -8060,7 +8060,7 @@
                             </div>
                             <button class="btn btn-success btn-small" onclick="saveReelPrestation(${p.id})">💾 Enregistrer</button>
                         </div>
-                        ${p.heuresReelles != null ? `<div style="margin-top:8px;font-size:0.85em;">Estimé : <strong>${p.heures.toFixed(2)}h</strong> → Réel : <strong>${p.heuresReelles.toFixed(2)}h</strong> → Écart : <strong class="${p.heuresReelles <= p.heures ? 'ecart-positif' : 'ecart-negatif'}">${p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1)+'%' : '—'}</strong></div>` : ''}
+                        ${p.heuresReelles != null ? `<div style="margin-top:8px;font-size:0.85em;">Estimé : <strong>${(p.heures||0).toFixed(2)}h</strong> → Réel : <strong>${(p.heuresReelles||0).toFixed(2)}h</strong> → Écart : <strong class="${p.heuresReelles <= p.heures ? 'ecart-positif' : 'ecart-negatif'}">${p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1)+'%' : '—'}</strong></div>` : ''}
                     </div>
                 </div>`;
             });
@@ -8073,8 +8073,8 @@
                         <strong style="color:#6b8fa3;min-width:140px;">${p.prestation}</strong>
                         <span style="color:#7a9db1;">🏢 ${p.client}</span>
                         <span style="color:#aaa;font-size:0.85em;">📅 ${new Date(p.date).toLocaleDateString('fr-FR')}</span>
-                        <span style="margin-left:auto;font-weight:bold;color:#6b8fa3;">${p.prixVente.toFixed(2)} CHF</span>
-                        <span style="color:${(p.prixVente-p.prixRevient)>=0?'#27ae60':'#e74c3c'};font-size:0.85em;">${p.marge}%</span>
+                        <span style="margin-left:auto;font-weight:bold;color:#6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</span>
+                        <span style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'};font-size:0.85em;">${p.marge||0}%</span>
                         <div style="display:flex;gap:4px;">
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Statut">🔄</button>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})">✏️</button>
@@ -8275,7 +8275,7 @@
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
                 return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85em;color:#5a7b8f;cursor:pointer;border-bottom:1px solid #eef4f8;">
                     <input type="checkbox" class="pie-prestation-cb" value="${p.id}" onchange="drawPieChart()">
-                    <span><strong>${p.prestation}</strong> — ${p.client} — ${date} — ${p.prixVente.toFixed(2)} CHF</span>
+                    <span><strong>${p.prestation}</strong> — ${p.client} — ${date} — ${(p.prixVente||0).toFixed(2)} CHF</span>
                 </label>`;
             }).join('');
         }
@@ -8687,7 +8687,7 @@
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
             const date = new Date(p.date).toLocaleDateString('fr-FR');
-            const margeChfVal = (p.prixVente - p.prixRevient).toFixed(2);
+            const margeChfVal = ((p.prixVente||0) - (p.prixRevient||0)).toFixed(2);
 
             let gestesHtml = '';
             (p.gestes || []).forEach(g => {
@@ -8723,17 +8723,17 @@
                         <tr><td style="padding:6px 10px;">Encadrement MSP</td><td style="padding:6px 10px;text-align:right;">${(p.coutEncadrement||0).toFixed(2)} CHF</td></tr>
                         <tr><td style="padding:6px 10px;">Consommables</td><td style="padding:6px 10px;text-align:right;">${(p.coutConsommables||0).toFixed(2)} CHF</td></tr>
                         <tr><td style="padding:6px 10px;">Stockage</td><td style="padding:6px 10px;text-align:right;">${(p.coutStockage||0).toFixed(2)} CHF</td></tr>
-                        <tr style="font-weight:bold;border-top:2px solid #a8d5e2;"><td style="padding:8px 10px;">Prix de revient</td><td style="padding:8px 10px;text-align:right;">${p.prixRevient.toFixed(2)} CHF</td></tr>
+                        <tr style="font-weight:bold;border-top:2px solid #a8d5e2;"><td style="padding:8px 10px;">Prix de revient</td><td style="padding:8px 10px;text-align:right;">${(p.prixRevient||0).toFixed(2)} CHF</td></tr>
                     </table>
 
                     <div style="background:linear-gradient(135deg,#c9dff0 0%,#e0d4ed 100%);padding:20px;border-radius:10px;text-align:center;">
                         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
-                            <div><div style="font-size:0.8em;color:#5a7b8f;">Temps total</div><div style="font-size:1.4em;font-weight:bold;">${p.heures.toFixed(2)} h</div></div>
-                            <div><div style="font-size:0.8em;color:#5a7b8f;">Marge</div><div style="font-size:1.4em;font-weight:bold;">${p.marge}%</div></div>
+                            <div><div style="font-size:0.8em;color:#5a7b8f;">Temps total</div><div style="font-size:1.4em;font-weight:bold;">${(p.heures||0).toFixed(2)} h</div></div>
+                            <div><div style="font-size:0.8em;color:#5a7b8f;">Marge</div><div style="font-size:1.4em;font-weight:bold;">${p.marge||0}%</div></div>
                             <div><div style="font-size:0.8em;color:#5a7b8f;">Marge CHF</div><div style="font-size:1.4em;font-weight:bold;">${margeChfVal} CHF</div></div>
                         </div>
                         <div style="font-size:0.9em;color:#5a7b8f;margin-bottom:5px;">PRIX DE VENTE</div>
-                        <div style="font-size:2.5em;font-weight:bold;color:#6b8fa3;">${p.prixVente.toFixed(2)} CHF</div>
+                        <div style="font-size:2.5em;font-weight:bold;color:#6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</div>
                     </div>
                     <p style="text-align:center;font-size:0.75em;color:#aaa;margin-top:20px;">Généré le ${new Date().toLocaleDateString('fr-FR')} — Outil Atelier La Pallanterie</p>
                 </div>`;
@@ -10175,12 +10175,12 @@
                     p.unite || 'pièce',
                     p.nbCEA || 1,
                     Math.round((p.nbMSP||0)*100) + '%',
-                    p.heures.toFixed(2),
-                    p.heuresReelles != null ? p.heuresReelles.toFixed(2) : '',
+                    (p.heures||0).toFixed(2),
+                    p.heuresReelles != null ? (p.heuresReelles||0).toFixed(2) : '',
                     ecart,
-                    p.prixRevient.toFixed(2),
-                    p.marge,
-                    p.prixVente.toFixed(2),
+                    (p.prixRevient||0).toFixed(2),
+                    p.marge||0,
+                    (p.prixVente||0).toFixed(2),
                     p.nbPieces > 1 ? (p.prixVente / p.nbPieces).toFixed(3) : '',
                     p.statut || 'devis',
                     p.dateDebut || '',
@@ -12726,8 +12726,8 @@
                         totalEstime += p.heures; totalReel += p.heuresReelles;
                         return `<tr style="border-bottom:1px solid #f0f4f8;">
                             <td style="padding:6px 8px;">${p.prestation}</td>
-                            <td style="padding:6px 8px;text-align:center;">${p.heures.toFixed(1)}h</td>
-                            <td style="padding:6px 8px;text-align:center;">${p.heuresReelles.toFixed(1)}h</td>
+                            <td style="padding:6px 8px;text-align:center;">${(p.heures||0).toFixed(1)}h</td>
+                            <td style="padding:6px 8px;text-align:center;">${(p.heuresReelles||0).toFixed(1)}h</td>
                             <td style="padding:6px 8px;text-align:center;color:${color};font-weight:bold;">${icon} ${ecart >= 0 ? '+' : ''}${pct}%</td>
                         </tr>`;
                     }).join('');
