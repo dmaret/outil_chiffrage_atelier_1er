@@ -24,6 +24,8 @@
    - [Accompagnement](#412-accompagnement-)
    - [Historique](#413-historique-)
    - [Planification](#414-planification-)
+   - [Formation Admin](#415-formation-admin-)
+   - [Formation Logistique](#416-formation-logistique-)
 5. [Calculs et méthodes financières](#5-calculs-et-méthodes-financières)
 6. [Import / Export de données](#6-import--export-de-données)
 7. [Raccourcis clavier](#7-raccourcis-clavier)
@@ -32,8 +34,10 @@
 10. [Données et persistance](#10-données-et-persistance)
 11. [Technologies utilisées](#11-technologies-utilisées)
 12. [Glossaire](#12-glossaire)
-16. [Gestion Logistique (Phase 4)](#16-gestion-logistique-phase-4)
-17. [Conditions d'utilisation](#17-conditions-dutilisation)
+13. [Authentification et Permissions (Phase 2)](#13-phase-2--authentification-et-permissions)
+14. [Email Webhooks (Phase 3)](#14-phase-3--email-webhooks)
+15. [Système de Formation (Phase 1)](#15-système-de-formation-phase-1)
+16. [Conditions d'utilisation](#16-conditions-dutilisation)
 
 ---
 
@@ -96,7 +100,7 @@ L'application est intentionnellement contenue dans un **seul fichier HTML** pour
 
 ## 4. Modules fonctionnels
 
-L'interface est organisée en **14 onglets** accessibles via la barre de navigation en haut de page. Selon le profil actif, certains onglets peuvent être masqués.
+L'interface est organisée en **16 onglets** accessibles via la barre de navigation en haut de page. Selon le profil actif, certains onglets peuvent être masqués. En mode administrateur, les onglets sont réorganisables par glisser-déposer.
 
 ---
 
@@ -104,12 +108,21 @@ L'interface est organisée en **14 onglets** accessibles via la barre de navigat
 
 Vue d'ensemble de l'activité de l'atelier.
 
-**Contenu :**
-- Devis en attente (alertes et actions rapides)
-- Pipeline de chiffre d'affaires sur 3 mois
+**KPIs principaux :**
+- Prestations totales, CA du mois, devis en attente, heures engagées, taux d'occupation CEA
+
+**Visualisations :**
+- Devis en attente avec ancienneté et alertes (> 7 jours, > 30 jours)
+- Pipeline de chiffre d'affaires sur 3 mois (confirmé vs potentiel)
 - Top clients par CA sur 12 mois
-- Indicateurs d'alerte (stock, devis expirés)
-- Cadres théoriques recommandés
+- Évolution CA sur 12 mois (graphique barres + moyenne mensuelle)
+- Top prestations par rentabilité (marge %)
+- Répartition par statut (devis/soumis/validé/facturé/annulé)
+- Tendance marge moyenne sur 6 mois (courbe + indicateur)
+
+**Alertes :**
+- Stock bas, devis expirés, capacité dépassée
+- Demandes de formation en attente (avec boutons accepter/refuser)
 
 ---
 
@@ -414,6 +427,44 @@ Diagramme de Gantt pour la planification des prestations.
 - Navigation temporelle
 - Duplication de blocs
 - Vue multi-projets simultanée
+
+---
+
+### 4.15 Formation Admin 🎓
+
+Gestion des apprenants et suivi de la progression des formations.
+
+**Fonctionnalités :**
+- Ajouter et gérer des apprenants
+- Assigner des formations par domaine (logistique, gestes, etc.)
+- Checklist de progression par apprenant (gestes maîtrisés / en cours)
+- Vidéos de formation intégrées par geste
+- Fiche formation imprimable par apprenant
+- Export et import des rapports de formation
+
+---
+
+### 4.16 Formation Logistique 🏭
+
+Module pédagogique dédié à la découverte des systèmes logistiques et technologies utilisés en industrie.
+
+**Contenu éducatif :**
+- Fiches descriptives des systèmes clés : WMS, ERP, TMS, Automatisation (Convoyeurs & AGV), RFID & Traçabilité, FIFO/FEFO/LIFO, Kanban & Lean, 5S
+- Concepts clés à retenir : Supply Chain, KPI Logistique, Flux Tendu, Traçabilité
+- Cas d'études réels (Amazon, Decathlon…)
+
+**Quiz interactif :**
+- 10 questions sur les systèmes logistiques
+- Score et pourcentage de réussite
+- Feedback pédagogique personnalisé
+- Possibilité de recommencer
+
+**Demande de formation :**
+- Formulaire pour demander une formation par domaine (WMS, ERP, TMS, Automatisation, RFID, Kanban, 5S)
+- Les demandes apparaissent dans le tableau de bord pour validation par l'administrateur
+
+**Apprenants :**
+- Affichage des apprenants assignés à cette formation (gérés depuis l'onglet Formation Admin)
 
 ---
 
@@ -770,141 +821,11 @@ Chaque apprenant a une **checklist de gestes** :
 
 ---
 
-## 16. Gestion Logistique (Phase 4)
-
-### 16.1 Module Gestion Logistique 🏭
-
-Nouvel onglet dédié à l'**organisation optimale du stockage** en atelier avec visualisation 2D/3D.
-
-**Fonction principale :** Organiser les articles (consommables, produits) sur des racks et palettes avec un système de placement flexible sans contraintes d'assignement forcé.
-
-#### 16.1.1 Configuration de l'entrepôt
-
-Création et gestion des emplacements de stockage :
-
-| Élément | Description |
-|--------|------------|
-| **Racks** | Mobiliers de rangement avec capacité définie |
-| **Palettes** | Zones de stockage temporaire ou permanent |
-| **Articles libres** | Articles non assignés à un emplacement spécifique |
-
-#### 16.1.2 Système de placement flexible
-
-**Trois modes de placement :**
-
-1. **Placement assigné** : Article droppe sur un rack/palette → assigné à cet emplacement
-2. **Placement libre** : Article droppe sur une zone vide → reste en "zone libre" (non assigné)
-3. **Déplacement** : Réorganisation des articles entre racks, palettes ou zone libre
-
-**Zone "Articles Libres"**
-- Affichée en bas de page (bandeau orange/jaune)
-- Liste tous les articles non assignés
-- Les articles de cette zone peuvent être réassignés à tout moment
-- Utile pour le stockage temporaire ou flexibilité de placement
-
-#### 16.1.3 Visualisation
-
-**Vue 2D** (par défaut)
-- Représentation en plan des racks et palettes
-- Affichage des articles placés avec quantités
-- Indicateur de capacité (% rempli)
-- Zoom et panoramique pour navigation
-
-**Vue 3D** (optionnel)
-- Visualisation isométrique de l'entrepôt
-- Interaction à la souris (rotation, zoom)
-- Utile pour planification spatiale complexe
-
-#### 16.1.4 Gestion des articles
-
-**Ajouter des articles**
-1. Accédez à la section "Articles disponibles"
-2. Les articles proviennent du catalogue de **Consommables**
-3. Dragguez-les sur le canvas pour les placer
-
-**Glisser-déposer (drag & drop)**
-- Dropper sur un emplacement → assigné
-- Dropper sur zone vide → article libre
-- Dropper en zone "Articles Libres" → retrait d'assignement
-
-**Gestion des quantités**
-- Chaque dépôt additionne la quantité
-- Possibilité de retirer des articles en les redéplaçant
-
-#### 16.1.5 Jeux logistiques 🎮
-
-**Deux modes d'entraînement pédagogiques :**
-
-1. **Mode Apprentissage** (📚)
-   - Explication des règles de compatibilité
-   - Guide des types de produits
-   - Affichage des contraintes
-
-2. **Mode Challenge** (🎯)
-   - Placer les articles en respectant les règles
-   - Contraintes de compatibilité activées
-   - Notation et feedback
-
-3. **Mode Speed** (⚡)
-   - 60 secondes pour placer 10 articles
-   - Aucune contrainte de compatibilité
-   - Test de vitesse et réactivité
-
-4. **Mode Quiz** (❓)
-   - Questions sur les règles de placement
-   - Feedback pédagogique
-   - Score et progression
-
-#### 16.1.6 Règles de compatibilité
-
-Système optionnel de **contraintes de placement** pour sensibiliser à la sécurité et conformité :
-
-| Produit | Incompatible avec | Raison |
-|---------|------------------|--------|
-| Liquides | Fragiles, Solides | Risque de dégâts |
-| Lourds | Fragiles | Écrasement |
-| Chaud | Froid | Dégâts thermiques |
-
-**Note :** Les règles sont activables/désactivables selon le mode de jeu.
-
-#### 16.1.7 Contrôles
-
-| Bouton | Action |
-|--------|--------|
-| 📍 Vue 2D | Basculer vers la visualisation 2D (défaut) |
-| 🎬 Vue 3D | Basculer vers la visualisation 3D |
-| 🎮 Jeux | Accéder aux modes d'entraînement gamifiés |
-| ⏱️ Chrono | Mode chronométré de placement (challenge) |
-| 📊 Analytics | Analyse de l'occupation et heatmap |
-| 👤 Profil | Voir les statistiques personnelles |
-
-#### 16.1.8 Analytics et reporting
-
-**Heatmap d'accès**
-- Visualisation graphique de l'occupation par emplacement
-- Codes couleur : vert (faible), jaune (moyen), rouge (saturation)
-
-**Statistiques (panneau dédié)**
-- Nombre total d'emplacements (racks + palettes)
-- Taux d'occupation global (%)
-- Nombre de mouvements enregistrés
-- Nombre d'articles en zone libre
-- Occupation moyenne par emplacement
-- Zone la plus chargée
-- Espace libre disponible
-- Export du rapport
-
-**Recherche et filtres**
-- Champ de recherche en temps réel pour les articles disponibles
-- Filtre en temps réel sur l'historique des mouvements
-
----
-
-## 17. Conditions d'utilisation
+## 16. Conditions d'utilisation
 
 Les conditions d'utilisation détaillées sont accessibles depuis le **footer** de l'application en cliquant sur le lien **"Conditions d'utilisation"**. Le footer est simplifié en une seule ligne : `© 2025–2026 MARET Davie — Conditions d'utilisation` avec un modal détaillé au clic.
 
-### 17.1 Résumé
+### 16.1 Résumé
 
 - © 2025–2026 **MARET Davie** — Tous droits réservés
 - Toute reproduction ou utilisation sans accord préalable écrit est **interdite**
@@ -912,7 +833,7 @@ Les conditions d'utilisation détaillées sont accessibles depuis le **footer** 
 - Designs et contenus créatifs **protégés par le droit d'auteur**
 - Pour collaborations : contactez l'auteur
 
-### 17.2 Attribution
+### 16.2 Attribution
 
 Si vous utilisez ou vous inspirez de ces projets, veuillez citer : **dmaret © 2025–2026**
 
