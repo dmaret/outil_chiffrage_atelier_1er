@@ -5243,6 +5243,11 @@
             const bundle = GESTES_BUNDLES[bundleKey];
             if (!bundle) return;
             pushUndoSnapshot('Bundle "' + bundle.label + '"');
+            // Supprime les lignes de gestes vides avant d'ajouter le bundle
+            [...gesteLines].forEach(id => {
+                const sel = document.getElementById('select-geste-' + id);
+                if (sel && !sel.value) removeGesteLine(id);
+            });
             bundle.codes.forEach(code => {
                 const g = catalogueGestes.find(x => x.code === code);
                 if (g) addGesteLine({code: g.code, temps: Math.round(g.temps * g.coef), quantite: 1});
