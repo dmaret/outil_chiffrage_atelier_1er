@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Outil Complet Atelier - La Pallanterie</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23a8d5e2'/><text x='50' y='62' text-anchor='middle' font-size='50' font-weight='bold' fill='%23fff'>LP</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -4640,9 +4640,13 @@
         window.addEventListener('load', () => {
             initAuthGroups();
             checkAuthSession();
-            syncEmailWebhooksUI();  // Synchronize email webhooks config UI
-            // Initialize tab drag-drop functionality
+            syncEmailWebhooksUI();
             initTabDragAndDropMode();
+            // Branche sans-icones : supprime tous les emojis au chargement
+            removeAllEmojis();
+            // Observer pour supprimer les emojis du contenu rendu dynamiquement
+            const _emojiObs = new MutationObserver(() => { removeAllEmojis(); });
+            _emojiObs.observe(document.body, { childList: true, subtree: true, characterData: true });
         });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
@@ -5385,56 +5389,31 @@
         }
 
 
-        function removeEmojisForSystemTheme(themeName) {
-            // List of system themes that should have emojis removed
-            const systemThemes = ['as400', 'sap', 'oracle', 'navision', 'c64'];
-            
-            if (!systemThemes.includes(themeName)) {
-                return; // Only remove emojis for system themes
-            }
-            
-            // Comprehensive emoji regex that matches most Unicode emoji characters
-            // This includes: emoticons, symbols, pictographs, and other emoji ranges
-            const emojiRegex = /[\p{Emoji}]/gu;
-            
-            // Fallback regex if Unicode property classes are not supported
-            const fallbackEmojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{27BF}]|[\u{1F680}-\u{1F6FF}]|[\u{2300}-\u{23FF}]|[\u{1F900}-\u{1F999}]|[\u{1FAA0}-\u{1FAFF}]|[\u{2700}-\u{27BF}]|[✅❌⬜🟡🟠🔵🟣🟢💙📥📦🚚]/gu;
-            
-            // Choose which regex to use
-            let finalRegex = emojiRegex;
-            try {
-                // Test if Unicode property classes work
-                "test".match(emojiRegex);
-            } catch (e) {
-                // Fall back to manual regex if Unicode properties aren't supported
-                finalRegex = fallbackEmojiRegex;
-            }
-            
-            // Process all text nodes in the DOM
-            const walker = document.createTreeWalker(
-                document.body,
-                NodeFilter.SHOW_TEXT,
-                null,
-                false
-            );
-            
+        // Regex qui cible uniquement les vrais emojis pictographiques (pas les chiffres ni symboles basiques)
+        const _EMOJI_RX = /[\u{1F300}-\u{1F9FF}\u{1FA00}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]|[\u{1F1E0}-\u{1F1FF}]{2}|[⬜⬛⭐⭕✅❌❓❗⏱⏰⏸⛶☑️✕✓◯↺↔⚡♻☰■▢◯←→⇄∅]/gu;
+
+        function removeAllEmojis() {
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
             let node;
-            const nodesToProcess = [];
+            const nodes = [];
             while (node = walker.nextNode()) {
-                if (node.textContent.match(finalRegex)) {
-                    nodesToProcess.push(node);
+                if (_EMOJI_RX.test(node.textContent)) {
+                    _EMOJI_RX.lastIndex = 0;
+                    nodes.push(node);
                 }
             }
-            
-            // Update the text content of collected nodes
-            nodesToProcess.forEach(node => {
-                const cleaned = node.textContent
-                    .replace(finalRegex, '') // Remove all emoji
-                    .replace(/\s+/g, ' ')    // Normalize spaces
-                    .trim();                  // Trim edges
-                if (cleaned) {
-                    node.textContent = cleaned;
-                }
+            nodes.forEach(n => {
+                _EMOJI_RX.lastIndex = 0;
+                const cleaned = n.textContent.replace(_EMOJI_RX, '').replace(/\s{2,}/g, ' ').trim();
+                if (cleaned) n.textContent = cleaned;
+                else if (n.parentNode && n.parentNode.childNodes.length === 1) n.textContent = '';
+            });
+        }
+
+        function removeEmojisForSystemTheme(themeName) {
+            const systemThemes = ['as400', 'sap', 'oracle', 'navision', 'c64'];
+            if (!systemThemes.includes(themeName)) return;
+            removeAllEmojis();
             });
         }
 
