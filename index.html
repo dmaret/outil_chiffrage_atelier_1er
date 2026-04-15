@@ -4642,6 +4642,12 @@
             checkAuthSession();
             syncEmailWebhooksUI();
             initTabDragAndDropMode();
+            // Restaurer le mode sans icônes si choisi précédemment
+            if (localStorage.getItem('appNoEmoji') === '1') {
+                activateNoEmojiMode();
+                const cb = document.getElementById('authNoEmoji');
+                if (cb) cb.checked = true;
+            }
         });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
@@ -5399,6 +5405,15 @@
             const systemThemes = ['as400', 'sap', 'oracle', 'navision', 'c64'];
             if (!systemThemes.includes(themeName)) return;
             removeAllEmojis();
+        }
+
+        let _noEmojiObserver = null;
+        function activateNoEmojiMode() {
+            removeAllEmojis();
+            if (!_noEmojiObserver) {
+                _noEmojiObserver = new MutationObserver(() => removeAllEmojis());
+                _noEmojiObserver.observe(document.body, { childList: true, subtree: true });
+            }
         }
 
         function applyTheme(name) {
@@ -11541,6 +11556,9 @@
                 localStorage.setItem('authGroups', JSON.stringify(authGroups));
                 // Proceed with login
                 sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
+                const noEmoji1 = document.getElementById('authNoEmoji')?.checked;
+                localStorage.setItem('appNoEmoji', noEmoji1 ? '1' : '0');
+                if (noEmoji1) activateNoEmojiMode();
                 document.getElementById('authOverlay').style.display = 'none';
                 applyAuthGroup(group);
                 toast(`✅ Mot de passe configuré! Bienvenue, groupe ${group.name} !`, 'success');
@@ -11558,6 +11576,10 @@
 
             // Auth OK
             sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
+            // Mode sans icônes
+            const noEmoji = document.getElementById('authNoEmoji')?.checked;
+            localStorage.setItem('appNoEmoji', noEmoji ? '1' : '0');
+            if (noEmoji) activateNoEmojiMode();
             document.getElementById('authOverlay').style.display = 'none';
             applyAuthGroup(group);
             toast(`Bienvenue, groupe ${group.name} !`, 'success');
@@ -18127,6 +18149,10 @@
                 </div>
                 <div class="auth-error" id="authError"></div>
                 <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
+                <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:0.85em;color:#7a9db1;cursor:pointer;justify-content:center;">
+                    <input type="checkbox" id="authNoEmoji" style="width:16px;height:16px;accent-color:var(--color-primary-dark);">
+                    Interface sans icônes
+                </label>
             </div>
 
             <!-- Container 2: Offre de prix assistant gestes -->
