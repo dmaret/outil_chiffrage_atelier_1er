@@ -1909,15 +1909,16 @@
             <div id="calculateur" class="tab-content">
                 <div class="presentation-banner">🖥️ MODE PRÉSENTATION CLIENT — Coûts internes masqués</div>
                 <div class="section" style="border-left-color:#c9b3d4;">
-                    <h2>Modèles de prestation</h2>
-                    <div class="modeles-bar">
-                        <select id="modeleSelect" onchange="">
+                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
+                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
                             <option value="">— Sélectionner un modèle —</option>
                         </select>
-                        <button class="btn btn-secondary btn-small" onclick="chargerModele()">📋 Charger</button>
+                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
                         <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
-                        <button class="btn btn-danger btn-small" onclick="supprimerModele()">🗑️ Supprimer</button>
+                        <button class="btn btn-danger btn-small" onclick="supprimerModele()">🗑️</button>
                     </div>
+                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
                 </div>
 
                 <div class="section">
@@ -3774,6 +3775,16 @@
                     Accéder au module →
                   </button>
                 </div>
+              </div>
+
+              <div class="section" style="margin-top:20px;">
+                <h2>⏱️ Précision des estimations — Estimé vs Réel</h2>
+                <div id="dashEstimeVsReel"></div>
+              </div>
+
+              <div class="section" style="margin-top:20px;">
+                <h2>🔔 Relances devis — Suivi commercial</h2>
+                <div id="dashRelancesDevis"></div>
               </div>
             </div>
 
@@ -6387,12 +6398,30 @@
                 <div class="stat-card"><div class="label">Délai paiement moy.</div><div class="value">${delaiMoyDet !== null ? delaiMoyDet + ' j' : '—'}</div></div>
                 <div class="stat-card"><div class="label">Rév. moy.</div><div class="value">${revMoyDet}</div></div>
                 <div class="stat-card"><div class="label">Taux conversion</div><div class="value">${tauxConvDet}%</div></div>
-            </div>
-            <table><thead><tr><th>Date</th><th>Prestation</th><th>Réf.</th><th>Statut</th><th>Prix vente</th><th>Marge</th><th>Délai paiement</th></tr></thead><tbody>`;
+            </div>`;
+
+            // Mini-dashboard rentabilité client
+            const margePctClient = ca > 0 ? ((marge / ca) * 100).toFixed(1) : 0;
+            const globalCA = prestationsSauvegardees.reduce((s,p) => s + (p.prixVente||0), 0);
+            const partCA = globalCA > 0 ? (ca / globalCA * 100).toFixed(1) : 0;
+            const rentabiliteScore = margePctClient >= 25 ? '🟢 Très rentable' : margePctClient >= 15 ? '🟡 Correct' : '🔴 Faible marge';
+            const caMoyen = prestations.length > 0 ? (ca / prestations.length).toFixed(0) : 0;
+
+            html += `<div style="background:linear-gradient(135deg,#f0f8ff,#f8f0ff);border-radius:10px;padding:16px;margin-bottom:16px;">
+                <h4 style="margin:0 0 10px;color:#6b8fa3;">💰 Analyse rentabilité</h4>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;">
+                    <div><div style="font-size:0.75em;color:#8a99a8;">Marge moyenne</div><div style="font-size:1.3em;font-weight:bold;color:${margePctClient>=15?'#27ae60':'#e74c3c'};">${margePctClient}%</div></div>
+                    <div><div style="font-size:0.75em;color:#8a99a8;">Part du CA total</div><div style="font-size:1.3em;font-weight:bold;color:#6b8fa3;">${partCA}%</div></div>
+                    <div><div style="font-size:0.75em;color:#8a99a8;">CA moy./prestation</div><div style="font-size:1.3em;font-weight:bold;">${caMoyen} CHF</div></div>
+                    <div><div style="font-size:0.75em;color:#8a99a8;">Rentabilité</div><div style="font-size:1.1em;font-weight:bold;">${rentabiliteScore}</div></div>
+                </div>
+            </div>`;
+
+            html += `<table><thead><tr><th>Date</th><th>Prestation</th><th>Réf.</th><th>Statut</th><th>Prix vente</th><th>Marge</th><th>Délai paiement</th></tr></thead><tbody>`;
             prestations.forEach(p => {
                 const badge = getStatutBadgeHtml(p.statut || 'devis');
                 const delai = p.dateFacturation && p.dateEncaissement ? Math.round((new Date(p.dateEncaissement) - new Date(p.dateFacturation)) / 86400000) + ' j' : '—';
-                html += `<tr><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${p.prestation}</td><td style="font-size:0.8em;color:#aaa;">${p.reference}</td><td>${badge}</td><td>${p.prixVente.toFixed(2)} CHF</td><td style="color:${(p.prixVente-p.prixRevient)>=0?'#27ae60':'#e74c3c'}">${(p.prixVente-p.prixRevient).toFixed(2)} CHF</td><td>${delai}</td></tr>`;
+                html += `<tr><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${p.prestation}</td><td style="font-size:0.8em;color:#aaa;">${p.reference}</td><td>${badge}</td><td>${(p.prixVente||0).toFixed(2)} CHF</td><td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${((p.prixVente||0)-(p.prixRevient||0)).toFixed(2)} CHF</td><td>${delai}</td></tr>`;
             });
             html += '</tbody></table>';
 
@@ -7968,7 +7997,8 @@
                             </select>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})" title="Éditer">✏️ Éditer</button>
                             <button class="btn btn-small" style="background:#f0f7f0;color:#3a7a4a;border:1px solid #b8e0c0;" onclick="toggleReelSection(${p.id})" title="Saisir temps réel">⏱️ Réel</button>
-                            <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF">📄 PDF</button>
+                            <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF interne">📄 PDF</button>
+                            <button class="btn btn-small" style="background:#edf5ff;color:#2980b9;border:1px solid #a8c8f0;" onclick="generateDevisPDF(${p.id})" title="Devis client PDF">📨 Devis</button>
                             <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
                             ${(p.statut === 'valide' || p.statut === 'facture') ? `<button class="btn btn-small" style="background:#f0e8f8;color:#7a5a9a;border:1px solid #c9b3d4;" onclick="programmerRecurrence(${p.id})" title="Créer récurrence">🔁 Récurrence</button>` : ''}
                             ${p.statut === 'facture' ? `<button class="btn btn-small" style="background:#f5fce8;color:#4a7a2a;border:1px solid #b8d890;" onclick="openPaiementModal(${p.id})" title="Suivi paiement">💶 Paiement</button>` : ''}
@@ -8710,6 +8740,93 @@
             window.print();
             printZone.style.display = 'none';
             printZone.innerHTML = '';
+        }
+
+        function generateDevisPDF(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const date = new Date(p.date).toLocaleDateString('fr-FR');
+            const validite = p.dateValidite ? new Date(p.dateValidite).toLocaleDateString('fr-FR') : '30 jours';
+            const ref = p.reference || 'N/A';
+
+            let gestesRows = '';
+            (p.gestes || []).forEach((g, i) => {
+                const tempsMin = (g.temps * g.quantite / 60).toFixed(1);
+                gestesRows += `<tr style="border-bottom:1px solid #e8f0f5;">
+                    <td style="padding:8px;font-size:0.85em;">${i+1}</td>
+                    <td style="padding:8px;">${g.description || g.code}</td>
+                    <td style="padding:8px;text-align:center;">${g.quantite}</td>
+                    <td style="padding:8px;text-align:center;">${tempsMin} min</td>
+                </tr>`;
+            });
+
+            let consoRows = '';
+            (p.consommables || []).forEach(c => {
+                consoRows += `<tr style="border-bottom:1px solid #e8f0f5;">
+                    <td style="padding:8px;">${c.designation || c.ref || '-'}</td>
+                    <td style="padding:8px;text-align:center;">${c.quantite || 0}</td>
+                    <td style="padding:8px;text-align:right;">${(c.prix || 0).toFixed(2)} CHF</td>
+                </tr>`;
+            });
+
+            const conditions = p.conditionsPaiement || '30 jours net';
+            const nbPieces = p.nbPieces || 1;
+            const unite = p.unite || 'pièce';
+            const prixPiece = nbPieces > 1 ? ((p.prixVente || 0) / nbPieces).toFixed(2) : null;
+
+            const html = `<div id="devisPdfContent" style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:30px;color:#2d3e50;">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:30px;">
+                    <div><h1 style="margin:0;color:#6b8fa3;font-size:1.8em;">🏭 Atelier La Pallanterie</h1>
+                    <p style="margin:4px 0 0;color:#8a99a8;font-size:0.9em;">Travail adapté • Services de qualité</p></div>
+                    <div style="text-align:right;"><div style="background:#6b8fa3;color:white;padding:8px 18px;border-radius:8px;font-weight:bold;font-size:1.1em;display:inline-block;">DEVIS</div>
+                    <p style="margin:6px 0 0;font-size:0.88em;color:#5a7b8f;">Réf: ${ref}<br>Date: ${date}</p></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:25px;">
+                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:8px;padding:14px;">
+                        <div style="font-size:0.78em;text-transform:uppercase;color:#8a99a8;margin-bottom:6px;font-weight:600;">Client</div>
+                        <div style="font-size:1.1em;font-weight:bold;">${p.client || '-'}</div></div>
+                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:8px;padding:14px;">
+                        <div style="font-size:0.78em;text-transform:uppercase;color:#8a99a8;margin-bottom:6px;font-weight:600;">Prestation</div>
+                        <div style="font-size:1.1em;font-weight:bold;">${p.prestation || '-'}</div>
+                        ${p.responsable ? `<div style="font-size:0.85em;color:#8a99a8;margin-top:4px;">Responsable: ${p.responsable}</div>` : ''}</div>
+                </div>
+                ${gestesRows ? `<h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:6px;">📋 Détail de la prestation</h3>
+                <table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#edf5fa;">
+                    <th style="padding:8px;text-align:left;width:30px;">#</th><th style="padding:8px;text-align:left;">Description</th>
+                    <th style="padding:8px;text-align:center;">Qté</th><th style="padding:8px;text-align:center;">Temps</th>
+                </tr></thead><tbody>${gestesRows}</tbody></table>` : ''}
+                ${consoRows ? `<h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:6px;margin-top:20px;">🛒 Fournitures incluses</h3>
+                <table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#edf5fa;">
+                    <th style="padding:8px;text-align:left;">Désignation</th><th style="padding:8px;text-align:center;">Qté</th>
+                    <th style="padding:8px;text-align:right;">Prix unit.</th></tr></thead><tbody>${consoRows}</tbody></table>` : ''}
+                <div style="margin-top:25px;background:linear-gradient(135deg,#e8f4f8,#f0e8f5);border-radius:12px;padding:24px;text-align:center;">
+                    <div style="font-size:0.85em;color:#5a7b8f;margin-bottom:4px;">Volume: ${nbPieces} ${unite}${nbPieces > 1 ? 's' : ''}</div>
+                    ${prixPiece ? `<div style="font-size:1em;color:#5a7b8f;margin-bottom:8px;">Prix unitaire: <strong>${prixPiece} CHF/${unite}</strong></div>` : ''}
+                    <div style="font-size:0.9em;color:#6b8fa3;margin-bottom:4px;">PRIX TOTAL</div>
+                    <div style="font-size:2.8em;font-weight:bold;color:#2d3e50;">${(p.prixVente||0).toFixed(2)} CHF</div>
+                    <div style="font-size:0.82em;color:#8a99a8;margin-top:4px;">HT — Temps estimé: ${(p.heures||0).toFixed(1)}h</div>
+                </div>
+                <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:0.88em;">
+                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:8px;padding:12px;"><strong>Conditions de paiement</strong><br>${conditions}</div>
+                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:8px;padding:12px;"><strong>Validité de l'offre</strong><br>${validite}</div>
+                </div>
+                <div style="margin-top:30px;border-top:1px solid #d5e3ed;padding-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:0.82em;color:#8a99a8;">
+                    <div><strong style="color:#2d3e50;">Signature client</strong><br><br>
+                        <div style="border-bottom:1px solid #ccc;width:200px;height:40px;"></div>
+                        <div style="margin-top:4px;">Date: ___/___/______</div></div>
+                    <div style="text-align:right;"><strong style="color:#2d3e50;">Atelier La Pallanterie</strong><br>
+                        <div style="margin-top:8px;">Devis généré le ${new Date().toLocaleDateString('fr-FR')}</div></div>
+                </div>
+            </div>`;
+
+            const el = document.createElement('div');
+            el.innerHTML = html;
+            document.body.appendChild(el);
+            html2pdf().set({
+                margin: 8, filename: `Devis_${ref}_${p.client || 'client'}.pdf`,
+                image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(el.querySelector('#devisPdfContent')).save().then(() => { document.body.removeChild(el); });
         }
 
         // ============================================================
@@ -9589,6 +9706,26 @@
             sel.innerHTML = '<option value="">— Sélectionner un modèle —</option>' +
                 configModeles.map(m => `<option value="${m.id}">${m.nom}</option>`).join('');
             if (current) sel.value = current;
+            renderModelesQuickAccess();
+        }
+
+        function renderModelesQuickAccess() {
+            const container = document.getElementById('modelesQuickAccess');
+            if (!container) return;
+            if (configModeles.length === 0) {
+                container.innerHTML = '<span style="font-size:0.82em;color:#9ab0be;">Aucun modèle sauvegardé — créez-en via 💾 Sauver comme modèle</span>';
+                return;
+            }
+            container.innerHTML = configModeles.map(m =>
+                `<button class="btn btn-small" style="background:linear-gradient(135deg,#f0f7ff,#f0f0ff);border:1px solid #c8d8f0;font-size:0.82em;" onclick="quickLoadModele(${m.id})" title="Charger le modèle ${m.nom}">⚡ ${m.nom}</button>`
+            ).join('');
+        }
+
+        function quickLoadModele(id) {
+            const sel = document.getElementById('modeleSelect');
+            if (sel) sel.value = id;
+            chargerModele();
+            toast('Modèle chargé !', 'success');
         }
 
         function sauverModele() {
@@ -12567,6 +12704,69 @@
                         <span>Marge actuelle : <strong>${currentMarge.toFixed(1)}%</strong></span>
                         <span style="color:${trendColor};">${trendIcon} Tendance : <strong>${trend >= 0 ? '+' : ''}${trend.toFixed(1)}%</strong></span>
                     </div>`;
+                }
+            }
+
+            // ── Estimé vs Réel ──
+            const evrEl = document.getElementById('dashEstimeVsReel');
+            if (evrEl) {
+                const avecReel = prestationsSauvegardees.filter(p => p.heuresReelles != null && p.heures > 0);
+                if (avecReel.length === 0) {
+                    evrEl.innerHTML = '<div style="color:#7a9db1;font-style:italic;padding:12px;">Aucune prestation avec temps réel saisi — saisissez le temps réel via le bouton ⏱️ Réel</div>';
+                } else {
+                    let totalEstime = 0, totalReel = 0;
+                    let rows = avecReel.slice(-10).reverse().map(p => {
+                        const ecart = p.heuresReelles - p.heures;
+                        const pct = (ecart / p.heures * 100).toFixed(0);
+                        const color = ecart <= 0 ? '#27ae60' : ecart / p.heures > 0.2 ? '#e74c3c' : '#f39c12';
+                        const icon = ecart <= 0 ? '✅' : '⚠️';
+                        totalEstime += p.heures; totalReel += p.heuresReelles;
+                        return `<tr style="border-bottom:1px solid #f0f4f8;">
+                            <td style="padding:6px 8px;">${p.prestation}</td>
+                            <td style="padding:6px 8px;text-align:center;">${p.heures.toFixed(1)}h</td>
+                            <td style="padding:6px 8px;text-align:center;">${p.heuresReelles.toFixed(1)}h</td>
+                            <td style="padding:6px 8px;text-align:center;color:${color};font-weight:bold;">${icon} ${ecart >= 0 ? '+' : ''}${pct}%</td>
+                        </tr>`;
+                    }).join('');
+                    const globalPct = totalEstime > 0 ? ((totalReel - totalEstime) / totalEstime * 100).toFixed(1) : 0;
+                    const globalColor = globalPct <= 0 ? '#27ae60' : globalPct > 15 ? '#e74c3c' : '#f39c12';
+                    evrEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.88em;">
+                        <thead><tr style="background:#edf5fa;"><th style="padding:8px;text-align:left;">Prestation</th>
+                        <th style="padding:8px;text-align:center;">Estimé</th><th style="padding:8px;text-align:center;">Réel</th>
+                        <th style="padding:8px;text-align:center;">Écart</th></tr></thead><tbody>${rows}</tbody></table>
+                        <div style="margin-top:10px;font-size:0.88em;display:flex;gap:16px;">
+                            <span>Échantillon: <strong>${avecReel.length}</strong> prestations</span>
+                            <span>Écart global: <strong style="color:${globalColor}">${globalPct >= 0 ? '+' : ''}${globalPct}%</strong></span>
+                            <span style="color:#8a99a8;">${globalPct <= 5 ? '🎯 Excellente précision' : globalPct <= 15 ? '👍 Bonne précision' : '⚠️ Estimations à revoir'}</span>
+                        </div>`;
+                }
+            }
+
+            // ── Relances devis ──
+            const relancesEl = document.getElementById('dashRelancesDevis');
+            if (relancesEl) {
+                const devisOuverts = prestationsSauvegardees.filter(p => ['devis','soumis'].includes(p.statut || 'devis'));
+                if (devisOuverts.length === 0) {
+                    relancesEl.innerHTML = '<div style="color:#5a9a6a;padding:12px;">✅ Aucun devis en attente</div>';
+                } else {
+                    const sorted = [...devisOuverts].sort((a, b) => new Date(a.date) - new Date(b.date));
+                    relancesEl.innerHTML = sorted.map(p => {
+                        const age = Math.floor((now - new Date(p.date)) / 86400000);
+                        let urgence, badgeColor, bgColor;
+                        if (age > 14) { urgence = '🔴 Relance urgente'; badgeColor = '#e74c3c'; bgColor = '#fde8e8'; }
+                        else if (age > 7) { urgence = '🟠 À relancer'; badgeColor = '#f39c12'; bgColor = '#fff8e8'; }
+                        else { urgence = '🟢 Récent'; badgeColor = '#27ae60'; bgColor = '#f0faf0'; }
+                        return `<div style="padding:10px;margin-bottom:8px;border-radius:8px;background:${bgColor};border-left:3px solid ${badgeColor};display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                            <div>
+                                <strong>${p.prestation}</strong> — ${p.client}
+                                <div style="font-size:0.82em;color:#5a7b8f;">${(p.prixVente||0).toFixed(0)} CHF • envoyé il y a ${age} jour${age>1?'s':''}</div>
+                            </div>
+                            <div style="display:flex;gap:6px;align-items:center;">
+                                <span style="font-size:0.82em;font-weight:bold;color:${badgeColor};">${urgence}</span>
+                                ${age > 7 ? `<button class="btn btn-small" style="background:${badgeColor};color:white;border:none;" onclick="toast('Relance notée pour ${p.client} — ${p.reference}','info')">📧 Relancer</button>` : ''}
+                            </div>
+                        </div>`;
+                    }).join('');
                 }
             }
 
