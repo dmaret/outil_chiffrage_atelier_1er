@@ -4027,6 +4027,7 @@
         // Vérification des permissions
         // ============================================================
         function hasPermission(action) {
+            if (isSuperUser) return true;
             if (!currentUserSession) return false;
             const role = currentUserSession.role;
             const permissions = ROLE_PERMISSIONS[role];
