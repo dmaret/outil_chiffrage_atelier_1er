@@ -157,8 +157,8 @@ Outil pédagogique de guidage à la création de prestations.
 
 #### Personnel
 
-- **CEA** : nombre de travailleurs (Collaborateurs en Emploi Adapté)
-- **MSP** : nombre d'encadrants (Maîtres SocioProfessionnels)
+- **CEA** : nombre de travailleurs (Conseillers en Emploi Accompagné)
+- **MSP** : nombre d'encadrants (Moniteurs de Stage et de Production)
 
 #### Gestion des gestes
 
@@ -668,8 +668,8 @@ L'absence de framework garantit la pérennité de l'outil : aucune dépendance �
 | Terme | Définition |
 |-------|-----------|
 | **outil_chiffrage_atelier_1er** | Outil complet de chiffrage financier, gestion de stock et prestations pour ateliers de travail adapté — application monopage (SPA) autonome en JavaScript |
-| **CEA** | Collaborateurs en Emploi Adapté — travailleurs de l'atelier |
-| **MSP** | Maître SocioProfessionnel — encadrant |
+| **CEA** | Conseillers en Emploi Accompagné — travailleurs de l'atelier |
+| **MSP** | Moniteurs de Stage et de Production — encadrants |
 | **Geste** | Étape élémentaire et mesurable d'une prestation (ex. : contrôle, emballage) |
 | **Prestation** | Ensemble de gestes formant un service proposé à un client |
 | **Devis** | Document chiffré transmis au client avant validation |
@@ -691,9 +691,9 @@ L'application propose un système de **connexion par groupe** avec 4 niveaux d'a
 
 | Groupe | Mot de passe | Description |
 |--------|--------------|-------------|
-| **CEA** | `cea2026` | Collaborateurs en emploi adapté |
+| **CEA** | `cea2026` | Conseillers en Emploi Accompagné |
 | **ASP** | `asp2026` | Assistant socioprofessionnel |
-| **MSP** | `msp2026` | Maître socioprofessionnel |
+| **MSP** | `msp2026` | Moniteur de Stage et de Production |
 | **ADMIN** | `admin2026` | Administrateur système |
 
 ### 13.2 Contrôle d'accès basé sur les rôles (RBAC)
