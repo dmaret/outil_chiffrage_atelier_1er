@@ -6588,12 +6588,20 @@
             const semaines = [];
             for (let i = 0; i < 10; i++) {
                 const debut = new Date(lundi); debut.setDate(lundi.getDate() + i * 7);
-                const fin = new Date(debut); fin.setDate(debut.getDate() + 6);
-                const label = debut.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'}) + ' – ' + fin.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'});
+                const vendredi = new Date(debut); vendredi.setDate(debut.getDate() + 4);
+                const label = debut.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'}) + ' – ' + vendredi.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'});
+                const debutISO = debut.toISOString().split('T')[0];
+                const vendrediISO = vendredi.toISOString().split('T')[0];
                 const prestas = prestationsSauvegardees
-                    .filter(p => statutsActifs.includes(p.statut) && p.date >= debut.toISOString().split('T')[0] && p.date <= fin.toISOString().split('T')[0]);
+                    .filter(p => {
+                        if (!statutsActifs.includes(p.statut)) return false;
+                        const pd = p.date;
+                        if (!pd || pd < debutISO || pd > vendrediISO) return false;
+                        const jour = new Date(pd).getDay();
+                        return jour !== 0 && jour !== 6;
+                    });
                 const heures = prestas.reduce((s,p) => s + (p.heures || 0), 0);
-                semaines.push({label, heures, prestas, debut, fin});
+                semaines.push({label, heures, prestas, debut, fin: vendredi});
             }
 
             const max = Math.max(...semaines.map(s => s.heures), capaciteHebdo);
@@ -6614,7 +6622,7 @@
                     </td>
                 </tr>`;
             });
-            html += `</tbody><tfoot><tr><td colspan="3" style="padding:8px 6px;font-size:0.8em;color:#aaa;border-top:1px solid #eee;">Capacité configurée : <strong>${capaciteHebdo} h/semaine</strong> — Statuts pris en compte : <strong>Soumis, Accepté, En cours</strong></td></tr></tfoot></table>`;
+            html += `</tbody><tfoot><tr><td colspan="3" style="padding:8px 6px;font-size:0.8em;color:#aaa;border-top:1px solid #eee;">Capacité configurée : <strong>${capaciteHebdo} h/semaine</strong> (Lun–Ven, hors weekends) — Statuts pris en compte : <strong>Accepté, En cours</strong></td></tr></tfoot></table>`;
             container.innerHTML = html;
         }
 
@@ -12357,8 +12365,9 @@
                     inRange = dDay >= dS && dDay <= dE;
 
                     const borderRadius = isStart && isEnd ? '6px' : isStart ? '6px 0 0 6px' : isEnd ? '0 6px 6px 0' : '0';
-                    html += `<td style="padding:2px 0;${isWeekend ? 'background:#f8f0f0;' : ''}">
-                        ${inRange ? `<div style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};" title="${p.prestation} — ${statutLabels[statut]||statut}"></div>` : ''}
+                    const showBar = inRange && !isWeekend;
+                    html += `<td style="padding:2px 0;${isWeekend ? 'background:repeating-linear-gradient(135deg,#f0e6e6,#f0e6e6 3px,#f8f0f0 3px,#f8f0f0 6px);' : ''}">
+                        ${showBar ? `<div style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};" title="${p.prestation} — ${statutLabels[statut]||statut}"></div>` : ''}
                     </td>`;
                 });
                 html += `</tr>`;
