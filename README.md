@@ -87,7 +87,8 @@ Dès que des données sont saisies, effectuez une sauvegarde depuis l'onglet **C
 outil_chiffrage_atelier_1er/
 ├── index.html                    # Application complète (HTML + CSS + JavaScript)
 ├── catalogue_gestes_import.csv   # Modèle CSV pour l'import de gestes
-└── DOCUMENTATION.md              # Ce fichier
+├── README.md                     # Ce fichier
+└── RELEASE_v2.0.0.md             # Notes de version 2.0.0
 ```
 
 L'application est intentionnellement contenue dans un **seul fichier HTML** pour garantir :
@@ -201,7 +202,7 @@ Calcul automatique du coût unitaire pour différents volumes : 100, 250, 500, 1
 
 #### Export PDF
 
-Génération d'un devis en PDF (version client ou version interne avec coûts détaillés).
+Génération d'un devis en PDF compact (optimisé pour tenir sur une seule page A4) en version client ou version interne avec coûts détaillés.
 
 ---
 
@@ -320,6 +321,7 @@ Historique et suivi de toutes les prestations enregistrées.
 
 **Statuts disponibles :**
 - Brouillon
+- Soumis
 - Devis envoyé
 - Accepté
 - En cours
@@ -351,7 +353,7 @@ Tableaux de bord analytiques pour piloter l'activité.
 - Bilan de gestion des stocks
 - Évolution CA et coûts sur 6 mois
 - Top 5 des prestations les plus rentables
-- Tableau de bord capacitaire (taux d'occupation CEA/MSP)
+- Tableau de bord capacitaire (taux d'occupation CEA/MSP, noms des prestations dans les barres de charge)
 - Précision des estimations vs réalisé
 - Objectifs mensuels de CA
 - Prévisions sur 3 mois
@@ -376,9 +378,10 @@ Paramètres de l'application et gestion des données.
 #### Apparence
 
 - **Thèmes** : classique, sombre, couleurs personnalisées
-- **Police** : choix de la typographie
-- **Rayon des coins** : personnalisation de l'arrondi des éléments
+- **Police** : choix de la typographie (Inter, Roboto, system-ui… via Google Fonts)
+- **Rayon des coins** : personnalisation de l'arrondi des éléments (CSS variables `--border-radius-*`)
 - **Densité** : compact, normal, spacieux
+- **Séparation des onglets** : bordure visuelle entre chaque onglet
 
 #### Sécurité
 
@@ -457,6 +460,7 @@ Module pédagogique dédié à la découverte des systèmes logistiques et techn
 - 10 questions sur les systèmes logistiques
 - Score et pourcentage de réussite
 - Feedback pédagogique personnalisé
+- Possibilité de quitter le quiz avant la fin
 - Possibilité de recommencer
 
 **Demande de formation :**
@@ -578,9 +582,13 @@ Masque tous les coûts internes pour une présentation cliente sans révéler le
 
 Disponible via le navigateur (F11) ou un bouton dédié dans l'interface.
 
+### Mode sans icônes
+
+Au moment de la connexion, une option **"Interface sans icônes"** permet de lancer l'application sans aucun emoji ni symbole. Ce mode utilise un `MutationObserver` pour retirer dynamiquement les emojis ajoutés au DOM. Le choix est mémorisé dans le `localStorage`.
+
 ### Mode administrateur
 
-Déverrouillé par code PIN, donne accès aux onglets et fonctions réservés (Assistant, Accompagnement, Historique, paramètres avancés).
+Déverrouillé par code PIN, donne accès aux onglets et fonctions réservés (Assistant, Accompagnement, Historique, paramètres avancés). En mode admin, les **onglets sont réorganisables par glisser-déposer** (HTML5 Drag and Drop).
 
 ---
 
@@ -642,10 +650,12 @@ Le localStorage est limité à environ **5 à 10 Mo** selon le navigateur. Pour 
 | Composant | Technologie |
 |-----------|-------------|
 | Interface | HTML5, CSS3 (variables CSS), JavaScript ES6+ |
+| Typographies | Google Fonts (Inter, Roboto) |
 | Génération PDF | html2pdf.js v0.10.1 |
 | Stockage des données | Browser localStorage (JSON) |
 | Mise en page | CSS Grid et Flexbox |
 | Thèmes | CSS Custom Properties |
+| Glisser-déposer | HTML5 Drag and Drop API (onglets, gestes) |
 | Langue | Français |
 | Frameworks | Aucun (JavaScript natif) |
 
