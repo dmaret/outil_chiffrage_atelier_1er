@@ -6578,7 +6578,7 @@
             lundi.setDate(now.getDate() - now.getDay() + 1 - 14);
             lundi.setHours(0,0,0,0);
 
-            const statutsActifs = ['soumis','accepte','en-cours'];
+            const statutsActifs = ['accepte','en-cours'];
             const semaines = [];
             for (let i = 0; i < 10; i++) {
                 const debut = new Date(lundi); debut.setDate(lundi.getDate() + i * 7);
