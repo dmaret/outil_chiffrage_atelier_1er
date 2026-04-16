@@ -1684,7 +1684,8 @@
                 <div style="background:#f9fbfc;border-radius:8px;padding:12px 16px;font-family:monospace;font-size:0.88em;border:1px solid #e0eaf0;margin-bottom:8px;">
                     index.html &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Application complète<br>
                     catalogue_gestes_import.csv &nbsp;# Modèle CSV pour l'import<br>
-                    DOCUMENTATION.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Documentation complète
+                    README.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Documentation complète<br>
+                    RELEASE_v2.0.0.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Notes de version 2.0.0
                 </div>
                 <ul style="margin:4px 0 8px 20px;">
                     <li>Déploiement sans étape de compilation</li>
@@ -1718,7 +1719,7 @@
                 <p style="margin:0 0 4px;"><em>Valorisation financière :</em> coût MO CEA + MSP, consommables (× facteur perte), stockage, frais généraux, coût de revient, marge, prix de vente (× urgence). Badges visuels colorés si urgence, perte ou temps non-facturable actifs.</p>
                 <p style="margin:0 0 4px;"><em>Simulation de volumes :</em> coût unitaire pour 100, 250, 500, 1 000 et 2 500 unités.</p>
                 <p style="margin:0 0 4px;"><em>📊 Analyse de sensibilité :</em> 10 scénarios what-if (hausse coûts CEA/MSP, hausse consommables, variation volume ×2/×5, ajout CEA, changement marge) avec impact en CHF et %.</p>
-                <p style="margin:0 0 8px;"><em>Export PDF :</em> version client (sans coûts) ou version interne (détail complet).</p>
+                <p style="margin:0 0 8px;"><em>Export PDF :</em> devis compact (optimisé pour une page A4) — version client (sans coûts) ou version interne (détail complet).</p>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.4 📦 Gestion de stock</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Mouvements : entrées, sorties, transferts avec traçabilité complète</li><li>Stock actuel en temps réel (quantité, valeur FIFO, emplacement)</li><li>Valorisation <strong>FIFO</strong> automatique (Premier Entré, Premier Sorti)</li><li>Alertes automatiques sous le seuil minimum défini</li></ul>
@@ -1747,10 +1748,10 @@
                 <ul style="margin:0 0 8px 20px;"><li>Coordonnées, tarifs personnalisés, conditions de paiement</li><li>Historique des prestations, export fiche client en PDF</li></ul>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.10 📈 Statistiques</h4>
-                <ul style="margin:0 0 8px 20px;"><li>Synthèse globale (CA, coûts, marges)</li><li>Répartition des coûts — camemberts comparatifs</li><li>Bilan de gestion des stocks</li><li>Évolution CA et coûts sur 6 mois</li><li>Top 5 des prestations les plus rentables</li><li>Tableau de bord capacitaire (taux d'occupation CEA/MSP)</li><li>Précision des estimations vs réalisé</li><li>Objectifs mensuels de CA, prévisions sur 3 mois</li><li>Rentabilité par geste, statistiques de stock mensuelles</li></ul>
+                <ul style="margin:0 0 8px 20px;"><li>Synthèse globale (CA, coûts, marges)</li><li>Répartition des coûts — camemberts comparatifs</li><li>Bilan de gestion des stocks</li><li>Évolution CA et coûts sur 6 mois</li><li>Top 5 des prestations les plus rentables</li><li>Tableau de bord capacitaire (taux d'occupation CEA/MSP, noms des prestations dans les barres de charge)</li><li>Précision des estimations vs réalisé</li><li>Objectifs mensuels de CA, prévisions sur 3 mois</li><li>Rentabilité par geste, statistiques de stock mensuelles</li></ul>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.11 ⚙️ Configuration</h4>
-                <ul style="margin:0 0 8px 20px;"><li><strong>Export JSON</strong> : sauvegarde complète de toutes les données</li><li><strong>Import JSON</strong> : restauration depuis une sauvegarde</li><li>Thèmes, police, densité, code PIN, préférences d'impression</li></ul>
+                <ul style="margin:0 0 8px 20px;"><li><strong>Export JSON</strong> : sauvegarde complète de toutes les données</li><li><strong>Import JSON</strong> : restauration depuis une sauvegarde</li><li>Thèmes, police (Google Fonts : Inter, Roboto), rayon des coins, séparation des onglets, densité, code PIN, préférences d'impression</li></ul>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.12 🧠 Accompagnement <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
                 <ul style="margin:0 0 8px 20px;"><li>Études de cas cliniques interactives</li><li>Cadres théoriques recommandés</li><li>Supports de formation</li></ul>
@@ -1765,7 +1766,7 @@
                 <ul style="margin:0 0 8px 20px;"><li>Gestion des apprenants (ajout, assignation, suivi)</li><li>Documents de formation et vidéos par geste</li><li>Checklist de progression par apprenant</li><li>Export / import des rapports de formation</li></ul>
 
                 <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.16 🏭 Formation Logistique</h4>
-                <ul style="margin:0 0 8px 20px;"><li>Fiches systèmes logistiques : WMS, ERP, TMS, Automatisation, RFID, Kanban, 5S</li><li>Quiz interactif (10 questions, score, feedback)</li><li>Demande de formation par domaine</li><li>Cas d'études réels (Amazon, Decathlon…)</li><li>Concepts clés : Supply Chain, KPI, Flux Tendu, Traçabilité</li></ul>
+                <ul style="margin:0 0 8px 20px;"><li>Fiches systèmes logistiques : WMS, ERP, TMS, Automatisation, RFID, Kanban, 5S</li><li>Quiz interactif (10 questions, score, feedback, possibilité de quitter avant la fin)</li><li>Demande de formation par domaine</li><li>Cas d'études réels (Amazon, Decathlon…)</li><li>Concepts clés : Supply Chain, KPI, Flux Tendu, Traçabilité</li></ul>
 
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
@@ -1807,7 +1808,8 @@
                     <li><strong>Mode sombre</strong> : bouton 🌙 en haut à droite ou Config → Thème</li>
                     <li><strong>Mode présentation</strong> : bouton 🖥️ — masque les coûts internes pour une présentation client</li>
                     <li><strong>Mode plein écran</strong> : F11 ou bouton ⛶ dans l'interface</li>
-                    <li><strong>Mode administrateur</strong> : bouton 🔓 + code PIN — déverrouille les onglets et fonctions avancées</li>
+                    <li><strong>Mode sans icônes</strong> : option à la connexion — lance l'application sans emoji ni symbole (choix mémorisé)</li>
+                    <li><strong>Mode administrateur</strong> : bouton 🔓 + code PIN — déverrouille les onglets et fonctions avancées, glisser-déposer des onglets</li>
                 </ul>
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
@@ -1846,9 +1848,13 @@
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:8px;">
                     <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Composant</th><th style="padding:6px 10px;text-align:left;">Technologie</th></tr>
                     <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Interface</td><td style="padding:5px 10px;">HTML5, CSS3 (variables CSS), JavaScript ES6+</td></tr>
-                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Génération PDF</td><td style="padding:5px 10px;">html2pdf.js v0.10.1</td></tr>
-                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Stockage</td><td style="padding:5px 10px;">Browser localStorage (JSON)</td></tr>
-                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Mise en page</td><td style="padding:5px 10px;">CSS Grid et Flexbox</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Typographies</td><td style="padding:5px 10px;">Google Fonts (Inter, Roboto)</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Génération PDF</td><td style="padding:5px 10px;">html2pdf.js v0.10.1</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Stockage</td><td style="padding:5px 10px;">Browser localStorage (JSON)</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Mise en page</td><td style="padding:5px 10px;">CSS Grid et Flexbox</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Thèmes</td><td style="padding:5px 10px;">CSS Custom Properties</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Glisser-déposer</td><td style="padding:5px 10px;">HTML5 Drag and Drop API (onglets, gestes)</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Langue</td><td style="padding:5px 10px;">Français</td></tr>
                     <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Frameworks</td><td style="padding:5px 10px;">Aucun (JavaScript natif)</td></tr>
                 </table>
                 <p>L'absence de framework garantit la pérennité de l'outil : aucune dépendance à mettre à jour, aucune rupture de compatibilité.</p>
