@@ -109,7 +109,27 @@
             color: var(--color-text);
             padding: 35px;
             text-align: center;
+            position: relative;
         }
+        .header-icons {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-icons button {
+            background: rgba(255,255,255,0.25);
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .header-icons button:hover { background: rgba(255,255,255,0.45); }
         
         .header h1 { font-size: 2em; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 1.05em; }
@@ -1266,7 +1286,7 @@
         body.fullscreen-calc .header { padding:14px 20px; }
         body.fullscreen-calc .header h1 { font-size:1.2em; margin:0; }
         body.fullscreen-calc .header p { display:none; }
-        #btnFullscreen { position:absolute; top:15px; right:226px; background:rgba(255,255,255,0.25); border:none; border-radius:50%; width:42px; height:42px; font-size:1.2em; cursor:pointer; transition:background 0.3s; }
+        #btnFullscreen { /* styles hérités de .header-icons button */ }
         #btnFullscreen:hover { background:rgba(255,255,255,0.4); }
 
         /* ── Objectif CA mensuel ─────────────────────────────────────── */
@@ -1873,17 +1893,19 @@
     </div>
 
     <div class="container">
-        <div class="header" style="position:relative;">
+        <div class="header">
             <h1>🏭 Outil Complet Atelier - La Pallanterie</h1>
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
             <span id="saveIndicator"><span class="autosave-dot" id="autosaveDot"></span>💾 Sauvegardé à l'instant</span>
-            <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
-            <button onclick="document.getElementById('docModal').style.display='flex'" style="position:absolute;top:15px;right:384px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Documentation">📖</button>
-            <div id="headerAuthBadge" style="display:none;position:absolute;top:13px;right:436px;background:rgba(255,255,255,0.30);border:1.5px solid rgba(255,255,255,0.55);border-radius:20px;padding:5px 13px;font-size:0.82em;font-weight:800;cursor:pointer;backdrop-filter:blur(4px);color:#2d3e50;white-space:nowrap;transition:background 0.2s;" onclick="doLogout()" title="Connecté — cliquer pour se déconnecter"><span id="headerAuthBadgeText">🔐</span></div>
-            <button onclick="document.getElementById('shortcutsModal').style.display='flex'" style="position:absolute;top:15px;right:332px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Aide raccourcis clavier">?</button>
-            <button onclick="openGlobalSearch()" style="position:absolute;top:15px;right:279px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;" title="Recherche globale (Ctrl+F)">🔍</button>
-            <button id="darkModeToggle" onclick="toggleDarkMode()" style="position:absolute;top:15px;right:174px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.3em;cursor:pointer;transition:background 0.3s;" title="Mode sombre">🌙</button>
-            <button id="btnPresentation" onclick="togglePresentation()" title="Mode présentation client — masque les coûts internes" style="position:absolute;top:15px;right:122px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:42px;height:42px;font-size:1.2em;cursor:pointer;transition:background 0.3s;">🖥️</button>
+            <div class="header-icons">
+                <div id="headerAuthBadge" style="display:none;background:rgba(255,255,255,0.30);border:1.5px solid rgba(255,255,255,0.55);border-radius:20px;padding:5px 13px;font-size:0.82em;font-weight:800;cursor:pointer;backdrop-filter:blur(4px);color:#2d3e50;white-space:nowrap;transition:background 0.2s;" onclick="doLogout()" title="Connecté — cliquer pour se déconnecter"><span id="headerAuthBadgeText">🔐</span></div>
+                <button onclick="document.getElementById('docModal').style.display='flex'" title="Documentation">📖</button>
+                <button onclick="document.getElementById('shortcutsModal').style.display='flex'" title="Aide raccourcis clavier">?</button>
+                <button onclick="openGlobalSearch()" title="Recherche globale (Ctrl+F)">🔍</button>
+                <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
+                <button id="darkModeToggle" onclick="toggleDarkMode()" title="Mode sombre" style="font-size:1.3em;">🌙</button>
+                <button id="btnPresentation" onclick="togglePresentation()" title="Mode présentation client">🖥️</button>
+            </div>
         </div>
 
         <div class="tabs-wrapper">
