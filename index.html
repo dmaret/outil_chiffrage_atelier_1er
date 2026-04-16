@@ -1877,6 +1877,66 @@
                     <tr style="background:#f9fbfc;"><td style="padding:5px 10px 5px 0;font-weight:600;">Pipeline CA</td><td style="padding:5px 0;">Prévision de chiffre d'affaires basée sur les devis en cours</td></tr>
                 </table>
 
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 13 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">13. Authentification et Permissions</h3>
+                <p>Système de <strong>connexion par groupe</strong> avec 4 niveaux d'accès :</p>
+                <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:10px;">
+                    <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Groupe</th><th style="padding:6px 10px;text-align:left;">Mot de passe</th><th style="padding:6px 10px;text-align:left;">Description</th></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><strong>CEA</strong></td><td style="padding:5px 10px;"><code>cea2026</code></td><td style="padding:5px 10px;">Collaborateur en emploi adapté</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><strong>ASP</strong></td><td style="padding:5px 10px;"><code>asp2026</code></td><td style="padding:5px 10px;">Assistant socioprofessionnel</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><strong>MSP</strong></td><td style="padding:5px 10px;"><code>msp2026</code></td><td style="padding:5px 10px;">Maître socioprofessionnel</td></tr>
+                    <tr style="background:#f9fbfc;"><td style="padding:5px 10px;"><strong>ADMIN</strong></td><td style="padding:5px 10px;"><code>admin2026</code></td><td style="padding:5px 10px;">Administrateur système</td></tr>
+                </table>
+                <p style="margin:8px 0 4px;"><strong>Permissions par groupe (RBAC) :</strong></p>
+                <table style="width:100%;border-collapse:collapse;font-size:0.85em;margin-bottom:10px;">
+                    <tr style="background:#f0f7fa;"><th style="padding:5px 8px;text-align:left;">Fonctionnalité</th><th style="padding:5px 8px;text-align:center;">CEA</th><th style="padding:5px 8px;text-align:center;">ASP</th><th style="padding:5px 8px;text-align:center;">MSP</th><th style="padding:5px 8px;text-align:center;">ADMIN</th></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:4px 8px;">Créer/modifier prestations</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:4px 8px;">Créer/modifier clients</td><td style="text-align:center;">❌</td><td style="text-align:center;">—</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:4px 8px;">Voir formation</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td><td style="text-align:center;">—</td><td style="text-align:center;">✅</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:4px 8px;">Voir statistiques</td><td style="text-align:center;">❌</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:4px 8px;">Gérer stock / consommables</td><td style="text-align:center;">❌</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td></tr>
+                    <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:4px 8px;">Gérer utilisateurs</td><td style="text-align:center;">❌</td><td style="text-align:center;">❌</td><td style="text-align:center;">✅</td><td style="text-align:center;">✅</td></tr>
+                    <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:4px 8px;">Configuration système</td><td style="text-align:center;">❌</td><td style="text-align:center;">❌</td><td style="text-align:center;">—</td><td style="text-align:center;">✅</td></tr>
+                </table>
+                <p><strong>Audit trail :</strong> chaque action est tracée (utilisateur, date, type d'action). Accès via l'onglet <strong>Historique</strong> (admin seulement).</p>
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 14 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">14. Email Webhooks</h3>
+                <p>Envoi de <strong>notifications email automatiques</strong> lors d'événements :</p>
+                <ul style="margin:4px 0 8px 20px;">
+                    <li><code>devis_sent</code> : quand un devis est généré</li>
+                    <li><code>report_ready</code> : quand un rapport mensuel est généré</li>
+                </ul>
+                <p><strong>Configuration :</strong> Paramétrage → Email Webhooks → activer, saisir URL + API Key, choisir les templates.</p>
+                <p><strong>Variables de template :</strong> <code>{client}</code>, <code>{prestation}</code>, <code>{reference}</code>, <code>{montant}</code>, <code>{marge}</code>, <code>{heures}</code>, <code>{statut}</code>, <code>{date}</code>, <code>{responsable}</code>.</p>
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 15 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">15. Système de Formation</h3>
+                <p><strong>Gestion des apprenants</strong> (onglet Formation Admin 🎓) :</p>
+                <ul style="margin:4px 0 8px 20px;">
+                    <li>Ajouter un apprenant, assigner des formations</li>
+                    <li>Checklist de progression (gestes maîtrisés / en cours)</li>
+                    <li>Vidéos de formation intégrées par geste</li>
+                    <li>Fiche formation imprimable, export / import rapports</li>
+                </ul>
+                <p><strong>Formation Logistique</strong> (onglet dédié 🏭) : fiches systèmes (WMS, ERP, TMS, RFID, Kanban, 5S), quiz interactif, demandes de formation par domaine.</p>
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 16 -->
+                <h3 style="color:#6b8fa3;margin:0 0 8px;">16. Conditions d'utilisation</h3>
+                <ul style="margin:4px 0 8px 20px;">
+                    <li>© 2025–2026 <strong>MARET Davie</strong> — Tous droits réservés</li>
+                    <li>Toute reproduction sans accord préalable écrit est <strong>interdite</strong></li>
+                    <li>Code fourni à titre <strong>informatif et éducatif</strong></li>
+                    <li>Designs et contenus créatifs protégés par le droit d'auteur</li>
+                    <li>Attribution requise : <strong>dmaret © 2025–2026</strong></li>
+                </ul>
+                <p style="font-size:0.85em;color:#aaa;">Conditions complètes accessibles via le footer de l'application.</p>
+
                 <p style="margin-top:24px;color:#aaa;font-size:0.85em;text-align:center;">Documentation — Outil Complet Atelier - La Pallanterie • Avril 2026</p>
             </div>
         </div>
