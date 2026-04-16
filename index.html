@@ -5385,10 +5385,18 @@
         const _EMOJI_RX = /[\u{1F300}-\u{1F9FF}\u{1FA00}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]|[\u{1F1E0}-\u{1F1FF}]{2}|[⬜⬛⭐⭕✅❌❓❗⏱⏰⏸⛶☑️✕✓◯↺↔⚡♻☰■▢◯←→⇄∅]/gu;
 
         function removeAllEmojis() {
+            // Éléments à préserver (boutons icônes du header + badge admin)
+            const preserve = new Set();
+            document.querySelectorAll('.header button, .header span, #headerAuthBadge, #saveIndicator').forEach(el => {
+                const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+                let n; while (n = tw.nextNode()) preserve.add(n);
+            });
+
             const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
             let node;
             const nodes = [];
             while (node = walker.nextNode()) {
+                if (preserve.has(node)) continue;
                 if (_EMOJI_RX.test(node.textContent)) {
                     _EMOJI_RX.lastIndex = 0;
                     nodes.push(node);
