@@ -6657,8 +6657,9 @@
                     .filter(p => {
                         if (!statutsActifs.includes(p.statut)) return false;
                         const pd = p.date;
-                        if (!pd || pd < debutISO || pd > vendrediISO) return false;
-                        return isWorkDay(pd);
+                        if (!pd) return false;
+                        const eff = getEffectiveWorkDate(pd);
+                        return eff >= debutISO && eff <= vendrediISO;
                     });
                 const heures = prestas.reduce((s,p) => s + (p.heures || 0), 0);
                 semaines.push({label, heures, prestas, debut, fin: vendredi});
@@ -12388,6 +12389,18 @@
             return dow !== 0 && dow !== 6 && !isJourFerie(dateISO);
         }
 
+        // Retourne le prochain jour ouvré si la date tombe un weekend/férié
+        function getEffectiveWorkDate(dateISO) {
+            let d = new Date(dateISO + 'T00:00:00');
+            let iso = dateISO;
+            let safety = 0;
+            while (!isWorkDay(iso) && safety++ < 10) {
+                d.setDate(d.getDate() + 1);
+                iso = d.toISOString().split('T')[0];
+            }
+            return iso;
+        }
+
         function addWorkDays(startDate, days) {
             const d = new Date(startDate);
             let added = 0;
@@ -12672,7 +12685,11 @@
                 const semDebutISO = semDebut.toISOString().split('T')[0];
                 const semVenISO = semVen.toISOString().split('T')[0];
                 const hSem = prestationsSauvegardees
-                    .filter(p => ['accepte','en-cours'].includes(p.statut) && p.date >= semDebutISO && p.date <= semVenISO && isWorkDay(p.date))
+                    .filter(p => {
+                        if (!['accepte','en-cours'].includes(p.statut) || !p.date) return false;
+                        const eff = getEffectiveWorkDate(p.date);
+                        return eff >= semDebutISO && eff <= semVenISO;
+                    })
                     .reduce((s, p) => s + (p.heures || 0), 0);
                 const capaciteHebdo = parseFloat(document.getElementById('capaciteHebdo')?.value || 35);
                 if (hSem > capaciteHebdo) {
