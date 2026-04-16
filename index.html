@@ -17482,7 +17482,9 @@
             inner.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                     <h3 style="margin:0;color:#e67e22;">🧠 Quiz Formation</h3>
-                    <button onclick="closeFormationQuizModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#999;line-height:1;">✕</button>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <button onclick="closeFormationQuizModal()" style="background:#f0f0f0;border:1px solid #ddd;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85em;color:#666;">✕ Quitter</button>
+                    </div>
                 </div>
                 <div style="background:#eee;border-radius:10px;height:8px;margin-bottom:16px;">
                     <div style="background:#e67e22;height:8px;border-radius:10px;width:${prog}%;transition:width 0.3s;"></div>
