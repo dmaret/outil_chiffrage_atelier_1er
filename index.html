@@ -1645,11 +1645,12 @@
     <!-- ── Modal Documentation ──────────────────────────────────────── -->
     <div id="docModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:5000;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
         <div style="background:white;border-radius:16px;padding:0;max-width:960px;width:96%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.25);">
-            <div style="padding:22px 28px 16px;border-bottom:1px solid #e8eef3;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-                <h2 style="margin:0;color:#6b8fa3;font-size:1.25em;">📖 Documentation — Outil Complet Atelier</h2>
-                <button onclick="document.getElementById('docModal').style.display='none'" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#9aa;line-height:1;" title="Fermer">&times;</button>
+            <div style="padding:22px 28px 16px;border-bottom:1px solid #e8eef3;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px;">
+                <h2 style="margin:0;color:#6b8fa3;font-size:1.25em;white-space:nowrap;">📖 Documentation — Outil Complet Atelier</h2>
+                <input id="docSearch" type="text" placeholder="🔍 Rechercher…" oninput="filterDoc(this.value)" style="flex:1;max-width:280px;padding:7px 12px;border:1px solid #d0e0ea;border-radius:20px;font-size:0.88em;outline:none;">
+                <button onclick="document.getElementById('docModal').style.display='none';document.getElementById('docSearch').value='';filterDoc('');" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#9aa;line-height:1;" title="Fermer">&times;</button>
             </div>
-            <div style="overflow-y:auto;padding:24px 32px 28px;font-size:0.93em;line-height:1.7;color:#2d3e50;">
+            <div id="docContent" style="overflow-y:auto;padding:24px 32px 28px;font-size:0.93em;line-height:1.7;color:#2d3e50;">
 
                 <p style="background:#f0f7fa;border-left:4px solid #a8d5e2;padding:10px 16px;border-radius:6px;margin-bottom:24px;font-style:italic;">Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
 
@@ -6657,8 +6658,7 @@
                         if (!statutsActifs.includes(p.statut)) return false;
                         const pd = p.date;
                         if (!pd || pd < debutISO || pd > vendrediISO) return false;
-                        const jour = new Date(pd).getDay();
-                        return jour !== 0 && jour !== 6;
+                        return isWorkDay(pd);
                     });
                 const heures = prestas.reduce((s,p) => s + (p.heures || 0), 0);
                 semaines.push({label, heures, prestas, debut, fin: vendredi});
@@ -6682,7 +6682,7 @@
                     </td>
                 </tr>`;
             });
-            html += `</tbody><tfoot><tr><td colspan="3" style="padding:8px 6px;font-size:0.8em;color:#aaa;border-top:1px solid #eee;">Capacité configurée : <strong>${capaciteHebdo} h/semaine</strong> (Lun–Ven, hors weekends) — Statuts pris en compte : <strong>Accepté, En cours</strong></td></tr></tfoot></table>`;
+            html += `</tbody><tfoot><tr><td colspan="3" style="padding:8px 6px;font-size:0.8em;color:#aaa;border-top:1px solid #eee;">Capacité configurée : <strong>${capaciteHebdo} h/semaine</strong> (Lun–Ven, hors weekends et jours fériés CH/GE) — Statuts pris en compte : <strong>Accepté, En cours</strong></td></tr></tfoot></table>`;
             container.innerHTML = html;
         }
 
@@ -8103,6 +8103,7 @@
                             <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF interne">📄 PDF</button>
                             <button class="btn btn-small" style="background:#edf5ff;color:#2980b9;border:1px solid #a8c8f0;" onclick="generateDevisPDF(${p.id})" title="Devis client PDF">📨 Devis</button>
                             <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
+                            <button class="btn btn-small" style="background:#f0f8e8;color:#4a8a2a;border:1px solid #b0d890;" onclick="copyPrestationToClient(${p.id})" title="Copier vers un autre client">👤 Copier client</button>
                             ${(p.statut === 'valide' || p.statut === 'facture') ? `<button class="btn btn-small" style="background:#f0e8f8;color:#7a5a9a;border:1px solid #c9b3d4;" onclick="programmerRecurrence(${p.id})" title="Créer récurrence">🔁 Récurrence</button>` : ''}
                             ${p.statut === 'facture' ? `<button class="btn btn-small" style="background:#f5fce8;color:#4a7a2a;border:1px solid #b8d890;" onclick="openPaiementModal(${p.id})" title="Suivi paiement">💶 Paiement</button>` : ''}
                             ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
@@ -8941,6 +8942,40 @@
         // ============================================================
         // FEATURE 2 : Duplication d'une prestation
         // ============================================================
+        function copyPrestationToClient(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const clients = [...new Set(prestationsSauvegardees.map(x => x.client).filter(Boolean))].sort();
+            const opts = clients.map(c => `<option value="${c}">${c}</option>`).join('');
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            modal.innerHTML = `<div style="background:#fff;border-radius:14px;padding:28px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 16px;color:#6b8fa3;">Copier vers un autre client</h3>
+                <p style="margin:0 0 12px;font-size:0.9em;color:#5a7b8f;">Prestation : <strong>${p.prestation}</strong></p>
+                <label style="font-size:0.88em;color:#7a9db1;">Client existant :</label>
+                <select id="_copyClientSel" style="width:100%;margin:4px 0 10px;padding:8px;border:1px solid #d0e0ea;border-radius:8px;font-size:0.9em;">
+                    <option value="">— Nouveau client —</option>${opts}
+                </select>
+                <label style="font-size:0.88em;color:#7a9db1;">Ou saisir un nom :</label>
+                <input id="_copyClientInput" type="text" placeholder="Nom du client…" style="width:100%;margin:4px 0 16px;padding:8px;border:1px solid #d0e0ea;border-radius:8px;font-size:0.9em;box-sizing:border-box;">
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button onclick="this.closest('div[style]').parentNode.remove()" style="padding:8px 18px;border:1px solid #d0e0ea;border-radius:8px;background:#fff;cursor:pointer;">Annuler</button>
+                    <button onclick="(function(){
+                        const sel=document.getElementById('_copyClientSel').value;
+                        const inp=document.getElementById('_copyClientInput').value.trim();
+                        const client=inp||sel;
+                        if(!client){alert('Veuillez saisir un client.');return;}
+                        document.querySelector('[data-id=\\'${id}\\']')?.remove();
+                        duplicatePrestation(${id});
+                        document.getElementById('client').value=client;
+                        document.getElementById('reference').value='${(p.reference||'').replace(/'/g,"\\'")} (${new Date().getFullYear()})';
+                        this.closest('div[style]').parentNode.remove();
+                    })()" style="padding:8px 18px;border:none;border-radius:8px;background:#6b8fa3;color:#fff;cursor:pointer;font-weight:600;">Copier</button>
+                </div>
+            </div>`;
+            document.body.appendChild(modal);
+        }
+
         function duplicatePrestation(id) {
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
@@ -9344,6 +9379,7 @@
             a.download = `atelier_backup_${new Date().toISOString().slice(0,10)}.json`;
             a.click();
             URL.revokeObjectURL(url);
+            localStorage.setItem('lastExportDate', new Date().toISOString());
         }
 
         function importJSON(input) {
@@ -12307,12 +12343,58 @@
             renderGantt();
         }
 
+        // ============================================================
+        // JOURS FÉRIÉS SUISSES (Genève + fédéraux)
+        // ============================================================
+        function getEaster(year) {
+            // Algorithme de Butcher
+            const a = year % 19, b = Math.floor(year/100), c = year % 100;
+            const d = Math.floor(b/4), e = b % 4, f = Math.floor((b+8)/25);
+            const g = Math.floor((b-f+1)/3), h = (19*a+b-d-g+15) % 30;
+            const i = Math.floor(c/4), k = c % 4, l = (32+2*e+2*i-h-k) % 7;
+            const m = Math.floor((a+11*h+22*l)/451);
+            const month = Math.floor((h+l-7*m+114)/31);
+            const day = ((h+l-7*m+114) % 31) + 1;
+            return new Date(year, month-1, day);
+        }
+
+        function getJoursFeries(year) {
+            const easter = getEaster(year);
+            const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+            const fmt = d => d.toISOString().split('T')[0];
+            return new Set([
+                `${year}-01-01`, // Nouvel An
+                `${year}-01-02`, // Restauration de la République (GE)
+                fmt(add(easter, -2)), // Vendredi Saint
+                fmt(add(easter,  1)), // Lundi de Pâques
+                `${year}-05-01`, // Fête du Travail
+                fmt(add(easter, 39)), // Ascension
+                fmt(add(easter, 50)), // Lundi de Pentecôte
+                `${year}-08-01`, // Fête nationale
+                `${year}-09-05`, // Jeûne genevois (1er jeu. de sept.)
+                `${year}-12-25`, // Noël
+                `${year}-12-31`, // Restauration de la République (GE)
+            ]);
+        }
+
+        function isJourFerie(dateISO) {
+            const year = parseInt(dateISO.slice(0,4));
+            return getJoursFeries(year).has(dateISO);
+        }
+
+        function isWorkDay(dateISO) {
+            const d = new Date(dateISO + 'T00:00:00');
+            const dow = d.getDay();
+            return dow !== 0 && dow !== 6 && !isJourFerie(dateISO);
+        }
+
         function addWorkDays(startDate, days) {
             const d = new Date(startDate);
             let added = 0;
             while (added < days) {
                 d.setDate(d.getDate() + 1);
-                if (d.getDay() !== 0 && d.getDay() !== 6) added++;
+                const iso = d.toISOString().split('T')[0];
+                if (isWorkDay(iso)) added++;
             }
             return d;
         }
@@ -12348,10 +12430,12 @@
                 for (let i = 0; i < 7; i++) {
                     const day = new Date(monday); day.setDate(monday.getDate() + i);
                     const dayNames = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+                    const dayISO = day.toISOString().split('T')[0];
+                    const ferie = isJourFerie(dayISO);
                     dayInfos.push({
-                        d: dayNames[day.getDay()] + ' ' + day.getDate(),
+                        d: dayNames[day.getDay()] + ' ' + day.getDate() + (ferie ? ' 🗓' : ''),
                         isToday: day.toDateString() === today.toDateString(),
-                        isWeekend: day.getDay() === 0 || day.getDay() === 6,
+                        isWeekend: day.getDay() === 0 || day.getDay() === 6 || ferie,
                         dayObj: day
                     });
                 }
@@ -12365,10 +12449,12 @@
                 if (lbl) lbl.textContent = label.charAt(0).toUpperCase() + label.slice(1);
                 for (let d = 1; d <= days; d++) {
                     const day = new Date(periodStart.getFullYear(), periodStart.getMonth(), d);
+                    const dayISO = day.toISOString().split('T')[0];
+                    const ferie = isJourFerie(dayISO);
                     dayInfos.push({
-                        d,
+                        d: d + (ferie ? '🗓' : ''),
                         isToday: day.toDateString() === today.toDateString(),
-                        isWeekend: day.getDay() === 0 || day.getDay() === 6,
+                        isWeekend: day.getDay() === 0 || day.getDay() === 6 || ferie,
                         dayObj: day
                     });
                 }
@@ -12427,7 +12513,7 @@
                     const borderRadius = isStart && isEnd ? '6px' : isStart ? '6px 0 0 6px' : isEnd ? '0 6px 6px 0' : '0';
                     const showBar = inRange && !isWeekend;
                     html += `<td style="padding:2px 0;${isWeekend ? 'background:repeating-linear-gradient(135deg,#f0e6e6,#f0e6e6 3px,#f8f0f0 3px,#f8f0f0 6px);' : ''}">
-                        ${showBar ? `<div style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};" title="${p.prestation} — ${statutLabels[statut]||statut}"></div>` : ''}
+                        ${showBar ? `<div onclick="editPrestation(${p.id})" style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};cursor:pointer;" title="${p.prestation} — ${statutLabels[statut]||statut} (cliquer pour ouvrir)"></div>` : ''}
                     </td>`;
                 });
                 html += `</tr>`;
@@ -12580,14 +12666,31 @@
                     msg += ` — <em>${expiringDevis.map(p => p.reference || p.client).join(', ')}</em>`;
                     alertes.push({ type: expiredCount > 0 ? 'danger' : 'warning', msg });
                 }
-                // Capacité
+                // Capacité (hors weekends et jours fériés)
                 const semDebut = new Date(now); semDebut.setDate(now.getDate() - now.getDay() + 1); semDebut.setHours(0,0,0,0);
-                const semFin = new Date(semDebut); semFin.setDate(semDebut.getDate() + 6);
+                const semVen = new Date(semDebut); semVen.setDate(semDebut.getDate() + 4);
+                const semDebutISO = semDebut.toISOString().split('T')[0];
+                const semVenISO = semVen.toISOString().split('T')[0];
                 const hSem = prestationsSauvegardees
-                    .filter(p => p.statut === 'valide' && p.date >= semDebut.toISOString().split('T')[0] && p.date <= semFin.toISOString().split('T')[0])
+                    .filter(p => ['accepte','en-cours'].includes(p.statut) && p.date >= semDebutISO && p.date <= semVenISO && isWorkDay(p.date))
                     .reduce((s, p) => s + (p.heures || 0), 0);
                 const capaciteHebdo = parseFloat(document.getElementById('capaciteHebdo')?.value || 35);
-                if (hSem > capaciteHebdo) alertes.push({ type: 'danger', msg: `⚡ Capacité dépassée cette semaine : ${hSem.toFixed(1)}h / ${capaciteHebdo}h` });
+                if (hSem > capaciteHebdo) {
+                    const pct = Math.round(hSem / capaciteHebdo * 100);
+                    alertes.push({ type: 'danger', msg: `⚡ Capacité dépassée cette semaine : <strong>${hSem.toFixed(1)}h / ${capaciteHebdo}h</strong> (${pct}%)` });
+                } else if (hSem > capaciteHebdo * 0.85) {
+                    const pct = Math.round(hSem / capaciteHebdo * 100);
+                    alertes.push({ type: 'warning', msg: `⚠️ Capacité proche du seuil : <strong>${hSem.toFixed(1)}h / ${capaciteHebdo}h</strong> (${pct}%)` });
+                }
+                // Rappel sauvegarde
+                const lastExport = localStorage.getItem('lastExportDate');
+                const joursDepuisExport = lastExport ? Math.floor((Date.now() - new Date(lastExport).getTime()) / 86400000) : 999;
+                if (joursDepuisExport >= 7) {
+                    const msg = joursDepuisExport >= 999
+                        ? `💾 Aucune sauvegarde effectuée — pensez à exporter vos données (Config → Export JSON)`
+                        : `💾 Dernière sauvegarde il y a <strong>${joursDepuisExport} jours</strong> — pensez à exporter (Config → Export JSON)`;
+                    alertes.push({ type: 'warning', msg });
+                }
 
                 if (alertes.length === 0) {
                     alertesEl.innerHTML = '<div style="padding:16px;color:#5a9a6a;font-size:0.9em;">✅ Aucune alerte</div>';
@@ -13197,6 +13300,37 @@
                 btn.textContent = '⛶'; btn.title = 'Plein écran';
                 document.querySelector('.content').style.maxHeight = '';
             }
+        }
+
+        // ============================================================
+        // DOC SEARCH
+        // ============================================================
+        function filterDoc(query) {
+            const content = document.getElementById('docContent');
+            if (!content) return;
+            const q = query.trim().toLowerCase();
+            if (!q) {
+                content.querySelectorAll('h3, h4, p, li, td, tr').forEach(el => el.style.display = '');
+                content.querySelectorAll('.doc-highlight').forEach(el => {
+                    el.outerHTML = el.textContent;
+                });
+                return;
+            }
+            // Highlight matching text
+            content.querySelectorAll('h3, h4, p, li, td').forEach(el => {
+                const text = el.textContent.toLowerCase();
+                el.style.display = text.includes(q) ? '' : 'none';
+            });
+            // Show parent h3/h4 if any child matches
+            content.querySelectorAll('h3, h4').forEach(el => {
+                let next = el.nextElementSibling;
+                let hasMatch = el.textContent.toLowerCase().includes(q);
+                while (next && !next.matches('h3,h4,hr')) {
+                    if (next.style.display !== 'none') hasMatch = true;
+                    next = next.nextElementSibling;
+                }
+                el.style.display = hasMatch ? '' : 'none';
+            });
         }
 
         // ============================================================
