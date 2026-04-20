@@ -1455,6 +1455,26 @@
         body.dark-mode .assistant-geste-row { background:#1a2535; border-color:#2a3a4a; }
         body.dark-mode .assistant-geste-row label { color:#cdd6e0; }
         body.dark-mode .assistant-geste-row .a-time { background:#243040; border-color:#3a5060; color:#cdd6e0; }
+        .assistant-search { width:100%; padding:8px 12px; border:1px solid #c5d8e4; border-radius:6px; font-size:0.9em; margin-bottom:10px; box-sizing:border-box; }
+        .assistant-search:focus { outline:none; border-color:#4e9af1; box-shadow:0 0 0 3px rgba(78,154,241,0.15); }
+        .assistant-live-stats { display:flex; flex-wrap:wrap; gap:14px; align-items:center; background:linear-gradient(135deg,#edf5ff,#f0faff); border:1px solid #c5e0f5; border-radius:8px; padding:10px 14px; margin:10px 0; font-size:0.84em; }
+        .assistant-live-stats .a-stat { display:flex; flex-direction:column; gap:1px; }
+        .assistant-live-stats .a-stat-label { font-size:0.72em; color:#6b8fa3; text-transform:uppercase; letter-spacing:0.04em; }
+        .assistant-live-stats .a-stat-value { font-weight:700; color:#2d5b8a; font-size:1.05em; }
+        .assistant-mode-toggle { display:inline-flex; border:1px solid #c5d8e4; border-radius:6px; overflow:hidden; background:#f8fbfd; }
+        .assistant-mode-toggle label { padding:6px 12px; font-size:0.83em; cursor:pointer; color:#6b8fa3; transition:all 0.15s; }
+        .assistant-mode-toggle input { display:none; }
+        .assistant-mode-toggle input:checked + label { background:#4e9af1; color:#fff; font-weight:600; }
+        .assistant-qty-chips { display:inline-flex; gap:4px; margin-left:6px; }
+        .assistant-qty-chips button { border:1px solid #c5d8e4; background:#fff; color:#4a6070; border-radius:4px; padding:2px 8px; font-size:0.78em; cursor:pointer; }
+        .assistant-qty-chips button:hover { background:#e8f4ff; border-color:#4e9af1; color:#2d5b8a; }
+        body.dark-mode .assistant-search { background:#243040; border-color:#3a5060; color:#cdd6e0; }
+        body.dark-mode .assistant-live-stats { background:linear-gradient(135deg,#1e2d3d,#1a2535); border-color:#2a4a6a; }
+        body.dark-mode .assistant-live-stats .a-stat-label { color:#8aacbc; }
+        body.dark-mode .assistant-live-stats .a-stat-value { color:#a8d5e2; }
+        body.dark-mode .assistant-mode-toggle { background:#1a2535; border-color:#2a3a4a; }
+        body.dark-mode .assistant-mode-toggle label { color:#8aacbc; }
+        body.dark-mode .assistant-qty-chips button { background:#243040; border-color:#3a5060; color:#cdd6e0; }
 
         /* ── Accompagnement — Théorie & Analyse ─────────────────────── */
         .theorie-card { border:1px solid #e0d08a; border-radius:8px; margin-bottom:10px; overflow:hidden; cursor:pointer; transition:box-shadow 0.2s; }
@@ -12017,14 +12037,15 @@
 
             let gestesHtml = '';
             Object.entries(phases).forEach(([phase, gestes]) => {
-                gestesHtml += `<div class="assistant-phase-header">${phase}</div>`;
+                gestesHtml += `<div class="assistant-phase-header" data-phase="${phase}">${phase}</div>`;
                 gestes.forEach(g => {
                     const chk = preset.includes(g.id) ? 'checked' : '';
+                    const searchStr = (g.label + ' ' + g.code + ' ' + g.phase).toLowerCase();
                     gestesHtml += `
-                        <div class="assistant-geste-row">
-                            <input type="checkbox" id="ag-${g.id}" name="ag" value="${g.id}" ${chk} style="flex-shrink:0;accent-color:#4e9af1;width:16px;height:16px;">
+                        <div class="assistant-geste-row" data-phase="${g.phase}" data-search="${searchStr.replace(/"/g,'&quot;')}">
+                            <input type="checkbox" id="ag-${g.id}" name="ag" value="${g.id}" ${chk} onchange="assistantUpdateLiveStats()" style="flex-shrink:0;accent-color:#4e9af1;width:16px;height:16px;">
                             <label for="ag-${g.id}">${g.label} <span style="color:#8aacbc;font-size:0.8em;">[${g.code}]</span></label>
-                            <input type="number" class="a-time" id="at-${g.id}" value="${g.time}" min="1" title="Temps en secondes par pièce">
+                            <input type="number" class="a-time" id="at-${g.id}" value="${g.time}" min="1" title="Temps en secondes par pièce" oninput="assistantUpdateLiveStats()">
                             <span style="font-size:0.77em;color:#8aacbc;white-space:nowrap;">s/pce</span>
                         </div>`;
                 });
@@ -12032,30 +12053,112 @@
 
             const checkAllId = 'ag-checkall-' + type;
             body.innerHTML = `
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <button class="btn btn-secondary btn-small" onclick="renderAssistantStep1()">← Retour</button>
                     <h3 style="margin:0;color:#2d3e50;">${typeLabels[type]}</h3>
                 </div>
-                <p style="font-size:0.83em;color:#7a9db1;margin:0 0 10px;">Cochez les gestes à inclure. Les temps sont en <strong>secondes par pièce</strong>. Ajustez si nécessaire.</p>
+                <p style="font-size:0.83em;color:#7a9db1;margin:0 0 8px;">Cochez les gestes à inclure. Temps en <strong>secondes par pièce</strong>.</p>
+                <input type="text" class="assistant-search" id="assistantSearch" placeholder="🔍 Filtrer les gestes (nom, code, phase)…" oninput="assistantFilterGestes(this.value)">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.84em;">
                     <input type="checkbox" id="${checkAllId}" onchange="assistantToggleAll(this)" style="accent-color:#4e9af1;">
-                    <label for="${checkAllId}" style="cursor:pointer;color:#6b8fa3;">Tout cocher / décocher</label>
+                    <label for="${checkAllId}" style="cursor:pointer;color:#6b8fa3;">Tout cocher / décocher (visibles)</label>
                 </div>
-                <div style="max-height:50vh;overflow-y:auto;padding-right:4px;">${gestesHtml}</div>
-                <div style="border-top:1px solid #d5e3ed;padding-top:12px;margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <div id="assistantGestesList" style="max-height:40vh;overflow-y:auto;padding-right:4px;">${gestesHtml}</div>
+                <div class="assistant-live-stats" id="assistantLiveStats">
+                    <div class="a-stat"><span class="a-stat-label">Gestes</span><span class="a-stat-value" id="asStatCount">0</span></div>
+                    <div class="a-stat"><span class="a-stat-label">Temps / pièce</span><span class="a-stat-value" id="asStatPerPce">0 s</span></div>
+                    <div class="a-stat"><span class="a-stat-label">Temps total lot</span><span class="a-stat-value" id="asStatTotal">—</span></div>
+                    <div class="a-stat"><span class="a-stat-label">Coût CEA estimé</span><span class="a-stat-value" id="asStatCost">—</span></div>
+                </div>
+                <div style="border-top:1px solid #d5e3ed;padding-top:12px;margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <label style="font-size:0.85em;color:#4a6070;display:flex;align-items:center;gap:6px;">
                         Quantité / lot :
-                        <input type="number" id="a-quantite" value="1" min="1" style="width:70px;border:1px solid #c5d8e4;border-radius:4px;padding:4px 6px;">
+                        <input type="number" id="a-quantite" value="1" min="1" oninput="assistantUpdateLiveStats()" style="width:70px;border:1px solid #c5d8e4;border-radius:4px;padding:4px 6px;">
                     </label>
+                    <div class="assistant-qty-chips" role="group" aria-label="Quantités rapides">
+                        <button type="button" onclick="assistantSetQty(10)">10</button>
+                        <button type="button" onclick="assistantSetQty(50)">50</button>
+                        <button type="button" onclick="assistantSetQty(100)">100</button>
+                        <button type="button" onclick="assistantSetQty(500)">500</button>
+                        <button type="button" onclick="assistantSetQty(1000)">1000</button>
+                    </div>
+                    <div class="assistant-mode-toggle" role="radiogroup" aria-label="Mode d'import">
+                        <input type="radio" name="assistantMode" id="assistantModeReplace" value="replace" checked>
+                        <label for="assistantModeReplace" title="Efface les gestes existants">Remplacer</label>
+                        <input type="radio" name="assistantMode" id="assistantModeAppend" value="append">
+                        <label for="assistantModeAppend" title="Ajoute aux gestes existants">Ajouter</label>
+                    </div>
                     <div style="margin-left:auto;display:flex;gap:8px;">
                         <button class="btn btn-secondary" onclick="closeAssistantModal()">Annuler</button>
-                        <button class="btn" onclick="importerGestesAssistant()">✅ Importer dans le calculateur</button>
+                        <button class="btn" onclick="importerGestesAssistant()">✅ Importer</button>
                     </div>
                 </div>`;
+            assistantUpdateLiveStats();
+        }
+
+        function assistantFilterGestes(q) {
+            const query = (q || '').trim().toLowerCase();
+            const list = document.getElementById('assistantGestesList');
+            if (!list) return;
+            // Show/hide rows
+            const phaseVisible = {};
+            list.querySelectorAll('.assistant-geste-row').forEach(row => {
+                const hay = row.getAttribute('data-search') || '';
+                const match = !query || hay.includes(query);
+                row.style.display = match ? '' : 'none';
+                if (match) phaseVisible[row.getAttribute('data-phase')] = true;
+            });
+            // Hide phase headers that have no visible rows
+            list.querySelectorAll('.assistant-phase-header').forEach(h => {
+                h.style.display = phaseVisible[h.getAttribute('data-phase')] ? '' : 'none';
+            });
+        }
+
+        function assistantSetQty(n) {
+            const input = document.getElementById('a-quantite');
+            if (!input) return;
+            input.value = n;
+            assistantUpdateLiveStats();
+        }
+
+        function assistantUpdateLiveStats() {
+            const rows = document.querySelectorAll('#assistantModalBody input[name="ag"]:checked');
+            const qte = parseFloat(document.getElementById('a-quantite')?.value) || 1;
+            let totalSec = 0;
+            rows.forEach(cb => {
+                const t = parseFloat(document.getElementById('at-' + cb.value)?.value);
+                if (isFinite(t)) totalSec += t;
+            });
+            const totalLotSec = totalSec * qte;
+            const taux = parseFloat(document.getElementById('coutHoraireCEA')?.value) || 35;
+            const cost = (totalLotSec / 3600) * taux;
+
+            const fmtDuration = (s) => {
+                if (!s) return '—';
+                if (s < 60) return Math.round(s) + ' s';
+                const h = Math.floor(s / 3600);
+                const m = Math.floor((s % 3600) / 60);
+                const sec = Math.round(s % 60);
+                if (h > 0) return `${h} h ${String(m).padStart(2,'0')}`;
+                if (m >= 10) return `${m} min`;
+                return `${m} min ${String(sec).padStart(2,'0')}`;
+            };
+
+            const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            setTxt('asStatCount', rows.length);
+            setTxt('asStatPerPce', totalSec ? `${totalSec} s` : '0 s');
+            setTxt('asStatTotal', totalLotSec ? fmtDuration(totalLotSec) : '—');
+            setTxt('asStatCost', cost ? (typeof fmtCHF === 'function' ? fmtCHF(cost) : cost.toFixed(2) + ' CHF') : '—');
         }
 
         function assistantToggleAll(cb) {
-            document.querySelectorAll('#assistantModalBody input[name="ag"]').forEach(c => c.checked = cb.checked);
+            // Affecte uniquement les lignes visibles (tient compte du filtre)
+            document.querySelectorAll('#assistantModalBody .assistant-geste-row').forEach(row => {
+                if (row.style.display === 'none') return;
+                const box = row.querySelector('input[name="ag"]');
+                if (box) box.checked = cb.checked;
+            });
+            assistantUpdateLiveStats();
         }
 
         function importerGestesAssistant() {
@@ -12063,12 +12166,14 @@
             const checked = [...document.querySelectorAll('#assistantModalBody input[name="ag"]:checked')];
             if (checked.length === 0) { toast('Sélectionnez au moins un geste.', 'warning'); return; }
 
-            // Snapshot before clearing
-            pushUndoSnapshot('Import assistant (' + checked.length + ' gestes)');
+            const mode = document.querySelector('#assistantModalBody input[name="assistantMode"]:checked')?.value || 'replace';
 
-            // Clear existing geste lines and import
-            document.getElementById('gestesContainer').innerHTML = '';
-            gesteLines = [];
+            pushUndoSnapshot(`Import assistant (${mode === 'append' ? 'ajout' : 'remplace'} · ${checked.length} gestes)`);
+
+            if (mode === 'replace') {
+                document.getElementById('gestesContainer').innerHTML = '';
+                gesteLines = [];
+            }
 
             checked.forEach(cb => {
                 const geste = ASSISTANT_GESTES.find(g => g.id === cb.value);
@@ -12082,7 +12187,8 @@
             calculateTotal();
             closeAssistantModal();
             switchTab('calculateur');
-            toast(`${checked.length} geste(s) importé(s) dans le calculateur !`, 'success');
+            const verb = mode === 'append' ? 'ajouté(s)' : 'importé(s)';
+            toast(`${checked.length} geste(s) ${verb} dans le calculateur !`, 'success');
         }
 
         // ── Chronomètre ────────────────────────────────────────────
