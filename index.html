@@ -2031,15 +2031,15 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Client</label>
-                            <input type="text" id="client" placeholder="Nom du client">
+                            <input type="text" id="client" placeholder="Nom du client" oninput="updateSaveButtonState()">
                         </div>
                         <div class="form-group">
                             <label>Prestation</label>
-                            <input type="text" id="prestation" placeholder="Description">
+                            <input type="text" id="prestation" placeholder="Description" oninput="updateSaveButtonState()">
                         </div>
                         <div class="form-group">
                             <label>Référence</label>
-                            <input type="text" id="reference" placeholder="Référence">
+                            <input type="text" id="reference" placeholder="Référence" oninput="updateSaveButtonState()">
                         </div>
                         <div class="form-group">
                             <label>Date</label>
@@ -6041,6 +6041,41 @@
             }
             updateVariantesPrix(prixRevient);
             updateLiveSummary({ totalHeures, prixRevient, prixVente, margePourcent, seuilMin });
+            updateSaveButtonState();
+        }
+
+        // Validation progressive : grise le bouton Enregistrer tant que
+        // les prérequis manquent, avec un tooltip explicite listant les
+        // champs à remplir. Appelé depuis calculateTotal (donc à chaque
+        // modification du formulaire).
+        function updateSaveButtonState() {
+            const btn = document.getElementById('btnSavePrestation');
+            if (!btn) return;
+            const client = document.getElementById('client')?.value.trim();
+            const prestation = document.getElementById('prestation')?.value.trim();
+            const reference = document.getElementById('reference')?.value.trim();
+            const hasValidGeste = gesteLines.some(id => {
+                const code = document.getElementById('select-geste-' + id)?.value;
+                const temps = parseFloat(document.getElementById('temps-' + id)?.value || 0);
+                const qte = parseFloat(document.getElementById('quantite-' + id)?.value || 0);
+                return code && temps > 0 && qte > 0;
+            });
+            const missing = [];
+            if (!client) missing.push('Client');
+            if (!prestation) missing.push('Prestation');
+            if (!reference) missing.push('Référence');
+            if (!hasValidGeste) missing.push('au moins un geste avec temps et quantité');
+            if (missing.length > 0) {
+                btn.disabled = true;
+                btn.style.opacity = '0.55';
+                btn.style.cursor = 'not-allowed';
+                btn.title = 'À compléter : ' + missing.join(', ');
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '';
+                btn.style.cursor = '';
+                btn.title = 'Enregistrer la prestation (⌘/Ctrl+S)';
+            }
         }
 
         // Panneau récap live : mise à jour temps / coût / jauge marge
