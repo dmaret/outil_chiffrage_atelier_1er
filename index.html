@@ -18427,6 +18427,30 @@
             }, 1000);
         });
 
+        // ============================================================
+        // PWA — Enregistrement du Service Worker
+        // ============================================================
+        if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => {
+                        // Détecte une nouvelle version et propose de recharger
+                        reg.addEventListener('updatefound', () => {
+                            const nw = reg.installing;
+                            if (!nw) return;
+                            nw.addEventListener('statechange', () => {
+                                if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                                    if (typeof toast === 'function') {
+                                        toast('🔄 Nouvelle version disponible — recharge la page pour l\'appliquer.', 'info');
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(() => { /* SW optionnel : on ignore l'échec silencieusement */ });
+            });
+        }
+
     </script>
 
     <!-- Auth : écran de connexion -->
