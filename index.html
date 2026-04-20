@@ -1851,10 +1851,56 @@
             </div>
             <div id="docContent" style="overflow-y:auto;padding:24px 32px 28px;font-size:0.93em;line-height:1.7;color:#2d3e50;">
 
-                <p style="background:#f0f7fa;border-left:4px solid #a8d5e2;padding:10px 16px;border-radius:6px;margin-bottom:24px;font-style:italic;">Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
+                <p style="background:#f0f7fa;border-left:4px solid #a8d5e2;padding:10px 16px;border-radius:6px;margin-bottom:18px;font-style:italic;">Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
+
+                <!-- INDEX / SOMMAIRE -->
+                <div id="docIndex" style="background:#f9fbfc;border:1px solid #e0eaf0;border-radius:10px;padding:14px 18px 12px;margin-bottom:24px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                        <strong style="color:#6b8fa3;font-size:1em;">📑 Sommaire</strong>
+                        <button onclick="document.getElementById('docModulesNav').style.display=document.getElementById('docModulesNav').style.display==='none'?'grid':'none';this.textContent=this.textContent.includes('Afficher')?'▲ Masquer les modules':'▼ Afficher les modules (16 onglets)';" style="background:none;border:1px solid #c5d8e4;border-radius:20px;padding:3px 12px;font-size:0.8em;color:#6b8fa3;cursor:pointer;">▼ Afficher les modules (16 onglets)</button>
+                    </div>
+                    <!-- 16 sections principales -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px 14px;font-size:0.85em;">
+                        <a href="#doc-s1"  onclick="event.preventDefault();docGoto('doc-s1')"  style="color:#4a6070;text-decoration:none;">1. Présentation</a>
+                        <a href="#doc-s2"  onclick="event.preventDefault();docGoto('doc-s2')"  style="color:#4a6070;text-decoration:none;">2. Démarrage rapide</a>
+                        <a href="#doc-s3"  onclick="event.preventDefault();docGoto('doc-s3')"  style="color:#4a6070;text-decoration:none;">3. Structure du projet</a>
+                        <a href="#doc-s4"  onclick="event.preventDefault();docGoto('doc-s4')"  style="color:#4a6070;text-decoration:none;"><strong>4. Modules fonctionnels</strong></a>
+                        <a href="#doc-s5"  onclick="event.preventDefault();docGoto('doc-s5')"  style="color:#4a6070;text-decoration:none;">5. Calculs financiers</a>
+                        <a href="#doc-s6"  onclick="event.preventDefault();docGoto('doc-s6')"  style="color:#4a6070;text-decoration:none;">6. Import / Export</a>
+                        <a href="#doc-s7"  onclick="event.preventDefault();docGoto('doc-s7')"  style="color:#4a6070;text-decoration:none;">7. Raccourcis clavier</a>
+                        <a href="#doc-s8"  onclick="event.preventDefault();docGoto('doc-s8')"  style="color:#4a6070;text-decoration:none;">8. Modes d'affichage</a>
+                        <a href="#doc-s9"  onclick="event.preventDefault();docGoto('doc-s9')"  style="color:#4a6070;text-decoration:none;">9. Accès et profils</a>
+                        <a href="#doc-s10" onclick="event.preventDefault();docGoto('doc-s10')" style="color:#4a6070;text-decoration:none;">10. Données / persistance</a>
+                        <a href="#doc-s11" onclick="event.preventDefault();docGoto('doc-s11')" style="color:#4a6070;text-decoration:none;">11. Technologies</a>
+                        <a href="#doc-s12" onclick="event.preventDefault();docGoto('doc-s12')" style="color:#4a6070;text-decoration:none;">12. Glossaire</a>
+                        <a href="#doc-s13" onclick="event.preventDefault();docGoto('doc-s13')" style="color:#4a6070;text-decoration:none;">13. Authentification</a>
+                        <a href="#doc-s14" onclick="event.preventDefault();docGoto('doc-s14')" style="color:#4a6070;text-decoration:none;">14. Email Webhooks</a>
+                        <a href="#doc-s15" onclick="event.preventDefault();docGoto('doc-s15')" style="color:#4a6070;text-decoration:none;">15. Formation</a>
+                        <a href="#doc-s16" onclick="event.preventDefault();docGoto('doc-s16')" style="color:#4a6070;text-decoration:none;">16. Conditions</a>
+                    </div>
+                    <!-- Modules 4.1 - 4.16 -->
+                    <div id="docModulesNav" style="display:none;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 14px;font-size:0.82em;margin-top:12px;padding-top:10px;border-top:1px dashed #c5d8e4;">
+                        <a href="#doc-s4-1"  onclick="event.preventDefault();docGoto('doc-s4-1')"  style="color:#7a9db1;text-decoration:none;">4.1 🏠 Tableau de bord</a>
+                        <a href="#doc-s4-2"  onclick="event.preventDefault();docGoto('doc-s4-2')"  style="color:#7a9db1;text-decoration:none;">4.2 🧙 Assistant</a>
+                        <a href="#doc-s4-3"  onclick="event.preventDefault();docGoto('doc-s4-3')"  style="color:#7a9db1;text-decoration:none;">4.3 💼 Calculateur</a>
+                        <a href="#doc-s4-4"  onclick="event.preventDefault();docGoto('doc-s4-4')"  style="color:#7a9db1;text-decoration:none;">4.4 📦 Gestion de stock</a>
+                        <a href="#doc-s4-5"  onclick="event.preventDefault();docGoto('doc-s4-5')"  style="color:#7a9db1;text-decoration:none;">4.5 ⚙️ Paramétrage</a>
+                        <a href="#doc-s4-6"  onclick="event.preventDefault();docGoto('doc-s4-6')"  style="color:#7a9db1;text-decoration:none;">4.6 📚 Catalogue des gestes</a>
+                        <a href="#doc-s4-7"  onclick="event.preventDefault();docGoto('doc-s4-7')"  style="color:#7a9db1;text-decoration:none;">4.7 🛒 Consommables</a>
+                        <a href="#doc-s4-8"  onclick="event.preventDefault();docGoto('doc-s4-8')"  style="color:#7a9db1;text-decoration:none;">4.8 📊 Prestations</a>
+                        <a href="#doc-s4-9"  onclick="event.preventDefault();docGoto('doc-s4-9')"  style="color:#7a9db1;text-decoration:none;">4.9 👥 Clients</a>
+                        <a href="#doc-s4-10" onclick="event.preventDefault();docGoto('doc-s4-10')" style="color:#7a9db1;text-decoration:none;">4.10 📈 Statistiques</a>
+                        <a href="#doc-s4-11" onclick="event.preventDefault();docGoto('doc-s4-11')" style="color:#7a9db1;text-decoration:none;">4.11 ⚙️ Configuration</a>
+                        <a href="#doc-s4-12" onclick="event.preventDefault();docGoto('doc-s4-12')" style="color:#7a9db1;text-decoration:none;">4.12 🧠 Accompagnement</a>
+                        <a href="#doc-s4-13" onclick="event.preventDefault();docGoto('doc-s4-13')" style="color:#7a9db1;text-decoration:none;">4.13 📝 Historique</a>
+                        <a href="#doc-s4-14" onclick="event.preventDefault();docGoto('doc-s4-14')" style="color:#7a9db1;text-decoration:none;">4.14 📅 Planification</a>
+                        <a href="#doc-s4-15" onclick="event.preventDefault();docGoto('doc-s4-15')" style="color:#7a9db1;text-decoration:none;">4.15 🎓 Formation Admin</a>
+                        <a href="#doc-s4-16" onclick="event.preventDefault();docGoto('doc-s4-16')" style="color:#7a9db1;text-decoration:none;">4.16 🏭 Formation Logistique</a>
+                    </div>
+                </div>
 
                 <!-- 1 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">1. Présentation générale</h3>
+                <h3 id="doc-s1" style="color:#6b8fa3;margin:0 0 8px;">1. Présentation générale</h3>
                 <p><strong>Outil Complet Atelier - La Pallanterie</strong> est une application web monopage (SPA) autonome conçue pour la gestion financière et opérationnelle d'un atelier de travail adapté.</p>
                 <p style="margin:8px 0 4px;">L'outil permet de :</p>
                 <ul style="margin:4px 0 8px 20px;">
@@ -1868,7 +1914,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 2 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">2. Démarrage rapide</h3>
+                <h3 id="doc-s2" style="color:#6b8fa3;margin:0 0 8px;">2. Démarrage rapide</h3>
                 <p><strong>Installation :</strong> aucune. Ouvrez simplement <code>index.html</code> dans un navigateur moderne (Chrome, Firefox, Edge).</p>
                 <p style="margin:10px 0 4px;"><strong>Premier lancement :</strong></p>
                 <ol style="margin:4px 0 8px 20px;">
@@ -1880,7 +1926,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 3 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">3. Structure du projet</h3>
+                <h3 id="doc-s3" style="color:#6b8fa3;margin:0 0 8px;">3. Structure du projet</h3>
                 <div style="background:#f9fbfc;border-radius:8px;padding:12px 16px;font-family:monospace;font-size:0.88em;border:1px solid #e0eaf0;margin-bottom:8px;">
                     index.html &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Application complète<br>
                     catalogue_gestes_import.csv &nbsp;# Modèle CSV pour l'import<br>
@@ -1896,16 +1942,25 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 4 -->
-                <h3 style="color:#6b8fa3;margin:0 0 12px;">4. Modules fonctionnels (16 onglets)</h3>
+                <h3 id="doc-s4" style="color:#6b8fa3;margin:0 0 12px;">4. Modules fonctionnels (16 onglets)</h3>
                 <p style="margin-bottom:10px;">L'interface est organisée en <strong>16 onglets</strong> accessibles via la barre de navigation. Selon le profil actif, certains onglets peuvent être masqués. En mode admin, les onglets sont réorganisables par glisser-déposer.</p>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.1 🏠 Tableau de bord</h4>
+                <h4 id="doc-s4-1" style="color:#5a7b8f;margin:12px 0 6px;">4.1 🏠 Tableau de bord</h4>
                 <ul style="margin:0 0 8px 20px;"><li>KPIs : prestations totales, CA du mois, devis en attente, heures engagées, taux d'occupation CEA</li><li>Devis en attente avec ancienneté et alertes (&gt; 30 jours)</li><li>Pipeline de chiffre d'affaires sur 3 mois (confirmé vs potentiel)</li><li>Top clients par CA sur 12 mois</li><li><strong>Évolution CA sur 12 mois</strong> (graphique barres + moyenne mensuelle)</li><li><strong>Top prestations par rentabilité</strong> (marge %)</li><li><strong>Répartition par statut</strong> (devis/soumis/validé/facturé/annulé)</li><li><strong>Tendance marge moyenne sur 6 mois</strong> (courbe + indicateur ↑↓)</li><li>Alertes (stock bas, devis expirés, capacité dépassée)</li><li>Demandes de formation en attente</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.2 🧙 Assistant <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
-                <ul style="margin:0 0 8px 20px;"><li>Assistant pas-à-pas pour construire une prestation</li><li>Modèles de services pré-configurés</li><li>Analyse de situations et recommandations théoriques</li><li>Support à la formation des encadrants</li></ul>
+                <h4 id="doc-s4-2" style="color:#5a7b8f;margin:12px 0 6px;">4.2 🧙 Assistant <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
+                <p style="margin:0 0 6px;">Assistant pas-à-pas pour composer une prestation en deux étapes :</p>
+                <ul style="margin:0 0 8px 20px;">
+                    <li><strong>Étape 1 — Type</strong> : Conditionnement · Étiquetage · Assemblage · Palettisation · Personnalisé (5 modèles pré-configurés avec gestes typiques cochés par défaut)</li>
+                    <li><strong>Étape 2 — Composition</strong> : liste des gestes regroupés par phase (Réception · Contrôle · Étiquetage · Conditionnement · Expédition), temps en secondes/pièce modifiables</li>
+                    <li><strong>🔍 Filtre</strong> : recherche par nom, code ou phase (masque automatique des phases vides)</li>
+                    <li><strong>📊 Totaux en direct</strong> : gestes cochés · temps cumulé/pièce · temps total du lot (h·min) · coût CEA estimé</li>
+                    <li><strong>🔢 Quantité rapide</strong> : puces 10 / 50 / 100 / 500 / 1000</li>
+                    <li><strong>🔁 Mode d'import</strong> : <em>Remplacer</em> (écrase) ou <em>Ajouter</em> (append aux gestes existants)</li>
+                    <li><strong>✅ Tout cocher</strong> respecte le filtre actif</li>
+                </ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.3 💼 Calculateur — module central</h4>
+                <h4 id="doc-s4-3" style="color:#5a7b8f;margin:12px 0 6px;">4.3 💼 Calculateur — module central</h4>
                 <p style="margin:0 0 6px;"><em>Informations de la prestation :</em> client, intitulé, référence, date, responsable.</p>
                 <p style="margin:0 0 6px;"><em>Personnel :</em> <strong>CEA</strong> (travailleurs) et <strong>MSP</strong> (encadrants).</p>
                 <p style="margin:0 0 4px;"><em>Gestion des gestes :</em></p>
@@ -1921,10 +1976,10 @@
                 <p style="margin:0 0 4px;"><em>📊 Analyse de sensibilité :</em> 10 scénarios what-if (hausse coûts CEA/MSP, hausse consommables, variation volume ×2/×5, ajout CEA, changement marge) avec impact en CHF et %.</p>
                 <p style="margin:0 0 8px;"><em>Export PDF :</em> devis compact (optimisé pour une page A4) — version client (sans coûts) ou version interne (détail complet).</p>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.4 📦 Gestion de stock</h4>
+                <h4 id="doc-s4-4" style="color:#5a7b8f;margin:12px 0 6px;">4.4 📦 Gestion de stock</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Mouvements : entrées, sorties, transferts avec traçabilité complète</li><li>Stock actuel en temps réel (quantité, valeur FIFO, emplacement)</li><li>Valorisation <strong>FIFO</strong> automatique (Premier Entré, Premier Sorti)</li><li>Alertes automatiques sous le seuil minimum défini</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.5 ⚙️ Paramétrage</h4>
+                <h4 id="doc-s4-5" style="color:#5a7b8f;margin:12px 0 6px;">4.5 ⚙️ Paramétrage</h4>
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:8px;">
                     <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Paramètre</th><th style="padding:6px 10px;text-align:left;">Description</th></tr>
                     <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Coût horaire CEA</td><td style="padding:5px 10px;">Taux horaire chargé d'un travailleur</td></tr>
@@ -1934,44 +1989,51 @@
                 </table>
                 <p style="margin:0 0 8px;"><em>Admin :</em> profils d'onglets, types de mouvements, emplacements, unités.</p>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.6 📚 Catalogue des gestes</h4>
+                <h4 id="doc-s4-6" style="color:#5a7b8f;margin:12px 0 6px;">4.6 📚 Catalogue des gestes</h4>
                 <p style="margin:0 0 4px;">Bibliothèque de toutes les activités élémentaires. Chaque geste contient : code unique (ex. <code>REC-01</code>), catégorie, description, durée standard, coefficient (1,0–1,5), notes.</p>
                 <p style="margin:0 0 8px;">Import CSV : glisser-déposer le fichier <code>catalogue_gestes_import.csv</code> (43 gestes pré-définis).</p>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.7 🛒 Consommables</h4>
+                <h4 id="doc-s4-7" style="color:#5a7b8f;margin:12px 0 6px;">4.7 🛒 Consommables</h4>
                 <p style="margin:0 0 8px;">Catalogue des matières et fournitures avec désignation, référence, coût unitaire, unité. Réutilisables directement depuis le Calculateur.</p>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.8 📊 Prestations</h4>
+                <h4 id="doc-s4-8" style="color:#5a7b8f;margin:12px 0 6px;">4.8 📊 Prestations</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Filtres par date, statut, client</li><li>Modifier, dupliquer, suivre les révisions</li><li>Statuts : Brouillon, Devis, Soumis, Accepté, En cours, Terminé, Facturé</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.9 👥 Clients</h4>
+                <h4 id="doc-s4-9" style="color:#5a7b8f;margin:12px 0 6px;">4.9 👥 Clients</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Coordonnées, tarifs personnalisés, conditions de paiement</li><li>Historique des prestations, export fiche client en PDF</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.10 📈 Statistiques</h4>
+                <h4 id="doc-s4-10" style="color:#5a7b8f;margin:12px 0 6px;">4.10 📈 Statistiques</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Synthèse globale (CA, coûts, marges)</li><li>Répartition des coûts — camemberts comparatifs</li><li>Bilan de gestion des stocks</li><li>Évolution CA et coûts sur 6 mois</li><li>Top 5 des prestations les plus rentables</li><li>Tableau de bord capacitaire (taux d'occupation CEA/MSP, noms des prestations dans les barres de charge)</li><li>Précision des estimations vs réalisé</li><li>Objectifs mensuels de CA, prévisions sur 3 mois</li><li>Rentabilité par geste, statistiques de stock mensuelles</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.11 ⚙️ Configuration</h4>
+                <h4 id="doc-s4-11" style="color:#5a7b8f;margin:12px 0 6px;">4.11 ⚙️ Configuration</h4>
                 <ul style="margin:0 0 8px 20px;"><li><strong>Export JSON</strong> : sauvegarde complète de toutes les données</li><li><strong>Import JSON</strong> : restauration depuis une sauvegarde</li><li>Thèmes, police (Google Fonts : Inter, Roboto), rayon des coins, séparation des onglets, densité, code PIN, préférences d'impression</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.12 🧠 Accompagnement <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
-                <ul style="margin:0 0 8px 20px;"><li>Études de cas cliniques interactives</li><li>Cadres théoriques recommandés</li><li>Supports de formation</li></ul>
+                <h4 id="doc-s4-12" style="color:#5a7b8f;margin:12px 0 6px;">4.12 🧠 Accompagnement <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
+                <p style="margin:0 0 4px;">Espace d'analyse socio-éducative articulé en 4 sections :</p>
+                <ul style="margin:0 0 8px 20px;">
+                    <li><strong>Matrice d'apprenance & autonomie</strong> (P. Carré + Piaget) : table éditable (collaborateur, tâche, stade d'assimilation, dynamique, observation). <em>Auto-save</em> 1 s avec indicateur "✓ enregistré à HH:MM", colonne "Maj" horodatée par ligne, filtre texte, <strong>export CSV</strong> (UTF-8, séparateur ;).</li>
+                    <li><strong>🔍 Outil d'analyse de situation</strong> : questionnaire 4 questions → barre de progression 0/4 · bouton désactivé tant qu'incomplet · champ contexte optionnel (CEA, tâche). Résultat = <strong>top 3 cadres théoriques cliquables avec scores</strong> (Piaget, Vygotski, Carré, Palo Alto, Bateson, Minuchin, Paul). Le clic sur une théorie ouvre l'accordéon correspondant dans le référentiel.</li>
+                    <li><strong>📔 Historique des analyses</strong> (localStorage, 200 entrées max) avec date · contexte · théorie retenue · alternatives — export CSV et effacement.</li>
+                    <li><strong>Situations cliniques</strong> : tableau de référence (symptôme → hypothèse systémique → piste de régulation MSP).</li>
+                    <li><strong>📚 Référentiel théorique</strong> : 7 cartes repliables (concepts clés, posture MSP, liens Cairn.info / Wikipedia / Google Scholar) + <strong>recherche plein-texte</strong> qui ouvre automatiquement les cartes pertinentes + boutons "Tout déplier / replier".</li>
+                </ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.13 📝 Historique <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
+                <h4 id="doc-s4-13" style="color:#5a7b8f;margin:12px 0 6px;">4.13 📝 Historique <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
                 <ul style="margin:0 0 8px 20px;"><li>Toutes les versions successives d'une prestation</li><li>Comparaison entre révisions, audit trail des changements</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.14 📅 Planification</h4>
+                <h4 id="doc-s4-14" style="color:#5a7b8f;margin:12px 0 6px;">4.14 📅 Planification</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Diagramme de Gantt, vues mois/semaine</li><li>Codage couleur par projet/client, duplication de blocs</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.15 🎓 Formation Admin</h4>
+                <h4 id="doc-s4-15" style="color:#5a7b8f;margin:12px 0 6px;">4.15 🎓 Formation Admin</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Gestion des apprenants (ajout, assignation, suivi)</li><li>Documents de formation et vidéos par geste</li><li>Checklist de progression par apprenant</li><li>Export / import des rapports de formation</li></ul>
 
-                <h4 style="color:#5a7b8f;margin:12px 0 6px;">4.16 🏭 Formation Logistique</h4>
+                <h4 id="doc-s4-16" style="color:#5a7b8f;margin:12px 0 6px;">4.16 🏭 Formation Logistique</h4>
                 <ul style="margin:0 0 8px 20px;"><li>Fiches systèmes logistiques : WMS, ERP, TMS, Automatisation, RFID, Kanban, 5S</li><li>Quiz interactif (10 questions, score, feedback, possibilité de quitter avant la fin)</li><li>Demande de formation par domaine</li><li>Cas d'études réels (Amazon, Decathlon…)</li><li>Concepts clés : Supply Chain, KPI, Flux Tendu, Traçabilité</li></ul>
 
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 5 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">5. Calculs et méthodes financières</h3>
+                <h3 id="doc-s5" style="color:#6b8fa3;margin:0 0 8px;">5. Calculs et méthodes financières</h3>
                 <div style="background:#f9fbfc;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:0.88em;border:1px solid #e0eaf0;margin-bottom:10px;">
                     Coût de revient = Coût MO CEA + Coût MO MSP + Consommables + Stockage + Frais généraux<br>
                     Coût MO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= (Temps en h) × Nb agents × Taux horaire chargé<br>
@@ -1984,7 +2046,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 6 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">6. Import / Export de données</h3>
+                <h3 id="doc-s6" style="color:#6b8fa3;margin:0 0 8px;">6. Import / Export de données</h3>
                 <p><strong>Export JSON</strong> (Config → Export JSON) : sauvegarde complète — gestes, consommables, prestations, clients, stock, mouvements, paramètres.</p>
                 <p><strong>Import JSON</strong> (Config → Import JSON) : restauration depuis une sauvegarde. <em>Attention : remplace les données existantes.</em></p>
                 <p><strong>Import CSV gestes</strong> (Gestes → Import CSV) : format <code>code, categorie, description, duree_minutes, coefficient, notes</code>.</p>
@@ -1992,7 +2054,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 7 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">7. Raccourcis clavier</h3>
+                <h3 id="doc-s7" style="color:#6b8fa3;margin:0 0 8px;">7. Raccourcis clavier</h3>
                 <table style="border-collapse:collapse;font-size:0.92em;margin-bottom:8px;">
                     <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+G</kbd></td><td>Ajouter un geste dans le Calculateur</td></tr>
                     <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+S</kbd></td><td>Sauvegarder la prestation en cours</td></tr>
@@ -2003,7 +2065,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 8 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">8. Modes d'affichage</h3>
+                <h3 id="doc-s8" style="color:#6b8fa3;margin:0 0 8px;">8. Modes d'affichage</h3>
                 <ul style="margin:4px 0 8px 20px;">
                     <li><strong>Mode sombre</strong> : bouton 🌙 en haut à droite ou Config → Thème</li>
                     <li><strong>Mode présentation</strong> : bouton 🖥️ — masque les coûts internes pour une présentation client</li>
@@ -2014,7 +2076,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 9 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">9. Gestion des accès et profils</h3>
+                <h3 id="doc-s9" style="color:#6b8fa3;margin:0 0 8px;">9. Gestion des accès et profils</h3>
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:10px;">
                     <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Groupe</th><th style="padding:6px 10px;text-align:left;">Accès</th></tr>
                     <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;"><strong>CEA</strong></td><td style="padding:5px 10px;">Formation, Dashboard, Calculateur — accès de base</td></tr>
@@ -2029,7 +2091,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 10 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">10. Données et persistance</h3>
+                <h3 id="doc-s10" style="color:#6b8fa3;margin:0 0 8px;">10. Données et persistance</h3>
                 <p>Toutes les données sont enregistrées dans le <strong>localStorage</strong> du navigateur (JSON). Elles persistent entre les sessions tant que le cache n'est pas effacé.</p>
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin:8px 0;">
                     <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Variable</th><th style="padding:6px 10px;text-align:left;">Contenu</th></tr>
@@ -2044,7 +2106,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 11 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">11. Technologies utilisées</h3>
+                <h3 id="doc-s11" style="color:#6b8fa3;margin:0 0 8px;">11. Technologies utilisées</h3>
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:8px;">
                     <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Composant</th><th style="padding:6px 10px;text-align:left;">Technologie</th></tr>
                     <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px;">Interface</td><td style="padding:5px 10px;">HTML5, CSS3 (variables CSS), JavaScript ES6+</td></tr>
@@ -2061,7 +2123,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 12 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">12. Glossaire</h3>
+                <h3 id="doc-s12" style="color:#6b8fa3;margin:0 0 8px;">12. Glossaire</h3>
                 <table style="width:100%;border-collapse:collapse;font-size:0.91em;">
                     <tr style="border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;white-space:nowrap;">CEA</td><td style="padding:5px 0;">Collaborateur en Emploi Adapté — travailleurs de l'atelier</td></tr>
                     <tr style="background:#f9fbfc;border-bottom:1px solid #eef2f6;"><td style="padding:5px 10px 5px 0;font-weight:600;">MSP</td><td style="padding:5px 0;">Maître SocioProfessionnel — encadrants</td></tr>
@@ -2080,7 +2142,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 13 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">13. Authentification et Permissions</h3>
+                <h3 id="doc-s13" style="color:#6b8fa3;margin:0 0 8px;">13. Authentification et Permissions</h3>
                 <p>Système de <strong>connexion par groupe</strong> avec 4 niveaux d'accès :</p>
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:10px;">
                     <tr style="background:#f0f7fa;"><th style="padding:6px 10px;text-align:left;">Groupe</th><th style="padding:6px 10px;text-align:left;">Mot de passe</th><th style="padding:6px 10px;text-align:left;">Description</th></tr>
@@ -2104,7 +2166,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 14 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">14. Email Webhooks</h3>
+                <h3 id="doc-s14" style="color:#6b8fa3;margin:0 0 8px;">14. Email Webhooks</h3>
                 <p>Envoi de <strong>notifications email automatiques</strong> lors d'événements :</p>
                 <ul style="margin:4px 0 8px 20px;">
                     <li><code>devis_sent</code> : quand un devis est généré</li>
@@ -2115,7 +2177,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 15 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">15. Système de Formation</h3>
+                <h3 id="doc-s15" style="color:#6b8fa3;margin:0 0 8px;">15. Système de Formation</h3>
                 <p><strong>Gestion des apprenants</strong> (onglet Formation Admin 🎓) :</p>
                 <ul style="margin:4px 0 8px 20px;">
                     <li>Ajouter un apprenant, assigner des formations</li>
@@ -2127,7 +2189,7 @@
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
 
                 <!-- 16 -->
-                <h3 style="color:#6b8fa3;margin:0 0 8px;">16. Conditions d'utilisation</h3>
+                <h3 id="doc-s16" style="color:#6b8fa3;margin:0 0 8px;">16. Conditions d'utilisation</h3>
                 <ul style="margin:4px 0 8px 20px;">
                     <li>© 2025–2026 <strong>MARET Davie</strong> — Tous droits réservés</li>
                     <li>Toute reproduction sans accord préalable écrit est <strong>interdite</strong></li>
@@ -2136,6 +2198,10 @@
                     <li>Attribution requise : <strong>dmaret © 2025–2026</strong></li>
                 </ul>
                 <p style="font-size:0.85em;color:#aaa;">Conditions complètes accessibles via le footer de l'application.</p>
+
+                <div style="text-align:center;margin-top:20px;">
+                    <a href="#docIndex" onclick="event.preventDefault();docGoto('docIndex')" style="display:inline-block;padding:6px 14px;background:#f0f7fa;border:1px solid #c5d8e4;border-radius:20px;color:#6b8fa3;text-decoration:none;font-size:0.85em;">↑ Retour au sommaire</a>
+                </div>
 
                 <p style="margin-top:24px;color:#aaa;font-size:0.85em;text-align:center;">Documentation — Outil Complet Atelier - La Pallanterie • Avril 2026</p>
             </div>
@@ -14527,8 +14593,22 @@
         }
 
         // ============================================================
-        // DOC SEARCH
+        // DOC SEARCH + NAVIGATION
         // ============================================================
+        function docGoto(id) {
+            const content = document.getElementById('docContent');
+            const target = document.getElementById(id);
+            if (!content || !target) return;
+            // Scroll dans le conteneur scrollable (pas la fenêtre)
+            const top = target.offsetTop - content.offsetTop - 8;
+            content.scrollTo({ top, behavior:'smooth' });
+            // Flash visuel
+            target.style.transition = 'background 0.3s';
+            const prev = target.style.background;
+            target.style.background = '#fff6c0';
+            setTimeout(() => { target.style.background = prev; }, 900);
+        }
+
         function filterDoc(query) {
             const content = document.getElementById('docContent');
             if (!content) return;
