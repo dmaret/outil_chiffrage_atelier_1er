@@ -592,6 +592,28 @@
             @page { size: A4 landscape; }
         }
 
+        /* Mode compact : force le devis sur 1 page en réduisant polices/marges/paddings */
+        .devis-compact { font-size: 10.5px !important; }
+        .devis-compact > div { padding: 14px !important; }
+        .devis-compact h1, .devis-compact h2, .devis-compact h3 { margin: 4px 0 !important; }
+        .devis-compact table { font-size: 0.75em !important; }
+        .devis-compact table th, .devis-compact table td { padding: 4px 6px !important; }
+        .devis-compact [style*="padding:28px"],
+        .devis-compact [style*="padding:22px"] { padding: 12px !important; }
+        .devis-compact [style*="padding:30px"] { padding: 14px !important; }
+        .devis-compact [style*="margin-bottom:24px"],
+        .devis-compact [style*="margin-bottom:22px"] { margin-bottom: 10px !important; }
+        .devis-compact [style*="margin-top:36px"] { margin-top: 14px !important; }
+        .devis-compact [style*="font-size:1.7em"] { font-size: 1.2em !important; }
+        .devis-compact [style*="font-size:2.2em"] { font-size: 1.5em !important; }
+        .devis-compact [style*="font-size:1.4em"] { font-size: 1.05em !important; }
+        .devis-compact [style*="font-size:1.15em"],
+        .devis-compact [style*="font-size:1.1em"],
+        .devis-compact [style*="font-size:1em"] { font-size: 0.9em !important; }
+        .devis-compact [style*="height:52px"] { height: 30px !important; }
+        .devis-compact [style*="height:30px"] { height: 22px !important; }
+        .devis-compact [style*="height:28px"] { height: 20px !important; }
+
         /* Dark mode */
         body.dark-mode { background: linear-gradient(135deg, #1a2535 0%, #2a1f35 100%); }
         body.dark-mode .container { background: #1e2530; color: #cdd6e0; }
@@ -1668,6 +1690,7 @@
                         <option value="landscape">Paysage</option>
                     </select>
                 </div>
+                <label class="print-check" style="grid-column:1 / -1;margin-top:6px;"><input type="checkbox" id="pp-compact"> 🗜️ Compacter sur 1 page (réduit polices et marges)</label>
             </div>
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;">
                 <button class="btn btn-secondary" onclick="closePrintPrefsModal()">Annuler</button>
@@ -5791,6 +5814,7 @@
                 equipe:       document.getElementById('pp-equipe')?.checked ?? false,
                 format:       document.getElementById('pp-format')?.value || 'a4',
                 orientation:  document.getElementById('pp-orientation')?.value || 'portrait',
+                compact:      document.getElementById('pp-compact')?.checked ?? false,
             };
         }
 
@@ -11280,7 +11304,8 @@
                 </div>
             </div>`;
 
-            return { html, pp, devisNum, client };
+            const finalHtml = pp.compact ? `<div class="devis-compact">${html}</div>` : html;
+            return { html: finalHtml, pp, devisNum, client };
         }
 
         function genererDevis() {
