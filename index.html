@@ -404,6 +404,108 @@
             padding: 50px 20px;
             color: var(--color-text-light);
         }
+
+        .onboarding-card {
+            background: linear-gradient(135deg, #f4f9ff 0%, #eaf2ff 100%);
+            border: 1px solid #c7d8ee;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(80, 120, 180, 0.08);
+        }
+        .onboarding-card h3 {
+            margin: 0 0 6px 0;
+            color: #2a5a8f;
+            font-size: 1.05em;
+        }
+        .onboarding-progress {
+            height: 8px;
+            background: #e0e8f2;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0 12px 0;
+        }
+        .onboarding-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4a90e2, #5bc0de);
+            transition: width 0.4s ease;
+        }
+        .onboarding-check-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+            font-size: 0.95em;
+            color: #3a4a5a;
+        }
+        .onboarding-check-row .chk {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            flex-shrink: 0;
+        }
+        .onboarding-check-row.done .chk {
+            background: #d4f0e3;
+            color: #2e8b57;
+        }
+        .onboarding-check-row.todo .chk {
+            background: #fff0d6;
+            color: #b58050;
+        }
+        .onboarding-check-row.done .label {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        .onboarding-check-row .cta {
+            margin-left: auto;
+            font-size: 0.85em;
+            color: #4a90e2;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .onboarding-check-row .cta:hover {
+            text-decoration: underline;
+        }
+        .onboarding-dismiss {
+            float: right;
+            font-size: 0.85em;
+            color: #8090a0;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .tab-badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            border-radius: 10px;
+            font-size: 0.7em;
+            padding: 1px 6px;
+            margin-left: 4px;
+            font-weight: bold;
+            min-width: 16px;
+            text-align: center;
+        }
+        .undo-toast {
+            background: #333 !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
+        }
+        .undo-toast button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
         
         .geste-line, .consommable-line, .stock-line {
             display: grid;
@@ -2247,12 +2349,12 @@
                 <button class="tab active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
                 <button class="tab admin-only" onclick="switchTab('assistant')">🧙 Assistant</button>
                 <button class="tab" onclick="switchTab('calculateur')">💼 Calculateur</button>
-                <button class="tab" onclick="switchTab('stock')">📦 Gestion Stock</button>
+                <button class="tab" data-tab="stock" onclick="switchTab('stock')">📦 Gestion Stock</button>
                 <button class="tab" onclick="switchTab('parametrage')">⚙️ Paramétrage</button>
                 <button class="tab" onclick="switchTab('catalogue')">📚 Gestes</button>
                 <button class="tab" onclick="switchTab('formation')">🎓 Formation Admin</button>
                 <button class="tab" onclick="switchTab('consommables')">🛒 Consommables</button>
-                <button class="tab" onclick="switchTab('prestations')">📊 Prestations</button>
+                <button class="tab" data-tab="prestations" onclick="switchTab('prestations')">📊 Prestations</button>
                 <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
                 <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
@@ -4114,6 +4216,7 @@
                 <h2 style="color:#4caf50;">🏠 Dashboard — Accueil</h2>
                 <p style="color:#666;font-size:0.95em;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
               </div>
+              <div id="onboardingChecklist"></div>
               <div class="stats-grid" id="dashboardKpis"></div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
                 <div class="section" id="dashDevisEnAttente">
@@ -9013,15 +9116,22 @@
                 return;
             }
             toastConfirm('Supprimer cette prestation?', () => {
-                const p = prestationsSauvegardees.find(x => x.id === id);
-                if (p) {
-                    pushUndoSnapshot(`Suppression prestation : ${p.prestation}`);
-                    logAction(`Suppression prestation : ${p.prestation} (${p.client})`, 'DELETE');
-                }
-                prestationsSauvegardees = prestationsSauvegardees.filter(p => p.id !== id);
+                const idx = prestationsSauvegardees.findIndex(x => x.id === id);
+                if (idx < 0) return;
+                const removed = prestationsSauvegardees[idx];
+                pushUndoSnapshot(`Suppression prestation : ${removed.prestation}`);
+                logAction(`Suppression prestation : ${removed.prestation} (${removed.client})`, 'DELETE');
+                prestationsSauvegardees.splice(idx, 1);
                 saveToStorage();
                 renderPrestations();
                 updateStats();
+                deleteWithUndo(`Prestation "${removed.prestation}"`, () => {
+                    prestationsSauvegardees.splice(Math.min(idx, prestationsSauvegardees.length), 0, removed);
+                    saveToStorage();
+                    renderPrestations();
+                    updateStats();
+                    logAction(`Restauration prestation : ${removed.prestation}`, 'RESTORE');
+                });
             });
         }
 
@@ -10256,11 +10366,19 @@
         }
 
         // Init dark mode from storage
-        if (localStorage.getItem('darkMode') === '1') {
-            document.body.classList.add('dark-mode');
-            const btn = document.getElementById('darkModeToggle');
-            if (btn) btn.textContent = '☀️';
-        }
+        // Si aucune préférence enregistrée, suit le thème système (prefers-color-scheme)
+        (function initDarkMode() {
+            const saved = localStorage.getItem('darkMode');
+            let wantDark;
+            if (saved === '1') wantDark = true;
+            else if (saved === '0') wantDark = false;
+            else wantDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (wantDark) {
+                document.body.classList.add('dark-mode');
+                const btn = document.getElementById('darkModeToggle');
+                if (btn) btn.textContent = '☀️';
+            }
+        })();
 
         // ============================================================
         // FEATURE : Modes d'affichage
@@ -13901,7 +14019,12 @@
             const devisListEl = document.getElementById('dashDevisList');
             if (devisListEl) {
                 if (devisEnAttente.length === 0) {
-                    devisListEl.innerHTML = '<div class="empty-state" style="padding:20px;">Aucun devis en attente</div>';
+                    devisListEl.innerHTML = uxEmptyState({
+                        icon: '📋',
+                        title: 'Aucun devis en attente',
+                        hint: 'Créez un nouveau devis depuis le Calculateur pour le voir apparaître ici.',
+                        cta: { label: '+ Nouveau devis', onclick: "switchTab('calculateur')" }
+                    });
                 } else {
                     const sorted = [...devisEnAttente].sort((a, b) => new Date(a.date) - new Date(b.date));
                     devisListEl.innerHTML = sorted.map(p => {
@@ -13994,7 +14117,11 @@
             if (formationReqEl) {
                 const pendingRequests = trainingRequests.filter(r => r.status === 'pending');
                 if (pendingRequests.length === 0) {
-                    formationReqEl.innerHTML = '<div class="empty-state" style="padding:20px;">Aucune demande en attente</div>';
+                    formationReqEl.innerHTML = uxEmptyState({
+                        icon: '🎓',
+                        title: 'Aucune demande en attente',
+                        hint: 'Les demandes de formation envoyées par les techniciens apparaîtront ici.'
+                    });
                 } else {
                     formationReqEl.innerHTML = pendingRequests.map(req => {
                         const statusColor = req.status === 'approved' ? '#27ae60' : req.status === 'rejected' ? '#e74c3c' : '#f39c12';
@@ -14280,6 +14407,123 @@
             }
 
             checkAndShowAlerts();
+            renderOnboardingChecklist();
+            updateTabBadges();
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // Onboarding — checklist de premiers pas
+        // ─────────────────────────────────────────────────────────
+        function renderOnboardingChecklist() {
+            const el = document.getElementById('onboardingChecklist');
+            if (!el) return;
+            if (localStorage.getItem('onboardingDismissed') === '1') { el.innerHTML = ''; return; }
+
+            const coutsOk = !!(config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard));
+            const catalogueOk = Array.isArray(catalogueGestes) && catalogueGestes.length > 0;
+            const clientsOk = Array.isArray(clientsList) && clientsList.length > 0;
+            const prestOk = Array.isArray(prestationsSauvegardees) && prestationsSauvegardees.length > 0;
+            const exportOk = !!localStorage.getItem('lastExportDate');
+
+            const steps = [
+                { done: coutsOk, label: 'Configurer les coûts horaires', cta: 'Config', tab: 'config' },
+                { done: catalogueOk, label: 'Ajouter au moins un geste au catalogue', cta: 'Catalogue', tab: 'catalogue' },
+                { done: clientsOk, label: 'Enregistrer au moins un client', cta: 'Clients', tab: 'clients' },
+                { done: prestOk, label: 'Créer une première prestation', cta: 'Calculateur', tab: 'calculateur' },
+                { done: exportOk, label: 'Effectuer un export de sauvegarde JSON', cta: 'Config', tab: 'config' }
+            ];
+            const doneCount = steps.filter(s => s.done).length;
+            const pct = Math.round(doneCount / steps.length * 100);
+            if (doneCount === steps.length) {
+                localStorage.setItem('onboardingDismissed', '1');
+                el.innerHTML = '';
+                return;
+            }
+
+            const rows = steps.map(s => `
+                <div class="onboarding-check-row ${s.done ? 'done' : 'todo'}">
+                    <span class="chk">${s.done ? '✓' : '•'}</span>
+                    <span class="label">${escapeHtml(s.label)}</span>
+                    ${s.done ? '' : `<a class="cta" onclick="switchTab('${s.tab}')">→ ${escapeHtml(s.cta)}</a>`}
+                </div>
+            `).join('');
+
+            el.innerHTML = `
+                <div class="onboarding-card">
+                    <button class="onboarding-dismiss" onclick="dismissOnboarding()" title="Masquer">✕</button>
+                    <h3>🚀 Premiers pas — ${doneCount}/${steps.length}</h3>
+                    <div style="color:#567;font-size:0.88em;">Quelques réglages pour démarrer en douceur.</div>
+                    <div class="onboarding-progress"><div class="onboarding-progress-bar" style="width:${pct}%;"></div></div>
+                    ${rows}
+                </div>
+            `;
+        }
+        function dismissOnboarding() {
+            localStorage.setItem('onboardingDismissed', '1');
+            const el = document.getElementById('onboardingChecklist');
+            if (el) el.innerHTML = '';
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // Badges d'alertes sur onglets
+        // ─────────────────────────────────────────────────────────
+        function updateTabBadges() {
+            const now = new Date();
+            // Stock bas
+            let stockLow = 0;
+            try {
+                Object.entries(stockActuel || {}).forEach(([ref, data]) => {
+                    const min = (stockMins || {})[ref];
+                    if (min !== undefined && (data.total || 0) <= min) stockLow++;
+                });
+            } catch (e) {}
+            // Devis expirés (> 30 jours)
+            let devisExp = 0;
+            try {
+                devisExp = (prestationsSauvegardees || [])
+                    .filter(p => (p.statut || 'devis') === 'devis' && (now - new Date(p.date)) / 86400000 > 30)
+                    .length;
+            } catch (e) {}
+            _setTabBadge('stock', stockLow);
+            _setTabBadge('prestations', devisExp);
+        }
+        function _setTabBadge(tabKey, count) {
+            const btn = document.querySelector(`.tab[data-tab="${tabKey}"]`);
+            if (!btn) return;
+            let badge = btn.querySelector('.tab-badge');
+            if (count > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'tab-badge';
+                    btn.appendChild(badge);
+                }
+                badge.textContent = count;
+            } else if (badge) {
+                badge.remove();
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // Corbeille 30s — suppression avec annulation
+        // ─────────────────────────────────────────────────────────
+        function deleteWithUndo(label, restoreFn) {
+            const container = document.createElement('div');
+            container.className = 'toast toast-info undo-toast';
+            container.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#333;color:white;padding:12px 16px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:99999;min-width:260px;';
+            const msg = document.createElement('span');
+            msg.textContent = `${label} supprimé — annuler ?`;
+            const btn = document.createElement('button');
+            btn.textContent = 'Annuler';
+            const timer = setTimeout(() => { container.remove(); }, 30000);
+            btn.onclick = () => {
+                clearTimeout(timer);
+                try { restoreFn(); } catch (e) { console.error(e); }
+                container.remove();
+                toast('Suppression annulée', 'success');
+            };
+            container.appendChild(msg);
+            container.appendChild(btn);
+            document.body.appendChild(container);
         }
 
         // ============================================================
