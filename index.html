@@ -4687,8 +4687,69 @@
         let lastSaveTime = null;
         let devisCounter = parseInt(localStorage.getItem('devisCounter') || '0');
 
+        // ============================================================
+        // Migration localStorage — versionnage du schéma
+        // ============================================================
+        // Bumper APP_SCHEMA_VERSION et ajouter une fn dans MIGRATIONS à
+        // chaque changement de structure des clés localStorage. Chaque
+        // migration reçoit l'ancienne version et doit amener les données
+        // à la version suivante.
+        const APP_SCHEMA_VERSION = 1;
+        const SCHEMA_VERSION_KEY = 'app_schema_version';
+
+        // Registre des migrations : MIGRATIONS[N] = fn() qui passe de la
+        // version (N-1) à la version N. Exemple pour le futur :
+        //   MIGRATIONS[2] = () => {
+        //       const prest = JSON.parse(localStorage.getItem('prestationsSauvegardees') || '[]');
+        //       prest.forEach(p => { if (!p.unite) p.unite = 'pièce'; });
+        //       localStorage.setItem('prestationsSauvegardees', JSON.stringify(prest));
+        //   };
+        const MIGRATIONS = {};
+
+        function migrateLocalStorage() {
+            const stored = parseInt(localStorage.getItem(SCHEMA_VERSION_KEY) || '0', 10);
+            // Installation vierge (aucune clé existante) : on pose directement la version courante.
+            if (stored === 0 && localStorage.length === 0) {
+                localStorage.setItem(SCHEMA_VERSION_KEY, String(APP_SCHEMA_VERSION));
+                return;
+            }
+            // Données présentes sans version : schéma v1 par convention.
+            let current = stored || 1;
+            if (current === APP_SCHEMA_VERSION) {
+                if (!stored) localStorage.setItem(SCHEMA_VERSION_KEY, String(APP_SCHEMA_VERSION));
+                return;
+            }
+            if (current > APP_SCHEMA_VERSION) {
+                console.warn(`localStorage version ${current} > app version ${APP_SCHEMA_VERSION}. L'app est peut-être en retard sur les données.`);
+                return;
+            }
+            // Sauvegarde préventive avant migration
+            try {
+                const backup = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    backup[k] = localStorage.getItem(k);
+                }
+                localStorage.setItem(`__backup_pre_v${APP_SCHEMA_VERSION}`, JSON.stringify({ at: Date.now(), data: backup }));
+            } catch (e) { console.error('Backup pré-migration impossible :', e); }
+
+            while (current < APP_SCHEMA_VERSION) {
+                const next = current + 1;
+                const fn = MIGRATIONS[next];
+                if (typeof fn === 'function') {
+                    try { fn(); } catch (e) {
+                        console.error(`Migration v${current} → v${next} a échoué :`, e);
+                        return;
+                    }
+                }
+                current = next;
+                localStorage.setItem(SCHEMA_VERSION_KEY, String(current));
+            }
+        }
+
         // Chargement
         try {
+        migrateLocalStorage();
         loadFromStorage();
         loadEmailWebhooksConfig();
         renderStockSelects();
