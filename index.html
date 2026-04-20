@@ -4924,7 +4924,24 @@
                 }
             } catch(e) { console.error('Error loading catalogue gestures:', e); catalogueGestes = defaultCatalogueGestes; }
             try { if (savedConsommables) catalogueConsommables = JSON.parse(savedConsommables); } catch(e) { console.error('Error loading consumables:', e); }
-            try { if (savedPrestations) prestationsSauvegardees = JSON.parse(savedPrestations); } catch(e) { console.error('Error loading services:', e); }
+            try {
+                if (savedPrestations) {
+                    prestationsSauvegardees = JSON.parse(savedPrestations);
+                    // Migration : les versions passées ont généré des IDs string
+                    // (`import_…`, `training_…`) — ils cassent les handlers onclick
+                    // `editPrestation(${p.id})`. On les convertit en numériques.
+                    let _migrated = 0;
+                    prestationsSauvegardees.forEach((p, i) => {
+                        if (typeof p.id !== 'number' || !isFinite(p.id)) {
+                            p.id = Date.now() + i;
+                            _migrated++;
+                        }
+                    });
+                    if (_migrated > 0) {
+                        try { localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees)); } catch {}
+                    }
+                }
+            } catch(e) { console.error('Error loading services:', e); }
             try {
                 if (savedStock) {
                     const data = JSON.parse(savedStock);
@@ -8825,13 +8842,20 @@
                 </table>`;
                 container.appendChild(cmpDiv);
             } else if (mode === 'selection' && sourcePrestations.length >= 3) {
-                // Camemberts individuels en grille responsive (max 4 par ligne)
+                // Camemberts individuels en grille responsive (max 4 par ligne).
+                // Les prestations sans coût (0 CHF) affichent un placeholder
+                // plutôt que d'être silencieusement omises.
                 sourcePrestations.forEach(p => {
                     const slices = buildSlices([p]);
-                    if (slices.length === 0) return;  // Skip if no data to render
                     const div = document.createElement('div');
                     div.style.cssText = 'flex:1 1 220px;min-width:200px;';
                     container.appendChild(div);
+                    if (slices.length === 0) {
+                        div.innerHTML = `<div style="text-align:center;padding:30px 10px;color:#aaa;border:1px dashed #d5e3ed;border-radius:10px;">
+                            <div style="font-weight:600;color:#6b8fa3;margin-bottom:6px;font-size:0.88em;">${escapeHtml(p.prestation)} (${escapeHtml(p.client)})</div>
+                            <em style="font-size:0.82em;">Aucun coût enregistré (0 CHF)</em></div>`;
+                        return;
+                    }
                     renderOnePie(div, slices, `${escapeHtml(p.prestation)} (${escapeHtml(p.client)})`);
                 });
             } else {
@@ -14527,7 +14551,7 @@
             if (prestationsSauvegardees) {
                 const gesturesDesc = selectedGestures.map(g => `[${g.code}] ${g.description}`).join(' + ');
                 const newPrestation = {
-                    id: 'training_' + Date.now(),
+                    id: Date.now(),
                     client,
                     prestation,
                     reference: ref,
@@ -14802,7 +14826,7 @@
 
             // Créer une nouvelle prestation
             const newPrestation = {
-                id: 'import_' + Date.now(),
+                id: Date.now(),
                 client: reportData.client,
                 prestation: reportData.prestation || 'Sans titre',
                 reference: reportData.reference,
