@@ -4803,9 +4803,11 @@
         });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
+        // Support Ctrl (Win/Linux) et Cmd ⌘ (Mac) via e.ctrlKey || e.metaKey
         document.addEventListener('keydown', e => {
-            // Ctrl+G : ajouter un geste (seulement si onglet calculateur actif)
-            if (e.ctrlKey && e.key === 'g') {
+            const mod = e.ctrlKey || e.metaKey;
+            // Ctrl/⌘+G : ajouter un geste (seulement si onglet calculateur actif)
+            if (mod && e.key === 'g') {
                 const calcTab = document.getElementById('calculateur');
                 if (calcTab && calcTab.classList.contains('active')) {
                     e.preventDefault();
@@ -4813,8 +4815,8 @@
                     document.getElementById('gestesContainer')?.lastElementChild?.querySelector('select')?.focus();
                 }
             }
-            // Ctrl+S : sauvegarder prestation
-            if (e.ctrlKey && e.key === 's') {
+            // Ctrl/⌘+S : sauvegarder prestation
+            if (mod && e.key === 's') {
                 const calcTab = document.getElementById('calculateur');
                 if (calcTab && calcTab.classList.contains('active')) {
                     e.preventDefault();
@@ -4831,30 +4833,32 @@
                 closeTabProfileModal();
                 closePresentationConfigModal();
                 closeAuthGroupModal();
+                // Ferme également toutes les modales génériques ouvertes
+                document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
             }
-            // Ctrl+Z : annuler
-            if (e.ctrlKey && e.key === 'z') {
+            // Ctrl/⌘+Z : annuler
+            if (mod && e.key === 'z') {
                 const tag = document.activeElement?.tagName;
                 if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
                     e.preventDefault();
                     undoLastAction();
                 }
             }
-            // Ctrl+F : recherche globale
-            if (e.ctrlKey && e.key === 'f') {
+            // Ctrl/⌘+F : recherche globale
+            if (mod && e.key === 'f') {
                 e.preventDefault();
                 openGlobalSearch();
             }
-            // Ctrl+D : dupliquer le dernier geste
-            if (e.ctrlKey && e.key === 'd') {
+            // Ctrl/⌘+D : dupliquer le dernier geste
+            if (mod && e.key === 'd') {
                 const calcTab = document.getElementById('calculateur');
                 if (calcTab && calcTab.classList.contains('active')) {
                     e.preventDefault();
                     if (gesteLines.length > 0) duplicateGesteLine(gesteLines[gesteLines.length - 1]);
                 }
             }
-            // Ctrl+P : ouvrir modale impression/devis
-            if (e.ctrlKey && e.key === 'p') {
+            // Ctrl/⌘+P : ouvrir modale impression/devis
+            if (mod && e.key === 'p') {
                 const calcTab = document.getElementById('calculateur');
                 if (calcTab && calcTab.classList.contains('active')) {
                     e.preventDefault();
