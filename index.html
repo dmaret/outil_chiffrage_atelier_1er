@@ -1317,6 +1317,18 @@
         .autosave-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--color-success); margin-right:4px; animation:pulse-dot 2s infinite; }
         @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+        /* ── Flash highlight après sauvegarde ────────────────────────── */
+        @keyframes prestJustSaved {
+            0%   { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); }
+            15%  { box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.55); background: linear-gradient(135deg, #fff9c4 0%, #fff2a8 100%); }
+            70%  { box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.35); background: linear-gradient(135deg, #fffbe0 0%, #fff4b5 100%); }
+            100% { box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15); background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); }
+        }
+        .prest-just-saved { animation: prestJustSaved 2.2s ease-out; }
+        @media (prefers-reduced-motion: reduce) {
+            .prest-just-saved { animation: none; outline: 3px solid #ffc107; outline-offset: 2px; }
+        }
+
         /* ── Rapport mensuel ─────────────────────────────────────────── */
         .rapport-section { page-break-inside:avoid; margin-bottom:24px; }
 
@@ -6254,13 +6266,13 @@
                 logAction(`Modification prestation : ${prest.prestation} (${prest.client})`, 'UPDATE');
                 saveToStorage();
                 triggerWebhookEmail('prestation_updated', prest);
-                toast('✅ Prestation mise à jour', 'success');
+                toast(`✅ Prestation mise à jour <span onclick="flashPrestation(${prest.id})" style="margin-left:10px;padding:2px 8px;background:rgba(255,255,255,0.25);border-radius:4px;cursor:pointer;text-decoration:underline;">Voir →</span>`, 'success', 5000);
             } else {
                 prestationsSauvegardees.push(prest);
                 logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${(prest.prixVente||0).toFixed(2)} CHF`, 'CREATE');
                 saveToStorage();
                 triggerWebhookEmail('prestation_created', prest);
-                toast('✅ Prestation enregistrée', 'success');
+                toast(`✅ Prestation enregistrée <span onclick="flashPrestation(${prest.id})" style="margin-left:10px;padding:2px 8px;background:rgba(255,255,255,0.25);border-radius:4px;cursor:pointer;text-decoration:underline;">Voir →</span>`, 'success', 5000);
             }
 
             resetCalculateur();
@@ -6305,6 +6317,187 @@
             currentAttachments = [];
             document.getElementById('attachmentsContainer').innerHTML = '';
             calculateTotal();
+            _clearBrouillonCalc();
+        }
+
+        // ============================================================
+        // AUTO-SAVE BROUILLON (calculateur)
+        // Sauvegarde périodique du formulaire de chiffrage dans
+        // localStorage pour ne pas perdre de saisie en cas de fermeture
+        // accidentelle de l'onglet ou de crash. Ignoré quand on édite
+        // une prestation existante (editingPrestationId !== null).
+        // ============================================================
+        const BROUILLON_KEY = 'prestationBrouillonCalc';
+        const BROUILLON_INTERVAL_MS = 10000;
+        let _brouillonTimer = null;
+
+        function _getCalcInput(id, fallback = '') {
+            const el = document.getElementById(id);
+            return el ? (el.value != null ? el.value : fallback) : fallback;
+        }
+
+        function _hasMeaningfulCalcData() {
+            const client = _getCalcInput('client').trim();
+            const prestation = _getCalcInput('prestation').trim();
+            const reference = _getCalcInput('reference').trim();
+            const notes = _getCalcInput('notesInternes').trim();
+            if (client || prestation || reference || notes) return true;
+            // Au moins un geste avec un code sélectionné ?
+            const gestes = (typeof captureFormGestes === 'function') ? captureFormGestes() : [];
+            return gestes.some(g => g.code);
+        }
+
+        function _collectCalcDraft() {
+            return {
+                savedAt: Date.now(),
+                client: _getCalcInput('client'),
+                prestation: _getCalcInput('prestation'),
+                reference: _getCalcInput('reference'),
+                date: _getCalcInput('date'),
+                responsable: _getCalcInput('responsable'),
+                nbCEA: _getCalcInput('nbCEA'),
+                nbMSP: _getCalcInput('nbMSP'),
+                nbPieces: _getCalcInput('nbPieces'),
+                uniteCalc: _getCalcInput('uniteCalc'),
+                margePercent: _getCalcInput('margePercent'),
+                tempsMailsMin: _getCalcInput('tempsMailsMin'),
+                tempsImpressionMin: _getCalcInput('tempsImpressionMin'),
+                tempsCoordMin: _getCalcInput('tempsCoordMin'),
+                tempsPrepMin: _getCalcInput('tempsPrepMin'),
+                tempsNettoyageMin: _getCalcInput('tempsNettoyageMin'),
+                notesInternes: _getCalcInput('notesInternes'),
+                conditionsPaiement: _getCalcInput('conditionsPaiement'),
+                dateValidite: _getCalcInput('dateValidite'),
+                gestes: (typeof captureFormGestes === 'function') ? captureFormGestes() : []
+            };
+        }
+
+        function _saveBrouillonCalc() {
+            // Ne pas écraser en cours d'édition d'une prestation existante
+            if (typeof editingPrestationId !== 'undefined' && editingPrestationId !== null) return;
+            if (!_hasMeaningfulCalcData()) { _clearBrouillonCalc(); return; }
+            try {
+                localStorage.setItem(BROUILLON_KEY, JSON.stringify(_collectCalcDraft()));
+            } catch { /* quota dépassé : silencieux */ }
+        }
+
+        function _clearBrouillonCalc() {
+            try { localStorage.removeItem(BROUILLON_KEY); } catch {}
+            const banner = document.getElementById('brouillonBanner');
+            if (banner) banner.remove();
+        }
+
+        function _setCalcInput(id, value) {
+            const el = document.getElementById(id);
+            if (el && value != null) el.value = value;
+        }
+
+        function _applyCalcDraft(draft) {
+            if (!draft) return;
+            _setCalcInput('client', draft.client);
+            _setCalcInput('prestation', draft.prestation);
+            _setCalcInput('reference', draft.reference);
+            _setCalcInput('date', draft.date);
+            _setCalcInput('responsable', draft.responsable);
+            _setCalcInput('nbCEA', draft.nbCEA);
+            _setCalcInput('nbMSP', draft.nbMSP);
+            _setCalcInput('nbPieces', draft.nbPieces);
+            _setCalcInput('uniteCalc', draft.uniteCalc);
+            if (typeof updateUniteCalcLabel === 'function') updateUniteCalcLabel();
+            _setCalcInput('margePercent', draft.margePercent);
+            _setCalcInput('tempsMailsMin', draft.tempsMailsMin);
+            _setCalcInput('tempsImpressionMin', draft.tempsImpressionMin);
+            _setCalcInput('tempsCoordMin', draft.tempsCoordMin);
+            _setCalcInput('tempsPrepMin', draft.tempsPrepMin);
+            _setCalcInput('tempsNettoyageMin', draft.tempsNettoyageMin);
+            _setCalcInput('notesInternes', draft.notesInternes);
+            _setCalcInput('conditionsPaiement', draft.conditionsPaiement);
+            _setCalcInput('dateValidite', draft.dateValidite);
+            // Reconstruire les gestes
+            const container = document.getElementById('gestesContainer');
+            if (container) {
+                container.innerHTML = '';
+                gesteLines = [];
+                const gs = Array.isArray(draft.gestes) ? draft.gestes : [];
+                if (gs.length === 0) {
+                    addGesteLine();
+                } else {
+                    gs.forEach(g => addGesteLine(g));
+                }
+            }
+            if (typeof calculateTotal === 'function') calculateTotal();
+        }
+
+        function restoreBrouillonCalc() {
+            try {
+                const raw = localStorage.getItem(BROUILLON_KEY);
+                if (!raw) { _clearBrouillonCalc(); return; }
+                const draft = JSON.parse(raw);
+                if (typeof switchTab === 'function') switchTab('calculateur');
+                _applyCalcDraft(draft);
+                _clearBrouillonCalc();
+                toast('📋 Brouillon restauré', 'success');
+            } catch {
+                _clearBrouillonCalc();
+                toast('⚠️ Impossible de restaurer le brouillon', 'warning');
+            }
+        }
+
+        function dismissBrouillonCalc() {
+            _clearBrouillonCalc();
+            toast('🗑️ Brouillon supprimé', 'info', 2000);
+        }
+
+        function _showBrouillonBanner(draft) {
+            if (document.getElementById('brouillonBanner')) return;
+            const when = new Date(draft.savedAt || Date.now());
+            const hh = String(when.getHours()).padStart(2, '0');
+            const mm = String(when.getMinutes()).padStart(2, '0');
+            const dd = String(when.getDate()).padStart(2, '0');
+            const mo = String(when.getMonth() + 1).padStart(2, '0');
+            const label = escapeHtml(draft.prestation || draft.client || 'Chiffrage en cours');
+            const banner = document.createElement('div');
+            banner.id = 'brouillonBanner';
+            banner.setAttribute('role', 'status');
+            banner.style.cssText = 'position:fixed;bottom:20px;left:20px;right:20px;max-width:560px;margin:0 auto;background:linear-gradient(135deg,#fff9e6,#fff3c4);border:1px solid #e0c97a;border-left:5px solid #e0a020;border-radius:12px;padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,0.18);z-index:9998;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:0.92em;';
+            banner.innerHTML = `
+                <div style="font-size:1.6em;line-height:1;">📝</div>
+                <div style="flex:1;min-width:180px;">
+                    <div style="font-weight:600;color:#7a5a1a;">Brouillon non enregistré</div>
+                    <div style="color:#8a6a2a;font-size:0.88em;">${label} — ${dd}/${mo} ${hh}:${mm}</div>
+                </div>
+                <button class="btn btn-primary btn-small" onclick="restoreBrouillonCalc()" style="background:#e0a020;border:none;">Restaurer</button>
+                <button class="btn btn-small btn-secondary" onclick="dismissBrouillonCalc()" title="Supprimer le brouillon">Ignorer</button>
+            `;
+            document.body.appendChild(banner);
+        }
+
+        function _checkBrouillonOnLoad() {
+            try {
+                const raw = localStorage.getItem(BROUILLON_KEY);
+                if (!raw) return;
+                const draft = JSON.parse(raw);
+                if (!draft || typeof draft !== 'object') { _clearBrouillonCalc(); return; }
+                // Brouillon trop vieux (> 14 jours) : on l'efface silencieusement
+                if (draft.savedAt && (Date.now() - draft.savedAt) > 14 * 86400000) {
+                    _clearBrouillonCalc();
+                    return;
+                }
+                // Pas de contenu utile ? On l'efface
+                const hasContent = (draft.client || draft.prestation || draft.reference || draft.notesInternes ||
+                    (Array.isArray(draft.gestes) && draft.gestes.some(g => g && g.code)));
+                if (!hasContent) { _clearBrouillonCalc(); return; }
+                _showBrouillonBanner(draft);
+            } catch { _clearBrouillonCalc(); }
+        }
+
+        function _startBrouillonAutosave() {
+            if (_brouillonTimer) return;
+            _brouillonTimer = setInterval(_saveBrouillonCalc, BROUILLON_INTERVAL_MS);
+            // Sauvegarde aussi avant de quitter la page (si l'utilisateur ferme l'onglet)
+            window.addEventListener('beforeunload', () => {
+                try { _saveBrouillonCalc(); } catch {}
+            });
         }
 
         function handleAttachmentUpload() {
@@ -8244,7 +8437,7 @@
                 const expiryBadge = _daysLeft !== null && _daysLeft <= 7
                     ? `<span style="background:${_daysLeft <= 0 ? '#e74c3c' : '#e67e22'};color:white;border-radius:4px;padding:1px 6px;font-size:0.75em;margin-left:4px;">${_daysLeft <= 0 ? '⚠️ Expiré' : `⚠️ ${_daysLeft}j`}</span>`
                     : '';
-                html += `<div style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);">
+                html += `<div data-prest-id="${p.id}" style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap:wrap; gap:6px;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                             <strong style="font-size: 1.1em; color: #6b8fa3;">${escapeHtml(p.prestation)}</strong>
@@ -8356,7 +8549,7 @@
                     <th>Actions</th></tr></thead><tbody>`;
                 filtered.forEach(p => {
                     const badge = getStatutBadgeHtml(p.statut || 'devis');
-                    thtml += `<tr>
+                    thtml += `<tr data-prest-id="${p.id}">
                         <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
                         <td>${escapeHtml(p.client)}</td><td><strong>${escapeHtml(p.prestation)}</strong><br><span style="font-size:0.78em;color:#aaa;">${escapeHtml(p.reference)}</span></td>
                         <td>${badge}</td>
@@ -8374,6 +8567,26 @@
             } else {
                 container.innerHTML = html;
             }
+            _applyPrestationFlash();
+        }
+
+        // Flash highlight d'une prestation fraîchement sauvegardée (scroll + animation)
+        let _pendingFlashPrestId = null;
+        function _applyPrestationFlash() {
+            if (_pendingFlashPrestId == null) return;
+            const id = _pendingFlashPrestId;
+            _pendingFlashPrestId = null;
+            requestAnimationFrame(() => {
+                const el = document.querySelector(`[data-prest-id="${id}"]`);
+                if (!el) return;
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('prest-just-saved');
+                setTimeout(() => el.classList.remove('prest-just-saved'), 2400);
+            });
+        }
+        function flashPrestation(id) {
+            _pendingFlashPrestId = id;
+            switchTab('prestations');
         }
 
         function sortPrestations(field) {
@@ -19001,6 +19214,15 @@
                     ).join('');
                 }
             }, 1000);
+
+            // ── UX : auto-save brouillon du calculateur ──
+            // Vérifie au démarrage s'il existe un brouillon non sauvegardé
+            // (onglet fermé avant "Enregistrer"), puis lance l'auto-save
+            // périodique toutes les 10s.
+            try {
+                _checkBrouillonOnLoad();
+                _startBrouillonAutosave();
+            } catch (e) { console.warn('Brouillon autosave non disponible:', e); }
 
             // ── UX : libellés de raccourcis adaptés à la plateforme ──
             // Les boutons avec data-kbd="x" affichent ⌘X sur Mac, Ctrl+X ailleurs.
