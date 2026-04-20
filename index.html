@@ -1506,6 +1506,22 @@
         body.dark-mode .theorie-links a { background:#3a3020; color:#e0c860; border-color:#5a4a20; }
         body.dark-mode .analyse-step { background:#1e1030; border-color:#6a3a90; }
         body.dark-mode .analyse-choices label { color:#c090e0; }
+        .analyse-progress { display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:0.85em; color:#6c3483; }
+        .analyse-progress-bar { flex:1; height:6px; background:#e8d4f0; border-radius:3px; overflow:hidden; }
+        .analyse-progress-bar > div { height:100%; background:linear-gradient(90deg,#8e44ad,#b888dd); transition:width 0.3s; }
+        .analyse-top3-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border:1px solid #d4aaee; border-radius:6px; margin-bottom:6px; background:#fff; cursor:pointer; transition:background 0.15s; }
+        .analyse-top3-item:hover { background:#f5e8ff; }
+        .analyse-top3-item.rank-1 { border-width:2px; border-color:#8e44ad; }
+        .analyse-top3-item .rank { font-size:1.2em; font-weight:700; color:#8e44ad; width:28px; }
+        .analyse-top3-item .title { flex:1; font-weight:600; color:#4a2060; font-size:0.9em; }
+        .analyse-top3-item .score { font-size:0.8em; color:#7a5a9a; background:#f0e0ff; padding:2px 8px; border-radius:10px; }
+        body.dark-mode .analyse-top3-item { background:#1a1020; border-color:#6a3a90; }
+        body.dark-mode .analyse-top3-item:hover { background:#2a1530; }
+        body.dark-mode .analyse-top3-item .title { color:#d0a0f0; }
+        body.dark-mode .analyse-top3-item .score { background:#3a2050; color:#d0a0f0; }
+        .matrice-meta { font-size:0.72em; color:#8aacbc; white-space:nowrap; }
+        .matrice-filter { margin-bottom:8px; padding:6px 10px; border:1px solid #c5d8e4; border-radius:6px; font-size:0.87em; }
+        body.dark-mode .matrice-filter { background:#243040; border-color:#3a5060; color:#cdd6e0; }
         body.dark-mode #analyseResultat { background:#1e1030; border-color:#6a3a90; }
         body.dark-mode #analyseResultat h3 { color:#c090e0; }
         body.dark-mode #analyseResultat .result-theory { color:#d0a0f0; }
@@ -3456,15 +3472,18 @@
                 <div class="section">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
                         <h2 style="margin:0;">Matrice d'Apprenance & Autonomie</h2>
-                        <div style="display:flex;gap:8px;">
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <span id="matriceSaveStatus" style="font-size:0.78em;color:#8aacbc;"></span>
                             <button class="btn btn-small" onclick="ajouterLigneMatrice()">+ Ajouter</button>
-                            <button class="btn btn-secondary btn-small" onclick="sauverMatrice()">💾 Sauver</button>
+                            <button class="btn btn-secondary btn-small" onclick="sauverMatrice()" title="Enregistrer maintenant (l'auto-save est actif)">💾 Sauver</button>
+                            <button class="btn btn-secondary btn-small" onclick="exportMatriceCSV()">📤 Export CSV</button>
                         </div>
                     </div>
-                    <p style="font-size:0.82em;color:#7a9db1;margin-bottom:10px;">D'après P. Carré (apprenance) & J. Piaget (assimilation/accommodation). Les données sont sauvegardées localement.</p>
+                    <p style="font-size:0.82em;color:#7a9db1;margin-bottom:8px;">D'après P. Carré (apprenance) & J. Piaget (assimilation/accommodation). Sauvegarde automatique (localStorage).</p>
+                    <input type="text" class="matrice-filter" id="matriceFilter" placeholder="🔍 Filtrer (nom, tâche, stade, observation)…" oninput="filterMatrice(this.value)" style="width:100%;max-width:420px;">
                     <div style="overflow-x:auto;">
                     <table id="matriceApprenanceTable" style="font-size:0.85em;">
-                        <thead><tr><th>Collaborateur (CEA)</th><th>Tâche assignée</th><th>Stade d'assimilation</th><th>Dynamique d'apprenance</th><th>Observation</th><th style="width:40px;"></th></tr></thead>
+                        <thead><tr><th>Collaborateur (CEA)</th><th>Tâche assignée</th><th>Stade d'assimilation</th><th>Dynamique d'apprenance</th><th>Observation</th><th style="width:90px;">Maj</th><th style="width:40px;"></th></tr></thead>
                         <tbody id="matriceBody"></tbody>
                     </table>
                     </div>
@@ -3473,7 +3492,11 @@
                 <!-- Outil analyse de situation -->
                 <div class="section" style="background:linear-gradient(135deg,#f0f8ff,#f8f0ff);border-left-color:#8e44ad;">
                     <h2 style="color:#6c3483;">🔍 Outil d'analyse de situation</h2>
-                    <p style="font-size:0.88em;color:#7a5a9a;margin-bottom:16px;">Répondez aux questions ci-dessous pour identifier le cadre théorique le plus pertinent et obtenir des pistes d'intervention.</p>
+                    <p style="font-size:0.88em;color:#7a5a9a;margin-bottom:10px;">Répondez aux questions ci-dessous pour identifier le cadre théorique le plus pertinent et obtenir des pistes d'intervention.</p>
+                    <div class="analyse-progress">
+                        <span id="analyseProgressLabel">0 / 4 questions répondues</span>
+                        <div class="analyse-progress-bar"><div id="analyseProgressFill" style="width:0%;"></div></div>
+                    </div>
                     <div id="analyseQuestionnaire">
                         <div class="analyse-step" id="step-1">
                             <p class="analyse-question">1. Quel comportement observez-vous principalement ?</p>
@@ -3512,12 +3535,27 @@
                                 <label><input type="radio" name="q4" value="opposition"> Opposition, résistance aux consignes</label>
                             </div>
                         </div>
-                        <div style="margin-top:16px;">
-                            <button class="btn" onclick="analyserSituation()">🔍 Analyser la situation</button>
+                        <div style="margin-top:10px;">
+                            <label style="font-size:0.83em;color:#7a5a9a;display:block;margin-bottom:4px;">Contexte (optionnel) : CEA, tâche, situation…</label>
+                            <input type="text" id="analyseContexte" placeholder="Ex : Marc — étiquetage orienté, poste 3" style="width:100%;max-width:500px;border:1px solid #d4aaee;border-radius:6px;padding:7px 10px;font-size:0.9em;">
+                        </div>
+                        <div style="margin-top:14px;">
+                            <button class="btn" id="btnAnalyser" onclick="analyserSituation()" disabled style="opacity:0.5;cursor:not-allowed;">🔍 Analyser la situation</button>
                             <button class="btn btn-secondary" onclick="resetAnalyse()" style="margin-left:8px;">↺ Réinitialiser</button>
                         </div>
                     </div>
                     <div id="analyseResultat" style="display:none;margin-top:20px;"></div>
+                    <!-- Historique des analyses -->
+                    <div id="analyseHistoriqueWrap" style="margin-top:22px;display:none;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+                            <h3 style="margin:0;color:#6c3483;font-size:1em;">📔 Historique des analyses</h3>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-secondary btn-small" onclick="exportAnalyseHistoriqueCSV()">📤 Export CSV</button>
+                                <button class="btn btn-secondary btn-small" onclick="clearAnalyseHistorique()">🗑️ Effacer</button>
+                            </div>
+                        </div>
+                        <div id="analyseHistorique"></div>
+                    </div>
                 </div>
 
                 <!-- Situations cliniques -->
@@ -3538,9 +3576,16 @@
                 </div>
 
                 <!-- Référentiel théorique enrichi -->
-                <div class="section" style="background:#fef9e6;border-left-color:#c9b84a;">
-                    <h2 style="color:#7a6208;">📚 Référentiel Théorique</h2>
-                    <p style="font-size:0.82em;color:#9a8220;margin-bottom:16px;">Cliquez sur un thème pour développer les ressources et liens de référence.</p>
+                <div class="section" id="referentielTheorique" style="background:#fef9e6;border-left-color:#c9b84a;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+                        <h2 style="color:#7a6208;margin:0;">📚 Référentiel Théorique</h2>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-secondary btn-small" onclick="toggleAllTheorie(true)">⬇️ Tout déplier</button>
+                            <button class="btn btn-secondary btn-small" onclick="toggleAllTheorie(false)">⬆️ Tout replier</button>
+                        </div>
+                    </div>
+                    <p style="font-size:0.82em;color:#9a8220;margin-bottom:10px;">Cliquez sur un thème pour développer les ressources et liens de référence.</p>
+                    <input type="text" id="theorieSearch" placeholder="🔍 Chercher (concept, auteur…)" oninput="filterTheorie(this.value)" style="width:100%;max-width:420px;padding:7px 10px;border:1px solid #c9b84a;border-radius:6px;font-size:0.88em;margin-bottom:14px;background:#fffdf0;color:#4a3c00;">
 
                     <div class="theorie-card" onclick="toggleTheorie('piaget')">
                         <div class="theorie-header">
@@ -4973,6 +5018,12 @@
         renderDashboard();
         initTheme();
         initMatrice();
+        renderAnalyseHistorique();
+        // Progress live sur le questionnaire d'analyse
+        document.querySelectorAll('#analyseQuestionnaire input[type=radio]').forEach(r => {
+            r.addEventListener('change', updateAnalyseProgress);
+        });
+        updateAnalyseProgress();
         loadTrainingRequests(); // dashboard l'utilise
         // Init différée (libère le thread pour le premier paint) — les onglets
         // lourds (Stats, Consommables, Formation, Historique, Stock) se
@@ -11742,36 +11793,83 @@
         // ============================================================
         // ACCOMPAGNEMENT — Matrice
         // ============================================================
+        function _matriceRowHtml(r) {
+            r = r || {};
+            const stades = ['Découverte','Assimilation en cours','Acquis / Autonomie'];
+            const dynamiques = ['Besoin de réassurance','Ouverture / Curiosité','Proactivité'];
+            const stadesOpt = stades.map(s => `<option${r.stade===s?' selected':''}>${s}</option>`).join('');
+            const dynOpt = dynamiques.map(s => `<option${r.dynamique===s?' selected':''}>${s}</option>`).join('');
+            const maj = r.maj ? new Date(r.maj).toLocaleString('fr-CH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+            const esc = (s) => (s||'').replace(/"/g,'&quot;');
+            return `
+                <td><input type="text" value="${esc(r.nom)}" placeholder="Nom CEA" oninput="_matriceDirty(this)" style="width:100%;border:none;background:transparent;"></td>
+                <td><input type="text" value="${esc(r.tache)}" placeholder="Ex: ASS-01 Kit 2 pièces" oninput="_matriceDirty(this)" style="width:100%;border:none;background:transparent;"></td>
+                <td><select onchange="_matriceDirty(this)">${stadesOpt}</select></td>
+                <td><select onchange="_matriceDirty(this)">${dynOpt}</select></td>
+                <td><input type="text" value="${esc(r.observation)}" placeholder="Observation libre..." oninput="_matriceDirty(this)" style="width:100%;border:none;background:transparent;font-size:0.85em;"></td>
+                <td class="matrice-meta" data-maj="${r.maj||''}">${maj}</td>
+                <td><button class="delete-btn btn-small" onclick="_matriceDeleteRow(this)">🗑️</button></td>`;
+        }
+
         function ajouterLigneMatrice() {
             const tbody = document.querySelector('#matriceApprenanceTable tbody');
             if (!tbody) return;
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" placeholder="Nom CEA" style="width:100%;border:none;background:transparent;"></td>
-                <td><input type="text" placeholder="Ex: ASS-01 Kit 2 pièces" style="width:100%;border:none;background:transparent;"></td>
-                <td><select><option>Découverte</option><option>Assimilation en cours</option><option>Acquis / Autonomie</option></select></td>
-                <td><select><option>Besoin de réassurance</option><option>Ouverture / Curiosité</option><option>Proactivité</option></select></td>
-                <td><input type="text" placeholder="Observation libre..." style="width:100%;border:none;background:transparent;font-size:0.85em;"></td>
-                <td><button class="delete-btn btn-small" onclick="this.closest('tr').remove()">🗑️</button></td>`;
+            tr.innerHTML = _matriceRowHtml();
             tbody.appendChild(tr);
+            _matriceScheduleSave();
         }
 
-        function sauverMatrice() {
+        function _matriceDeleteRow(btn) {
+            btn.closest('tr')?.remove();
+            _matriceScheduleSave();
+        }
+
+        // Auto-save debounced + stamp
+        let _matriceSaveTimer = null;
+        function _matriceDirty(input) {
+            // Met à jour la cellule "Maj" de la ligne
+            const tr = input?.closest?.('tr');
+            if (tr) {
+                const metaCell = tr.querySelector('td.matrice-meta');
+                if (metaCell) {
+                    const now = new Date();
+                    metaCell.setAttribute('data-maj', now.toISOString());
+                    metaCell.textContent = now.toLocaleString('fr-CH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+                }
+            }
+            const status = document.getElementById('matriceSaveStatus');
+            if (status) status.textContent = '✎ modifié…';
+            _matriceScheduleSave();
+        }
+
+        function _matriceScheduleSave() {
+            clearTimeout(_matriceSaveTimer);
+            _matriceSaveTimer = setTimeout(() => sauverMatrice(true), 1000);
+        }
+
+        function sauverMatrice(silent) {
             const rows = [];
             document.querySelectorAll('#matriceBody tr').forEach(tr => {
                 const cells = tr.querySelectorAll('td');
-                if (cells.length >= 5) {
+                if (cells.length >= 6) {
                     rows.push({
                         nom: cells[0].querySelector('input')?.value || '',
                         tache: cells[1].querySelector('input')?.value || '',
                         stade: cells[2].querySelector('select')?.value || '',
                         dynamique: cells[3].querySelector('select')?.value || '',
-                        observation: cells[4].querySelector('input')?.value || ''
+                        observation: cells[4].querySelector('input')?.value || '',
+                        maj: cells[5].getAttribute('data-maj') || new Date().toISOString()
                     });
                 }
             });
             localStorage.setItem('matriceApprenance', JSON.stringify(rows));
-            toast('Matrice sauvegardée !', 'success');
+            const status = document.getElementById('matriceSaveStatus');
+            if (status) {
+                const t = new Date().toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'});
+                status.textContent = `✓ enregistré à ${t}`;
+            }
+            if (!silent) toast('Matrice sauvegardée !', 'success');
         }
 
         function initMatrice() {
@@ -11784,24 +11882,44 @@
                 tbody.innerHTML = '';
                 rows.forEach(r => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><input type="text" value="${r.nom||''}" placeholder="Nom CEA" style="width:100%;border:none;background:transparent;"></td>
-                        <td><input type="text" value="${r.tache||''}" placeholder="Tâche assignée" style="width:100%;border:none;background:transparent;"></td>
-                        <td><select>
-                            <option${r.stade==='Découverte'?' selected':''}>Découverte</option>
-                            <option${r.stade==='Assimilation en cours'?' selected':''}>Assimilation en cours</option>
-                            <option${r.stade==='Acquis / Autonomie'?' selected':''}>Acquis / Autonomie</option>
-                        </select></td>
-                        <td><select>
-                            <option${r.dynamique==='Besoin de réassurance'?' selected':''}>Besoin de réassurance</option>
-                            <option${r.dynamique==='Ouverture / Curiosité'?' selected':''}>Ouverture / Curiosité</option>
-                            <option${r.dynamique==='Proactivité'?' selected':''}>Proactivité</option>
-                        </select></td>
-                        <td><input type="text" value="${r.observation||''}" placeholder="Observation libre..." style="width:100%;border:none;background:transparent;font-size:0.85em;"></td>
-                        <td><button class="delete-btn btn-small" onclick="this.closest('tr').remove()">🗑️</button></td>`;
+                    tr.innerHTML = _matriceRowHtml(r);
                     tbody.appendChild(tr);
                 });
             } catch(e) { /* silent */ }
+        }
+
+        function filterMatrice(q) {
+            const query = (q || '').trim().toLowerCase();
+            document.querySelectorAll('#matriceBody tr').forEach(tr => {
+                const hay = [...tr.querySelectorAll('input,select')]
+                    .map(el => (el.value||'').toLowerCase()).join(' ');
+                tr.style.display = (!query || hay.includes(query)) ? '' : 'none';
+            });
+        }
+
+        function exportMatriceCSV() {
+            const rows = [...document.querySelectorAll('#matriceBody tr')].map(tr => {
+                const cells = tr.querySelectorAll('td');
+                return [
+                    cells[0]?.querySelector('input')?.value || '',
+                    cells[1]?.querySelector('input')?.value || '',
+                    cells[2]?.querySelector('select')?.value || '',
+                    cells[3]?.querySelector('select')?.value || '',
+                    cells[4]?.querySelector('input')?.value || '',
+                    cells[5]?.textContent?.trim() || ''
+                ];
+            });
+            if (rows.length === 0) { toast('Matrice vide — rien à exporter.', 'warning'); return; }
+            const header = ['Collaborateur','Tâche','Stade','Dynamique','Observation','Maj'];
+            const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+            const csv = '\uFEFF' + [header, ...rows].map(r => r.map(esc).join(';')).join('\r\n');
+            const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `matrice-apprenance-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            toast('Matrice exportée en CSV.', 'success');
         }
 
         function toggleTheorie(id) {
@@ -11811,6 +11929,53 @@
             const isOpen = body.style.display !== 'none';
             body.style.display = isOpen ? 'none' : 'block';
             if (chev) chev.classList.toggle('open', !isOpen);
+        }
+
+        function toggleAllTheorie(open) {
+            document.querySelectorAll('#referentielTheorique .theorie-body').forEach(b => b.style.display = open ? 'block' : 'none');
+            document.querySelectorAll('#referentielTheorique .theorie-chevron').forEach(c => c.classList.toggle('open', !!open));
+        }
+
+        function filterTheorie(q) {
+            const query = (q || '').trim().toLowerCase();
+            document.querySelectorAll('#referentielTheorique .theorie-card').forEach(card => {
+                const hay = card.textContent.toLowerCase();
+                const match = !query || hay.includes(query);
+                card.style.display = match ? '' : 'none';
+                // Auto-open on search
+                if (query && match) {
+                    const body = card.querySelector('.theorie-body');
+                    const chev = card.querySelector('.theorie-chevron');
+                    if (body) body.style.display = 'block';
+                    if (chev) chev.classList.add('open');
+                }
+            });
+        }
+
+        function openTheorieFromAnalyse(id) {
+            // Ensure accordion is open + scroll to it
+            const body = document.getElementById('body-' + id);
+            const chev = document.getElementById('chev-' + id);
+            if (body) body.style.display = 'block';
+            if (chev) chev.classList.add('open');
+            document.getElementById('body-' + id)?.closest('.theorie-card')?.scrollIntoView({behavior:'smooth', block:'center'});
+        }
+
+        function updateAnalyseProgress() {
+            const names = ['q1','q2','q3','q4'];
+            const answered = names.filter(n => !!document.querySelector(`input[name="${n}"]:checked`)).length;
+            const pct = (answered / names.length) * 100;
+            const label = document.getElementById('analyseProgressLabel');
+            const fill = document.getElementById('analyseProgressFill');
+            const btn = document.getElementById('btnAnalyser');
+            if (label) label.textContent = `${answered} / ${names.length} questions répondues`;
+            if (fill) fill.style.width = pct + '%';
+            if (btn) {
+                const complete = answered === names.length;
+                btn.disabled = !complete;
+                btn.style.opacity = complete ? '1' : '0.5';
+                btn.style.cursor = complete ? 'pointer' : 'not-allowed';
+            }
         }
 
         function analyserSituation() {
@@ -11852,8 +12017,10 @@
             if (q4==='neutre') { scores.carre+=2; scores.piaget+=1; }
             if (q4==='opposition') { scores.minuchin+=2; scores.bateson+=2; scores.paul+=1; }
 
-            // Find winner
-            const winner = Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+            // Find top 3
+            const ranked = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+            const winner = ranked[0][0];
+            const top3 = ranked.slice(0, 3).filter(([,s]) => s > 0);
 
             const theories = {
                 piaget: {
@@ -11921,22 +12088,131 @@
 
             const t = theories[winner];
             const linksHtml = t.links.map(l=>`<a href="${l.url}" target="_blank">${l.label}</a>`).join('');
+            const top3Html = top3.map(([id, score], i) => {
+                const theory = theories[id];
+                const rank = i + 1;
+                return `<div class="analyse-top3-item rank-${rank}" onclick="openTheorieFromAnalyse('${id}')" title="Voir la théorie complète">
+                    <span class="rank">#${rank}</span>
+                    <span class="title">${theory.name}</span>
+                    <span class="score">score ${score}</span>
+                </div>`;
+            }).join('');
+
+            const contexte = document.getElementById('analyseContexte')?.value?.trim() || '';
             const container = document.getElementById('analyseResultat');
             container.innerHTML = `
                 <h3>Cadre théorique recommandé</h3>
+                ${contexte ? `<p style="font-size:0.85em;color:#7a5a9a;margin:0 0 10px;"><em>Contexte : ${contexte.replace(/</g,'&lt;')}</em></p>` : ''}
                 <div class="result-theory">${t.name}</div>
                 <p style="font-size:0.9em;color:#4a2060;margin-bottom:10px;">${t.desc}</p>
                 <div class="result-posture">${t.posture}</div>
-                <div class="result-links">${linksHtml}</div>
+                <div class="result-links">${linksHtml}
+                    <a href="#" onclick="event.preventDefault();openTheorieFromAnalyse('${winner}');">📚 Voir la théorie complète</a>
+                </div>
+                ${top3.length > 1 ? `
+                <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #b888dd;">
+                    <p style="font-size:0.82em;color:#6c3483;margin:0 0 8px;font-weight:600;">Autres pistes à considérer :</p>
+                    ${top3Html}
+                </div>` : ''}
                 <p style="font-size:0.78em;color:#9a7ab0;margin-top:12px;margin-bottom:0;">⚠️ Cette analyse est indicative. Elle ne remplace pas l'évaluation clinique d'un professionnel qualifié.</p>`;
             container.style.display = 'block';
             container.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+            // Sauver dans l'historique
+            saveAnalyseHistorique({
+                date: new Date().toISOString(),
+                contexte,
+                reponses: { q1, q2, q3, q4 },
+                scores,
+                winner,
+                top3: top3.map(([id, s]) => ({ id, name: theories[id].name, score: s }))
+            });
+            renderAnalyseHistorique();
         }
 
         function resetAnalyse() {
             document.querySelectorAll('#analyseQuestionnaire input[type=radio]').forEach(r => r.checked = false);
+            const ctx = document.getElementById('analyseContexte'); if (ctx) ctx.value = '';
             const res = document.getElementById('analyseResultat');
             if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+            updateAnalyseProgress();
+        }
+
+        function saveAnalyseHistorique(entry) {
+            try {
+                const key = 'analyseHistorique';
+                const list = JSON.parse(localStorage.getItem(key) || '[]');
+                list.push(entry);
+                // cap 200 entrées
+                localStorage.setItem(key, JSON.stringify(list.slice(-200)));
+            } catch {}
+        }
+
+        function renderAnalyseHistorique() {
+            const wrap = document.getElementById('analyseHistoriqueWrap');
+            const host = document.getElementById('analyseHistorique');
+            if (!wrap || !host) return;
+            let list = [];
+            try { list = JSON.parse(localStorage.getItem('analyseHistorique') || '[]'); } catch {}
+            if (!list.length) { wrap.style.display = 'none'; host.innerHTML = ''; return; }
+            wrap.style.display = 'block';
+            const fmtD = (iso) => new Date(iso).toLocaleString('fr-CH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+            const esc = s => (s||'').replace(/</g,'&lt;');
+            host.innerHTML = `<div style="max-height:280px;overflow-y:auto;">
+                <table style="width:100%;font-size:0.82em;border-collapse:collapse;">
+                    <thead><tr style="background:#f0e0ff;">
+                        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #d4aaee;">Date</th>
+                        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #d4aaee;">Contexte</th>
+                        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #d4aaee;">Théorie retenue</th>
+                        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #d4aaee;">Alternatives</th>
+                    </tr></thead>
+                    <tbody>
+                    ${[...list].reverse().slice(0, 50).map(e => {
+                        const alts = (e.top3||[]).slice(1).map(t => t.name).join(' · ');
+                        const winName = (e.top3||[]).find(t => t.id === e.winner)?.name || e.winner;
+                        return `<tr style="border-bottom:1px solid #eee;">
+                            <td style="padding:6px 8px;color:#7a5a9a;white-space:nowrap;">${fmtD(e.date)}</td>
+                            <td style="padding:6px 8px;">${esc(e.contexte) || '<em style="color:#aaa;">—</em>'}</td>
+                            <td style="padding:6px 8px;"><strong>${winName}</strong></td>
+                            <td style="padding:6px 8px;color:#8a6aaa;">${alts || '—'}</td>
+                        </tr>`;
+                    }).join('')}
+                    </tbody>
+                </table></div>`;
+        }
+
+        function exportAnalyseHistoriqueCSV() {
+            let list = [];
+            try { list = JSON.parse(localStorage.getItem('analyseHistorique') || '[]'); } catch {}
+            if (!list.length) { toast('Aucune analyse à exporter.', 'warning'); return; }
+            const header = ['Date','Contexte','Q1','Q2','Q3','Q4','Théorie retenue','Top2','Top3'];
+            const esc = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+            const rows = list.map(e => [
+                e.date,
+                e.contexte || '',
+                e.reponses?.q1 || '',
+                e.reponses?.q2 || '',
+                e.reponses?.q3 || '',
+                e.reponses?.q4 || '',
+                (e.top3||[]).find(t => t.id === e.winner)?.name || e.winner,
+                (e.top3||[])[1]?.name || '',
+                (e.top3||[])[2]?.name || '',
+            ]);
+            const csv = '\uFEFF' + [header, ...rows].map(r => r.map(esc).join(';')).join('\r\n');
+            const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `analyses-situation-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            toast('Historique exporté.', 'success');
+        }
+
+        function clearAnalyseHistorique() {
+            if (!confirm('Effacer tout l\'historique des analyses ?')) return;
+            localStorage.removeItem('analyseHistorique');
+            renderAnalyseHistorique();
+            toast('Historique effacé.', 'success');
         }
 
         // ============================================================
