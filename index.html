@@ -11473,10 +11473,86 @@
         // ============================================================
         // AUDIT LOG (Historique)
         // ============================================================
+        // === IndexedDB — stockage "cold" pour historique volumineux ===
+        // localStorage plafonne à ~5 Mo et dégrade les perfs sur gros journaux.
+        // IndexedDB mirror = pas de limite pratique + async + historique complet
+        // même si localStorage est purgé ou sature.
+        const _idb = {
+            _dbPromise: null,
+            _ready() {
+                if (!('indexedDB' in window)) return Promise.reject(new Error('IndexedDB indisponible'));
+                if (this._dbPromise) return this._dbPromise;
+                return this._dbPromise = new Promise((resolve, reject) => {
+                    const req = indexedDB.open('atelier_db', 1);
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('audit')) {
+                            const st = db.createObjectStore('audit', { keyPath: 'id', autoIncrement: true });
+                            st.createIndex('timestamp', 'timestamp');
+                        }
+                    };
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            },
+            async putMany(storeName, items) {
+                const db = await this._ready();
+                return new Promise((res, rej) => {
+                    const tx = db.transaction(storeName, 'readwrite');
+                    items.forEach(v => tx.objectStore(storeName).put(v));
+                    tx.oncomplete = () => res();
+                    tx.onerror = () => rej(tx.error);
+                });
+            },
+            async getAll(storeName) {
+                const db = await this._ready();
+                return new Promise((res, rej) => {
+                    const tx = db.transaction(storeName, 'readonly');
+                    const r = tx.objectStore(storeName).getAll();
+                    r.onsuccess = () => res(r.result);
+                    r.onerror = () => rej(r.error);
+                });
+            },
+            async clear(storeName) {
+                const db = await this._ready();
+                return new Promise((res, rej) => {
+                    const tx = db.transaction(storeName, 'readwrite');
+                    const r = tx.objectStore(storeName).clear();
+                    r.onsuccess = () => res();
+                    r.onerror = () => rej(r.error);
+                });
+            }
+        };
+
+        // Fire-and-forget : mirror auditLog vers IDB (debounced 1s)
+        let _auditIdbTimer = null;
+        function _mirrorAuditToIDB() {
+            clearTimeout(_auditIdbTimer);
+            _auditIdbTimer = setTimeout(async () => {
+                try {
+                    await _idb.clear('audit');
+                    // IDB attend un id — on ajoute un id synthétique par timestamp+index
+                    const rows = auditLog.map((e, i) => ({ ...e, id: i + 1 }));
+                    if (rows.length) await _idb.putMany('audit', rows);
+                } catch (e) { /* IDB indisponible : localStorage fait foi */ }
+            }, 1000);
+        }
+
         function loadAuditLog() {
             const saved = JSON.parse(localStorage.getItem('auditLog') || '[]');
             auditLog = saved;
             renderAuditLog();
+            // Si localStorage vide/perdu, tente de rapatrier depuis IDB
+            if (saved.length === 0) {
+                _idb.getAll('audit').then(rows => {
+                    if (rows && rows.length) {
+                        auditLog = rows.map(({ id, ...rest }) => rest);
+                        try { localStorage.setItem('auditLog', JSON.stringify(auditLog.slice(-5000))); } catch {}
+                        renderAuditLog();
+                        if (typeof toast === 'function') toast(`📥 Historique restauré : ${auditLog.length} entrées`, 'info');
+                    }
+                }).catch(() => { /* pas grave */ });
+            }
         }
 
         function toggleAuditLogs() {
@@ -11494,6 +11570,7 @@
 
         function saveAuditLog() {
             localStorage.setItem('auditLog', JSON.stringify(auditLog.slice(-5000))); // Keep last 5000 entries
+            _mirrorAuditToIDB();
         }
 
         function renderAuditLog() {
