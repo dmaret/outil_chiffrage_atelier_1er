@@ -3552,7 +3552,9 @@
                             <div id="quizQuestions"></div>
                         </div>
                         <div id="quizStartButtons" style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-                            <button class="btn btn-primary" onclick="startFormationQuiz()" style="background:#e67e22;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🎯 Démarrer Quiz</button>
+                            <button class="btn btn-primary" onclick="startFormationQuiz('all')" style="background:#e67e22;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🎯 Démarrer Quiz</button>
+                            <button class="btn" onclick="startFormationQuiz('adaptive')" style="background:#2980b9;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🧠 Quiz adaptatif</button>
+                            <button class="btn" onclick="openFormationDashboard()" style="background:#6b8fa3;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">📊 Ma progression</button>
                             <button class="btn btn-secondary" onclick="resetFormationQuiz()" style="background:#bdc3c7;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">↻ Réinitialiser</button>
                         </div>
                     </div>
@@ -12100,7 +12102,9 @@
                     <div id="formationQuizContainer" style="display:block;">
                         <div id="formationQuizQuestions"></div>
                         <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-                            <button class="btn btn-primary" onclick="startFormationQuiz()" style="background:#e67e22;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🎯 Démarrer Quiz</button>
+                            <button class="btn btn-primary" onclick="startFormationQuiz('all')" style="background:#e67e22;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🎯 Démarrer Quiz</button>
+                            <button class="btn" onclick="startFormationQuiz('adaptive')" style="background:#2980b9;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🧠 Quiz adaptatif</button>
+                            <button class="btn" onclick="openFormationDashboard()" style="background:#6b8fa3;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">📊 Ma progression</button>
                             <button class="btn btn-secondary" onclick="resetFormationQuiz()" style="background:#bdc3c7;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">↻ Réinitialiser</button>
                         </div>
                     </div>
@@ -17773,74 +17777,157 @@
         // QUIZ FORMATION LOGISTIQUE
         // ═══════════════════════════════════════════════════════════════
 
+        // Domaines de formation — libellés + icônes utilisés pour filtrer/afficher
+        const FORMATION_DOMAINS = {
+            systemes:   { label: 'Systèmes',   icon: '💻' },
+            methodes:   { label: 'Méthodes',   icon: '🔄' },
+            retailers:  { label: 'Retailers',  icon: '🏬' },
+            operations: { label: 'Opérations', icon: '📦' },
+            kpi:        { label: 'KPI',        icon: '📈' }
+        };
+
         const formationQuizQuestions = [
             {
+                id: 'q1', domain: 'systemes', difficulty: 1,
                 question: "Quel système gère spécifiquement les stocks et emplacements en entrepôt?",
                 options: ["ERP", "WMS", "TMS", "5S"],
                 correct: 1,
-                explanation: "Le WMS (Warehouse Management System) est dédié à la gestion d'entrepôt."
+                explanation: "Le WMS (Warehouse Management System) est dédié à la gestion d'entrepôt.",
+                moreInfo: "À retenir : l'ERP gère l'entreprise globalement, le TMS le transport, le WMS uniquement l'entrepôt (réception, emplacement, picking, expédition)."
             },
             {
+                id: 'q2', domain: 'methodes', difficulty: 1,
                 question: "FIFO signifie :",
                 options: ["First In For Out", "First In, First Out", "Final Input, Final Output", "Flexible In, Fixed Out"],
                 correct: 1,
-                explanation: "FIFO = First In, First Out (premier entré, premier sorti)."
+                explanation: "FIFO = First In, First Out (premier entré, premier sorti).",
+                moreInfo: "FIFO s'oppose à LIFO (Last In, First Out). Utilisé partout où la fraîcheur ou l'ancienneté comptent : produits périssables, pièces avec date de péremption, comptabilité."
             },
             {
+                id: 'q3', domain: 'methodes', difficulty: 2,
                 question: "Quel terme décrit une livraison juste-à-temps pour minimiser les stocks?",
                 options: ["Kanban", "Flux Tendu", "5S", "RFID"],
                 correct: 1,
-                explanation: "Le Flux Tendu (ou Just-in-Time) synchronise la production/livraison à la demande."
+                explanation: "Le Flux Tendu (ou Just-in-Time) synchronise la production/livraison à la demande.",
+                moreInfo: "Inventé par Toyota. Avantages : moins de stock = moins de capital immobilisé. Risques : rupture si un fournisseur lâche (ex. crise COVID)."
             },
             {
+                id: 'q4', domain: 'retailers', difficulty: 2,
                 question: "Amazon utilise principalement quel système pour gérer ses 150+ entrepôts?",
                 options: ["ERP seul", "WMS propriétaire + robots AGV", "Kanban uniquement", "RFID seul"],
                 correct: 1,
-                explanation: "Amazon combine un WMS propriétaire avec des robots Kiva AGV pour l'automatisation."
+                explanation: "Amazon combine un WMS propriétaire avec des robots Kiva AGV pour l'automatisation.",
+                moreInfo: "Les robots Kiva (rachetés 775M$ en 2012) déplacent les rayonnages vers les opérateurs, qui ne se déplacent plus. Gain : ~3× plus rapide."
             },
             {
+                id: 'q5', domain: 'methodes', difficulty: 2,
                 question: "Quelle méthode de gestion est privilégiée pour les produits alimentaires avec dates d'expiration?",
                 options: ["LIFO", "Kanban", "FEFO", "5S"],
                 correct: 2,
-                explanation: "FEFO (First Expire, First Out) : priorité à la date d'expiration pour éviter la perte."
+                explanation: "FEFO (First Expire, First Out) : priorité à la date d'expiration pour éviter la perte.",
+                moreInfo: "Différence avec FIFO : FEFO trie par DLC/DLUO, pas par date d'entrée. Un produit entré après un autre peut sortir en premier si sa DLC est plus courte."
             },
             {
+                id: 'q6', domain: 'operations', difficulty: 1,
                 question: "Le picking est :",
                 options: ["Le tri des emails", "Le prélèvement de produits selon les commandes", "La gestion des prix", "L'organisation du poste"],
                 correct: 1,
-                explanation: "Le picking est l'opération de sélection/prélèvement de produits en entrepôt."
+                explanation: "Le picking est l'opération de sélection/prélèvement de produits en entrepôt.",
+                moreInfo: "Méthodes courantes : pick & pack (une commande à la fois), batch picking (plusieurs en parallèle), zone picking (par zones), voice picking (ordres vocaux)."
             },
             {
+                id: 'q7', domain: 'kpi', difficulty: 2,
                 question: "Quel KPI mesure le pourcentage de commandes livrées à temps et complètes?",
                 options: ["Rotation de stock", "Lead time", "Taux de service", "Palettisation"],
                 correct: 2,
-                explanation: "Le Taux de service mesure le % de commandes livrées à temps et au complet."
+                explanation: "Le Taux de service mesure le % de commandes livrées à temps et au complet.",
+                moreInfo: "Aussi appelé OTIF (On Time In Full). Objectif typique : 95-98 %. En dessous de 90 % : problème sérieux de supply chain."
             },
             {
+                id: 'q8', domain: 'retailers', difficulty: 2,
                 question: "Decathlon utilise principalement :",
                 options: ["WMS classique", "ERP traditionnel", "Kanban visuel + 5S", "TMS"],
                 correct: 2,
-                explanation: "Decathlon exploite Kanban visuel et zones de picking optimisées en 5S."
+                explanation: "Decathlon exploite Kanban visuel et zones de picking optimisées en 5S.",
+                moreInfo: "5S = Seiri (trier), Seiton (ranger), Seiso (nettoyer), Seiketsu (standardiser), Shitsuke (maintenir). Principe venu de Toyota."
             },
             {
+                id: 'q9', domain: 'systemes', difficulty: 3,
                 question: "L'EDI (Échange de Données Informatisé) permet :",
                 options: ["D'éditer les factures", "La transmission automatique de données entre systèmes", "De gérer les emails", "De tracer les produits"],
                 correct: 1,
-                explanation: "L'EDI automatise l'échange de données entre les systèmes informatiques."
+                explanation: "L'EDI automatise l'échange de données entre les systèmes informatiques.",
+                moreInfo: "Formats courants : EDIFACT (international), X12 (Amérique du Nord). Remplace les bons de commande papier entre fournisseurs et clients."
             },
             {
+                id: 'q10', domain: 'kpi', difficulty: 2,
                 question: "Quel indicateur mesure le nombre de fois qu'un stock se renouvelle?",
                 options: ["Lead time", "Rotation de stock", "Taux de service", "FIFO"],
                 correct: 1,
-                explanation: "La Rotation de stock mesure le nombre de fois qu'un stock se renouvelle sur une période."
+                explanation: "La Rotation de stock mesure le nombre de fois qu'un stock se renouvelle sur une période.",
+                moreInfo: "Formule : coût des ventes / stock moyen. Rotation haute = produits qui tournent vite (bien). Rotation basse = stock dormant, capital immobilisé."
             }
         ];
 
-        let formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
+        let formationQuizState = {
+            currentQuestion: 0, score: 0, answered: false, selectedAnswer: null,
+            // Questions actives pour cette session (permet filtrage par domaine / révisions)
+            questions: formationQuizQuestions,
+            mode: 'all',           // 'all' | 'review' | 'domain:<key>' | 'adaptive'
+            startedAt: null,
+            wrongIds: []           // ids des questions échouées dans cette session
+        };
         let currentFormationId = null; // Track which formation the user is studying
 
-        function startFormationQuiz() {
-            formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
+        // ── Historique & progression formation (localStorage) ───────────
+        // Clé : formationProgress v1 — { attempts: [...], wrongQuestionIds: [...],
+        //       badges: [...], xp: 0, streak: {lastDate, days} }
+        function loadFormationProgress() {
+            try {
+                const raw = localStorage.getItem('formationProgress');
+                const p = raw ? JSON.parse(raw) : {};
+                return {
+                    attempts: p.attempts || [],
+                    wrongQuestionIds: p.wrongQuestionIds || [],
+                    badges: p.badges || [],
+                    xp: p.xp || 0,
+                    streak: p.streak || { lastDate: null, days: 0 }
+                };
+            } catch { return { attempts: [], wrongQuestionIds: [], badges: [], xp: 0, streak: { lastDate: null, days: 0 } }; }
+        }
+        function saveFormationProgress(p) {
+            try { localStorage.setItem('formationProgress', JSON.stringify(p)); } catch {}
+        }
+
+        function startFormationQuiz(mode = 'all') {
+            // Sélection des questions selon le mode
+            let qs = formationQuizQuestions;
+            if (mode === 'review') {
+                const progress = loadFormationProgress();
+                qs = formationQuizQuestions.filter(q => progress.wrongQuestionIds.includes(q.id));
+                if (qs.length === 0) {
+                    toast('🎉 Aucune erreur à revoir — essayez le quiz complet !', 'success');
+                    qs = formationQuizQuestions;
+                    mode = 'all';
+                }
+            } else if (typeof mode === 'string' && mode.startsWith('domain:')) {
+                const dom = mode.split(':')[1];
+                qs = formationQuizQuestions.filter(q => q.domain === dom);
+                if (qs.length === 0) { toast('Aucune question dans ce domaine', 'warning'); return; }
+            } else if (mode === 'adaptive') {
+                // Tri par difficulté croissante, avec priorité aux questions déjà ratées
+                const progress = loadFormationProgress();
+                qs = [...formationQuizQuestions].sort((a, b) => {
+                    const wa = progress.wrongQuestionIds.includes(a.id) ? 0 : 1;
+                    const wb = progress.wrongQuestionIds.includes(b.id) ? 0 : 1;
+                    if (wa !== wb) return wa - wb;
+                    return (a.difficulty || 1) - (b.difficulty || 1);
+                });
+            }
+            formationQuizState = {
+                currentQuestion: 0, score: 0, answered: false, selectedAnswer: null,
+                questions: qs, mode, startedAt: Date.now(), wrongIds: []
+            };
 
             // Ouvrir dans une modal flottante pour éviter les problèmes de DOM
             let modal = document.getElementById('formationQuizModal');
@@ -17863,8 +17950,15 @@
         function renderFormationQuizQuestion() {
             const inner = document.getElementById('formationQuizInner');
             if (!inner) return;
-            const q = formationQuizQuestions[formationQuizState.currentQuestion];
-            const prog = Math.round(((formationQuizState.currentQuestion + 1) / formationQuizQuestions.length) * 100);
+            const qs = formationQuizState.questions || formationQuizQuestions;
+            const q = qs[formationQuizState.currentQuestion];
+            const prog = Math.round(((formationQuizState.currentQuestion + 1) / qs.length) * 100);
+            const dom = FORMATION_DOMAINS[q.domain];
+            const domBadge = dom ? `<span style="background:#f0f7ff;color:#2980b9;border-radius:10px;padding:2px 8px;font-size:0.72em;font-weight:600;">${dom.icon} ${dom.label}</span>` : '';
+            const diffDots = '●'.repeat(q.difficulty || 1) + '○'.repeat(Math.max(0, 3 - (q.difficulty || 1)));
+            const modeBadge = formationQuizState.mode === 'review' ? '<span style="background:#fff4e0;color:#e67e22;border-radius:10px;padding:2px 8px;font-size:0.72em;font-weight:600;">🎯 Révisions</span>'
+                            : formationQuizState.mode === 'adaptive' ? '<span style="background:#e8f4fb;color:#2980b9;border-radius:10px;padding:2px 8px;font-size:0.72em;font-weight:600;">🧠 Adaptatif</span>'
+                            : '';
 
             let optionsHtml = '';
             q.options.forEach((option, idx) => {
@@ -17879,31 +17973,40 @@
                 }
                 optionsHtml += `<button onclick="selectFormationQuizAnswer(${idx})" ${formationQuizState.answered ? 'disabled' : ''}
                     style="width:100%;text-align:left;padding:14px 16px;border-radius:8px;cursor:pointer;font-size:0.95em;font-weight:500;color:#333;margin-bottom:8px;${bg}">
-                    <strong>${String.fromCharCode(65+idx)}.</strong> ${option}
+                    <strong>${String.fromCharCode(65+idx)}.</strong> ${escapeHtml(option)}
                 </button>`;
             });
 
+            const moreInfoHtml = q.moreInfo && formationQuizState.answered ? `
+                <details style="background:#fffdf4;padding:10px 14px;border-radius:8px;border-left:4px solid #f39c12;margin:8px 0;">
+                    <summary style="cursor:pointer;font-weight:600;color:#b97a00;font-size:0.9em;">💡 En savoir plus</summary>
+                    <p style="color:#665520;margin:8px 0 0;font-size:0.92em;">${escapeHtml(q.moreInfo)}</p>
+                </details>` : '';
+
             inner.innerHTML = `
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
                     <h3 style="margin:0;color:#e67e22;">🧠 Quiz Formation</h3>
-                    <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        ${modeBadge}${domBadge}
+                        <span title="Difficulté" style="font-size:0.82em;color:#999;letter-spacing:1px;">${diffDots}</span>
                         <button onclick="closeFormationQuizModal()" style="background:#f0f0f0;border:1px solid #ddd;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85em;color:#666;">× Quitter</button>
                     </div>
                 </div>
                 <div style="background:#eee;border-radius:10px;height:8px;margin-bottom:16px;">
                     <div style="background:#e67e22;height:8px;border-radius:10px;width:${prog}%;transition:width 0.3s;"></div>
                 </div>
-                <p style="color:#999;font-size:0.85em;margin:0 0 8px;">Question ${formationQuizState.currentQuestion + 1} / ${formationQuizQuestions.length}</p>
-                <p style="font-size:1.1em;font-weight:600;color:#2d3e50;margin:0 0 20px;">${q.question}</p>
+                <p style="color:#999;font-size:0.85em;margin:0 0 8px;">Question ${formationQuizState.currentQuestion + 1} / ${qs.length}</p>
+                <p style="font-size:1.1em;font-weight:600;color:#2d3e50;margin:0 0 20px;">${escapeHtml(q.question)}</p>
                 ${optionsHtml}
                 ${formationQuizState.answered ? `
                     <div style="background:#f0f8ff;padding:14px;border-radius:8px;border-left:4px solid #2980b9;margin:12px 0;">
                         <strong style="color:#2980b9;">Explication :</strong>
-                        <p style="color:#555;margin:6px 0 0;">${q.explanation}</p>
+                        <p style="color:#555;margin:6px 0 0;">${escapeHtml(q.explanation)}</p>
                     </div>
-                    <button onclick="${formationQuizState.currentQuestion < formationQuizQuestions.length-1 ? 'nextFormationQuizQuestion()' : 'finishFormationQuiz()'}"
-                        style="width:100%;padding:14px;background:${formationQuizState.currentQuestion < formationQuizQuestions.length-1 ? '#e67e22':'#27ae60'};color:white;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:1em;margin-top:8px;">
-                        ${formationQuizState.currentQuestion < formationQuizQuestions.length-1 ? 'Suivant →' : '📊 Voir Résultats'}
+                    ${moreInfoHtml}
+                    <button onclick="${formationQuizState.currentQuestion < qs.length-1 ? 'nextFormationQuizQuestion()' : 'finishFormationQuiz()'}"
+                        style="width:100%;padding:14px;background:${formationQuizState.currentQuestion < qs.length-1 ? '#e67e22':'#27ae60'};color:white;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:1em;margin-top:8px;">
+                        ${formationQuizState.currentQuestion < qs.length-1 ? 'Suivant →' : '📊 Voir Résultats'}
                     </button>
                 ` : `
                     <button onclick="submitFormationQuizAnswer()"
@@ -17923,8 +18026,13 @@
 
         function submitFormationQuizAnswer() {
             if (formationQuizState.selectedAnswer === null) { toast('Sélectionnez une réponse', 'warning'); return; }
-            const q = formationQuizQuestions[formationQuizState.currentQuestion];
-            if (formationQuizState.selectedAnswer === q.correct) formationQuizState.score++;
+            const qs = formationQuizState.questions || formationQuizQuestions;
+            const q = qs[formationQuizState.currentQuestion];
+            if (formationQuizState.selectedAnswer === q.correct) {
+                formationQuizState.score++;
+            } else if (q.id) {
+                formationQuizState.wrongIds.push(q.id);
+            }
             formationQuizState.answered = true;
             renderFormationQuizQuestion();
         }
@@ -17934,6 +18042,66 @@
             formationQuizState.answered = false;
             formationQuizState.selectedAnswer = null;
             renderFormationQuizQuestion();
+        }
+
+        // ── Badges & gamification ───────────────────────────────────────
+        // Logique déterministe : les badges sont recalculés depuis l'historique
+        // à chaque fin de quiz. Pas de mutation en cours de session.
+        const FORMATION_BADGES = [
+            { id: 'first_try',  label: 'Première tentative',  icon: '🎯', test: p => p.attempts.length >= 1 },
+            { id: 'perfect',    label: 'Quiz parfait',        icon: '🏆', test: p => p.attempts.some(a => a.score === a.total) },
+            { id: 'streak_3',   label: 'Série de 3 jours',    icon: '🔥', test: p => (p.streak?.days || 0) >= 3 },
+            { id: 'streak_7',   label: 'Série de 7 jours',    icon: '🔥🔥', test: p => (p.streak?.days || 0) >= 7 },
+            { id: 'ten_quizzes',label: '10 quiz complétés',   icon: '📚', test: p => p.attempts.length >= 10 },
+            { id: 'no_errors',  label: 'Toutes erreurs effacées', icon: '✨', test: p => p.attempts.length >= 3 && (p.wrongQuestionIds || []).length === 0 },
+            { id: 'domain_master', label: 'Maître d\'un domaine', icon: '🥇', test: p => {
+                // 3 bonnes réponses consécutives sur le même domaine
+                const byDomain = {};
+                p.attempts.forEach(a => (a.perDomain || []).forEach(d => {
+                    byDomain[d.domain] = byDomain[d.domain] || [];
+                    byDomain[d.domain].push(d.correct === d.total);
+                }));
+                return Object.values(byDomain).some(arr => arr.filter(Boolean).length >= 3);
+            } }
+        ];
+
+        function updateFormationProgress(attempt) {
+            const p = loadFormationProgress();
+            p.attempts.push(attempt);
+            if (p.attempts.length > 50) p.attempts = p.attempts.slice(-50); // borne
+            // Maj liste des erreurs persistantes : ajoute les wrong du quiz,
+            // retire les ids réussis cette fois-ci
+            const wrong = new Set(p.wrongQuestionIds);
+            (attempt.wrongIds || []).forEach(id => wrong.add(id));
+            (attempt.questionIds || []).forEach(id => {
+                if (!attempt.wrongIds.includes(id)) wrong.delete(id);
+            });
+            p.wrongQuestionIds = [...wrong];
+            // Streak journalier
+            const today = new Date(); today.setHours(0,0,0,0);
+            const todayIso = today.toISOString().split('T')[0];
+            if (p.streak.lastDate !== todayIso) {
+                if (p.streak.lastDate) {
+                    const last = new Date(p.streak.lastDate);
+                    const diff = Math.round((today - last) / 86400000);
+                    if (diff === 1) p.streak.days = (p.streak.days || 0) + 1;
+                    else if (diff > 1) p.streak.days = 1;
+                } else {
+                    p.streak.days = 1;
+                }
+                p.streak.lastDate = todayIso;
+            }
+            // XP : 10 par bonne réponse + 20 si parfait + 5 bonus si mode révisions
+            let gained = attempt.score * 10;
+            if (attempt.score === attempt.total) gained += 20;
+            if (attempt.mode === 'review') gained += 5;
+            p.xp = (p.xp || 0) + gained;
+            // Badges débloqués (calculés depuis l'état final)
+            const unlocked = FORMATION_BADGES.filter(b => b.test(p)).map(b => b.id);
+            const newBadges = unlocked.filter(id => !p.badges.includes(id));
+            p.badges = unlocked;
+            saveFormationProgress(p);
+            return { xpGained: gained, newBadges, progress: p };
         }
 
         // Stub: ancienne fonction maintenant remplacée mais conservée pour le compilateur
@@ -18014,45 +18182,257 @@
         function finishFormationQuiz() {
             const inner = document.getElementById('formationQuizInner');
             if (!inner) return;
-            const percent = Math.round((formationQuizState.score / formationQuizQuestions.length) * 100);
+            const qs = formationQuizState.questions || formationQuizQuestions;
+            const total = qs.length;
+            const percent = Math.round((formationQuizState.score / total) * 100);
             const emoji = percent === 100 ? '🏆' : percent >= 80 ? '⭐' : percent >= 60 ? '👍' : '📚';
             const msg = percent === 100 ? 'Parfait! Vous maîtrisez les systèmes logistiques!'
                       : percent >= 80 ? 'Très bien! Excellente compréhension des concepts.'
                       : percent >= 60 ? 'Correct! Quelques points à revoir.'
                       : 'À revoir. Relisez les sections avant de réessayer.';
 
+            // Enregistrement de l'essai dans l'historique + mise à jour gamification
+            const perDomain = {};
+            qs.forEach((q, i) => {
+                if (!q.domain) return;
+                perDomain[q.domain] = perDomain[q.domain] || { domain: q.domain, correct: 0, total: 0 };
+                perDomain[q.domain].total++;
+                if (!formationQuizState.wrongIds.includes(q.id)) perDomain[q.domain].correct++;
+            });
+            const attempt = {
+                date: new Date().toISOString(),
+                score: formationQuizState.score,
+                total,
+                mode: formationQuizState.mode || 'all',
+                durationSec: formationQuizState.startedAt ? Math.round((Date.now() - formationQuizState.startedAt) / 1000) : 0,
+                questionIds: qs.map(q => q.id).filter(Boolean),
+                wrongIds: formationQuizState.wrongIds.slice(),
+                perDomain: Object.values(perDomain)
+            };
+            const { xpGained, newBadges, progress } = updateFormationProgress(attempt);
+
             // Save quiz completion to trainingRequests
             if (currentFormationId) {
                 const formation = trainingRequests.find(r => r.id === currentFormationId);
                 if (formation && !formation.quizCompletedAt) {
-                    formation.quizCompletedAt = new Date().toISOString().split('T')[0];
+                    formation.quizCompletedAt = fmtLocalDate(new Date());
                     formation.quizScore = formationQuizState.score;
-                    formation.quizTotal = formationQuizQuestions.length;
+                    formation.quizTotal = total;
                     saveFormationData();
-                    renderLearners(); // Refresh learner cards to show updated timeline
-                    renderFormationLogistiqueApprenants(); // Refresh apprenants list in Formation tab
+                    renderLearners();
+                    renderFormationLogistiqueApprenants();
                 }
             }
 
-            inner.innerHTML = `
-                <div style="text-align:center;padding:20px;">
-                    <div style="font-size:4em;margin-bottom:16px;">${emoji}</div>
-                    <h2 style="color:#e67e22;margin-bottom:8px;">Résultats du Quiz</h2>
-                    <div style="font-size:3em;font-weight:bold;color:#e67e22;margin:16px 0;">${formationQuizState.score}/${formationQuizQuestions.length}</div>
-                    <div style="font-size:1.4em;color:#555;margin-bottom:16px;">${percent}% de réussite</div>
-                    <p style="color:#666;margin-bottom:24px;">${msg}</p>
-                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                        <button onclick="startFormationQuiz()" style="padding:12px 24px;background:#e67e22;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">↻ Recommencer</button>
-                        <button onclick="closeFormationQuizModal()" style="padding:12px 24px;background:#6b8fa3;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">× Fermer</button>
+            // Détermine le meilleur score précédent pour afficher l'évolution
+            const previous = progress.attempts.slice(0, -1);
+            const bestPrev = previous.length ? Math.max(...previous.map(a => Math.round(a.score / a.total * 100))) : null;
+            const evolutionHtml = bestPrev !== null
+                ? (percent > bestPrev ? `<div style="color:#27ae60;font-size:0.9em;">📈 Nouveau record (+${percent - bestPrev}%)</div>`
+                : percent === bestPrev ? '<div style="color:#999;font-size:0.9em;">= Votre meilleur score</div>'
+                : `<div style="color:#999;font-size:0.9em;">Meilleur précédent : ${bestPrev}%</div>`)
+                : '';
+
+            const badgesHtml = newBadges.length ? `
+                <div style="background:#fff8e0;border:1px solid #f0d080;border-radius:10px;padding:12px;margin:12px 0;">
+                    <strong style="color:#b97a00;">🎖️ Nouveaux badges débloqués :</strong>
+                    <div style="margin-top:6px;">
+                        ${newBadges.map(id => { const b = FORMATION_BADGES.find(x => x.id === id); return b ? `<span style="display:inline-block;margin:2px 4px;padding:4px 10px;background:white;border-radius:14px;font-size:0.85em;">${b.icon} ${escapeHtml(b.label)}</span>` : ''; }).join('')}
                     </div>
-                </div>
-            `;
+                </div>` : '';
+
+            // Boutons d'action contextuels selon le résultat
+            const canReview = progress.wrongQuestionIds.length > 0;
+            const actionBtns = `
+                <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
+                    <button onclick="startFormationQuiz('all')" style="padding:10px 18px;background:#e67e22;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.9em;">↻ Recommencer</button>
+                    ${canReview ? `<button onclick="startFormationQuiz('review')" style="padding:10px 18px;background:#9a70b8;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.9em;">🎯 Revoir mes erreurs (${progress.wrongQuestionIds.length})</button>` : ''}
+                    <button onclick="startFormationQuiz('adaptive')" style="padding:10px 18px;background:#2980b9;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.9em;">🧠 Mode adaptatif</button>
+                    <button onclick="openFormationDashboard()" style="padding:10px 18px;background:#6b8fa3;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.9em;">📊 Ma progression</button>
+                    <button onclick="closeFormationQuizModal()" style="padding:10px 18px;background:#95a5a6;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.9em;">Fermer</button>
+                </div>`;
+
+            inner.innerHTML = `
+                <div style="text-align:center;padding:16px;">
+                    <div style="font-size:3.5em;margin-bottom:8px;">${emoji}</div>
+                    <h2 style="color:#e67e22;margin:0 0 6px;">Résultats du Quiz</h2>
+                    <div style="font-size:2.6em;font-weight:bold;color:#e67e22;margin:8px 0;">${formationQuizState.score}/${total}</div>
+                    <div style="font-size:1.2em;color:#555;margin-bottom:6px;">${percent}% de réussite</div>
+                    ${evolutionHtml}
+                    <p style="color:#666;margin:12px 0;">${msg}</p>
+                    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;background:#f7fbfd;padding:10px;border-radius:10px;margin:8px 0;">
+                        <div><span style="color:#999;font-size:0.82em;">XP gagnés</span><br><strong style="color:#e67e22;font-size:1.2em;">+${xpGained}</strong></div>
+                        <div><span style="color:#999;font-size:0.82em;">Total XP</span><br><strong style="color:#6b8fa3;font-size:1.2em;">${progress.xp}</strong></div>
+                        <div><span style="color:#999;font-size:0.82em;">Série</span><br><strong style="color:#e67e22;font-size:1.2em;">🔥 ${progress.streak.days}j</strong></div>
+                    </div>
+                    ${badgesHtml}
+                    ${actionBtns}
+                </div>`;
         }
 
         function resetFormationQuiz() {
-            formationQuizState = { currentQuestion: 0, score: 0, answered: false, selectedAnswer: null };
+            formationQuizState = {
+                currentQuestion: 0, score: 0, answered: false, selectedAnswer: null,
+                questions: formationQuizQuestions, mode: 'all', startedAt: null, wrongIds: []
+            };
             closeFormationQuizModal();
             toast('✅ Quiz réinitialisé', 'success');
+        }
+
+        // ── Dashboard progression formation ─────────────────────────────
+        function openFormationDashboard() {
+            const progress = loadFormationProgress();
+            let modal = document.getElementById('formationDashboardModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'formationDashboardModal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:20000;display:flex;align-items:center;justify-content:center;padding:16px;';
+                modal.innerHTML = '<div id="formationDashboardInner" style="background:white;border-radius:16px;padding:24px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);"></div>';
+                document.body.appendChild(modal);
+            }
+            modal.style.display = 'flex';
+            renderFormationDashboard(progress);
+        }
+
+        function closeFormationDashboard() {
+            const modal = document.getElementById('formationDashboardModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function renderFormationDashboard(progress) {
+            const inner = document.getElementById('formationDashboardInner');
+            if (!inner) return;
+            const attempts = progress.attempts || [];
+            const lastTen = attempts.slice(-10);
+            const bestPercent = attempts.length ? Math.max(...attempts.map(a => Math.round(a.score / a.total * 100))) : 0;
+            const avgPercent = attempts.length ? Math.round(attempts.reduce((s, a) => s + (a.score / a.total * 100), 0) / attempts.length) : 0;
+
+            // Agrégation par domaine (cumul des perDomain de tous les essais)
+            const domainStats = {};
+            attempts.forEach(a => (a.perDomain || []).forEach(d => {
+                domainStats[d.domain] = domainStats[d.domain] || { correct: 0, total: 0 };
+                domainStats[d.domain].correct += d.correct;
+                domainStats[d.domain].total += d.total;
+            }));
+
+            // Courbe sparkline minimaliste (SVG) des 10 derniers essais
+            const sparkW = 260, sparkH = 50;
+            const sparkHtml = lastTen.length < 2 ? '<div style="color:#999;font-size:0.85em;">Pas assez d\'essais pour une tendance</div>' : (() => {
+                const pts = lastTen.map((a, i) => {
+                    const x = (i / (lastTen.length - 1)) * sparkW;
+                    const y = sparkH - (a.score / a.total) * sparkH;
+                    return `${x.toFixed(1)},${y.toFixed(1)}`;
+                }).join(' ');
+                return `<svg viewBox="0 0 ${sparkW} ${sparkH}" style="width:100%;max-width:${sparkW}px;height:${sparkH}px;"><polyline points="${pts}" fill="none" stroke="#e67e22" stroke-width="2" stroke-linejoin="round"/>${lastTen.map((a, i) => { const x = (i / (lastTen.length - 1)) * sparkW; const y = sparkH - (a.score / a.total) * sparkH; return `<circle cx="${x}" cy="${y}" r="3" fill="#e67e22"/>`; }).join('')}</svg>`;
+            })();
+
+            // Barres par domaine
+            const domainHtml = Object.keys(FORMATION_DOMAINS).map(key => {
+                const dom = FORMATION_DOMAINS[key];
+                const s = domainStats[key];
+                const pct = s && s.total > 0 ? Math.round(s.correct / s.total * 100) : null;
+                const color = pct === null ? '#bdc3c7' : pct >= 80 ? '#27ae60' : pct >= 60 ? '#f39c12' : '#e74c3c';
+                const label = pct === null ? 'Jamais tenté' : `${pct}% (${s.correct}/${s.total})`;
+                return `<div style="margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.85em;margin-bottom:3px;">
+                        <span>${dom.icon} ${escapeHtml(dom.label)}</span>
+                        <span style="color:#666;">${label}</span>
+                    </div>
+                    <div style="height:6px;background:#eef1f4;border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct || 0}%;background:${color};"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Derniers essais (table compacte)
+            const attemptsHtml = lastTen.length === 0 ? '<div style="color:#999;padding:14px;text-align:center;">Aucun essai enregistré. Lancez votre premier quiz !</div>' : `
+                <table style="width:100%;font-size:0.85em;border-collapse:collapse;">
+                    <thead><tr style="background:#f7fbfd;color:#6b8fa3;">
+                        <th style="padding:6px 8px;text-align:left;">Date</th>
+                        <th style="padding:6px 8px;">Score</th>
+                        <th style="padding:6px 8px;">%</th>
+                        <th style="padding:6px 8px;">Mode</th>
+                        <th style="padding:6px 8px;">Durée</th>
+                    </tr></thead>
+                    <tbody>${[...lastTen].reverse().map(a => {
+                        const p = Math.round(a.score / a.total * 100);
+                        const color = p >= 80 ? '#27ae60' : p >= 60 ? '#f39c12' : '#e74c3c';
+                        const modeLabel = a.mode === 'review' ? '🎯 Révisions' : a.mode === 'adaptive' ? '🧠 Adaptatif' : a.mode?.startsWith('domain:') ? '📚 Domaine' : 'Complet';
+                        const d = new Date(a.date);
+                        return `<tr style="border-top:1px solid #eee;">
+                            <td style="padding:5px 8px;">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</td>
+                            <td style="padding:5px 8px;text-align:center;">${a.score}/${a.total}</td>
+                            <td style="padding:5px 8px;text-align:center;color:${color};font-weight:600;">${p}%</td>
+                            <td style="padding:5px 8px;text-align:center;">${modeLabel}</td>
+                            <td style="padding:5px 8px;text-align:center;color:#999;">${a.durationSec ? a.durationSec + 's' : '—'}</td>
+                        </tr>`;
+                    }).join('')}</tbody>
+                </table>`;
+
+            // Badges
+            const allBadgesHtml = FORMATION_BADGES.map(b => {
+                const owned = (progress.badges || []).includes(b.id);
+                return `<div title="${escapeHtml(b.label)}" style="display:inline-block;margin:3px;padding:8px 12px;border-radius:12px;background:${owned ? '#fff4e0' : '#f0f0f0'};border:1px solid ${owned ? '#f0c080' : '#ddd'};opacity:${owned ? '1' : '0.4'};font-size:0.85em;">
+                    ${b.icon} ${escapeHtml(b.label)}
+                </div>`;
+            }).join('');
+
+            const domainButtons = Object.keys(FORMATION_DOMAINS).map(key => {
+                const dom = FORMATION_DOMAINS[key];
+                return `<button onclick="closeFormationDashboard();startFormationQuiz('domain:${key}')" style="padding:6px 12px;background:#f0f7ff;border:1px solid #c8d8f0;border-radius:14px;cursor:pointer;font-size:0.82em;">${dom.icon} ${escapeHtml(dom.label)}</button>`;
+            }).join('');
+
+            const hasReview = (progress.wrongQuestionIds || []).length > 0;
+
+            inner.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <h2 style="margin:0;color:#e67e22;">📊 Ma progression formation</h2>
+                    <button onclick="closeFormationDashboard()" style="background:none;border:none;cursor:pointer;font-size:1.4em;color:#999;">×</button>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px;">
+                    <div style="background:#fff4e0;padding:12px;border-radius:10px;text-align:center;">
+                        <div style="font-size:0.78em;color:#b97a00;">XP total</div>
+                        <div style="font-size:1.6em;font-weight:bold;color:#e67e22;">${progress.xp || 0}</div>
+                    </div>
+                    <div style="background:#f7fbfd;padding:12px;border-radius:10px;text-align:center;">
+                        <div style="font-size:0.78em;color:#6b8fa3;">Série</div>
+                        <div style="font-size:1.6em;font-weight:bold;color:#6b8fa3;">🔥 ${progress.streak?.days || 0}j</div>
+                    </div>
+                    <div style="background:#f0f8ec;padding:12px;border-radius:10px;text-align:center;">
+                        <div style="font-size:0.78em;color:#3a7a4a;">Meilleur</div>
+                        <div style="font-size:1.6em;font-weight:bold;color:#27ae60;">${bestPercent}%</div>
+                    </div>
+                    <div style="background:#f0f0f7;padding:12px;border-radius:10px;text-align:center;">
+                        <div style="font-size:0.78em;color:#6a5a8a;">Moyenne</div>
+                        <div style="font-size:1.6em;font-weight:bold;color:#8a6ac0;">${avgPercent}%</div>
+                    </div>
+                    <div style="background:#f7f0f0;padding:12px;border-radius:10px;text-align:center;">
+                        <div style="font-size:0.78em;color:#8a4a3a;">Essais</div>
+                        <div style="font-size:1.6em;font-weight:bold;color:#c0392b;">${attempts.length}</div>
+                    </div>
+                </div>
+
+                <h3 style="color:#6b8fa3;margin:18px 0 8px;font-size:1em;">📈 Tendance (10 derniers essais)</h3>
+                <div style="background:#f7fbfd;padding:10px;border-radius:10px;display:flex;justify-content:center;">${sparkHtml}</div>
+
+                <h3 style="color:#6b8fa3;margin:18px 0 8px;font-size:1em;">📚 Maîtrise par domaine</h3>
+                ${domainHtml}
+
+                <h3 style="color:#6b8fa3;margin:18px 0 8px;font-size:1em;">🎖️ Badges</h3>
+                <div>${allBadgesHtml}</div>
+
+                <h3 style="color:#6b8fa3;margin:18px 0 8px;font-size:1em;">🕑 Derniers essais</h3>
+                ${attemptsHtml}
+
+                <h3 style="color:#6b8fa3;margin:18px 0 8px;font-size:1em;">▶️ Lancer un quiz</h3>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <button onclick="closeFormationDashboard();startFormationQuiz('all')" style="padding:8px 14px;background:#e67e22;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">↻ Quiz complet</button>
+                    ${hasReview ? `<button onclick="closeFormationDashboard();startFormationQuiz('review')" style="padding:8px 14px;background:#9a70b8;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">🎯 Revoir mes erreurs (${progress.wrongQuestionIds.length})</button>` : ''}
+                    <button onclick="closeFormationDashboard();startFormationQuiz('adaptive')" style="padding:8px 14px;background:#2980b9;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">🧠 Adaptatif</button>
+                </div>
+                <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">${domainButtons}</div>
+            `;
         }
 
         // MINI-JEUX D'ENTRAÎNEMENT
