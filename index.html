@@ -6642,7 +6642,7 @@
             const capaciteHebdo = parseFloat(document.getElementById('capaciteHebdo')?.value || 35);
             const now = new Date();
             const lundi = new Date(now);
-            lundi.setDate(now.getDate() - now.getDay() + 1 - 14);
+            lundi.setDate(now.getDate() - ((now.getDay() || 7) - 1) - 14);
             lundi.setHours(0,0,0,0);
 
             const statutsActifs = ['accepte','en-cours'];
@@ -6672,7 +6672,7 @@
                 const pct = max > 0 ? Math.min(s.heures / max * 100, 100) : 0;
                 const over = s.heures > capaciteHebdo;
                 const pctCap = capaciteHebdo > 0 ? (s.heures / capaciteHebdo * 100).toFixed(0) : '—';
-                const noms = s.prestas.map(p => `${p.prestation} (${(p.heures||0).toFixed(1)}h)`).join(' + ');
+                const noms = s.prestas.map(p => `${escapeHtml(p.prestation)} (${(p.heures||0).toFixed(1)}h)`).join(' + ');
                 html += `<tr>
                     <td style="padding:6px;font-size:0.85em;color:#5a7b8f;">${s.label}</td>
                     <td style="padding:6px;font-size:0.85em;font-weight:bold;color:${over?'#e74c3c':'#6b8fa3'};">${s.heures.toFixed(1)} h <span style="color:#aaa;font-weight:normal;">(${pctCap}%)</span></td>
@@ -12359,6 +12359,17 @@
             return new Date(year, month-1, day);
         }
 
+        // Échappe une chaîne pour injection sûre dans innerHTML
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // Formate une Date en "YYYY-MM-DD" selon le fuseau local
         // (évite le décalage d'un jour de toISOString() en CET/CEST)
         function fmtLocalDate(d) {
@@ -12525,13 +12536,15 @@
                 const color = projectColors[p.id];
                 const statut = p.statut || 'devis';
 
+                const pNameFull = escapeHtml(p.prestation);
+                const pNameShort = escapeHtml((p.prestation || '').length > 22 ? (p.prestation || '').slice(0,20)+'…' : (p.prestation || ''));
                 html += `<tr>
-                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${p.prestation}">
+                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${pNameFull}">
                         <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;vertical-align:middle;"></span>
-                        <strong>${p.prestation.length > 22 ? p.prestation.slice(0,20)+'…' : p.prestation}</strong>
+                        <strong>${pNameShort}</strong>
                         <button onclick="duplicatePrestation(${p.id})" style="background:none;border:none;cursor:pointer;font-size:0.8em;padding:1px 3px;" title="Dupliquer">📋</button>
                     </td>
-                    <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;">${p.client}</td>`;
+                    <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;">${escapeHtml(p.client)}</td>`;
 
                 let inRange = false;
                 dayInfos.forEach(({dayObj, isWeekend}) => {
@@ -12545,7 +12558,7 @@
                     const borderRadius = isStart && isEnd ? '6px' : isStart ? '6px 0 0 6px' : isEnd ? '0 6px 6px 0' : '0';
                     const showBar = inRange && !isWeekend;
                     html += `<td style="padding:2px 0;${isWeekend ? 'background:repeating-linear-gradient(135deg,#f0e6e6,#f0e6e6 3px,#f8f0f0 3px,#f8f0f0 6px);' : ''}">
-                        ${showBar ? `<div onclick="editPrestation(${p.id})" style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};cursor:pointer;" title="${p.prestation} — ${statutLabels[statut]||statut} (cliquer pour ouvrir)"></div>` : ''}
+                        ${showBar ? `<div onclick="editPrestation(${p.id})" style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};cursor:pointer;" title="${pNameFull} — ${escapeHtml(statutLabels[statut]||statut)} (cliquer pour ouvrir)"></div>` : ''}
                     </td>`;
                 });
                 html += `</tr>`;
@@ -12556,8 +12569,8 @@
                 <span style="font-weight:600;color:#5a7b8f;">Projets :</span>
                 ${prests.map(p => `<span style="display:flex;align-items:center;gap:5px;font-size:0.82em;">
                     <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${projectColors[p.id]};"></span>
-                    ${p.prestation.length > 18 ? p.prestation.slice(0,16)+'…' : p.prestation}
-                    <span style="color:#aaa;font-size:0.88em;">(${statutLabels[p.statut||'devis']||p.statut})</span>
+                    ${escapeHtml((p.prestation || '').length > 18 ? (p.prestation || '').slice(0,16)+'…' : (p.prestation || ''))}
+                    <span style="color:#aaa;font-size:0.88em;">(${escapeHtml(statutLabels[p.statut||'devis']||p.statut)})</span>
                 </span>`).join('')}
             </div>`;
 
@@ -12699,7 +12712,7 @@
                     alertes.push({ type: expiredCount > 0 ? 'danger' : 'warning', msg });
                 }
                 // Capacité (hors weekends et jours fériés)
-                const semDebut = new Date(now); semDebut.setDate(now.getDate() - now.getDay() + 1); semDebut.setHours(0,0,0,0);
+                const semDebut = new Date(now); semDebut.setDate(now.getDate() - ((now.getDay() || 7) - 1)); semDebut.setHours(0,0,0,0);
                 const semVen = new Date(semDebut); semVen.setDate(semDebut.getDate() + 4);
                 const semDebutISO = fmtLocalDate(semDebut);
                 const semVenISO = fmtLocalDate(semVen);
@@ -13058,7 +13071,7 @@
             if (expires.length > 0) alertes.push({ danger: true, msg: `📋 ${expires.length} devis expiré(s) : ${expires.map(p=>`<strong>${p.reference||p.prestation}</strong>`).join(', ')}` });
             if (expireSoon.length > 0) alertes.push({ danger: false, msg: `⏰ ${expireSoon.length} devis expire(nt) dans &lt;7 jours : ${expireSoon.map(p=>`<strong>${p.reference||p.prestation}</strong>`).join(', ')}` });
             // Capacité semaine
-            const semDebut = new Date(now); semDebut.setDate(now.getDate() - now.getDay() + 1); semDebut.setHours(0,0,0,0);
+            const semDebut = new Date(now); semDebut.setDate(now.getDate() - ((now.getDay() || 7) - 1)); semDebut.setHours(0,0,0,0);
             const semFin = new Date(semDebut); semFin.setDate(semDebut.getDate() + 6);
             const hSem = prestationsSauvegardees
                 .filter(p => p.statut === 'valide' && p.date >= fmtLocalDate(semDebut) && p.date <= fmtLocalDate(semFin))
