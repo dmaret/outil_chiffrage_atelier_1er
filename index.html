@@ -4095,6 +4095,18 @@
     </div>
 
     <script>
+        // === Helpers de formatage numérique (format suisse avec apostrophe ' comme séparateur de milliers) ===
+        // fmtNum(1234.5) → "1'234.50" ; fmtNum(1234.5, 0) → "1'235"
+        function fmtNum(n, decimals = 2) {
+            const num = Number(n);
+            if (!isFinite(num)) return '0';
+            return num.toLocaleString('de-CH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+        // fmtCHF(1234.5) → "1'234.50 CHF"
+        function fmtCHF(n, decimals = 2) { return fmtNum(n, decimals) + ' CHF'; }
+        // fmtInt(1234) → "1'234"
+        function fmtInt(n) { return fmtNum(n, 0); }
+
         // Configuration
         let config = {
             coutHoraireCEA: 35,
@@ -4444,17 +4456,17 @@
                 prestation_created: (d) => `
                     <h2>Nouvelle prestation créée</h2>
                     <p><strong>${d.prestation}</strong> pour ${d.client}</p>
-                    <p>Montant: <strong>${(d.prixVente||0).toFixed(2)} CHF</strong></p>
+                    <p>Montant: <strong>${fmtCHF((d.prixVente||0))}</strong></p>
                 `,
                 prestation_updated: (d) => `
                     <h2>Prestation mise à jour</h2>
                     <p><strong>${d.prestation}</strong> pour ${d.client}</p>
-                    <p>Nouveau montant: <strong>${(d.prixVente||0).toFixed(2)} CHF</strong></p>
+                    <p>Nouveau montant: <strong>${fmtCHF((d.prixVente||0))}</strong></p>
                 `,
                 devis_sent: (d) => `
                     <h2>Votre devis</h2>
                     <p>Prestation: <strong>${d.prestation}</strong></p>
-                    <p>Montant: <strong>${(d.prixVente||0).toFixed(2)} CHF</strong></p>
+                    <p>Montant: <strong>${fmtCHF((d.prixVente||0))}</strong></p>
                     <p>Référence: <em>${d.reference}</em></p>
                 `,
                 report_ready: (d) => `
@@ -6114,8 +6126,8 @@
             const variants = [{label:'Éco 10%', pct:10, bg:'#eef8f3', color:'#2d6a4f'}, {label:'Std 20%', pct:20, bg:'#f0f8fc', color:'#1a5276'}, {label:'Premium 35%', pct:35, bg:'#fdf0ff', color:'#5a2d8a'}];
             el.innerHTML = variants.map(v => {
                 const total = prixRevient * (1 + v.pct/100);
-                const perUnit = nbPieces > 1 ? ` | ${(total/nbPieces).toFixed(2)} CHF/${unite}` : '';
-                return `<div style="background:${v.bg};border-radius:6px;padding:5px 8px;"><span style="color:${v.color};font-weight:600;">${v.label}</span> : <strong>${total.toFixed(2)} CHF</strong>${perUnit}</div>`;
+                const perUnit = nbPieces > 1 ? ` | ${fmtCHF((total/nbPieces))}/${unite}` : '';
+                return `<div style="background:${v.bg};border-radius:6px;padding:5px 8px;"><span style="color:${v.color};font-weight:600;">${v.label}</span> : <strong>${fmtCHF(total)}</strong>${perUnit}</div>`;
             }).join('');
         }
 
@@ -6220,23 +6232,23 @@
 
             const prixVentePiece = nbPieces > 1 ? prixVente / nbPieces : null;
 
-            document.getElementById('totalHeures').textContent = totalHeures.toFixed(2);
+            document.getElementById('totalHeures').textContent = fmtNum(totalHeures);
             document.getElementById('totalHeuresPiece').textContent = nbPieces > 1 ? (heuresParPiece * 60).toFixed(1) + ' min' : '—';
-            document.getElementById('coutMO').textContent = coutMO.toFixed(2) + ' CHF';
-            document.getElementById('coutEncadrement').textContent = coutEncadrementBrut.toFixed(2) + ' CHF';
-            document.getElementById('coutConsommables').textContent = coutConsommables.toFixed(2) + ' CHF';
-            document.getElementById('coutStockage').textContent = coutStockage.toFixed(2) + ' CHF';
-            document.getElementById('coutFraisGeneraux').textContent = fraisGeneraux.toFixed(2) + ' CHF';
-            document.getElementById('prixRevient').textContent = prixRevient.toFixed(2) + ' CHF';
-            document.getElementById('totalRevient').textContent = prixRevient.toFixed(2);
-            document.getElementById('margeChf').textContent = margeChf.toFixed(2);
-            document.getElementById('prixVente').textContent = prixVente.toFixed(2);
+            document.getElementById('coutMO').textContent = fmtCHF(coutMO);
+            document.getElementById('coutEncadrement').textContent = fmtCHF(coutEncadrementBrut);
+            document.getElementById('coutConsommables').textContent = fmtCHF(coutConsommables);
+            document.getElementById('coutStockage').textContent = fmtCHF(coutStockage);
+            document.getElementById('coutFraisGeneraux').textContent = fmtCHF(fraisGeneraux);
+            document.getElementById('prixRevient').textContent = fmtCHF(prixRevient);
+            document.getElementById('totalRevient').textContent = fmtNum(prixRevient);
+            document.getElementById('margeChf').textContent = fmtNum(margeChf);
+            document.getElementById('prixVente').textContent = fmtNum(prixVente);
 
             // Indicateurs urgence, perte, temps non-facturable
             let badgesHtml = '';
             if (multUrgence > 1) badgesHtml += `<span style="background:#e74c3c;color:white;padding:3px 8px;border-radius:10px;font-size:0.78em;font-weight:bold;">🚨 Urgence ×${multUrgence} (+${((multUrgence-1)*100).toFixed(0)}%)</span> `;
             if (facteurPerte > 1) badgesHtml += `<span style="background:#f39c12;color:white;padding:3px 8px;border-radius:10px;font-size:0.78em;font-weight:bold;">♻️ Perte +${((facteurPerte-1)*100).toFixed(0)}%</span> `;
-            if (tempsNonFact > 0) badgesHtml += `<span style="background:#8e44ad;color:white;padding:3px 8px;border-radius:10px;font-size:0.78em;font-weight:bold;">⏸️ ${tempsNonFact}min non-fact. (total réel: ${heuresReellesTotal.toFixed(2)}h)</span> `;
+            if (tempsNonFact > 0) badgesHtml += `<span style="background:#8e44ad;color:white;padding:3px 8px;border-radius:10px;font-size:0.78em;font-weight:bold;">⏸️ ${tempsNonFact}min non-fact. (total réel: ${fmtNum(heuresReellesTotal)}h)</span> `;
             const badgesEl = document.getElementById('calcBadges');
             if (badgesEl) badgesEl.innerHTML = badgesHtml;
 
@@ -6248,7 +6260,7 @@
                 if (boxUnitaire) boxUnitaire.style.display = 'block';
                 if (boxTotal) boxTotal.style.cssText = '';
                 const pvpEl = document.getElementById('prixVentePiece');
-                if (pvpEl && prixVentePiece !== null) pvpEl.textContent = prixVentePiece.toFixed(2);
+                if (pvpEl && prixVentePiece !== null) pvpEl.textContent = fmtNum(prixVentePiece);
                 if (labelTotal) labelTotal.textContent = `(× ${nbPieces} pièces)`;
             } else {
                 if (boxUnitaire) boxUnitaire.style.display = 'none';
@@ -6315,9 +6327,9 @@
             const pvEl = document.getElementById('livePV');
             const pctEl = document.getElementById('liveMargePct');
             const barEl = document.getElementById('liveMargeBar');
-            if (tempsEl) tempsEl.textContent = totalHeures > 0 ? totalHeures.toFixed(2) + ' h' : '—';
-            if (prEl) prEl.textContent = prixRevient > 0 ? prixRevient.toFixed(2) + ' CHF' : '—';
-            if (pvEl) pvEl.textContent = prixVente > 0 ? prixVente.toFixed(2) + ' CHF' : '—';
+            if (tempsEl) tempsEl.textContent = totalHeures > 0 ? fmtNum(totalHeures) + ' h' : '—';
+            if (prEl) prEl.textContent = prixRevient > 0 ? fmtCHF(prixRevient) : '—';
+            if (pvEl) pvEl.textContent = prixVente > 0 ? fmtCHF(prixVente) : '—';
             if (pctEl) pctEl.textContent = (margePourcent || 0).toFixed(0) + ' %';
             if (barEl) {
                 const pct = Math.max(0, Math.min(100, margePourcent || 0));
@@ -6335,9 +6347,9 @@
             const coutRackJour = config.coutRack * config.surfaceRack;
             const ratio = coutPal / coutRackJour;
             
-            document.getElementById('coutJourPalette').textContent = coutPal.toFixed(2);
-            document.getElementById('coutJourRack').textContent = coutRackJour.toFixed(2);
-            document.getElementById('ratioValue').textContent = ratio.toFixed(2);
+            document.getElementById('coutJourPalette').textContent = fmtNum(coutPal);
+            document.getElementById('coutJourRack').textContent = fmtNum(coutRackJour);
+            document.getElementById('ratioValue').textContent = fmtNum(ratio);
             
             let reco = "";
             if (ratio > 2) reco = "Rack recommandé pour séjours > 2 jours";
@@ -6470,7 +6482,7 @@
                 toast(`✅ Prestation mise à jour <span onclick="flashPrestation(${prest.id})" style="margin-left:10px;padding:2px 8px;background:rgba(255,255,255,0.25);border-radius:4px;cursor:pointer;text-decoration:underline;">Voir →</span>`, 'success', 5000);
             } else {
                 prestationsSauvegardees.push(prest);
-                logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${(prest.prixVente||0).toFixed(2)} CHF`, 'CREATE');
+                logAction(`Création prestation : ${prest.prestation} (${prest.client}) — ${fmtCHF((prest.prixVente||0))}`, 'CREATE');
                 saveToStorage();
                 triggerWebhookEmail('prestation_created', prest);
                 toast(`✅ Prestation enregistrée <span onclick="flashPrestation(${prest.id})" style="margin-left:10px;padding:2px 8px;background:rgba(255,255,255,0.25);border-radius:4px;cursor:pointer;text-decoration:underline;">Voir →</span>`, 'success', 5000);
@@ -7033,8 +7045,8 @@
             const tauxConvDet = prestations.length > 0 ? Math.round(nonDevisDet / prestations.length * 100) : 0;
             let html = `<div class="stats-grid" style="margin-bottom:16px;">
                 <div class="stat-card"><div class="label">Prestations</div><div class="value">${prestations.length}</div></div>
-                <div class="stat-card"><div class="label">CA total</div><div class="value" style="font-size:1.3em;">${ca.toFixed(2)} CHF</div></div>
-                <div class="stat-card"><div class="label">Marge totale</div><div class="value" style="font-size:1.3em;color:${marge>=0?'#27ae60':'#e74c3c'}">${marge.toFixed(2)} CHF</div></div>
+                <div class="stat-card"><div class="label">CA total</div><div class="value" style="font-size:1.3em;">${fmtCHF(ca)}</div></div>
+                <div class="stat-card"><div class="label">Marge totale</div><div class="value" style="font-size:1.3em;color:${marge>=0?'#27ae60':'#e74c3c'}">${fmtCHF(marge)}</div></div>
                 <div class="stat-card"><div class="label">Délai paiement moy.</div><div class="value">${delaiMoyDet !== null ? delaiMoyDet + ' j' : '—'}</div></div>
                 <div class="stat-card"><div class="label">Rév. moy.</div><div class="value">${revMoyDet}</div></div>
                 <div class="stat-card"><div class="label">Taux conversion</div><div class="value">${tauxConvDet}%</div></div>
@@ -7061,7 +7073,7 @@
             prestations.forEach(p => {
                 const badge = getStatutBadgeHtml(p.statut || 'devis');
                 const delai = p.dateFacturation && p.dateEncaissement ? Math.round((new Date(p.dateEncaissement) - new Date(p.dateFacturation)) / 86400000) + ' j' : '—';
-                html += `<tr><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${escapeHtml(p.prestation)}</td><td style="font-size:0.8em;color:#aaa;">${escapeHtml(p.reference)}</td><td>${badge}</td><td>${(p.prixVente||0).toFixed(2)} CHF</td><td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${((p.prixVente||0)-(p.prixRevient||0)).toFixed(2)} CHF</td><td>${delai}</td></tr>`;
+                html += `<tr><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${escapeHtml(p.prestation)}</td><td style="font-size:0.8em;color:#aaa;">${escapeHtml(p.reference)}</td><td>${badge}</td><td>${fmtCHF((p.prixVente||0))}</td><td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${fmtCHF(((p.prixVente||0)-(p.prixRevient||0)))}</td><td>${delai}</td></tr>`;
             });
             html += '</tbody></table>';
 
@@ -7117,7 +7129,7 @@
                 <td>${p.prestation}</td>
                 <td>${p.reference||''}</td>
                 <td>${p.statut||'devis'}</td>
-                <td>${(p.prixVente||0).toFixed(2)} CHF</td>
+                <td>${fmtCHF((p.prixVente||0))}</td>
                 <td>${p.marge}%</td>
                 <td>${(p.heures||0).toFixed(1)} h</td>
             </tr>`).join('');
@@ -7133,7 +7145,7 @@
                     </div>
                     <div style="background:#f5f9fc;border-radius:8px;padding:12px;text-align:center;">
                         <div style="font-size:0.8em;color:#7a9db1;">CA total</div>
-                        <div style="font-size:1.4em;font-weight:bold;color:#3a6a7e;">${caTotal.toFixed(2)} CHF</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:#3a6a7e;">${fmtCHF(caTotal)}</div>
                     </div>
                     <div style="background:#f5f9fc;border-radius:8px;padding:12px;text-align:center;">
                         <div style="font-size:0.8em;color:#7a9db1;">Heures totales</div>
@@ -8503,7 +8515,7 @@
                 html += `<tr>
                     <td>${c.nom}</td>
                     <td>${c.unite}</td>
-                    <td>${c.prix.toFixed(2)}</td>
+                    <td>${fmtNum(c.prix)}</td>
                 </tr>`;
             });
             
@@ -8631,7 +8643,7 @@
             let html = '';
             filtered.forEach(p => {
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
-                const margeChfVal = ((p.prixVente||0) - (p.prixRevient||0)).toFixed(2);
+                const margeChfVal = fmtNum((p.prixVente||0) - (p.prixRevient||0));
                 const statutBadge = getStatutBadgeHtml(p.statut || 'devis');
                 const _dv = p.dateValidite ? new Date(p.dateValidite) : null;
                 const _daysLeft = _dv ? Math.ceil((_dv - _today) / 86400000) : null;
@@ -8675,7 +8687,7 @@
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Revient</div>
-                            <div style="font-weight: bold; color: #6b8fa3;">${(p.prixRevient || 0).toFixed(2)} CHF</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${fmtCHF((p.prixRevient || 0))}</div>
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Marge</div>
@@ -8683,15 +8695,15 @@
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Vente ${p.nbPieces > 1 ? 'total' : ''}</div>
-                            <div style="font-weight: bold; color: #6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${fmtCHF((p.prixVente||0))}</div>
                         </div>
                         ${p.nbPieces > 1 ? `<div style="text-align: center;">
                             <div style="font-size: 0.75em; color: #7a9db1;">Prix / pièce</div>
-                            <div style="font-weight: bold; color: #6b8fa3;">${((p.prixVente||0) / (p.nbPieces||1)).toFixed(2)} CHF</div>
+                            <div style="font-weight: bold; color: #6b8fa3;">${fmtCHF(((p.prixVente||0) / (p.nbPieces||1)))}</div>
                         </div>` : ''}
                         ${p.heuresReelles != null ? `<div style="text-align:center;">
                             <div style="font-size:0.75em;color:#3a7a4a;">Temps réel</div>
-                            <div style="font-weight:bold;color:${p.heuresReelles <= p.heures ? '#27ae60' : '#e74c3c'};">${(p.heuresReelles||0).toFixed(2)} h
+                            <div style="font-weight:bold;color:${p.heuresReelles <= p.heures ? '#27ae60' : '#e74c3c'};">${fmtNum((p.heuresReelles||0))} h
                                 <span style="font-size:0.78em;color:#aaa;">(${p.heures > 0 ? (((p.heuresReelles||0)/p.heures-1)*100).toFixed(0)+'%' : '—'})</span>
                             </div>
                         </div>` : ''}
@@ -8700,7 +8712,7 @@
                     ${(p.revisions||[]).length > 0 ? `<div style="margin-top:6px;font-size:0.8em;color:#9a7ac0;cursor:pointer;" onclick="toggleRevisions(${p.id})">🔄 ${p.revisions.length} révision(s) — cliquez pour voir l'historique</div>
                     <div class="revisions-panel" id="rev-${p.id}" style="display:none;">
                         <table style="width:100%;font-size:0.82em;"><thead><tr><th>V.</th><th>Date archivage</th><th>Prix vente</th><th>Marge</th><th>Heures</th></tr></thead><tbody>
-                        ${(p.revisions||[]).map(r => `<tr><td>v${r.version}</td><td>${new Date(r.date).toLocaleDateString('fr-FR')}</td><td>${r.prixVente?.toFixed(2)} CHF</td><td>${r.marge}%</td><td>${r.heures?.toFixed(2)} h</td></tr>`).join('')}
+                        ${(p.revisions||[]).map(r => `<tr><td>v${r.version}</td><td>${new Date(r.date).toLocaleDateString('fr-FR')}</td><td>${fmtCHF(r.prixVente || 0)}</td><td>${r.marge}%</td><td>${fmtNum(r.heures || 0)} h</td></tr>`).join('')}
                         </tbody></table>
                     </div>` : ''}
                     <div class="suivi-reel-panel" id="reel-panel-${p.id}" style="display:none;">
@@ -8716,7 +8728,7 @@
                             </div>
                             <button class="btn btn-success btn-small" onclick="saveReelPrestation(${p.id})">💾 Enregistrer</button>
                         </div>
-                        ${p.heuresReelles != null ? `<div style="margin-top:8px;font-size:0.85em;">Estimé : <strong>${(p.heures||0).toFixed(2)}h</strong> → Réel : <strong>${(p.heuresReelles||0).toFixed(2)}h</strong> → Écart : <strong class="${p.heuresReelles <= p.heures ? 'ecart-positif' : 'ecart-negatif'}">${p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1)+'%' : '—'}</strong></div>` : ''}
+                        ${p.heuresReelles != null ? `<div style="margin-top:8px;font-size:0.85em;">Estimé : <strong>${fmtNum((p.heures||0))} h</strong> → Réel : <strong>${fmtNum((p.heuresReelles||0))} h</strong> → Écart : <strong class="${p.heuresReelles <= p.heures ? 'ecart-positif' : 'ecart-negatif'}">${p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1)+'%' : '—'}</strong></div>` : ''}
                     </div>
                 </div>`;
             });
@@ -8729,7 +8741,7 @@
                         <strong style="color:#6b8fa3;min-width:140px;">${escapeHtml(p.prestation)}</strong>
                         <span style="color:#7a9db1;">🏢 ${escapeHtml(p.client)}</span>
                         <span style="color:#aaa;font-size:0.85em;">📅 ${new Date(p.date).toLocaleDateString('fr-FR')}</span>
-                        <span style="margin-left:auto;font-weight:bold;color:#6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</span>
+                        <span style="margin-left:auto;font-weight:bold;color:#6b8fa3;">${fmtCHF((p.prixVente||0))}</span>
                         <span style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'};font-size:0.85em;">${p.marge||0}%</span>
                         <div style="display:flex;gap:4px;">
                             <button class="btn btn-small btn-secondary" onclick="cycleStatut(${p.id})" title="Statut">🔄</button>
@@ -8754,7 +8766,7 @@
                         <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
                         <td>${escapeHtml(p.client)}</td><td><strong>${escapeHtml(p.prestation)}</strong><br><span style="font-size:0.78em;color:#aaa;">${escapeHtml(p.reference)}</span></td>
                         <td>${badge}</td>
-                        <td style="font-weight:bold;">${(p.prixVente||0).toFixed(2)} CHF</td>
+                        <td style="font-weight:bold;">${fmtCHF((p.prixVente||0))}</td>
                         <td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${p.marge||0}%</td>
                         <td>${(p.heures||0).toFixed(1)}h</td>
                         <td style="white-space:nowrap;">
@@ -8820,9 +8832,9 @@
             const heuresMSP = prestationsSauvegardees.reduce((sum, p) => sum + p.heures * p.nbMSP, 0);
 
             document.getElementById('statTotal').textContent = total;
-            document.getElementById('statCA').textContent = ca.toFixed(2) + ' CHF';
-            document.getElementById('statCouts').textContent = couts.toFixed(2) + ' CHF';
-            document.getElementById('statMarge').textContent = marge.toFixed(2) + ' CHF';
+            document.getElementById('statCA').textContent = fmtCHF(ca);
+            document.getElementById('statCouts').textContent = fmtCHF(couts);
+            document.getElementById('statMarge').textContent = fmtCHF(marge);
             document.getElementById('statHeuresCEA').textContent = heuresCEA.toFixed(1) + ' h';
             document.getElementById('statHeuresMSP').textContent = heuresMSP.toFixed(1) + ' h';
             const tauxMSP = (heuresCEA + heuresMSP) > 0 ? (heuresMSP / (heuresCEA + heuresMSP) * 100) : 0;
@@ -8876,8 +8888,8 @@
                 html += `<tr>
                     <td><strong>${r.code}</strong></td>
                     <td style="font-size:0.85em;">${r.description}</td>
-                    <td>${r.tempsEstime.toFixed(2)} h</td>
-                    <td style="font-weight:bold;color:${color};">×${r.ratioMoy.toFixed(2)} (${pct>0?'+':''}${pct}%)</td>
+                    <td>${fmtNum(r.tempsEstime)} h</td>
+                    <td style="font-weight:bold;color:${color};">×${fmtNum(r.ratioMoy)} (${pct>0?'+':''}${pct}%)</td>
                     <td style="font-size:0.82em;color:${color};">${conseil}</td>
                 </tr>`;
             });
@@ -8921,7 +8933,7 @@
                 const pct = (sl.value / total * 100).toFixed(1);
                 return `<div style="display:flex;align-items:center;gap:6px;font-size:0.82em;color:#5a7b8f;">
                     <span style="width:12px;height:12px;border-radius:2px;background:${sl.color};flex-shrink:0;"></span>
-                    <span><strong>${sl.label}</strong> — ${sl.value.toFixed(2)} CHF (${pct}%)</span>
+                    <span><strong>${sl.label}</strong> — ${fmtCHF(sl.value)} (${pct}%)</span>
                 </div>`;
             }).join('');
             const titleHtml = title ? `<div style="text-align:center;font-size:0.85em;font-weight:bold;color:#6b8fa3;margin-bottom:6px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${title}">${title}</div>` : '';
@@ -8929,7 +8941,7 @@
                 ${titleHtml}
                 <svg width="220" height="220" viewBox="0 0 220 220">${paths}</svg>
                 <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;max-width:220px;">${legendHtml}</div>
-                <div style="margin-top:8px;font-size:0.85em;color:#6b8fa3;font-weight:bold;">Total : ${total.toFixed(2)} CHF</div>
+                <div style="margin-top:8px;font-size:0.85em;color:#6b8fa3;font-weight:bold;">Total : ${fmtCHF(total)}</div>
             </div>`;
         }
 
@@ -8951,7 +8963,7 @@
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
                 return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85em;color:#5a7b8f;cursor:pointer;border-bottom:1px solid #eef4f8;">
                     <input type="checkbox" class="pie-prestation-cb" value="${p.id}" onchange="drawPieChart()">
-                    <span><strong>${escapeHtml(p.prestation)}</strong> — ${escapeHtml(p.client)} — ${date} — ${(p.prixVente||0).toFixed(2)} CHF</span>
+                    <span><strong>${escapeHtml(p.prestation)}</strong> — ${escapeHtml(p.client)} — ${date} — ${fmtCHF((p.prixVente||0))}</span>
                 </label>`;
             }).join('');
         }
@@ -9003,9 +9015,9 @@
                     const diffStyle = diff > 0 ? 'color:#c0392b' : diff < 0 ? 'color:#27ae60' : 'color:#7a9db1';
                     return `<tr>
                         <td style="padding:6px 10px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colors[i]};margin-right:6px;"></span>${name}</td>
-                        <td style="padding:6px 10px;text-align:right;">${va.toFixed(2)} CHF</td>
-                        <td style="padding:6px 10px;text-align:right;">${vb.toFixed(2)} CHF</td>
-                        <td style="padding:6px 10px;text-align:right;font-weight:bold;${diffStyle}">${diff >= 0 ? '+' : ''}${diff.toFixed(2)} CHF</td>
+                        <td style="padding:6px 10px;text-align:right;">${fmtCHF(va)}</td>
+                        <td style="padding:6px 10px;text-align:right;">${fmtCHF(vb)}</td>
+                        <td style="padding:6px 10px;text-align:right;font-weight:bold;${diffStyle}">${diff >= 0 ? '+' : ''}${fmtCHF(diff)}</td>
                     </tr>`;
                 }).join('');
                 const cmpDiv = document.createElement('div');
@@ -9019,9 +9031,9 @@
                     </tr></thead><tbody>${rows}</tbody>
                     <tfoot><tr style="border-top:2px solid #a8d5e2;font-weight:bold;">
                         <td style="padding:8px 10px;">Total revient</td>
-                        <td style="padding:8px 10px;text-align:right;">${(a.prixRevient||0).toFixed(2)} CHF</td>
-                        <td style="padding:8px 10px;text-align:right;">${(b.prixRevient||0).toFixed(2)} CHF</td>
-                        <td style="padding:8px 10px;text-align:right;${((b.prixRevient||0)-(a.prixRevient||0))>=0?'color:#c0392b':'color:#27ae60'}">${((b.prixRevient||0)-(a.prixRevient||0))>=0?'+':''}${((b.prixRevient||0)-(a.prixRevient||0)).toFixed(2)} CHF</td>
+                        <td style="padding:8px 10px;text-align:right;">${fmtCHF((a.prixRevient||0))}</td>
+                        <td style="padding:8px 10px;text-align:right;">${fmtCHF((b.prixRevient||0))}</td>
+                        <td style="padding:8px 10px;text-align:right;${((b.prixRevient||0)-(a.prixRevient||0))>=0?'color:#c0392b':'color:#27ae60'}">${((b.prixRevient||0)-(a.prixRevient||0))>=0?'+':''}${fmtCHF(((b.prixRevient||0)-(a.prixRevient||0)))}</td>
                     </tr></tfoot>
                 </table>`;
                 container.appendChild(cmpDiv);
@@ -9093,11 +9105,11 @@
             const totalCoutStock = totalCoutEspace + totalCoutMOStock;
             const margeStock = totalCAStock - totalCoutStock;
 
-            document.getElementById('bilanCoutMOStock').textContent = totalCoutMOStock.toFixed(2) + ' CHF';
-            document.getElementById('bilanCoutEspace').textContent = totalCoutEspace.toFixed(2) + ' CHF';
-            document.getElementById('bilanCoutTotal').textContent = totalCoutStock.toFixed(2) + ' CHF';
-            document.getElementById('bilanCAStock').textContent = totalCAStock.toFixed(2) + ' CHF';
-            document.getElementById('bilanMargeStock').textContent = margeStock.toFixed(2) + ' CHF';
+            document.getElementById('bilanCoutMOStock').textContent = fmtCHF(totalCoutMOStock);
+            document.getElementById('bilanCoutEspace').textContent = fmtCHF(totalCoutEspace);
+            document.getElementById('bilanCoutTotal').textContent = fmtCHF(totalCoutStock);
+            document.getElementById('bilanCAStock').textContent = fmtCHF(totalCAStock);
+            document.getElementById('bilanMargeStock').textContent = fmtCHF(margeStock);
             document.getElementById('bilanTempsStock').textContent = totalTempsStockH.toFixed(1) + ' h';
         }
 
@@ -9261,10 +9273,10 @@
             const coutStock7j = totalQte * config.coutPalette * 7;
             
             document.getElementById('stockActuel').textContent = totalQte.toFixed(0);
-            document.getElementById('valorisationStock').textContent = totalValeur.toFixed(2) + ' CHF';
+            document.getElementById('valorisationStock').textContent = fmtCHF(totalValeur);
             document.getElementById('tauxOccupation').textContent = occupation + '%';
             document.getElementById('rotationMoyenne').textContent = rotationMoy + ' j';
-            document.getElementById('coutStockage7j').textContent = coutStock7j.toFixed(2) + ' CHF';
+            document.getElementById('coutStockage7j').textContent = fmtCHF(coutStock7j);
             document.getElementById('nbReferences').textContent = nbRefs;
             
             const now = new Date();
@@ -9276,9 +9288,9 @@
             document.getElementById('statEntrees').textContent = entreesMois;
             document.getElementById('statSorties').textContent = sortiesMois;
             document.getElementById('statTauxRotation').textContent = tauxRotation + '%';
-            document.getElementById('statValorisationStock').textContent = totalValeur.toFixed(2) + ' CHF';
-            document.getElementById('statCoutStockage').textContent = coutStock7j.toFixed(2) + ' CHF';
-            document.getElementById('statCoutStockageMois').textContent = (totalQte * config.coutPalette * 30).toFixed(2) + ' CHF';
+            document.getElementById('statValorisationStock').textContent = fmtCHF(totalValeur);
+            document.getElementById('statCoutStockage').textContent = fmtCHF(coutStock7j);
+            document.getElementById('statCoutStockageMois').textContent = fmtCHF((totalQte * config.coutPalette * 30));
             updateStockAlertBadge();
         }
 
@@ -9310,7 +9322,7 @@
                     <td>${m.ref}</td>
                     <td>${m.qte} ${m.unite}</td>
                     <td>${m.emplacement}</td>
-                    <td>${m.prix.toFixed(2)}</td>
+                    <td>${fmtNum(m.prix)}</td>
                     <td style="display:flex;gap:4px;">
                         <button class="btn btn-small" style="padding:4px 8px;font-size:0.8em;background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editMouvement(${m.id})">✏️</button>
                         <button class="delete-btn btn-small" onclick="deleteMouvement(${m.id})">🗑️</button>
@@ -9350,8 +9362,8 @@
                     <td><strong>${ref}</strong></td>
                     <td>${data.total.toFixed(0)}</td>
                     <td>${data.lots.length}</td>
-                    <td>${valeurTotale.toFixed(2)} CHF</td>
-                    <td>${prixMoyen.toFixed(2)}</td>
+                    <td>${fmtCHF(valeurTotale)}</td>
+                    <td>${fmtNum(prixMoyen)}</td>
                     <td>${plusAncien}</td>
                     <td><button class="btn btn-small btn-secondary" onclick="toggleStockHistory('${refId}', '${ref}')">📋 Historique</button></td>
                 </tr>
@@ -9384,7 +9396,7 @@
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
             const date = new Date(p.date).toLocaleDateString('fr-FR');
-            const margeChfVal = ((p.prixVente||0) - (p.prixRevient||0)).toFixed(2);
+            const margeChfVal = fmtNum((p.prixVente||0) - (p.prixRevient||0));
 
             let gestesHtml = '';
             (p.gestes || []).forEach(g => {
@@ -9416,21 +9428,21 @@
 
                     <h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-top:20px;">Décomposition des coûts</h3>
                     <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-                        <tr><td style="padding:6px 10px;">Main d'œuvre CEA</td><td style="padding:6px 10px;text-align:right;">${(p.coutMO||0).toFixed(2)} CHF</td></tr>
-                        <tr><td style="padding:6px 10px;">Encadrement MSP</td><td style="padding:6px 10px;text-align:right;">${(p.coutEncadrement||0).toFixed(2)} CHF</td></tr>
-                        <tr><td style="padding:6px 10px;">Consommables</td><td style="padding:6px 10px;text-align:right;">${(p.coutConsommables||0).toFixed(2)} CHF</td></tr>
-                        <tr><td style="padding:6px 10px;">Stockage</td><td style="padding:6px 10px;text-align:right;">${(p.coutStockage||0).toFixed(2)} CHF</td></tr>
-                        <tr style="font-weight:bold;border-top:2px solid #a8d5e2;"><td style="padding:8px 10px;">Prix de revient</td><td style="padding:8px 10px;text-align:right;">${(p.prixRevient||0).toFixed(2)} CHF</td></tr>
+                        <tr><td style="padding:6px 10px;">Main d'œuvre CEA</td><td style="padding:6px 10px;text-align:right;">${fmtCHF((p.coutMO||0))}</td></tr>
+                        <tr><td style="padding:6px 10px;">Encadrement MSP</td><td style="padding:6px 10px;text-align:right;">${fmtCHF((p.coutEncadrement||0))}</td></tr>
+                        <tr><td style="padding:6px 10px;">Consommables</td><td style="padding:6px 10px;text-align:right;">${fmtCHF((p.coutConsommables||0))}</td></tr>
+                        <tr><td style="padding:6px 10px;">Stockage</td><td style="padding:6px 10px;text-align:right;">${fmtCHF((p.coutStockage||0))}</td></tr>
+                        <tr style="font-weight:bold;border-top:2px solid #a8d5e2;"><td style="padding:8px 10px;">Prix de revient</td><td style="padding:8px 10px;text-align:right;">${fmtCHF((p.prixRevient||0))}</td></tr>
                     </table>
 
                     <div style="background:linear-gradient(135deg,#c9dff0 0%,#e0d4ed 100%);padding:20px;border-radius:10px;text-align:center;">
                         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
-                            <div><div style="font-size:0.8em;color:#5a7b8f;">Temps total</div><div style="font-size:1.4em;font-weight:bold;">${(p.heures||0).toFixed(2)} h</div></div>
+                            <div><div style="font-size:0.8em;color:#5a7b8f;">Temps total</div><div style="font-size:1.4em;font-weight:bold;">${fmtNum((p.heures||0))} h</div></div>
                             <div><div style="font-size:0.8em;color:#5a7b8f;">Marge</div><div style="font-size:1.4em;font-weight:bold;">${p.marge||0}%</div></div>
                             <div><div style="font-size:0.8em;color:#5a7b8f;">Marge CHF</div><div style="font-size:1.4em;font-weight:bold;">${margeChfVal} CHF</div></div>
                         </div>
                         <div style="font-size:0.9em;color:#5a7b8f;margin-bottom:5px;">PRIX DE VENTE</div>
-                        <div style="font-size:2.5em;font-weight:bold;color:#6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</div>
+                        <div style="font-size:2.5em;font-weight:bold;color:#6b8fa3;">${fmtCHF((p.prixVente||0))}</div>
                     </div>
                     <p style="text-align:center;font-size:0.75em;color:#aaa;margin-top:20px;">Généré le ${new Date().toLocaleDateString('fr-FR')} — Outil Atelier La Pallanterie</p>
                 </div>`;
@@ -9466,14 +9478,14 @@
                 consoRows += `<tr style="border-bottom:1px solid #e8f0f5;">
                     <td style="padding:4px 6px;">${c.designation || c.ref || '-'}</td>
                     <td style="padding:4px 6px;text-align:center;">${c.quantite || 0}</td>
-                    <td style="padding:4px 6px;text-align:right;">${(c.prix || 0).toFixed(2)} CHF</td>
+                    <td style="padding:4px 6px;text-align:right;">${fmtCHF((c.prix || 0))}</td>
                 </tr>`;
             });
 
             const conditions = p.conditionsPaiement || '30 jours net';
             const nbPieces = p.nbPieces || 1;
             const unite = p.unite || 'pièce';
-            const prixPiece = nbPieces > 1 ? ((p.prixVente || 0) / nbPieces).toFixed(2) : null;
+            const prixPiece = nbPieces > 1 ? fmtNum((p.prixVente || 0) / nbPieces) : null;
 
             const html = `<div id="devisPdfContent" style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:15px 25px;color:#2d3e50;font-size:11px;">
                 <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:15px;">
@@ -9504,7 +9516,7 @@
                     <div style="font-size:0.8em;color:#5a7b8f;">Volume: ${nbPieces} ${unite}${nbPieces > 1 ? 's' : ''}</div>
                     ${prixPiece ? `<div style="font-size:0.9em;color:#5a7b8f;">Prix unitaire: <strong>${prixPiece} CHF/${unite}</strong></div>` : ''}
                     <div style="font-size:0.85em;color:#6b8fa3;margin-top:4px;">PRIX TOTAL</div>
-                    <div style="font-size:2.2em;font-weight:bold;color:#2d3e50;">${(p.prixVente||0).toFixed(2)} CHF</div>
+                    <div style="font-size:2.2em;font-weight:bold;color:#2d3e50;">${fmtCHF((p.prixVente||0))}</div>
                     <div style="font-size:0.78em;color:#8a99a8;">HT — Temps estimé: ${(p.heures||0).toFixed(1)}h</div>
                 </div>
                 <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.85em;">
@@ -9792,9 +9804,9 @@
                     <td><strong>${p.prestation}</strong></td>
                     <td>${p.client}</td>
                     <td>${date}</td>
-                    <td>${prixVente.toFixed(2)}</td>
-                    <td>${prixRevient.toFixed(2)}</td>
-                    <td style="color:#4a8966;font-weight:bold;">${margeChf.toFixed(2)}</td>
+                    <td>${fmtNum(prixVente)}</td>
+                    <td>${fmtNum(prixRevient)}</td>
+                    <td style="color:#4a8966;font-weight:bold;">${fmtNum(margeChf)}</td>
                     <td>${marge}%</td>
                 </tr>`;
             });
@@ -10730,14 +10742,14 @@
 
                 html += `<tr style="border-bottom:1px solid #e8e0f0;">
                     <td style="padding:6px 8px;">${sc.label}</td>
-                    <td style="padding:6px 8px;text-align:right;font-weight:600;">${newPrix.toFixed(2)} CHF</td>
-                    <td style="padding:6px 8px;text-align:right;color:${color};font-weight:600;">${ecart >= 0 ? '+' : ''}${ecart.toFixed(2)} CHF</td>
+                    <td style="padding:6px 8px;text-align:right;font-weight:600;">${fmtCHF(newPrix)}</td>
+                    <td style="padding:6px 8px;text-align:right;color:${color};font-weight:600;">${ecart >= 0 ? '+' : ''}${fmtCHF(ecart)}</td>
                     <td style="padding:6px 8px;text-align:right;color:${color};font-weight:bold;">${arrow} ${Math.abs(pctImpact).toFixed(1)}%</td>
                 </tr>`;
             });
 
             html += '</tbody></table>';
-            html += `<p style="font-size:0.78em;color:#8a99a8;margin-top:8px;">Base: prix actuel ${currentPrix.toFixed(2)} CHF — marge ${margePct}%</p>`;
+            html += `<p style="font-size:0.78em;color:#8a99a8;margin-top:8px;">Base: prix actuel ${fmtCHF(currentPrix)} — marge ${margePct}%</p>`;
             container.innerHTML = html;
         }
 
@@ -10859,7 +10871,7 @@
 
             let html = `
             <div style="background:#f8f4ec;border:1px solid #e8dfc0;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:0.85em;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
-                <div><span style="color:#9ab0be;">Coûts fixes</span><br><strong>${fixedTotal.toFixed(2)} CHF</strong><span style="font-size:0.8em;color:#aaa;"> (admin + stockage)</span></div>
+                <div><span style="color:#9ab0be;">Coûts fixes</span><br><strong>${fmtCHF(fixedTotal)}</strong><span style="font-size:0.8em;color:#aaa;"> (admin + stockage)</span></div>
                 <div><span style="color:#9ab0be;">Coût variable / ${unite}</span><br><strong>${varUnitTotal.toFixed(3)} CHF</strong><span style="font-size:0.8em;color:#aaa;"> (MO + consommables)</span></div>
                 <div><span style="color:#9ab0be;">Seuil d'amortissement</span><br>${seuilHtml}</div>
             </div>
@@ -10876,7 +10888,7 @@
                     : '<span style="color:#aaa;">—</span>';
                 html += `<tr>
                     <td><strong>${r.qty}</strong></td>
-                    <td>${r.prix.toFixed(2)}</td>
+                    <td>${fmtNum(r.prix)}</td>
                     <td>${prixPiece.toFixed(3)}</td>
                     <td>${econHtml}</td>
                 </tr>`;
@@ -11018,7 +11030,7 @@
                         <td>${new Date(m.date).toLocaleDateString('fr-FR')}</td>
                         <td><span class="badge ${badgeClass}">${m.type.toUpperCase()}</span></td>
                         <td>${m.qte} ${m.unite}</td>
-                        <td>${m.prix.toFixed(2)} CHF</td>
+                        <td>${fmtCHF(m.prix)}</td>
                         <td>${m.emplacement}</td>
                     </tr>`;
                 });
@@ -11184,7 +11196,7 @@
                             <td style="padding:7px 10px;text-align:right;font-size:0.85em;">${temps}s</td>
                             <td style="padding:7px 10px;text-align:right;font-size:0.85em;">${qte}</td>
                             <td style="padding:7px 10px;text-align:right;font-size:0.85em;">${(totalSec/60).toFixed(1)} min</td>
-                            <td style="padding:7px 10px;text-align:right;font-size:0.85em;font-weight:bold;">${sousTotal.toFixed(2)} CHF</td>
+                            <td style="padding:7px 10px;text-align:right;font-size:0.85em;font-weight:bold;">${fmtCHF(sousTotal)}</td>
                         </tr>`;
                     }
                 }
@@ -11205,9 +11217,9 @@
                             consomRows += `<tr style="border-bottom:1px solid #f0f4f8;">
                                 <td style="padding:7px 10px;font-size:0.85em;">${c.nom}</td>
                                 <td style="padding:7px 10px;text-align:right;font-size:0.85em;">${qte} ${c.unite}</td>
-                                <td style="padding:7px 10px;text-align:right;font-size:0.85em;">${prix.toFixed(2)} CHF/u</td>
+                                <td style="padding:7px 10px;text-align:right;font-size:0.85em;">${fmtCHF(prix)}/u</td>
                                 <td style="padding:7px 10px;text-align:right;font-size:0.85em;">${nbPieces} pcs</td>
-                                <td style="padding:7px 10px;text-align:right;font-size:0.85em;font-weight:bold;">${(prix * qte * nbPieces).toFixed(2)} CHF</td>
+                                <td style="padding:7px 10px;text-align:right;font-size:0.85em;font-weight:bold;">${fmtCHF((prix * qte * nbPieces))}</td>
                             </tr>`;
                         }
                     }
@@ -11271,7 +11283,7 @@
                         <tfoot><tr style="background:#f0f7fb;font-weight:bold;">
                             <td colspan="4" style="padding:8px 10px;font-size:0.85em;">Total gestes</td>
                             <td style="padding:8px 10px;text-align:right;font-size:0.85em;">${gestesTotalMin.toFixed(1)} min</td>
-                            <td style="padding:8px 10px;text-align:right;font-size:0.85em;">${coutMO.toFixed(2)} CHF</td>
+                            <td style="padding:8px 10px;text-align:right;font-size:0.85em;">${fmtCHF(coutMO)}</td>
                         </tr></tfoot>
                     </table>
                 </div>` : ''}
@@ -11296,12 +11308,12 @@
                     <div style="font-weight:bold;color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:7px;margin-bottom:10px;font-size:1em;">Récapitulatif des coûts</div>
                     <table style="width:100%;border-collapse:collapse;font-size:0.88em;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
                         <tbody>
-                            ${pp.mo ? `<tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Main d'œuvre CEA (${totalHeures.toFixed(2)} h × ${nbCEA} pers.)</td><td style="padding:8px 14px;text-align:right;">${coutMO.toFixed(2)} CHF</td></tr>
-                            <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Encadrement MSP (${totalHeures.toFixed(2)} h × ${nbMSP}%)</td><td style="padding:8px 14px;text-align:right;">${coutEncadrement.toFixed(2)} CHF</td></tr>` : ''}
-                            <tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Consommables</td><td style="padding:8px 14px;text-align:right;">${coutConsommables.toFixed(2)} CHF</td></tr>
-                            <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Frais de stockage</td><td style="padding:8px 14px;text-align:right;">${coutStockage.toFixed(2)} CHF</td></tr>
-                            ${pp.frais ? `<tr style="border-bottom:2px solid #a8d5e2;"><td style="padding:8px 14px;">Frais généraux</td><td style="padding:8px 14px;text-align:right;">${coutFrais.toFixed(2)} CHF</td></tr>` : ''}
-                            ${pp.prixRevient ? `<tr style="font-weight:bold;background:#f0f7fb;"><td style="padding:10px 14px;">PRIX DE REVIENT</td><td style="padding:10px 14px;text-align:right;">${prixRevient.toFixed(2)} CHF</td></tr>` : ''}
+                            ${pp.mo ? `<tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Main d'œuvre CEA (${fmtNum(totalHeures)} h × ${nbCEA} pers.)</td><td style="padding:8px 14px;text-align:right;">${fmtCHF(coutMO)}</td></tr>
+                            <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Encadrement MSP (${fmtNum(totalHeures)} h × ${nbMSP}%)</td><td style="padding:8px 14px;text-align:right;">${fmtCHF(coutEncadrement)}</td></tr>` : ''}
+                            <tr style="border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Consommables</td><td style="padding:8px 14px;text-align:right;">${fmtCHF(coutConsommables)}</td></tr>
+                            <tr style="background:#fafcff;border-bottom:1px solid #f0f4f8;"><td style="padding:8px 14px;">Frais de stockage</td><td style="padding:8px 14px;text-align:right;">${fmtCHF(coutStockage)}</td></tr>
+                            ${pp.frais ? `<tr style="border-bottom:2px solid #a8d5e2;"><td style="padding:8px 14px;">Frais généraux</td><td style="padding:8px 14px;text-align:right;">${fmtCHF(coutFrais)}</td></tr>` : ''}
+                            ${pp.prixRevient ? `<tr style="font-weight:bold;background:#f0f7fb;"><td style="padding:10px 14px;">PRIX DE REVIENT</td><td style="padding:10px 14px;text-align:right;">${fmtCHF(prixRevient)}</td></tr>` : ''}
                         </tbody>
                     </table>
                 </div>` : ''}
@@ -11310,12 +11322,12 @@
                 <div style="background:linear-gradient(135deg,#c9dff0 0%,#e0d4ed 100%);padding:22px;border-radius:12px;margin-bottom:22px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;">
                     <div>
                         ${pp.prixRevient ? `<div style="font-size:0.82em;color:#5a7b8f;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Prix de revient</div>
-                        <div style="font-size:1.4em;font-weight:bold;color:#5a7b8f;">${prixRevient.toFixed(2)} CHF</div>` : ''}
-                        ${pp.marge ? `<div style="font-size:0.82em;color:#7a9db1;margin-top:6px;">Marge appliquée : ${marge}% (${margeChf.toFixed(2)} CHF)</div>` : ''}
+                        <div style="font-size:1.4em;font-weight:bold;color:#5a7b8f;">${fmtCHF(prixRevient)}</div>` : ''}
+                        ${pp.marge ? `<div style="font-size:0.82em;color:#7a9db1;margin-top:6px;">Marge appliquée : ${marge}% (${fmtCHF(margeChf)})</div>` : ''}
                     </div>
                     <div style="text-align:right;">
                         <div style="font-size:0.85em;color:#5a7b8f;text-transform:uppercase;letter-spacing:0.5px;">PRIX DE VENTE HT${nbPieces > 1 ? ` (${nbPieces} pcs)` : ''}</div>
-                        <div style="font-size:2.2em;font-weight:bold;color:#6b8fa3;">${prixVente.toFixed(2)} CHF</div>
+                        <div style="font-size:2.2em;font-weight:bold;color:#6b8fa3;">${fmtCHF(prixVente)}</div>
                         ${nbPieces > 1 ? `<div style="font-size:0.9em;color:#7a9db1;margin-top:4px;">Soit <strong>${(prixVente/nbPieces).toFixed(3)} CHF</strong> / pièce</div>` : ''}
                     </div>
                 </div>
@@ -11544,18 +11556,18 @@
                             ${p.revisions.map(r => `<tr>
                                 <td>v${r.version}</td>
                                 <td>${r.date}</td>
-                                <td>${(r.prixRevient||0).toFixed(2)} CHF</td>
-                                <td>${(r.prixVente||0).toFixed(2)} CHF</td>
+                                <td>${fmtCHF((r.prixRevient||0))}</td>
+                                <td>${fmtCHF((r.prixVente||0))}</td>
                                 <td>${(r.marge||0).toFixed(1)}%</td>
-                                <td>${(r.heures||0).toFixed(2)} h</td>
+                                <td>${fmtNum((r.heures||0))} h</td>
                             </tr>`).join('')}
                             <tr style="font-weight:600;background:#f0f8f5;">
                                 <td>Actuelle</td>
                                 <td>${p.date}</td>
-                                <td>${(p.prixRevient||0).toFixed(2)} CHF</td>
-                                <td>${(p.prixVente||0).toFixed(2)} CHF</td>
+                                <td>${fmtCHF((p.prixRevient||0))}</td>
+                                <td>${fmtCHF((p.prixVente||0))}</td>
                                 <td>${(p.marge||0).toFixed(1)}%</td>
-                                <td>${(p.heures||0).toFixed(2)} h</td>
+                                <td>${fmtNum((p.heures||0))} h</td>
                             </tr>
                         </tbody>
                     </table>
@@ -12026,8 +12038,8 @@
                 ['Nb CEA', pA.nbCEA||'—', pB.nbCEA||'—'],
                 ['MSP (%)', pA.nbMSP != null ? Math.round(pA.nbMSP*100)+'%' : '—', pB.nbMSP != null ? Math.round(pB.nbMSP*100)+'%' : '—'],
                 ['Nb pièces', pA.nbPieces||'—', pB.nbPieces||'—'],
-                ['Prix total HT', (parseFloat(pA.prixTotal)||0).toFixed(2)+' CHF', (parseFloat(pB.prixTotal)||0).toFixed(2)+' CHF'],
-                ['Prix unit.', (parseFloat(pA.prixUnitaire)||0).toFixed(4)+' CHF', (parseFloat(pB.prixUnitaire)||0).toFixed(4)+' CHF'],
+                ['Prix total HT', fmtCHF(parseFloat(pA.prixTotal)||0), fmtCHF(parseFloat(pB.prixTotal)||0)],
+                ['Prix unit.', fmtNum(parseFloat(pA.prixUnitaire)||0, 4)+' CHF', fmtNum(parseFloat(pB.prixUnitaire)||0, 4)+' CHF'],
                 ['Marge %', (pA.margePercent||0)+'%', (pB.margePercent||0)+'%'],
                 ['Nb gestes', (pA.gestes||[]).length, (pB.gestes||[]).length],
             ];
@@ -13311,7 +13323,7 @@
                                 <div style="font-weight:bold;color:#6b8fa3;">${escapeHtml(p.prestation)}</div>
                                 <div style="font-size:0.8em;color:#7a9db1;">🏢 ${escapeHtml(p.client)} — 📅 ${new Date(p.date).toLocaleDateString('fr-FR')}${badge}</div>
                             </div>
-                            <div style="font-weight:bold;color:#6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</div>
+                            <div style="font-weight:bold;color:#6b8fa3;">${fmtCHF((p.prixVente||0))}</div>
                         </div>`;
                     }).join('');
                 }
@@ -13917,9 +13929,9 @@
             months.forEach(m => {
                 tableHtml += `<tr>
                     <td>${m.label}</td>
-                    <td style="font-weight:bold;color:#3a6a7e;">${m.confirmed.toFixed(2)}</td>
-                    <td style="color:#7a5a9a;">${m.pipeline.toFixed(2)}</td>
-                    <td style="font-weight:bold;">${(m.confirmed + m.pipeline).toFixed(2)}</td>
+                    <td style="font-weight:bold;color:#3a6a7e;">${fmtNum(m.confirmed)}</td>
+                    <td style="color:#7a5a9a;">${fmtNum(m.pipeline)}</td>
+                    <td style="font-weight:bold;">${fmtNum((m.confirmed + m.pipeline))}</td>
                 </tr>`;
             });
             tableHtml += '</tbody></table>';
@@ -14096,7 +14108,7 @@
                     </div>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:0.85em;color:#5a7b8f;margin-top:4px;">
-                    <span>CA confirmé ce mois : <strong style="color:${color}">${caActuel.toFixed(2)} CHF</strong></span>
+                    <span>CA confirmé ce mois : <strong style="color:${color}">${fmtCHF(caActuel)}</strong></span>
                     <span>Objectif : <strong>${objectif.toFixed(0)} CHF</strong></span>
                 </div>`;
         }
@@ -14132,8 +14144,8 @@
                     return `<tr>
                         <td><strong>${r.code}</strong></td>
                         <td>${r.count}</td>
-                        <td>${r.totalTemps.toFixed(2)} h</td>
-                        <td>${r.totalCout.toFixed(2)} CHF</td>
+                        <td>${fmtNum(r.totalTemps)} h</td>
+                        <td>${fmtCHF(r.totalCout)}</td>
                         <td><span class="${badgeClass}">${diffLabel}</span></td>
                     </tr>`;
                 }).join('')}</tbody>
@@ -14210,9 +14222,9 @@
                 <td>${p.reference||''}</td>
                 <td>${p.client||''}</td>
                 <td>${p.statut||''}</td>
-                <td>${(p.prixVente||0).toFixed(2)} CHF</td>
-                <td>${(p.coutRevient||0).toFixed(2)} CHF</td>
-                <td>${((p.prixVente||0)-(p.coutRevient||0)).toFixed(2)} CHF</td>
+                <td>${fmtCHF((p.prixVente||0))}</td>
+                <td>${fmtCHF((p.coutRevient||0))}</td>
+                <td>${fmtCHF(((p.prixVente||0)-(p.coutRevient||0)))}</td>
             </tr>`).join('');
             const html = `<div style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:30px;color:#2d3e50;">
                 <div style="background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%);padding:20px;border-radius:10px;margin-bottom:24px;text-align:center;">
@@ -14222,16 +14234,16 @@
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
                     <div style="background:#f5f9fc;border-radius:8px;padding:14px;text-align:center;">
                         <div style="font-size:0.8em;color:#7a9db1;margin-bottom:4px;">CA du mois</div>
-                        <div style="font-size:1.4em;font-weight:bold;color:#3a6a7e;">${caTotal.toFixed(2)} CHF</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:#3a6a7e;">${fmtCHF(caTotal)}</div>
                         ${objectif>0?`<div style="font-size:0.8em;color:#5a7b8f;">${pct}% de l'objectif</div>`:''}
                     </div>
                     <div style="background:#f5f9fc;border-radius:8px;padding:14px;text-align:center;">
                         <div style="font-size:0.8em;color:#7a9db1;margin-bottom:4px;">Coûts totaux</div>
-                        <div style="font-size:1.4em;font-weight:bold;color:#c0392b;">${coutTotal.toFixed(2)} CHF</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:#c0392b;">${fmtCHF(coutTotal)}</div>
                     </div>
                     <div style="background:#f5f9fc;border-radius:8px;padding:14px;text-align:center;">
                         <div style="font-size:0.8em;color:#7a9db1;margin-bottom:4px;">Marge nette</div>
-                        <div style="font-size:1.4em;font-weight:bold;color:${margeTotal>=0?'#27ae60':'#e74c3c'}">${margeTotal.toFixed(2)} CHF</div>
+                        <div style="font-size:1.4em;font-weight:bold;color:${margeTotal>=0?'#27ae60':'#e74c3c'}">${fmtCHF(margeTotal)}</div>
                     </div>
                 </div>
                 <h2 style="font-size:1.1em;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-bottom:12px;">Détail des prestations</h2>
