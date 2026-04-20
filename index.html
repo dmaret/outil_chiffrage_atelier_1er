@@ -5206,6 +5206,10 @@
 
             // Initialize drag-and-drop for sections in admin mode
             setTimeout(() => initSectionDragAndDrop(), 100);
+
+            // Récap live : visible uniquement sur l'onglet calculateur
+            const live = document.getElementById('liveSummary');
+            if (live) live.style.display = (tabName === 'calculateur') ? 'block' : 'none';
         }
 
         function buildGesteOptions(selCode) {
@@ -6036,6 +6040,31 @@
                 }
             }
             updateVariantesPrix(prixRevient);
+            updateLiveSummary({ totalHeures, prixRevient, prixVente, margePourcent, seuilMin });
+        }
+
+        // Panneau récap live : mise à jour temps / coût / jauge marge
+        function updateLiveSummary({ totalHeures, prixRevient, prixVente, margePourcent, seuilMin }) {
+            const el = document.getElementById('liveSummary');
+            if (!el) return;
+            const tempsEl = document.getElementById('liveTemps');
+            const prEl = document.getElementById('livePR');
+            const pvEl = document.getElementById('livePV');
+            const pctEl = document.getElementById('liveMargePct');
+            const barEl = document.getElementById('liveMargeBar');
+            if (tempsEl) tempsEl.textContent = totalHeures > 0 ? totalHeures.toFixed(2) + ' h' : '—';
+            if (prEl) prEl.textContent = prixRevient > 0 ? prixRevient.toFixed(2) + ' CHF' : '—';
+            if (pvEl) pvEl.textContent = prixVente > 0 ? prixVente.toFixed(2) + ' CHF' : '—';
+            if (pctEl) pctEl.textContent = (margePourcent || 0).toFixed(0) + ' %';
+            if (barEl) {
+                const pct = Math.max(0, Math.min(100, margePourcent || 0));
+                barEl.style.width = pct + '%';
+                // Couleur : rouge < seuilMin, orange < seuilMin+5, vert au-delà
+                let color = '#27ae60';
+                if (margePourcent < seuilMin) color = '#e74c3c';
+                else if (margePourcent < seuilMin + 5) color = '#f39c12';
+                barEl.style.background = color;
+            }
         }
 
         function calculateRatio() {
@@ -18791,5 +18820,26 @@
         </div>
     </div>
 <div class="toast-container" id="toast-container"></div>
+
+<!-- Panneau récap live (visible uniquement onglet calculateur) -->
+<div id="liveSummary" style="display:none;position:fixed;bottom:16px;right:16px;z-index:9500;background:rgba(255,255,255,0.98);border:1px solid #d0d7de;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.12);padding:12px 14px;min-width:230px;font-size:0.85em;backdrop-filter:blur(6px);" aria-live="polite">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <strong style="color:#6b8fa3;font-size:0.95em;">📊 Récap live</strong>
+        <button onclick="document.getElementById('liveSummary').style.display='none';" title="Masquer" style="background:none;border:none;cursor:pointer;color:#999;font-size:1em;line-height:1;padding:0 2px;">×</button>
+    </div>
+    <div style="display:grid;grid-template-columns:auto auto;gap:4px 10px;">
+        <span style="color:#666;">Temps :</span><span id="liveTemps" style="font-weight:600;text-align:right;">—</span>
+        <span style="color:#666;">Prix revient :</span><span id="livePR" style="font-weight:600;text-align:right;">—</span>
+        <span style="color:#666;">Prix vente :</span><span id="livePV" style="font-weight:600;text-align:right;color:#27ae60;">—</span>
+    </div>
+    <div style="margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:0.78em;color:#666;margin-bottom:3px;">
+            <span>Marge</span><span id="liveMargePct">—</span>
+        </div>
+        <div style="height:6px;background:#eef1f4;border-radius:3px;overflow:hidden;">
+            <div id="liveMargeBar" style="height:100%;width:0%;background:#bdc3c7;transition:width .25s,background .25s;"></div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
