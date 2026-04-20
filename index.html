@@ -2153,7 +2153,7 @@
                     </div>
                     <div id="gestesContainer"></div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
-                        <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd">Ctrl+G</span></button>
+                        <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd" data-kbd="g">Ctrl+G</span></button>
                         <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
                         <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
                         <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
@@ -2303,11 +2303,11 @@
                 </div>
 
                 <div style="margin-top: 25px; text-align: center;">
-                    <button class="btn btn-success" id="btnSavePrestation" onclick="savePrestation()">💾 Enregistrer</button>
+                    <button class="btn btn-success" id="btnSavePrestation" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
                     <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
                     <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
-                    <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis…</button>
+                    <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis… <span class="kbd" data-kbd="p">Ctrl+P</span></button>
                 </div>
             </div>
 
@@ -18961,6 +18961,16 @@
                     ).join('');
                 }
             }, 1000);
+
+            // ── UX : libellés de raccourcis adaptés à la plateforme ──
+            // Les boutons avec data-kbd="x" affichent ⌘X sur Mac, Ctrl+X ailleurs.
+            const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+            document.querySelectorAll('[data-kbd]').forEach(el => {
+                const key = (el.dataset.kbd || '').toUpperCase();
+                if (!key) return;
+                el.textContent = isMac ? `⌘${key}` : `Ctrl+${key}`;
+                el.setAttribute('title', `Raccourci ${el.textContent}`);
+            });
 
             // ── A11y : aria-label automatique sur les boutons "icône seule" ──
             // Beaucoup de boutons affichent uniquement un emoji (🗑️ 📋 ✏️ ×…)
