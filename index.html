@@ -6515,7 +6515,7 @@
             prestations.forEach(p => {
                 const badge = getStatutBadgeHtml(p.statut || 'devis');
                 const delai = p.dateFacturation && p.dateEncaissement ? Math.round((new Date(p.dateEncaissement) - new Date(p.dateFacturation)) / 86400000) + ' j' : '—';
-                html += `<tr><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${p.prestation}</td><td style="font-size:0.8em;color:#aaa;">${p.reference}</td><td>${badge}</td><td>${(p.prixVente||0).toFixed(2)} CHF</td><td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${((p.prixVente||0)-(p.prixRevient||0)).toFixed(2)} CHF</td><td>${delai}</td></tr>`;
+                html += `<tr><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${escapeHtml(p.prestation)}</td><td style="font-size:0.8em;color:#aaa;">${escapeHtml(p.reference)}</td><td>${badge}</td><td>${(p.prixVente||0).toFixed(2)} CHF</td><td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${((p.prixVente||0)-(p.prixRevient||0)).toFixed(2)} CHF</td><td>${delai}</td></tr>`;
             });
             html += '</tbody></table>';
 
@@ -8009,8 +8009,8 @@
                 const badge = getStatutBadgeHtml(p.statut || 'devis');
                 return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid #f5ddb8;flex-wrap:wrap;">
                     <span>${icon}</span>
-                    <span style="font-weight:600;flex:1;min-width:120px;">${p.client}</span>
-                    <span style="flex:2;min-width:140px;color:#5a7b8f;">${p.prestation}</span>
+                    <span style="font-weight:600;flex:1;min-width:120px;">${escapeHtml(p.client)}</span>
+                    <span style="flex:2;min-width:140px;color:#5a7b8f;">${escapeHtml(p.prestation)}</span>
                     ${badge}
                     <span class="${cls}">${jours} j</span>
                     <button class="btn btn-small btn-secondary" onclick="editPrestation(${p.id})" style="padding:3px 8px;font-size:0.78em;">Éditer</button>
@@ -8086,7 +8086,7 @@
                 html += `<div style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap:wrap; gap:6px;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                            <strong style="font-size: 1.1em; color: #6b8fa3;">${p.prestation}</strong>
+                            <strong style="font-size: 1.1em; color: #6b8fa3;">${escapeHtml(p.prestation)}</strong>
                             ${statutBadge}${expiryBadge}
                         </div>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
@@ -8111,7 +8111,7 @@
                         </div>
                     </div>
                     <div style="font-size: 0.85em; color: #7a9db1; margin-bottom: 10px;">
-                        📅 ${date} | 🏢 ${p.client} | 📋 ${p.reference} | 👥 ${p.nbCEA||1} CEA + ${Math.round((p.nbMSP||0)*100)}% MSP${p.nbPieces > 1 ? ` | 🔢 ${p.nbPieces} ${p.unite || 'pièce'}` : ''}
+                        📅 ${date} | 🏢 ${escapeHtml(p.client)} | 📋 ${escapeHtml(p.reference)} | 👥 ${p.nbCEA||1} CEA + ${Math.round((p.nbMSP||0)*100)}% MSP${p.nbPieces > 1 ? ` | 🔢 ${p.nbPieces} ${escapeHtml(p.unite || 'pièce')}` : ''}
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
                         <div style="text-align: center;">
@@ -8141,7 +8141,7 @@
                             </div>
                         </div>` : ''}
                     </div>
-                    ${p.notesInternes ? `<div class="notes-internes-display">📝 ${p.notesInternes}</div>` : ''}
+                    ${p.notesInternes ? `<div class="notes-internes-display">📝 ${escapeHtml(p.notesInternes)}</div>` : ''}
                     ${(p.revisions||[]).length > 0 ? `<div style="margin-top:6px;font-size:0.8em;color:#9a7ac0;cursor:pointer;" onclick="toggleRevisions(${p.id})">🔄 ${p.revisions.length} révision(s) — cliquez pour voir l'historique</div>
                     <div class="revisions-panel" id="rev-${p.id}" style="display:none;">
                         <table style="width:100%;font-size:0.82em;"><thead><tr><th>V.</th><th>Date archivage</th><th>Prix vente</th><th>Marge</th><th>Heures</th></tr></thead><tbody>
@@ -8171,8 +8171,8 @@
                     const badge = getStatutBadgeHtml(p.statut || 'devis');
                     return `<div class="prest-compact-row">
                         ${badge}
-                        <strong style="color:#6b8fa3;min-width:140px;">${p.prestation}</strong>
-                        <span style="color:#7a9db1;">🏢 ${p.client}</span>
+                        <strong style="color:#6b8fa3;min-width:140px;">${escapeHtml(p.prestation)}</strong>
+                        <span style="color:#7a9db1;">🏢 ${escapeHtml(p.client)}</span>
                         <span style="color:#aaa;font-size:0.85em;">📅 ${new Date(p.date).toLocaleDateString('fr-FR')}</span>
                         <span style="margin-left:auto;font-weight:bold;color:#6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</span>
                         <span style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'};font-size:0.85em;">${p.marge||0}%</span>
@@ -8197,7 +8197,7 @@
                     const badge = getStatutBadgeHtml(p.statut || 'devis');
                     thtml += `<tr>
                         <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
-                        <td>${p.client}</td><td><strong>${p.prestation}</strong><br><span style="font-size:0.78em;color:#aaa;">${p.reference}</span></td>
+                        <td>${escapeHtml(p.client)}</td><td><strong>${escapeHtml(p.prestation)}</strong><br><span style="font-size:0.78em;color:#aaa;">${escapeHtml(p.reference)}</span></td>
                         <td>${badge}</td>
                         <td style="font-weight:bold;">${(p.prixVente||0).toFixed(2)} CHF</td>
                         <td style="color:${((p.prixVente||0)-(p.prixRevient||0))>=0?'#27ae60':'#e74c3c'}">${p.marge||0}%</td>
@@ -8376,7 +8376,7 @@
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
                 return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85em;color:#5a7b8f;cursor:pointer;border-bottom:1px solid #eef4f8;">
                     <input type="checkbox" class="pie-prestation-cb" value="${p.id}" onchange="drawPieChart()">
-                    <span><strong>${p.prestation}</strong> — ${p.client} — ${date} — ${(p.prixVente||0).toFixed(2)} CHF</span>
+                    <span><strong>${escapeHtml(p.prestation)}</strong> — ${escapeHtml(p.client)} — ${date} — ${(p.prixVente||0).toFixed(2)} CHF</span>
                 </label>`;
             }).join('');
         }
@@ -8411,11 +8411,11 @@
                     container.appendChild(div);
                     if (slices.length === 0) {
                         div.innerHTML = `<div style="text-align:center;padding:40px 10px;color:#aaa;">
-                            <div style="font-weight:600;color:#6b8fa3;margin-bottom:8px;">${p.prestation} (${p.client})</div>
+                            <div style="font-weight:600;color:#6b8fa3;margin-bottom:8px;">${escapeHtml(p.prestation)} (${escapeHtml(p.client)})</div>
                             <em>Aucun coût enregistré (0 CHF)</em></div>`;
                         return;
                     }
-                    renderOnePie(div, slices, `${p.prestation} (${p.client})`);
+                    renderOnePie(div, slices, `${escapeHtml(p.prestation)} (${escapeHtml(p.client)})`);
                 });
                 // Tableau comparatif
                 const [a, b] = sourcePrestations;
@@ -8458,7 +8458,7 @@
                     const div = document.createElement('div');
                     div.style.cssText = 'flex:1 1 220px;min-width:200px;';
                     container.appendChild(div);
-                    renderOnePie(div, slices, `${p.prestation} (${p.client})`);
+                    renderOnePie(div, slices, `${escapeHtml(p.prestation)} (${escapeHtml(p.client)})`);
                 });
             } else {
                 // Camembert unique (toutes ou sélection 1)
@@ -8809,11 +8809,11 @@
                     </div>
 
                     <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-                        <tr><td style="padding:6px 10px;font-weight:bold;width:150px;">Client</td><td style="padding:6px 10px;">${p.client}</td>
+                        <tr><td style="padding:6px 10px;font-weight:bold;width:150px;">Client</td><td style="padding:6px 10px;">${escapeHtml(p.client)}</td>
                             <td style="padding:6px 10px;font-weight:bold;width:150px;">Date</td><td style="padding:6px 10px;">${date}</td></tr>
-                        <tr><td style="padding:6px 10px;font-weight:bold;">Prestation</td><td style="padding:6px 10px;">${p.prestation}</td>
-                            <td style="padding:6px 10px;font-weight:bold;">Référence</td><td style="padding:6px 10px;">${p.reference}</td></tr>
-                        <tr><td style="padding:6px 10px;font-weight:bold;">Responsable</td><td style="padding:6px 10px;">${p.responsable || '-'}</td>
+                        <tr><td style="padding:6px 10px;font-weight:bold;">Prestation</td><td style="padding:6px 10px;">${escapeHtml(p.prestation)}</td>
+                            <td style="padding:6px 10px;font-weight:bold;">Référence</td><td style="padding:6px 10px;">${escapeHtml(p.reference)}</td></tr>
+                        <tr><td style="padding:6px 10px;font-weight:bold;">Responsable</td><td style="padding:6px 10px;">${escapeHtml(p.responsable || '-')}</td>
                             <td style="padding:6px 10px;font-weight:bold;">Équipe</td><td style="padding:6px 10px;">${p.nbCEA} CEA + ${Math.round((p.nbMSP||0)*100)}% MSP</td></tr>
                     </table>
 
@@ -8894,11 +8894,11 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
                     <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:6px;padding:8px 10px;">
                         <div style="font-size:0.7em;text-transform:uppercase;color:#8a99a8;font-weight:600;">Client</div>
-                        <div style="font-size:1.05em;font-weight:bold;">${p.client || '-'}</div></div>
+                        <div style="font-size:1.05em;font-weight:bold;">${escapeHtml(p.client || '-')}</div></div>
                     <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:6px;padding:8px 10px;">
                         <div style="font-size:0.7em;text-transform:uppercase;color:#8a99a8;font-weight:600;">Prestation</div>
-                        <div style="font-size:1.05em;font-weight:bold;">${p.prestation || '-'}</div>
-                        ${p.responsable ? `<div style="font-size:0.8em;color:#8a99a8;">Resp: ${p.responsable}</div>` : ''}</div>
+                        <div style="font-size:1.05em;font-weight:bold;">${escapeHtml(p.prestation || '-')}</div>
+                        ${p.responsable ? `<div style="font-size:0.8em;color:#8a99a8;">Resp: ${escapeHtml(p.responsable)}</div>` : ''}</div>
                 </div>
                 ${gestesRows ? `<h3 style="color:#6b8fa3;border-bottom:1px solid #a8d5e2;padding-bottom:3px;margin:8px 0 4px;font-size:1em;">📋 Détail de la prestation</h3>
                 <table style="width:100%;border-collapse:collapse;font-size:0.95em;"><thead><tr style="background:#edf5fa;">
@@ -8952,7 +8952,7 @@
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
             modal.innerHTML = `<div style="background:#fff;border-radius:14px;padding:28px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
                 <h3 style="margin:0 0 16px;color:#6b8fa3;">Copier vers un autre client</h3>
-                <p style="margin:0 0 12px;font-size:0.9em;color:#5a7b8f;">Prestation : <strong>${p.prestation}</strong></p>
+                <p style="margin:0 0 12px;font-size:0.9em;color:#5a7b8f;">Prestation : <strong>${escapeHtml(p.prestation)}</strong></p>
                 <label style="font-size:0.88em;color:#7a9db1;">Client existant :</label>
                 <select id="_copyClientSel" style="width:100%;margin:4px 0 10px;padding:8px;border:1px solid #d0e0ea;border-radius:8px;font-size:0.9em;">
                     <option value="">— Nouveau client —</option>${opts}
@@ -12670,8 +12670,8 @@
                             : `<span class="badge badge-info" style="margin-left:6px;">${age}j</span>`;
                         return `<div style="padding:10px;border-bottom:1px solid #e8f0f5;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
                             <div>
-                                <div style="font-weight:bold;color:#6b8fa3;">${p.prestation}</div>
-                                <div style="font-size:0.8em;color:#7a9db1;">🏢 ${p.client} — 📅 ${new Date(p.date).toLocaleDateString('fr-FR')}${badge}</div>
+                                <div style="font-weight:bold;color:#6b8fa3;">${escapeHtml(p.prestation)}</div>
+                                <div style="font-size:0.8em;color:#7a9db1;">🏢 ${escapeHtml(p.client)} — 📅 ${new Date(p.date).toLocaleDateString('fr-FR')}${badge}</div>
                             </div>
                             <div style="font-weight:bold;color:#6b8fa3;">${(p.prixVente||0).toFixed(2)} CHF</div>
                         </div>`;
@@ -12829,7 +12829,7 @@
                     clientCAEl.innerHTML = top5.map(([client, ca], i) => `
                         <div style="margin-bottom:10px;">
                             <div style="display:flex;justify-content:space-between;font-size:0.85em;margin-bottom:3px;">
-                                <span style="font-weight:600;color:#2d3e50;">${client}</span>
+                                <span style="font-weight:600;color:#2d3e50;">${escapeHtml(client)}</span>
                                 <span style="color:#6b8fa3;">${ca.toFixed(0)} CHF</span>
                             </div>
                             <div style="background:#e8f0f5;border-radius:6px;height:10px;">
@@ -13026,12 +13026,12 @@
                         else { urgence = '🟢 Récent'; badgeColor = '#27ae60'; bgColor = '#f0faf0'; }
                         return `<div style="padding:10px;margin-bottom:8px;border-radius:8px;background:${bgColor};border-left:3px solid ${badgeColor};display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                             <div>
-                                <strong>${p.prestation}</strong> — ${p.client}
+                                <strong>${escapeHtml(p.prestation)}</strong> — ${escapeHtml(p.client)}
                                 <div style="font-size:0.82em;color:#5a7b8f;">${(p.prixVente||0).toFixed(0)} CHF • envoyé il y a ${age} jour${age>1?'s':''}</div>
                             </div>
                             <div style="display:flex;gap:6px;align-items:center;">
                                 <span style="font-size:0.82em;font-weight:bold;color:${badgeColor};">${urgence}</span>
-                                ${age > 7 ? `<button class="btn btn-small" style="background:${badgeColor};color:white;border:none;" onclick="toast('Relance notée pour ${p.client} — ${p.reference}','info')">📧 Relancer</button>` : ''}
+                                ${age > 7 ? `<button class="btn btn-small" style="background:${badgeColor};color:white;border:none;" onclick="toast('Relance notée','info')">📧 Relancer</button>` : ''}
                             </div>
                         </div>`;
                     }).join('');
@@ -13191,15 +13191,15 @@
             const tempsAjuste = Math.round(g.temps * (g.coef || 1));
             const html = `<div style="font-family:'Segoe UI',sans-serif;max-width:420px;margin:0 auto;padding:24px;color:#2d3e50;border:2px solid #a8d5e2;border-radius:12px;">
                 <div style="background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%);padding:16px;border-radius:8px;margin-bottom:18px;">
-                    <div style="font-size:1.6em;font-weight:bold;">${g.code}</div>
-                    <div style="font-size:0.9em;opacity:0.85;">${g.categorie}</div>
+                    <div style="font-size:1.6em;font-weight:bold;">${escapeHtml(g.code)}</div>
+                    <div style="font-size:0.9em;opacity:0.85;">${escapeHtml(g.categorie)}</div>
                 </div>
-                <div style="font-size:1.15em;font-weight:bold;margin-bottom:14px;">${g.description}</div>
+                <div style="font-size:1.15em;font-weight:bold;margin-bottom:14px;">${escapeHtml(g.description)}</div>
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-bottom:14px;">
                     <tr style="background:#f5f9fc;"><td style="padding:7px 10px;font-weight:bold;">Temps standard</td><td style="padding:7px 10px;">${g.temps} sec</td></tr>
                     <tr><td style="padding:7px 10px;font-weight:bold;">Coef. ajustement</td><td style="padding:7px 10px;">× ${g.coef || 1}</td></tr>
                     <tr style="background:#f5f9fc;"><td style="padding:7px 10px;font-weight:bold;">Temps ajusté</td><td style="padding:7px 10px;font-weight:bold;color:#6b8fa3;">${tempsAjuste} sec</td></tr>
-                    <tr><td style="padding:7px 10px;font-weight:bold;">Notes / Niveau</td><td style="padding:7px 10px;font-style:italic;">${g.notes || '—'}</td></tr>
+                    <tr><td style="padding:7px 10px;font-weight:bold;">Notes / Niveau</td><td style="padding:7px 10px;font-style:italic;">${escapeHtml(g.notes || '—')}</td></tr>
                 </table>
                 <div style="background:#f0f4f8;border-radius:6px;padding:12px;margin-bottom:14px;">
                     <div style="font-weight:bold;margin-bottom:8px;color:#6b8fa3;">Consignes de sécurité</div>
@@ -13207,7 +13207,7 @@
                     <div style="height:18px;border-bottom:1px solid #ccc;margin-bottom:6px;"></div>
                     <div style="height:18px;border-bottom:1px solid #ccc;"></div>
                 </div>
-                <div style="text-align:center;font-size:0.75em;color:#999;border-top:1px solid #eee;padding-top:10px;">Fiche geste ${g.code}<br><span style="font-size:0.85em;color:#bbb;">© ${new Date().getFullYear()} MARET Davie — Tous droits réservés.</span></div>
+                <div style="text-align:center;font-size:0.75em;color:#999;border-top:1px solid #eee;padding-top:10px;">Fiche geste ${escapeHtml(g.code)}<br><span style="font-size:0.85em;color:#bbb;">© ${new Date().getFullYear()} MARET Davie — Tous droits réservés.</span></div>
             </div>`;
             if (typeof html2pdf === 'undefined') { toast('html2pdf non disponible', 'error'); return; }
             const el = document.createElement('div'); el.innerHTML = html;
@@ -13223,10 +13223,10 @@
                 const tempsAjuste = Math.round(g.temps * (g.coef || 1));
                 allHtml += `<div style="font-family:'Segoe UI',sans-serif;max-width:420px;margin:0 auto 20px;padding:20px;color:#2d3e50;border:2px solid #a8d5e2;border-radius:10px;page-break-inside:avoid;">
                     <div style="background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%);padding:12px;border-radius:6px;margin-bottom:12px;display:flex;justify-content:space-between;">
-                        <span style="font-size:1.3em;font-weight:bold;">${g.code}</span><span style="font-size:0.88em;opacity:0.85;">${g.categorie}</span>
+                        <span style="font-size:1.3em;font-weight:bold;">${escapeHtml(g.code)}</span><span style="font-size:0.88em;opacity:0.85;">${escapeHtml(g.categorie)}</span>
                     </div>
-                    <div style="font-weight:bold;margin-bottom:8px;">${g.description}</div>
-                    <div style="font-size:0.85em;color:#5a7b8f;">Temps : <strong>${g.temps}s</strong> × ${g.coef} = <strong>${tempsAjuste}s</strong> | ${g.notes||'—'}</div>
+                    <div style="font-weight:bold;margin-bottom:8px;">${escapeHtml(g.description)}</div>
+                    <div style="font-size:0.85em;color:#5a7b8f;">Temps : <strong>${g.temps}s</strong> × ${g.coef} = <strong>${tempsAjuste}s</strong> | ${escapeHtml(g.notes||'—')}</div>
                 </div>`;
             });
             const el = document.createElement('div'); el.style.cssText = 'padding:20px;'; el.innerHTML = allHtml;
@@ -13933,12 +13933,12 @@
                     const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
 
                     return `<div style="padding:10px;border-bottom:1px solid #e0e8f0;margin-bottom:6px;background:#f9fbfc;border-radius:4px;">
-                        <div style="margin-bottom:4px;"><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
+                        <div style="margin-bottom:4px;"><strong>${i+1}. [${escapeHtml(g.code)}]</strong> ${escapeHtml(g.description)}</div>
                         <div style="font-size:0.8em;color:#7a9db1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
-                            <div>🏷️ ${g.categorie}</div>
+                            <div>🏷️ ${escapeHtml(g.categorie)}</div>
                             <div>⏱️ ${tempsAffiche} × ${g.coef || 1} = <strong>${tempsAjusteAffiche}</strong></div>
                             <div>📊 ${diffLabel}</div>
-                            ${g.notes ? `<div style="grid-column:1/-1;font-style:italic;color:#999;">📝 ${g.notes}</div>` : ''}
+                            ${g.notes ? `<div style="grid-column:1/-1;font-style:italic;color:#999;">📝 ${escapeHtml(g.notes)}</div>` : ''}
                         </div>
                     </div>`;
                 })
@@ -14042,12 +14042,12 @@
                     const diffLabel = ['', 'Facile', 'Moyen', 'Difficile'][diff] || '—';
 
                     return `<div style="padding:10px;border-bottom:1px solid #e0e8f0;margin-bottom:6px;background:#f9fbfc;border-radius:4px;">
-                        <div style="margin-bottom:4px;"><strong>${i+1}. [${g.code}]</strong> ${g.description}</div>
+                        <div style="margin-bottom:4px;"><strong>${i+1}. [${escapeHtml(g.code)}]</strong> ${escapeHtml(g.description)}</div>
                         <div style="font-size:0.8em;color:#7a9db1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
-                            <div>🏷️ ${g.categorie}</div>
+                            <div>🏷️ ${escapeHtml(g.categorie)}</div>
                             <div>⏱️ ${tempsAffiche} × ${g.coef || 1} = <strong>${tempsAjusteAffiche}</strong></div>
                             <div>📊 ${diffLabel}</div>
-                            ${g.notes ? `<div style="grid-column:1/-1;font-style:italic;color:#999;">📝 ${g.notes}</div>` : ''}
+                            ${g.notes ? `<div style="grid-column:1/-1;font-style:italic;color:#999;">📝 ${escapeHtml(g.notes)}</div>` : ''}
                         </div>
                     </div>`;
                 })
@@ -17350,7 +17350,7 @@
                     <div style="padding:10px;background:#fff9e6;margin-bottom:8px;border-left:4px solid #ffa500;border-radius:6px;display:flex;justify-content:space-between;align-items:center;font-size:0.9em;">
                         <div>
                             <strong>${escapeHtml(r.article)}</strong> × ${r.qty}
-                            <br><span style="color:#666;">Raison: ${r.reason} | ${r.createdBy}</span>
+                            <br><span style="color:#666;">Raison: ${escapeHtml(r.reason)} | ${escapeHtml(r.createdBy)}</span>
                         </div>
                         <button class="delete-btn" onclick="removeReservation('${r.id}')">🗑️</button>
                     </div>
