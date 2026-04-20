@@ -2095,6 +2095,7 @@
                         <a href="#doc-s14" onclick="event.preventDefault();docGoto('doc-s14')" style="color:#4a6070;text-decoration:none;">14. Email Webhooks</a>
                         <a href="#doc-s15" onclick="event.preventDefault();docGoto('doc-s15')" style="color:#4a6070;text-decoration:none;">15. Formation</a>
                         <a href="#doc-s16" onclick="event.preventDefault();docGoto('doc-s16')" style="color:#4a6070;text-decoration:none;">16. Conditions</a>
+                        <a href="#doc-s17" onclick="event.preventDefault();docGoto('doc-s17')" style="color:#4a6070;text-decoration:none;"><strong>17. ✨ Confort & raccourcis UX</strong></a>
                     </div>
                     <!-- Modules 4.1 - 4.16 -->
                     <div id="docModulesNav" style="display:none;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 14px;font-size:0.82em;margin-top:12px;padding-top:10px;border-top:1px dashed #c5d8e4;">
@@ -2164,7 +2165,7 @@
                 <p style="margin-bottom:10px;">L'interface est organisée en <strong>16 onglets</strong> accessibles via la barre de navigation. Selon le profil actif, certains onglets peuvent être masqués. En mode admin, les onglets sont réorganisables par glisser-déposer.</p>
 
                 <h4 id="doc-s4-1" style="color:#5a7b8f;margin:12px 0 6px;">4.1 🏠 Tableau de bord</h4>
-                <ul style="margin:0 0 8px 20px;"><li>KPIs : prestations totales, CA du mois, devis en attente, heures engagées, taux d'occupation CEA</li><li>Devis en attente avec ancienneté et alertes (&gt; 30 jours)</li><li>Pipeline de chiffre d'affaires sur 3 mois (confirmé vs potentiel)</li><li>Top clients par CA sur 12 mois</li><li><strong>Évolution CA sur 12 mois</strong> (graphique barres + moyenne mensuelle)</li><li><strong>Top prestations par rentabilité</strong> (marge %)</li><li><strong>Répartition par statut</strong> (devis/soumis/validé/facturé/annulé)</li><li><strong>Tendance marge moyenne sur 6 mois</strong> (courbe + indicateur ↑↓)</li><li>Alertes (stock bas, devis expirés, capacité dépassée)</li><li>Demandes de formation en attente</li></ul>
+                <ul style="margin:0 0 8px 20px;"><li><strong>🚀 Checklist premiers pas</strong> (nouveau) : 5 étapes d'onboarding avec progression, masquée auto une fois complète</li><li>KPIs : prestations totales, CA du mois, devis en attente, heures engagées, taux d'occupation CEA</li><li>Devis en attente avec ancienneté et alertes (&gt; 30 jours)</li><li>Pipeline de chiffre d'affaires sur 3 mois (confirmé vs potentiel)</li><li>Top clients par CA sur 12 mois</li><li><strong>Évolution CA sur 12 mois</strong> (graphique barres + moyenne mensuelle)</li><li><strong>Top prestations par rentabilité</strong> (marge %)</li><li><strong>Répartition par statut</strong> (devis/soumis/validé/facturé/annulé)</li><li><strong>Tendance marge moyenne sur 6 mois</strong> (courbe + indicateur ↑↓)</li><li>Alertes (stock bas, devis expirés, capacité dépassée)</li><li>Demandes de formation en attente</li><li><strong>🔔 Badges rouges</strong> sur les onglets Stock et Prestations (mis à jour à chaque rendu)</li><li>Sections réordonnables par glisser-déposer en mode admin</li></ul>
 
                 <h4 id="doc-s4-2" style="color:#5a7b8f;margin:12px 0 6px;">4.2 🧙 Assistant <em style="color:#9a70b8;font-size:0.85em;">(admin)</em></h4>
                 <p style="margin:0 0 6px;">Assistant pas-à-pas pour composer une prestation en deux étapes :</p>
@@ -2274,10 +2275,12 @@
                 <!-- 7 -->
                 <h3 id="doc-s7" style="color:#6b8fa3;margin:0 0 8px;">7. Raccourcis clavier</h3>
                 <table style="border-collapse:collapse;font-size:0.92em;margin-bottom:8px;">
+                    <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+K</kbd> / <kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">⌘+K</kbd></td><td>Palette de commandes — recherche rapide d'un onglet ou d'une action</td></tr>
                     <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+G</kbd></td><td>Ajouter un geste dans le Calculateur</td></tr>
                     <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+S</kbd></td><td>Sauvegarder la prestation en cours</td></tr>
                     <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+Z</kbd></td><td>Annuler la dernière action</td></tr>
                     <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">Ctrl+F</kbd></td><td>Recherche globale</td></tr>
+                    <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">↑ ↓ Enter Esc</kbd></td><td>Dans la palette : naviguer, exécuter, fermer</td></tr>
                     <tr><td style="padding:4px 12px 4px 0;"><kbd style="background:#eef2f6;padding:2px 7px;border-radius:4px;">?</kbd></td><td>Afficher l'aide des raccourcis</td></tr>
                 </table>
                 <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
@@ -2285,7 +2288,7 @@
                 <!-- 8 -->
                 <h3 id="doc-s8" style="color:#6b8fa3;margin:0 0 8px;">8. Modes d'affichage</h3>
                 <ul style="margin:4px 0 8px 20px;">
-                    <li><strong>Mode sombre</strong> : bouton 🌙 en haut à droite ou Config → Thème</li>
+                    <li><strong>Mode sombre</strong> : bouton 🌙 en haut à droite ou Config → Thème. <em>Auto</em> au premier lancement selon <code>prefers-color-scheme</code> du système ; le choix manuel est ensuite mémorisé.</li>
                     <li><strong>Mode présentation</strong> : bouton 🖥️ — masque les coûts internes pour une présentation client</li>
                     <li><strong>Mode plein écran</strong> : F11 ou bouton ⛶ dans l'interface</li>
                     <li><strong>Mode sans icônes</strong> : option à la connexion — lance l'application sans emoji ni symbole (choix mémorisé)</li>
@@ -2417,6 +2420,42 @@
                 </ul>
                 <p style="font-size:0.85em;color:#aaa;">Conditions complètes accessibles via le footer de l'application.</p>
 
+                <hr style="border:none;border-top:1px solid #e8eef3;margin:20px 0;">
+
+                <!-- 17 : nouveautés UX -->
+                <h3 id="doc-s17" style="color:#6b8fa3;margin:0 0 8px;">17. ✨ Confort & raccourcis UX <em style="color:#9a70b8;font-size:0.7em;">(Avril 2026)</em></h3>
+                <p style="margin:0 0 10px;">Trois vagues d'améliorations (Onboarding, Productivité, Confort) pour rendre l'outil plus rassurant, rapide et lisible.</p>
+
+                <h4 style="color:#5a7b8f;margin:14px 0 6px;">🚀 Onboarding & rassurance</h4>
+                <ul style="margin:0 0 8px 20px;">
+                    <li><strong>Checklist premiers pas</strong> sur le Dashboard : 5 étapes (coûts horaires, geste catalogue, client, prestation, export JSON) avec barre de progression. Se masque automatiquement une fois complète.</li>
+                    <li><strong>Dark mode auto</strong> : respecte <code>prefers-color-scheme</code> au premier lancement, puis mémorise le choix manuel.</li>
+                    <li><strong>Badges rouges sur onglets</strong> : compteurs automatiques sur 📦 Stock (stock bas) et 📊 Prestations (devis &gt; 30 jours).</li>
+                    <li><strong>Corbeille 30 secondes</strong> : toast d'annulation après suppression d'une prestation — restauration à l'index d'origine.</li>
+                    <li><strong>Empty states parlants</strong> : icône + conseil + bouton d'action quand une liste est vide (devis, clients, formations…).</li>
+                </ul>
+
+                <h4 style="color:#5a7b8f;margin:14px 0 6px;">⚡ Productivité</h4>
+                <ul style="margin:0 0 8px 20px;">
+                    <li><strong>Palette de commandes</strong> <kbd style="background:#eef2f6;padding:1px 6px;border-radius:4px;font-size:0.85em;">Ctrl+K</kbd> / <kbd style="background:#eef2f6;padding:1px 6px;border-radius:4px;font-size:0.85em;">⌘+K</kbd> : recherche rapide de tous les onglets et actions courantes (doc, export, undo/redo, dark mode). Navigation ↑↓, Enter, Esc.</li>
+                    <li><strong>Champs intelligents</strong> : les inputs marqués <code>data-smart</code> ou <code>.smart-number</code> acceptent les formats naturels — <code>2h30</code>, <code>2'500</code>, <code>3j4h</code>, <code>1,5</code> — et les convertissent en nombre au blur. Helper exposé sur <code>window.parseSmartNumber</code>.</li>
+                    <li><strong>Duplication partout</strong> : bouton 📋 dans le catalogue des gestes (suffixe <code>-COPIE</code>), en plus des prestations et lignes de geste déjà duplicables.</li>
+                    <li><strong>Validation inline</strong> : les champs validés affichent désormais un message d'erreur rouge sous le champ (au lieu d'un toast fugace), en plus de la bordure colorée.</li>
+                    <li><strong>Dashboard réordonnable</strong> : en mode admin, les sections du Dashboard peuvent être déplacées par glisser-déposer (fonction pré-existante <code>initSectionDragAndDrop</code>).</li>
+                </ul>
+
+                <h4 style="color:#5a7b8f;margin:14px 0 6px;">💡 Confort de lecture</h4>
+                <ul style="margin:0 0 8px 20px;">
+                    <li><strong>Tooltips explicatifs</strong> (symbole ⓘ) sur les cartes de totaux du calculateur : Temps total, Temps/pièce, Prix revient, Marge %, Marge CHF. Survolez pour voir la formule.</li>
+                    <li><strong>Bottom-nav mobile</strong> : barre de navigation fixe en bas, visible uniquement sur écrans &lt; 640 px. 5 raccourcis : Accueil, Calcul, Prestations, Stock, Palette 🔍. Respecte <code>env(safe-area-inset-bottom)</code>.</li>
+                    <li><strong>Breadcrumbs contextuels</strong> : fil d'Ariane « 🏠 Accueil › 💼 Calculateur » sous la barre d'onglets, automatiquement rempli selon l'onglet actif (masqué sur le Dashboard).</li>
+                    <li><strong>Skeleton screens</strong> : animation shimmer sur les KPIs et listes du Dashboard avant le premier rendu, pour éviter le flash de contenu vide. Helper <code>showSkeleton(id, rows)</code>.</li>
+                </ul>
+
+                <p style="margin-top:12px;padding:10px 14px;background:#f9fbfc;border-left:3px solid #a8d5e2;border-radius:6px;font-size:0.88em;">
+                    <strong>🔎 Astuce :</strong> la palette <kbd style="background:#eef2f6;padding:1px 6px;border-radius:4px;">Ctrl+K</kbd> est le moyen le plus rapide d'accéder à n'importe quelle fonction sans quitter le clavier.
+                </p>
+
                 <div style="text-align:center;margin-top:20px;">
                     <a href="#docIndex" onclick="event.preventDefault();docGoto('docIndex')" style="display:inline-block;padding:6px 14px;background:#f0f7fa;border:1px solid #c5d8e4;border-radius:20px;color:#6b8fa3;text-decoration:none;font-size:0.85em;">↑ Retour au sommaire</a>
                 </div>
@@ -2430,6 +2469,7 @@
         <div style="background:white;border-radius:16px;padding:28px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
             <h3 style="margin:0 0 16px;color:#6b8fa3;">⌨️ Raccourcis clavier</h3>
             <table style="width:100%;border-collapse:collapse;font-size:0.9em;">
+                <tr><td style="padding:6px 0;"><kbd>Ctrl+K</kbd></td><td>Palette de commandes (recherche rapide)</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+G</kbd></td><td>Ajouter un geste</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+D</kbd></td><td>Dupliquer le dernier geste</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+Z</kbd></td><td>Annuler la dernière action</td></tr>

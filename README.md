@@ -38,6 +38,7 @@
 14. [Email Webhooks (Phase 3)](#14-phase-3--email-webhooks)
 15. [Système de Formation (Phase 1)](#15-système-de-formation-phase-1)
 16. [Conditions d'utilisation](#16-conditions-dutilisation)
+17. [✨ Confort & raccourcis UX *(Avril 2026)*](#17--confort--raccourcis-ux-avril-2026)
 
 ---
 
@@ -560,10 +561,12 @@ Depuis le **Calculateur** ou l'onglet **Clients** :
 
 | Raccourci | Action |
 |-----------|--------|
+| `Ctrl + K` / `⌘ + K` | **Palette de commandes** — recherche rapide d'un onglet ou d'une action |
 | `Ctrl + G` | Ajouter un geste dans le Calculateur |
 | `Ctrl + S` | Sauvegarder la prestation en cours |
 | `Ctrl + Z` | Annuler la dernière action |
 | `Ctrl + F` | Recherche globale |
+| `↑ ↓ Enter Esc` | Dans la palette : naviguer, exécuter, fermer |
 | `?` | Afficher l'aide des raccourcis |
 
 ---
@@ -572,7 +575,7 @@ Depuis le **Calculateur** ou l'onglet **Clients** :
 
 ### Mode sombre
 
-Basculer via l'icône lune/soleil en haut à droite ou depuis **Configuration → Thème**.
+Basculer via l'icône lune/soleil en haut à droite ou depuis **Configuration → Thème**. **Détection automatique** au premier lancement selon la préférence système (`prefers-color-scheme`) ; le choix manuel est ensuite mémorisé.
 
 ### Mode présentation
 
@@ -846,6 +849,37 @@ Les conditions d'utilisation détaillées sont accessibles depuis le **footer** 
 ### 16.2 Attribution
 
 Si vous utilisez ou vous inspirez de ces projets, veuillez citer : **dmaret © 2025–2026**
+
+---
+
+## 17. ✨ Confort & raccourcis UX *(Avril 2026)*
+
+Trois vagues successives d'améliorations pour rendre l'outil plus rassurant, rapide et lisible.
+
+### 17.1 🚀 Onboarding & rassurance
+
+- **Checklist premiers pas** sur le Dashboard : 5 étapes (coûts horaires, geste catalogue, client, prestation, export JSON) avec barre de progression. Se masque automatiquement une fois complète.
+- **Dark mode auto** : respecte `prefers-color-scheme` au premier lancement, puis mémorise le choix manuel.
+- **Badges rouges sur onglets** : compteurs automatiques sur 📦 Stock (stock bas) et 📊 Prestations (devis > 30 jours).
+- **Corbeille 30 secondes** : toast d'annulation après suppression d'une prestation — restauration à l'index d'origine.
+- **Empty states parlants** : icône + conseil + bouton d'action quand une liste est vide.
+
+### 17.2 ⚡ Productivité
+
+- **Palette de commandes** `Ctrl+K` / `⌘+K` : recherche rapide de tous les onglets et actions courantes (documentation, export, undo/redo, dark mode). Navigation clavier ↑↓, Enter pour exécuter, Esc pour fermer.
+- **Champs intelligents** : les inputs marqués `data-smart` ou `.smart-number` acceptent les formats naturels — `2h30`, `2'500`, `3j4h`, `1,5` — et les convertissent en nombre au blur. Helper exposé sur `window.parseSmartNumber`.
+- **Duplication partout** : bouton 📋 dans le catalogue des gestes (suffixe `-COPIE`), en plus des prestations et lignes de geste déjà duplicables.
+- **Validation inline** : les champs validés affichent désormais un message d'erreur rouge sous le champ (au lieu d'un toast fugace), en plus de la bordure colorée.
+- **Dashboard réordonnable** : en mode admin, les sections du Dashboard peuvent être déplacées par glisser-déposer.
+
+### 17.3 💡 Confort de lecture
+
+- **Tooltips explicatifs** (symbole ⓘ) sur les cartes de totaux du calculateur : Temps total, Temps/pièce, Prix revient, Marge %, Marge CHF. Survolez pour voir la formule.
+- **Bottom-nav mobile** : barre de navigation fixe en bas, visible uniquement sur écrans < 640 px. 5 raccourcis : Accueil, Calcul, Prestations, Stock, Palette 🔍. Respecte `env(safe-area-inset-bottom)` pour les iPhone X+.
+- **Breadcrumbs contextuels** : fil d'Ariane « 🏠 Accueil › 💼 Calculateur » sous la barre d'onglets, automatiquement rempli selon l'onglet actif (masqué sur le Dashboard).
+- **Skeleton screens** : animation shimmer sur les KPIs et listes du Dashboard avant le premier rendu, pour éviter le flash de contenu vide. Helper `showSkeleton(id, rows)`.
+
+> 🔎 **Astuce :** la palette `Ctrl+K` est le moyen le plus rapide d'accéder à n'importe quelle fonction sans quitter le clavier.
 
 ---
 
