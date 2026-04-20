@@ -6540,7 +6540,15 @@
                 map[p.client].heures += p.heures || 0;
             });
             const clients = Object.entries(map).sort((a,b) => b[1].ca - a[1].ca);
-            if (clients.length === 0) { grid.innerHTML = '<div class="empty-state">Aucun client enregistré</div>'; return; }
+            if (clients.length === 0) {
+                grid.innerHTML = uxEmptyState({
+                    icon: '🏢',
+                    title: 'Aucun client enregistré',
+                    hint: 'Les clients se créent automatiquement lors de la saisie d\'une prestation. Créez-en une pour démarrer.',
+                    cta: { label: '➕ Créer ma première prestation', onclick: "switchTab('calculateur')" }
+                });
+                return;
+            }
             grid.innerHTML = '<div class="clients-grid">' + clients.map(([nom, d]) => {
                 const marge = d.ca - d.revient;
                 const margePct = d.ca > 0 ? (marge / d.ca * 100).toFixed(1) : '0';
@@ -8176,7 +8184,12 @@
             }
 
             if (prestationsSauvegardees.length === 0) {
-                container.innerHTML = '<div class="empty-state">Aucune prestation</div>';
+                container.innerHTML = uxEmptyState({
+                    icon: '📋',
+                    title: 'Aucune prestation enregistrée',
+                    hint: 'Commencez par créer votre première prestation dans le calculateur, ou chargez un modèle pour gagner du temps.',
+                    cta: { label: '➕ Créer ma première prestation', onclick: "switchTab('calculateur')" }
+                });
                 return;
             }
 
@@ -8212,7 +8225,11 @@
             if (dateA)  filtered = filtered.filter(p => (p.date || p.dateDebut || '') <= dateA);
 
             if (filtered.length === 0) {
-                container.innerHTML = '<div class="empty-state">Aucune prestation correspondante</div>';
+                container.innerHTML = uxEmptyState({
+                    icon: '🔎',
+                    title: 'Aucune prestation ne correspond aux filtres',
+                    hint: 'Modifiez les filtres (texte, statut, client, dates) ou réinitialisez-les pour voir toutes les prestations.'
+                });
                 return;
             }
 
@@ -8848,7 +8865,11 @@
             const container = document.getElementById('mouvementsTable');
             
             if (mouvements.length === 0) {
-                container.innerHTML = '<div class="empty-state">Aucun mouvement</div>';
+                container.innerHTML = uxEmptyState({
+                    icon: '📦',
+                    title: 'Aucun mouvement de stock',
+                    hint: 'Enregistrez vos entrées et sorties pour suivre l\'évolution du stock et générer des rapports de valorisation.'
+                });
                 return;
             }
             
@@ -8884,7 +8905,12 @@
             const container = document.getElementById('valorisationTable');
             
             if (Object.keys(stockActuel).length === 0) {
-                container.innerHTML = '<div class="empty-state">Aucun stock</div>';
+                container.innerHTML = uxEmptyState({
+                    icon: '🏷️',
+                    title: 'Aucun article en stock',
+                    hint: 'Ajoutez vos articles depuis le catalogue consommables, puis enregistrez des mouvements d\'entrée pour constituer votre stock.',
+                    cta: { label: '📚 Aller au catalogue', onclick: "switchTab('consommables')" }
+                });
                 return;
             }
             
@@ -12528,6 +12554,20 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }
+
+        // Empty state guidé — renvoie le HTML d'une carte avec icône, titre,
+        // conseil et (optionnel) bouton d'action. Utilisé quand une liste est
+        // vide pour orienter l'utilisateur vers la prochaine étape.
+        function uxEmptyState({ icon = '📭', title, hint = '', cta = null }) {
+            const ctaHtml = cta ? `<button class="btn btn-primary" style="margin-top:14px;" onclick="${cta.onclick}">${escapeHtml(cta.label)}</button>` : '';
+            const hintHtml = hint ? `<p style="color:#7a9db1;max-width:380px;margin:4px auto 0;font-size:0.92em;">${escapeHtml(hint)}</p>` : '';
+            return `<div class="empty-state">
+                <div style="font-size:3em;opacity:0.6;line-height:1;">${icon}</div>
+                <h3 style="color:#6b8fa3;margin:10px 0 4px;font-weight:600;">${escapeHtml(title)}</h3>
+                ${hintHtml}
+                ${ctaHtml}
+            </div>`;
         }
 
         // Formate une Date en "YYYY-MM-DD" selon le fuseau local
