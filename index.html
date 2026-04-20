@@ -1792,7 +1792,7 @@
     <!-- Global search overlay -->
     <div id="searchGlobalOverlay" onclick="if(event.target===this)closeGlobalSearch()">
         <div class="search-global-box">
-            <input type="text" id="searchGlobalInput" placeholder="🔍 Rechercher dans toute l'application..." aria-label="Recherche globale" oninput="runGlobalSearch(this.value)" onkeydown="if(event.key==='Escape')closeGlobalSearch()">
+            <input type="text" id="searchGlobalInput" placeholder="🔍 Rechercher : prestations, gestes, clients, stock…" aria-label="Recherche globale" aria-autocomplete="list" aria-controls="searchGlobalResults" oninput="runGlobalSearch(this.value)" onkeydown="if(event.key==='Escape'){closeGlobalSearch()}else if(event.key==='ArrowDown'){event.preventDefault();_moveSearchSelection(1)}else if(event.key==='ArrowUp'){event.preventDefault();_moveSearchSelection(-1)}else if(event.key==='Enter'){event.preventDefault();_activateSearchSelection()}">
             <div id="searchGlobalResults"></div>
         </div>
     </div>
@@ -14045,45 +14045,123 @@
         function closeGlobalSearch() {
             document.getElementById('searchGlobalOverlay').classList.remove('open');
         }
+        // Surligne les occurrences de q dans text. Retourne du HTML safe.
+        function _highlightMatch(text, q) {
+            if (!text) return '';
+            const safe = escapeHtml(String(text));
+            if (!q || q.length < 2) return safe;
+            const qSafe = escapeHtml(q).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            return safe.replace(new RegExp('(' + qSafe + ')', 'gi'),
+                '<mark style="background:#fff3a3;color:#5a4200;padding:0 2px;border-radius:2px;">$1</mark>');
+        }
+
         function runGlobalSearch(q) {
             const res = document.getElementById('searchGlobalResults');
-            if (!q || q.length < 2) { res.innerHTML = ''; return; }
+            if (!q || q.length < 2) {
+                res.innerHTML = '<div style="padding:14px;color:#7a9db1;font-style:italic;font-size:0.88em;">Tapez au moins 2 caractères — ↑↓ pour naviguer, Entrée pour ouvrir, Échap pour fermer</div>';
+                window.searchResultActions = [];
+                window._searchSelectedIdx = -1;
+                return;
+            }
             const ql = q.toLowerCase();
-            let items = [];
+            const groups = { prestations: [], gestes: [], clients: [], stock: [], consommables: [], modeles: [] };
+
             // Prestations
             prestationsSauvegardees.forEach(p => {
                 if ((p.client||'').toLowerCase().includes(ql) || (p.prestation||'').toLowerCase().includes(ql) || (p.reference||'').toLowerCase().includes(ql)) {
-                    items.push({ icon:'💼', label: `${p.reference} — ${p.client}`, sub: p.prestation, action: ()=>{ closeGlobalSearch(); switchTab('prestations'); } });
+                    groups.prestations.push({ icon:'💼', label: `${p.reference||''} — ${p.client||''}`, sub: p.prestation||'', action: ()=>{ closeGlobalSearch(); switchTab('prestations'); } });
                 }
             });
             // Gestes catalogue
             catalogueGestes.forEach(g => {
-                if (g.code.toLowerCase().includes(ql) || g.description.toLowerCase().includes(ql) || (g.notes||'').toLowerCase().includes(ql)) {
-                    items.push({ icon:'📋', label: `${g.code} — ${g.description}`, sub: g.categorie + (g.notes ? ' · '+g.notes : ''), action: ()=>{ closeGlobalSearch(); switchTab('catalogue'); } });
+                if ((g.code||'').toLowerCase().includes(ql) || (g.description||'').toLowerCase().includes(ql) || (g.notes||'').toLowerCase().includes(ql)) {
+                    groups.gestes.push({ icon:'📋', label: `${g.code} — ${g.description}`, sub: (g.categorie||'') + (g.notes ? ' · '+g.notes : ''), action: ()=>{ closeGlobalSearch(); switchTab('catalogue'); } });
                 }
             });
             // Clients
-            Object.entries(clientsData).forEach(([nom, c]) => {
-                if (nom.toLowerCase().includes(ql) || (c.email||'').toLowerCase().includes(ql)) {
-                    items.push({ icon:'👤', label: nom, sub: c.email||c.tel||'', action: ()=>{ closeGlobalSearch(); switchTab('clients'); } });
+            Object.entries(clientsData || {}).forEach(([nom, c]) => {
+                if (nom.toLowerCase().includes(ql) || (c.email||'').toLowerCase().includes(ql) || (c.tel||'').toLowerCase().includes(ql)) {
+                    groups.clients.push({ icon:'👤', label: nom, sub: [c.email, c.tel].filter(Boolean).join(' · '), action: ()=>{ closeGlobalSearch(); switchTab('clients'); } });
                 }
             });
             // Stock
             try {
                 (JSON.parse(localStorage.getItem('atelier_stock')||'[]')).forEach(s => {
                     if ((s.reference||'').toLowerCase().includes(ql) || (s.description||'').toLowerCase().includes(ql)) {
-                        items.push({ icon:'📦', label: s.reference, sub: s.description, action: ()=>{ closeGlobalSearch(); switchTab('stock'); } });
+                        groups.stock.push({ icon:'📦', label: s.reference||'', sub: s.description||'', action: ()=>{ closeGlobalSearch(); switchTab('stock'); } });
                     }
                 });
             } catch(e) { console.error('Error parsing stock data in search:', e); }
-            if (items.length === 0) { res.innerHTML = '<div style="padding:12px;color:#7a9db1;font-style:italic;">Aucun résultat</div>'; return; }
-            res.innerHTML = items.slice(0,20).map((it,i) =>
-                `<div class="search-result-item" onclick="searchResultActions[${i}]()">
-                    <span style="font-size:1.2em">${it.icon}</span>
-                    <div><div style="font-weight:600">${it.label}</div><div style="font-size:0.82em;color:#7a9db1">${it.sub}</div></div>
-                </div>`
-            ).join('');
-            window.searchResultActions = items.slice(0,20).map(it=>it.action);
+            // Consommables
+            (catalogueConsommables || []).forEach(c => {
+                if ((c.nom||'').toLowerCase().includes(ql)) {
+                    groups.consommables.push({ icon:'🛒', label: c.nom, sub: `${fmtCHF(c.prix||0)} / ${c.unite||'u'}`, action: ()=>{ closeGlobalSearch(); switchTab('consommables'); } });
+                }
+            });
+            // Modèles prestation
+            (configModeles || []).forEach(m => {
+                if ((m.nom||'').toLowerCase().includes(ql) || (m.description||'').toLowerCase().includes(ql)) {
+                    groups.modeles.push({ icon:'📑', label: m.nom||'(modèle)', sub: m.description||'', action: ()=>{ closeGlobalSearch(); switchTab('calculateur'); } });
+                }
+            });
+
+            const total = Object.values(groups).reduce((a, g) => a + g.length, 0);
+            if (total === 0) {
+                res.innerHTML = '<div style="padding:14px;color:#7a9db1;font-style:italic;">Aucun résultat pour « ' + escapeHtml(q) + ' »</div>';
+                window.searchResultActions = [];
+                window._searchSelectedIdx = -1;
+                return;
+            }
+
+            const groupTitles = {
+                prestations: '💼 Prestations', gestes: '📋 Gestes', clients: '👤 Clients',
+                stock: '📦 Stock', consommables: '🛒 Consommables', modeles: '📑 Modèles'
+            };
+            let html = `<div style="padding:8px 14px;font-size:0.78em;color:#7a9db1;">${total} résultat${total>1?'s':''} — ↑↓ puis Entrée</div>`;
+            const actions = [];
+            let idx = 0;
+            Object.keys(groups).forEach(key => {
+                if (!groups[key].length) return;
+                html += `<div style="padding:6px 14px;font-size:0.74em;font-weight:600;color:#6b8fa3;text-transform:uppercase;letter-spacing:0.5px;background:#f5f9fc;border-top:1px solid #e8eef3;">${groupTitles[key]} (${groups[key].length})</div>`;
+                groups[key].slice(0, 8).forEach(it => {
+                    actions.push(it.action);
+                    html += `<div class="search-result-item" data-idx="${idx}" onclick="searchResultActions[${idx}]()" role="option" aria-selected="false">
+                        <span style="font-size:1.2em;">${it.icon}</span>
+                        <div style="min-width:0;flex:1;">
+                            <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;">${_highlightMatch(it.label, q)}</div>
+                            <div style="font-size:0.82em;color:#7a9db1;overflow:hidden;text-overflow:ellipsis;">${_highlightMatch(it.sub, q)}</div>
+                        </div>
+                    </div>`;
+                    idx++;
+                });
+                if (groups[key].length > 8) {
+                    html += `<div style="padding:4px 14px;font-size:0.75em;color:#aaa;font-style:italic;">+ ${groups[key].length - 8} autre${groups[key].length - 8 > 1 ? 's' : ''} dans cette catégorie</div>`;
+                }
+            });
+            res.innerHTML = html;
+            window.searchResultActions = actions;
+            window._searchSelectedIdx = -1;
+        }
+
+        function _moveSearchSelection(delta) {
+            const items = document.querySelectorAll('#searchGlobalResults .search-result-item');
+            if (!items.length) return;
+            let cur = window._searchSelectedIdx ?? -1;
+            cur = (cur + delta + items.length) % items.length;
+            items.forEach((el, i) => {
+                const selected = i === cur;
+                el.style.background = selected ? '#e0edf5' : '';
+                el.setAttribute('aria-selected', selected ? 'true' : 'false');
+                if (selected) el.scrollIntoView({ block: 'nearest' });
+            });
+            window._searchSelectedIdx = cur;
+        }
+
+        function _activateSearchSelection() {
+            const idx = window._searchSelectedIdx;
+            if (idx != null && idx >= 0 && window.searchResultActions && window.searchResultActions[idx]) {
+                window.searchResultActions[idx]();
+            }
         }
 
         // ============================================================
