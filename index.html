@@ -514,6 +514,74 @@
             letter-spacing: 0.5px;
             background: #fafbfc;
         }
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #d7dee5;
+            z-index: 4500;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+            padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+            justify-content: space-around;
+        }
+        .mobile-bottom-nav button {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 4px 6px;
+            color: #6b8fa3;
+            font-size: 0.7em;
+            cursor: pointer;
+            flex: 1;
+            min-width: 0;
+        }
+        .mobile-bottom-nav button .ic { font-size: 1.3em; }
+        .mobile-bottom-nav button.active { color: #4a90e2; font-weight: bold; }
+        .mobile-bottom-nav button.active .ic { transform: translateY(-2px); }
+        @media (max-width: 640px) {
+            .mobile-bottom-nav { display: flex; }
+            body { padding-bottom: 60px; }
+        }
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85em;
+            color: #7a9db1;
+            padding: 6px 12px;
+            background: #f5f9fc;
+            border-bottom: 1px solid #e0eaf0;
+        }
+        .breadcrumbs a {
+            color: #4a90e2;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .breadcrumbs a:hover { text-decoration: underline; }
+        .breadcrumbs .sep { color: #c0d0dc; }
+        .skeleton {
+            display: inline-block;
+            background: linear-gradient(90deg, #eef2f6 25%, #f8fafc 50%, #eef2f6 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.4s infinite;
+            border-radius: 4px;
+            color: transparent;
+        }
+        @keyframes skeleton-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skeleton-block {
+            height: 14px;
+            margin: 6px 0;
+            border-radius: 6px;
+        }
         .tab-badge {
             display: inline-block;
             background: #e74c3c;
@@ -2423,6 +2491,9 @@
         <!-- Barre de navigation mode présentation -->
         <div id="presentationNav"></div>
 
+        <!-- Fil d'Ariane contextuel -->
+        <div id="breadcrumbs" class="breadcrumbs" style="display:none;"></div>
+
         <div class="content">
             <div id="alertBanner" style="display:none;"></div>
             <!-- ONGLET CALCULATEUR -->
@@ -2633,8 +2704,8 @@
                         <span>Frais généraux</span>
                         <span id="coutFraisGeneraux">0.00 CHF</span>
                     </div>
-                    <div class="cost-line total">
-                        <span>PRIX DE REVIENT</span>
+                    <div class="cost-line total" title="Somme de toutes les composantes de coût ci-dessus. C'est le seuil de rentabilité : en dessous, l'atelier perd de l'argent.">
+                        <span>PRIX DE REVIENT ⓘ</span>
                         <span id="prixRevient">0.00 CHF</span>
                     </div>
                 </div>
@@ -2643,28 +2714,28 @@
                 <div class="total-box">
                     <h3>Valorisation financière</h3>
                     <div class="total-grid">
-                        <div class="total-item">
-                            <div class="label">Temps total</div>
+                        <div class="total-item" title="Temps total = Σ(temps geste × coef × quantité) + temps fixes. Utilisé comme base pour la facturation horaire et la charge atelier.">
+                            <div class="label">Temps total ⓘ</div>
                             <div class="value"><span id="totalHeures">0.00</span> h</div>
                         </div>
-                        <div class="total-item">
-                            <div class="label" id="labelTempsPiece">Temps / pièce</div>
+                        <div class="total-item" title="Temps total divisé par le nombre de pièces produites.">
+                            <div class="label" id="labelTempsPiece">Temps / pièce ⓘ</div>
                             <div class="value" id="totalHeuresPiece" style="font-size:1.2em;">— h</div>
                         </div>
-                        <div class="total-item">
-                            <div class="label">Prix revient</div>
+                        <div class="total-item" title="Prix de revient = Main d'œuvre + Consommables + Énergie + Stockage + Frais généraux. C'est le coût total avant marge.">
+                            <div class="label">Prix revient ⓘ</div>
                             <div class="value"><span id="totalRevient">0.00</span> CHF</div>
                         </div>
-                        <div class="total-item">
-                            <div class="label">Marge %</div>
+                        <div class="total-item" title="Marge bénéficiaire en % du prix de vente. Prix vente = Prix revient / (1 - marge%).">
+                            <div class="label">Marge % ⓘ</div>
                             <div class="value">
                                 <input type="number" id="margePercent" min="0" max="100" value="15"
                                        onchange="calculateTotal()"
                                        style="width: 70px; text-align: center; background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; font-size: 0.9em; font-weight: bold; padding: 3px;">
                             </div>
                         </div>
-                        <div class="total-item">
-                            <div class="label">Marge CHF</div>
+                        <div class="total-item" title="Marge en CHF = Prix vente − Prix revient.">
+                            <div class="label">Marge CHF ⓘ</div>
                             <div class="value"><span id="margeChf">0.00</span></div>
                         </div>
                     </div>
@@ -5247,6 +5318,10 @@
         addConsommableLine();
         addStockageLine();
         updateModeleSelect();
+        // Skeleton immédiat — lissage visuel avant que renderDashboard() arrive
+        showSkeleton('dashboardKpis', 5);
+        showSkeleton('dashDevisList', 3);
+        showSkeleton('dashAlertesList', 2);
         renderDashboard();
         initTheme();
         initMatrice();
@@ -5728,6 +5803,60 @@
             // Récap live : visible uniquement sur l'onglet calculateur
             const live = document.getElementById('liveSummary');
             if (live) live.style.display = (tabName === 'calculateur') ? 'block' : 'none';
+
+            updateBottomNavActive(tabName);
+            updateBreadcrumbs(tabName);
+        }
+
+        // Met en surbrillance le bouton actif de la bottom-nav mobile
+        function updateBottomNavActive(tabName) {
+            document.querySelectorAll('.mobile-bottom-nav button[data-mob-tab]').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-mob-tab') === tabName);
+            });
+        }
+
+        // Affiche un fil d'Ariane contextuel pour l'onglet courant
+        const _breadcrumbLabels = {
+            dashboard: ['🏠 Accueil'],
+            assistant: ['🏠 Accueil', '🧙 Assistant'],
+            calculateur: ['🏠 Accueil', '💼 Calculateur'],
+            stock: ['🏠 Accueil', '📦 Gestion Stock'],
+            parametrage: ['🏠 Accueil', '⚙️ Paramétrage'],
+            catalogue: ['🏠 Accueil', '📚 Catalogue gestes'],
+            formation: ['🏠 Accueil', '🎓 Formation'],
+            consommables: ['🏠 Accueil', '🛒 Consommables'],
+            prestations: ['🏠 Accueil', '📊 Prestations'],
+            clients: ['🏠 Accueil', '👥 Clients'],
+            stats: ['🏠 Accueil', '📈 Stats'],
+            config: ['🏠 Accueil', '⚙️ Config'],
+            accompagnement: ['🏠 Accueil', '🧠 Accompagnement'],
+            historique: ['🏠 Accueil', '📝 Historique'],
+            gantt: ['🏠 Accueil', '📅 Planification'],
+            'formation-logistique': ['🏠 Accueil', '🏭 Formation logistique']
+        };
+        // Remplit un conteneur avec un skeleton screen pour masquer le "flash" avant rendu
+        function showSkeleton(container, rows = 4) {
+            const el = typeof container === 'string' ? document.getElementById(container) : container;
+            if (!el) return;
+            let html = '';
+            for (let i = 0; i < rows; i++) {
+                const w = 40 + Math.floor(Math.random() * 55);
+                html += `<div class="skeleton skeleton-block" style="width:${w}%;"></div>`;
+            }
+            el.innerHTML = html;
+        }
+
+        function updateBreadcrumbs(tabName) {
+            const el = document.getElementById('breadcrumbs');
+            if (!el) return;
+            const parts = _breadcrumbLabels[tabName] || ['🏠 Accueil'];
+            if (parts.length <= 1) { el.style.display = 'none'; return; }
+            el.style.display = 'flex';
+            const html = parts.map((p, i) => {
+                if (i === parts.length - 1) return `<span>${p}</span>`;
+                return `<a onclick="switchTab('dashboard')">${p}</a><span class="sep">›</span>`;
+            }).join('');
+            el.innerHTML = html;
         }
 
         function buildGesteOptions(selCode) {
@@ -20961,6 +21090,15 @@
 <div class="toast-container" id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Panneau récap live (visible uniquement onglet calculateur) -->
+<!-- Bottom-nav mobile : visible uniquement < 640px -->
+<nav class="mobile-bottom-nav" aria-label="Navigation mobile">
+    <button data-mob-tab="dashboard" onclick="switchTab('dashboard')"><span class="ic">🏠</span><span>Accueil</span></button>
+    <button data-mob-tab="calculateur" onclick="switchTab('calculateur')"><span class="ic">💼</span><span>Calcul</span></button>
+    <button data-mob-tab="prestations" onclick="switchTab('prestations')"><span class="ic">📊</span><span>Prest.</span></button>
+    <button data-mob-tab="stock" onclick="switchTab('stock')"><span class="ic">📦</span><span>Stock</span></button>
+    <button onclick="openCmdPalette()"><span class="ic">🔍</span><span>Palette</span></button>
+</nav>
+
 <div id="liveSummary" style="display:none;position:fixed;bottom:16px;right:16px;z-index:9500;background:rgba(255,255,255,0.98);border:1px solid #d0d7de;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.12);padding:12px 14px;min-width:230px;font-size:0.85em;backdrop-filter:blur(6px);" aria-live="polite">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <strong style="color:#6b8fa3;font-size:0.95em;">📊 Récap live</strong>
