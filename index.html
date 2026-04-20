@@ -557,10 +557,66 @@
             padding-top: 14px;
         }
         
-        @media (max-width: 768px) {
-            .geste-line, .consommable-line, .stock-line {
-                grid-template-columns: 1fr;
+        /* Wrapper scroll horizontal générique pour tableaux larges */
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+        .table-scroll > table { min-width: 600px; }
+
+        /* === TABLETTE (≤ 1024px) === */
+        @media (max-width: 1024px) {
+            .container { padding: 12px; }
+            .geste-line { grid-template-columns: 1.6fr 0.7fr 0.7fr 0.9fr 90px; gap: 6px; padding: 10px 12px; }
+            .consommable-line { grid-template-columns: 1.8fr 1fr 1fr 1fr 70px; gap: 6px; }
+            .stock-line { grid-template-columns: 1.4fr 0.7fr 0.7fr 0.7fr 0.9fr 70px; gap: 6px; }
+            .prestations-filters { flex-wrap: wrap; }
+            .prestations-filters input,
+            .prestations-filters select { flex: 1 1 200px; min-width: 0 !important; }
+            /* Grilles inline repeat(4,1fr) ou plus → 2 colonnes */
+            [style*="grid-template-columns:repeat(4,1fr)"],
+            [style*="grid-template-columns: repeat(4, 1fr)"],
+            [style*="grid-template-columns:repeat(5,1fr)"],
+            [style*="grid-template-columns: repeat(5, 1fr)"],
+            [style*="grid-template-columns:repeat(6,1fr)"] {
+                grid-template-columns: repeat(2, 1fr) !important;
             }
+        }
+
+        /* === MOBILE (≤ 768px) === */
+        @media (max-width: 768px) {
+            .container { padding: 8px; border-radius: 8px; }
+            .header { padding: 14px; }
+            .geste-line, .consommable-line, .stock-line { grid-template-columns: 1fr; gap: 6px; }
+            .tabs { font-size: 0.85em; }
+            .tab { padding: 10px 12px; }
+            .section { padding: 12px; }
+            .form-row { gap: 6px; grid-template-columns: 1fr; }
+            /* Grilles inline repeat(N,1fr) → 1 colonne */
+            [style*="grid-template-columns:repeat(3,1fr)"],
+            [style*="grid-template-columns: repeat(3, 1fr)"],
+            [style*="grid-template-columns:repeat(4,1fr)"],
+            [style*="grid-template-columns: repeat(4, 1fr)"],
+            [style*="grid-template-columns:repeat(5,1fr)"],
+            [style*="grid-template-columns: repeat(5, 1fr)"] {
+                grid-template-columns: 1fr !important;
+            }
+            /* Modales adaptées au viewport mobile */
+            .modal-box { width: 96% !important; max-width: 96% !important; max-height: 92vh; overflow-y: auto; padding: 18px !important; }
+            #printPrefsModal .modal-box,
+            #devisPreviewModal > div { max-width: 96% !important; max-height: 92vh; }
+            /* SVG charts min-width assoupli */
+            svg[style*="min-width:400px"] { min-width: 260px !important; }
+            /* Boutons de la barre d'action passent en flex wrap */
+            .btn { padding: 10px 12px; font-size: 0.88em; }
+            /* Stat cards en 1 colonne */
+            .stat-card { padding: 12px; }
+        }
+
+        /* === MINI MOBILE (≤ 420px) === */
+        @media (max-width: 420px) {
+            body { padding: 4px; }
+            .header h1 { font-size: 1.2em; }
+            .tab { padding: 8px 10px; font-size: 0.82em; }
+            .section { padding: 10px; }
+            .btn { padding: 9px 10px; font-size: 0.85em; }
         }
 
         @media print {
