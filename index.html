@@ -9956,9 +9956,18 @@
                 container.innerHTML = '<span style="font-size:0.82em;color:#9ab0be;">Aucun modèle sauvegardé — créez-en via 💾 Sauver comme modèle</span>';
                 return;
             }
-            container.innerHTML = configModeles.map(m =>
-                `<button class="btn btn-small" style="background:linear-gradient(135deg,#f0f7ff,#f0f0ff);border:1px solid #c8d8f0;font-size:0.82em;" onclick="quickLoadModele(${m.id})" title="Charger le modèle ${m.nom}">⚡ ${m.nom}</button>`
-            ).join('');
+            // Tri : modèles les plus utilisés en premier, puis alpha
+            const sorted = [...configModeles].sort((a, b) => {
+                const ua = a.usageCount || 0, ub = b.usageCount || 0;
+                if (ub !== ua) return ub - ua;
+                return (a.nom || '').localeCompare(b.nom || '');
+            });
+            container.innerHTML = sorted.map(m => {
+                const count = m.usageCount || 0;
+                const badge = count > 0 ? `<span style="background:#6b8fa3;color:white;border-radius:10px;padding:1px 6px;font-size:0.72em;margin-left:4px;">${count}</span>` : '';
+                const popular = count >= 3 ? '⭐' : '⚡';
+                return `<button class="btn btn-small" style="background:linear-gradient(135deg,#f0f7ff,#f0f0ff);border:1px solid #c8d8f0;font-size:0.82em;" onclick="quickLoadModele(${m.id})" title="Charger le modèle ${escapeHtml(m.nom)}${count > 0 ? ' (utilisé ' + count + '×)' : ''}">${popular} ${escapeHtml(m.nom)}${badge}</button>`;
+            }).join('');
         }
 
         function quickLoadModele(id) {
@@ -10117,6 +10126,11 @@
             if (stockageLines.length === 0) addStockageLine();
 
             calculateTotal();
+            // Compteur d'usage : incrémente et persiste pour trier par popularité
+            modele.usageCount = (modele.usageCount || 0) + 1;
+            modele.lastUsed = Date.now();
+            saveToStorage();
+            renderModelesQuickAccess();
             toast('✅ Modèle "' + modele.nom + '" chargé', 'success');
         }
 
