@@ -478,6 +478,42 @@
             border: none;
             cursor: pointer;
         }
+        .cmd-palette-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            font-size: 0.94em;
+        }
+        .cmd-palette-item:hover,
+        .cmd-palette-item.active {
+            background: #eef6ff;
+            border-left-color: #4a90e2;
+        }
+        .cmd-palette-item .cmd-icon {
+            font-size: 1.2em;
+            width: 24px;
+            text-align: center;
+        }
+        .cmd-palette-item .cmd-label {
+            flex: 1;
+            color: #2d3e50;
+        }
+        .cmd-palette-item .cmd-hint {
+            font-size: 0.78em;
+            color: #9aa;
+        }
+        .cmd-palette-section {
+            padding: 6px 16px 2px;
+            font-size: 0.72em;
+            font-weight: bold;
+            color: #9aa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #fafbfc;
+        }
         .tab-badge {
             display: inline-block;
             background: #e74c3c;
@@ -1939,6 +1975,18 @@
     <div id="assistantModal" role="dialog" aria-modal="true" aria-label="Assistant de chiffrage" onclick="if(event.target===this)closeAssistantModal()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:5000;align-items:center;justify-content:center;padding:16px;">
         <div style="background:white;border-radius:16px;padding:24px;max-width:640px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 15px 50px rgba(0,0,0,0.25);">
             <div id="assistantModalBody"></div>
+        </div>
+    </div>
+
+    <!-- ── Palette de commandes (Ctrl+K / Cmd+K) ──────────────────── -->
+    <div id="cmdPalette" role="dialog" aria-modal="true" aria-label="Palette de commandes" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,20,30,0.45);z-index:6000;align-items:flex-start;justify-content:center;padding-top:12vh;" onclick="if(event.target===this)closeCmdPalette()">
+        <div style="background:white;border-radius:14px;width:92%;max-width:580px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;display:flex;flex-direction:column;max-height:70vh;">
+            <div style="padding:12px 16px;border-bottom:1px solid #e8eef3;display:flex;align-items:center;gap:8px;">
+                <span style="color:#9aa;">🔍</span>
+                <input id="cmdPaletteInput" type="text" placeholder="Tapez une action ou un onglet…" oninput="filterCmdPalette(this.value)" style="flex:1;border:none;outline:none;font-size:1em;padding:4px 2px;">
+                <kbd style="font-size:0.75em;color:#9aa;background:#f4f6f8;padding:2px 6px;border-radius:4px;">Esc</kbd>
+            </div>
+            <div id="cmdPaletteList" style="overflow-y:auto;flex:1;"></div>
         </div>
     </div>
 
@@ -4430,18 +4478,33 @@
             const field = document.getElementById(fieldId);
             if (!field) return;
 
-            field.addEventListener('input', function() {
-                const isValid = validator(this.value);
-                this.style.borderColor = isValid ? '' : '#e74c3c';
-                this.style.backgroundColor = isValid ? '' : 'rgba(231, 76, 60, 0.05)';
-            });
-
-            field.addEventListener('blur', function() {
-                const isValid = validator(this.value);
-                if (!isValid && this.value) {
-                    toast(`⚠️ ${errorMessage}`, 'warning');
+            const getOrCreateHint = () => {
+                let hint = field.parentElement && field.parentElement.querySelector(`.inline-validation[data-for="${fieldId}"]`);
+                if (!hint && field.parentElement) {
+                    hint = document.createElement('div');
+                    hint.className = 'inline-validation';
+                    hint.setAttribute('data-for', fieldId);
+                    hint.style.cssText = 'color:#c0392b;font-size:0.78em;margin-top:3px;display:none;';
+                    field.parentElement.appendChild(hint);
                 }
-            });
+                return hint;
+            };
+
+            const apply = (showMsg) => {
+                const isValid = validator(field.value);
+                field.style.borderColor = isValid ? '' : '#e74c3c';
+                field.style.backgroundColor = isValid ? '' : 'rgba(231, 76, 60, 0.05)';
+                const hint = getOrCreateHint();
+                if (!hint) return;
+                if (!isValid && field.value && showMsg) {
+                    hint.textContent = '⚠️ ' + errorMessage;
+                    hint.style.display = 'block';
+                } else {
+                    hint.style.display = 'none';
+                }
+            };
+            field.addEventListener('input', () => apply(false));
+            field.addEventListener('blur', () => apply(true));
         }
 
         // IMPORTANT: Default credentials have been removed for security.
@@ -7570,6 +7633,7 @@
                     <td style="font-size:0.8em;color:#7a9db1;font-style:italic;">${notes}</td>
                     <td style="white-space:nowrap;">
                         ${hasPermission('manage_gestes') ? `<button class="btn btn-small" onclick="editGesteInline('${codeEsc}')" title="Éditer">✏️</button>` : ''}
+                        ${hasPermission('manage_gestes') ? `<button class="btn btn-small btn-secondary" onclick="duplicateGeste('${codeEsc}')" title="Dupliquer">📋</button>` : ''}
                         <button class="btn btn-small btn-secondary" onclick="imprimerFicheGeste('${codeEsc}')" title="Fiche PDF">🖨️</button>
                         <button class="btn btn-small btn-secondary" onclick="voirHistoriqueGeste('${codeEsc}')" title="Historique des modifications">📈</button>
                         ${hasPermission('manage_gestes') ? `<button class="delete-btn btn-small" onclick="deleteGeste('${codeEsc}')">🗑️</button>` : ''}
@@ -7626,6 +7690,22 @@
             document.getElementById('newNotes').value = '';
             
             toast('✅ Geste ajouté au catalogue!', 'success');
+        }
+
+        function duplicateGeste(code) {
+            if (!checkPermission('manage_gestes')) return;
+            const orig = catalogueGestes.find(g => g.code === code);
+            if (!orig) return;
+            let newCode = orig.code + '-COPIE';
+            let i = 2;
+            while (catalogueGestes.find(g => g.code === newCode)) newCode = orig.code + '-COPIE' + i++;
+            const copy = Object.assign({}, orig, { code: newCode });
+            catalogueGestes.push(copy);
+            catalogueGestes.sort((a, b) => a.code.localeCompare(b.code));
+            saveToStorage();
+            renderCatalogue();
+            logAction(`Duplication geste : ${code} → ${newCode}`, 'CREATE');
+            toast(`✅ Geste dupliqué : ${newCode}`, 'success');
         }
 
         function deleteGeste(code) {
@@ -14502,6 +14582,165 @@
                 badge.remove();
             }
         }
+
+        // ─────────────────────────────────────────────────────────
+        // Palette de commandes (Ctrl+K / Cmd+K)
+        // ─────────────────────────────────────────────────────────
+        const _cmdPaletteCommands = [
+            { section: 'Onglets', icon: '🏠', label: 'Dashboard', run: () => switchTab('dashboard') },
+            { section: 'Onglets', icon: '💼', label: 'Calculateur', run: () => switchTab('calculateur') },
+            { section: 'Onglets', icon: '📊', label: 'Prestations', run: () => switchTab('prestations') },
+            { section: 'Onglets', icon: '👥', label: 'Clients', run: () => switchTab('clients') },
+            { section: 'Onglets', icon: '📦', label: 'Gestion Stock', run: () => switchTab('stock') },
+            { section: 'Onglets', icon: '📚', label: 'Catalogue de gestes', run: () => switchTab('catalogue') },
+            { section: 'Onglets', icon: '🛒', label: 'Consommables', run: () => switchTab('consommables') },
+            { section: 'Onglets', icon: '📈', label: 'Stats', run: () => switchTab('stats') },
+            { section: 'Onglets', icon: '⚙️', label: 'Paramétrage', run: () => switchTab('parametrage') },
+            { section: 'Onglets', icon: '⚙️', label: 'Config', run: () => switchTab('config') },
+            { section: 'Onglets', icon: '📝', label: 'Historique', run: () => switchTab('historique') },
+            { section: 'Onglets', icon: '📅', label: 'Planification / Gantt', run: () => switchTab('gantt') },
+            { section: 'Onglets', icon: '🎓', label: 'Formation', run: () => switchTab('formation') },
+            { section: 'Onglets', icon: '🧙', label: 'Assistant', run: () => switchTab('assistant'), admin: true },
+            { section: 'Onglets', icon: '🧠', label: 'Accompagnement', run: () => switchTab('accompagnement'), admin: true },
+            { section: 'Actions', icon: '📖', label: 'Ouvrir la documentation', run: () => { const m = document.getElementById('docModal'); if (m) m.style.display = 'flex'; } },
+            { section: 'Actions', icon: '🌙', label: 'Basculer mode sombre', run: () => { if (typeof toggleDarkMode === 'function') toggleDarkMode(); } },
+            { section: 'Actions', icon: '💾', label: 'Exporter sauvegarde JSON', run: () => { if (typeof exportDataJSON === 'function') exportDataJSON(); else switchTab('config'); } },
+            { section: 'Actions', icon: '↩️', label: 'Annuler la dernière action', run: () => { if (typeof undoLastAction === 'function') undoLastAction(); } },
+            { section: 'Actions', icon: '↪️', label: 'Refaire', run: () => { if (typeof redoLastAction === 'function') redoLastAction(); } }
+        ];
+        let _cmdPaletteActiveIdx = 0;
+        let _cmdPaletteFiltered = [];
+
+        function openCmdPalette() {
+            const el = document.getElementById('cmdPalette');
+            if (!el) return;
+            el.style.display = 'flex';
+            const input = document.getElementById('cmdPaletteInput');
+            if (input) { input.value = ''; setTimeout(() => input.focus(), 10); }
+            filterCmdPalette('');
+        }
+        function closeCmdPalette() {
+            const el = document.getElementById('cmdPalette');
+            if (el) el.style.display = 'none';
+        }
+        function filterCmdPalette(query) {
+            const q = (query || '').trim().toLowerCase();
+            const isAdmin = typeof hasPermission === 'function' ? hasPermission('admin') : true;
+            _cmdPaletteFiltered = _cmdPaletteCommands.filter(c => {
+                if (c.admin && !isAdmin) return false;
+                if (!q) return true;
+                return c.label.toLowerCase().includes(q) || (c.section || '').toLowerCase().includes(q);
+            });
+            _cmdPaletteActiveIdx = 0;
+            _renderCmdPaletteList();
+        }
+        function _renderCmdPaletteList() {
+            const list = document.getElementById('cmdPaletteList');
+            if (!list) return;
+            if (_cmdPaletteFiltered.length === 0) {
+                list.innerHTML = '<div style="padding:20px;text-align:center;color:#9aa;">Aucun résultat</div>';
+                return;
+            }
+            let html = '';
+            let lastSection = null;
+            _cmdPaletteFiltered.forEach((c, i) => {
+                if (c.section !== lastSection) {
+                    html += `<div class="cmd-palette-section">${escapeHtml(c.section || '')}</div>`;
+                    lastSection = c.section;
+                }
+                html += `<div class="cmd-palette-item ${i === _cmdPaletteActiveIdx ? 'active' : ''}" onclick="_runCmdPaletteItem(${i})" onmouseover="_cmdPaletteActiveIdx=${i};_renderCmdPaletteList();">
+                    <span class="cmd-icon">${c.icon || '•'}</span>
+                    <span class="cmd-label">${escapeHtml(c.label)}</span>
+                </div>`;
+            });
+            list.innerHTML = html;
+            const active = list.querySelector('.cmd-palette-item.active');
+            if (active) active.scrollIntoView({ block: 'nearest' });
+        }
+        function _runCmdPaletteItem(i) {
+            const cmd = _cmdPaletteFiltered[i];
+            if (!cmd) return;
+            closeCmdPalette();
+            try { cmd.run(); } catch (e) { console.error(e); toast('Erreur : ' + e.message, 'error'); }
+        }
+        document.addEventListener('keydown', function(e) {
+            const isMac = navigator.platform.toUpperCase().includes('MAC');
+            const modKey = isMac ? e.metaKey : e.ctrlKey;
+            if (modKey && (e.key === 'k' || e.key === 'K')) {
+                e.preventDefault();
+                const palette = document.getElementById('cmdPalette');
+                if (palette && palette.style.display === 'flex') closeCmdPalette();
+                else openCmdPalette();
+                return;
+            }
+            const palette = document.getElementById('cmdPalette');
+            if (!palette || palette.style.display !== 'flex') return;
+            if (e.key === 'Escape') { e.preventDefault(); closeCmdPalette(); }
+            else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                _cmdPaletteActiveIdx = Math.min(_cmdPaletteFiltered.length - 1, _cmdPaletteActiveIdx + 1);
+                _renderCmdPaletteList();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                _cmdPaletteActiveIdx = Math.max(0, _cmdPaletteActiveIdx - 1);
+                _renderCmdPaletteList();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                _runCmdPaletteItem(_cmdPaletteActiveIdx);
+            }
+        });
+
+        // ─────────────────────────────────────────────────────────
+        // Champs intelligents — parsing "2h30", "2'500", "3j4h"
+        // ─────────────────────────────────────────────────────────
+        function parseSmartNumber(raw) {
+            if (raw == null) return NaN;
+            let s = String(raw).trim().toLowerCase();
+            if (!s) return NaN;
+            s = s.replace(/\s+/g, '').replace(/chf/g, '').replace(/'/g, '').replace(/\u2019/g, '');
+            // Durée "2h30", "2h", "45m", "3j4h"
+            const dur = s.match(/^(?:(\d+)j)?(?:(\d+)h)?(?:(\d+)m)?$/);
+            if (dur && (dur[1] || dur[2] || dur[3])) {
+                const j = parseInt(dur[1] || 0, 10);
+                const h = parseInt(dur[2] || 0, 10);
+                const m = parseInt(dur[3] || 0, 10);
+                return j * 8 + h + m / 60;
+            }
+            // Remplace virgule décimale par point
+            s = s.replace(/,/g, '.');
+            const n = parseFloat(s);
+            return isNaN(n) ? NaN : n;
+        }
+        function attachSmartNumber(input) {
+            if (!input || input._smartAttached) return;
+            input._smartAttached = true;
+            // Les inputs type=number n'acceptent pas les caractères non numériques,
+            // on bascule donc dynamiquement au focus pour autoriser "2h30", "2'500".
+            const originalType = input.type;
+            input.addEventListener('focus', function() {
+                if (this.type === 'number') {
+                    this._originalType = 'number';
+                    this.type = 'text';
+                }
+            });
+            input.addEventListener('blur', function() {
+                const raw = this.value;
+                const parsed = parseSmartNumber(raw);
+                if (!isNaN(parsed)) {
+                    this.value = parsed;
+                }
+                if (this._originalType === 'number') this.type = 'number';
+                this.dispatchEvent(new Event('input', { bubbles: true }));
+                this.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        }
+        function enableSmartNumberInputs() {
+            document.querySelectorAll('input[data-smart], input.smart-number').forEach(attachSmartNumber);
+        }
+        document.addEventListener('DOMContentLoaded', enableSmartNumberInputs);
+        // Rescan périodique pour inputs ajoutés dynamiquement
+        setInterval(enableSmartNumberInputs, 5000);
+        window.parseSmartNumber = parseSmartNumber;
 
         // ─────────────────────────────────────────────────────────
         // Corbeille 30s — suppression avec annulation
