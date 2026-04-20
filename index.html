@@ -4943,11 +4943,8 @@
         renderCatalogue();
         renderBundleButtons();
         updateUniteCalcLabel();
-        renderConsommablesTable();
         calculateRatio();
-        updateStockStats();
         updateStockAlertBadge();
-        updateStats();
         addGesteLine();
         addConsommableLine();
         addStockageLine();
@@ -4955,10 +4952,25 @@
         renderDashboard();
         initTheme();
         initMatrice();
-        loadFormationData();
-        loadTrainingRequests();
-        loadReferenceDocuments();
-        loadAuditLog();
+        loadTrainingRequests(); // dashboard l'utilise
+        // Init différée (libère le thread pour le premier paint) — les onglets
+        // lourds (Stats, Consommables, Formation, Historique, Stock) se
+        // chargent en tâche de fond dès que le navigateur est disponible.
+        (function deferredInit() {
+            const run = () => {
+                try { updateStockStats(); } catch(e) { console.warn('updateStockStats defer:', e); }
+                try { renderConsommablesTable(); } catch(e) { console.warn('renderConsommablesTable defer:', e); }
+                try { updateStats(); } catch(e) { console.warn('updateStats defer:', e); }
+                try { loadFormationData(); } catch(e) { console.warn('loadFormationData defer:', e); }
+                try { loadReferenceDocuments(); } catch(e) { console.warn('loadReferenceDocuments defer:', e); }
+                try { loadAuditLog(); } catch(e) { console.warn('loadAuditLog defer:', e); }
+            };
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(run, { timeout: 1500 });
+            } else {
+                setTimeout(run, 200);
+            }
+        })();
         // Initialize learner date field with today's date
         const learnerStartDateField = document.getElementById('learnerStartDate');
         if (learnerStartDateField) {
