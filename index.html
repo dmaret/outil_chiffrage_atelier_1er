@@ -4097,8 +4097,8 @@
                 manage_users: false
             },
             'asp': {
-                create_prestation: false,
-                edit_prestation: false,
+                create_prestation: true,
+                edit_prestation: true,
                 delete_prestation: false,
                 create_client: false,
                 edit_client: false,
@@ -6651,8 +6651,8 @@
                 const debut = new Date(lundi); debut.setDate(lundi.getDate() + i * 7);
                 const vendredi = new Date(debut); vendredi.setDate(debut.getDate() + 4);
                 const label = debut.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'}) + ' – ' + vendredi.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'});
-                const debutISO = debut.toISOString().split('T')[0];
-                const vendrediISO = vendredi.toISOString().split('T')[0];
+                const debutISO = fmtLocalDate(debut);
+                const vendrediISO = fmtLocalDate(vendredi);
                 const prestas = prestationsSauvegardees
                     .filter(p => {
                         if (!statutsActifs.includes(p.statut)) return false;
@@ -12359,20 +12359,39 @@
             return new Date(year, month-1, day);
         }
 
+        // Formate une Date en "YYYY-MM-DD" selon le fuseau local
+        // (évite le décalage d'un jour de toISOString() en CET/CEST)
+        function fmtLocalDate(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        // Jeûne genevois : jeudi suivant le 1er dimanche de septembre
+        function getJeuneGenevois(year) {
+            const sept1 = new Date(year, 8, 1);
+            const dow = sept1.getDay(); // 0=dim, 1=lun, ...
+            const daysToFirstSunday = (7 - dow) % 7;
+            const firstSunday = new Date(year, 8, 1 + daysToFirstSunday);
+            const thursday = new Date(firstSunday);
+            thursday.setDate(firstSunday.getDate() + 4);
+            return fmtLocalDate(thursday);
+        }
+
         function getJoursFeries(year) {
             const easter = getEaster(year);
             const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
-            const fmt = d => d.toISOString().split('T')[0];
             return new Set([
                 `${year}-01-01`, // Nouvel An
                 `${year}-01-02`, // Restauration de la République (GE)
-                fmt(add(easter, -2)), // Vendredi Saint
-                fmt(add(easter,  1)), // Lundi de Pâques
+                fmtLocalDate(add(easter, -2)), // Vendredi Saint
+                fmtLocalDate(add(easter,  1)), // Lundi de Pâques
                 `${year}-05-01`, // Fête du Travail
-                fmt(add(easter, 39)), // Ascension
-                fmt(add(easter, 50)), // Lundi de Pentecôte
+                fmtLocalDate(add(easter, 39)), // Ascension
+                fmtLocalDate(add(easter, 50)), // Lundi de Pentecôte
                 `${year}-08-01`, // Fête nationale
-                `${year}-09-05`, // Jeûne genevois (1er jeu. de sept.)
+                getJeuneGenevois(year), // Jeûne genevois (jeudi après 1er dim. de sept.)
                 `${year}-12-25`, // Noël
                 `${year}-12-31`, // Restauration de la République (GE)
             ]);
@@ -12396,7 +12415,7 @@
             let safety = 0;
             while (!isWorkDay(iso) && safety++ < 10) {
                 d.setDate(d.getDate() + 1);
-                iso = d.toISOString().split('T')[0];
+                iso = fmtLocalDate(d);
             }
             return iso;
         }
@@ -12406,7 +12425,7 @@
             let added = 0;
             while (added < days) {
                 d.setDate(d.getDate() + 1);
-                const iso = d.toISOString().split('T')[0];
+                const iso = fmtLocalDate(d);
                 if (isWorkDay(iso)) added++;
             }
             return d;
@@ -12443,7 +12462,7 @@
                 for (let i = 0; i < 7; i++) {
                     const day = new Date(monday); day.setDate(monday.getDate() + i);
                     const dayNames = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-                    const dayISO = day.toISOString().split('T')[0];
+                    const dayISO = fmtLocalDate(day);
                     const ferie = isJourFerie(dayISO);
                     dayInfos.push({
                         d: dayNames[day.getDay()] + ' ' + day.getDate() + (ferie ? ' 🗓' : ''),
@@ -12462,7 +12481,7 @@
                 if (lbl) lbl.textContent = label.charAt(0).toUpperCase() + label.slice(1);
                 for (let d = 1; d <= days; d++) {
                     const day = new Date(periodStart.getFullYear(), periodStart.getMonth(), d);
-                    const dayISO = day.toISOString().split('T')[0];
+                    const dayISO = fmtLocalDate(day);
                     const ferie = isJourFerie(dayISO);
                     dayInfos.push({
                         d: d + (ferie ? '🗓' : ''),
@@ -12682,8 +12701,8 @@
                 // Capacité (hors weekends et jours fériés)
                 const semDebut = new Date(now); semDebut.setDate(now.getDate() - now.getDay() + 1); semDebut.setHours(0,0,0,0);
                 const semVen = new Date(semDebut); semVen.setDate(semDebut.getDate() + 4);
-                const semDebutISO = semDebut.toISOString().split('T')[0];
-                const semVenISO = semVen.toISOString().split('T')[0];
+                const semDebutISO = fmtLocalDate(semDebut);
+                const semVenISO = fmtLocalDate(semVen);
                 const hSem = prestationsSauvegardees
                     .filter(p => {
                         if (!['accepte','en-cours'].includes(p.statut) || !p.date) return false;
@@ -13042,7 +13061,7 @@
             const semDebut = new Date(now); semDebut.setDate(now.getDate() - now.getDay() + 1); semDebut.setHours(0,0,0,0);
             const semFin = new Date(semDebut); semFin.setDate(semDebut.getDate() + 6);
             const hSem = prestationsSauvegardees
-                .filter(p => p.statut === 'valide' && p.date >= semDebut.toISOString().split('T')[0] && p.date <= semFin.toISOString().split('T')[0])
+                .filter(p => p.statut === 'valide' && p.date >= fmtLocalDate(semDebut) && p.date <= fmtLocalDate(semFin))
                 .reduce((s, p) => s + (p.heures || 0), 0);
             const capHebdo = parseFloat(document.getElementById('capaciteHebdo')?.value || 35);
             if (hSem > capHebdo) alertes.push({ danger: true, msg: `⚡ Surcharge capacité cette semaine : ${hSem.toFixed(1)}h / ${capHebdo}h` });
@@ -13121,11 +13140,11 @@
             const months = parseInt(n);
             const newDate = new Date(p.date || new Date());
             newDate.setMonth(newDate.getMonth() + months);
-            const newDateStr = newDate.toISOString().split('T')[0];
+            const newDateStr = fmtLocalDate(newDate);
             let newDebut = p.dateDebut || p.date;
             if (newDebut) {
                 const d = new Date(newDebut); d.setMonth(d.getMonth() + months);
-                newDebut = d.toISOString().split('T')[0];
+                newDebut = fmtLocalDate(d);
             }
             const recCounter = prestationsSauvegardees.filter(x => (x.reference || '').startsWith(p.reference + '-R')).length + 1;
             const newPrest = Object.assign({}, p, {
