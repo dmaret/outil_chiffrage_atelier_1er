@@ -564,10 +564,32 @@
         }
 
         @media print {
+            @page { size: A4 portrait; margin: 12mm 10mm; }
+            @page :first { margin-top: 10mm; }
             body * { visibility: hidden; }
-            body { background: white; padding: 0; }
+            body { background: white; padding: 0; margin: 0; color: #000; }
             #printZone, #printZone * { visibility: visible; }
-            #printZone { position: fixed; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
+            #printZone { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 0; color: #000; }
+            #printZone * { box-shadow: none !important; text-shadow: none !important; }
+            /* Tableaux : en-tête répété sur chaque page, lignes insécables */
+            #printZone table { page-break-inside: auto; border-collapse: collapse; width: 100%; }
+            #printZone thead { display: table-header-group; }
+            #printZone tfoot { display: table-footer-group; }
+            #printZone tr, #printZone td, #printZone th { page-break-inside: avoid; }
+            /* Helpers explicites de sauts de page */
+            .print-page-break { page-break-before: always; break-before: page; }
+            .print-page-break-after { page-break-after: always; break-after: page; }
+            .print-avoid-break { page-break-inside: avoid; break-inside: avoid; }
+            /* Images à qualité imprimable */
+            #printZone img, #printZone svg { max-width: 100% !important; }
+            /* Cache éléments non imprimables dans la zone */
+            .no-print, #printZone .no-print { display: none !important; }
+            /* Liens : afficher l'URL entre parenthèses pour les liens externes */
+            #printZone a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.75em; color: #666; }
+            #printZone a { color: #000; text-decoration: none; }
+        }
+        @media print and (orientation: landscape) {
+            @page { size: A4 landscape; }
         }
 
         /* Dark mode */
@@ -1630,9 +1652,46 @@
                 <label class="print-check"><input type="checkbox" id="pp-signature" checked> Bloc signature</label>
                 <label class="print-check"><input type="checkbox" id="pp-equipe"> Composition équipe</label>
             </div>
-            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;">
+            <div style="margin-top:14px;padding:12px;background:#f5f9fc;border-radius:8px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <label style="font-size:0.82em;color:#6b8fa3;font-weight:600;display:block;margin-bottom:4px;">Format</label>
+                    <select id="pp-format" style="width:100%;padding:6px;border:1px solid #d0e0ea;border-radius:6px;">
+                        <option value="a4" selected>A4</option>
+                        <option value="a5">A5 (compact)</option>
+                        <option value="letter">Letter (US)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.82em;color:#6b8fa3;font-weight:600;display:block;margin-bottom:4px;">Orientation</label>
+                    <select id="pp-orientation" style="width:100%;padding:6px;border:1px solid #d0e0ea;border-radius:6px;">
+                        <option value="portrait" selected>Portrait</option>
+                        <option value="landscape">Paysage</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;">
                 <button class="btn btn-secondary" onclick="closePrintPrefsModal()">Annuler</button>
+                <button class="btn" onclick="openDevisPreview()" title="Voir un aperçu avant génération">👁️ Aperçu</button>
                 <button class="btn btn-success" onclick="genererDevis()">✅ Générer le PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Devis Modal -->
+    <div id="devisPreviewModal" role="dialog" aria-modal="true" aria-label="Aperçu du devis" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:2100;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:#fff;border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 15px 50px rgba(0,0,0,0.3);">
+            <div style="padding:16px 22px;border-bottom:1px solid #e8eef3;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div>
+                    <h3 style="margin:0;color:#6b8fa3;font-size:1.1em;">👁️ Aperçu du devis</h3>
+                    <div style="font-size:0.78em;color:#8aacbc;margin-top:2px;" id="devisPreviewMeta"></div>
+                </div>
+                <button class="btn btn-secondary btn-small" onclick="closeDevisPreview()" aria-label="Fermer l'aperçu">✕</button>
+            </div>
+            <div id="devisPreviewContent" style="flex:1;overflow:auto;padding:18px;background:#eef2f6;"></div>
+            <div style="padding:14px 22px;border-top:1px solid #e8eef3;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="backToPrintPrefs()">← Retour aux options</button>
+                <button class="btn" onclick="printFromPreview()">🖨️ Imprimer</button>
+                <button class="btn btn-success" onclick="genererDevis()">📄 Générer le PDF</button>
             </div>
         </div>
     </div>
@@ -5730,7 +5789,52 @@
                 conditions:   document.getElementById('pp-conditions')?.checked ?? true,
                 signature:    document.getElementById('pp-signature')?.checked ?? true,
                 equipe:       document.getElementById('pp-equipe')?.checked ?? false,
+                format:       document.getElementById('pp-format')?.value || 'a4',
+                orientation:  document.getElementById('pp-orientation')?.value || 'portrait',
             };
+        }
+
+        function openDevisPreview() {
+            const client = document.getElementById('client')?.value;
+            const prestation = document.getElementById('prestation')?.value;
+            if (!client || !prestation) {
+                toast('Merci de remplir Client et Prestation avant de prévisualiser', 'warning');
+                return;
+            }
+            const built = buildDevisHtml({ preview: true });
+            if (!built) return;
+            const modal = document.getElementById('devisPreviewModal');
+            const content = document.getElementById('devisPreviewContent');
+            const meta = document.getElementById('devisPreviewMeta');
+            content.innerHTML = built.html;
+            const pp = built.pp;
+            const fmtLabel = { a4: 'A4', a5: 'A5', letter: 'Letter' }[pp.format] || pp.format;
+            const orLabel = pp.orientation === 'landscape' ? 'paysage' : 'portrait';
+            meta.textContent = `${built.devisNum} • ${fmtLabel} ${orLabel} • ${built.client}`;
+            modal.style.display = 'flex';
+            document.getElementById('printPrefsModal')?.classList.remove('open');
+        }
+
+        function closeDevisPreview() {
+            const modal = document.getElementById('devisPreviewModal');
+            modal.style.display = 'none';
+            document.getElementById('devisPreviewContent').innerHTML = '';
+        }
+
+        function backToPrintPrefs() {
+            closeDevisPreview();
+            document.getElementById('printPrefsModal')?.classList.add('open');
+        }
+
+        function printFromPreview() {
+            const html = document.getElementById('devisPreviewContent')?.innerHTML;
+            if (!html) return;
+            const printZone = document.getElementById('printZone');
+            printZone.innerHTML = html;
+            printZone.style.display = 'block';
+            window.print();
+            printZone.style.display = 'none';
+            printZone.innerHTML = '';
         }
 
         function filterGesteSelect(input, lineId) {
@@ -10933,23 +11037,29 @@
         // ============================================================
         // FEATURE 6 : Devis PDF
         // ============================================================
-        function genererDevis() {
+        // Prépare le HTML du devis en fonction des préférences.
+        // Pour la preview, n'incrémente PAS le compteur (il sera fait à la génération finale).
+        function buildDevisHtml({ preview = false } = {}) {
             const client = document.getElementById('client').value;
             const prestation = document.getElementById('prestation').value;
             const reference = document.getElementById('reference').value;
 
             if (!client || !prestation) {
                 toast('Merci de remplir Client et Prestation avant de générer un devis', 'warning');
-                return;
+                return null;
             }
 
-            devisCounter++;
-            localStorage.setItem('devisCounter', String(devisCounter));
-
             const now = new Date();
-            const year = now.getFullYear();
-            const num = String(devisCounter).padStart(3, '0');
-            const devisNum = `DEV-${year}-${num}`;
+            let devisNumLocal;
+            if (preview) {
+                const pendingNum = devisCounter + 1;
+                devisNumLocal = `DEV-${now.getFullYear()}-${String(pendingNum).padStart(3, '0')}`;
+            } else {
+                devisCounter++;
+                localStorage.setItem('devisCounter', String(devisCounter));
+                devisNumLocal = `DEV-${now.getFullYear()}-${String(devisCounter).padStart(3, '0')}`;
+            }
+            const devisNum = devisNumLocal;
             const dateStr = now.toLocaleDateString('fr-FR');
 
             const nbPieces = parseFloat(document.getElementById('nbPieces').value || 1);
@@ -10971,7 +11081,6 @@
             const coutStockage = parseFloat((document.getElementById('coutStockage').textContent || '0').replace(' CHF',''));
             const coutFrais = parseFloat((document.getElementById('coutFraisGeneraux').textContent || '0').replace(' CHF',''));
 
-            closePrintPrefsModal();
             const pp = getPrintPrefs();
 
             // Build gestes table
@@ -11171,6 +11280,16 @@
                 </div>
             </div>`;
 
+            return { html, pp, devisNum, client };
+        }
+
+        function genererDevis() {
+            const built = buildDevisHtml({ preview: false });
+            if (!built) return;
+            const { html, pp, devisNum } = built;
+            closePrintPrefsModal();
+            closeDevisPreview();
+
             if (typeof html2pdf !== 'undefined') {
                 const el = document.createElement('div');
                 el.innerHTML = html;
@@ -11179,7 +11298,8 @@
                     margin: 10,
                     filename: `devis-${devisNum}.pdf`,
                     html2canvas: { scale: 2 },
-                    jsPDF: { format: 'a4', orientation: 'portrait' }
+                    jsPDF: { format: pp.format || 'a4', orientation: pp.orientation || 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
                 }).from(el).save().then(() => document.body.removeChild(el));
             } else {
                 const printZone = document.getElementById('printZone');
