@@ -1779,6 +1779,29 @@
         body.dark-mode .assistant-wizard-summary { background:#243040; border-color:#3a5060; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
 
+        /* ── CEA Niveaux (Paramétrage) ──────────────────────────────── */
+        .cea-levels-table { width:100%; border-collapse:collapse; font-size:0.88em; margin-bottom:12px; }
+        .cea-levels-table th { background:#eaf4fb; color:#2d5b8a; font-weight:700; padding:7px 10px; text-align:left; border-bottom:2px solid #c5d8e4; }
+        .cea-levels-table td { padding:7px 10px; border-bottom:1px solid #e8f0f6; vertical-align:middle; }
+        .cea-levels-table tr:last-child td { border-bottom:none; }
+        .cea-levels-table .niveau-badge { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; font-weight:700; font-size:0.9em; }
+        .cea-levels-table .n1 { background:#fde8e8; color:#c53030; }
+        .cea-levels-table .n2 { background:#fef3cd; color:#9a6700; }
+        .cea-levels-table .n3 { background:#e6f4ea; color:#2d7a3a; }
+        .cea-levels-table input[type="number"] { width:72px; border:1px solid #c5d8e4; border-radius:5px; padding:4px 6px; font-size:0.9em; text-align:center; }
+        .cea-mix-row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; background:#f4f8fc; border:1px solid #d5e3ed; border-radius:8px; padding:10px 14px; margin-top:10px; }
+        .cea-mix-item { display:flex; align-items:center; gap:8px; font-size:0.87em; }
+        .cea-mix-item label { color:#4a6070; font-weight:600; }
+        .cea-mix-item input[type="number"] { width:52px; border:1px solid #c5d8e4; border-radius:5px; padding:4px 6px; text-align:center; }
+        .cea-effective-rate { display:flex; align-items:center; gap:10px; background:linear-gradient(135deg,#edf5ff,#f0faff); border:1px solid #c5e0f5; border-radius:8px; padding:10px 14px; margin-top:10px; font-size:0.9em; }
+        .cea-effective-rate .cer-label { color:#4a6070; }
+        .cea-effective-rate .cer-value { font-weight:700; color:#2d5b8a; font-size:1.15em; }
+        .cea-effective-rate .cer-detail { color:#7a9db1; font-size:0.82em; }
+        body.dark-mode .cea-levels-table th { background:#1e2d3d; color:#a8d5e2; border-color:#2a4a6a; }
+        body.dark-mode .cea-levels-table td { border-color:#2a3a4a; }
+        body.dark-mode .cea-levels-table input[type="number"] { background:#243040; border-color:#3a5060; color:#cdd6e0; }
+        body.dark-mode .cea-mix-row { background:#1a2535; border-color:#2a3a4a; }
+        body.dark-mode .cea-effective-rate { background:linear-gradient(135deg,#1e2d3d,#1a2535); border-color:#2a4a6a; }
         /* ── Accompagnement — Théorie & Analyse ─────────────────────── */
         .theorie-card { border:1px solid #e0d08a; border-radius:8px; margin-bottom:10px; overflow:hidden; cursor:pointer; transition:box-shadow 0.2s; }
         .theorie-card:hover { box-shadow:0 2px 10px rgba(0,0,0,0.1); }
@@ -3115,13 +3138,21 @@
 
                 <div class="section">
                     <h2>Coûts horaires</h2>
-                    <div class="form-row">
+
+                    <!-- Tableau des 3 niveaux CEA -->
+                    <h3 style="font-size:0.9em;color:#2d5b8a;margin:0 0 8px;font-weight:700;">Niveaux CEA</h3>
+                    <p style="font-size:0.82em;color:#7a9db1;margin:0 0 10px;">Définissez le tarif horaire de chaque niveau. Le taux effectif est calculé automatiquement selon la composition de l'équipe.</p>
+                    <div id="ceaNiveauxContainer"><!-- rendu par renderCeaNiveaux() --></div>
+
+                    <!-- Taux effectif + MSP -->
+                    <div class="form-row" style="margin-top:14px;">
                         <div class="form-group">
-                            <label>Coût CEA (CHF/h)</label>
+                            <label>Taux CEA effectif <span style="background:#4e9af1;color:#fff;padding:1px 7px;border-radius:10px;font-size:0.72em;margin-left:4px;font-weight:600;">calculé</span></label>
                             <div class="input-with-unit">
-                                <input type="number" id="coutHoraireCEA" step="0.5" value="35" onchange="saveConfig(); calculateTotal()">
+                                <input type="number" id="coutHoraireCEA" step="0.01" value="8.28" readonly style="background:#edf5ff;color:#2d5b8a;font-weight:700;" title="Calculé automatiquement depuis la composition CEA">
                                 <span class="unit">CHF/h</span>
                             </div>
+                            <span class="help-text">Pondéré selon la composition de l'équipe CEA</span>
                         </div>
                         <div class="form-group">
                             <label>Coût MSP (CHF/h)</label>
@@ -4599,9 +4630,16 @@
         function fmtInt(n) { return fmtNum(n, 0); }
 
         // Configuration
+        const CEA_LEVELS_DEFAULT = [
+            { niveau: 1, label: 'Niveau 1', coeff: 2.5, tarif: 6.21 },
+            { niveau: 2, label: 'Niveau 2', coeff: 2.0, tarif: 8.28 },
+            { niveau: 3, label: 'Niveau 3', coeff: 1.5, tarif: 11.38 }
+        ];
         let config = {
-            coutHoraireCEA: 35,
+            coutHoraireCEA: 8.28,
             coutHoraireMSP: 65,
+            ceaLevels: JSON.parse(JSON.stringify(CEA_LEVELS_DEFAULT)),
+            ceaMix: [0, 1, 0],   // nb travailleurs par niveau [niv1, niv2, niv3]
             modeFraisGeneraux: 'pourcentage',
             fraisGenerauxPourcent: 25,
             fraisGenerauxHoraire: 15,
@@ -5686,7 +5724,10 @@
         }
 
         function loadConfig() {
-            document.getElementById('coutHoraireCEA').value = config.coutHoraireCEA;
+            if (!config.ceaLevels) config.ceaLevels = JSON.parse(JSON.stringify(CEA_LEVELS_DEFAULT));
+            if (!config.ceaMix)    config.ceaMix    = [0, 1, 0];
+            renderCeaNiveaux();
+            recomputeEffectiveCeaRate();
             document.getElementById('coutHoraireMSP').value = config.coutHoraireMSP;
             document.getElementById('modeFraisGeneraux').value = config.modeFraisGeneraux;
             document.getElementById('fraisGenerauxPourcent').value = config.fraisGenerauxPourcent;
@@ -5706,8 +5747,84 @@
             updatePinStatus();
         }
 
+        // ── CEA Niveaux ─────────────────────────────────────────────
+        function renderCeaNiveaux() {
+            const container = document.getElementById('ceaNiveauxContainer');
+            if (!container) return;
+            const levels = config.ceaLevels || CEA_LEVELS_DEFAULT;
+            const mix    = config.ceaMix    || [0, 1, 0];
+            const badges = ['n1','n2','n3'];
+
+            const rows = levels.map((l, i) => `
+                <tr>
+                    <td><span class="niveau-badge ${badges[i]}">${l.niveau}</span></td>
+                    <td>${l.label}</td>
+                    <td><input type="number" value="${l.coeff}" min="0.1" step="0.1" onchange="updateCeaLevel(${i},'coeff',this.value)"> </td>
+                    <td><input type="number" value="${l.tarif}" min="0" step="0.01" onchange="updateCeaLevel(${i},'tarif',this.value)"> CHF/h</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <button onclick="updateCeaMixWorker(${i}, (config.ceaMix[${i}]||0)-1)" style="border:1px solid #c5d8e4;background:#fff;border-radius:4px;width:22px;height:22px;cursor:pointer;font-weight:700;font-size:0.9em;line-height:1;">−</button>
+                            <span id="ceaMixCount${i}" style="min-width:18px;text-align:center;font-weight:700;color:#2d5b8a;">${mix[i] || 0}</span>
+                            <button onclick="updateCeaMixWorker(${i}, (config.ceaMix[${i}]||0)+1)" style="border:1px solid #c5d8e4;background:#fff;border-radius:4px;width:22px;height:22px;cursor:pointer;font-weight:700;font-size:0.9em;line-height:1;">+</button>
+                            <span style="font-size:0.8em;color:#8aacbc;">travailleur${(mix[i]||0)>1?'s':''}</span>
+                        </div>
+                    </td>
+                </tr>`).join('');
+
+            container.innerHTML = `
+                <table class="cea-levels-table">
+                    <thead><tr>
+                        <th>Niv.</th>
+                        <th>Libellé</th>
+                        <th>Coefficient</th>
+                        <th>Tarif horaire</th>
+                        <th>Composition équipe</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+        }
+
+        function updateCeaLevel(idx, field, val) {
+            if (!config.ceaLevels) config.ceaLevels = JSON.parse(JSON.stringify(CEA_LEVELS_DEFAULT));
+            const v = parseFloat(val);
+            if (!isFinite(v) || v <= 0) return;
+            config.ceaLevels[idx][field] = v;
+            recomputeEffectiveCeaRate();
+            saveToStorage();
+        }
+
+        function updateCeaMixWorker(idx, count) {
+            if (!config.ceaMix) config.ceaMix = [0, 1, 0];
+            config.ceaMix[idx] = Math.max(0, Math.round(count));
+            const el = document.getElementById('ceaMixCount' + idx);
+            if (el) el.textContent = config.ceaMix[idx];
+            recomputeEffectiveCeaRate();
+            // Sync nbCEA in calculateur = total workers
+            const totalWorkers = config.ceaMix.reduce((a, b) => a + b, 0);
+            const nbCeaInput = document.getElementById('nbCEA');
+            if (nbCeaInput && totalWorkers > 0) nbCeaInput.value = totalWorkers;
+            saveToStorage();
+        }
+
+        function recomputeEffectiveCeaRate() {
+            const levels = config.ceaLevels || CEA_LEVELS_DEFAULT;
+            const mix    = config.ceaMix    || [0, 1, 0];
+            const total  = mix.reduce((a, b) => a + b, 0);
+            let rate;
+            if (total === 0) {
+                // Aucun travailleur défini → moyenne simple des 3 niveaux
+                rate = levels.reduce((sum, l) => sum + l.tarif, 0) / levels.length;
+            } else {
+                rate = mix.reduce((sum, count, i) => sum + count * (levels[i]?.tarif || 0), 0) / total;
+            }
+            config.coutHoraireCEA = Math.round(rate * 100) / 100;
+            const input = document.getElementById('coutHoraireCEA');
+            if (input) input.value = config.coutHoraireCEA.toFixed(2);
+            calculateTotal();
+        }
+
         function saveConfig() {
-            config.coutHoraireCEA = parseFloat(document.getElementById('coutHoraireCEA').value);
+            // coutHoraireCEA is auto-computed by recomputeEffectiveCeaRate() — no manual read needed
             config.coutHoraireMSP = parseFloat(document.getElementById('coutHoraireMSP').value);
             config.modeFraisGeneraux = document.getElementById('modeFraisGeneraux').value;
             config.fraisGenerauxPourcent = parseFloat(document.getElementById('fraisGenerauxPourcent').value);
@@ -5745,8 +5862,10 @@
             }
             toastConfirm('Réinitialiser tous les paramètres?', () => {
                 config = {
-                    coutHoraireCEA: 35,
+                    coutHoraireCEA: 8.28,
                     coutHoraireMSP: 65,
+                    ceaLevels: JSON.parse(JSON.stringify(CEA_LEVELS_DEFAULT)),
+                    ceaMix: [0, 1, 0],
                     modeFraisGeneraux: 'pourcentage',
                     fraisGenerauxPourcent: 25,
                     fraisGenerauxHoraire: 15,
