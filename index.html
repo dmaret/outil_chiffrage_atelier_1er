@@ -1682,6 +1682,103 @@
         body.dark-mode .assistant-mode-toggle label { color:#8aacbc; }
         body.dark-mode .assistant-qty-chips button { background:#243040; border-color:#3a5060; color:#cdd6e0; }
 
+        /* ── Assistant : vues alternatives (Timeline, Palette, Atelier, Wizard) ── */
+        .assistant-view-bar { display:flex; gap:4px; background:#eef4fb; border:1px solid #d5e3ed; border-radius:8px; padding:4px; margin-bottom:12px; overflow-x:auto; }
+        .assistant-view-tab { flex:1; min-width:110px; padding:8px 10px; border-radius:6px; background:transparent; color:#6b8fa3; border:none; cursor:pointer; font-size:0.83em; font-weight:600; transition:all 0.15s; white-space:nowrap; display:flex; align-items:center; justify-content:center; gap:6px; }
+        .assistant-view-tab:hover { background:#dcebfa; color:#2d5b8a; }
+        .assistant-view-tab.active { background:#4e9af1; color:#fff; box-shadow:0 2px 6px rgba(78,154,241,0.4); }
+        body.dark-mode .assistant-view-bar { background:#1a2535; border-color:#2a3a4a; }
+        body.dark-mode .assistant-view-tab { color:#8aacbc; }
+        body.dark-mode .assistant-view-tab:hover { background:#243040; color:#a8d5e2; }
+
+        /* Timeline */
+        .assistant-timeline { display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; max-height:42vh; }
+        .assistant-timeline-col { flex:0 0 210px; background:#f4f8fc; border:1px solid #d5e3ed; border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:8px; }
+        .assistant-timeline-col h4 { margin:0 0 6px; font-size:0.82em; color:#2d5b8a; font-weight:700; border-bottom:2px solid #4e9af1; padding-bottom:5px; }
+        .assistant-timeline-col .col-count { font-size:0.72em; color:#6b8fa3; font-weight:400; }
+        .assistant-timeline-card { background:#fff; border:1.5px solid #d5e3ed; border-radius:7px; padding:7px 9px; cursor:pointer; transition:all 0.15s; font-size:0.8em; line-height:1.3; position:relative; }
+        .assistant-timeline-card:hover { border-color:#4e9af1; background:#f0f8ff; transform:translateY(-1px); }
+        .assistant-timeline-card.selected { border-color:#4e9af1; background:#e8f4ff; box-shadow:0 2px 6px rgba(78,154,241,0.25); }
+        .assistant-timeline-card.selected::before { content:'✓'; position:absolute; top:4px; right:6px; color:#4e9af1; font-weight:700; font-size:0.95em; }
+        .assistant-timeline-card .c-label { font-weight:600; color:#2d3e50; margin-bottom:3px; }
+        .assistant-timeline-card .c-meta { display:flex; justify-content:space-between; font-size:0.78em; color:#8aacbc; }
+        .assistant-timeline-card .c-code { font-family:monospace; }
+        .assistant-timeline-card .c-time-edit { width:50px; border:1px solid #c5d8e4; border-radius:4px; padding:1px 4px; font-size:0.85em; text-align:center; }
+        body.dark-mode .assistant-timeline-col { background:#1a2535; border-color:#2a3a4a; }
+        body.dark-mode .assistant-timeline-card { background:#243040; border-color:#3a5060; }
+        body.dark-mode .assistant-timeline-card .c-label { color:#cdd6e0; }
+        body.dark-mode .assistant-timeline-card.selected { background:#1e3552; }
+
+        /* Palette + panier */
+        .assistant-palette { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-height:42vh; }
+        .assistant-palette-side, .assistant-basket { background:#f4f8fc; border:1px solid #d5e3ed; border-radius:10px; padding:10px; overflow-y:auto; }
+        .assistant-palette-side h4, .assistant-basket h4 { margin:0 0 8px; font-size:0.85em; color:#2d5b8a; font-weight:700; display:flex; justify-content:space-between; align-items:center; }
+        .assistant-palette-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(70px,1fr)); gap:6px; }
+        .assistant-palette-chip { background:#fff; border:1.5px solid #d5e3ed; border-radius:8px; padding:8px 4px; text-align:center; cursor:pointer; transition:all 0.15s; font-size:0.72em; line-height:1.25; user-select:none; min-height:62px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+        .assistant-palette-chip:hover { border-color:#4e9af1; background:#f0f8ff; transform:scale(1.03); }
+        .assistant-palette-chip.dragging { opacity:0.4; }
+        .assistant-palette-chip.in-basket { background:#e5f2e5; border-color:#7bbd7b; color:#3a7a3a; }
+        .assistant-palette-chip .chip-icon { font-size:1.3em; }
+        .assistant-palette-chip .chip-label { font-weight:500; color:#4a6070; }
+        .assistant-basket { display:flex; flex-direction:column; min-height:200px; }
+        .assistant-basket.drop-active { background:#e5f2e5; border-color:#7bbd7b; border-style:dashed; }
+        .assistant-basket-empty { text-align:center; color:#8aacbc; font-size:0.82em; font-style:italic; padding:30px 10px; }
+        .assistant-basket-item { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #d5e3ed; border-radius:6px; padding:6px 8px; margin-bottom:5px; font-size:0.82em; }
+        .assistant-basket-item .bi-icon { flex-shrink:0; font-size:1.05em; }
+        .assistant-basket-item .bi-label { flex:1; color:#2d3e50; }
+        .assistant-basket-item .bi-time { width:50px; border:1px solid #c5d8e4; border-radius:4px; padding:1px 4px; font-size:0.85em; text-align:center; }
+        .assistant-basket-item .bi-del { background:transparent; border:none; color:#c53030; cursor:pointer; font-size:1em; padding:0 2px; }
+        .assistant-basket-item .bi-del:hover { color:#e55; }
+        body.dark-mode .assistant-palette-side, body.dark-mode .assistant-basket { background:#1a2535; border-color:#2a3a4a; }
+        body.dark-mode .assistant-palette-chip { background:#243040; border-color:#3a5060; }
+        body.dark-mode .assistant-palette-chip.in-basket { background:#1e3b1e; border-color:#3a6a3a; color:#8fc98f; }
+        body.dark-mode .assistant-basket-item { background:#243040; border-color:#3a5060; }
+
+        /* Atelier */
+        .assistant-atelier { background:linear-gradient(135deg,#eaf4fa,#f4f8fc); border:2px dashed #a3c4df; border-radius:12px; padding:18px; position:relative; max-height:42vh; overflow-y:auto; }
+        .assistant-atelier-title { text-align:center; font-size:0.78em; color:#6b8fa3; margin-bottom:12px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; }
+        .assistant-atelier-map { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
+        .assistant-atelier-zone { background:#fff; border:2px solid #c5d8e4; border-radius:10px; padding:12px 10px; cursor:pointer; transition:all 0.2s; position:relative; text-align:center; }
+        .assistant-atelier-zone:hover { border-color:#4e9af1; transform:translateY(-2px); box-shadow:0 4px 12px rgba(78,154,241,0.18); }
+        .assistant-atelier-zone.has-selection { border-color:#4e9af1; background:linear-gradient(135deg,#eaf4ff,#d8ebff); }
+        .assistant-atelier-zone.has-selection::after { content:attr(data-count); position:absolute; top:-8px; right:-8px; background:#4e9af1; color:#fff; width:22px; height:22px; border-radius:50%; font-size:0.75em; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+        .assistant-atelier-zone .z-icon { font-size:2em; display:block; margin-bottom:4px; }
+        .assistant-atelier-zone .z-label { font-size:0.82em; font-weight:600; color:#2d3e50; }
+        .assistant-atelier-zone .z-hint { font-size:0.72em; color:#7a9db1; margin-top:2px; }
+        .assistant-atelier-detail { background:#fff; border:1px solid #d5e3ed; border-radius:10px; padding:12px; margin-top:12px; display:none; }
+        .assistant-atelier-detail.open { display:block; animation:fadeIn 0.2s; }
+        .assistant-atelier-detail h4 { margin:0 0 8px; font-size:0.92em; color:#2d5b8a; }
+        body.dark-mode .assistant-atelier { background:linear-gradient(135deg,#1a2535,#243040); border-color:#3a5060; }
+        body.dark-mode .assistant-atelier-zone { background:#243040; border-color:#3a5060; }
+        body.dark-mode .assistant-atelier-zone .z-label { color:#cdd6e0; }
+        body.dark-mode .assistant-atelier-zone.has-selection { background:linear-gradient(135deg,#1e3552,#24456a); }
+        body.dark-mode .assistant-atelier-detail { background:#1a2535; border-color:#2a3a4a; }
+
+        /* Wizard */
+        .assistant-wizard { background:#f4f8fc; border:1px solid #d5e3ed; border-radius:10px; padding:18px; max-height:42vh; overflow-y:auto; }
+        .assistant-wizard-progress { display:flex; gap:5px; margin-bottom:16px; }
+        .assistant-wizard-progress .dot { flex:1; height:5px; background:#d5e3ed; border-radius:3px; transition:background 0.2s; }
+        .assistant-wizard-progress .dot.done { background:#4e9af1; }
+        .assistant-wizard-progress .dot.current { background:#4e9af1; box-shadow:0 0 0 3px rgba(78,154,241,0.25); }
+        .assistant-wizard h4 { margin:0 0 12px; font-size:1em; color:#2d5b8a; }
+        .assistant-wizard-choices { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:14px; }
+        .assistant-wizard-choice { background:#fff; border:2px solid #d5e3ed; border-radius:8px; padding:12px; cursor:pointer; transition:all 0.15s; text-align:left; font-size:0.86em; }
+        .assistant-wizard-choice:hover { border-color:#4e9af1; background:#f0f8ff; }
+        .assistant-wizard-choice.selected { border-color:#4e9af1; background:#e8f4ff; }
+        .assistant-wizard-choice .wc-icon { font-size:1.4em; display:block; margin-bottom:4px; }
+        .assistant-wizard-choice .wc-label { font-weight:600; color:#2d3e50; }
+        .assistant-wizard-choice .wc-desc { font-size:0.8em; color:#7a9db1; margin-top:3px; }
+        .assistant-wizard-nav { display:flex; justify-content:space-between; margin-top:14px; padding-top:12px; border-top:1px solid #d5e3ed; }
+        .assistant-wizard-summary { background:#fff; border:1px solid #b8d4eb; border-radius:8px; padding:12px; margin-top:10px; font-size:0.85em; }
+        .assistant-wizard-summary ul { margin:4px 0 0; padding-left:20px; }
+        .assistant-wizard-summary li { padding:2px 0; color:#4a6070; }
+        body.dark-mode .assistant-wizard { background:#1a2535; border-color:#2a3a4a; }
+        body.dark-mode .assistant-wizard-choice { background:#243040; border-color:#3a5060; color:#cdd6e0; }
+        body.dark-mode .assistant-wizard-choice:hover { background:#1e3552; }
+        body.dark-mode .assistant-wizard-choice.selected { background:#1e3552; }
+        body.dark-mode .assistant-wizard-summary { background:#243040; border-color:#3a5060; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
         /* ── Accompagnement — Théorie & Analyse ─────────────────────── */
         .theorie-card { border:1px solid #e0d08a; border-radius:8px; margin-bottom:10px; overflow:hidden; cursor:pointer; transition:box-shadow 0.2s; }
         .theorie-card:hover { box-shadow:0 2px 10px rgba(0,0,0,0.1); }
@@ -12731,48 +12828,87 @@
                 </div>`;
         }
 
+        // ── Shared Assistant State ──────────────────────────────────
+        let _assistantState = {
+            type: null,
+            viewMode: 'liste',      // 'liste' | 'timeline' | 'palette' | 'atelier' | 'wizard'
+            selected: new Map(),    // gesteId -> { time }
+            qty: 1,
+            mode: 'replace',        // 'replace' | 'append'
+            atelierZone: null,
+            wizardStep: 0,
+            wizardAnswers: []
+        };
+
+        function _assistantInit(type) {
+            const preset = ASSISTANT_PRESETS[type] || [];
+            _assistantState.type = type;
+            _assistantState.selected = new Map();
+            preset.forEach(id => {
+                const g = ASSISTANT_GESTES.find(x => x.id === id);
+                if (g) _assistantState.selected.set(id, { time: g.time });
+            });
+        }
+
+        function _assistantToggleGeste(id, force) {
+            const g = ASSISTANT_GESTES.find(x => x.id === id);
+            if (!g) return;
+            const on = (force !== undefined) ? !!force : !_assistantState.selected.has(id);
+            if (on) {
+                const cur = _assistantState.selected.get(id);
+                _assistantState.selected.set(id, { time: cur ? cur.time : g.time });
+            } else {
+                _assistantState.selected.delete(id);
+            }
+            assistantUpdateLiveStats();
+        }
+
+        function _assistantSetTime(id, time) {
+            const entry = _assistantState.selected.get(id);
+            if (entry) entry.time = parseFloat(time) || 1;
+            assistantUpdateLiveStats();
+        }
+
+        function _assistantSwitchView(mode) {
+            _assistantState.viewMode = mode;
+            if (mode === 'wizard') { _assistantState.wizardStep = 0; _assistantState.wizardAnswers = []; }
+            _assistantRenderView();
+            document.querySelectorAll('.assistant-view-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-view') === mode);
+            });
+        }
+
+        const _ASSIST_VIEW_TABS = [
+            { id:'liste',    icon:'☰',  label:'Liste' },
+            { id:'timeline', icon:'📅', label:'Timeline' },
+            { id:'palette',  icon:'🎨', label:'Palette' },
+            { id:'atelier',  icon:'🗺️', label:'Atelier' },
+            { id:'wizard',   icon:'🧙', label:'Wizard' }
+        ];
+
         function assistantSelectType(type) {
+            _assistantInit(type);
+            _assistantRenderBody();
+        }
+
+        function _assistantRenderBody() {
             const body = document.getElementById('assistantModalBody');
             if (!body) return;
             const typeLabels = {
                 conditionnement:'📦 Conditionnement', etiquetage:'🏷️ Étiquetage',
                 assemblage:'🏭 Assemblage', palettisation:'🏗️ Palettisation', custom:'✏️ Personnalisé'
             };
-            const preset = ASSISTANT_PRESETS[type] || [];
-
-            // Group by phase
-            const phases = {};
-            ASSISTANT_GESTES.forEach(g => { (phases[g.phase] = phases[g.phase] || []).push(g); });
-
-            let gestesHtml = '';
-            Object.entries(phases).forEach(([phase, gestes]) => {
-                gestesHtml += `<div class="assistant-phase-header" data-phase="${phase}">${phase}</div>`;
-                gestes.forEach(g => {
-                    const chk = preset.includes(g.id) ? 'checked' : '';
-                    const searchStr = (g.label + ' ' + g.code + ' ' + g.phase).toLowerCase();
-                    gestesHtml += `
-                        <div class="assistant-geste-row" data-phase="${g.phase}" data-search="${searchStr.replace(/"/g,'&quot;')}">
-                            <input type="checkbox" id="ag-${g.id}" name="ag" value="${g.id}" ${chk} onchange="assistantUpdateLiveStats()" style="flex-shrink:0;accent-color:#4e9af1;width:16px;height:16px;">
-                            <label for="ag-${g.id}">${g.label} <span style="color:#8aacbc;font-size:0.8em;">[${g.code}]</span></label>
-                            <input type="number" class="a-time" id="at-${g.id}" value="${g.time}" min="1" title="Temps en secondes par pièce" oninput="assistantUpdateLiveStats()">
-                            <span style="font-size:0.77em;color:#8aacbc;white-space:nowrap;">s/pce</span>
-                        </div>`;
-                });
-            });
-
-            const checkAllId = 'ag-checkall-' + type;
+            const modeCheckedR = _assistantState.mode === 'replace' ? 'checked' : '';
+            const modeCheckedA = _assistantState.mode === 'append' ? 'checked' : '';
             body.innerHTML = `
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <button class="btn btn-secondary btn-small" onclick="renderAssistantStep1()">← Retour</button>
-                    <h3 style="margin:0;color:#2d3e50;">${typeLabels[type]}</h3>
+                    <h3 style="margin:0;color:#2d3e50;">${typeLabels[_assistantState.type] || '✏️ Personnalisé'}</h3>
                 </div>
-                <p style="font-size:0.83em;color:#7a9db1;margin:0 0 8px;">Cochez les gestes à inclure. Temps en <strong>secondes par pièce</strong>.</p>
-                <input type="text" class="assistant-search" id="assistantSearch" placeholder="🔍 Filtrer les gestes (nom, code, phase)…" oninput="assistantFilterGestes(this.value)">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.84em;">
-                    <input type="checkbox" id="${checkAllId}" onchange="assistantToggleAll(this)" style="accent-color:#4e9af1;">
-                    <label for="${checkAllId}" style="cursor:pointer;color:#6b8fa3;">Tout cocher / décocher (visibles)</label>
+                <div class="assistant-view-bar">
+                    ${_ASSIST_VIEW_TABS.map(t => `<button class="assistant-view-tab${t.id === _assistantState.viewMode ? ' active' : ''}" data-view="${t.id}" onclick="_assistantSwitchView('${t.id}')" title="${t.label}">${t.icon} ${t.label}</button>`).join('')}
                 </div>
-                <div id="assistantGestesList" style="max-height:40vh;overflow-y:auto;padding-right:4px;">${gestesHtml}</div>
+                <div id="assistantViewContent"></div>
                 <div class="assistant-live-stats" id="assistantLiveStats">
                     <div class="a-stat"><span class="a-stat-label">Gestes</span><span class="a-stat-value" id="asStatCount">0</span></div>
                     <div class="a-stat"><span class="a-stat-label">Temps / pièce</span><span class="a-stat-value" id="asStatPerPce">0 s</span></div>
@@ -12782,7 +12918,7 @@
                 <div style="border-top:1px solid #d5e3ed;padding-top:12px;margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <label style="font-size:0.85em;color:#4a6070;display:flex;align-items:center;gap:6px;">
                         Quantité / lot :
-                        <input type="number" id="a-quantite" value="1" min="1" oninput="assistantUpdateLiveStats()" style="width:70px;border:1px solid #c5d8e4;border-radius:4px;padding:4px 6px;">
+                        <input type="number" id="a-quantite" value="${_assistantState.qty}" min="1" oninput="_assistantState.qty=parseFloat(this.value)||1;assistantUpdateLiveStats()" style="width:70px;border:1px solid #c5d8e4;border-radius:4px;padding:4px 6px;">
                     </label>
                     <div class="assistant-qty-chips" role="group" aria-label="Quantités rapides">
                         <button type="button" onclick="assistantSetQty(10)">10</button>
@@ -12792,9 +12928,9 @@
                         <button type="button" onclick="assistantSetQty(1000)">1000</button>
                     </div>
                     <div class="assistant-mode-toggle" role="radiogroup" aria-label="Mode d'import">
-                        <input type="radio" name="assistantMode" id="assistantModeReplace" value="replace" checked>
+                        <input type="radio" name="assistantMode" id="assistantModeReplace" value="replace" ${modeCheckedR} onchange="_assistantState.mode='replace'">
                         <label for="assistantModeReplace" title="Efface les gestes existants">Remplacer</label>
-                        <input type="radio" name="assistantMode" id="assistantModeAppend" value="append">
+                        <input type="radio" name="assistantMode" id="assistantModeAppend" value="append" ${modeCheckedA} onchange="_assistantState.mode='append'">
                         <label for="assistantModeAppend" title="Ajoute aux gestes existants">Ajouter</label>
                     </div>
                     <div style="margin-left:auto;display:flex;gap:8px;">
@@ -12802,14 +12938,57 @@
                         <button class="btn" onclick="importerGestesAssistant()">✅ Importer</button>
                     </div>
                 </div>`;
+            _assistantRenderView();
             assistantUpdateLiveStats();
         }
 
+        function _assistantRenderView() {
+            const vc = document.getElementById('assistantViewContent');
+            if (!vc) return;
+            switch (_assistantState.viewMode) {
+                case 'timeline': vc.innerHTML = _buildAssistantTimeline(); break;
+                case 'palette':  vc.innerHTML = _buildAssistantPalette();  break;
+                case 'atelier':  vc.innerHTML = _buildAssistantAtelier();  break;
+                case 'wizard':   vc.innerHTML = _buildAssistantWizard();   break;
+                default:         vc.innerHTML = _buildAssistantListe();    break;
+            }
+        }
+
+        // ── Vue Liste (classique) ───────────────────────────────────
+        function _buildAssistantListe() {
+            const phases = {};
+            ASSISTANT_GESTES.forEach(g => { (phases[g.phase] = phases[g.phase] || []).push(g); });
+            let html = `
+                <p style="font-size:0.83em;color:#7a9db1;margin:0 0 8px;">Cochez les gestes à inclure. Temps en <strong>secondes par pièce</strong>.</p>
+                <input type="text" class="assistant-search" id="assistantSearch" placeholder="🔍 Filtrer les gestes (nom, code, phase)…" oninput="assistantFilterGestes(this.value)">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.84em;">
+                    <input type="checkbox" id="ag-checkall" onchange="assistantToggleAll(this)" style="accent-color:#4e9af1;">
+                    <label for="ag-checkall" style="cursor:pointer;color:#6b8fa3;">Tout cocher / décocher (visibles)</label>
+                </div>
+                <div id="assistantGestesList" style="max-height:34vh;overflow-y:auto;padding-right:4px;">`;
+            Object.entries(phases).forEach(([phase, gestes]) => {
+                html += `<div class="assistant-phase-header" data-phase="${phase}">${phase}</div>`;
+                gestes.forEach(g => {
+                    const chk = _assistantState.selected.has(g.id) ? 'checked' : '';
+                    const t = (_assistantState.selected.get(g.id) || {}).time ?? g.time;
+                    const search = (g.label + ' ' + g.code + ' ' + g.phase).toLowerCase().replace(/"/g, '&quot;');
+                    html += `<div class="assistant-geste-row" data-phase="${g.phase}" data-search="${search}">
+                        <input type="checkbox" name="ag-liste" value="${g.id}" ${chk} onchange="_assistantToggleGeste('${g.id}',this.checked);_assistantRenderView()" style="flex-shrink:0;accent-color:#4e9af1;width:16px;height:16px;">
+                        <label style="flex:1;font-size:0.86em;cursor:pointer;">${g.label} <span style="color:#8aacbc;font-size:0.8em;">[${g.code}]</span></label>
+                        <input type="number" class="a-time" value="${t}" min="1" title="Temps en secondes par pièce" oninput="_assistantSetTime('${g.id}',this.value)" ${chk ? '' : 'disabled'}>
+                        <span style="font-size:0.77em;color:#8aacbc;white-space:nowrap;">s/pce</span>
+                    </div>`;
+                });
+            });
+            html += `</div>`;
+            return html;
+        }
+
         function assistantFilterGestes(q) {
+            if (_assistantState.viewMode !== 'liste') return;
             const query = (q || '').trim().toLowerCase();
             const list = document.getElementById('assistantGestesList');
             if (!list) return;
-            // Show/hide rows
             const phaseVisible = {};
             list.querySelectorAll('.assistant-geste-row').forEach(row => {
                 const hay = row.getAttribute('data-search') || '';
@@ -12817,87 +12996,303 @@
                 row.style.display = match ? '' : 'none';
                 if (match) phaseVisible[row.getAttribute('data-phase')] = true;
             });
-            // Hide phase headers that have no visible rows
             list.querySelectorAll('.assistant-phase-header').forEach(h => {
                 h.style.display = phaseVisible[h.getAttribute('data-phase')] ? '' : 'none';
             });
         }
 
+        function assistantToggleAll(cb) {
+            if (_assistantState.viewMode !== 'liste') return;
+            document.querySelectorAll('#assistantGestesList .assistant-geste-row').forEach(row => {
+                if (row.style.display === 'none') return;
+                const id = row.querySelector('input[name="ag-liste"]')?.value;
+                if (id) _assistantToggleGeste(id, cb.checked);
+            });
+            _assistantRenderView();
+            assistantUpdateLiveStats();
+        }
+
+        // ── Vue Timeline ────────────────────────────────────────────
+        function _buildAssistantTimeline() {
+            const phases = {};
+            ASSISTANT_GESTES.forEach(g => { (phases[g.phase] = phases[g.phase] || []).push(g); });
+            let cols = '';
+            Object.entries(phases).forEach(([phase, gestes]) => {
+                const selCount = gestes.filter(g => _assistantState.selected.has(g.id)).length;
+                const cards = gestes.map(g => {
+                    const sel = _assistantState.selected.has(g.id);
+                    const t = (_assistantState.selected.get(g.id) || {}).time ?? g.time;
+                    return `<div class="assistant-timeline-card ${sel ? 'selected' : ''}" onclick="_assistantToggleGeste('${g.id}');_assistantRenderView()">
+                        <div class="c-label">${g.label}</div>
+                        <div class="c-meta">
+                            <span class="c-code">${g.code}</span>
+                            <span>${sel
+                                ? `<input class="c-time-edit" type="number" value="${t}" min="1" onclick="event.stopPropagation()" oninput="_assistantSetTime('${g.id}',this.value)" title="s/pce"> s`
+                                : g.time + ' s'}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+                cols += `<div class="assistant-timeline-col">
+                    <h4>${phase} <span class="col-count">${selCount > 0 ? '· ' + selCount + ' sélectionné' + (selCount > 1 ? 's' : '') : ''}</span></h4>
+                    ${cards}
+                </div>`;
+            });
+            return `<div class="assistant-timeline">${cols}</div>`;
+        }
+
+        // ── Vue Palette + panier ────────────────────────────────────
+        function _buildAssistantPalette() {
+            const phaseIcons = {
+                '📦 Réception':'📦', '🔍 Contrôle qualité':'🔍',
+                '🏷️ Étiquetage':'🏷️', '🏭 Conditionnement & Assemblage':'🏭', '🚚 Expédition':'🚚'
+            };
+            const chips = ASSISTANT_GESTES.map(g => {
+                const inBasket = _assistantState.selected.has(g.id);
+                const icon = phaseIcons[g.phase] || '⚙️';
+                return `<div class="assistant-palette-chip ${inBasket ? 'in-basket' : ''}" onclick="_assistantToggleGeste('${g.id}');_assistantRenderView()" title="${g.phase} — ${g.label} [${g.code}] · ${g.time}s">
+                    <span class="chip-icon">${icon}</span>
+                    <span class="chip-label">${g.code}</span>
+                </div>`;
+            }).join('');
+
+            const sel = _assistantState.selected.size;
+            const basketItems = [..._assistantState.selected.entries()].map(([id, entry]) => {
+                const g = ASSISTANT_GESTES.find(x => x.id === id);
+                if (!g) return '';
+                const icon = phaseIcons[g.phase] || '⚙️';
+                return `<div class="assistant-basket-item">
+                    <span class="bi-icon">${icon}</span>
+                    <span class="bi-label">${g.label} <small style="color:#8aacbc;">[${g.code}]</small></span>
+                    <input class="bi-time" type="number" value="${entry.time}" min="1" oninput="_assistantSetTime('${id}',this.value)" title="s/pce">
+                    <span style="font-size:0.77em;color:#8aacbc;">s</span>
+                    <button class="bi-del" onclick="_assistantToggleGeste('${id}',false);_assistantRenderView()" title="Retirer">✕</button>
+                </div>`;
+            }).join('');
+
+            return `<div class="assistant-palette">
+                <div class="assistant-palette-side">
+                    <h4>🎨 Catalogue <small style="font-weight:400;color:#7a9db1;">${ASSISTANT_GESTES.length} gestes</small></h4>
+                    <div class="assistant-palette-grid">${chips}</div>
+                </div>
+                <div class="assistant-basket">
+                    <h4>🧺 Composition <small style="font-weight:400;color:#7a9db1;">${sel} sélectionné${sel !== 1 ? 's' : ''}</small></h4>
+                    ${basketItems || '<div class="assistant-basket-empty">Cliquez sur un geste<br>du catalogue pour l\'ajouter ici</div>'}
+                </div>
+            </div>`;
+        }
+
+        // ── Vue Atelier ─────────────────────────────────────────────
+        function _buildAssistantAtelier() {
+            const ZONES = [
+                { phase:'📦 Réception',                    icon:'🚛', label:'Réception',    hint:'Déchargement, déballage' },
+                { phase:'🔍 Contrôle qualité',             icon:'🔬', label:'Contrôle',      hint:'Visuel, conformité' },
+                { phase:'🏷️ Étiquetage',                   icon:'🏷️', label:'Étiquetage',    hint:'Collage, impression' },
+                { phase:'🏭 Conditionnement & Assemblage', icon:'🤝', label:'Assemblage',    hint:'Kitting, conditionnement' },
+                { phase:'🚚 Expédition',                   icon:'📮', label:'Expédition',    hint:'Filmage, livraison' },
+            ];
+            const zones = ZONES.map(z => {
+                const gestes = ASSISTANT_GESTES.filter(g => g.phase === z.phase);
+                const selCount = gestes.filter(g => _assistantState.selected.has(g.id)).length;
+                const safePhase = z.phase.replace(/'/g, "\\'");
+                return `<div class="assistant-atelier-zone ${selCount > 0 ? 'has-selection' : ''}" data-count="${selCount}" onclick="_assistantOpenAtelierZone('${safePhase}')" title="Voir les gestes">
+                    <span class="z-icon">${z.icon}</span>
+                    <div class="z-label">${z.label}</div>
+                    <div class="z-hint">${z.hint}</div>
+                </div>`;
+            }).join('');
+
+            let detail = '';
+            if (_assistantState.atelierZone) {
+                const gestes = ASSISTANT_GESTES.filter(g => g.phase === _assistantState.atelierZone);
+                const cards = gestes.map(g => {
+                    const sel = _assistantState.selected.has(g.id);
+                    const t = (_assistantState.selected.get(g.id) || {}).time ?? g.time;
+                    return `<div class="assistant-timeline-card ${sel ? 'selected' : ''}" onclick="_assistantToggleGeste('${g.id}');_assistantRenderView()">
+                        <div class="c-label">${g.label}</div>
+                        <div class="c-meta">
+                            <span class="c-code">${g.code}</span>
+                            <span>${sel
+                                ? `<input class="c-time-edit" type="number" value="${t}" min="1" onclick="event.stopPropagation()" oninput="_assistantSetTime('${g.id}',this.value)"> s`
+                                : g.time + ' s'}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+                detail = `<div class="assistant-atelier-detail open">
+                    <h4>${_assistantState.atelierZone}</h4>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">${cards}</div>
+                </div>`;
+            }
+
+            return `<div class="assistant-atelier">
+                <div class="assistant-atelier-title">Plan atelier — cliquez une zone pour voir et sélectionner ses gestes</div>
+                <div class="assistant-atelier-map">${zones}</div>
+                ${detail}
+            </div>`;
+        }
+
+        function _assistantOpenAtelierZone(phase) {
+            _assistantState.atelierZone = (_assistantState.atelierZone === phase) ? null : phase;
+            _assistantRenderView();
+        }
+
+        // ── Vue Wizard ──────────────────────────────────────────────
+        const _WIZARD_STEPS = [
+            {
+                q: 'Volume du lot à traiter ?',
+                choices: [
+                    { icon:'🔹', label:'Petite série',  desc:'Moins de 10 pièces',  qty:5,   ids:[], remove:[] },
+                    { icon:'📦', label:'Lot standard',  desc:'10 à 99 pièces',       qty:50,  ids:[], remove:[] },
+                    { icon:'📦', label:'Grande série',  desc:'100 à 499 pièces',     qty:200, ids:[], remove:[] },
+                    { icon:'🏗️', label:'Masse',          desc:'500 pièces et plus',   qty:500, ids:[], remove:[] },
+                ]
+            },
+            {
+                q: 'Complexité du produit ?',
+                choices: [
+                    { icon:'🟢', label:'Simple',    desc:'1-2 gestes de manipulation',     ids:['g-ass14','g-ass09','g-eti05'], remove:['g-ass12','g-ass08','g-eti04'] },
+                    { icon:'🟡', label:'Moyen',     desc:'Plusieurs insertions',             ids:['g-ass14','g-ass09','g-eti04'], remove:['g-ass12','g-ass08','g-eti05'] },
+                    { icon:'🔴', label:'Complexe',  desc:'Multi-composants ou fragile',      ids:['g-ass12','g-ass08','g-eti04'], remove:['g-ass14','g-ass09','g-eti05'] },
+                ]
+            },
+            {
+                q: 'Niveau de contrôle qualité ?',
+                choices: [
+                    { icon:'👁️', label:'Visuel rapide',  desc:'Contrôle à vue par pièce',       ids:['g-ctr01'],                       remove:['g-ctr02','g-ctr03','g-ctr04'] },
+                    { icon:'🔍', label:'Standard',        desc:'Visuel + mise en conformité',    ids:['g-ctr01','g-ctr03'],             remove:['g-ctr02','g-ctr04'] },
+                    { icon:'🧪', label:'Approfondi',      desc:'Contrôle complet + conformité',  ids:['g-ctr01','g-ctr02','g-ctr03','g-ctr04'], remove:[] },
+                ]
+            },
+            {
+                q: 'Mode d\'expédition ?',
+                choices: [
+                    { icon:'📮', label:'Colis Poste',    desc:'Pesage + dépôt postal',         ids:['g-exp01','g-exp03'],              remove:['g-exp02','g-exp04'] },
+                    { icon:'🚚', label:'Palette camion', desc:'Filmage + mise à disposition',   ids:['g-exp01','g-exp02','g-exp04'],    remove:['g-exp03'] },
+                    { icon:'🤝', label:'Enlèvement',     desc:'Client vient chercher',          ids:['g-exp01'],                       remove:['g-exp02','g-exp03','g-exp04'] },
+                ]
+            }
+        ];
+
+        function _buildAssistantWizard() {
+            const step = _assistantState.wizardStep;
+            const answers = _assistantState.wizardAnswers;
+            const dots = _WIZARD_STEPS.map((_, i) =>
+                `<div class="dot${i < step ? ' done' : i === step ? ' current' : ''}"></div>`
+            ).join('');
+
+            if (step >= _WIZARD_STEPS.length) {
+                const items = [..._assistantState.selected.entries()].map(([id]) => {
+                    const g = ASSISTANT_GESTES.find(x => x.id === id);
+                    return g ? `<li>${g.label} <small style="color:#8aacbc;">[${g.code}]</small></li>` : '';
+                }).join('');
+                const doneDots = _WIZARD_STEPS.map(() => `<div class="dot done"></div>`).join('');
+                return `<div class="assistant-wizard">
+                    <div class="assistant-wizard-progress">${doneDots}</div>
+                    <h4>✅ Récapitulatif — ${_assistantState.selected.size} geste${_assistantState.selected.size !== 1 ? 's' : ''} sélectionné${_assistantState.selected.size !== 1 ? 's' : ''}</h4>
+                    <div class="assistant-wizard-summary"><ul>${items || '<li style="color:#8aacbc;font-style:italic;">Aucun geste sélectionné</li>'}</ul></div>
+                    <div class="assistant-wizard-nav">
+                        <button class="btn btn-secondary btn-small" onclick="_assistantWizardBack()">← Modifier</button>
+                        <button class="btn" onclick="importerGestesAssistant()">✅ Importer maintenant</button>
+                    </div>
+                </div>`;
+            }
+
+            const s = _WIZARD_STEPS[step];
+            const choices = s.choices.map((c, ci) => {
+                const sel = answers[step] === ci ? ' selected' : '';
+                return `<button class="assistant-wizard-choice${sel}" onclick="_assistantWizardChoose(${ci})">
+                    <span class="wc-icon">${c.icon}</span>
+                    <span class="wc-label">${c.label}</span>
+                    <span class="wc-desc">${c.desc}</span>
+                </button>`;
+            }).join('');
+
+            return `<div class="assistant-wizard">
+                <div class="assistant-wizard-progress">${dots}</div>
+                <h4>Question ${step + 1} / ${_WIZARD_STEPS.length} — ${s.q}</h4>
+                <div class="assistant-wizard-choices">${choices}</div>
+                <div class="assistant-wizard-nav">
+                    ${step > 0
+                        ? `<button class="btn btn-secondary btn-small" onclick="_assistantWizardBack()">← Retour</button>`
+                        : '<span></span>'}
+                    ${answers[step] !== undefined
+                        ? `<button class="btn btn-small" onclick="_assistantWizardNext()">Suivant →</button>`
+                        : '<span style="font-size:0.82em;color:#8aacbc;">Choisissez une option</span>'}
+                </div>
+            </div>`;
+        }
+
+        function _assistantWizardChoose(choiceIdx) {
+            const step = _assistantState.wizardStep;
+            _assistantState.wizardAnswers[step] = choiceIdx;
+            const c = _WIZARD_STEPS[step].choices[choiceIdx];
+            if (c.qty !== undefined) {
+                _assistantState.qty = c.qty;
+                const qInput = document.getElementById('a-quantite');
+                if (qInput) qInput.value = c.qty;
+            }
+            (c.remove || []).forEach(id => _assistantToggleGeste(id, false));
+            ['g-rec01', 'g-rec02', 'g-rec04'].forEach(id => _assistantToggleGeste(id, true));
+            (c.ids || []).forEach(id => _assistantToggleGeste(id, true));
+            _assistantRenderView();
+            assistantUpdateLiveStats();
+        }
+
+        function _assistantWizardNext() {
+            if (_assistantState.wizardAnswers[_assistantState.wizardStep] === undefined) return;
+            _assistantState.wizardStep++;
+            _assistantRenderView();
+        }
+
+        function _assistantWizardBack() {
+            if (_assistantState.wizardStep > 0) _assistantState.wizardStep--;
+            _assistantRenderView();
+        }
+
+        // ── Stats & Import ──────────────────────────────────────────
         function assistantSetQty(n) {
+            _assistantState.qty = n;
             const input = document.getElementById('a-quantite');
-            if (!input) return;
-            input.value = n;
+            if (input) input.value = n;
             assistantUpdateLiveStats();
         }
 
         function assistantUpdateLiveStats() {
-            const rows = document.querySelectorAll('#assistantModalBody input[name="ag"]:checked');
-            const qte = parseFloat(document.getElementById('a-quantite')?.value) || 1;
             let totalSec = 0;
-            rows.forEach(cb => {
-                const t = parseFloat(document.getElementById('at-' + cb.value)?.value);
-                if (isFinite(t)) totalSec += t;
-            });
+            _assistantState.selected.forEach(entry => { totalSec += (entry.time || 0); });
+            const qte = _assistantState.qty || 1;
             const totalLotSec = totalSec * qte;
             const taux = parseFloat(document.getElementById('coutHoraireCEA')?.value) || 35;
             const cost = (totalLotSec / 3600) * taux;
-
-            const fmtDuration = (s) => {
+            const fmtDuration = s => {
                 if (!s) return '—';
                 if (s < 60) return Math.round(s) + ' s';
-                const h = Math.floor(s / 3600);
-                const m = Math.floor((s % 3600) / 60);
-                const sec = Math.round(s % 60);
-                if (h > 0) return `${h} h ${String(m).padStart(2,'0')}`;
-                if (m >= 10) return `${m} min`;
-                return `${m} min ${String(sec).padStart(2,'0')}`;
+                const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+                if (h > 0) return `${h} h ${String(m).padStart(2, '0')}`;
+                return m >= 10 ? `${m} min` : `${m} min ${String(Math.round(s % 60)).padStart(2, '0')}`;
             };
-
             const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-            setTxt('asStatCount', rows.length);
+            setTxt('asStatCount', _assistantState.selected.size);
             setTxt('asStatPerPce', totalSec ? `${totalSec} s` : '0 s');
             setTxt('asStatTotal', totalLotSec ? fmtDuration(totalLotSec) : '—');
             setTxt('asStatCost', cost ? (typeof fmtCHF === 'function' ? fmtCHF(cost) : cost.toFixed(2) + ' CHF') : '—');
         }
 
-        function assistantToggleAll(cb) {
-            // Affecte uniquement les lignes visibles (tient compte du filtre)
-            document.querySelectorAll('#assistantModalBody .assistant-geste-row').forEach(row => {
-                if (row.style.display === 'none') return;
-                const box = row.querySelector('input[name="ag"]');
-                if (box) box.checked = cb.checked;
-            });
-            assistantUpdateLiveStats();
-        }
-
         function importerGestesAssistant() {
-            const qte = parseFloat(document.getElementById('a-quantite')?.value) || 1;
-            const checked = [...document.querySelectorAll('#assistantModalBody input[name="ag"]:checked')];
-            if (checked.length === 0) { toast('Sélectionnez au moins un geste.', 'warning'); return; }
-
-            const mode = document.querySelector('#assistantModalBody input[name="assistantMode"]:checked')?.value || 'replace';
-
-            pushUndoSnapshot(`Import assistant (${mode === 'append' ? 'ajout' : 'remplace'} · ${checked.length} gestes)`);
-
-            if (mode === 'replace') {
-                document.getElementById('gestesContainer').innerHTML = '';
-                gesteLines = [];
-            }
-
-            checked.forEach(cb => {
-                const geste = ASSISTANT_GESTES.find(g => g.id === cb.value);
+            if (_assistantState.selected.size === 0) { toast('Sélectionnez au moins un geste.', 'warning'); return; }
+            const mode = _assistantState.mode;
+            pushUndoSnapshot(`Import assistant (${mode === 'append' ? 'ajout' : 'remplace'} · ${_assistantState.selected.size} gestes)`);
+            if (mode === 'replace') { document.getElementById('gestesContainer').innerHTML = ''; gesteLines = []; }
+            _assistantState.selected.forEach((entry, id) => {
+                const geste = ASSISTANT_GESTES.find(g => g.id === id);
                 if (!geste) return;
-                const timeInput = document.getElementById('at-' + geste.id);
-                const temps = parseInt(timeInput?.value) || geste.time;
-                addGesteLine({ code: geste.code, temps, quantite: qte });
+                addGesteLine({ code: geste.code, temps: entry.time, quantite: _assistantState.qty });
             });
-
             if (gesteLines.length === 0) addGesteLine();
             calculateTotal();
             closeAssistantModal();
             switchTab('calculateur');
             const verb = mode === 'append' ? 'ajouté(s)' : 'importé(s)';
-            toast(`${checked.length} geste(s) ${verb} dans le calculateur !`, 'success');
+            toast(`${_assistantState.selected.size} geste(s) ${verb} dans le calculateur !`, 'success');
         }
 
         // ── Chronomètre ────────────────────────────────────────────
