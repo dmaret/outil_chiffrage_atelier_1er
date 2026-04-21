@@ -6367,9 +6367,9 @@
         const _EMOJI_RX = /[\u{1F300}-\u{1F9FF}\u{1FA00}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]|[\u{1F1E0}-\u{1F1FF}]{2}|[⬜⬛⭐⭕✅❌❓❗⏱⏰⏸⛶☑️✓◯↺↔⚡♻☰■▢◯←→⇄∅]/gu;
 
         function removeAllEmojis() {
-            // Éléments à préserver (boutons icônes du header + badge admin + croix de fermeture)
+            // Éléments à préserver (boutons icônes du header + badge admin + croix de fermeture + œil du mot de passe)
             const preserve = new Set();
-            document.querySelectorAll('.header button, .header span, #headerAuthBadge, #saveIndicator, .modal-close').forEach(el => {
+            document.querySelectorAll('.header button, .header span, #headerAuthBadge, #saveIndicator, .modal-close, #authPasswordToggle').forEach(el => {
                 const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
                 let n; while (n = tw.nextNode()) preserve.add(n);
             });
@@ -13648,10 +13648,12 @@
 
         function togglePasswordVisibility() {
             const input = document.getElementById('authPasswordInput');
-            if (input.type === 'password') {
-                input.type = 'text';
-            } else {
-                input.type = 'password';
+            const btn = document.getElementById('authPasswordToggle');
+            const reveal = input.type === 'password';
+            input.type = reveal ? 'text' : 'password';
+            if (btn) {
+                btn.textContent = reveal ? '🙈' : '👁️';
+                btn.setAttribute('aria-label', reveal ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
             }
         }
 
@@ -21264,7 +21266,7 @@
                 </select>
                 <div style="position:relative;display:flex;align-items:center;">
                     <input type="password" id="authPasswordInput" placeholder="Mot de passe du groupe" onkeydown="if(event.key==='Enter')doLogin()" style="flex:1;">
-                    <button type="button" onclick="togglePasswordVisibility()" style="position:absolute;right:12px;background:none;border:none;cursor:pointer;font-size:1.2em;padding:4px;color:#6b8fa3;">👁️</button>
+                    <button type="button" id="authPasswordToggle" onclick="togglePasswordVisibility()" style="position:absolute;right:12px;background:none;border:none;cursor:pointer;font-size:1.2em;padding:4px;color:#6b8fa3;" title="Afficher / masquer le mot de passe" aria-label="Afficher ou masquer le mot de passe">👁️</button>
                 </div>
                 <div class="auth-error" id="authError"></div>
                 <button class="btn-login" onclick="doLogin()">🔐 Se connecter</button>
