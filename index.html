@@ -14928,7 +14928,7 @@
             const tabs = [...document.querySelectorAll('#newGroupChecklist input:checked')].map(cb => cb.value);
             if (tabs.length === 0) { toast('Sélectionnez au moins un onglet', 'warning'); return; }
             const id = 'grp_' + Date.now();
-            authGroups.push({ id, name, password, tabs });
+            authGroups.push({ id, name, passwordHash: hashPassword(password), tabs });
             saveAuthGroups();
             const sel = document.getElementById('authGroupSelect');
             if (sel) sel.innerHTML = authGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
@@ -14955,7 +14955,7 @@
             document.getElementById('authGroupModalTitle').textContent = `Mot de passe : ${group.name}`;
             document.getElementById('authGroupEditId').value = groupId;
             document.getElementById('authGroupNameInput').value = group.name;
-            document.getElementById('authGroupPasswordInput').value = group.password || '';
+            document.getElementById('authGroupPasswordInput').value = '';
             document.getElementById('authGroupChecklist').innerHTML = '<p style="color:#7a9db1;font-size:0.88em;font-style:italic;margin:0;">Les accès aux onglets se gèrent dans la matrice ci-dessus.</p>';
             document.getElementById('authGroupModal').classList.add('open');
         }
@@ -14996,7 +14996,7 @@
             const password = document.getElementById('authGroupPasswordInput').value.trim();
             if (!password) { toast('Le mot de passe ne peut pas être vide', 'warning'); return; }
             const idx = authGroups.findIndex(g => g.id === id);
-            if (idx >= 0) { authGroups[idx].password = password; }
+            if (idx >= 0) { authGroups[idx].passwordHash = hashPassword(password); }
             saveAuthGroups();
             closeAuthGroupModal();
             toast(`Mot de passe de "${authGroups[idx]?.name || id}" mis à jour`, 'success');
