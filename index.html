@@ -1051,6 +1051,52 @@
         .btn-training:hover { opacity: 0.88; }
         .training-footer { font-size: 0.72em; color: var(--color-text-light); margin-top: 20px; }
 
+        /* ── Pédalboard ─────────────────────────────────────────── */
+        #pb-wrapper { display:flex; height:calc(100vh - 130px); min-height:460px; gap:0; overflow:hidden; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.18); }
+        #pb-palette { width:200px; flex-shrink:0; background:#12121e; color:#c8cdd8; overflow-y:auto; padding:12px 10px; border-right:2px solid #2a2a40; }
+        #pb-palette h4 { font-size:0.72em; letter-spacing:1.5px; text-transform:uppercase; color:#f0c040; margin:14px 0 6px; padding-bottom:4px; border-bottom:1px solid #2a2a40; }
+        #pb-palette h4:first-child { margin-top:0; }
+        .pb-palette-btn { display:block; width:100%; text-align:left; padding:7px 10px; margin-bottom:4px; border-radius:6px; border:1px solid #2a2a40; background:#1c1c2e; color:#c8cdd8; cursor:pointer; font-size:0.82em; transition:background 0.15s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .pb-palette-btn:hover { background:#28283e; border-color:#4a4a70; }
+        #pb-main { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#0d0d18; }
+        #pb-header { display:flex; gap:8px; padding:10px 14px; background:#0d0d18; border-bottom:1px solid #1e1e38; align-items:center; flex-wrap:wrap; }
+        #pb-header input { background:#1c1c2e; border:1px solid #3a3a60; border-radius:8px; color:#e8ecf0; padding:7px 12px; font-size:0.88em; }
+        #pb-board { flex:1; position:relative; overflow:auto; margin:12px; border-radius:10px; border:3px solid #3a2a1a; background:
+            repeating-linear-gradient(90deg,rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
+            repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
+            #1a1008; }
+        #pb-chain { display:flex; align-items:center; gap:0; padding:50px 36px; min-width:max-content; min-height:100%; position:relative; }
+        #pb-cable-svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5; overflow:visible; }
+        /* Endpoint devices */
+        .pb-endpoint { position:relative; z-index:10; flex-shrink:0; }
+        .pb-ampli-body { width:120px; background:linear-gradient(160deg,#c8b47a,#a89050); border:3px solid #7a6030; border-radius:10px 10px 14px 14px; padding:14px 10px 16px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2); }
+        .pb-baffle-body { width:120px; background:linear-gradient(160deg,#2a2a2a,#1a1a1a); border:3px solid #444; border-radius:10px; padding:14px 10px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.6); }
+        .pb-endpoint-label { font-size:0.62em; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; opacity:0.7; }
+        .pb-endpoint-icon { font-size:2.2em; margin:4px 0; }
+        .pb-endpoint-title { font-size:0.72em; font-weight:700; letter-spacing:1px; }
+        /* Jack sockets */
+        .pb-jack { width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 40% 35%,#555,#111); border:2px solid #888; position:absolute; top:50%; transform:translateY(-50%); z-index:15; box-shadow:0 0 4px rgba(0,0,0,0.8); cursor:default; }
+        .pb-jack-in  { left:-8px; }
+        .pb-jack-out { right:-8px; }
+        /* Pedals */
+        .pb-pedal { position:relative; z-index:10; flex-shrink:0; margin:0 8px; }
+        .pb-pedal-body { width:110px; border-radius:8px 8px 12px 12px; padding:10px 8px 12px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.12); position:relative; }
+        .pb-pedal-led { width:8px; height:8px; border-radius:50%; margin:0 auto 6px; box-shadow:0 0 6px currentColor; }
+        .pb-pedal-name { font-size:0.65em; font-weight:700; letter-spacing:.8px; text-transform:uppercase; margin-bottom:6px; line-height:1.2; min-height:26px; display:flex; align-items:center; justify-content:center; }
+        .pb-pedal-knob-wrap { margin:6px 0; }
+        .pb-pedal-knob { width:80%; height:5px; border-radius:3px; cursor:pointer; margin:0 auto; display:block; }
+        .pb-pedal-val { font-size:0.72em; opacity:0.8; margin-top:3px; }
+        .pb-pedal-foot { width:40px; height:40px; border-radius:50%; margin:8px auto 4px; border:3px solid rgba(0,0,0,0.4); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.7em; box-shadow:0 3px 8px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.1); transition:transform 0.1s; }
+        .pb-pedal-foot:active { transform:scale(0.93); }
+        .pb-pedal-del { position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.4); border:none; border-radius:50%; width:18px; height:18px; color:#f88; cursor:pointer; font-size:0.65em; display:flex; align-items:center; justify-content:center; opacity:0.6; }
+        .pb-pedal-del:hover { opacity:1; background:rgba(200,0,0,0.6); }
+        .pb-pedal-move { position:absolute; top:4px; left:4px; background:rgba(0,0,0,0.3); border:none; border-radius:4px; width:18px; height:18px; color:#aaa; cursor:grab; font-size:0.65em; display:flex; align-items:center; justify-content:center; opacity:0.5; }
+        .pb-pedal-move:hover { opacity:1; }
+        /* Empty hint */
+        #pb-empty-hint { color:#3a3a60; font-size:0.85em; padding:20px 24px; border:2px dashed #2a2a48; border-radius:10px; white-space:nowrap; }
+        /* Baffle totals */
+        .pb-total-line { font-size:0.72em; letter-spacing:.5px; margin:3px 0; }
+        .pb-total-big { font-size:1.1em; font-weight:700; color:#f0c040; margin-top:6px; }
         /* ── Theme Selector Box ─────────────────────────────────── */
         .theme-selector-box {
             background: var(--color-container); border-radius: 20px;
@@ -2885,6 +2931,7 @@
                 <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
                 <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
+                <button class="tab" onclick="switchTab('pedalboard')">🎸 Pédalboard</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
@@ -4224,6 +4271,63 @@
             </div>
 
             <!-- ONGLET ACCOMPAGNEMENT (admin) -->
+            <!-- ONGLET PÉDALBOARD -->
+            <div id="pedalboard" class="tab-content">
+                <div id="pb-wrapper">
+                    <!-- Palette (gauche) -->
+                    <div id="pb-palette">
+                        <h4>Gestes</h4>
+                        <div id="pb-palette-gestes"></div>
+                        <h4>Consommables</h4>
+                        <div id="pb-palette-conso"></div>
+                        <h4>Blocs</h4>
+                        <button class="pb-palette-btn" onclick="pbAddPedal('msp')">⏱ Temps MSP</button>
+                        <button class="pb-palette-btn" onclick="pbAddPedal('note')">📝 Note / Commentaire</button>
+                        <h4>Projet</h4>
+                        <button class="pb-palette-btn" onclick="pbClear()" style="color:#f88;">🗑 Vider le board</button>
+                    </div>
+                    <!-- Zone principale -->
+                    <div id="pb-main">
+                        <div id="pb-header">
+                            <input id="pb-client" placeholder="Client…" style="flex:1;min-width:120px;" oninput="pbCalcTotal()">
+                            <input id="pb-title"  placeholder="Intitulé de la prestation…" style="flex:2;min-width:180px;">
+                            <input id="pb-marge"  type="number" placeholder="Marge %" style="width:80px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
+                            <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver comme prestation</button>
+                        </div>
+                        <div id="pb-board">
+                            <svg id="pb-cable-svg"></svg>
+                            <div id="pb-chain">
+                                <!-- AMPLI -->
+                                <div class="pb-endpoint" id="pb-ampli">
+                                    <div class="pb-ampli-body" style="color:#3a2a10;">
+                                        <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
+                                        <div class="pb-endpoint-icon">🎸</div>
+                                        <div class="pb-endpoint-title">PROJET</div>
+                                        <div id="pb-ampli-client" style="font-size:0.65em;margin-top:4px;opacity:0.6;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                                    </div>
+                                    <div class="pb-jack pb-jack-out"></div>
+                                </div>
+                                <!-- Pédales dynamiques -->
+                                <div id="pb-pedals" style="display:flex;align-items:center;gap:0;">
+                                    <div id="pb-empty-hint">← Cliquez sur une pédale pour l'ajouter au board</div>
+                                </div>
+                                <!-- BAFFLE -->
+                                <div class="pb-endpoint" id="pb-baffle">
+                                    <div class="pb-jack pb-jack-in"></div>
+                                    <div class="pb-baffle-body" style="color:#c8cdd8;">
+                                        <div class="pb-endpoint-label" style="color:#888;">SORTIE</div>
+                                        <div class="pb-endpoint-icon">📢</div>
+                                        <div class="pb-endpoint-title">TOTAL</div>
+                                        <div class="pb-total-line" id="pb-total-cout" style="margin-top:8px;">Coût : —</div>
+                                        <div class="pb-total-big" id="pb-total-vente">Prix vente : —</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="accompagnement" class="tab-content">
 
                 <!-- ── Navigation sous-onglets ── -->
@@ -4272,6 +4376,15 @@
                 <div class="accomp-sub-panel" id="accomp-outils" style="display:none;">
                 <div class="info-box" style="border-left-color:#8bc98b; background:#eef8f3;">
                     <strong>Espace d'analyse socio-éducative.</strong> Croisement des exigences de production et du projet d'accompagnement individuel. Réservé aux MSP / Administrateurs.
+                </div>
+
+                <!-- Fiches d'intervention rapide -->
+                <div class="section">
+                    <h2>⚡ Fiches d'intervention rapide</h2>
+                    <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">En face de chaque situation observée, une posture et des actions concrètes. Cliquez pour développer.</p>
+                    <div id="fichesRapides">
+                        <!-- rendered by renderFichesRapides() -->
+                    </div>
                 </div>
 
                 <!-- Matrice apprenance -->
@@ -5034,7 +5147,8 @@
             {key:'clients',        label:'👥 Clients'},
             {key:'stats',          label:'📈 Stats'},
             {key:'config',         label:'⚙️ Config'},
-            {key:'accompagnement', label:'🧠 Accompagnement',  adminOnly:true},
+            {key:'pedalboard',     label:'🎸 Pédalboard'},
+    {key:'accompagnement', label:'🧠 Accompagnement',  adminOnly:true},
             {key:'historique',     label:'📝 Historique',      adminOnly:true},
             {key:'gantt',          label:'📅 Planification'},
         ];
@@ -6393,6 +6507,322 @@
         // ACCOMPAGNEMENT — Bénéficiaires & Jalons
         // ════════════════════════════════════════════════════════
 
+        // ════════════════════════════════════════════════════════
+        // PÉDALBOARD — Interface visuelle de chiffrage
+        // ════════════════════════════════════════════════════════
+
+        let pbPedals = [];  // { id, type, label, value, unit, coutUnit, color, ledColor }
+        const PB_CABLE_COLORS = ['#e74c3c','#f0c040','#27ae60','#4e9af1','#e67e22','#9b59b6','#1abc9c','#e84393'];
+        const PB_PEDAL_STYLES = {
+            geste:       { bg:'#1a2a4a', border:'#2a4a80', led:'#4e9af1', foot:'#2a3a6a' },
+            consommable: { bg:'#1a3a1a', border:'#2a6a2a', led:'#27ae60', foot:'#2a502a' },
+            msp:         { bg:'#3a1a0a', border:'#7a3a10', led:'#e67e22', foot:'#5a2a10' },
+            note:        { bg:'#2a2a1a', border:'#5a5a20', led:'#f0c040', foot:'#3a3a20' },
+        };
+
+        function pbInit() {
+            // Populate palette
+            const pg = document.getElementById('pb-palette-gestes');
+            const pc = document.getElementById('pb-palette-conso');
+            if (pg) pg.innerHTML = (catalogueGestes||[]).slice(0,30).map(g =>
+                `<button class="pb-palette-btn" onclick="pbAddPedal('geste',${JSON.stringify(g.nom||g.code).replace(/"/g,"'")},${g.coutHeure||0},${g.duree||60})" title="${g.nom||g.code}">🎸 ${g.nom||g.code}</button>`
+            ).join('');
+            if (pc) pc.innerHTML = (catalogueConsommables||[]).slice(0,20).map(c =>
+                `<button class="pb-palette-btn" onclick="pbAddPedal('consommable',${JSON.stringify(c.nom||c.designation||'Conso').replace(/"/g,"'")},${c.prixUnitaire||0},1)" title="${c.nom||c.designation||''}">🟢 ${c.nom||c.designation||'Consommable'}</button>`
+            ).join('');
+            pbRender();
+        }
+
+        function pbAddPedal(type, label, coutUnit, value) {
+            const hint = document.getElementById('pb-empty-hint');
+            if (hint) hint.style.display = 'none';
+            const st = PB_PEDAL_STYLES[type] || PB_PEDAL_STYLES.note;
+            const units = { geste:'min', consommable:'pcs', msp:'min', note:'' };
+            pbPedals.push({ id: Date.now(), type, label: label || type, value: value || 60, coutUnit: coutUnit || 0, color: st.bg, border: st.border, led: st.led, foot: st.foot, unit: units[type]||'' });
+            pbRender();
+        }
+
+        function pbRemovePedal(id) {
+            pbPedals = pbPedals.filter(p => p.id !== id);
+            if (!pbPedals.length) { const h = document.getElementById('pb-empty-hint'); if(h) h.style.display=''; }
+            pbRender();
+        }
+
+        function pbMovePedal(id, dir) {
+            const idx = pbPedals.findIndex(p => p.id === id);
+            if (idx < 0) return;
+            const ni = idx + dir;
+            if (ni < 0 || ni >= pbPedals.length) return;
+            [pbPedals[idx], pbPedals[ni]] = [pbPedals[ni], pbPedals[idx]];
+            pbRender();
+        }
+
+        function pbUpdateValue(id, val) {
+            const p = pbPedals.find(x => x.id === id);
+            if (!p) return;
+            p.value = parseFloat(val) || 0;
+            const display = document.getElementById(`pbval-${id}`);
+            if (display) display.textContent = _pbFormatVal(p);
+            pbCalcTotal();
+        }
+
+        function _pbFormatVal(p) {
+            if (p.type === 'geste' || p.type === 'msp') {
+                const h = Math.floor(p.value/60); const m = p.value%60;
+                return h > 0 ? `${h}h${m > 0 ? m+'m' : ''}` : `${m} min`;
+            }
+            return `${p.value} ${p.unit}`;
+        }
+
+        function pbCalcTotal() {
+            let cout = 0;
+            const tauxCEA = config?.coutHoraireEffectif || config?.coutHoraire || 18;
+            const tauxMSP = config?.coutHoraireMSP || 35;
+            pbPedals.forEach(p => {
+                if (p.type === 'geste')       cout += (p.value/60) * tauxCEA;
+                else if (p.type === 'msp')    cout += (p.value/60) * tauxMSP;
+                else if (p.type === 'consommable') cout += p.value * (p.coutUnit || 0);
+            });
+            const marge = parseFloat(document.getElementById('pb-marge')?.value||30)/100;
+            const vente = marge < 1 ? cout / (1 - marge) : cout;
+            document.getElementById('pb-total-cout').textContent  = `Coût : CHF ${cout.toFixed(2)}`;
+            document.getElementById('pb-total-vente').textContent = `Prix : CHF ${vente.toFixed(2)}`;
+            document.getElementById('pb-ampli-client').textContent = document.getElementById('pb-client')?.value || '';
+        }
+
+        function pbRender() {
+            const c = document.getElementById('pb-pedals');
+            if (!c) return;
+            const hint = document.getElementById('pb-empty-hint');
+
+            // Keep/recreate pedal elements
+            const existingIds = new Set([...c.querySelectorAll('.pb-pedal')].map(el => Number(el.dataset.id)));
+            pbPedals.forEach((p, idx) => {
+                if (!existingIds.has(p.id)) {
+                    // Build pedal element
+                    const el = document.createElement('div');
+                    el.className = 'pb-pedal';
+                    el.dataset.id = p.id;
+                    const typeLabels = { geste:'🎸 GESTE', consommable:'🟢 CONSO', msp:'⏱ MSP', note:'📝 NOTE' };
+                    const unitLabel = (p.type === 'geste' || p.type === 'msp') ? 'min' : (p.type === 'consommable' ? 'pcs' : '');
+                    el.innerHTML = `
+                        <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;">
+                            <button class="pb-pedal-del" onclick="pbRemovePedal(${p.id})" title="Retirer">✕</button>
+                            <div class="pb-pedal-led" style="background:${p.led};color:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
+                            <div class="pb-pedal-name" style="color:#eee;">${p.label}</div>
+                            <div style="font-size:0.58em;color:#888;margin-bottom:6px;">${typeLabels[p.type]||''}</div>
+                            <div class="pb-pedal-knob-wrap">
+                                <input type="range" class="pb-pedal-knob" min="0" max="${p.type==='geste'||p.type==='msp'?480:100}" step="${p.type==='consommable'?0.5:5}" value="${p.value}"
+                                    oninput="pbUpdateValue(${p.id},this.value)" style="accent-color:${p.led};">
+                            </div>
+                            <div class="pb-pedal-val" id="pbval-${p.id}" style="color:#aab;">${_pbFormatVal(p)}</div>
+                            <div class="pb-pedal-foot" style="background:${p.foot};border-color:${p.border};">
+                                <span style="font-size:1.3em;">${p.type==='geste'?'🎸':p.type==='consommable'?'🟢':p.type==='msp'?'⏱':'📝'}</span>
+                            </div>
+                        </div>
+                        <div class="pb-jack pb-jack-in"></div>
+                        <div class="pb-jack pb-jack-out"></div>
+                        <div style="display:flex;justify-content:center;gap:4px;margin-top:6px;">
+                            <button class="pb-pedal-move" onclick="pbMovePedal(${p.id},-1)" title="Vers la gauche">◀</button>
+                            <button class="pb-pedal-move" onclick="pbMovePedal(${p.id},1)"  title="Vers la droite">▶</button>
+                        </div>`;
+                    c.appendChild(el);
+                }
+            });
+            // Remove pedals no longer in array
+            [...c.querySelectorAll('.pb-pedal')].forEach(el => {
+                if (!pbPedals.find(p => p.id === Number(el.dataset.id))) el.remove();
+            });
+            // Reorder DOM to match pbPedals order
+            pbPedals.forEach(p => {
+                const el = c.querySelector(`.pb-pedal[data-id="${p.id}"]`);
+                if (el) c.appendChild(el); // appendChild moves to end, preserving order
+            });
+            if (hint) hint.style.display = pbPedals.length ? 'none' : '';
+            pbCalcTotal();
+            requestAnimationFrame(pbDrawCables);
+        }
+
+        function pbDrawCables() {
+            const svg = document.getElementById('pb-cable-svg');
+            const board = document.getElementById('pb-board');
+            if (!svg || !board) return;
+            const br = board.getBoundingClientRect();
+            const scrollLeft = board.scrollLeft;
+            const scrollTop  = board.scrollTop;
+
+            // Collect all jack-out and jack-in elements in order
+            const ampliOut  = document.querySelector('#pb-ampli .pb-jack-out');
+            const baffleIn  = document.querySelector('#pb-baffle .pb-jack-in');
+            const pedalIns  = pbPedals.map(p => document.querySelector(`.pb-pedal[data-id="${p.id}"] .pb-jack-in`)).filter(Boolean);
+            const pedalOuts = pbPedals.map(p => document.querySelector(`.pb-pedal[data-id="${p.id}"] .pb-jack-out`)).filter(Boolean);
+
+            const allFroms = [ampliOut,  ...pedalOuts];
+            const allTos   = [...pedalIns, baffleIn];
+
+            let paths = '';
+            allFroms.forEach((from, i) => {
+                const to = allTos[i];
+                if (!from || !to) return;
+                const fr = from.getBoundingClientRect();
+                const tr = to.getBoundingClientRect();
+                const x1 = fr.left + fr.width/2 - br.left + scrollLeft;
+                const y1 = fr.top  + fr.height/2 - br.top  + scrollTop;
+                const x2 = tr.left + tr.width/2 - br.left + scrollLeft;
+                const y2 = tr.top  + tr.height/2 - br.top  + scrollTop;
+                const sag = 30 + Math.abs(x2-x1) * 0.12;
+                const col = PB_CABLE_COLORS[i % PB_CABLE_COLORS.length];
+                paths += `<path d="M${x1},${y1} C${x1+30},${y1+sag} ${x2-30},${y2+sag} ${x2},${y2}" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.85"/>`;
+                paths += `<circle cx="${x1}" cy="${y1}" r="5.5" fill="${col}" opacity="0.9"/>`;
+                paths += `<circle cx="${x2}" cy="${y2}" r="5.5" fill="${col}" opacity="0.9"/>`;
+                // Cable shadow
+                paths += `<path d="M${x1},${y1} C${x1+30},${y1+sag+4} ${x2-30},${y2+sag+4} ${x2},${y2}" stroke="rgba(0,0,0,0.3)" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+            });
+
+            // Set SVG size to match board scroll area
+            const chain = document.getElementById('pb-chain');
+            if (chain) {
+                svg.setAttribute('width',  chain.scrollWidth  || board.clientWidth);
+                svg.setAttribute('height', chain.scrollHeight || board.clientHeight);
+            }
+            // Put shadows behind, cables on top
+            const shadowPaths = paths.match(/<path[^/]*shadow[^>]*\/>/g)||[];
+            const cablePaths  = paths.replace(/<path[^/]*shadow[^>]*\/>/g,'');
+            svg.innerHTML = shadowPaths.join('') + cablePaths;
+        }
+
+        function pbClear() {
+            if (!confirm('Vider le pédalboard ?')) return;
+            pbPedals = [];
+            pbRender();
+        }
+
+        function pbSaveAsPrestation() {
+            const client = document.getElementById('pb-client')?.value.trim() || 'Client pédalboard';
+            const titre  = document.getElementById('pb-title')?.value.trim()  || 'Prestation pédalboard';
+            const marge  = parseFloat(document.getElementById('pb-marge')?.value||30)/100;
+            const tauxCEA = config?.coutHoraireEffectif || 18;
+            const tauxMSP = config?.coutHoraireMSP || 35;
+            let cout = 0;
+            const gestes = [];
+            pbPedals.forEach(p => {
+                if (p.type === 'geste') {
+                    const c = (p.value/60)*tauxCEA;
+                    cout += c;
+                    gestes.push({ nom: p.label, duree: p.value, cout: c });
+                } else if (p.type === 'msp') {
+                    cout += (p.value/60)*tauxMSP;
+                } else if (p.type === 'consommable') {
+                    cout += p.value * (p.coutUnit||0);
+                }
+            });
+            const prixVente = marge < 1 ? cout / (1 - marge) : cout;
+            const newP = {
+                id: Date.now(), client, prestation: titre,
+                date: new Date().toISOString().split('T')[0],
+                statut: 'brouillon', prixVente, prixRevient: cout,
+                marge: Math.round(marge*100), margeChf: prixVente - cout,
+                gestes, description: '🎸 Créé via Pédalboard',
+            };
+            prestationsSauvegardees.push(newP);
+            saveToStorage();
+            toast(`Prestation "${titre}" sauvegardée !`, 'success');
+            switchTab('prestations');
+        }
+
+        function renderPedalboard() {
+            pbInit();
+            window.addEventListener('resize', () => requestAnimationFrame(pbDrawCables));
+            document.getElementById('pb-board')?.addEventListener('scroll', () => requestAnimationFrame(pbDrawCables));
+        }
+
+        // ── Fiches d'intervention rapide ──────────────────────
+        const FICHES_RAPIDES = [
+            {
+                id:'cadence', icon:'🐢', title:'Baisse de cadence / Erreurs répétées',
+                theorie:'Piaget / Vygotski — Dépassement de la ZPD', color:'#4e9af1',
+                actions:[
+                    'Décomposer la tâche en micro-étapes séquencées',
+                    '"Faire avec" avant de "laisser faire" : démonstration accompagnée',
+                    'Identifier la source d\'erreur : compréhension ? fatigue ? outil ?',
+                    'Valoriser chaque micro-réussite verbalement',
+                    'Réduire temporairement le volume ou la pression de production',
+                ],
+                note:'Ne pas interpréter comme de la mauvaise volonté. La cadence est un symptôme, pas une cause.'
+            },
+            {
+                id:'conflit', icon:'⚡', title:'Tension / Conflit interpersonnel',
+                theorie:'Minuchin — Frontières et rôles', color:'#e74c3c',
+                actions:[
+                    'Ne pas prendre parti. Nommer le conflit sans le juger',
+                    'Clarifier les rôles et espaces de travail de chacun',
+                    'Organiser un échange en présence du MSP (cadre tiers)',
+                    'Éviter d\'être triangulé dans le conflit entre pairs',
+                    'Vérifier si la cause est organisationnelle (manque de clarté sur qui fait quoi)',
+                ],
+                note:'Les conflits d\'équipe ont souvent une cause structurelle, pas uniquement relationnelle.'
+            },
+            {
+                id:'dependance', icon:'🔗', title:'Dépendance excessive / Sollicitations répétées',
+                theorie:'Bateson — Double contrainte', color:'#9b59b6',
+                actions:[
+                    'Chercher le message contradictoire reçu ("Sois autonome" + "Chaque erreur est sanctionnée")',
+                    'Lever explicitement la pression de perfection : "tu as le droit d\'essayer"',
+                    'Répondre en différé : ne pas valider immédiatement chaque sollicitation',
+                    'Proposer une question de retour : "Que ferais-tu si je n\'étais pas là ?"',
+                    'Augmenter progressivement les plages d\'autonomie non supervisée',
+                ],
+                note:'La dépendance est souvent une réponse rationnelle à un environnement qui punit l\'erreur.'
+            },
+            {
+                id:'retrait', icon:'🔇', title:'Retrait / Mutisme / Absentéisme',
+                theorie:'Palo Alto — Le symptôme est un message', color:'#e67e22',
+                actions:[
+                    'Ne pas agir directement sur le comportement de retrait',
+                    'Créer un espace informel de parole (pause, moment calme)',
+                    'Poser des questions ouvertes : "Comment tu vas en ce moment ?"',
+                    'Signaler aux équipes médico-sociales si le retrait dure > 2 semaines',
+                    'Adapter temporairement la charge ou le poste sans attendre l\'explication',
+                ],
+                note:'Forcer la participation ou punir le retrait aggrave systématiquement la situation.'
+            },
+            {
+                id:'agitation', icon:'🌀', title:'Agitation / Dispersion / Difficultés de concentration',
+                theorie:'Carré — Rapport au savoir / Piaget — Surcharge cognitive', color:'#27ae60',
+                actions:[
+                    'Simplifier l\'environnement : réduire les distracteurs visuels et sonores',
+                    'Donner une seule consigne à la fois, vérifier la compréhension',
+                    'Proposer des pauses courtes et régulières (toutes les 25-30 min)',
+                    'Donner du sens : "ce geste sert à quoi dans le produit final ?"',
+                    'Varier les supports ou les postures de travail',
+                ],
+                note:'L\'agitation peut signaler un sous-défi (ennui) autant qu\'un sur-défi (saturation).'
+            },
+        ];
+
+        function renderFichesRapides() {
+            const c = document.getElementById('fichesRapides');
+            if (!c) return;
+            c.innerHTML = FICHES_RAPIDES.map(f => `
+                <div style="border:1px solid ${f.color}44;border-left:4px solid ${f.color};border-radius:10px;margin-bottom:10px;overflow:hidden;">
+                    <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none';this.querySelector('.fiche-chevron').textContent=this.nextElementSibling.style.display===''?'▾':'▸'"
+                        style="width:100%;text-align:left;padding:12px 16px;border:none;background:${f.color}11;cursor:pointer;display:flex;align-items:center;gap:10px;">
+                        <span style="font-size:1.2em;">${f.icon}</span>
+                        <div style="flex:1;">
+                            <strong style="color:${f.color};font-size:0.95em;">${f.title}</strong>
+                            <span style="font-size:0.75em;color:#7a9db1;display:block;">${f.theorie}</span>
+                        </div>
+                        <span class="fiche-chevron" style="color:${f.color};">▸</span>
+                    </button>
+                    <div style="display:none;padding:14px 16px;background:#fff;">
+                        <ol style="margin:0 0 10px;padding-left:20px;">
+                            ${f.actions.map(a => `<li style="font-size:0.88em;color:#3a4a5a;margin-bottom:5px;">${a}</li>`).join('')}
+                        </ol>
+                        <p style="font-size:0.82em;color:#7a9db1;border-left:3px solid ${f.color}55;padding-left:10px;margin:0;font-style:italic;">💡 ${f.note}</p>
+                    </div>
+                </div>`).join('');
+        }
+
         const JALON_TYPES = [
             { id: 'progression',    label: '🌱 Progression',    color: '#27ae60' },
             { id: 'difficulte',     label: '⚠️ Difficulté',     color: '#e67e22' },
@@ -6425,6 +6855,7 @@
             if (sub === 'suivi')  renderBeneficiaires();
             if (sub === 'jalons') { _populateJalonBenefFilter(); renderJalons(); }
             if (sub === 'croise') renderVueCroisee();
+            if (sub === 'outils') renderFichesRapides();
         }
 
         function renderAccompagnement() {
@@ -6459,7 +6890,8 @@
             c.innerHTML = beneficiaires.map(b => {
                 const st   = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
                 const nbJ  = jalons.filter(j => String(j.beneficiaireId) === String(b.id)).length;
-                const nbP  = new Set(jalons.filter(j => String(j.beneficiaireId) === String(b.id) && j.prestationId).map(j => j.prestationId)).size;
+                const pFromJalons = jalons.filter(j => String(j.beneficiaireId) === String(b.id) && j.prestationId).map(j => j.prestationId);
+                const nbP  = new Set([...(b.prestationsIds||[]), ...pFromJalons]).size;
                 return `<div style="display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:12px;background:#f5f9fc;border:1px solid #e0e8f0;margin-bottom:10px;flex-wrap:wrap;">
                     <div style="width:50px;height:50px;border-radius:50%;background:#e8f4f8;display:flex;align-items:center;justify-content:center;font-size:1.7em;flex-shrink:0;">${b.avatar || '👤'}</div>
                     <div style="flex:1;min-width:160px;">
@@ -6496,6 +6928,8 @@
             document.getElementById('benefCompetences').value  = (b?.competences || []).join(', ');
             document.getElementById('benefNotes').value        = b?.notes       || '';
             document.getElementById('benefAvatar').value       = b?.avatar      || '👤';
+            document.getElementById('benefPrestSearch').value  = '';
+            _renderBenefPrestList(b?.prestationsIds || []);
             document.getElementById('benefModal').classList.add('open');
         }
 
@@ -6511,8 +6945,9 @@
                 statut:      document.getElementById('benefStatut').value,
                 objectifs:   document.getElementById('benefObjectifs').value.trim(),
                 competences: document.getElementById('benefCompetences').value.split(',').map(s => s.trim()).filter(Boolean),
-                notes:       document.getElementById('benefNotes').value.trim(),
-                avatar:      document.getElementById('benefAvatar').value.trim() || '👤',
+                notes:          document.getElementById('benefNotes').value.trim(),
+                avatar:         document.getElementById('benefAvatar').value.trim() || '👤',
+                prestationsIds: [...document.querySelectorAll('#benefPrestList input:checked')].map(cb => Number(cb.value)),
             };
             if (!data.prenom) { toast('Le prénom est requis', 'warning'); return; }
             if (id) {
@@ -6535,6 +6970,27 @@
             saveBeneficiairesData();
             renderBeneficiaires();
             toast(`${b.prenom} ${b.nom} supprimé`, 'info');
+        }
+
+        function _renderBenefPrestList(selectedIds, filter) {
+            const c = document.getElementById('benefPrestList');
+            if (!c) return;
+            const f = (filter || '').toLowerCase();
+            const list = [...prestationsSauvegardees].reverse().slice(0, 80)
+                .filter(p => !f || (p.prestation||'').toLowerCase().includes(f) || (p.client||'').toLowerCase().includes(f));
+            if (!list.length) { c.innerHTML = '<span style="font-size:0.82em;color:#aaa;padding:4px;">Aucune prestation trouvée.</span>'; return; }
+            c.innerHTML = list.map(p => {
+                const label = [p.prestation, p.client, p.reference].filter(Boolean).join(' — ');
+                return `<label style="display:flex;align-items:center;gap:6px;padding:3px 2px;font-size:0.85em;">
+                    <input type="checkbox" value="${p.id}" ${selectedIds.includes(p.id) ? 'checked' : ''}>
+                    <span>${label}</span><span style="color:#aaa;font-size:0.8em;">${p.date||''}</span>
+                </label>`;
+            }).join('');
+        }
+
+        function filterBenefPrestList(val) {
+            const checked = [...document.querySelectorAll('#benefPrestList input:checked')].map(cb => Number(cb.value));
+            _renderBenefPrestList(checked, val);
         }
 
         // ── Jalons ────────────────────────────────────────────
@@ -6644,7 +7100,7 @@
             }
             c.innerHTML = beneficiaires.map(b => {
                 const myJ  = jalons.filter(j => j.beneficiaireId === b.id).sort((a, x) => x.date > a.date ? 1 : -1);
-                const pIds = [...new Set(myJ.map(j => j.prestationId).filter(Boolean))];
+                const pIds = [...new Set([...(b.prestationsIds||[]), ...myJ.map(j => j.prestationId).filter(Boolean)])];
                 const prests = pIds.map(id => prestationsSauvegardees.find(p => p.id == id)).filter(Boolean);
                 const st   = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
                 return `<div style="border:1px solid #e0e8f0;border-radius:14px;padding:18px;margin-bottom:16px;">
@@ -6712,6 +7168,7 @@
             }
             else if (tabName === 'parametrage') loadConfig();
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
+            else if (tabName === 'pedalboard')     renderPedalboard();
             else if (tabName === 'accompagnement') renderAccompagnement();
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
@@ -13679,6 +14136,17 @@
                 }
             };
 
+            // Enrich theories with action steps
+            const theoryActions = {
+                piaget:   ['Séquencer la tâche en micro-étapes','Démonstration accompagnée avant autonomie','Valoriser chaque pallier de maîtrise','Réduire temporairement la charge cognitive'],
+                vygotski: ['Soutien actif et progressivement retiré','Nommer les compétences en construction','Travailler dans la ZPD : ni trop simple, ni trop complexe','Poser des questions pour guider plutôt qu\'expliquer'],
+                carre:    ['Travailler le sens : "à quoi ça sert pour toi ?"','Proposer un choix dans l\'organisation','Valoriser les progrès même minimes','Identifier ce qui bloque le rapport au savoir'],
+                paloalto: ['Ne pas agir directement sur le comportement','Créer un espace informel d\'écoute','Chercher la fonction du symptôme','Recadrer la situation sans moraliser'],
+                bateson:  ['Nommer explicitement la contradiction','Lever la pression de perfection','Restaurer le droit à l\'erreur','Créer un contexte d\'apprentissage sécurisé'],
+                minuchin: ['Clarifier les rôles et espaces de chacun','Éviter d\'être triangulé dans les conflits','Redéfinir la hiérarchie fonctionnelle','Organiser un échange cadré (tiers-arbitre)'],
+                paul:     ['Se mettre à côté, non devant','Poser des questions ouvertes sur le sens','Cheminer avec la personne sans imposer','Accepter le rythme de l\'autre'],
+            };
+
             const t = theories[winner];
             const linksHtml = t.links.map(l=>`<a href="${l.url}" target="_blank">${l.label}</a>`).join('');
             const top3Html = top3.map(([id, score], i) => {
@@ -13699,6 +14167,10 @@
                 <div class="result-theory">${t.name}</div>
                 <p style="font-size:0.9em;color:#4a2060;margin-bottom:10px;">${t.desc}</p>
                 <div class="result-posture">${t.posture}</div>
+                ${theoryActions[winner] ? `<div style="margin:10px 0;background:#f4eeff;border-radius:8px;padding:12px 14px;">
+                    <p style="font-size:0.8em;font-weight:700;color:#6c3483;margin:0 0 8px;letter-spacing:.5px;">ACTIONS CONCRÈTES</p>
+                    <ol style="margin:0;padding-left:18px;">${theoryActions[winner].map(a=>`<li style="font-size:0.86em;color:#4a2060;margin-bottom:4px;">${a}</li>`).join('')}</ol>
+                </div>` : ''}
                 <div class="result-links">${linksHtml}
                     <a href="#" onclick="event.preventDefault();openTheorieFromAnalyse('${winner}');">📚 Voir la théorie complète</a>
                 </div>
@@ -22663,6 +23135,11 @@
                     <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Avatar</label>
                     <input type="text" id="benefAvatar" placeholder="👤" maxlength="4" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:1.4em;text-align:center;box-sizing:border-box;">
                 </div>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Prestations associées <span style="font-weight:400;color:#9aacb8;">(cochez celles auxquelles cette personne a participé)</span></label>
+                <input type="text" id="benefPrestSearch" placeholder="🔍 Filtrer…" oninput="filterBenefPrestList(this.value)" style="width:100%;padding:7px;border:1px solid #ddd;border-radius:6px;margin-bottom:6px;box-sizing:border-box;font-size:0.88em;">
+                <div id="benefPrestList" class="prof-checklist" style="max-height:130px;overflow-y:auto;border:1px solid #eee;border-radius:6px;padding:6px;background:#fafcfe;"></div>
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end;">
                 <button class="btn btn-secondary" onclick="closeBeneficiaireModal()">Annuler</button>
