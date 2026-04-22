@@ -6845,6 +6845,59 @@
             }
         }
 
+        // ── Terminal : patch des backgrounds clairs codés en dur ──────────
+        let _terminalObserver = null;
+
+        function _isLightBg(val) {
+            if (!val) return false;
+            const v = val.replace(/\s+/g, '').toLowerCase();
+            if (v === 'transparent' || v === 'none' || v === 'inherit') return false;
+            return /^(white|#fff[0-9a-f]{0,3}|#f[0-9a-f]{5}|#f[0-9a-f]{2}[^0-9a-f])/.test(v)
+                || /linear-gradient[^#]*(#fff|white)/.test(v)
+                || /rgba?\(25[0-9],\s*25[0-9],\s*25[0-9]/.test(v);
+        }
+
+        function _patchTerminalEl(el) {
+            if (!el || !el.style) return;
+            const bg = el.style.background || el.style.backgroundColor;
+            if (_isLightBg(bg)) {
+                el.style.setProperty('background', '#161b22', 'important');
+                if (el.style.borderColor && /^#[ef][0-9a-f]{5}/i.test(el.style.borderColor))
+                    el.style.setProperty('border-color', '#30363d', 'important');
+            }
+        }
+
+        function _patchTerminalAll() {
+            document.querySelectorAll('[style]').forEach(_patchTerminalEl);
+        }
+
+        function _activateTerminalPatching() {
+            _patchTerminalAll();
+            if (_terminalObserver) return;
+            _terminalObserver = new MutationObserver(mutations => {
+                if (document.body.getAttribute('data-theme') !== 'terminal') {
+                    _terminalObserver.disconnect(); _terminalObserver = null; return;
+                }
+                mutations.forEach(m => {
+                    m.addedNodes.forEach(n => {
+                        if (n.nodeType !== 1) return;
+                        _patchTerminalEl(n);
+                        n.querySelectorAll('[style]').forEach(_patchTerminalEl);
+                    });
+                    if (m.type === 'attributes' && m.target.nodeType === 1) _patchTerminalEl(m.target);
+                });
+            });
+            _terminalObserver.observe(document.body, {
+                childList: true, subtree: true,
+                attributes: true, attributeFilter: ['style']
+            });
+        }
+
+        function _deactivateTerminalPatching() {
+            if (_terminalObserver) { _terminalObserver.disconnect(); _terminalObserver = null; }
+        }
+        // ─────────────────────────────────────────────────────────────────
+
         function applyTheme(name) {
             const t = THEMES[name];
             if (!t) return;
@@ -6854,6 +6907,9 @@
             applyThemeCss(t, radius, themePrefs.font);
             // Attribut data-theme sur body pour les overrides CSS spécifiques
             document.body.setAttribute('data-theme', name);
+            // Patch inline backgrounds pour le thème terminal
+            if (name === 'terminal') _activateTerminalPatching();
+            else _deactivateTerminalPatching();
             // Remove emojis for system themes
             removeEmojisForSystemTheme(name);
             saveToStorage();
@@ -6919,6 +6975,10 @@
             const r = name === 'terminal' ? RADIUS_SETS.square : (RADIUS_SETS[themePrefs.radius] || RADIUS_SETS.round);
             applyThemeCss(t, r, themePrefs.font);
             document.body.setAttribute('data-theme', name);
+            if (name === 'terminal') {
+                // Lancer le patching après le rendu initial
+                requestIdleCallback ? requestIdleCallback(_activateTerminalPatching) : setTimeout(_activateTerminalPatching, 300);
+            }
         }
 
         // ── Fonctions Impression / PDF ──────────────────────────────
