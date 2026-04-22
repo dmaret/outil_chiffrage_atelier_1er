@@ -1870,6 +1870,237 @@
         body.dark-mode #analyseResultat .result-theory { color:#d0a0f0; }
         body.dark-mode #analyseResultat .result-posture { background:#2a1540; border-left-color:#8e44ad; color:#c090e0; }
 
+        /* ════════════════════════════════════════════════════════
+           THÈME TERMINAL  —  ASCII / Monospace / Green-on-Black
+           ════════════════════════════════════════════════════════ */
+        body[data-theme="terminal"],
+        body[data-theme="terminal"] .container {
+            font-family: 'Courier New', Consolas, 'Lucida Console', monospace !important;
+            background: #0d1117 !important;
+            color: #e6edf3 !important;
+        }
+        body[data-theme="terminal"] * {
+            border-radius: 0 !important;
+            font-family: 'Courier New', Consolas, 'Lucida Console', monospace !important;
+        }
+
+        /* ── Header ── */
+        body[data-theme="terminal"] .header {
+            background: #0d1117 !important;
+            border-bottom: 2px solid #30d158;
+            padding: 14px 20px;
+        }
+        body[data-theme="terminal"] .header h1 {
+            font-size: 1.1em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #30d158;
+        }
+        body[data-theme="terminal"] .header p {
+            color: #6e7681;
+            font-size: 0.78em;
+            letter-spacing: 1px;
+        }
+        body[data-theme="terminal"] .header-icons button {
+            background: transparent;
+            border: 1px solid #30363d;
+            color: #30d158;
+        }
+        body[data-theme="terminal"] .header-icons button:hover { border-color:#30d158; color:#5de08a; }
+        body[data-theme="terminal"] #saveIndicator { color:#30d158; font-size:0.75em; letter-spacing:1px; }
+        body[data-theme="terminal"] #onlineIndicator { background:transparent; border-color:#30363d; color:#6e7681; }
+        body[data-theme="terminal"] #onlineIndicator .dot { background:#30d158; box-shadow:0 0 6px #30d158; }
+        body[data-theme="terminal"] #onlineIndicator.offline .dot { background:#f85149; box-shadow:0 0 6px #f85149; }
+
+        /* ── Tabs ── */
+        body[data-theme="terminal"] .tabs-wrapper { background:#0d1117; border-bottom:1px solid #30d158; }
+        body[data-theme="terminal"] .tabs { background:#0d1117; }
+        body[data-theme="terminal"] .tab {
+            color: #6e7681;
+            background: transparent;
+            border-right: 1px solid #21262d;
+            font-size: 0.72em;
+            letter-spacing: 0.5px;
+            padding: 8px 12px;
+            text-transform: uppercase;
+        }
+        body[data-theme="terminal"] .tab.active {
+            background: #161b22;
+            color: #30d158;
+            border-bottom: 2px solid #30d158;
+        }
+        body[data-theme="terminal"] .tab:hover:not(.active) { background:#161b22; color:#8b949e; }
+        body[data-theme="terminal"] .tabs-drag-hint,
+        body[data-theme="terminal"] .tab-profile-badge { color:#484f58; font-size:0.72em; }
+
+        /* ── Sections — style boîte ASCII ── */
+        body[data-theme="terminal"] .content { background:#0d1117; }
+        body[data-theme="terminal"] .section {
+            background: #0d1117;
+            border: 1px solid #30d158;
+            box-shadow: none;
+            padding: 22px 16px 16px;
+            margin-bottom: 14px;
+            position: relative;
+        }
+        body[data-theme="terminal"] .section::before {
+            content: '╔';
+            position: absolute; top: -1px; left: -1px;
+            color: #30d158; line-height: 1; font-size: 1em;
+            background: #0d1117;
+        }
+        body[data-theme="terminal"] .section::after {
+            content: '╝';
+            position: absolute; bottom: -1px; right: -1px;
+            color: #30d158; line-height: 1; font-size: 1em;
+            background: #0d1117;
+        }
+        body[data-theme="terminal"] .section h2 {
+            position: absolute;
+            top: -0.75em;
+            left: 20px;
+            background: #0d1117;
+            padding: 0 8px;
+            color: #30d158;
+            font-size: 0.78em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        body[data-theme="terminal"] .section h2::before { content: '══ '; }
+        body[data-theme="terminal"] .section h2::after  { content: ' ══'; }
+        body[data-theme="terminal"] .section h3 { color:#ffd60a; font-size:0.82em; letter-spacing:1px; text-transform:uppercase; border-bottom:1px dashed #30363d; padding-bottom:6px; margin-bottom:10px; }
+
+        /* ── Stat cards ── */
+        body[data-theme="terminal"] .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            box-shadow: none;
+            text-align: left;
+        }
+        body[data-theme="terminal"] .stat-card:hover { border-color:#30d158; }
+        body[data-theme="terminal"] .stat-card .label {
+            color: #6e7681;
+            font-size: 0.68em;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        body[data-theme="terminal"] .stat-card .value {
+            color: #30d158;
+            text-shadow: 0 0 8px rgba(48,209,88,0.4);
+        }
+
+        /* ── Tables ── */
+        body[data-theme="terminal"] table { border-collapse: collapse; }
+        body[data-theme="terminal"] th {
+            background: #161b22;
+            color: #30d158;
+            border: 1px solid #30363d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.75em;
+        }
+        body[data-theme="terminal"] td {
+            border: 1px solid #21262d;
+            color: #e6edf3;
+            font-size: 0.83em;
+        }
+        body[data-theme="terminal"] tr:nth-child(even) td { background: #0d1117; }
+        body[data-theme="terminal"] tr:hover td { background:#1c2128; color:#5de08a; }
+
+        /* ── Boutons ── */
+        body[data-theme="terminal"] .btn {
+            background: #0d1117 !important;
+            color: #30d158 !important;
+            border: 1px solid #30d158 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.72em;
+            box-shadow: none !important;
+        }
+        body[data-theme="terminal"] .btn:hover {
+            background: #161b22 !important;
+            color: #5de08a !important;
+            box-shadow: 0 0 6px rgba(48,209,88,0.25) !important;
+        }
+        body[data-theme="terminal"] .btn-success { color:#3fb950 !important; border-color:#3fb950 !important; }
+        body[data-theme="terminal"] .btn-secondary { color:#ffd60a !important; border-color:#ffd60a !important; }
+        body[data-theme="terminal"] .delete-btn { color:#f85149 !important; border-color:#f85149 !important; }
+
+        /* ── Inputs ── */
+        body[data-theme="terminal"] input:not([type=color]):not([type=checkbox]):not([type=radio]),
+        body[data-theme="terminal"] select,
+        body[data-theme="terminal"] textarea {
+            background: #161b22 !important;
+            color: #e6edf3 !important;
+            border: 1px solid #30363d !important;
+            box-shadow: none !important;
+        }
+        body[data-theme="terminal"] input::placeholder { color:#484f58 !important; }
+        body[data-theme="terminal"] input:focus, body[data-theme="terminal"] select:focus, body[data-theme="terminal"] textarea:focus {
+            border-color: #30d158 !important;
+            box-shadow: 0 0 0 2px rgba(48,209,88,0.2) !important;
+        }
+        body[data-theme="terminal"] label { color:#8b949e; font-size:0.82em; }
+
+        /* ── Info box ── */
+        body[data-theme="terminal"] .info-box {
+            background: #161b22;
+            border-left: 3px solid #ffd60a;
+            color: #8b949e;
+            font-size: 0.82em;
+        }
+
+        /* ── Cartes prestations ── */
+        body[data-theme="terminal"] [data-prest-id] {
+            background: #161b22 !important;
+            border-left: 3px solid #30d158 !important;
+            box-shadow: none !important;
+        }
+        body[data-theme="terminal"] [data-prest-id]:hover { border-left-color:#ffd60a !important; }
+
+        /* ── Modales ── */
+        body[data-theme="terminal"] .modal-box,
+        body[data-theme="terminal"] [id$="Modal"] > div:not([style*="display:none"]) > div {
+            background: #0d1117 !important;
+            border: 1px solid #30d158 !important;
+            box-shadow: 0 0 30px rgba(48,209,88,0.15) !important;
+        }
+
+        /* ── Badges statut ── */
+        body[data-theme="terminal"] [class*="badge-statut"] {
+            font-size: 0.72em !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        /* ── Pagination et summary ── */
+        body[data-theme="terminal"] #prestationsListSummary { color:#6e7681; font-size:0.78em; letter-spacing:0.5px; }
+        body[data-theme="terminal"] #batchBar { background:#161b22; border-color:#ffd60a; }
+        body[data-theme="terminal"] #batchCount { color:#ffd60a; }
+
+        /* ── Effet scanlines subtil ── */
+        body[data-theme="terminal"] .container::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 3px,
+                rgba(48,209,88,0.012) 3px, rgba(48,209,88,0.012) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ── Curseur clignotant dans le titre ── */
+        @keyframes terminal-blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+        body[data-theme="terminal"] .header h1::after {
+            content: '▌';
+            animation: terminal-blink 1s infinite;
+            color: #30d158;
+        }
+
+        /* ─────────────────────────────────────────────────────── */
+
         /* ── Chronomètre ─────────────────────────────────── */
         .chrono-bar { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--color-bg-alt); border:1px solid var(--color-border); border-radius:8px; margin-top:8px; flex-wrap:wrap; }
         .chrono-display { font-family:monospace; font-size:1.4em; font-weight:700; color:var(--color-text); min-width:80px; }
@@ -3655,6 +3886,28 @@
                         </div>
                     </div>
 
+                    <h3 style="font-size:0.95em;color:#5a7b8f;margin:16px 0 10px;">Thèmes spéciaux</h3>
+                    <div class="theme-grid">
+                        <div class="theme-card" onclick="applyTheme('terminal')" id="theme-terminal">
+                            <div class="theme-preview" style="background:#0d1117;display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;">
+                                <span style="color:#30d158;font-size:0.75em;line-height:1.4;padding:4px;">╔══ ATELIER ══╗<br>║  30d158 CHF  ║<br>╚═════════════╝</span>
+                            </div>
+                            <div class="theme-label" style="background:#161b22;color:#30d158;font-family:'Courier New',monospace;letter-spacing:1px;">[ TERMINAL ]</div>
+                        </div>
+                        <div class="theme-card" onclick="applyTheme('as400')" id="theme-as400">
+                            <div class="theme-preview" style="background:#0a0e27;display:flex;align-items:center;justify-content:center;">
+                                <span style="color:#00c864;font-family:'Courier New',monospace;font-size:0.75em;">AS/400</span>
+                            </div>
+                            <div class="theme-label" style="background:#0f1432;color:#00c864;font-family:'Courier New',monospace;letter-spacing:1px;">IBM AS/400</div>
+                        </div>
+                        <div class="theme-card" onclick="applyTheme('c64')" id="theme-c64">
+                            <div class="theme-preview" style="background:#4d4dff;display:flex;align-items:center;justify-content:center;">
+                                <span style="color:#ffff00;font-family:'Courier New',monospace;font-size:0.75em;">C64</span>
+                            </div>
+                            <div class="theme-label" style="background:#2d2daa;color:#ffff00;font-family:'Courier New',monospace;letter-spacing:1px;">Commodore 64</div>
+                        </div>
+                    </div>
+
                     <h3 style="font-size:0.95em;color:#5a7b8f;margin:16px 0 10px;">Typographie</h3>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;" id="fontButtons">
                         <button class="font-btn" onclick="applyFont('Segoe UI')" style="font-family:'Segoe UI'">Segoe UI</button>
@@ -5316,6 +5569,22 @@
                 border: '#5555dd', borderLight: '#6666ff', borderFocus: '#3668ff',
                 shadow: 'rgba(54,104,255,0.3)',
                 fontBody: 'Courier New', fontHeading: 'Courier New', fontMono: 'Courier New'
+            },
+            terminal: {
+                primary: '#30d158', primaryLight: '#5de08a', primaryDark: '#1aaa42',
+                secondary: '#ffd60a', secondaryLight: '#ffe55a', secondaryDark: '#c9a800',
+                bgFrom: '#0d1117', bgTo: '#0d1117', bgAlt: '#161b22',
+                container: '#0d1117', surface: '#161b22',
+                headerFrom: '#0d1117', headerTo: '#0d1117',
+                sectionBg: '#161b22', sectionBorder: '#30d158',
+                text: '#e6edf3', textSecondary: '#8b949e', textMuted: '#6e7681', textLight: '#484f58',
+                success: '#3fb950', successDark: '#238636',
+                danger: '#f85149', dangerDark: '#da3633',
+                warning: '#d29922', warningBg: '#161009',
+                info: '#58a6ff', infoDark: '#1f6feb',
+                border: '#30363d', borderLight: '#21262d', borderFocus: '#30d158',
+                shadow: 'rgba(0,0,0,0.6)',
+                fontBody: 'Courier New', fontHeading: 'Courier New', fontMono: 'Courier New'
             }
         };
         const RADIUS_SETS = {
@@ -6562,7 +6831,7 @@
         }
 
         function removeEmojisForSystemTheme(themeName) {
-            const systemThemes = ['as400', 'sap', 'oracle', 'navision', 'c64'];
+            const systemThemes = ['as400', 'sap', 'oracle', 'navision', 'c64', 'terminal'];
             if (!systemThemes.includes(themeName)) return;
             removeAllEmojis();
         }
@@ -6580,7 +6849,11 @@
             const t = THEMES[name];
             if (!t) return;
             themePrefs.theme = name;
-            applyThemeCss(t, RADIUS_SETS[themePrefs.radius], themePrefs.font);
+            // Radius carré forcé pour le thème terminal, sinon respecte le choix utilisateur
+            const radius = name === 'terminal' ? RADIUS_SETS.square : RADIUS_SETS[themePrefs.radius];
+            applyThemeCss(t, radius, themePrefs.font);
+            // Attribut data-theme sur body pour les overrides CSS spécifiques
+            document.body.setAttribute('data-theme', name);
             // Remove emojis for system themes
             removeEmojisForSystemTheme(name);
             saveToStorage();
@@ -6641,9 +6914,11 @@
         }
 
         function initTheme() {
-            const t = THEMES[themePrefs.theme] || THEMES.classique;
-            const r = RADIUS_SETS[themePrefs.radius] || RADIUS_SETS.round;
+            const name = themePrefs.theme || 'classique';
+            const t = THEMES[name] || THEMES.classique;
+            const r = name === 'terminal' ? RADIUS_SETS.square : (RADIUS_SETS[themePrefs.radius] || RADIUS_SETS.round);
             applyThemeCss(t, r, themePrefs.font);
+            document.body.setAttribute('data-theme', name);
         }
 
         // ── Fonctions Impression / PDF ──────────────────────────────
