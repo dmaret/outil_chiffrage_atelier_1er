@@ -6839,8 +6839,17 @@
             }
         }
 
-        // ── Terminal : patch des backgrounds clairs codés en dur ──────────
-        let _terminalObserver = null;
+        // ── Thèmes sombres : patch des backgrounds clairs codés en dur ───────
+        // S'applique à : terminal, as400, c64 (et tout thème ajouté à DARK_THEMES)
+        const DARK_THEMES = new Set(['terminal', 'as400', 'c64']);
+        let _darkThemeObserver = null;
+
+        // Couleurs de remplacement par thème sombre
+        const DARK_THEME_COLORS = {
+            terminal: { bg: '#161b22', border: '#30363d' },
+            as400:    { bg: '#121829', border: '#2a3850' },
+            c64:      { bg: '#2a2a66', border: '#5555dd' },
+        };
 
         function _isLightBg(val) {
             if (!val) return false;
@@ -6851,44 +6860,46 @@
                 || /rgba?\(25[0-9],\s*25[0-9],\s*25[0-9]/.test(v);
         }
 
-        function _patchTerminalEl(el) {
+        function _patchDarkEl(el) {
             if (!el || !el.style) return;
+            const themeName = document.body.getAttribute('data-theme');
+            const colors = DARK_THEME_COLORS[themeName] || DARK_THEME_COLORS.terminal;
             const bg = el.style.background || el.style.backgroundColor;
             if (_isLightBg(bg)) {
-                el.style.setProperty('background', '#161b22', 'important');
+                el.style.setProperty('background', colors.bg, 'important');
                 if (el.style.borderColor && /^#[ef][0-9a-f]{5}/i.test(el.style.borderColor))
-                    el.style.setProperty('border-color', '#30363d', 'important');
+                    el.style.setProperty('border-color', colors.border, 'important');
             }
         }
 
-        function _patchTerminalAll() {
-            document.querySelectorAll('[style]').forEach(_patchTerminalEl);
+        function _patchDarkAll() {
+            document.querySelectorAll('[style]').forEach(_patchDarkEl);
         }
 
-        function _activateTerminalPatching() {
-            _patchTerminalAll();
-            if (_terminalObserver) return;
-            _terminalObserver = new MutationObserver(mutations => {
-                if (document.body.getAttribute('data-theme') !== 'terminal') {
-                    _terminalObserver.disconnect(); _terminalObserver = null; return;
+        function _activateDarkPatching() {
+            _patchDarkAll();
+            if (_darkThemeObserver) return;
+            _darkThemeObserver = new MutationObserver(mutations => {
+                if (!DARK_THEMES.has(document.body.getAttribute('data-theme'))) {
+                    _darkThemeObserver.disconnect(); _darkThemeObserver = null; return;
                 }
                 mutations.forEach(m => {
                     m.addedNodes.forEach(n => {
                         if (n.nodeType !== 1) return;
-                        _patchTerminalEl(n);
-                        n.querySelectorAll('[style]').forEach(_patchTerminalEl);
+                        _patchDarkEl(n);
+                        n.querySelectorAll('[style]').forEach(_patchDarkEl);
                     });
-                    if (m.type === 'attributes' && m.target.nodeType === 1) _patchTerminalEl(m.target);
+                    if (m.type === 'attributes' && m.target.nodeType === 1) _patchDarkEl(m.target);
                 });
             });
-            _terminalObserver.observe(document.body, {
+            _darkThemeObserver.observe(document.body, {
                 childList: true, subtree: true,
                 attributes: true, attributeFilter: ['style']
             });
         }
 
-        function _deactivateTerminalPatching() {
-            if (_terminalObserver) { _terminalObserver.disconnect(); _terminalObserver = null; }
+        function _deactivateDarkPatching() {
+            if (_darkThemeObserver) { _darkThemeObserver.disconnect(); _darkThemeObserver = null; }
         }
         // ─────────────────────────────────────────────────────────────────
 
@@ -6902,8 +6913,8 @@
             // Attribut data-theme sur body pour les overrides CSS spécifiques
             document.body.setAttribute('data-theme', name);
             // Patch inline backgrounds pour le thème terminal
-            if (name === 'terminal') _activateTerminalPatching();
-            else _deactivateTerminalPatching();
+            if (DARK_THEMES.has(name)) _activateDarkPatching();
+            else _deactivateDarkPatching();
             // Remove emojis for system themes
             removeEmojisForSystemTheme(name);
             saveToStorage();
@@ -6971,7 +6982,7 @@
             document.body.setAttribute('data-theme', name);
             if (name === 'terminal') {
                 // Lancer le patching après le rendu initial
-                requestIdleCallback ? requestIdleCallback(_activateTerminalPatching) : setTimeout(_activateTerminalPatching, 300);
+                requestIdleCallback ? requestIdleCallback(_activateDarkPatching) : setTimeout(_activateDarkPatching, 300);
             }
         }
 
