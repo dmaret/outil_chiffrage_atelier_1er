@@ -3486,6 +3486,12 @@
                     <div id="rbacMatrix" style="overflow-x:auto;"></div>
                 </div>
 
+                <div class="section admin-section" style="display:none; border-left: 4px solid #6b8fa3;">
+                    <h2>🖥️ Écran d'accueil <span style="background:#6b8fa3;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                    <p style="font-size:0.85em;color:#7a9db1;margin-bottom:16px;">Choisissez les cartes affichées à côté du formulaire de connexion. Les modifications sont visibles immédiatement.</p>
+                    <div id="loginConfigAdmin"></div>
+                </div>
+
                 <div class="section admin-section" style="display:none; border-left: 4px solid #a8d5e2;">
                     <h2>👁️ Profils d'onglets <span style="background:#a8d5e2;color:#2d3e50;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
                     <p style="font-size:0.88em;color:#7a9db1;margin-bottom:14px;">Créez des groupes nommés d'onglets pour adapter l'interface selon le contexte (vue client, vue interne, compta…).</p>
@@ -4963,6 +4969,7 @@
         let isSuperUser = false;
         let authGroups = [];
         let currentUserSession = null;
+        let loginConfig = { widgets: [], messageTitle: 'Bienvenue', messageText: '', messageBg: '#f0f7ff' };
 
         function getCurrentUser() {
             return currentUserSession ? currentUserSession.name : 'Anonyme';
@@ -11745,6 +11752,7 @@
             document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'block');
             renderTabProfiles();
             renderAuthGroups();
+            renderLoginConfigAdmin();
         }
 
         function hideAdminSections() {
@@ -14305,12 +14313,142 @@
             if (pw) { pw.value = ''; }
             const err = document.getElementById('authError');
             if (err) err.textContent = '';
-            // Focus on select or password after slight delay
+            renderLoginWidgets();
             setTimeout(() => {
                 const sel = document.getElementById('authGroupSelect');
                 if (sel && !sel.value) sel.focus();
                 else document.getElementById('authPasswordInput')?.focus();
             }, 50);
+        }
+
+        // ── Login screen widget config ────────────────────────────
+        (function loadLoginConfig() {
+            const saved = localStorage.getItem('loginConfig');
+            if (saved) { try { loginConfig = { ...loginConfig, ...JSON.parse(saved) }; } catch(e){} }
+        })();
+
+        const LOGIN_WIDGETS_DEF = [
+            { id: 'message',  icon: '💬', label: 'Message d\'accueil',              desc: 'Texte de bienvenue personnalisable' },
+            { id: 'training', icon: '📋', label: 'Offre de Prix / Assistant Gestes', desc: 'Module d\'entraînement aux gestes' },
+            { id: 'stats',    icon: '📊', label: 'Statistiques rapides',             desc: 'Chiffres clés de l\'atelier' },
+        ];
+
+        function renderLoginWidgets() {
+            const container = document.getElementById('loginWidgets');
+            const wrapper   = document.querySelector('.auth-overlay-wrapper');
+            if (!container || !wrapper) return;
+
+            const active = (loginConfig.widgets || []);
+            if (active.length === 0) {
+                container.style.display = 'none';
+                wrapper.style.gridTemplateColumns = '1fr';
+                wrapper.style.maxWidth = '460px';
+                return;
+            }
+            wrapper.style.gridTemplateColumns = '1fr 1fr';
+            wrapper.style.maxWidth = '900px';
+            container.style.display = 'flex';
+
+            let html = '';
+
+            if (active.includes('message')) {
+                const bg  = loginConfig.messageBg || '#f0f7ff';
+                const ttl = loginConfig.messageTitle || '';
+                const txt = (loginConfig.messageText || '').replace(/\n/g, '<br>');
+                html += `<div class="training-box" style="background:${bg};">
+                    <div style="font-size:2.5em;margin-bottom:6px;">👋</div>
+                    <h2>${ttl}</h2>
+                    <p class="training-subtitle" style="white-space:pre-wrap;">${txt}</p>
+                </div>`;
+            }
+
+            if (active.includes('training')) {
+                html += `<div class="training-box">
+                    <div style="font-size:2.5em;margin-bottom:6px;">📋</div>
+                    <h2>Offre de Prix</h2>
+                    <h3 style="font-size:1.1em;color:#9a70b8;margin-bottom:12px;">Assistant Gestes</h3>
+                    <p class="training-subtitle">Entraînez-vous à identifier et planifier les gestes de vos offres</p>
+                    <button class="btn-training" onclick="openTrainingModule()">✏️ Démarrer l'assistant</button>
+                    <p class="training-footer">Outil d'entraînement parallèle • Intégrable à l'outil complet</p>
+                </div>`;
+            }
+
+            if (active.includes('stats')) {
+                const pCount = (typeof prestations !== 'undefined' ? prestations : []).length;
+                const cCount = (typeof clients    !== 'undefined' ? clients    : []).length;
+                const oCount = (typeof offres     !== 'undefined' ? offres     : []).length;
+                html += `<div class="training-box">
+                    <div style="font-size:2.5em;margin-bottom:6px;">📊</div>
+                    <h2>Statistiques</h2>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;">
+                        <div style="background:#f0f7ff;border-radius:12px;padding:14px;">
+                            <div style="font-size:1.8em;font-weight:700;color:#4e9af1;">${pCount}</div>
+                            <div style="font-size:0.8em;color:#6b8fa3;">Prestations</div>
+                        </div>
+                        <div style="background:#f0f7ff;border-radius:12px;padding:14px;">
+                            <div style="font-size:1.8em;font-weight:700;color:#27ae60;">${cCount}</div>
+                            <div style="font-size:0.8em;color:#6b8fa3;">Clients</div>
+                        </div>
+                        <div style="background:#f0f7ff;border-radius:12px;padding:14px;">
+                            <div style="font-size:1.8em;font-weight:700;color:#9a70b8;">${oCount}</div>
+                            <div style="font-size:0.8em;color:#6b8fa3;">Offres</div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderLoginConfigAdmin() {
+            const container = document.getElementById('loginConfigAdmin');
+            if (!container) return;
+            const active = loginConfig.widgets || [];
+
+            const widgetsHtml = LOGIN_WIDGETS_DEF.map(w => {
+                const checked = active.includes(w.id);
+                return `<label style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:${checked ? '#edfaf3' : '#f5f9fc'};border:1.5px solid ${checked ? '#27ae60' : '#e0e8f0'};cursor:pointer;margin-bottom:8px;transition:all 0.2s;">
+                    <input type="checkbox" class="lwt-cb" value="${w.id}" ${checked ? 'checked' : ''}
+                        onchange="toggleLoginWidget(this)"
+                        style="width:18px;height:18px;accent-color:#27ae60;cursor:pointer;flex-shrink:0;">
+                    <span style="font-size:1.4em;">${w.icon}</span>
+                    <div>
+                        <strong style="display:block;">${w.label}</strong>
+                        <span style="font-size:0.82em;color:#7a9db1;">${w.desc}</span>
+                    </div>
+                </label>`;
+            }).join('');
+
+            const msgVisible = active.includes('message') ? '' : 'display:none;';
+            container.innerHTML = `
+                <div style="margin-bottom:16px;">${widgetsHtml}</div>
+                <div id="loginMsgConfig" style="${msgVisible}padding:14px;background:#f0f7ff;border-radius:10px;border:1px solid #cce4f7;margin-bottom:16px;">
+                    <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:6px;">Titre du message</label>
+                    <input type="text" id="loginMsgTitle" value="${loginConfig.messageTitle || ''}" placeholder="Ex: Bienvenue à l'Atelier" style="width:100%;padding:9px;border:1px solid #cce4f7;border-radius:8px;font-size:0.95em;margin-bottom:10px;">
+                    <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:6px;">Texte</label>
+                    <textarea id="loginMsgText" rows="4" placeholder="Message affiché sur l'écran d'accueil…" style="width:100%;padding:9px;border:1px solid #cce4f7;border-radius:8px;font-size:0.95em;resize:vertical;">${loginConfig.messageText || ''}</textarea>
+                    <label style="font-weight:600;font-size:0.9em;display:block;margin-top:10px;margin-bottom:6px;">Couleur de fond</label>
+                    <input type="color" id="loginMsgBg" value="${loginConfig.messageBg || '#f0f7ff'}" style="width:50px;height:32px;border:none;cursor:pointer;border-radius:6px;">
+                </div>
+                <button class="btn btn-success btn-small" onclick="saveLoginConfigAdmin()">💾 Sauvegarder</button>`;
+        }
+
+        function toggleLoginWidget(cb) {
+            const row = cb.closest('label');
+            if (cb.checked) { row.style.background = '#edfaf3'; row.style.borderColor = '#27ae60'; }
+            else            { row.style.background = '#f5f9fc'; row.style.borderColor = '#e0e8f0'; }
+            const msgCfg = document.getElementById('loginMsgConfig');
+            if (msgCfg) msgCfg.style.display = cb.value === 'message' ? (cb.checked ? '' : 'none') : msgCfg.style.display;
+        }
+
+        function saveLoginConfigAdmin() {
+            loginConfig.widgets     = [...document.querySelectorAll('.lwt-cb:checked')].map(cb => cb.value);
+            loginConfig.messageTitle = document.getElementById('loginMsgTitle')?.value || '';
+            loginConfig.messageText  = document.getElementById('loginMsgText')?.value  || '';
+            loginConfig.messageBg    = document.getElementById('loginMsgBg')?.value    || '#f0f7ff';
+            localStorage.setItem('loginConfig', JSON.stringify(loginConfig));
+            renderLoginConfigAdmin();
+            toast('Configuration de l\'accueil sauvegardée', 'success');
         }
 
         // Simple hash function for passwords (not cryptographically secure)
@@ -22104,17 +22242,8 @@
                 </label>
             </div>
 
-            <!-- Container 2: Offre de prix assistant gestes -->
-            <div class="training-box">
-                <div style="font-size:2.8em;margin-bottom:6px;">📋</div>
-                <h2>Offre de Prix</h2>
-                <h3 style="font-size: 1.1em; color: #9a70b8; margin-bottom: 12px;">Assistant Gestes</h3>
-                <p class="training-subtitle">Entraînez-vous à identifier et planifier les gestes de vos offres</p>
-                <button class="btn-training" onclick="openTrainingModule()">
-                    ✏️ Démarrer l'assistant
-                </button>
-                <p class="training-footer">Outil d'entraînement parallèle • Intégrable à l'outil complet</p>
-            </div>
+            <!-- Widgets d'accueil dynamiques (configurables par admin) -->
+            <div id="loginWidgets" style="display:none;flex-direction:column;gap:20px;"></div>
 
         </div>
     </div>
