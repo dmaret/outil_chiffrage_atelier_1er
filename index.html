@@ -143,7 +143,24 @@
             transition: background 0.3s;
         }
         .header-icons button:hover { background: rgba(255,255,255,0.45); }
-        
+
+        #onlineIndicator {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,0.25); border-radius: 16px;
+            padding: 4px 10px; font-size: 0.78em; font-weight: 700;
+            color: #fff; white-space: nowrap; transition: all 0.4s;
+            border: 1.5px solid rgba(255,255,255,0.4);
+        }
+        #onlineIndicator .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #4caf50; flex-shrink: 0;
+            box-shadow: 0 0 6px #4caf50;
+            animation: pulse-dot 2s infinite;
+        }
+        #onlineIndicator.offline .dot { background: #e74c3c; box-shadow: 0 0 6px #e74c3c; animation: none; }
+        #onlineIndicator.offline { background: rgba(231,76,60,0.22); border-color: rgba(231,76,60,0.5); }
+        @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
         .header h1 { font-size: 2em; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 1.05em; }
         
@@ -2609,6 +2626,9 @@
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
             <span id="saveIndicator"><span class="autosave-dot" id="autosaveDot"></span>💾 Sauvegardé à l'instant</span>
             <div class="header-icons">
+                <div id="onlineIndicator" title="Statut de connexion">
+                    <span class="dot"></span><span id="onlineLabel">En ligne</span>
+                </div>
                 <div id="headerAuthBadge" style="display:none;background:rgba(255,255,255,0.30);border:1.5px solid rgba(255,255,255,0.55);border-radius:20px;padding:5px 13px;font-size:0.82em;font-weight:800;cursor:pointer;backdrop-filter:blur(4px);color:#2d3e50;white-space:nowrap;transition:background 0.2s;" onclick="doLogout()" title="Connecté — cliquer pour se déconnecter"><span id="headerAuthBadgeText">🔐</span></div>
                 <button onclick="document.getElementById('docModal').style.display='flex'" title="Documentation">📖</button>
                 <button onclick="document.getElementById('shortcutsModal').style.display='flex'" title="Aide raccourcis clavier">?</button>
@@ -3518,8 +3538,8 @@
                 <div class="section">
                     <h2>Prestations enregistrées</h2>
                     <div class="prestations-filters">
-                        <input type="text" id="filtreTexte" placeholder="🔍 Client, prestation, référence..." oninput="renderPrestations()" style="flex:2;min-width:180px;">
-                        <select id="filtreStatut" onchange="renderPrestations()" style="flex:1;min-width:135px;">
+                        <input type="text" id="filtreTexte" placeholder="🔍 Client, prestation, référence..." oninput="window._prestPage=0;renderPrestations()" style="flex:2;min-width:180px;">
+                        <select id="filtreStatut" onchange="window._prestPage=0;renderPrestations()" style="flex:1;min-width:135px;">
                             <option value="">Tous statuts</option>
                             <option value="brouillon">⬜ Brouillon</option>
                             <option value="devis">🟡 Devis</option>
@@ -3529,19 +3549,43 @@
                             <option value="termine">🟢 Terminé</option>
                             <option value="facture">💙 Facturé</option>
                         </select>
-                        <select id="filtreClient" onchange="renderPrestations()" style="flex:1;min-width:120px;">
+                        <select id="filtreClient" onchange="window._prestPage=0;renderPrestations()" style="flex:1;min-width:120px;">
                             <option value="">Tous clients</option>
                         </select>
                         <label style="font-size:0.85em;color:#7a9db1;white-space:nowrap;">Du</label>
-                        <input type="date" id="filtreDateDe" oninput="renderPrestations()" style="flex:1;min-width:120px;">
+                        <input type="date" id="filtreDateDe" oninput="window._prestPage=0;renderPrestations()" style="flex:1;min-width:120px;">
                         <label style="font-size:0.85em;color:#7a9db1;white-space:nowrap;">Au</label>
-                        <input type="date" id="filtreDateA" oninput="renderPrestations()" style="flex:1;min-width:120px;">
+                        <input type="date" id="filtreDateA" oninput="window._prestPage=0;renderPrestations()" style="flex:1;min-width:120px;">
                         <button class="btn btn-small" onclick="exportPrestationsCSV()" style="white-space:nowrap;">📥 CSV</button>
                         <button class="btn btn-small" onclick="exportPrestationsXLSX()" style="white-space:nowrap;background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">📊 Excel</button>
                         <button class="btn btn-small" onclick="openCompareModal()" style="white-space:nowrap;background:#edf5ff;border-color:#a8c8f0;color:#5a7b8f;">📊 Comparer</button>
                         <button class="btn btn-small" onclick="openTrainingImportModal()" style="white-space:nowrap;background:#fff3cd;border-color:#ffc107;color:#856404;">📤 Importer rapport</button>
+                        <select id="prestPerPage" onchange="window._prestPage=0;renderPrestations()" title="Prestations par page" style="font-size:0.82em;padding:4px 6px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-section-bg);">
+                            <option value="20">20 / page</option>
+                            <option value="50">50 / page</option>
+                            <option value="100">100 / page</option>
+                            <option value="0">Tout afficher</option>
+                        </select>
+                    </div>
+                    <div id="prestationsListSummary" style="font-size:0.82em;color:#7a9db1;margin:6px 0 4px;min-height:18px;"></div>
+                    <div id="batchBar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:var(--color-primary-light);border-radius:8px;border:1px solid var(--color-primary);margin-bottom:8px;">
+                        <span id="batchCount" style="font-weight:700;color:var(--color-primary-dark);white-space:nowrap;"></span>
+                        <select id="batchStatut" style="font-size:0.85em;padding:4px 8px;border-radius:6px;border:1px solid var(--color-border);">
+                            <option value="">— Changer statut vers —</option>
+                            <option value="brouillon">⬜ Brouillon</option>
+                            <option value="devis">🟡 Devis</option>
+                            <option value="soumis">🟠 Soumis</option>
+                            <option value="accepte">🔵 Accepté</option>
+                            <option value="en-cours">🟣 En cours</option>
+                            <option value="termine">🟢 Terminé</option>
+                            <option value="facture">💙 Facturé</option>
+                        </select>
+                        <button class="btn btn-small btn-success" onclick="applyBatchStatut()">✔ Appliquer</button>
+                        <button class="btn btn-small" onclick="selectAllPrestations()" style="background:#fff3cd;border-color:#ffc107;color:#856404;">☑ Tout sélectionner (page)</button>
+                        <button class="btn btn-small btn-secondary" onclick="clearBatchSelection()">✖ Désélectionner</button>
                     </div>
                     <div id="prestationsList"></div>
+                    <div id="prestationsPagination" style="display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:12px;"></div>
                 </div>
             </div>
 
@@ -3686,7 +3730,13 @@
             <!-- ONGLET STATS -->
             <div id="stats" class="tab-content">
                 <div class="section">
-                    <h2>Vue d'ensemble</h2>
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
+                        <h2 style="margin:0;">Vue d'ensemble</h2>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-small" onclick="exportStatsCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;" title="Exporter les statistiques en CSV">📥 Export CSV</button>
+                            <button class="btn btn-small" onclick="exportStatsXLSX()" style="background:#edf5ff;border-color:#a8c8f0;color:#2980b9;" title="Exporter les statistiques en Excel">📊 Export Excel</button>
+                        </div>
+                    </div>
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="label">Prestations</div>
@@ -9403,12 +9453,58 @@
                     title: 'Aucune prestation ne correspond aux filtres',
                     hint: 'Modifiez les filtres (texte, statut, client, dates) ou réinitialisez-les pour voir toutes les prestations.'
                 });
+                const sumEl2 = document.getElementById('prestationsListSummary');
+                if (sumEl2) sumEl2.textContent = '';
+                const pagEl2 = document.getElementById('prestationsPagination');
+                if (pagEl2) pagEl2.innerHTML = '';
                 return;
+            }
+
+            // ── Pagination ────────────────────────────────────────────────
+            const perPageVal = parseInt(document.getElementById('prestPerPage')?.value || '20', 10);
+            const perPage = perPageVal === 0 ? filtered.length : perPageVal;
+            const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+            if (window._prestPage === undefined) window._prestPage = 0;
+            if (window._prestPage >= totalPages) window._prestPage = totalPages - 1;
+            const pageStart = window._prestPage * perPage;
+            const pageEnd   = Math.min(pageStart + perPage, filtered.length);
+            const pageSlice = filtered.slice(pageStart, pageEnd);
+
+            // Résumé
+            const sumEl = document.getElementById('prestationsListSummary');
+            if (sumEl) {
+                const caPage = pageSlice.reduce((s, p) => s + (p.prixVente || 0), 0);
+                const caTotal = filtered.reduce((s, p) => s + (p.prixVente || 0), 0);
+                sumEl.textContent = perPageVal === 0
+                    ? `${filtered.length} prestation(s) — CA total : ${fmtCHF(caTotal)}`
+                    : `Affichage ${pageStart + 1}–${pageEnd} sur ${filtered.length} — CA page : ${fmtCHF(caPage)} | CA total filtré : ${fmtCHF(caTotal)}`;
+            }
+
+            // Contrôles de pagination
+            const pagEl = document.getElementById('prestationsPagination');
+            if (pagEl) {
+                if (totalPages <= 1) {
+                    pagEl.innerHTML = '';
+                } else {
+                    const btnStyle = 'padding:5px 11px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-section-bg);cursor:pointer;font-size:0.85em;';
+                    const btnActive = 'padding:5px 11px;border-radius:6px;border:1px solid var(--color-primary);background:var(--color-primary-light);cursor:pointer;font-size:0.85em;font-weight:700;color:var(--color-primary-dark);';
+                    let phtml = `<button style="${btnStyle}" onclick="window._prestPage=0;renderPrestations()" ${window._prestPage===0?'disabled':''}>«</button>`;
+                    phtml += `<button style="${btnStyle}" onclick="window._prestPage=Math.max(0,window._prestPage-1);renderPrestations()" ${window._prestPage===0?'disabled':''}>‹</button>`;
+                    const start = Math.max(0, window._prestPage - 2);
+                    const end   = Math.min(totalPages, start + 5);
+                    for (let i = start; i < end; i++) {
+                        phtml += `<button style="${i===window._prestPage?btnActive:btnStyle}" onclick="window._prestPage=${i};renderPrestations()">${i+1}</button>`;
+                    }
+                    phtml += `<button style="${btnStyle}" onclick="window._prestPage=Math.min(${totalPages-1},window._prestPage+1);renderPrestations()" ${window._prestPage>=totalPages-1?'disabled':''}>›</button>`;
+                    phtml += `<button style="${btnStyle}" onclick="window._prestPage=${totalPages-1};renderPrestations()" ${window._prestPage>=totalPages-1?'disabled':''}>»</button>`;
+                    phtml += `<span style="font-size:0.82em;color:#7a9db1;">Page ${window._prestPage+1}/${totalPages}</span>`;
+                    pagEl.innerHTML = phtml;
+                }
             }
 
             const _today = new Date(); _today.setHours(0,0,0,0);
             let html = '';
-            filtered.forEach(p => {
+            pageSlice.forEach(p => {
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
                 const margeChfVal = fmtNum((p.prixVente||0) - (p.prixRevient||0));
                 const statutBadge = getStatutBadgeHtml(p.statut || 'devis');
@@ -9417,9 +9513,11 @@
                 const expiryBadge = _daysLeft !== null && _daysLeft <= 7
                     ? `<span style="background:${_daysLeft <= 0 ? '#e74c3c' : '#e67e22'};color:white;border-radius:4px;padding:1px 6px;font-size:0.75em;margin-left:4px;">${_daysLeft <= 0 ? '⚠️ Expiré' : `⚠️ ${_daysLeft}j`}</span>`
                     : '';
-                html += `<div data-prest-id="${p.id}" style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);">
+                const isSelected = window._batchSelected.has(p.id);
+                html += `<div data-prest-id="${p.id}" style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);${isSelected?' outline:2px solid var(--color-primary);':''}">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap:wrap; gap:6px;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <input type="checkbox" id="batch-cb-${p.id}" ${isSelected?'checked':''} onchange="toggleBatchSelect(${p.id})" title="Sélectionner pour action en lot" style="width:16px;height:16px;cursor:pointer;accent-color:var(--color-primary-dark);">
                             <strong style="font-size: 1.1em; color: #6b8fa3;">${escapeHtml(p.prestation)}</strong>
                             ${statutBadge}${expiryBadge}
                         </div>
@@ -9501,7 +9599,7 @@
             });
 
             if (displayPrefs.vuePrestations === 'compacte') {
-                container.innerHTML = filtered.map(p => {
+                container.innerHTML = pageSlice.map(p => {
                     const badge = getStatutBadgeHtml(p.statut || 'devis');
                     return `<div class="prest-compact-row">
                         ${badge}
@@ -9527,7 +9625,7 @@
                     ${th('date','Date')}${th('client','Client')}${th('prestation','Prestation')}${th('statut','Statut')}
                     ${th('prixVente','Prix vente')}${th('marge','Marge')}${th('heures','Heures')}
                     <th>Actions</th></tr></thead><tbody>`;
-                filtered.forEach(p => {
+                pageSlice.forEach(p => {
                     const badge = getStatutBadgeHtml(p.statut || 'devis');
                     thtml += `<tr data-prest-id="${p.id}">
                         <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
@@ -9573,6 +9671,70 @@
             if (window._prestSort === field) window._prestSortDir = (window._prestSortDir || -1) * -1;
             else { window._prestSort = field; window._prestSortDir = -1; }
             renderPrestations();
+        }
+
+        // ── Sélection en lot ──────────────────────────────────────────────
+        window._batchSelected = new Set();
+
+        function _batchUpdateBar() {
+            const bar = document.getElementById('batchBar');
+            const cnt = document.getElementById('batchCount');
+            if (!bar || !cnt) return;
+            const n = window._batchSelected.size;
+            bar.style.display = n > 0 ? 'flex' : 'none';
+            cnt.textContent = `${n} prestation(s) sélectionnée(s)`;
+        }
+
+        function toggleBatchSelect(id) {
+            if (window._batchSelected.has(id)) window._batchSelected.delete(id);
+            else window._batchSelected.add(id);
+            const cb = document.getElementById(`batch-cb-${id}`);
+            if (cb) cb.checked = window._batchSelected.has(id);
+            const row = document.querySelector(`[data-prest-id="${id}"]`);
+            if (row) row.style.outline = window._batchSelected.has(id) ? '2px solid var(--color-primary)' : '';
+            _batchUpdateBar();
+        }
+
+        function selectAllPrestations() {
+            document.querySelectorAll('[data-prest-id]').forEach(el => {
+                const id = parseInt(el.dataset.prestId, 10);
+                if (!isNaN(id)) {
+                    window._batchSelected.add(id);
+                    el.style.outline = '2px solid var(--color-primary)';
+                    const cb = document.getElementById(`batch-cb-${id}`);
+                    if (cb) cb.checked = true;
+                }
+            });
+            _batchUpdateBar();
+        }
+
+        function clearBatchSelection() {
+            window._batchSelected.clear();
+            document.querySelectorAll('[data-prest-id]').forEach(el => {
+                el.style.outline = '';
+                const id = el.dataset.prestId;
+                const cb = document.getElementById(`batch-cb-${id}`);
+                if (cb) cb.checked = false;
+            });
+            _batchUpdateBar();
+        }
+
+        function applyBatchStatut() {
+            if (!checkPermission('edit_prestation')) return;
+            const statut = document.getElementById('batchStatut')?.value;
+            if (!statut) { toast('Choisissez un statut dans la liste.', 'warning'); return; }
+            const ids = [...window._batchSelected];
+            if (ids.length === 0) return;
+            pushUndoSnapshot(`Changement statut en lot (${ids.length} prestations)`);
+            ids.forEach(id => {
+                const p = prestationsSauvegardees.find(x => x.id === id);
+                if (p) p.statut = statut;
+            });
+            saveToStorage();
+            clearBatchSelection();
+            renderPrestations();
+            updateStats();
+            toast(`✅ Statut mis à jour pour ${ids.length} prestation(s).`, 'success');
         }
 
         function deletePrestation(id) {
@@ -9629,6 +9791,85 @@
             renderPrevisions();
             renderObjectifCA();
             renderRentabiliteGestes();
+        }
+
+        function _buildStatsData() {
+            const ps = prestationsSauvegardees;
+            const ca = ps.reduce((s, p) => s + (p.prixVente||0), 0);
+            const couts = ps.reduce((s, p) => s + (p.prixRevient||0), 0);
+            const hCEA = ps.reduce((s, p) => s + (p.heures||0) * (p.nbCEA||1), 0);
+            const hMSP = ps.reduce((s, p) => s + (p.heures||0) * (p.nbMSP||0), 0);
+            const margeAvg = ps.length ? ps.reduce((s, p) => s + (p.marge||0), 0) / ps.length : 0;
+            const byStatut = {};
+            ps.forEach(p => { const s = p.statut || 'devis'; byStatut[s] = (byStatut[s]||0) + 1; });
+            return { ps, ca, couts, hCEA, hMSP, margeAvg, byStatut };
+        }
+
+        function exportStatsCSV() {
+            const { ps, ca, couts, hCEA, hMSP, margeAvg, byStatut } = _buildStatsData();
+            const date = new Date().toLocaleDateString('fr-FR');
+            const rows = [
+                ['Statistiques Atelier — ' + date],
+                [],
+                ['Indicateur', 'Valeur'],
+                ['Nb prestations', ps.length],
+                ['CA prévisionnel (CHF)', ca.toFixed(2)],
+                ['Coûts totaux (CHF)', couts.toFixed(2)],
+                ['Marge totale (CHF)', (ca-couts).toFixed(2)],
+                ['Marge moyenne (%)', margeAvg.toFixed(1)],
+                ['Heures CEA (h)', hCEA.toFixed(1)],
+                ['Heures MSP (h)', hMSP.toFixed(1)],
+                ['Taux MSP (%)', (hCEA+hMSP>0 ? hMSP/(hCEA+hMSP)*100 : 0).toFixed(1)],
+                [],
+                ['Répartition par statut'],
+                ['Statut', 'Nb'],
+                ...Object.entries(byStatut).map(([s, n]) => [s, n]),
+                [],
+                ['Top 5 prestations par CA (CHF)'],
+                ['Prestation', 'Client', 'Date', 'Prix vente', 'Marge %'],
+                ...[...ps].sort((a,b) => (b.prixVente||0) - (a.prixVente||0)).slice(0,5)
+                    .map(p => [p.prestation, p.client, p.date, (p.prixVente||0).toFixed(2), p.marge||0])
+            ];
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+            const blob = new Blob(['﻿' + csv], {type: 'text/csv;charset=utf-8;'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `stats-atelier-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            toast('Export CSV des statistiques téléchargé !', 'success');
+        }
+
+        function exportStatsXLSX() {
+            if (typeof XLSX === 'undefined') { toast('📊 Export Excel non disponible.', 'error'); return; }
+            const { ps, ca, couts, hCEA, hMSP, margeAvg, byStatut } = _buildStatsData();
+            const wb = XLSX.utils.book_new();
+
+            const wsData = [
+                ['Indicateur', 'Valeur'],
+                ['Nb prestations', ps.length],
+                ['CA prévisionnel (CHF)', parseFloat(ca.toFixed(2))],
+                ['Coûts totaux (CHF)', parseFloat(couts.toFixed(2))],
+                ['Marge totale (CHF)', parseFloat((ca-couts).toFixed(2))],
+                ['Marge moyenne (%)', parseFloat(margeAvg.toFixed(1))],
+                ['Heures CEA (h)', parseFloat(hCEA.toFixed(1))],
+                ['Heures MSP (h)', parseFloat(hMSP.toFixed(1))],
+                ['Taux MSP (%)', parseFloat((hCEA+hMSP>0 ? hMSP/(hCEA+hMSP)*100 : 0).toFixed(1))],
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Résumé');
+
+            const wsStatut = [['Statut','Nb'], ...Object.entries(byStatut).map(([s,n]) => [s, n])];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsStatut), 'Par statut');
+
+            const wsTop = [
+                ['Prestation','Client','Date','Prix vente (CHF)','Marge %','Heures'],
+                ...[...ps].sort((a,b)=>(b.prixVente||0)-(a.prixVente||0)).slice(0,20)
+                    .map(p => [p.prestation, p.client, p.date, parseFloat((p.prixVente||0).toFixed(2)), p.marge||0, parseFloat((p.heures||0).toFixed(1))])
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsTop), 'Top 20 prestations');
+
+            XLSX.writeFile(wb, `stats-atelier-${new Date().toISOString().slice(0,10)}.xlsx`);
+            toast('Export Excel des statistiques téléchargé !', 'success');
         }
 
         function renderPrecisionParGeste() {
@@ -11697,6 +11938,8 @@
             const statut = document.getElementById('filtreStatut')?.value || '';
             const client = document.getElementById('filtreClient')?.value || '';
 
+            const dateDe = document.getElementById('filtreDateDe')?.value || '';
+            const dateA  = document.getElementById('filtreDateA')?.value || '';
             let filtered = [...prestationsSauvegardees].sort((a, b) => new Date(b.date) - new Date(a.date));
             if (texte) filtered = filtered.filter(p =>
                 (p.client||'').toLowerCase().includes(texte) ||
@@ -11705,6 +11948,8 @@
             );
             if (statut) filtered = filtered.filter(p => (p.statut || 'devis') === statut);
             if (client) filtered = filtered.filter(p => p.client === client);
+            if (dateDe) filtered = filtered.filter(p => (p.date || p.dateDebut || '') >= dateDe);
+            if (dateA)  filtered = filtered.filter(p => (p.date || p.dateDebut || '') <= dateA);
 
             const cols = ['Date','Client','Prestation','Référence','Nb unités','Unité','Nb CEA','MSP%','Heures estimées','Heures réelles','Écart%','Prix revient','Marge%','Prix vente','Prix/unité','Statut','Date début','Date fin','Gestes','Notes internes'];
             const rows = [cols];
@@ -11754,10 +11999,14 @@
             const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
             const statut = document.getElementById('filtreStatut')?.value || '';
             const client = document.getElementById('filtreClient')?.value || '';
+            const dateDe2 = document.getElementById('filtreDateDe')?.value || '';
+            const dateA2  = document.getElementById('filtreDateA')?.value || '';
             let filtered = [...prestationsSauvegardees].sort((a, b) => new Date(b.date) - new Date(a.date));
             if (texte) filtered = filtered.filter(p => (p.client||'').toLowerCase().includes(texte) || (p.prestation||'').toLowerCase().includes(texte) || (p.reference||'').toLowerCase().includes(texte));
             if (statut) filtered = filtered.filter(p => (p.statut || 'devis') === statut);
             if (client) filtered = filtered.filter(p => p.client === client);
+            if (dateDe2) filtered = filtered.filter(p => (p.date || p.dateDebut || '') >= dateDe2);
+            if (dateA2)  filtered = filtered.filter(p => (p.date || p.dateDebut || '') <= dateA2);
 
             const headers = ['Date','Client','Prestation','Référence','Nb unités','Unité','Nb CEA','MSP %','Heures estimées','Heures réelles','Écart %','Prix revient (CHF)','Marge %','Prix vente (CHF)','Prix/unité (CHF)','Statut','Date début','Date fin','Notes internes'];
             const rows = filtered.map(p => {
@@ -21368,6 +21617,25 @@
                     .catch(() => { /* SW optionnel : on ignore l'échec silencieusement */ });
             });
         }
+
+        // ── Indicateur online / offline ──────────────────────────────────
+        (function initOnlineIndicator() {
+            function updateOnlineUI() {
+                const el = document.getElementById('onlineIndicator');
+                const lbl = document.getElementById('onlineLabel');
+                if (!el || !lbl) return;
+                if (navigator.onLine) {
+                    el.classList.remove('offline');
+                    lbl.textContent = 'En ligne';
+                } else {
+                    el.classList.add('offline');
+                    lbl.textContent = 'Hors ligne';
+                }
+            }
+            window.addEventListener('online',  () => { updateOnlineUI(); if (typeof toast === 'function') toast('✅ Connexion rétablie', 'success'); });
+            window.addEventListener('offline', () => { updateOnlineUI(); if (typeof toast === 'function') toast('⚠️ Mode hors ligne — les données sont sauvegardées localement.', 'warning'); });
+            document.addEventListener('DOMContentLoaded', updateOnlineUI);
+        })();
 
     </script>
 
