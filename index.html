@@ -3478,9 +3478,12 @@
 
                 <!-- SECTIONS ADMIN -->
                 <div class="section admin-section" style="display:none; border-left: 4px solid #f39c12;">
-                    <h2>🔐 Groupes d'accès <span style="background:#f39c12;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
-                    <p style="font-size:0.88em;color:#7a9db1;margin-bottom:14px;">Gérez les mots de passe et onglets accessibles pour chaque groupe (CEA, ASP, MSP, ADMIN).</p>
-                    <div id="authGroupsList"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+                        <h2 style="margin:0;">🔐 Accès par rôle <span style="background:#f39c12;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                        <button class="btn btn-small btn-success" onclick="openAddGroupModal()" style="white-space:nowrap;">➕ Nouveau groupe</button>
+                    </div>
+                    <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Cochez les onglets accessibles pour chaque groupe. Les modifications sont sauvegardées instantanément. Cliquez sur 🔑 pour (re)définir le mot de passe d'un groupe.</p>
+                    <div id="rbacMatrix" style="overflow-x:auto;"></div>
                 </div>
 
                 <div class="section admin-section" style="display:none; border-left: 4px solid #a8d5e2;">
@@ -14840,18 +14843,121 @@
             setTimeout(updateTabScrollBtns, 50);
         }
 
-        function renderAuthGroups() {
-            const container = document.getElementById('authGroupsList');
+        function renderAuthGroups() { renderRbacMatrix(); }
+
+        function renderRbacMatrix() {
+            const container = document.getElementById('rbacMatrix');
             if (!container) return;
-            container.innerHTML = authGroups.map(g => {
-                const tabCount = g.tabs[0] === '*' ? 'Tous les onglets' : `${g.tabs.length} onglets`;
-                return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f5f9fc;margin-bottom:8px;border:1px solid #e0e8f0;flex-wrap:wrap;">
-                    <strong style="min-width:70px;">${g.name}</strong>
-                    <span style="font-size:0.82em;color:#7a9db1;flex:1;">${tabCount}</span>
-                    <span style="font-size:0.82em;color:#aaa;font-family:monospace;background:#f0f4f8;padding:2px 8px;border-radius:6px;">••••••</span>
-                    <button class="btn btn-small btn-secondary" onclick="openAuthGroupModal('${g.id}')">✏️ Modifier</button>
-                </div>`;
-            }).join('');
+            const groups = authGroups.filter(g => g.id !== 'admin');
+            const defaultIds = new Set(['cea','asp','msp']);
+
+            let html = `<table style="border-collapse:collapse;width:100%;min-width:500px;font-size:0.88em;">
+                <thead><tr style="background:#f0f4f8;">
+                    <th style="text-align:left;padding:8px 12px;border:1px solid #dde3ea;min-width:180px;">Onglet</th>`;
+
+            groups.forEach(g => {
+                html += `<th style="text-align:center;padding:6px 10px;border:1px solid #dde3ea;white-space:nowrap;">
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                        <span style="font-weight:700;">${g.name}</span>
+                        <div style="display:flex;gap:3px;">
+                            <button class="btn btn-small" onclick="openRbacPasswordModal('${g.id}')" title="Changer le mot de passe" style="padding:2px 6px;font-size:0.78em;">🔑</button>
+                            ${!defaultIds.has(g.id) ? `<button class="btn btn-small" onclick="deleteCustomGroup('${g.id}')" title="Supprimer" style="padding:2px 6px;font-size:0.78em;background:#e74c3c;color:#fff;border-color:#c0392b;">🗑</button>` : ''}
+                        </div>
+                    </div>
+                </th>`;
+            });
+
+            html += `<th style="text-align:center;padding:6px 10px;border:1px solid #dde3ea;background:#fff8ee;white-space:nowrap;">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                    <span style="font-weight:700;color:#f39c12;">ADMIN</span>
+                    <button class="btn btn-small" onclick="openRbacPasswordModal('admin')" title="Changer le mot de passe admin" style="padding:2px 6px;font-size:0.78em;">🔑</button>
+                </div>
+            </th>`;
+            html += `</tr></thead><tbody>`;
+
+            ALL_TABS.forEach((tab, idx) => {
+                const rowBg = idx % 2 === 0 ? '#ffffff' : '#fafcfe';
+                html += `<tr style="background:${rowBg};">
+                    <td style="padding:7px 12px;border:1px solid #dde3ea;font-weight:500;">${tab.label}${tab.adminOnly ? ' <span style="font-size:0.7em;background:#c9b3d4;color:#fff;border-radius:8px;padding:1px 6px;">admin</span>' : ''}</td>`;
+
+                groups.forEach(g => {
+                    const hasTab = g.tabs[0] === '*' || g.tabs.includes(tab.key);
+                    html += `<td style="text-align:center;padding:7px;border:1px solid #dde3ea;">
+                        <input type="checkbox" ${hasTab ? 'checked' : ''}
+                            onchange="toggleRbacCell('${g.id}','${tab.key}',this.checked)"
+                            style="width:16px;height:16px;accent-color:#27ae60;cursor:pointer;">
+                    </td>`;
+                });
+
+                html += `<td style="text-align:center;padding:7px;border:1px solid #dde3ea;background:#fff8ee;">
+                    <span style="color:#f39c12;font-size:1.1em;" title="Admin a toujours accès à tout">★</span>
+                </td></tr>`;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function toggleRbacCell(groupId, tabKey, checked) {
+            const group = authGroups.find(g => g.id === groupId);
+            if (!group) return;
+            if (group.tabs[0] === '*') group.tabs = ALL_TABS.map(t => t.key);
+            if (checked) { if (!group.tabs.includes(tabKey)) group.tabs.push(tabKey); }
+            else { group.tabs = group.tabs.filter(k => k !== tabKey); }
+            saveAuthGroups();
+        }
+
+        function openAddGroupModal() {
+            document.getElementById('newGroupNameInput').value = '';
+            document.getElementById('newGroupPasswordInput').value = '';
+            document.getElementById('newGroupChecklist').innerHTML = ALL_TABS.map(t =>
+                `<label><input type="checkbox" value="${t.key}"> ${t.label}${t.adminOnly ? ' <span style="font-size:0.7em;background:#c9b3d4;color:#fff;border-radius:8px;padding:1px 6px;">admin</span>' : ''}</label>`
+            ).join('');
+            document.getElementById('addGroupModal').classList.add('open');
+        }
+
+        function closeAddGroupModal() {
+            document.getElementById('addGroupModal')?.classList.remove('open');
+        }
+
+        function saveNewGroup() {
+            const name = document.getElementById('newGroupNameInput').value.trim();
+            const password = document.getElementById('newGroupPasswordInput').value.trim();
+            if (!name) { toast('Le nom du groupe est requis', 'warning'); return; }
+            if (!password) { toast('Le mot de passe est requis', 'warning'); return; }
+            const tabs = [...document.querySelectorAll('#newGroupChecklist input:checked')].map(cb => cb.value);
+            if (tabs.length === 0) { toast('Sélectionnez au moins un onglet', 'warning'); return; }
+            const id = 'grp_' + Date.now();
+            authGroups.push({ id, name, password, tabs });
+            saveAuthGroups();
+            const sel = document.getElementById('authGroupSelect');
+            if (sel) sel.innerHTML = authGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+            renderRbacMatrix();
+            closeAddGroupModal();
+            toast(`Groupe "${name}" créé`, 'success');
+        }
+
+        function deleteCustomGroup(id) {
+            if (['cea','asp','msp','admin'].includes(id)) { toast('Impossible de supprimer un groupe par défaut', 'warning'); return; }
+            const group = authGroups.find(g => g.id === id);
+            if (!group || !confirm(`Supprimer le groupe "${group.name}" ?`)) return;
+            authGroups = authGroups.filter(g => g.id !== id);
+            saveAuthGroups();
+            const sel = document.getElementById('authGroupSelect');
+            if (sel) sel.innerHTML = authGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+            renderRbacMatrix();
+            toast(`Groupe "${group.name}" supprimé`, 'info');
+        }
+
+        function openRbacPasswordModal(groupId) {
+            const group = authGroups.find(g => g.id === groupId);
+            if (!group) return;
+            document.getElementById('authGroupModalTitle').textContent = `Mot de passe : ${group.name}`;
+            document.getElementById('authGroupEditId').value = groupId;
+            document.getElementById('authGroupNameInput').value = group.name;
+            document.getElementById('authGroupPasswordInput').value = group.password || '';
+            document.getElementById('authGroupChecklist').innerHTML = '<p style="color:#7a9db1;font-size:0.88em;font-style:italic;margin:0;">Les accès aux onglets se gèrent dans la matrice ci-dessus.</p>';
+            document.getElementById('authGroupModal').classList.add('open');
         }
 
         function openAuthGroupModal(groupId) {
@@ -14889,16 +14995,11 @@
             const id = document.getElementById('authGroupEditId').value;
             const password = document.getElementById('authGroupPasswordInput').value.trim();
             if (!password) { toast('Le mot de passe ne peut pas être vide', 'warning'); return; }
-            const allChecked = document.getElementById('authTabsAll')?.checked;
-            const tabs = allChecked ? ['*'] :
-                [...document.querySelectorAll('#authGroupChecklist .auth-tab-cb:checked')].map(cb => cb.value);
-            if (!allChecked && tabs.length === 0) { toast('Sélectionnez au moins un onglet', 'warning'); return; }
             const idx = authGroups.findIndex(g => g.id === id);
-            if (idx >= 0) { authGroups[idx].password = password; authGroups[idx].tabs = tabs; }
+            if (idx >= 0) { authGroups[idx].password = password; }
             saveAuthGroups();
-            renderAuthGroups();
             closeAuthGroupModal();
-            toast(`Groupe ${authGroups[idx]?.name || ''} mis à jour`, 'success');
+            toast(`Mot de passe de "${authGroups[idx]?.name || id}" mis à jour`, 'success');
         }
 
         // ── Mode présentation (refonte) ───────────────────────────
@@ -22038,6 +22139,29 @@
             <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;">
                 <button class="btn btn-secondary" onclick="closeAuthGroupModal()">Annuler</button>
                 <button class="btn btn-success" onclick="saveAuthGroupModal()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal : Nouveau groupe d'accès -->
+    <div class="prof-modal-overlay" id="addGroupModal" role="dialog" aria-modal="true" aria-label="Nouveau groupe">
+        <div class="prof-modal-box">
+            <h3>➕ Nouveau groupe d'accès</h3>
+            <div style="margin-bottom:14px;">
+                <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:6px;">Nom du groupe</label>
+                <input type="text" id="newGroupNameInput" placeholder="Ex : Technicien, Commercial…" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:6px;">Mot de passe</label>
+                <input type="text" id="newGroupPasswordInput" placeholder="Mot de passe du groupe…" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;">
+            </div>
+            <div>
+                <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:8px;">Onglets accessibles</label>
+                <div class="prof-checklist" id="newGroupChecklist"></div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="closeAddGroupModal()">Annuler</button>
+                <button class="btn btn-success" onclick="saveNewGroup()">💾 Créer le groupe</button>
             </div>
         </div>
     </div>
