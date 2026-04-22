@@ -4225,6 +4225,51 @@
 
             <!-- ONGLET ACCOMPAGNEMENT (admin) -->
             <div id="accompagnement" class="tab-content">
+
+                <!-- ── Navigation sous-onglets ── -->
+                <div style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;border-bottom:2px solid #c8e6d0;padding-bottom:10px;">
+                    <button class="btn accomp-pill" data-sub="suivi"   onclick="switchAccompSub('suivi')"  style="background:#27ae60;color:#fff;border-color:#1e8449;">👤 Bénéficiaires</button>
+                    <button class="btn accomp-pill" data-sub="jalons"  onclick="switchAccompSub('jalons')">🎯 Jalons</button>
+                    <button class="btn accomp-pill" data-sub="croise"  onclick="switchAccompSub('croise')">🗺️ Vue croisée</button>
+                    <button class="btn accomp-pill" data-sub="outils"  onclick="switchAccompSub('outils')">🔬 Outils cliniques</button>
+                </div>
+
+                <!-- ── Panneau : Suivi bénéficiaires ── -->
+                <div class="accomp-sub-panel" id="accomp-suivi">
+                    <div class="section">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+                            <h2 style="margin:0;">👤 Bénéficiaires en suivi</h2>
+                            <button class="btn btn-success btn-small" onclick="openBeneficiaireModal()">➕ Nouveau bénéficiaire</button>
+                        </div>
+                        <div id="beneficiairesList"></div>
+                    </div>
+                </div>
+
+                <!-- ── Panneau : Jalons ── -->
+                <div class="accomp-sub-panel" id="accomp-jalons" style="display:none;">
+                    <div class="section">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+                            <h2 style="margin:0;">🎯 Jalons d'accompagnement</h2>
+                            <button class="btn btn-success btn-small" onclick="openJalonModal()">➕ Nouveau jalon</button>
+                        </div>
+                        <select id="jalonFilterBenef" onchange="renderJalons()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;margin-bottom:14px;">
+                            <option value="">— Tous les bénéficiaires —</option>
+                        </select>
+                        <div id="jalonsList"></div>
+                    </div>
+                </div>
+
+                <!-- ── Panneau : Vue croisée ── -->
+                <div class="accomp-sub-panel" id="accomp-croise" style="display:none;">
+                    <div class="section">
+                        <h2>🗺️ Vue croisée bénéficiaires ↔ projets</h2>
+                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:16px;">Prestations et jalons de chaque bénéficiaire en un coup d'œil.</p>
+                        <div id="vueCroiseeContent"></div>
+                    </div>
+                </div>
+
+                <!-- ── Panneau : Outils cliniques (contenu existant) ── -->
+                <div class="accomp-sub-panel" id="accomp-outils" style="display:none;">
                 <div class="info-box" style="border-left-color:#8bc98b; background:#eef8f3;">
                     <strong>Espace d'analyse socio-éducative.</strong> Croisement des exigences de production et du projet d'accompagnement individuel. Réservé aux MSP / Administrateurs.
                 </div>
@@ -4452,7 +4497,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                </div><!-- /accomp-outils -->
+            </div><!-- /accompagnement -->
 
             <!-- ONGLET HISTORIQUE (admin) -->
             <div id="historique" class="tab-content">
@@ -5395,6 +5441,8 @@
 
         let recentGestes = [];     // 10 derniers codes utilisés
         let clientsData = {};      // {nom: {tel, email, adresse, notes, tarifSpecial}}
+        let beneficiaires = [];    // profils des personnes en accompagnement
+        let jalons = [];           // jalons liés aux bénéficiaires et/ou prestations
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
         let stockMinTemplates = {};  // Stock min templates
         const THEMES = {
@@ -6018,6 +6066,8 @@
             try { if (savedRecent) recentGestes = JSON.parse(savedRecent); } catch(e) { console.error('Error loading recent gestures:', e); }
             const savedClientsData = localStorage.getItem('clientsData');
             try { if (savedClientsData) clientsData = JSON.parse(savedClientsData); } catch(e) { console.error('Error loading clients data:', e); }
+            try { const sb = localStorage.getItem('beneficiaires'); if (sb) beneficiaires = JSON.parse(sb); } catch(e) {}
+            try { const sj = localStorage.getItem('jalons');        if (sj) jalons        = JSON.parse(sj); } catch(e) {}
             const savedTheme = localStorage.getItem('themePrefs');
             try { if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme)); } catch(e) { console.error('Error loading theme preferences:', e); }
             loadConfig();
@@ -6042,6 +6092,8 @@
             localStorage.setItem('recentGestes', JSON.stringify(recentGestes));
             localStorage.setItem('clientsData', JSON.stringify(clientsData));
             localStorage.setItem('themePrefs', JSON.stringify(themePrefs));
+            localStorage.setItem('beneficiaires', JSON.stringify(beneficiaires));
+            localStorage.setItem('jalons', JSON.stringify(jalons));
             lastSaveTime = Date.now();
             updateSaveIndicator();
         }
@@ -6337,6 +6389,297 @@
             });
         }
 
+        // ════════════════════════════════════════════════════════
+        // ACCOMPAGNEMENT — Bénéficiaires & Jalons
+        // ════════════════════════════════════════════════════════
+
+        const JALON_TYPES = [
+            { id: 'progression',    label: '🌱 Progression',    color: '#27ae60' },
+            { id: 'difficulte',     label: '⚠️ Difficulté',     color: '#e67e22' },
+            { id: 'bilan',          label: '📋 Bilan',           color: '#4e9af1' },
+            { id: 'transition',     label: '🔄 Transition',     color: '#9a70b8' },
+            { id: 'reconnaissance', label: '⭐ Reconnaissance',  color: '#f39c12' },
+        ];
+        const BENEF_STATUTS = [
+            { id: 'en-cours',  label: 'En cours',  color: '#27ae60' },
+            { id: 'suspendu',  label: 'Suspendu',  color: '#e67e22' },
+            { id: 'bilan',     label: 'En bilan',  color: '#4e9af1' },
+            { id: 'sorti',     label: 'Sorti',     color: '#7a9db1' },
+        ];
+
+        function saveBeneficiairesData() {
+            localStorage.setItem('beneficiaires', JSON.stringify(beneficiaires));
+            localStorage.setItem('jalons',        JSON.stringify(jalons));
+        }
+
+        function switchAccompSub(sub) {
+            document.querySelectorAll('.accomp-pill').forEach(b => {
+                const on = b.dataset.sub === sub;
+                b.style.background  = on ? '#27ae60' : '';
+                b.style.color       = on ? '#fff'    : '';
+                b.style.borderColor = on ? '#1e8449' : '';
+            });
+            document.querySelectorAll('.accomp-sub-panel').forEach(p => p.style.display = 'none');
+            const panel = document.getElementById('accomp-' + sub);
+            if (panel) panel.style.display = '';
+            if (sub === 'suivi')  renderBeneficiaires();
+            if (sub === 'jalons') { _populateJalonBenefFilter(); renderJalons(); }
+            if (sub === 'croise') renderVueCroisee();
+        }
+
+        function renderAccompagnement() {
+            // Default to suivi panel on first open
+            const anyVisible = [...document.querySelectorAll('.accomp-sub-panel')].some(p => p.style.display !== 'none');
+            if (!anyVisible) switchAccompSub('suivi');
+            else {
+                const vis = [...document.querySelectorAll('.accomp-sub-panel')].find(p => p.style.display !== 'none');
+                if (vis) switchAccompSub(vis.id.replace('accomp-', ''));
+            }
+        }
+
+        function _populateJalonBenefFilter() {
+            const sel = document.getElementById('jalonFilterBenef');
+            if (!sel) return;
+            const prev = sel.value;
+            sel.innerHTML = '<option value="">— Tous les bénéficiaires —</option>' +
+                beneficiaires.map(b => `<option value="${b.id}" ${String(b.id) === prev ? 'selected' : ''}>${b.prenom} ${b.nom}</option>`).join('');
+        }
+
+        // ── Bénéficiaires ─────────────────────────────────────
+        function renderBeneficiaires() {
+            const c = document.getElementById('beneficiairesList');
+            if (!c) return;
+            if (!beneficiaires.length) {
+                c.innerHTML = `<div style="text-align:center;padding:40px 20px;color:#7a9db1;">
+                    <div style="font-size:3em;margin-bottom:10px;">👤</div>
+                    <p>Aucun bénéficiaire enregistré.<br>Commencez par en ajouter un.</p>
+                </div>`;
+                return;
+            }
+            c.innerHTML = beneficiaires.map(b => {
+                const st   = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
+                const nbJ  = jalons.filter(j => String(j.beneficiaireId) === String(b.id)).length;
+                const nbP  = new Set(jalons.filter(j => String(j.beneficiaireId) === String(b.id) && j.prestationId).map(j => j.prestationId)).size;
+                return `<div style="display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:12px;background:#f5f9fc;border:1px solid #e0e8f0;margin-bottom:10px;flex-wrap:wrap;">
+                    <div style="width:50px;height:50px;border-radius:50%;background:#e8f4f8;display:flex;align-items:center;justify-content:center;font-size:1.7em;flex-shrink:0;">${b.avatar || '👤'}</div>
+                    <div style="flex:1;min-width:160px;">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <strong style="font-size:1.05em;">${b.prenom} ${b.nom}</strong>
+                            <span style="font-size:0.78em;background:${st.color}22;color:${st.color};border:1px solid ${st.color}55;border-radius:20px;padding:2px 9px;">${st.label}</span>
+                        </div>
+                        ${b.objectifs ? `<p style="font-size:0.84em;color:#6b8fa3;margin:4px 0 0;font-style:italic;">${b.objectifs}</p>` : ''}
+                        <div style="display:flex;gap:14px;margin-top:8px;font-size:0.81em;color:#7a9db1;">
+                            <span>📅 ${b.dateEntree || 'N/D'}</span>
+                            <span>🎯 ${nbJ} jalon${nbJ !== 1 ? 's' : ''}</span>
+                            <span>📋 ${nbP} prestation${nbP !== 1 ? 's' : ''}</span>
+                        </div>
+                        ${b.competences?.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;">${b.competences.map(c => `<span style="font-size:0.75em;background:#e8f0f8;color:#3a6fa3;border-radius:10px;padding:2px 8px;">${c}</span>`).join('')}</div>` : ''}
+                    </div>
+                    <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
+                        <button class="btn btn-small btn-success" onclick="openJalonModal(null,${b.id})" title="Ajouter un jalon pour ce bénéficiaire">🎯 Jalon</button>
+                        <button class="btn btn-small btn-secondary" onclick="openBeneficiaireModal(${b.id})">✏️</button>
+                        <button class="btn btn-small" onclick="deleteBeneficiaire(${b.id})" style="background:#e74c3c;color:#fff;border-color:#c0392b;">🗑</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openBeneficiaireModal(id) {
+            const b = id ? beneficiaires.find(x => x.id === id) : null;
+            document.getElementById('benefModal').dataset.id = id || '';
+            document.getElementById('benefModalTitle').textContent = b ? `Modifier : ${b.prenom} ${b.nom}` : 'Nouveau bénéficiaire';
+            document.getElementById('benefPrenom').value       = b?.prenom      || '';
+            document.getElementById('benefNom').value          = b?.nom         || '';
+            document.getElementById('benefDateEntree').value   = b?.dateEntree  || new Date().toISOString().split('T')[0];
+            document.getElementById('benefStatut').value       = b?.statut      || 'en-cours';
+            document.getElementById('benefObjectifs').value    = b?.objectifs   || '';
+            document.getElementById('benefCompetences').value  = (b?.competences || []).join(', ');
+            document.getElementById('benefNotes').value        = b?.notes       || '';
+            document.getElementById('benefAvatar').value       = b?.avatar      || '👤';
+            document.getElementById('benefModal').classList.add('open');
+        }
+
+        function closeBeneficiaireModal() { document.getElementById('benefModal')?.classList.remove('open'); }
+
+        function saveBeneficiaireModal() {
+            const rawId = document.getElementById('benefModal').dataset.id;
+            const id    = rawId ? Number(rawId) : null;
+            const data  = {
+                prenom:      document.getElementById('benefPrenom').value.trim(),
+                nom:         document.getElementById('benefNom').value.trim(),
+                dateEntree:  document.getElementById('benefDateEntree').value,
+                statut:      document.getElementById('benefStatut').value,
+                objectifs:   document.getElementById('benefObjectifs').value.trim(),
+                competences: document.getElementById('benefCompetences').value.split(',').map(s => s.trim()).filter(Boolean),
+                notes:       document.getElementById('benefNotes').value.trim(),
+                avatar:      document.getElementById('benefAvatar').value.trim() || '👤',
+            };
+            if (!data.prenom) { toast('Le prénom est requis', 'warning'); return; }
+            if (id) {
+                const idx = beneficiaires.findIndex(b => b.id === id);
+                if (idx >= 0) beneficiaires[idx] = { ...beneficiaires[idx], ...data };
+            } else {
+                beneficiaires.push({ id: Date.now(), ...data });
+            }
+            saveBeneficiairesData();
+            renderBeneficiaires();
+            closeBeneficiaireModal();
+            toast(`${data.prenom} ${data.nom} ${id ? 'mis à jour' : 'ajouté'}`, 'success');
+        }
+
+        function deleteBeneficiaire(id) {
+            const b = beneficiaires.find(x => x.id === id);
+            if (!b || !confirm(`Supprimer ${b.prenom} ${b.nom} et tous ses jalons ?`)) return;
+            beneficiaires = beneficiaires.filter(x => x.id !== id);
+            jalons        = jalons.filter(j => j.beneficiaireId !== id);
+            saveBeneficiairesData();
+            renderBeneficiaires();
+            toast(`${b.prenom} ${b.nom} supprimé`, 'info');
+        }
+
+        // ── Jalons ────────────────────────────────────────────
+        function renderJalons() {
+            const c = document.getElementById('jalonsList');
+            if (!c) return;
+            const filterBenef = document.getElementById('jalonFilterBenef')?.value || '';
+            const filtered = jalons
+                .filter(j => !filterBenef || String(j.beneficiaireId) === filterBenef)
+                .sort((a, b) => (b.date || '') > (a.date || '') ? 1 : -1);
+            if (!filtered.length) {
+                c.innerHTML = `<div style="text-align:center;padding:40px 20px;color:#7a9db1;">
+                    <div style="font-size:3em;margin-bottom:10px;">🎯</div>
+                    <p>Aucun jalon${filterBenef ? ' pour ce bénéficiaire' : ''}.<br>Ajoutez-en un pour commencer à tracer le parcours.</p>
+                </div>`;
+                return;
+            }
+            c.innerHTML = filtered.map(j => {
+                const type  = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                const benef = beneficiaires.find(b => b.id === j.beneficiaireId);
+                const prest = j.prestationId ? prestationsSauvegardees.find(p => p.id == j.prestationId) : null;
+                return `<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;background:#fafcfe;border:1px solid #e8eef4;border-left:4px solid ${type.color};margin-bottom:8px;">
+                    <div style="flex:1;">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                            <span style="font-size:0.78em;background:${type.color}22;color:${type.color};border-radius:10px;padding:2px 9px;font-weight:600;">${type.label}</span>
+                            <strong>${j.titre}</strong>
+                            <span style="font-size:0.8em;color:#9aacb8;">📅 ${j.date}</span>
+                        </div>
+                        ${j.note ? `<p style="font-size:0.84em;color:#6b8fa3;margin:4px 0;">${j.note}</p>` : ''}
+                        <div style="display:flex;gap:12px;font-size:0.8em;color:#9aacb8;flex-wrap:wrap;">
+                            ${benef ? `<span>👤 ${benef.prenom} ${benef.nom}</span>` : ''}
+                            ${prest ? `<span>📋 ${prest.prestation || prest.client || 'Prestation'}</span>` : ''}
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:flex-start;flex-shrink:0;">
+                        <button class="btn btn-small btn-secondary" onclick="openJalonModal(${j.id})">✏️</button>
+                        <button class="btn btn-small" onclick="deleteJalon(${j.id})" style="background:#e74c3c;color:#fff;border-color:#c0392b;">🗑</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openJalonModal(id, forceBenefId) {
+            const j = id ? jalons.find(x => x.id === id) : null;
+            document.getElementById('jalonModal').dataset.id = id || '';
+            document.getElementById('jalonModalTitle').textContent = j ? 'Modifier le jalon' : 'Nouveau jalon';
+            document.getElementById('jalonDate').value  = j?.date  || new Date().toISOString().split('T')[0];
+            document.getElementById('jalonType').value  = j?.type  || 'progression';
+            document.getElementById('jalonTitre').value = j?.titre || '';
+            document.getElementById('jalonNote').value  = j?.note  || '';
+            // Bénéficiaires
+            const bSel = document.getElementById('jalonBenefSelect');
+            bSel.innerHTML = '<option value="">— Sélectionner —</option>' +
+                beneficiaires.map(b => `<option value="${b.id}" ${b.id === (j?.beneficiaireId || forceBenefId) ? 'selected' : ''}>${b.prenom} ${b.nom}</option>`).join('');
+            // Prestations (50 dernières)
+            const pSel = document.getElementById('jalonPrestSelect');
+            const recents = [...prestationsSauvegardees].reverse().slice(0, 60);
+            pSel.innerHTML = '<option value="">— Aucune prestation —</option>' +
+                recents.map(p => `<option value="${p.id}" ${String(p.id) === String(j?.prestationId) ? 'selected' : ''}>${p.prestation || p.client || p.reference || '—'} (${p.date || ''})</option>`).join('');
+            document.getElementById('jalonModal').classList.add('open');
+        }
+
+        function closeJalonModal() { document.getElementById('jalonModal')?.classList.remove('open'); }
+
+        function saveJalonModal() {
+            const rawId = document.getElementById('jalonModal').dataset.id;
+            const id    = rawId ? Number(rawId) : null;
+            const benId = document.getElementById('jalonBenefSelect').value;
+            const prId  = document.getElementById('jalonPrestSelect').value;
+            const data  = {
+                date:           document.getElementById('jalonDate').value,
+                type:           document.getElementById('jalonType').value,
+                titre:          document.getElementById('jalonTitre').value.trim(),
+                note:           document.getElementById('jalonNote').value.trim(),
+                beneficiaireId: benId ? Number(benId) : null,
+                prestationId:   prId  ? Number(prId)  : null,
+            };
+            if (!data.titre)          { toast('Le titre est requis', 'warning'); return; }
+            if (!data.beneficiaireId) { toast('Sélectionnez un bénéficiaire', 'warning'); return; }
+            if (id) {
+                const idx = jalons.findIndex(j => j.id === id);
+                if (idx >= 0) jalons[idx] = { ...jalons[idx], ...data };
+            } else {
+                jalons.push({ id: Date.now(), ...data });
+            }
+            saveBeneficiairesData();
+            renderJalons();
+            closeJalonModal();
+            toast('Jalon enregistré', 'success');
+        }
+
+        function deleteJalon(id) {
+            if (!confirm('Supprimer ce jalon ?')) return;
+            jalons = jalons.filter(j => j.id !== id);
+            saveBeneficiairesData();
+            renderJalons();
+            toast('Jalon supprimé', 'info');
+        }
+
+        // ── Vue croisée ────────────────────────────────────────
+        function renderVueCroisee() {
+            const c = document.getElementById('vueCroiseeContent');
+            if (!c) return;
+            if (!beneficiaires.length) {
+                c.innerHTML = `<p style="color:#7a9db1;text-align:center;padding:30px;">Aucun bénéficiaire enregistré.</p>`;
+                return;
+            }
+            c.innerHTML = beneficiaires.map(b => {
+                const myJ  = jalons.filter(j => j.beneficiaireId === b.id).sort((a, x) => x.date > a.date ? 1 : -1);
+                const pIds = [...new Set(myJ.map(j => j.prestationId).filter(Boolean))];
+                const prests = pIds.map(id => prestationsSauvegardees.find(p => p.id == id)).filter(Boolean);
+                const st   = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
+                return `<div style="border:1px solid #e0e8f0;border-radius:14px;padding:18px;margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                        <span style="font-size:1.6em;">${b.avatar || '👤'}</span>
+                        <strong style="font-size:1.05em;">${b.prenom} ${b.nom}</strong>
+                        <span style="font-size:0.78em;background:${st.color}22;color:${st.color};border:1px solid ${st.color}44;border-radius:20px;padding:2px 9px;">${st.label}</span>
+                        <span style="font-size:0.8em;color:#7a9db1;margin-left:auto;">${myJ.length} jalon${myJ.length !== 1 ? 's' : ''} · ${prests.length} prestation${prests.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    ${prests.length ? `<div style="margin-bottom:12px;">
+                        <p style="font-size:0.78em;font-weight:700;color:#6b8fa3;letter-spacing:.5px;margin-bottom:6px;">PRESTATIONS LIÉES</p>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            ${prests.map(p => `<span style="font-size:0.82em;background:#e8f4fb;color:#2980b9;border-radius:8px;padding:3px 10px;cursor:pointer;" onclick="switchTab('prestations')" title="Voir les prestations">${p.prestation || p.client}</span>`).join('')}
+                        </div>
+                    </div>` : ''}
+                    ${myJ.length ? `<div>
+                        <p style="font-size:0.78em;font-weight:700;color:#6b8fa3;letter-spacing:.5px;margin-bottom:8px;">CHRONOLOGIE DES JALONS</p>
+                        <div style="display:flex;flex-direction:column;gap:5px;">
+                            ${myJ.slice(0, 6).map(j => {
+                                const tp = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                                return `<div style="display:flex;gap:8px;align-items:baseline;font-size:0.83em;">
+                                    <span style="color:#9aacb8;white-space:nowrap;min-width:88px;">${j.date}</span>
+                                    <span style="background:${tp.color}22;color:${tp.color};border-radius:6px;padding:1px 7px;font-size:0.82em;white-space:nowrap;">${tp.label}</span>
+                                    <span>${j.titre}</span>
+                                </div>`;
+                            }).join('')}
+                            ${myJ.length > 6 ? `<span style="font-size:0.8em;color:#9aacb8;">+ ${myJ.length - 6} autre${myJ.length - 6 > 1 ? 's' : ''}</span>` : ''}
+                        </div>
+                    </div>` : `<p style="font-size:0.85em;color:#9aacb8;font-style:italic;">Aucun jalon enregistré pour ce bénéficiaire.</p>`}
+                </div>`;
+            }).join('');
+        }
+
+        // ════════════════════════════════════════════════════════
+
         function switchTab(tabName) {
             // Ignore le clic si on vient de terminer un drag d'onglet
             if (_tabDragJustEnded) return;
@@ -6369,6 +6712,7 @@
             }
             else if (tabName === 'parametrage') loadConfig();
             else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
+            else if (tabName === 'accompagnement') renderAccompagnement();
             else if (tabName === 'historique') renderHistory();
             else if (tabName === 'gantt') { loadGanttPrestSelect(); renderGantt(); }
             else if (tabName === 'formation-logistique') {
@@ -22273,6 +22617,107 @@
     </div>
 
     <!-- Modal : Nouveau groupe d'accès -->
+    <!-- Modal : Bénéficiaire -->
+    <div class="prof-modal-overlay" id="benefModal" role="dialog" aria-modal="true">
+        <div class="prof-modal-box" style="max-width:520px;">
+            <h3 id="benefModalTitle">Nouveau bénéficiaire</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div>
+                    <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Prénom *</label>
+                    <input type="text" id="benefPrenom" placeholder="Prénom" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Nom</label>
+                    <input type="text" id="benefNom" placeholder="Nom" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div>
+                    <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Date d'entrée</label>
+                    <input type="date" id="benefDateEntree" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Statut</label>
+                    <select id="benefStatut" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+                        <option value="en-cours">En cours</option>
+                        <option value="suspendu">Suspendu</option>
+                        <option value="bilan">En bilan</option>
+                        <option value="sorti">Sorti</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Objectifs d'accompagnement</label>
+                <textarea id="benefObjectifs" rows="2" placeholder="Ex : Développer l'autonomie sur le conditionnement…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;resize:vertical;box-sizing:border-box;"></textarea>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Compétences visées <span style="font-weight:400;color:#9aacb8;">(séparées par virgule)</span></label>
+                <input type="text" id="benefCompetences" placeholder="Ex : Conditionnement, Manutention, Relation client" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 80px;gap:12px;margin-bottom:14px;">
+                <div>
+                    <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Notes internes</label>
+                    <textarea id="benefNotes" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;resize:vertical;box-sizing:border-box;"></textarea>
+                </div>
+                <div>
+                    <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Avatar</label>
+                    <input type="text" id="benefAvatar" placeholder="👤" maxlength="4" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:1.4em;text-align:center;box-sizing:border-box;">
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn btn-secondary" onclick="closeBeneficiaireModal()">Annuler</button>
+                <button class="btn btn-success" onclick="saveBeneficiaireModal()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal : Jalon -->
+    <div class="prof-modal-overlay" id="jalonModal" role="dialog" aria-modal="true">
+        <div class="prof-modal-box" style="max-width:480px;">
+            <h3 id="jalonModalTitle">Nouveau jalon</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div>
+                    <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Date *</label>
+                    <input type="date" id="jalonDate" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Type *</label>
+                    <select id="jalonType" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+                        <option value="progression">🌱 Progression</option>
+                        <option value="difficulte">⚠️ Difficulté</option>
+                        <option value="bilan">📋 Bilan</option>
+                        <option value="transition">🔄 Transition</option>
+                        <option value="reconnaissance">⭐ Reconnaissance</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Titre *</label>
+                <input type="text" id="jalonTitre" placeholder="Ex : Autonomie acquise sur le poste 3" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Bénéficiaire *</label>
+                <select id="jalonBenefSelect" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+                    <option value="">— Sélectionner —</option>
+                </select>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Prestation liée <span style="font-weight:400;color:#9aacb8;">(optionnel)</span></label>
+                <select id="jalonPrestSelect" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+                    <option value="">— Aucune —</option>
+                </select>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-weight:600;font-size:0.88em;display:block;margin-bottom:4px;">Note / contexte</label>
+                <textarea id="jalonNote" rows="3" placeholder="Observations, suite à donner, contexte…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;resize:vertical;box-sizing:border-box;"></textarea>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn btn-secondary" onclick="closeJalonModal()">Annuler</button>
+                <button class="btn btn-success" onclick="saveJalonModal()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <div class="prof-modal-overlay" id="addGroupModal" role="dialog" aria-modal="true" aria-label="Nouveau groupe">
         <div class="prof-modal-box">
             <h3>➕ Nouveau groupe d'accès</h3>
