@@ -17299,7 +17299,7 @@
 
             const coutsOk = !!(config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard));
             const catalogueOk = Array.isArray(catalogueGestes) && catalogueGestes.length > 0;
-            const clientsOk = Array.isArray(clientsList) && clientsList.length > 0;
+            const clientsOk = typeof clientsData === 'object' && clientsData !== null && Object.keys(clientsData).length > 0;
             const prestOk = Array.isArray(prestationsSauvegardees) && prestationsSauvegardees.length > 0;
             const exportOk = !!localStorage.getItem('lastExportDate');
 
