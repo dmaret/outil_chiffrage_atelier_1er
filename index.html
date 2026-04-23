@@ -7031,10 +7031,9 @@
 
                 // Drag via pointerdown + setPointerCapture (fiable, fonctionne partout)
                 const handle = el.querySelector('.pb-drag-handle');
-                if (handle) handle.addEventListener('pointerdown', e => {
-                    if (e.button !== 0 && e.pointerType === 'mouse') return;
+                if (handle) handle.addEventListener('mousedown', e => {
+                    if (e.button !== 0) return;
                     e.preventDefault();
-                    handle.setPointerCapture(e.pointerId);
                     const br = el.getBoundingClientRect();
                     const ghost = el.cloneNode(true);
                     ghost.style.cssText = `position:fixed;top:${br.top}px;left:${br.left}px;width:${br.width}px;opacity:0.85;pointer-events:none;z-index:99999;transform:rotate(2deg) scale(1.05);box-shadow:0 16px 48px rgba(0,0,0,0.7);`;
@@ -7055,9 +7054,8 @@
                         if (overTarget) overTarget.classList.add('drag-over');
                     };
                     const onUp = () => {
-                        handle.removeEventListener('pointermove', onMove);
-                        handle.removeEventListener('pointerup', onUp);
-                        handle.removeEventListener('pointercancel', onUp);
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onUp);
                         ghost.remove();
                         document.querySelectorAll('.pb-pedal').forEach(x => { x.classList.remove('drag-over'); x.classList.remove('dragging'); });
                         if (overTarget?.isConnected && overTarget.dataset.id !== String(p.id)) {
@@ -7070,9 +7068,8 @@
                         }
                         pbRender();
                     };
-                    handle.addEventListener('pointermove', onMove);
-                    handle.addEventListener('pointerup', onUp);
-                    handle.addEventListener('pointercancel', onUp);
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
                 });
 
             }); // end pbPedals.forEach
