@@ -1073,8 +1073,8 @@
         #pb-zoom-label { min-width:38px; text-align:center; font-weight:700; color:#7ac4ff; font-size:0.85em; }
         #pb-grid-wrap { display:flex; align-items:center; justify-content:center; padding:24px 20px; flex:1; overflow:auto; }
         .pb-endpoint-fixed { position:relative; z-index:10; flex-shrink:0; }
-        #pb-grid-center { display:flex; flex-direction:column; gap:8px; transform-origin:center center; transition:transform 0.18s; }
-        #pb-serie-row-inner { display:flex; align-items:center; gap:16px; }
+        #pb-grid-center { display:flex; flex-direction:row; align-items:center; gap:16px; transform-origin:center center; transition:transform 0.18s; }
+        #pb-grid-col { display:flex; flex-direction:column; gap:8px; }
         /* Parallel row (top of grid) */
         #pb-parallel-row { display:flex; gap:6px; padding:8px 10px 10px; background:rgba(240,192,64,0.03); border:1px solid #2a2a12; border-radius:10px; min-height:52px; align-items:flex-end; flex-wrap:nowrap; }
         .pb-parallel-drop { width:130px; min-height:52px; border:2px dashed #f0c04033; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#f0c04044; font-size:1.6em; flex-shrink:0; transition:all 0.15s; cursor:default; }
@@ -4355,14 +4355,14 @@
                             <!-- ENTRÉE [grille] SORTIE -->
                             <div id="pb-grid-wrap">
                                 <div id="pb-grid-center">
-                                    <!-- Ligne parallèle (6 emplacements) -->
-                                    <div id="pb-parallel-row"></div>
-                                    <!-- Grille série 6×6 + endpoints dans même conteneur scalé -->
-                                    <div id="pb-serie-row-inner">
-                                        <div id="pb-endpoint-ampli" class="pb-endpoint-fixed"></div>
+                                    <div id="pb-endpoint-ampli" class="pb-endpoint-fixed"></div>
+                                    <div id="pb-grid-col">
+                                        <!-- Ligne parallèle (6 emplacements) -->
+                                        <div id="pb-parallel-row"></div>
+                                        <!-- Grille série 6×6 (36 emplacements) -->
                                         <div id="pb-serie-grid"></div>
-                                        <div id="pb-endpoint-baffle" class="pb-endpoint-fixed"></div>
                                     </div>
+                                    <div id="pb-endpoint-baffle" class="pb-endpoint-fixed"></div>
                                 </div>
                             </div>
                         </div>
