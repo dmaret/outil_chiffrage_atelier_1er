@@ -7065,7 +7065,7 @@
                             const ti = pbPedals.findIndex(x => String(x.id) === overTarget.dataset.id);
                             if (fi >= 0 && ti >= 0) {
                                 const [moved] = pbPedals.splice(fi, 1);
-                                pbPedals.splice(fi < ti ? ti - 1 : ti, 0, moved);
+                                pbPedals.splice(ti, 0, moved);
                             }
                         }
                         pbRender();
