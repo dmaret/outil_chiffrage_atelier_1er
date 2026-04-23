@@ -7025,23 +7025,41 @@
             const scrollTop  = board.scrollTop;
 
             let paths = '', shadows = '';
-            for (let i = 0; i < pbPedals.length - 1; i++) {
-                const from = document.querySelector(`.pb-pedal[data-id="${pbPedals[i].id}"] .pb-jack-out`);
-                const to   = document.querySelector(`.pb-pedal[data-id="${pbPedals[i+1].id}"] .pb-jack-in`);
-                if (!from || !to) continue;
-                const fr = from.getBoundingClientRect();
-                const tr = to.getBoundingClientRect();
-                const x1 = fr.left + fr.width/2 - br.left + scrollLeft;
-                const y1 = fr.top  + fr.height/2 - br.top  + scrollTop;
-                const x2 = tr.left + tr.width/2 - br.left + scrollLeft;
-                const y2 = tr.top  + tr.height/2 - br.top  + scrollTop;
-                const sag = 30 + Math.abs(x2-x1) * 0.12;
-                const col = PB_CABLE_COLORS[i % PB_CABLE_COLORS.length];
-                paths += `<path d="M${x1},${y1} C${x1+30},${y1+sag} ${x2-30},${y2+sag} ${x2},${y2}" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.85"/>`;
-                paths += `<circle cx="${x1}" cy="${y1}" r="5.5" fill="${col}" opacity="0.9"/>`;
-                paths += `<circle cx="${x2}" cy="${y2}" r="5.5" fill="${col}" opacity="0.9"/>`;
-                shadows += `<path d="M${x1},${y1} C${x1+30},${y1+sag+4} ${x2-30},${y2+sag+4} ${x2},${y2}" stroke="rgba(0,0,0,0.3)" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+
+            // Helper: get jack center coords relative to board scroll area
+            const jackXY = (pedalId, side) => {
+                const j = document.querySelector(`.pb-pedal[data-id="${pedalId}"] .pb-jack-${side}`);
+                if (!j) return null;
+                const r = j.getBoundingClientRect();
+                return { x: r.left + r.width/2 - br.left + scrollLeft,
+                         y: r.top  + r.height/2 - br.top  + scrollTop };
+            };
+
+            const addCable = (p1, p2, col, arcDir, w=5, op=0.85) => {
+                if (!p1 || !p2) return;
+                const sag = (30 + Math.abs(p2.x - p1.x) * 0.14) * arcDir;
+                paths   += `<path d="M${p1.x},${p1.y} C${p1.x+30},${p1.y+sag} ${p2.x-30},${p2.y+sag} ${p2.x},${p2.y}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="${op}"/>`;
+                paths   += `<circle cx="${p1.x}" cy="${p1.y}" r="5" fill="${col}" opacity="${op}"/>`;
+                paths   += `<circle cx="${p2.x}" cy="${p2.y}" r="5" fill="${col}" opacity="${op}"/>`;
+                shadows += `<path d="M${p1.x},${p1.y} C${p1.x+30},${p1.y+sag+4} ${p2.x-30},${p2.y+sag+4} ${p2.x},${p2.y}" stroke="rgba(0,0,0,0.28)" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+            };
+
+            // ── Série chain (ampli + serie pedals + baffle) ─────────
+            const serieChain = pbPedals.filter(p => p.type === 'ampli' || p.type === 'baffle' || !p.parallel);
+            let colIdx = 0;
+            for (let i = 0; i < serieChain.length - 1; i++) {
+                addCable(jackXY(serieChain[i].id, 'out'), jackXY(serieChain[i+1].id, 'in'),
+                         PB_CABLE_COLORS[colIdx++ % PB_CABLE_COLORS.length], +1);
             }
+
+            // ── Parallel branches: ENTRÉE → pedal → SORTIE ──────────
+            const ampliId  = pbPedals.find(p => p.type === 'ampli')?.id;
+            const baffleId = pbPedals.find(p => p.type === 'baffle')?.id;
+            pbPedals.filter(p => p.parallel).forEach((p, idx) => {
+                const arcUp = -(1 + idx * 0.4); // arcs above the chain, stagger if multiple
+                addCable(jackXY(ampliId, 'out'), jackXY(p.id, 'in'),  '#f0c040', arcUp, 3.5, 0.7);
+                addCable(jackXY(p.id, 'out'),    jackXY(baffleId, 'in'), '#f0c040', arcUp, 3.5, 0.7);
+            });
 
             // Set SVG size to match board scroll area
             const chain = document.getElementById('pb-chain');
