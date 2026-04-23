@@ -1079,18 +1079,20 @@
         .pb-jack-in  { left:-8px; }
         .pb-jack-out { right:-8px; }
         /* Pedals */
-        .pb-pedal { position:relative; z-index:10; flex-shrink:0; margin:0 8px; }
-        .pb-pedal.dragging { opacity:0.35; }
-        .pb-pedal.drag-over .pb-pedal-body { outline:2px dashed #4e9af1; }
-        .pb-pedal-body { width:120px; border-radius:8px 8px 12px 12px; padding:10px 8px 12px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.12); position:relative; cursor:grab; user-select:none; }
-        .pb-pedal-body:active { cursor:grabbing; }
+        .pb-pedal { position:relative; z-index:10; flex-shrink:0; margin:0 8px; display:flex; flex-direction:column; align-items:center; }
+        .pb-pedal.dragging { opacity:0.3; }
+        .pb-pedal.drag-over { filter:brightness(1.4); outline:2px dashed #4e9af1; border-radius:12px; }
+        .pb-drag-handle { width:120px; text-align:center; color:#445; font-size:1.15em; cursor:grab; padding:3px 0 2px; line-height:1; user-select:none; letter-spacing:2px; transition:color 0.15s; border-radius:6px 6px 0 0; }
+        .pb-drag-handle:hover { color:#8ab; background:rgba(255,255,255,0.06); }
+        .pb-drag-handle:active { cursor:grabbing; }
+        .pb-pedal-body { width:120px; border-radius:8px 8px 0 0; padding:10px 8px 8px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.12); position:relative; user-select:none; }
         .pb-pedal-parallel .pb-pedal-body { border-style:dashed !important; opacity:0.82; }
         .pb-pedal-icon { display:flex; align-items:center; justify-content:center; }
         .pb-pedal-icon svg { width:100%; height:100%; display:block; filter:drop-shadow(0 0 4px currentColor); }
         .pb-pedal-led { width:8px; height:8px; border-radius:50%; margin:0 auto 6px; box-shadow:0 0 6px currentColor; }
-        .pb-parallel-btn { position:absolute; top:4px; left:4px; background:rgba(0,0,0,0.4); border:none; border-radius:4px; width:18px; height:18px; font-size:0.65em; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0.55; color:#aaa; }
-        .pb-parallel-btn:hover { opacity:1; }
-        .pb-parallel-btn.active { color:#f0c040; opacity:0.9; }
+        .pb-parallel-btn { width:120px; background:rgba(0,0,0,0.45); border:none; border-radius:0 0 10px 10px; padding:5px 0; font-size:0.63em; cursor:pointer; color:#778; display:block; border-top:1px solid rgba(255,255,255,0.07); transition:background 0.15s,color 0.15s; }
+        .pb-parallel-btn:hover { background:rgba(255,255,255,0.1); color:#ccd; }
+        .pb-parallel-btn.active { color:#f0c040; background:rgba(240,192,64,0.15); }
         #pb-recap { background:#080c14; border-top:1px solid #1a2a40; padding:0; max-height:200px; overflow-y:auto; flex-shrink:0; }
         #pb-recap table { width:100%; border-collapse:collapse; font-size:0.78em; }
         #pb-recap td, #pb-recap th { padding:4px 8px; border-bottom:1px solid #141e2e; }
@@ -4305,8 +4307,9 @@
                         <div id="pb-header">
                             <input id="pb-client" placeholder="Client…" style="flex:1;min-width:120px;" oninput="pbCalcTotal()">
                             <input id="pb-title"  placeholder="Intitulé de la prestation…" style="flex:2;min-width:180px;">
-                            <input id="pb-marge"  type="number" placeholder="Marge %" style="width:75px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
-                            <input id="pb-nbpieces" type="number" placeholder="Pièces" title="Nombre de pièces" style="width:75px;" value="1" min="1" oninput="pbCalcTotal()">
+                            <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">marge %</span>
+                            <input id="pb-marge"  type="number" placeholder="Marge %" style="width:60px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
+                            <input id="pb-nbpieces" type="number" placeholder="Pièces" title="Nombre de pièces" style="width:60px;" value="1" min="1" oninput="pbCalcTotal()">
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">pcs</span>
                             <button class="btn btn-small" onclick="pbToggleRecap()" title="Récap live" style="background:#1c2a40;color:#7ab0e0;border:1px solid #2a4a70;">📊</button>
                             <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver</button>
@@ -6557,6 +6560,54 @@
         // ════════════════════════════════════════════════════════
 
         let pbPedals = [];  // { id, type, label, value, unit, coutUnit, color, ledColor }
+        let _pbDrag = null;
+
+        function pbStartDrag(e, id) {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const el = Array.from(document.querySelectorAll('.pb-pedal')).find(x => x.dataset.id === String(id));
+            if (!el) return;
+            const br = el.getBoundingClientRect();
+            const ghost = el.cloneNode(true);
+            ghost.style.cssText = `position:fixed;top:${br.top}px;left:${br.left}px;width:${br.width}px;opacity:0.85;pointer-events:none;z-index:99999;transform:rotate(2deg) scale(1.05);box-shadow:0 16px 48px rgba(0,0,0,0.7);`;
+            document.body.appendChild(ghost);
+            el.classList.add('dragging');
+            _pbDrag = { id: String(id), ghost, el, gx: br.left, gy: br.top, mx: e.clientX, my: e.clientY };
+            document.addEventListener('mousemove', _pbDragMove);
+            document.addEventListener('mouseup', _pbDragEnd);
+        }
+        function _pbDragMove(e) {
+            if (!_pbDrag) return;
+            _pbDrag.gx += e.clientX - _pbDrag.mx;
+            _pbDrag.gy += e.clientY - _pbDrag.my;
+            _pbDrag.mx = e.clientX; _pbDrag.my = e.clientY;
+            _pbDrag.ghost.style.left = _pbDrag.gx + 'px';
+            _pbDrag.ghost.style.top  = _pbDrag.gy + 'px';
+            document.querySelectorAll('.pb-pedal').forEach(p => p.classList.remove('drag-over'));
+            _pbDrag.ghost.style.visibility = 'hidden';
+            const under = document.elementFromPoint(e.clientX, e.clientY);
+            _pbDrag.ghost.style.visibility = '';
+            const target = under?.closest('.pb-pedal');
+            if (target && target.dataset.id !== _pbDrag.id) target.classList.add('drag-over');
+        }
+        function _pbDragEnd(e) {
+            if (!_pbDrag) return;
+            _pbDrag.ghost.style.visibility = 'hidden';
+            const under = document.elementFromPoint(e.clientX, e.clientY);
+            _pbDrag.ghost.style.visibility = '';
+            const target = under?.closest('.pb-pedal');
+            _pbDrag.ghost.remove();
+            document.querySelectorAll('.pb-pedal').forEach(p => { p.classList.remove('drag-over'); p.classList.remove('dragging'); });
+            if (target && target.dataset.id !== _pbDrag.id) {
+                const fromIdx = pbPedals.findIndex(x => String(x.id) === _pbDrag.id);
+                const toIdx   = pbPedals.findIndex(x => String(x.id) === target.dataset.id);
+                if (fromIdx >= 0 && toIdx >= 0) { pbPedals.splice(toIdx, 0, pbPedals.splice(fromIdx, 1)[0]); pbRender(); }
+            }
+            _pbDrag = null;
+            document.removeEventListener('mousemove', _pbDragMove);
+            document.removeEventListener('mouseup', _pbDragEnd);
+        }
         const PB_CABLE_COLORS = ['#e74c3c','#f0c040','#27ae60','#4e9af1','#e67e22','#9b59b6','#1abc9c','#e84393'];
         const PB_PEDAL_STYLES = {
             geste:       { bg:'#1a2a4a', border:'#2a4a80', led:'#4e9af1', foot:'#2a3a6a' },
@@ -6862,12 +6913,12 @@
             pbPedals.forEach(p => {
                 const el = document.createElement('div');
                 el.dataset.id = String(p.id);
-                el.draggable = true;
 
                 if (p.type === 'ampli') {
                     el.className = 'pb-pedal pb-endpoint';
                     el.innerHTML = `
-                        <div class="pb-ampli-body" style="cursor:grab;" title="Glisser pour repositionner">
+                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
+                        <div class="pb-ampli-body" title="Glisser la poignée pour repositionner">
                             <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
                             <div class="pb-endpoint-icon">🎸</div>
                             <div class="pb-endpoint-title">${document.getElementById('pb-title')?.value || 'PROJET'}</div>
@@ -6877,8 +6928,9 @@
                 } else if (p.type === 'baffle') {
                     el.className = 'pb-pedal pb-endpoint';
                     el.innerHTML = `
+                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
                         <div class="pb-jack pb-jack-in"></div>
-                        <div class="pb-baffle-body" style="cursor:grab;" title="Glisser pour repositionner">
+                        <div class="pb-baffle-body" title="Glisser la poignée pour repositionner">
                             <div class="pb-endpoint-label" style="color:#888;">SORTIE</div>
                             <div class="pb-endpoint-icon">📢</div>
                             <div class="pb-endpoint-title">TOTAL</div>
@@ -6896,12 +6948,11 @@
                     const sliderStep = p.type === 'consommable' ? 0.5 : 1;
                     const sliderInfo = p.type === 'geste'
                         ? `<div style="font-size:0.55em;color:#6a8aaa;margin-bottom:2px;">⏱ ${p.tempsUnit||1}min/fois</div>` : '';
-                    const parallelIcon = p.parallel ? '🔀' : '✅';
-                    const parallelTip  = p.parallel ? 'Inclure dans chiffrage' : 'Mettre en parallèle';
+                    const parallelLabel = p.parallel ? '⇌ Parallèle (info)' : '▶ Série (chiffré)';
                     el.innerHTML = `
-                        <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;" title="Glisser pour réordonner">
+                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
+                        <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;">
                             <button class="pb-pedal-del" onclick="pbRemovePedal('${p.id}')" title="Retirer">✕</button>
-                            <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel('${p.id}')" title="${parallelTip}">${parallelIcon}</button>
                             <div style="background:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
                             ${p.desc ? `<div style="font-size:0.56em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
                             <div class="pb-pedal-name">${p.label}</div>
@@ -6913,30 +6964,11 @@
                             </div>
                             <div class="pb-pedal-val" id="pbval-${p.id}" style="color:#aab;font-size:0.7em;">${_pbFormatVal(p)}</div>
                         </div>
+                        <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel('${p.id}')">${parallelLabel}</button>
                         <div class="pb-jack pb-jack-in"></div>
                         <div class="pb-jack pb-jack-out"></div>`;
                 }
 
-                // Drag-and-drop (string IDs for compatibility with ampli/baffle)
-                el.addEventListener('dragstart', e => {
-                    e.dataTransfer.setData('text/plain', String(p.id));
-                    e.dataTransfer.effectAllowed = 'move';
-                    setTimeout(() => el.classList.add('dragging'), 0);
-                });
-                el.addEventListener('dragend', () => el.classList.remove('dragging'));
-                el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
-                el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-                el.addEventListener('drop', e => {
-                    e.preventDefault();
-                    el.classList.remove('drag-over');
-                    const fromId = e.dataTransfer.getData('text/plain');
-                    if (fromId === String(p.id)) return;
-                    const fromIdx = pbPedals.findIndex(x => String(x.id) === fromId);
-                    const toIdx   = pbPedals.findIndex(x => String(x.id) === String(p.id));
-                    if (fromIdx < 0 || toIdx < 0) return;
-                    pbPedals.splice(toIdx, 0, pbPedals.splice(fromIdx, 1)[0]);
-                    pbRender();
-                });
                 c.appendChild(el);
             });
 
