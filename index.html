@@ -1101,9 +1101,6 @@
         .pb-step-btn:hover { background:rgba(255,255,255,0.18); }
         .pb-step-btn:active { background:rgba(255,255,255,0.28); transform:scale(0.92); }
         .pb-step-val { font-size:0.65em; color:#c8d8e8; min-width:52px; text-align:center; line-height:1.25; }
-        /* Stats bar */
-        #pb-stats-bar { display:flex; align-items:center; gap:8px; padding:5px 14px; background:#06090f; border-bottom:1px solid #0f1a28; font-size:0.76em; color:#5a7090; flex-wrap:wrap; flex-shrink:0; }
-        #pb-stats-bar strong { color:#b0c8e0; margin-left:3px; }
         #pb-recap { background:#080c14; border-top:1px solid #1a2a40; padding:0; max-height:200px; overflow-y:auto; flex-shrink:0; }
         #pb-recap table { width:100%; border-collapse:collapse; font-size:0.78em; }
         #pb-recap td, #pb-recap th { padding:4px 8px; border-bottom:1px solid #141e2e; }
@@ -4324,15 +4321,6 @@
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">pcs</span>
                             <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver</button>
                         </div>
-                        <div id="pb-stats-bar">
-                            <span>⏱</span><strong id="pb-recap-temps">—</strong>
-                            <span style="opacity:0.3;">|</span>
-                            <span>Prix revient</span><strong id="pb-recap-cout">—</strong>
-                            <span style="opacity:0.3;">|</span>
-                            <span>Prix vente</span><strong id="pb-recap-vente" style="color:#4ed880;">—</strong>
-                            <span style="opacity:0.3;">|</span>
-                            <span>Marge</span><strong id="pb-recap-marge">—</strong>
-                        </div>
                         <div id="pb-board">
                             <svg id="pb-cable-svg"></svg>
                             <div id="pb-chain">
@@ -4343,19 +4331,7 @@
                 </div>
             </div>
 
-            <!-- Popup Récap live flottant -->
-            <div id="pb-recap-popup" style="display:none;position:fixed;top:120px;right:30px;z-index:9999;background:#fff;border-radius:12px;box-shadow:0 4px 28px rgba(0,0,0,0.18);width:230px;font-size:0.88em;user-select:none;">
-                <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:12px 12px 0 0;background:#f6f9fc;">
-                    <span style="font-weight:700;color:#2d3e50;font-size:0.95em;">Récap live</span>
-                    <button onclick="document.getElementById('pb-recap-popup').style.display='none'" style="background:none;border:none;color:#9aabb8;font-size:1.2em;cursor:pointer;line-height:1;padding:0 2px;">×</button>
-                </div>
-                <div style="padding:10px 14px 14px;">
-                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Temps :</span><span id="pb-recap-temps" style="font-weight:600;color:#2d3e50;">—</span></div>
-                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix revient :</span><span id="pb-recap-cout" style="font-weight:600;color:#2d3e50;">—</span></div>
-                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix vente :</span><span id="pb-recap-vente" style="font-weight:700;color:#27ae60;">—</span></div>
-                    <div style="display:flex;justify-content:space-between;padding:5px 0;"><span style="color:#7a8e9a;">Marge</span><span id="pb-recap-marge" style="font-weight:600;color:#2d3e50;">—</span></div>
-                </div>
-            </div>
+            <!-- Popup Récap (déplacé dans <body> par JS pour éviter le z-index/transform du tab) -->
 
             <!-- Modal nouveau geste personnalisé -->
             <div id="pb-newgeste-modal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;">
@@ -6716,6 +6692,25 @@
         };
 
         function pbInit() {
+            // Inject recap popup into <body> once (escapes CSS transform of tab-content)
+            if (!document.getElementById('pb-recap-popup')) {
+                const pop = document.createElement('div');
+                pop.id = 'pb-recap-popup';
+                pop.style.cssText = 'display:block;position:fixed;bottom:20px;right:20px;z-index:9999;background:#fff;border-radius:12px;box-shadow:0 4px 32px rgba(0,0,0,0.22);width:230px;font-size:0.88em;user-select:none;';
+                pop.innerHTML = `
+                    <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:12px 12px 0 0;background:#f6f9fc;">
+                        <span style="font-weight:700;color:#2d3e50;font-size:0.95em;">📊 Récap live</span>
+                    </div>
+                    <div style="padding:10px 14px 14px;">
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Temps :</span><span id="pb-recap-temps" style="font-weight:600;color:#2d3e50;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix revient :</span><span id="pb-recap-cout" style="font-weight:600;color:#2d3e50;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix vente :</span><span id="pb-recap-vente" style="font-weight:700;color:#27ae60;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;"><span style="color:#7a8e9a;">Marge :</span><span id="pb-recap-marge" style="font-weight:600;color:#2d3e50;">—</span></div>
+                    </div>`;
+                document.body.appendChild(pop);
+                pbMakeDraggable(pop, document.getElementById('pb-recap-popup-hdr'));
+            }
+
             // Seed ampli and baffle as first/last elements of the chain (if not already)
             if (!pbPedals.some(p => p.id === '__ampli__'))
                 pbPedals.unshift({ id:'__ampli__', type:'ampli', label:'PROJET' });
@@ -6871,13 +6866,10 @@
         }
 
         function _pbFormatVal(p) {
-            if (p.type === 'geste') {
-                const total = p.value * (p.tempsUnit || 1);
-                return p.value <= 1 ? `${p.tempsUnit||1} min` : `${p.value} × ${p.tempsUnit||1}min = ${total}min`;
-            }
+            if (p.type === 'geste')       return p.value <= 1 ? '1 ×' : `${p.value} ×`;
             if (p.type === 'msp') {
                 const h = Math.floor(p.value/60), m = p.value % 60;
-                return h > 0 ? `${h}h${m ? m+'m' : ''}` : `${m} min`;
+                return h > 0 ? `${h}h${m ? m+'min' : ''}` : `${m} min`;
             }
             if (p.type === 'consommable') return `${p.value} pcs`;
             return '';
@@ -6970,27 +6962,31 @@
                     const svgIcon = p.type === 'geste' ? (PB_GESTE_ICONS[p.categorie] || PB_GESTE_ICONS['default'])
                                   : p.type === 'msp'   ? SVG_MSP
                                   : p.type === 'consommable' ? SVG_CONSO : SVG_NOTE;
-                    const stepSize   = p.type === 'msp' ? 15 : 1;
-                    const stepMin    = p.type === 'geste' ? 1 : 0;
-                    const stepMax    = p.type === 'geste' ? 99 : p.type === 'msp' ? 480 : 999;
-                    const tempsInfo  = p.type === 'geste' ? `<div style="font-size:0.52em;color:#5a7a9a;margin-bottom:3px;">⏱ ${p.tempsUnit||1} min/fois</div>` : '';
+                    const isGeste = p.type === 'geste';
+                    const stepSize = p.type === 'msp' ? 15 : 1;
+                    const stepMin  = isGeste ? 1 : 0;
+                    const stepMax  = isGeste ? 99 : p.type === 'msp' ? 480 : 999;
                     const parallelLabel = p.parallel ? '⇌ PARALLÈLE' : '▶ SÉRIE';
-                    const showStepper = p.type !== 'note';
+                    const showStepper   = p.type !== 'note';
+                    const totalMin = isGeste ? p.value * (p.tempsUnit||1) : 0;
                     el.innerHTML = `
                         <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
                         <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;position:relative;">
                             <button class="pb-pedal-del" onclick="pbRemovePedal('${p.id}')" title="Retirer">✕</button>
                             <div style="background:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
-                            ${p.desc ? `<div style="font-size:0.52em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
                             <div class="pb-pedal-name">${p.label}</div>
-                            <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:4px auto 2px;width:56px;height:42px;">${svgIcon}</div>
-                            ${tempsInfo}
+                            ${isGeste ? `<div style="font-size:0.7em;color:${p.led};font-weight:700;margin-bottom:2px;">${p.tempsUnit||1} min</div>` : ''}
+                            ${p.desc && !isGeste ? `<div style="font-size:0.52em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
+                            <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:3px auto 2px;width:52px;height:38px;">${svgIcon}</div>
                             ${showStepper ? `
+                            <div style="font-size:0.55em;color:#6a8aaa;margin-bottom:2px;text-align:center;">${isGeste ? 'nb de fois' : p.type === 'msp' ? 'durée' : 'qté'}</div>
                             <div class="pb-stepper">
                                 <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${-stepSize},${stepMin},${stepMax})">−</button>
                                 <div class="pb-step-val" id="pbval-${p.id}">${_pbFormatVal(p)}</div>
                                 <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${stepSize},${stepMin},${stepMax})">+</button>
-                            </div>` : `<div class="pb-step-val" id="pbval-${p.id}" style="margin:4px 0;">${_pbFormatVal(p)}</div>`}
+                            </div>
+                            ${isGeste && p.value > 1 ? `<div style="font-size:0.58em;color:#8a9ab0;text-align:center;margin-top:2px;">= ${totalMin} min</div>` : ''}
+                            ` : `<div style="font-size:0.65em;color:#8a9ab0;margin:4px 0;" id="pbval-${p.id}"></div>`}
                         </div>
                         <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel('${p.id}')">${parallelLabel}</button>
                         <div class="pb-jack pb-jack-in"></div>
