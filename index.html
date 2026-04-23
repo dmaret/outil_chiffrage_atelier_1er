@@ -1058,7 +1058,7 @@
         #pb-palette h4:first-child { margin-top:0; }
         .pb-palette-btn { display:block; width:100%; text-align:left; padding:7px 10px; margin-bottom:4px; border-radius:6px; border:1px solid #2a2a40; background:#1c1c2e; color:#c8cdd8; cursor:pointer; font-size:0.82em; transition:background 0.15s; white-space:normal; overflow:hidden; line-height:1.35; }
         .pb-palette-btn:hover { background:#28283e; border-color:#4a4a70; }
-        #pb-main { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#0d0d18; }
+        #pb-main { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#0d0d18; min-height:0; }
         #pb-header { display:flex; gap:8px; padding:10px 14px; background:#0d0d18; border-bottom:1px solid #1e1e38; align-items:center; flex-wrap:wrap; }
         #pb-header input { background:#1c1c2e; border:1px solid #3a3a60; border-radius:8px; color:#e8ecf0; padding:7px 12px; font-size:0.88em; }
         #pb-board { flex:1; position:relative; overflow:auto; margin:12px; border-radius:10px; border:3px solid #3a2a1a; background:
@@ -1090,9 +1090,20 @@
         .pb-pedal-icon { display:flex; align-items:center; justify-content:center; }
         .pb-pedal-icon svg { width:100%; height:100%; display:block; filter:drop-shadow(0 0 4px currentColor); }
         .pb-pedal-led { width:8px; height:8px; border-radius:50%; margin:0 auto 6px; box-shadow:0 0 6px currentColor; }
-        .pb-parallel-btn { width:120px; background:rgba(0,0,0,0.45); border:none; border-radius:0 0 10px 10px; padding:5px 0; font-size:0.63em; cursor:pointer; color:#778; display:block; border-top:1px solid rgba(255,255,255,0.07); transition:background 0.15s,color 0.15s; }
-        .pb-parallel-btn:hover { background:rgba(255,255,255,0.1); color:#ccd; }
-        .pb-parallel-btn.active { color:#f0c040; background:rgba(240,192,64,0.15); }
+        .pb-parallel-btn { width:120px; background:#0f1a28; border:none; border-radius:0 0 10px 10px; padding:6px 0; font-size:0.68em; cursor:pointer; color:#556; display:block; border-top:1px solid rgba(255,255,255,0.05); transition:all 0.18s; letter-spacing:0.3px; }
+        .pb-parallel-btn:hover { background:#1a2a40; color:#aab; }
+        .pb-parallel-btn.active { color:#f0c040; background:#2a2000; border-top:1px solid #4a3800; font-weight:700; }
+        .pb-pedal-parallel .pb-pedal-body { opacity:0.75; }
+        .pb-pedal-parallel .pb-pedal-body::after { content:'⇌'; position:absolute; top:4px; left:50%; transform:translateX(-50%); font-size:1.4em; color:#f0c040; text-shadow:0 0 8px #f0c040; pointer-events:none; }
+        /* Stepper +/- */
+        .pb-stepper { display:flex; align-items:center; gap:4px; justify-content:center; margin:5px 0 2px; }
+        .pb-step-btn { width:24px; height:24px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.08); color:#ccd; cursor:pointer; font-size:1em; line-height:1; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.12s; }
+        .pb-step-btn:hover { background:rgba(255,255,255,0.18); }
+        .pb-step-btn:active { background:rgba(255,255,255,0.28); transform:scale(0.92); }
+        .pb-step-val { font-size:0.65em; color:#c8d8e8; min-width:52px; text-align:center; line-height:1.25; }
+        /* Stats bar */
+        #pb-stats-bar { display:flex; align-items:center; gap:8px; padding:5px 14px; background:#06090f; border-bottom:1px solid #0f1a28; font-size:0.76em; color:#5a7090; flex-wrap:wrap; flex-shrink:0; }
+        #pb-stats-bar strong { color:#b0c8e0; margin-left:3px; }
         #pb-recap { background:#080c14; border-top:1px solid #1a2a40; padding:0; max-height:200px; overflow-y:auto; flex-shrink:0; }
         #pb-recap table { width:100%; border-collapse:collapse; font-size:0.78em; }
         #pb-recap td, #pb-recap th { padding:4px 8px; border-bottom:1px solid #141e2e; }
@@ -4308,11 +4319,19 @@
                             <input id="pb-client" placeholder="Client…" style="flex:1;min-width:120px;" oninput="pbCalcTotal()">
                             <input id="pb-title"  placeholder="Intitulé de la prestation…" style="flex:2;min-width:180px;">
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">marge %</span>
-                            <input id="pb-marge"  type="number" placeholder="Marge %" style="width:60px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
-                            <input id="pb-nbpieces" type="number" placeholder="Pièces" title="Nombre de pièces" style="width:60px;" value="1" min="1" oninput="pbCalcTotal()">
+                            <input id="pb-marge"  type="number" style="width:55px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
+                            <input id="pb-nbpieces" type="number" style="width:55px;" value="1" min="1" oninput="pbCalcTotal()">
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">pcs</span>
-                            <button class="btn btn-small" onclick="pbToggleRecap()" title="Récap live" style="background:#1c2a40;color:#7ab0e0;border:1px solid #2a4a70;">📊</button>
                             <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver</button>
+                        </div>
+                        <div id="pb-stats-bar">
+                            <span>⏱</span><strong id="pb-recap-temps">—</strong>
+                            <span style="opacity:0.3;">|</span>
+                            <span>Prix revient</span><strong id="pb-recap-cout">—</strong>
+                            <span style="opacity:0.3;">|</span>
+                            <span>Prix vente</span><strong id="pb-recap-vente" style="color:#4ed880;">—</strong>
+                            <span style="opacity:0.3;">|</span>
+                            <span>Marge</span><strong id="pb-recap-marge">—</strong>
                         </div>
                         <div id="pb-board">
                             <svg id="pb-cable-svg"></svg>
@@ -6835,10 +6854,18 @@
         }
 
         function pbUpdateValue(id, val) {
-            const p = pbPedals.find(x => x.id === id);
+            const p = pbPedals.find(x => String(x.id) === String(id));
             if (!p) return;
             p.value = parseFloat(val) || 0;
             const display = document.getElementById(`pbval-${id}`);
+            if (display) display.textContent = _pbFormatVal(p);
+            pbCalcTotal();
+        }
+        function pbStepValue(id, step, min, max) {
+            const p = pbPedals.find(x => String(x.id) === String(id));
+            if (!p) return;
+            p.value = Math.max(min, Math.min(max, (p.value || 0) + step));
+            const display = document.getElementById(`pbval-${p.id}`);
             if (display) display.textContent = _pbFormatVal(p);
             pbCalcTotal();
         }
@@ -6943,26 +6970,27 @@
                     const svgIcon = p.type === 'geste' ? (PB_GESTE_ICONS[p.categorie] || PB_GESTE_ICONS['default'])
                                   : p.type === 'msp'   ? SVG_MSP
                                   : p.type === 'consommable' ? SVG_CONSO : SVG_NOTE;
-                    const sliderMin  = p.type === 'geste' ? 1 : 0;
-                    const sliderMax  = p.type === 'geste' ? 50 : p.type === 'msp' ? 480 : 200;
-                    const sliderStep = p.type === 'consommable' ? 0.5 : 1;
-                    const sliderInfo = p.type === 'geste'
-                        ? `<div style="font-size:0.55em;color:#6a8aaa;margin-bottom:2px;">⏱ ${p.tempsUnit||1}min/fois</div>` : '';
-                    const parallelLabel = p.parallel ? '⇌ Parallèle (info)' : '▶ Série (chiffré)';
+                    const stepSize   = p.type === 'msp' ? 15 : 1;
+                    const stepMin    = p.type === 'geste' ? 1 : 0;
+                    const stepMax    = p.type === 'geste' ? 99 : p.type === 'msp' ? 480 : 999;
+                    const tempsInfo  = p.type === 'geste' ? `<div style="font-size:0.52em;color:#5a7a9a;margin-bottom:3px;">⏱ ${p.tempsUnit||1} min/fois</div>` : '';
+                    const parallelLabel = p.parallel ? '⇌ PARALLÈLE' : '▶ SÉRIE';
+                    const showStepper = p.type !== 'note';
                     el.innerHTML = `
                         <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
-                        <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;">
+                        <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;position:relative;">
                             <button class="pb-pedal-del" onclick="pbRemovePedal('${p.id}')" title="Retirer">✕</button>
                             <div style="background:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
-                            ${p.desc ? `<div style="font-size:0.56em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
+                            ${p.desc ? `<div style="font-size:0.52em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
                             <div class="pb-pedal-name">${p.label}</div>
-                            <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:4px auto 2px;width:60px;height:46px;">${svgIcon}</div>
-                            ${sliderInfo}
-                            <div class="pb-pedal-knob-wrap">
-                                <input type="range" class="pb-pedal-knob" min="${sliderMin}" max="${sliderMax}" step="${sliderStep}" value="${p.value}"
-                                    oninput="pbUpdateValue('${p.id}',this.value)" style="accent-color:${p.led};" ${p.type==='note'?'style="display:none"':''}>
-                            </div>
-                            <div class="pb-pedal-val" id="pbval-${p.id}" style="color:#aab;font-size:0.7em;">${_pbFormatVal(p)}</div>
+                            <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:4px auto 2px;width:56px;height:42px;">${svgIcon}</div>
+                            ${tempsInfo}
+                            ${showStepper ? `
+                            <div class="pb-stepper">
+                                <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${-stepSize},${stepMin},${stepMax})">−</button>
+                                <div class="pb-step-val" id="pbval-${p.id}">${_pbFormatVal(p)}</div>
+                                <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${stepSize},${stepMin},${stepMax})">+</button>
+                            </div>` : `<div class="pb-step-val" id="pbval-${p.id}" style="margin:4px 0;">${_pbFormatVal(p)}</div>`}
                         </div>
                         <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel('${p.id}')">${parallelLabel}</button>
                         <div class="pb-jack pb-jack-in"></div>
