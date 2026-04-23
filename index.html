@@ -4307,8 +4307,9 @@
                         <div id="pb-header">
                             <input id="pb-client" placeholder="Client…" style="flex:1;min-width:120px;" oninput="pbCalcTotal()">
                             <input id="pb-title"  placeholder="Intitulé de la prestation…" style="flex:2;min-width:180px;">
-                            <input id="pb-marge"  type="number" placeholder="Marge %" style="width:75px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
-                            <input id="pb-nbpieces" type="number" placeholder="Pièces" title="Nombre de pièces" style="width:75px;" value="1" min="1" oninput="pbCalcTotal()">
+                            <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">marge %</span>
+                            <input id="pb-marge"  type="number" placeholder="Marge %" style="width:60px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
+                            <input id="pb-nbpieces" type="number" placeholder="Pièces" title="Nombre de pièces" style="width:60px;" value="1" min="1" oninput="pbCalcTotal()">
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">pcs</span>
                             <button class="btn btn-small" onclick="pbToggleRecap()" title="Récap live" style="background:#1c2a40;color:#7ab0e0;border:1px solid #2a4a70;">📊</button>
                             <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver</button>
