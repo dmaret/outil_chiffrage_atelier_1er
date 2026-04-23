@@ -4297,6 +4297,7 @@
                         <button class="pb-palette-btn" onclick="pbAddPedal('msp')">⏱ Temps MSP</button>
                         <button class="pb-palette-btn" onclick="pbAddPedal('note')">📝 Note / Commentaire</button>
                         <h4>Projet</h4>
+                        <button class="pb-palette-btn" onclick="pbOpenNewGeste()" style="color:#4e9af1;border-color:#2a4a80;">➕ Créer un geste</button>
                         <button class="pb-palette-btn" onclick="pbClear()" style="color:#f88;">🗑 Vider le board</button>
                     </div>
                     <!-- Zone principale -->
@@ -4304,42 +4305,70 @@
                         <div id="pb-header">
                             <input id="pb-client" placeholder="Client…" style="flex:1;min-width:120px;" oninput="pbCalcTotal()">
                             <input id="pb-title"  placeholder="Intitulé de la prestation…" style="flex:2;min-width:180px;">
-                            <input id="pb-marge"  type="number" placeholder="Marge %" style="width:80px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
-                            <input id="pb-nbpieces" type="number" placeholder="Qté pièces" title="Nombre de pièces pour la prestation" style="width:100px;" value="1" min="1" oninput="pbCalcTotal()">
-                            <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">pièces</span>
-                            <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver comme prestation</button>
+                            <input id="pb-marge"  type="number" placeholder="Marge %" style="width:75px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
+                            <input id="pb-nbpieces" type="number" placeholder="Pièces" title="Nombre de pièces" style="width:75px;" value="1" min="1" oninput="pbCalcTotal()">
+                            <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">pcs</span>
+                            <button class="btn btn-small" onclick="pbToggleRecap()" title="Récap live" style="background:#1c2a40;color:#7ab0e0;border:1px solid #2a4a70;">📊</button>
+                            <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver</button>
                         </div>
                         <div id="pb-board">
                             <svg id="pb-cable-svg"></svg>
                             <div id="pb-chain">
-                                <!-- AMPLI -->
-                                <div class="pb-endpoint" id="pb-ampli">
-                                    <div class="pb-ampli-body" style="color:#3a2a10;">
-                                        <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
-                                        <div class="pb-endpoint-icon">🎸</div>
-                                        <div class="pb-endpoint-title">PROJET</div>
-                                        <div id="pb-ampli-client" style="font-size:0.65em;margin-top:4px;opacity:0.6;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-                                    </div>
-                                    <div class="pb-jack pb-jack-out"></div>
-                                </div>
-                                <!-- Pédales dynamiques -->
-                                <div id="pb-pedals" style="display:flex;align-items:center;gap:0;">
-                                    <div id="pb-empty-hint">← Cliquez sur une pédale pour l'ajouter au board</div>
-                                </div>
-                                <!-- BAFFLE -->
-                                <div class="pb-endpoint" id="pb-baffle">
-                                    <div class="pb-jack pb-jack-in"></div>
-                                    <div class="pb-baffle-body" style="color:#c8cdd8;">
-                                        <div class="pb-endpoint-label" style="color:#888;">SORTIE</div>
-                                        <div class="pb-endpoint-icon">📢</div>
-                                        <div class="pb-endpoint-title">TOTAL</div>
-                                        <div class="pb-total-line" id="pb-total-cout" style="margin-top:8px;">Coût : —</div>
-                                        <div class="pb-total-big" id="pb-total-vente">Prix vente : —</div>
-                                    </div>
-                                </div>
+                                <div id="pb-pedals" style="display:flex;align-items:center;gap:0;"></div>
                             </div>
                         </div>
-                        <div id="pb-recap"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popup Récap live flottant -->
+            <div id="pb-recap-popup" style="display:none;position:fixed;top:120px;right:30px;z-index:9999;background:#fff;border-radius:12px;box-shadow:0 4px 28px rgba(0,0,0,0.18);width:230px;font-size:0.88em;user-select:none;">
+                <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:12px 12px 0 0;background:#f6f9fc;">
+                    <span style="font-weight:700;color:#2d3e50;font-size:0.95em;">Récap live</span>
+                    <button onclick="document.getElementById('pb-recap-popup').style.display='none'" style="background:none;border:none;color:#9aabb8;font-size:1.2em;cursor:pointer;line-height:1;padding:0 2px;">×</button>
+                </div>
+                <div style="padding:10px 14px 14px;">
+                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Temps :</span><span id="pb-recap-temps" style="font-weight:600;color:#2d3e50;">—</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix revient :</span><span id="pb-recap-cout" style="font-weight:600;color:#2d3e50;">—</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix vente :</span><span id="pb-recap-vente" style="font-weight:700;color:#27ae60;">—</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:5px 0;"><span style="color:#7a8e9a;">Marge</span><span id="pb-recap-marge" style="font-weight:600;color:#2d3e50;">—</span></div>
+                </div>
+            </div>
+
+            <!-- Modal nouveau geste personnalisé -->
+            <div id="pb-newgeste-modal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;">
+                <div style="background:#fff;border-radius:14px;padding:24px;max-width:500px;width:92%;max-height:82vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                        <h3 style="margin:0;font-size:1.05em;color:#2d3e50;">➕ Nouveau geste personnalisé</h3>
+                        <button onclick="document.getElementById('pb-newgeste-modal').style.display='none'" style="background:none;border:none;font-size:1.3em;cursor:pointer;color:#9ab;">×</button>
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <label style="font-size:0.84em;font-weight:700;color:#4a6a7a;display:block;margin-bottom:8px;">Choisir une icône :</label>
+                        <div id="pb-ng-icon-grid" style="display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;padding:4px;"></div>
+                        <input type="hidden" id="pb-ng-selected-key" value="default">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                        <div>
+                            <label style="font-size:0.82em;font-weight:600;color:#4a6a7a;display:block;margin-bottom:4px;">Code (ex: MON-01)</label>
+                            <input id="pb-ng-code" type="text" placeholder="MON-01" style="width:100%;padding:8px;border:1px solid #d0dae8;border-radius:8px;font-size:0.92em;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82em;font-weight:600;color:#4a6a7a;display:block;margin-bottom:4px;">Catégorie</label>
+                            <input id="pb-ng-categorie" type="text" placeholder="ex: Assemblage" style="width:100%;padding:8px;border:1px solid #d0dae8;border-radius:8px;font-size:0.92em;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:0.82em;font-weight:600;color:#4a6a7a;display:block;margin-bottom:4px;">Description du geste</label>
+                        <input id="pb-ng-desc" type="text" placeholder="Ex: Visser capuchon" style="width:100%;padding:8px;border:1px solid #d0dae8;border-radius:8px;font-size:0.92em;">
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <label style="font-size:0.82em;font-weight:600;color:#4a6a7a;display:block;margin-bottom:4px;">Temps standard (secondes)</label>
+                        <input id="pb-ng-temps" type="number" value="60" min="1" style="width:130px;padding:8px;border:1px solid #d0dae8;border-radius:8px;font-size:0.92em;">
+                        <span style="font-size:0.8em;color:#8a9ab0;margin-left:8px;">sec</span>
+                    </div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button onclick="document.getElementById('pb-newgeste-modal').style.display='none'" style="padding:9px 20px;border-radius:8px;border:1px solid #dde;background:#f8fafc;cursor:pointer;font-size:0.9em;">Annuler</button>
+                        <button onclick="pbSaveNewGeste()" style="padding:9px 20px;border-radius:8px;border:none;background:#27ae60;color:#fff;font-weight:600;cursor:pointer;font-size:0.9em;">Ajouter au board</button>
                     </div>
                 </div>
             </div>
@@ -6617,10 +6646,16 @@
         };
 
         function pbInit() {
-            // Populate palette
+            // Seed ampli and baffle as first/last elements of the chain (if not already)
+            if (!pbPedals.some(p => p.id === '__ampli__'))
+                pbPedals.unshift({ id:'__ampli__', type:'ampli', label:'PROJET' });
+            if (!pbPedals.some(p => p.id === '__baffle__'))
+                pbPedals.push({ id:'__baffle__', type:'baffle', label:'TOTAL' });
+
+            // Populate palette — gestes
             const pg = document.getElementById('pb-palette-gestes');
             const pc = document.getElementById('pb-palette-conso');
-            if (pg) pg.innerHTML = (catalogueGestes||[]).slice(0,30).map(g => {
+            if (pg) pg.innerHTML = (catalogueGestes||[]).slice(0,40).map(g => {
                 const mins = Math.round((g.temps||60)/60) || 1;
                 const shortDesc = (g.description||g.code).slice(0,36);
                 const catIcon = (PB_GESTE_ICONS[g.categorie] || PB_GESTE_ICONS['default']).replace(/currentColor/g,'#4e9af1');
@@ -6644,29 +6679,99 @@
         }
 
         function pbAddPedal(type, label, coutUnit, value, desc, categorie, tempsUnit) {
-            const hint = document.getElementById('pb-empty-hint');
-            if (hint) hint.style.display = 'none';
             const st = PB_PEDAL_STYLES[type] || PB_PEDAL_STYLES.note;
             const parallel = type === 'msp' || type === 'note';
-            pbPedals.push({
+            const newPedal = {
                 id: Date.now(), type, label: label || type,
                 desc: desc || '', categorie: categorie || '',
                 value: value || 1, tempsUnit: tempsUnit || 1,
                 coutUnit: coutUnit || 0, parallel,
                 color: st.bg, border: st.border, led: st.led, foot: st.foot,
-            });
+            };
+            // Insert before baffle
+            const baffleIdx = pbPedals.findIndex(p => p.id === '__baffle__');
+            if (baffleIdx >= 0) pbPedals.splice(baffleIdx, 0, newPedal);
+            else pbPedals.push(newPedal);
             pbRender();
         }
 
         function pbToggleParallel(id) {
-            const p = pbPedals.find(x => x.id === id);
+            const p = pbPedals.find(x => String(x.id) === String(id));
             if (p) { p.parallel = !p.parallel; pbRender(); }
         }
 
         function pbRemovePedal(id) {
-            pbPedals = pbPedals.filter(p => p.id !== id);
-            if (!pbPedals.length) { const h = document.getElementById('pb-empty-hint'); if(h) h.style.display=''; }
+            pbPedals = pbPedals.filter(p => String(p.id) !== String(id) && p.type !== 'ampli' && p.type !== 'baffle' || p.type === 'ampli' || p.type === 'baffle');
             pbRender();
+        }
+
+        // ── Popup récap flottant ──
+        function pbToggleRecap() {
+            const pop = document.getElementById('pb-recap-popup');
+            if (!pop) return;
+            if (pop.style.display === 'none') {
+                pop.style.display = 'block';
+                if (!pop._drag) { pop._drag = true; pbMakeDraggable(pop, document.getElementById('pb-recap-popup-hdr')); }
+                pbCalcTotal();
+            } else pop.style.display = 'none';
+        }
+        function pbMakeDraggable(el, handle) {
+            if (!handle) return;
+            handle.addEventListener('mousedown', e => {
+                if (e.target.tagName === 'BUTTON') return;
+                const r = el.getBoundingClientRect();
+                const ox = e.clientX - r.left, oy = e.clientY - r.top;
+                el.style.right = 'auto';
+                const move = m => { el.style.left=(m.clientX-ox)+'px'; el.style.top=(m.clientY-oy)+'px'; };
+                const up = () => { document.removeEventListener('mousemove',move); document.removeEventListener('mouseup',up); };
+                document.addEventListener('mousemove',move);
+                document.addEventListener('mouseup',up);
+                e.preventDefault();
+            });
+        }
+
+        // ── Création de geste personnalisé ──
+        function pbOpenNewGeste() {
+            const grid = document.getElementById('pb-ng-icon-grid');
+            if (grid) {
+                grid.innerHTML = Object.entries(PB_GESTE_ICONS).map(([k,svg]) =>
+                    `<button type="button" class="pb-ng-icon-btn" data-key="${k}" onclick="pbSelectNewGesteIcon('${k}')"
+                        style="width:54px;height:46px;border:2px solid #cce;border-radius:8px;background:#f0f4ff;cursor:pointer;padding:3px;color:#4466aa;" title="${k}">
+                        ${svg.replace(/currentColor/g,'#4466aa')}</button>`
+                ).join('');
+            }
+            const modal = document.getElementById('pb-newgeste-modal');
+            if (modal) modal.style.display = 'flex';
+            document.getElementById('pb-ng-selected-key').value = 'default';
+            document.getElementById('pb-ng-code').value = '';
+            document.getElementById('pb-ng-desc').value = '';
+            document.getElementById('pb-ng-categorie').value = '';
+            document.getElementById('pb-ng-temps').value = '60';
+        }
+        function pbSelectNewGesteIcon(key) {
+            document.getElementById('pb-ng-selected-key').value = key;
+            if (key !== 'default') document.getElementById('pb-ng-categorie').value = key;
+            [...document.querySelectorAll('.pb-ng-icon-btn')].forEach(b => {
+                const sel = b.dataset.key === key;
+                b.style.borderColor = sel ? '#4466aa' : '#cce';
+                b.style.background  = sel ? '#d0e0ff' : '#f0f4ff';
+            });
+        }
+        function pbSaveNewGeste() {
+            const code  = (document.getElementById('pb-ng-code')?.value||'').trim().toUpperCase();
+            const desc  = (document.getElementById('pb-ng-desc')?.value||'').trim();
+            const temps = parseInt(document.getElementById('pb-ng-temps')?.value||60);
+            const cat   = (document.getElementById('pb-ng-categorie')?.value||'').trim();
+            if (!code || !desc) { toast('Code et description requis', 'error'); return; }
+            const g = { code, categorie: cat||'default', description: desc, temps, coef:1, notes:'🎸 Geste personnalisé' };
+            if (!catalogueGestes.find(x => x.code === code)) {
+                catalogueGestes.push(g);
+                localStorage.setItem('catalogueGestes', JSON.stringify(catalogueGestes));
+            }
+            document.getElementById('pb-newgeste-modal').style.display = 'none';
+            const tempsUnit = Math.max(1, Math.round(temps/60));
+            pbAddPedal('geste', desc, 0, 1, code, cat||'default', tempsUnit);
+            pbInit(); // refresh palette
         }
 
         function pbMovePedal(id, dir) {
@@ -6701,131 +6806,118 @@
         }
 
         function pbCalcTotal() {
-            let coutSerie = 0, coutParallel = 0;
+            let coutSerie = 0, coutParallel = 0, totalMin = 0;
             const tauxCEA = config?.coutHoraireEffectif || config?.coutHoraire || 18;
             const tauxMSP = config?.coutHoraireMSP || 35;
             pbPedals.forEach(p => {
-                let c = 0;
-                if (p.type === 'geste')            c = (p.value * (p.tempsUnit||1) / 60) * tauxCEA;
-                else if (p.type === 'msp')         c = (p.value / 60) * tauxMSP;
-                else if (p.type === 'consommable') c = p.value * (p.coutUnit || 0);
-                if (p.parallel) coutParallel += c; else coutSerie += c;
+                let c = 0, mins = 0;
+                if (p.type === 'geste')            { mins = p.value*(p.tempsUnit||1); c = (mins/60)*tauxCEA; }
+                else if (p.type === 'msp')         { mins = p.value; c = (mins/60)*tauxMSP; }
+                else if (p.type === 'consommable') { c = p.value*(p.coutUnit||0); }
+                if (p.parallel) coutParallel += c;
+                else { coutSerie += c; if (p.type !== 'ampli' && p.type !== 'baffle') totalMin += mins; }
             });
             const nbP = Math.max(1, parseInt(document.getElementById('pb-nbpieces')?.value||1));
             const marge = parseFloat(document.getElementById('pb-marge')?.value||30)/100;
             const cout = coutSerie * nbP;
             const vente = marge < 1 ? cout / (1 - marge) : cout;
+            // Update baffle live display
             const elCout = document.getElementById('pb-total-cout');
             const elVente = document.getElementById('pb-total-vente');
             if (elCout)  elCout.textContent  = `Coût : CHF ${cout.toFixed(2)}`;
             if (elVente) elVente.textContent = `CHF ${vente.toFixed(2)}`;
+            // Update ampli client
             const elClient = document.getElementById('pb-ampli-client');
             if (elClient) elClient.textContent = document.getElementById('pb-client')?.value || '';
-            pbRenderRecap(coutSerie, coutParallel, marge, vente, nbP);
+            pbRenderRecap(coutSerie, coutParallel, marge, vente, nbP, totalMin);
         }
 
-        function pbRenderRecap(coutSerie, coutParallel, marge, vente, nbP) {
-            const el = document.getElementById('pb-recap');
-            if (!el || !pbPedals.length) { if (el) el.innerHTML = ''; return; }
-            const tauxCEA = config?.coutHoraireEffectif || config?.coutHoraire || 18;
-            const tauxMSP = config?.coutHoraireMSP || 35;
-            let serieRows = '', parallelRows = '', serieMinTotal = 0;
-            pbPedals.forEach(p => {
-                let mins = 0, coutP = 0, qDisp = '—';
-                if (p.type === 'geste') {
-                    mins = p.value * (p.tempsUnit||1);
-                    coutP = (mins/60) * tauxCEA;
-                    qDisp = p.value > 1 ? `${p.value}×${p.tempsUnit||1}min` : `${p.tempsUnit||1}min`;
-                } else if (p.type === 'msp') {
-                    mins = p.value;
-                    coutP = (mins/60) * tauxMSP;
-                    qDisp = `${mins}min`;
-                } else if (p.type === 'consommable') {
-                    coutP = p.value * (p.coutUnit||0);
-                    qDisp = `${p.value} pcs`;
-                } else { qDisp = '—'; }
-                const icon = {geste:'🎸',msp:'⏱',consommable:'🟢',note:'📝'}[p.type]||'';
-                const codeSpan = p.desc ? `<span style="color:#7ab4e0;font-size:0.88em;">[${p.desc}]</span> ` : '';
-                const row = `<tr><td style="color:#a8b8c8;">${icon} ${codeSpan}</td>
-                    <td style="color:#d0dce8;">${p.label.slice(0,32)}</td>
-                    <td style="text-align:center;color:#c0ccd8;">${qDisp}</td>
-                    <td style="text-align:right;color:#9ab8d0;">${coutP>0?`${coutP.toFixed(2)}`:''}</td></tr>`;
-                if (p.parallel) parallelRows += row;
-                else { serieRows += row; serieMinTotal += mins; }
-            });
-            const hh = Math.floor(serieMinTotal/60), mm = serieMinTotal%60;
-            const dureeStr = hh>0 ? `${hh}h${mm?mm+'m':''}` : `${mm}min`;
+        function pbRenderRecap(coutSerie, coutParallel, marge, vente, nbP, totalMin) {
+            // Update floating popup
+            const hh = Math.floor((totalMin||0)/60), mm = (totalMin||0)%60;
+            const dureeStr = (totalMin||0) > 0 ? (hh > 0 ? `${hh}h${mm?mm+'min':''}` : `${mm}min`) : '—';
+            const cout = coutSerie * nbP;
             const prixUnit = nbP > 1 ? ` (${(vente/nbP).toFixed(2)}/pce)` : '';
-            el.innerHTML = `<table>
-                <thead><tr style="background:#0e1624;color:#5a7a9a;font-size:0.85em;">
-                    <th style="padding:5px 8px;text-align:left;width:32px;"></th>
-                    <th style="text-align:left;">Élément</th>
-                    <th style="text-align:center;">Temps / Qté</th>
-                    <th style="text-align:right;">Coût CHF</th>
-                </tr></thead>
-                <tbody>${serieRows}${parallelRows ? `
-                    <tr style="background:#0e1a0e;"><td colspan="4" style="padding:3px 8px;color:#4a8a5a;font-size:0.82em;">🔀 Parallèles (informatif, non compté)</td></tr>${parallelRows}` : ''}
-                    <tr style="background:#0a1420;border-top:1px solid #2a4a6a;">
-                        <td colspan="2" style="padding:5px 8px;color:#7a9ab0;font-size:0.82em;">⏱ ${dureeStr} · ${nbP>1?nbP+' pce·':''}marge ${Math.round(marge*100)}%</td>
-                        <td style="text-align:center;color:#a0b8d0;font-weight:600;">= CHF ${(coutSerie*nbP).toFixed(2)}</td>
-                        <td style="text-align:right;color:#f0c040;font-weight:700;font-size:1.05em;">CHF ${vente.toFixed(2)}${prixUnit}</td>
-                    </tr>
-                </tbody></table>`;
+            const elT = document.getElementById('pb-recap-temps');
+            const elC = document.getElementById('pb-recap-cout');
+            const elV = document.getElementById('pb-recap-vente');
+            const elM = document.getElementById('pb-recap-marge');
+            if (elT) elT.textContent = nbP > 1 ? `${dureeStr} × ${nbP} pce` : dureeStr;
+            if (elC) elC.textContent = cout > 0 ? `CHF ${cout.toFixed(2)}` : '—';
+            if (elV) elV.textContent = vente > 0 ? `CHF ${vente.toFixed(2)}${prixUnit}` : '—';
+            if (elM) elM.textContent = `${Math.round(marge*100)}%`;
         }
 
         function pbRender() {
             const c = document.getElementById('pb-pedals');
             if (!c) return;
-            const hint = document.getElementById('pb-empty-hint');
-
-            // Full rebuild for consistency (pedalboard is always small)
             [...c.querySelectorAll('.pb-pedal')].forEach(el => el.remove());
+
+            const SVG_MSP  = `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="22" r="14"/><polyline points="24,12 24,22 32,28"/><line x1="18" y1="6" x2="30" y2="6"/></svg>`;
+            const SVG_CONSO= `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14,4 L34,4 L38,10 L38,36 Q38,38 24,38 Q10,38 10,36 L10,10 Z"/><line x1="10" y1="10" x2="38" y2="10"/><line x1="16" y1="20" x2="32" y2="20"/><line x1="16" y1="27" x2="28" y2="27"/></svg>`;
+            const SVG_NOTE = `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="4" width="32" height="34" rx="2"/><line x1="14" y1="14" x2="34" y2="14"/><line x1="14" y1="21" x2="34" y2="21"/><line x1="14" y1="28" x2="26" y2="28"/></svg>`;
+
+            const hasUserPedals = pbPedals.some(p => p.type !== 'ampli' && p.type !== 'baffle');
 
             pbPedals.forEach(p => {
                 const el = document.createElement('div');
-                el.className = 'pb-pedal' + (p.parallel ? ' pb-pedal-parallel' : '');
-                el.dataset.id = p.id;
+                el.dataset.id = String(p.id);
                 el.draggable = true;
 
-                const SVG_MSP  = `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="22" r="14"/><polyline points="24,12 24,22 32,28"/><line x1="18" y1="6" x2="30" y2="6"/></svg>`;
-                const SVG_CONSO= `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14,4 L34,4 L38,10 L38,36 Q38,38 24,38 Q10,38 10,36 L10,10 Z"/><line x1="10" y1="10" x2="38" y2="10"/><line x1="16" y1="20" x2="32" y2="20"/><line x1="16" y1="27" x2="28" y2="27"/></svg>`;
-                const SVG_NOTE = `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="4" width="32" height="34" rx="2"/><line x1="14" y1="14" x2="34" y2="14"/><line x1="14" y1="21" x2="34" y2="21"/><line x1="14" y1="28" x2="26" y2="28"/></svg>`;
-                const svgIcon  = p.type === 'geste' ? (PB_GESTE_ICONS[p.categorie] || PB_GESTE_ICONS['default'])
-                               : p.type === 'msp'   ? SVG_MSP
-                               : p.type === 'consommable' ? SVG_CONSO : SVG_NOTE;
-
-                // Slider config per type
-                // Geste: quantity (fois/pcs), source-of-truth time is fixed (tempsUnit)
-                // MSP: time in minutes
-                // Consommable: quantity in units
-                const sliderMin  = p.type === 'geste' ? 1 : 0;
-                const sliderMax  = p.type === 'geste' ? 50 : p.type === 'msp' ? 480 : 200;
-                const sliderStep = p.type === 'consommable' ? 0.5 : 1;
-                const sliderLabel= p.type === 'geste'
-                    ? `<div style="font-size:0.56em;color:#6a8aaa;margin-bottom:2px;">⏱ ${p.tempsUnit||1} min/fois (catalogue)</div>`
-                    : '';
-                const parallelTip = p.parallel ? 'Inclure dans le chiffrage' : 'Marquer comme parallèle';
-                const parallelIcon = p.parallel ? '🔀' : '✅';
-
-                el.innerHTML = `
-                    <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;" title="Glisser pour réordonner">
-                        <button class="pb-pedal-del" onclick="pbRemovePedal(${p.id})" title="Retirer">✕</button>
-                        <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel(${p.id})" title="${parallelTip}">${parallelIcon}</button>
-                        <div class="pb-pedal-led" style="background:${p.led};color:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
-                        ${p.desc ? `<div style="font-size:0.56em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;opacity:0.9;">[${p.desc}]</div>` : ''}
-                        <div class="pb-pedal-name" style="color:#eee;">${p.label}</div>
-                        <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:4px auto 2px;width:60px;height:46px;">${svgIcon}</div>
-                        ${sliderLabel}
-                        <div class="pb-pedal-knob-wrap">
-                            <input type="range" class="pb-pedal-knob" min="${sliderMin}" max="${sliderMax}" step="${sliderStep}" value="${p.value}"
-                                oninput="pbUpdateValue(${p.id},this.value)" style="accent-color:${p.led};" ${p.type==='note'?'disabled style="display:none"':''}>
+                if (p.type === 'ampli') {
+                    el.className = 'pb-pedal pb-endpoint';
+                    el.innerHTML = `
+                        <div class="pb-ampli-body" style="cursor:grab;" title="Glisser pour repositionner">
+                            <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
+                            <div class="pb-endpoint-icon">🎸</div>
+                            <div class="pb-endpoint-title">${document.getElementById('pb-title')?.value || 'PROJET'}</div>
+                            <div id="pb-ampli-client" style="font-size:0.65em;margin-top:4px;opacity:0.6;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
                         </div>
-                        <div class="pb-pedal-val" id="pbval-${p.id}" style="color:#aab;font-size:0.7em;">${_pbFormatVal(p)}</div>
-                    </div>
-                    <div class="pb-jack pb-jack-in"></div>
-                    <div class="pb-jack pb-jack-out"></div>`;
+                        <div class="pb-jack pb-jack-out"></div>`;
+                } else if (p.type === 'baffle') {
+                    el.className = 'pb-pedal pb-endpoint';
+                    el.innerHTML = `
+                        <div class="pb-jack pb-jack-in"></div>
+                        <div class="pb-baffle-body" style="cursor:grab;" title="Glisser pour repositionner">
+                            <div class="pb-endpoint-label" style="color:#888;">SORTIE</div>
+                            <div class="pb-endpoint-icon">📢</div>
+                            <div class="pb-endpoint-title">TOTAL</div>
+                            <div class="pb-total-line" id="pb-total-cout" style="margin-top:8px;font-size:0.72em;">Coût : —</div>
+                            <div class="pb-total-big" id="pb-total-vente" style="font-size:0.88em;">—</div>
+                        </div>`;
+                } else {
+                    // Regular pedal
+                    el.className = 'pb-pedal' + (p.parallel ? ' pb-pedal-parallel' : '');
+                    const svgIcon = p.type === 'geste' ? (PB_GESTE_ICONS[p.categorie] || PB_GESTE_ICONS['default'])
+                                  : p.type === 'msp'   ? SVG_MSP
+                                  : p.type === 'consommable' ? SVG_CONSO : SVG_NOTE;
+                    const sliderMin  = p.type === 'geste' ? 1 : 0;
+                    const sliderMax  = p.type === 'geste' ? 50 : p.type === 'msp' ? 480 : 200;
+                    const sliderStep = p.type === 'consommable' ? 0.5 : 1;
+                    const sliderInfo = p.type === 'geste'
+                        ? `<div style="font-size:0.55em;color:#6a8aaa;margin-bottom:2px;">⏱ ${p.tempsUnit||1}min/fois</div>` : '';
+                    const parallelIcon = p.parallel ? '🔀' : '✅';
+                    const parallelTip  = p.parallel ? 'Inclure dans chiffrage' : 'Mettre en parallèle';
+                    el.innerHTML = `
+                        <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;" title="Glisser pour réordonner">
+                            <button class="pb-pedal-del" onclick="pbRemovePedal('${p.id}')" title="Retirer">✕</button>
+                            <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel('${p.id}')" title="${parallelTip}">${parallelIcon}</button>
+                            <div style="background:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
+                            ${p.desc ? `<div style="font-size:0.56em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
+                            <div class="pb-pedal-name">${p.label}</div>
+                            <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:4px auto 2px;width:60px;height:46px;">${svgIcon}</div>
+                            ${sliderInfo}
+                            <div class="pb-pedal-knob-wrap">
+                                <input type="range" class="pb-pedal-knob" min="${sliderMin}" max="${sliderMax}" step="${sliderStep}" value="${p.value}"
+                                    oninput="pbUpdateValue('${p.id}',this.value)" style="accent-color:${p.led};" ${p.type==='note'?'style="display:none"':''}>
+                            </div>
+                            <div class="pb-pedal-val" id="pbval-${p.id}" style="color:#aab;font-size:0.7em;">${_pbFormatVal(p)}</div>
+                        </div>
+                        <div class="pb-jack pb-jack-in"></div>
+                        <div class="pb-jack pb-jack-out"></div>`;
+                }
 
-                // Drag-and-drop for reordering
+                // Drag-and-drop (string IDs for compatibility with ampli/baffle)
                 el.addEventListener('dragstart', e => {
                     e.dataTransfer.setData('text/plain', String(p.id));
                     e.dataTransfer.effectAllowed = 'move';
@@ -6837,19 +6929,29 @@
                 el.addEventListener('drop', e => {
                     e.preventDefault();
                     el.classList.remove('drag-over');
-                    const fromId = Number(e.dataTransfer.getData('text/plain'));
-                    if (fromId === p.id) return;
-                    const fromIdx = pbPedals.findIndex(x => x.id === fromId);
-                    const toIdx   = pbPedals.findIndex(x => x.id === p.id);
+                    const fromId = e.dataTransfer.getData('text/plain');
+                    if (fromId === String(p.id)) return;
+                    const fromIdx = pbPedals.findIndex(x => String(x.id) === fromId);
+                    const toIdx   = pbPedals.findIndex(x => String(x.id) === String(p.id));
                     if (fromIdx < 0 || toIdx < 0) return;
                     pbPedals.splice(toIdx, 0, pbPedals.splice(fromIdx, 1)[0]);
                     pbRender();
                 });
-
                 c.appendChild(el);
             });
 
-            if (hint) hint.style.display = pbPedals.length ? 'none' : '';
+            // Show hint when no user pedals
+            let hint = c.querySelector('#pb-empty-hint');
+            if (!hint) {
+                hint = document.createElement('div');
+                hint.id = 'pb-empty-hint';
+                hint.textContent = '← Cliquez sur un geste pour l\'ajouter';
+            }
+            // Insert hint between ampli and baffle if no pedals
+            const baffleEl = c.querySelector('.pb-pedal[data-id="__baffle__"]');
+            if (!hasUserPedals && baffleEl) c.insertBefore(hint, baffleEl);
+            else if (hint.parentNode) hint.parentNode.removeChild(hint);
+
             pbCalcTotal();
             requestAnimationFrame(pbDrawCables);
         }
@@ -6862,19 +6964,11 @@
             const scrollLeft = board.scrollLeft;
             const scrollTop  = board.scrollTop;
 
-            // Collect all jack-out and jack-in elements in order
-            const ampliOut  = document.querySelector('#pb-ampli .pb-jack-out');
-            const baffleIn  = document.querySelector('#pb-baffle .pb-jack-in');
-            const pedalIns  = pbPedals.map(p => document.querySelector(`.pb-pedal[data-id="${p.id}"] .pb-jack-in`)).filter(Boolean);
-            const pedalOuts = pbPedals.map(p => document.querySelector(`.pb-pedal[data-id="${p.id}"] .pb-jack-out`)).filter(Boolean);
-
-            const allFroms = [ampliOut,  ...pedalOuts];
-            const allTos   = [...pedalIns, baffleIn];
-
             let paths = '', shadows = '';
-            allFroms.forEach((from, i) => {
-                const to = allTos[i];
-                if (!from || !to) return;
+            for (let i = 0; i < pbPedals.length - 1; i++) {
+                const from = document.querySelector(`.pb-pedal[data-id="${pbPedals[i].id}"] .pb-jack-out`);
+                const to   = document.querySelector(`.pb-pedal[data-id="${pbPedals[i+1].id}"] .pb-jack-in`);
+                if (!from || !to) continue;
                 const fr = from.getBoundingClientRect();
                 const tr = to.getBoundingClientRect();
                 const x1 = fr.left + fr.width/2 - br.left + scrollLeft;
@@ -6887,7 +6981,7 @@
                 paths += `<circle cx="${x1}" cy="${y1}" r="5.5" fill="${col}" opacity="0.9"/>`;
                 paths += `<circle cx="${x2}" cy="${y2}" r="5.5" fill="${col}" opacity="0.9"/>`;
                 shadows += `<path d="M${x1},${y1} C${x1+30},${y1+sag+4} ${x2-30},${y2+sag+4} ${x2},${y2}" stroke="rgba(0,0,0,0.3)" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-            });
+            }
 
             // Set SVG size to match board scroll area
             const chain = document.getElementById('pb-chain');
@@ -6900,7 +6994,7 @@
 
         function pbClear() {
             if (!confirm('Vider le pédalboard ?')) return;
-            pbPedals = [];
+            pbPedals = pbPedals.filter(p => p.type === 'ampli' || p.type === 'baffle');
             pbRender();
         }
 
@@ -6914,7 +7008,7 @@
             let coutUnit = 0;
             const gestes = [];
             pbPedals.forEach(p => {
-                if (p.parallel) return;  // n'inclure que les éléments en série
+                if (p.type === 'ampli' || p.type === 'baffle' || p.parallel) return;
                 if (p.type === 'geste') {
                     const mins = p.value * (p.tempsUnit||1);
                     const c = (mins/60) * tauxCEA;
