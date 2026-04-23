@@ -6936,8 +6936,8 @@
                 if (p.type === 'ampli') {
                     el.className = 'pb-pedal pb-endpoint';
                     el.innerHTML = `
-                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
-                        <div class="pb-ampli-body" title="Glisser la poignée pour repositionner">
+                        <div class="pb-drag-handle">⠿ ⠿ ⠿</div>
+                        <div class="pb-ampli-body">
                             <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
                             <div class="pb-endpoint-icon">🎸</div>
                             <div class="pb-endpoint-title">${document.getElementById('pb-title')?.value || 'PROJET'}</div>
@@ -6947,9 +6947,9 @@
                 } else if (p.type === 'baffle') {
                     el.className = 'pb-pedal pb-endpoint';
                     el.innerHTML = `
-                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
+                        <div class="pb-drag-handle">⠿ ⠿ ⠿</div>
                         <div class="pb-jack pb-jack-in"></div>
-                        <div class="pb-baffle-body" title="Glisser la poignée pour repositionner">
+                        <div class="pb-baffle-body">
                             <div class="pb-endpoint-label" style="color:#888;">SORTIE</div>
                             <div class="pb-endpoint-icon">📢</div>
                             <div class="pb-endpoint-title">TOTAL</div>
@@ -6970,7 +6970,7 @@
                     const showStepper   = p.type !== 'note';
                     const totalMin = isGeste ? p.value * (p.tempsUnit||1) : 0;
                     el.innerHTML = `
-                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
+                        <div class="pb-drag-handle">⠿ ⠿ ⠿</div>
                         <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;position:relative;">
                             <button class="pb-pedal-del" onclick="pbRemovePedal('${p.id}')" title="Retirer">✕</button>
                             <div style="background:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
@@ -6994,7 +6994,47 @@
                 }
 
                 c.appendChild(el);
-            });
+
+                // Drag via pointerdown + setPointerCapture (fiable, fonctionne partout)
+                const handle = el.querySelector('.pb-drag-handle');
+                if (handle) handle.addEventListener('pointerdown', e => {
+                    if (e.button !== 0 && e.pointerType === 'mouse') return;
+                    e.preventDefault();
+                    handle.setPointerCapture(e.pointerId);
+                    const br = el.getBoundingClientRect();
+                    const ghost = el.cloneNode(true);
+                    ghost.style.cssText = `position:fixed;top:${br.top}px;left:${br.left}px;width:${br.width}px;opacity:0.85;pointer-events:none;z-index:99999;transform:rotate(2deg) scale(1.05);box-shadow:0 16px 48px rgba(0,0,0,0.7);`;
+                    document.body.appendChild(ghost);
+                    el.classList.add('dragging');
+                    let gx = br.left, gy = br.top, mx = e.clientX, my = e.clientY, overTarget = null;
+
+                    const onMove = ev => {
+                        gx += ev.clientX - mx; gy += ev.clientY - my;
+                        mx = ev.clientX; my = ev.clientY;
+                        ghost.style.left = gx + 'px'; ghost.style.top = gy + 'px';
+                        document.querySelectorAll('.pb-pedal').forEach(x => x.classList.remove('drag-over'));
+                        ghost.style.visibility = 'hidden';
+                        const under = document.elementFromPoint(ev.clientX, ev.clientY);
+                        ghost.style.visibility = '';
+                        const tgt = under?.closest('.pb-pedal');
+                        overTarget = (tgt && tgt.dataset.id !== String(p.id)) ? tgt : null;
+                        if (overTarget) overTarget.classList.add('drag-over');
+                    };
+                    const onUp = () => {
+                        handle.removeEventListener('pointermove', onMove);
+                        handle.removeEventListener('pointerup', onUp);
+                        ghost.remove();
+                        document.querySelectorAll('.pb-pedal').forEach(x => { x.classList.remove('drag-over'); x.classList.remove('dragging'); });
+                        if (overTarget?.isConnected && overTarget.dataset.id !== String(p.id)) {
+                            const fi = pbPedals.findIndex(x => String(x.id) === String(p.id));
+                            const ti = pbPedals.findIndex(x => String(x.id) === overTarget.dataset.id);
+                            if (fi >= 0 && ti >= 0) pbPedals.splice(ti, 0, pbPedals.splice(fi, 1)[0]);
+                        }
+                        pbRender();
+                    };
+                    handle.addEventListener('pointermove', onMove);
+                    handle.addEventListener('pointerup', onUp);
+                });
 
             // Show hint when no user pedals
             let hint = c.querySelector('#pb-empty-hint');
