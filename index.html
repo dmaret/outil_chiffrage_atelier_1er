@@ -1065,8 +1065,21 @@
             repeating-linear-gradient(90deg,rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
             repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
             #1a1008; }
-        #pb-chain { display:flex; align-items:center; gap:0; padding:50px 36px; min-width:max-content; min-height:100%; position:relative; }
-        #pb-cable-svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5; overflow:visible; }
+        #pb-cable-svg { position:absolute; top:0; left:0; pointer-events:none; z-index:5; overflow:visible; }
+        /* ── Slot-based layout ── */
+        #pb-parallel-zone { min-height:50px; border-bottom:2px solid #2a2a10; padding:10px 16px 0; background:rgba(240,192,64,0.025); position:relative; }
+        .pb-pz-header { font-size:0.58em; letter-spacing:1.5px; text-transform:uppercase; color:#f0c04055; margin-bottom:6px; }
+        #pb-parallel-pedals { display:flex; gap:10px; align-items:flex-end; padding:0 0 10px; min-height:44px; flex-wrap:wrap; }
+        .pb-parallel-drop { width:82px; min-height:64px; border:2px dashed #f0c04033; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#f0c04044; font-size:1.8em; flex-shrink:0; transition:all 0.15s; cursor:default; }
+        .pb-parallel-drop.drag-over { border-color:#f0c040; background:rgba(240,192,64,0.1); color:#f0c040; }
+        #pb-serie-row { display:flex; align-items:center; padding:24px 16px; min-width:max-content; position:relative; }
+        .pb-endpoint-fixed { position:relative; z-index:10; flex-shrink:0; }
+        #pb-serie-slots { display:flex; gap:6px; align-items:center; flex-shrink:0; padding:0 10px; }
+        .pb-slot { width:138px; min-height:218px; border:2px dashed #2c2c2c; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative; transition:border-color 0.14s,background 0.14s; background:rgba(255,255,255,0.007); }
+        .pb-slot.occupied { border-style:solid; border-color:transparent; background:transparent; justify-content:flex-start; }
+        .pb-slot.drag-over { border-color:#4e9af1 !important; border-style:solid !important; background:rgba(78,154,241,0.09) !important; }
+        .pb-slot .pb-pedal { margin:0; }
+        .pb-slot-num { font-size:0.6em; color:#2a2a2a; font-weight:700; user-select:none; }
         /* Endpoint devices */
         .pb-endpoint { position:relative; z-index:10; flex-shrink:0; }
         .pb-ampli-body { width:120px; background:linear-gradient(160deg,#c8b47a,#a89050); border:3px solid #7a6030; border-radius:10px 10px 14px 14px; padding:14px 10px 16px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2); }
@@ -4326,8 +4339,16 @@
                         </div>
                         <div id="pb-board">
                             <svg id="pb-cable-svg"></svg>
-                            <div id="pb-chain">
-                                <div id="pb-pedals" style="display:flex;align-items:center;gap:0;"></div>
+                            <!-- Zone parallèle (au-dessus) -->
+                            <div id="pb-parallel-zone">
+                                <div class="pb-pz-header">⇌ Zone parallèle — câbles de ENTRÉE à SORTIE</div>
+                                <div id="pb-parallel-pedals"></div>
+                            </div>
+                            <!-- Ligne série : ENTRÉE + 60 cases + SORTIE -->
+                            <div id="pb-serie-row">
+                                <div id="pb-endpoint-ampli" class="pb-endpoint-fixed"></div>
+                                <div id="pb-serie-slots"></div>
+                                <div id="pb-endpoint-baffle" class="pb-endpoint-fixed"></div>
                             </div>
                         </div>
                     </div>
@@ -6564,26 +6585,16 @@
             if (e.button !== 0) return;
             e.preventDefault();
             e.stopPropagation();
-            const el = Array.from(document.querySelectorAll('.pb-pedal')).find(x => x.dataset.id === String(id));
+            const el = document.querySelector(`.pb-pedal[data-id="${id}"]`);
             if (!el) return;
             const br = el.getBoundingClientRect();
             const ghost = el.cloneNode(true);
-            ghost.style.cssText = `position:fixed;top:${br.top}px;left:${br.left}px;width:${br.width}px;opacity:0.85;pointer-events:none;z-index:99999;transform:rotate(2deg) scale(1.05);box-shadow:0 16px 48px rgba(0,0,0,0.7);`;
+            ghost.style.cssText = `position:fixed;top:${br.top}px;left:${br.left}px;width:${br.width}px;opacity:0.82;pointer-events:none;z-index:99999;transform:rotate(2deg) scale(1.04);box-shadow:0 16px 48px rgba(0,0,0,0.7);`;
             document.body.appendChild(ghost);
             el.classList.add('dragging');
-            _pbDrag = { id: String(id), ghost, el, gx: br.left, gy: br.top, mx: e.clientX, my: e.clientY };
+            _pbDrag = { id: String(id), ghost, el, gx: br.left, gy: br.top, mx: e.clientX, my: e.clientY, overTarget: null };
             document.addEventListener('mousemove', _pbDragMove);
             document.addEventListener('mouseup', _pbDragEnd);
-        }
-        function _pbNearestPedal(ghostX) {
-            let nearest = null, minDist = Infinity;
-            document.querySelectorAll('.pb-pedal').forEach(el => {
-                if (el.dataset.id === _pbDrag.id) return;
-                const r = el.getBoundingClientRect();
-                const dist = Math.abs((r.left + r.width / 2) - ghostX);
-                if (dist < minDist) { minDist = dist; nearest = el; }
-            });
-            return nearest;
         }
 
         function _pbDragMove(e) {
@@ -6593,22 +6604,46 @@
             _pbDrag.mx = e.clientX; _pbDrag.my = e.clientY;
             _pbDrag.ghost.style.left = _pbDrag.gx + 'px';
             _pbDrag.ghost.style.top  = _pbDrag.gy + 'px';
-            // Highlight the nearest pedal (pas besoin de viser exactement)
-            const ghostCx = _pbDrag.gx + (_pbDrag.ghost.offsetWidth / 2);
-            const nearest = _pbNearestPedal(ghostCx);
-            document.querySelectorAll('.pb-pedal').forEach(p => p.classList.remove('drag-over'));
-            if (nearest) { nearest.classList.add('drag-over'); _pbDrag.overTarget = nearest; }
-            else _pbDrag.overTarget = null;
+            document.querySelectorAll('.pb-slot.drag-over,.pb-parallel-drop.drag-over').forEach(el => el.classList.remove('drag-over'));
+            _pbDrag.overTarget = null;
+            const cx = e.clientX, cy = e.clientY;
+            for (const slot of document.querySelectorAll('.pb-slot')) {
+                const r = slot.getBoundingClientRect();
+                if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
+                    slot.classList.add('drag-over');
+                    _pbDrag.overTarget = { type: 'slot', idx: parseInt(slot.dataset.slot) };
+                    return;
+                }
+            }
+            const pzone = document.getElementById('pb-parallel-zone');
+            if (pzone) {
+                const r = pzone.getBoundingClientRect();
+                if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
+                    const pdz = document.getElementById('pb-parallel-drop-zone');
+                    if (pdz) pdz.classList.add('drag-over');
+                    _pbDrag.overTarget = { type: 'parallel' };
+                }
+            }
         }
+
         function _pbDragEnd(e) {
             if (!_pbDrag) return;
             const target = _pbDrag.overTarget;
             _pbDrag.ghost.remove();
-            document.querySelectorAll('.pb-pedal').forEach(p => { p.classList.remove('drag-over'); p.classList.remove('dragging'); });
-            if (target && target.isConnected && target.dataset.id !== _pbDrag.id) {
-                const fromIdx = pbPedals.findIndex(x => String(x.id) === _pbDrag.id);
-                const toIdx   = pbPedals.findIndex(x => String(x.id) === target.dataset.id);
-                if (fromIdx >= 0 && toIdx >= 0) { pbPedals.splice(toIdx, 0, pbPedals.splice(fromIdx, 1)[0]); }
+            document.querySelectorAll('.pb-slot.drag-over,.pb-parallel-drop.drag-over').forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.pb-pedal.dragging').forEach(el => el.classList.remove('dragging'));
+            const draggedPedal = pbPedals.find(p => String(p.id) === _pbDrag.id);
+            if (target && draggedPedal) {
+                if (target.type === 'slot') {
+                    const toSlot = target.idx;
+                    const occupant = pbPedals.find(p => !p.parallel && p.slot === toSlot && String(p.id) !== _pbDrag.id);
+                    if (occupant) occupant.slot = draggedPedal.slot;
+                    draggedPedal.slot = toSlot;
+                    draggedPedal.parallel = false;
+                } else if (target.type === 'parallel') {
+                    draggedPedal.parallel = true;
+                    draggedPedal.slot = undefined;
+                }
             }
             _pbDrag = null;
             document.removeEventListener('mousemove', _pbDragMove);
@@ -6723,11 +6758,18 @@
                 pbMakeDraggable(pop, document.getElementById('pb-recap-popup-hdr'));
             }
 
-            // Seed ampli and baffle as first/last elements of the chain (if not already)
-            if (!pbPedals.some(p => p.id === '__ampli__'))
-                pbPedals.unshift({ id:'__ampli__', type:'ampli', label:'PROJET' });
-            if (!pbPedals.some(p => p.id === '__baffle__'))
-                pbPedals.push({ id:'__baffle__', type:'baffle', label:'TOTAL' });
+            // Migrate: remove legacy ampli/baffle entries (now fixed endpoints in HTML)
+            pbPedals = pbPedals.filter(p => p.type !== 'ampli' && p.type !== 'baffle');
+            // Migrate: assign slots to existing pedals that don't have one yet
+            const usedSlots = new Set(pbPedals.filter(p => !p.parallel && p.slot !== undefined).map(p => p.slot));
+            let nextSlot = 0;
+            pbPedals.forEach(p => {
+                if (!p.parallel && p.slot === undefined) {
+                    while (usedSlots.has(nextSlot)) nextSlot++;
+                    p.slot = nextSlot;
+                    usedSlots.add(nextSlot++);
+                }
+            });
 
             // Populate palette — gestes
             const pg = document.getElementById('pb-palette-gestes');
@@ -6757,24 +6799,34 @@
 
         function pbAddPedal(type, label, coutUnit, value, desc, categorie, tempsUnit) {
             const st = PB_PEDAL_STYLES[type] || PB_PEDAL_STYLES.note;
-            const parallel = type === 'msp' || type === 'note';
-            const newPedal = {
+            const isParallel = type === 'msp' || type === 'note';
+            let slot = undefined;
+            if (!isParallel) {
+                const usedSlots = new Set(pbPedals.filter(p => !p.parallel && p.slot !== undefined).map(p => p.slot));
+                for (let i = 0; i < 60; i++) { if (!usedSlots.has(i)) { slot = i; break; } }
+            }
+            pbPedals.push({
                 id: Date.now(), type, label: label || type,
                 desc: desc || '', categorie: categorie || '',
                 value: value || 1, tempsUnit: tempsUnit || 1,
-                coutUnit: coutUnit || 0, parallel, perPiece: true,
+                coutUnit: coutUnit || 0, parallel: isParallel, perPiece: true, slot,
                 color: st.bg, border: st.border, led: st.led, foot: st.foot,
-            };
-            // Insert before baffle
-            const baffleIdx = pbPedals.findIndex(p => p.id === '__baffle__');
-            if (baffleIdx >= 0) pbPedals.splice(baffleIdx, 0, newPedal);
-            else pbPedals.push(newPedal);
+            });
             pbRender();
         }
 
         function pbToggleParallel(id) {
             const p = pbPedals.find(x => String(x.id) === String(id));
-            if (p) { p.parallel = !p.parallel; pbRender(); }
+            if (!p) return;
+            if (p.parallel) {
+                const usedSlots = new Set(pbPedals.filter(q => !q.parallel && q.slot !== undefined).map(q => q.slot));
+                for (let i = 0; i < 60; i++) { if (!usedSlots.has(i)) { p.slot = i; break; } }
+                p.parallel = false;
+            } else {
+                p.parallel = true;
+                p.slot = undefined;
+            }
+            pbRender();
         }
 
         function pbSetAppliq(id, perPiece) {
@@ -6790,7 +6842,7 @@
         }
 
         function pbRemovePedal(id) {
-            pbPedals = pbPedals.filter(p => String(p.id) !== String(id) && p.type !== 'ampli' && p.type !== 'baffle' || p.type === 'ampli' || p.type === 'baffle');
+            pbPedals = pbPedals.filter(p => String(p.id) !== String(id));
             pbRender();
         }
 
@@ -6868,11 +6920,13 @@
         }
 
         function pbMovePedal(id, dir) {
-            const idx = pbPedals.findIndex(p => String(p.id) === String(id));
-            if (idx < 0) return;
-            const ni = idx + dir;
-            if (ni < 0 || ni >= pbPedals.length) return;
-            [pbPedals[idx], pbPedals[ni]] = [pbPedals[ni], pbPedals[idx]];
+            const p = pbPedals.find(x => String(x.id) === String(id));
+            if (!p || p.parallel || p.slot === undefined) return;
+            const newSlot = p.slot + dir;
+            if (newSlot < 0 || newSlot >= 60) return;
+            const occupant = pbPedals.find(q => !q.parallel && q.slot === newSlot && String(q.id) !== String(id));
+            if (occupant) occupant.slot = p.slot;
+            p.slot = newSlot;
             pbRender();
         }
 
@@ -6923,12 +6977,11 @@
                 if (p.type === 'geste')            { mins = p.value*(p.tempsUnit||1); c = (mins/60)*tauxCEA; }
                 else if (p.type === 'msp')         { mins = p.value; c = (mins/60)*tauxMSP; }
                 else if (p.type === 'consommable') { c = p.value*(p.coutUnit||0); }
-                const isUser = p.type !== 'ampli' && p.type !== 'baffle';
-                const isPerPiece = isUser && p.perPiece !== false;
+                const isPerPiece = p.perPiece !== false;
                 if (isPerPiece) hasPerPiece = true;
                 const mult = isPerPiece ? nbP : 1;
                 if (p.parallel) coutParallel += c * mult;
-                else { coutSerie += c * mult; if (isUser && isPerPiece) totalMinPiece += mins; }
+                else { coutSerie += c * mult; if (isPerPiece) totalMinPiece += mins; }
             });
             const cout = coutSerie;
             const vente = marge < 1 ? cout / (1 - marge) : cout;
@@ -6958,101 +7011,116 @@
         }
 
         function pbRender() {
-            const c = document.getElementById('pb-pedals');
-            if (!c) return;
-            [...c.querySelectorAll('.pb-pedal')].forEach(el => el.remove());
-
             const SVG_MSP  = `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="22" r="14"/><polyline points="24,12 24,22 32,28"/><line x1="18" y1="6" x2="30" y2="6"/></svg>`;
             const SVG_CONSO= `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14,4 L34,4 L38,10 L38,36 Q38,38 24,38 Q10,38 10,36 L10,10 Z"/><line x1="10" y1="10" x2="38" y2="10"/><line x1="16" y1="20" x2="32" y2="20"/><line x1="16" y1="27" x2="28" y2="27"/></svg>`;
             const SVG_NOTE = `<svg viewBox="0 0 48 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="4" width="32" height="34" rx="2"/><line x1="14" y1="14" x2="34" y2="14"/><line x1="14" y1="21" x2="34" y2="21"/><line x1="14" y1="28" x2="26" y2="28"/></svg>`;
 
-            const hasUserPedals = pbPedals.some(p => p.type !== 'ampli' && p.type !== 'baffle');
-
-            pbPedals.forEach(p => {
+            function makePedalEl(p) {
                 const el = document.createElement('div');
+                el.className = 'pb-pedal' + (p.parallel ? ' pb-pedal-parallel' : '');
                 el.dataset.id = String(p.id);
-
-                if (p.type === 'ampli') {
-                    el.className = 'pb-pedal pb-endpoint';
-                    el.innerHTML = `
-                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
-                        <div class="pb-ampli-body">
-                            <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
-                            <div class="pb-endpoint-icon">🎸</div>
-                            <div class="pb-endpoint-title">${document.getElementById('pb-title')?.value || 'PROJET'}</div>
-                            <div id="pb-ampli-client" style="font-size:0.65em;margin-top:4px;opacity:0.6;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                const svgIcon = p.type === 'geste' ? (PB_GESTE_ICONS[p.categorie] || PB_GESTE_ICONS['default'])
+                              : p.type === 'msp' ? SVG_MSP
+                              : p.type === 'consommable' ? SVG_CONSO : SVG_NOTE;
+                const isGeste = p.type === 'geste';
+                const stepSize = p.type === 'msp' ? 15 : 1;
+                const stepMin  = isGeste ? 1 : 0;
+                const stepMax  = isGeste ? 99 : p.type === 'msp' ? 480 : 999;
+                const showStepper = p.type !== 'note';
+                const totalMin = isGeste ? p.value * (p.tempsUnit||1) : 0;
+                el.innerHTML = `
+                    <div class="pb-drag-handle" data-dragid="${p.id}">⠿ ⠿</div>
+                    <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;position:relative;">
+                        <button class="pb-pedal-del" onclick="pbRemovePedal('${p.id}')" title="Retirer">✕</button>
+                        <div style="background:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
+                        <div class="pb-pedal-name">${p.label}</div>
+                        ${isGeste ? `<div style="font-size:0.7em;color:${p.led};font-weight:700;margin-bottom:2px;">${p.tempsUnit||1} min</div>` : ''}
+                        ${p.desc && !isGeste ? `<div style="font-size:0.52em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
+                        <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:3px auto 2px;width:52px;height:38px;">${svgIcon}</div>
+                        ${showStepper ? `
+                        <div style="font-size:0.55em;color:#6a8aaa;margin-bottom:2px;text-align:center;">${isGeste ? 'nb de fois' : p.type === 'msp' ? 'durée' : 'qté'}</div>
+                        <div class="pb-stepper">
+                            <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${-stepSize},${stepMin},${stepMax})">−</button>
+                            <div class="pb-step-val" id="pbval-${p.id}">${_pbFormatVal(p)}</div>
+                            <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${stepSize},${stepMin},${stepMax})">+</button>
                         </div>
-                        <div class="pb-jack pb-jack-out"></div>`;
-                } else if (p.type === 'baffle') {
-                    el.className = 'pb-pedal pb-endpoint';
-                    el.innerHTML = `
-                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
-                        <div class="pb-jack pb-jack-in"></div>
-                        <div class="pb-baffle-body">
-                            <div class="pb-endpoint-label" style="color:#888;">SORTIE</div>
-                            <div class="pb-endpoint-icon">📢</div>
-                            <div class="pb-endpoint-title">TOTAL</div>
-                            <div class="pb-total-line" id="pb-total-cout" style="margin-top:8px;font-size:0.72em;">Coût : —</div>
-                            <div class="pb-total-big" id="pb-total-vente" style="font-size:0.88em;">—</div>
-                        </div>`;
-                } else {
-                    // Regular pedal
-                    el.className = 'pb-pedal' + (p.parallel ? ' pb-pedal-parallel' : '');
-                    const svgIcon = p.type === 'geste' ? (PB_GESTE_ICONS[p.categorie] || PB_GESTE_ICONS['default'])
-                                  : p.type === 'msp'   ? SVG_MSP
-                                  : p.type === 'consommable' ? SVG_CONSO : SVG_NOTE;
-                    const isGeste = p.type === 'geste';
-                    const stepSize = p.type === 'msp' ? 15 : 1;
-                    const stepMin  = isGeste ? 1 : 0;
-                    const stepMax  = isGeste ? 99 : p.type === 'msp' ? 480 : 999;
-                    const parallelLabel = p.parallel ? '⇌ PARALLÈLE' : '▶ SÉRIE';
-                    const showStepper   = p.type !== 'note';
-                    const totalMin = isGeste ? p.value * (p.tempsUnit||1) : 0;
-                    el.innerHTML = `
-                        <div class="pb-drag-handle" onmousedown="pbStartDrag(event,'${p.id}')">⠿ ⠿ ⠿</div>
-                        <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;position:relative;">
-                            <button class="pb-pedal-del" onclick="pbRemovePedal('${p.id}')" title="Retirer">✕</button>
-                            <div style="background:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
-                            <div class="pb-pedal-name">${p.label}</div>
-                            ${isGeste ? `<div style="font-size:0.7em;color:${p.led};font-weight:700;margin-bottom:2px;">${p.tempsUnit||1} min</div>` : ''}
-                            ${p.desc && !isGeste ? `<div style="font-size:0.52em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
-                            <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:3px auto 2px;width:52px;height:38px;">${svgIcon}</div>
-                            ${showStepper ? `
-                            <div style="font-size:0.55em;color:#6a8aaa;margin-bottom:2px;text-align:center;">${isGeste ? 'nb de fois' : p.type === 'msp' ? 'durée' : 'qté'}</div>
-                            <div class="pb-stepper">
-                                <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${-stepSize},${stepMin},${stepMax})">−</button>
-                                <div class="pb-step-val" id="pbval-${p.id}">${_pbFormatVal(p)}</div>
-                                <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${stepSize},${stepMin},${stepMax})">+</button>
-                            </div>
-                            <div id="pbtotalmin-${p.id}" style="font-size:0.58em;color:#8a9ab0;text-align:center;margin-top:2px;">${isGeste && p.value > 1 ? `= ${totalMin} min` : ''}</div>
-                            <div class="pb-appliq-row">
-                                <button class="pb-appliq-btn${p.perPiece !== false ? ' active' : ''}" data-pp="true" onclick="pbSetAppliq('${p.id}',true)" title="Par pièce (× nb pièces)">/pce</button>
-                                <button class="pb-appliq-btn${p.perPiece === false ? ' active' : ''}" data-pp="false" onclick="pbSetAppliq('${p.id}',false)" title="Par lot (1×)">×lot</button>
-                            </div>
-                            ` : `<div style="font-size:0.65em;color:#8a9ab0;margin:4px 0;" id="pbval-${p.id}"></div>`}
+                        <div id="pbtotalmin-${p.id}" style="font-size:0.58em;color:#8a9ab0;text-align:center;margin-top:2px;">${isGeste && p.value > 1 ? `= ${totalMin} min` : ''}</div>
+                        <div class="pb-appliq-row">
+                            <button class="pb-appliq-btn${p.perPiece !== false ? ' active' : ''}" data-pp="true" onclick="pbSetAppliq('${p.id}',true)">/pce</button>
+                            <button class="pb-appliq-btn${p.perPiece === false ? ' active' : ''}" data-pp="false" onclick="pbSetAppliq('${p.id}',false)">×lot</button>
                         </div>
-                        <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel('${p.id}')">${parallelLabel}</button>
-                        <div class="pb-jack pb-jack-in"></div>
-                        <div class="pb-jack pb-jack-out"></div>`;
-                }
-
-                c.appendChild(el);
-
-                // Drag via pointerdown + setPointerCapture (fiable, fonctionne partout)
-                const handle = el.querySelector('.pb-drag-handle');
-            }); // end pbPedals.forEach
-
-            // Show hint when no user pedals
-            let hint = c.querySelector('#pb-empty-hint');
-            if (!hint) {
-                hint = document.createElement('div');
-                hint.id = 'pb-empty-hint';
-                hint.textContent = '← Cliquez sur un geste pour l\'ajouter';
+                        ` : `<div style="font-size:0.65em;color:#8a9ab0;margin:4px 0;" id="pbval-${p.id}"></div>`}
+                    </div>
+                    <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel('${p.id}')">${p.parallel ? '⇌ PARALLÈLE' : '▶ SÉRIE'}</button>
+                    <div class="pb-jack pb-jack-in"></div>
+                    <div class="pb-jack pb-jack-out"></div>`;
+                el.querySelector('.pb-drag-handle').addEventListener('mousedown', e => pbStartDrag(e, p.id));
+                return el;
             }
-            // Insert hint between ampli and baffle if no pedals
-            const baffleEl = c.querySelector('.pb-pedal[data-id="__baffle__"]');
-            if (!hasUserPedals && baffleEl) c.insertBefore(hint, baffleEl);
-            else if (hint.parentNode) hint.parentNode.removeChild(hint);
+
+            // ── Zone parallèle ──────────────────────────────────────
+            const ppEl = document.getElementById('pb-parallel-pedals');
+            if (ppEl) {
+                ppEl.innerHTML = '';
+                pbPedals.filter(p => p.parallel).forEach(p => ppEl.appendChild(makePedalEl(p)));
+                const drop = document.createElement('div');
+                drop.className = 'pb-parallel-drop';
+                drop.id = 'pb-parallel-drop-zone';
+                drop.textContent = '+';
+                drop.title = 'Déposer ici pour passer en parallèle';
+                ppEl.appendChild(drop);
+            }
+
+            // ── ENTRÉE endpoint ─────────────────────────────────────
+            const ampliEl = document.getElementById('pb-endpoint-ampli');
+            if (ampliEl) {
+                ampliEl.innerHTML = `
+                    <div class="pb-ampli-body">
+                        <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
+                        <div class="pb-endpoint-icon">🎸</div>
+                        <div class="pb-endpoint-title">${document.getElementById('pb-title')?.value||'PROJET'}</div>
+                        <div id="pb-ampli-client" style="font-size:0.65em;margin-top:4px;opacity:0.6;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${document.getElementById('pb-client')?.value||''}</div>
+                    </div>
+                    <div class="pb-jack pb-jack-out"></div>`;
+            }
+
+            // ── SORTIE endpoint ──────────────────────────────────────
+            const baffleEl = document.getElementById('pb-endpoint-baffle');
+            if (baffleEl) {
+                baffleEl.innerHTML = `
+                    <div class="pb-jack pb-jack-in"></div>
+                    <div class="pb-baffle-body">
+                        <div class="pb-endpoint-label" style="color:#888;">SORTIE</div>
+                        <div class="pb-endpoint-icon">📢</div>
+                        <div class="pb-endpoint-title">TOTAL</div>
+                        <div class="pb-total-line" id="pb-total-cout" style="margin-top:8px;font-size:0.72em;">Coût : —</div>
+                        <div class="pb-total-big" id="pb-total-vente" style="font-size:0.88em;">—</div>
+                    </div>`;
+            }
+
+            // ── 60 slots série ──────────────────────────────────────
+            const slotsEl = document.getElementById('pb-serie-slots');
+            if (slotsEl) {
+                slotsEl.innerHTML = '';
+                const slotMap = {};
+                pbPedals.filter(p => !p.parallel && p.slot !== undefined).forEach(p => { slotMap[p.slot] = p; });
+                for (let i = 0; i < 60; i++) {
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = 'pb-slot';
+                    slotDiv.dataset.slot = String(i);
+                    const p = slotMap[i];
+                    if (p) {
+                        slotDiv.classList.add('occupied');
+                        slotDiv.appendChild(makePedalEl(p));
+                    } else {
+                        const num = document.createElement('span');
+                        num.className = 'pb-slot-num';
+                        num.textContent = String(i + 1);
+                        slotDiv.appendChild(num);
+                    }
+                    slotsEl.appendChild(slotDiv);
+                }
+            }
 
             pbCalcTotal();
             requestAnimationFrame(pbDrawCables);
@@ -7063,18 +7131,14 @@
             const board = document.getElementById('pb-board');
             if (!svg || !board) return;
             const br = board.getBoundingClientRect();
-            const scrollLeft = board.scrollLeft;
-            const scrollTop  = board.scrollTop;
+            const sl = board.scrollLeft, st = board.scrollTop;
 
             let paths = '', shadows = '';
 
-            // Helper: get jack center coords relative to board scroll area
-            const jackXY = (pedalId, side) => {
-                const j = document.querySelector(`.pb-pedal[data-id="${pedalId}"] .pb-jack-${side}`);
-                if (!j) return null;
-                const r = j.getBoundingClientRect();
-                return { x: r.left + r.width/2 - br.left + scrollLeft,
-                         y: r.top  + r.height/2 - br.top  + scrollTop };
+            const elXY = (el) => {
+                if (!el) return null;
+                const r = el.getBoundingClientRect();
+                return { x: r.left + r.width/2 - br.left + sl, y: r.top + r.height/2 - br.top + st };
             };
 
             const addCable = (p1, p2, col, arcDir, w=5, op=0.85) => {
@@ -7086,35 +7150,39 @@
                 shadows += `<path d="M${p1.x},${p1.y} C${p1.x+30},${p1.y+sag+4} ${p2.x-30},${p2.y+sag+4} ${p2.x},${p2.y}" stroke="rgba(0,0,0,0.28)" stroke-width="7" fill="none" stroke-linecap="round"/>`;
             };
 
-            // ── Série chain (ampli + serie pedals + baffle) ─────────
-            const serieChain = pbPedals.filter(p => p.type === 'ampli' || p.type === 'baffle' || !p.parallel);
-            let colIdx = 0;
-            for (let i = 0; i < serieChain.length - 1; i++) {
-                addCable(jackXY(serieChain[i].id, 'out'), jackXY(serieChain[i+1].id, 'in'),
-                         PB_CABLE_COLORS[colIdx++ % PB_CABLE_COLORS.length], +1);
-            }
+            const ampliJack  = elXY(document.querySelector('#pb-endpoint-ampli .pb-jack-out'));
+            const baffleJack = elXY(document.querySelector('#pb-endpoint-baffle .pb-jack-in'));
 
-            // ── Parallel branches: ENTRÉE → pedal → SORTIE ──────────
-            const ampliId  = pbPedals.find(p => p.type === 'ampli')?.id;
-            const baffleId = pbPedals.find(p => p.type === 'baffle')?.id;
-            pbPedals.filter(p => p.parallel).forEach((p, idx) => {
-                const arcUp = -(1 + idx * 0.4); // arcs above the chain, stagger if multiple
-                addCable(jackXY(ampliId, 'out'), jackXY(p.id, 'in'),  '#f0c040', arcUp, 3.5, 0.7);
-                addCable(jackXY(p.id, 'out'),    jackXY(baffleId, 'in'), '#f0c040', arcUp, 3.5, 0.7);
+            // ── Série: ENTRÉE → occupied slots in order → SORTIE ────
+            let prev = ampliJack;
+            let colIdx = 0;
+            for (let i = 0; i < 60; i++) {
+                const pedalEl = document.querySelector(`.pb-slot[data-slot="${i}"] .pb-pedal`);
+                if (!pedalEl) continue;
+                const jIn  = elXY(pedalEl.querySelector('.pb-jack-in'));
+                const jOut = elXY(pedalEl.querySelector('.pb-jack-out'));
+                addCable(prev, jIn, PB_CABLE_COLORS[colIdx++ % PB_CABLE_COLORS.length], +1);
+                prev = jOut;
+            }
+            addCable(prev, baffleJack, PB_CABLE_COLORS[colIdx % PB_CABLE_COLORS.length], +1);
+
+            // ── Parallel: ENTRÉE → each parallel pedal → SORTIE ─────
+            document.querySelectorAll('#pb-parallel-pedals .pb-pedal').forEach((pedalEl, idx) => {
+                const jIn  = elXY(pedalEl.querySelector('.pb-jack-in'));
+                const jOut = elXY(pedalEl.querySelector('.pb-jack-out'));
+                const arcMag = -(0.8 + idx * 0.35);
+                addCable(ampliJack, jIn,   '#f0c040', arcMag, 3.5, 0.72);
+                addCable(jOut, baffleJack, '#f0c040', arcMag, 3.5, 0.72);
             });
 
-            // Set SVG size to match board scroll area
-            const chain = document.getElementById('pb-chain');
-            if (chain) {
-                svg.setAttribute('width',  chain.scrollWidth  || board.clientWidth);
-                svg.setAttribute('height', chain.scrollHeight || board.clientHeight);
-            }
+            svg.setAttribute('width',  board.scrollWidth  || board.clientWidth);
+            svg.setAttribute('height', board.scrollHeight || board.clientHeight);
             svg.innerHTML = shadows + paths;
         }
 
         function pbClear() {
             if (!confirm('Vider le pédalboard ?')) return;
-            pbPedals = pbPedals.filter(p => p.type === 'ampli' || p.type === 'baffle');
+            pbPedals = [];
             pbRender();
         }
 
@@ -7128,7 +7196,7 @@
             let cout = 0;
             const gestes = [];
             pbPedals.forEach(p => {
-                if (p.type === 'ampli' || p.type === 'baffle' || p.parallel) return;
+                if (p.parallel) return;
                 const mult = p.perPiece !== false ? nbPieces : 1;
                 if (p.type === 'geste') {
                     const mins = p.value * (p.tempsUnit||1);
@@ -7568,7 +7636,7 @@
             // Avertir si on quitte le pédalboard avec du travail en cours
             const _activeTab = document.querySelector('.tab-content.active')?.id;
             if (_activeTab === 'pedalboard' && tabName !== 'pedalboard') {
-                const _hasWork = pbPedals.some(p => p.type !== 'ampli' && p.type !== 'baffle');
+                const _hasWork = pbPedals.length > 0;
                 if (_hasWork && !confirm('Session Pédalboard en cours. Quitter sans sauvegarder ?')) return;
             }
 
