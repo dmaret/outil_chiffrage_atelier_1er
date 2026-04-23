@@ -6830,7 +6830,7 @@
             let slot = undefined;
             if (!isParallel) {
                 const usedSlots = new Set(pbPedals.filter(p => !p.parallel && p.slot !== undefined).map(p => p.slot));
-                for (let i = 0; i < 36; i++) { if (!usedSlots.has(i)) { slot = i; break; } }
+                for (let i = 0; i < 36; i++) { const si = (i + 12) % 36; if (!usedSlots.has(si)) { slot = si; break; } }
             }
             pbPedals.push({
                 id: Date.now(), type, label: label || type,
@@ -6847,7 +6847,7 @@
             if (!p) return;
             if (p.parallel) {
                 const usedSlots = new Set(pbPedals.filter(q => !q.parallel && q.slot !== undefined).map(q => q.slot));
-                for (let i = 0; i < 36; i++) { if (!usedSlots.has(i)) { p.slot = i; break; } }
+                for (let i = 0; i < 36; i++) { const si = (i + 12) % 36; if (!usedSlots.has(si)) { p.slot = si; break; } }
                 p.parallel = false;
             } else {
                 p.parallel = true;
