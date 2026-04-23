@@ -6608,24 +6608,24 @@
             const under = document.elementFromPoint(e.clientX, e.clientY);
             _pbDrag.ghost.style.visibility = '';
             const target = under?.closest('.pb-pedal');
-            if (target && target.dataset.id !== _pbDrag.id) target.classList.add('drag-over');
+            // Store the last valid target so _pbDragEnd can use it reliably
+            _pbDrag.overTarget = (target && target.dataset.id !== _pbDrag.id) ? target : null;
+            if (_pbDrag.overTarget) _pbDrag.overTarget.classList.add('drag-over');
         }
         function _pbDragEnd(e) {
             if (!_pbDrag) return;
-            _pbDrag.ghost.style.visibility = 'hidden';
-            const under = document.elementFromPoint(e.clientX, e.clientY);
-            _pbDrag.ghost.style.visibility = '';
-            const target = under?.closest('.pb-pedal');
+            const target = _pbDrag.overTarget;
             _pbDrag.ghost.remove();
             document.querySelectorAll('.pb-pedal').forEach(p => { p.classList.remove('drag-over'); p.classList.remove('dragging'); });
-            if (target && target.dataset.id !== _pbDrag.id) {
+            if (target && target.isConnected && target.dataset.id !== _pbDrag.id) {
                 const fromIdx = pbPedals.findIndex(x => String(x.id) === _pbDrag.id);
                 const toIdx   = pbPedals.findIndex(x => String(x.id) === target.dataset.id);
-                if (fromIdx >= 0 && toIdx >= 0) { pbPedals.splice(toIdx, 0, pbPedals.splice(fromIdx, 1)[0]); pbRender(); }
+                if (fromIdx >= 0 && toIdx >= 0) { pbPedals.splice(toIdx, 0, pbPedals.splice(fromIdx, 1)[0]); }
             }
             _pbDrag = null;
             document.removeEventListener('mousemove', _pbDragMove);
             document.removeEventListener('mouseup', _pbDragEnd);
+            pbRender();
         }
         const PB_CABLE_COLORS = ['#e74c3c','#f0c040','#27ae60','#4e9af1','#e67e22','#9b59b6','#1abc9c','#e84393'];
         const PB_PEDAL_STYLES = {
