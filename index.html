@@ -6575,6 +6575,17 @@
             document.addEventListener('mousemove', _pbDragMove);
             document.addEventListener('mouseup', _pbDragEnd);
         }
+        function _pbNearestPedal(ghostX) {
+            let nearest = null, minDist = Infinity;
+            document.querySelectorAll('.pb-pedal').forEach(el => {
+                if (el.dataset.id === _pbDrag.id) return;
+                const r = el.getBoundingClientRect();
+                const dist = Math.abs((r.left + r.width / 2) - ghostX);
+                if (dist < minDist) { minDist = dist; nearest = el; }
+            });
+            return nearest;
+        }
+
         function _pbDragMove(e) {
             if (!_pbDrag) return;
             _pbDrag.gx += e.clientX - _pbDrag.mx;
@@ -6582,14 +6593,12 @@
             _pbDrag.mx = e.clientX; _pbDrag.my = e.clientY;
             _pbDrag.ghost.style.left = _pbDrag.gx + 'px';
             _pbDrag.ghost.style.top  = _pbDrag.gy + 'px';
+            // Highlight the nearest pedal (pas besoin de viser exactement)
+            const ghostCx = _pbDrag.gx + (_pbDrag.ghost.offsetWidth / 2);
+            const nearest = _pbNearestPedal(ghostCx);
             document.querySelectorAll('.pb-pedal').forEach(p => p.classList.remove('drag-over'));
-            _pbDrag.ghost.style.visibility = 'hidden';
-            const under = document.elementFromPoint(e.clientX, e.clientY);
-            _pbDrag.ghost.style.visibility = '';
-            const target = under?.closest('.pb-pedal');
-            // Store the last valid target so _pbDragEnd can use it reliably
-            _pbDrag.overTarget = (target && target.dataset.id !== _pbDrag.id) ? target : null;
-            if (_pbDrag.overTarget) _pbDrag.overTarget.classList.add('drag-over');
+            if (nearest) { nearest.classList.add('drag-over'); _pbDrag.overTarget = nearest; }
+            else _pbDrag.overTarget = null;
         }
         function _pbDragEnd(e) {
             if (!_pbDrag) return;
