@@ -6859,7 +6859,7 @@
         }
 
         function pbMovePedal(id, dir) {
-            const idx = pbPedals.findIndex(p => p.id === id);
+            const idx = pbPedals.findIndex(p => String(p.id) === String(id));
             if (idx < 0) return;
             const ni = idx + dir;
             if (ni < 0 || ni >= pbPedals.length) return;
@@ -7057,17 +7057,22 @@
                     const onUp = () => {
                         handle.removeEventListener('pointermove', onMove);
                         handle.removeEventListener('pointerup', onUp);
+                        handle.removeEventListener('pointercancel', onUp);
                         ghost.remove();
                         document.querySelectorAll('.pb-pedal').forEach(x => { x.classList.remove('drag-over'); x.classList.remove('dragging'); });
                         if (overTarget?.isConnected && overTarget.dataset.id !== String(p.id)) {
                             const fi = pbPedals.findIndex(x => String(x.id) === String(p.id));
                             const ti = pbPedals.findIndex(x => String(x.id) === overTarget.dataset.id);
-                            if (fi >= 0 && ti >= 0) pbPedals.splice(ti, 0, pbPedals.splice(fi, 1)[0]);
+                            if (fi >= 0 && ti >= 0) {
+                                const [moved] = pbPedals.splice(fi, 1);
+                                pbPedals.splice(fi < ti ? ti - 1 : ti, 0, moved);
+                            }
                         }
                         pbRender();
                     };
                     handle.addEventListener('pointermove', onMove);
                     handle.addEventListener('pointerup', onUp);
+                    handle.addEventListener('pointercancel', onUp);
                 });
 
             }); // end pbPedals.forEach
