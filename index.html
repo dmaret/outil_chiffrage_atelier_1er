@@ -1061,21 +1061,26 @@
         #pb-main { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#0d0d18; min-height:0; }
         #pb-header { display:flex; gap:8px; padding:10px 14px; background:#0d0d18; border-bottom:1px solid #1e1e38; align-items:center; flex-wrap:wrap; }
         #pb-header input { background:#1c1c2e; border:1px solid #3a3a60; border-radius:8px; color:#e8ecf0; padding:7px 12px; font-size:0.88em; }
-        #pb-board { flex:1; position:relative; overflow:auto; margin:12px; border-radius:10px; border:3px solid #3a2a1a; background:
+        #pb-board { flex:1; position:relative; overflow:hidden; margin:12px; border-radius:10px; border:3px solid #3a2a1a; background:
             repeating-linear-gradient(90deg,rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
             repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
-            #1a1008; }
+            #1a1008; display:flex; flex-direction:column; }
         #pb-cable-svg { position:absolute; top:0; left:0; pointer-events:none; z-index:5; overflow:visible; }
-        /* ── Slot-based layout ── */
-        #pb-parallel-zone { min-height:50px; border-bottom:2px solid #2a2a10; padding:10px 16px 0; background:rgba(240,192,64,0.025); position:relative; }
-        .pb-pz-header { font-size:0.58em; letter-spacing:1.5px; text-transform:uppercase; color:#f0c04055; margin-bottom:6px; }
-        #pb-parallel-pedals { display:flex; gap:10px; align-items:flex-end; padding:0 0 10px; min-height:44px; flex-wrap:wrap; }
-        .pb-parallel-drop { width:82px; min-height:64px; border:2px dashed #f0c04033; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#f0c04044; font-size:1.8em; flex-shrink:0; transition:all 0.15s; cursor:default; }
-        .pb-parallel-drop.drag-over { border-color:#f0c040; background:rgba(240,192,64,0.1); color:#f0c040; }
-        #pb-serie-row { display:flex; align-items:center; padding:24px 16px; min-width:max-content; position:relative; }
+        /* ── Grid-based layout ── */
+        #pb-board-controls { display:flex; align-items:center; gap:8px; padding:5px 14px; background:#090910; border-bottom:1px solid #1e1e38; flex-shrink:0; font-size:0.82em; color:#7a9ab0; }
+        .pb-zoom-btn { width:26px; height:26px; border-radius:6px; border:1px solid #2a3a50; background:#1a2a3a; color:#c8d8e8; cursor:pointer; font-size:1.05em; line-height:1; display:flex; align-items:center; justify-content:center; transition:background 0.12s; }
+        .pb-zoom-btn:hover { background:#2a3a5a; color:#fff; }
+        #pb-zoom-label { min-width:38px; text-align:center; font-weight:700; color:#7ac4ff; font-size:0.85em; }
+        #pb-grid-wrap { display:flex; align-items:center; justify-content:center; padding:24px 20px; flex:1; overflow:auto; gap:20px; }
         .pb-endpoint-fixed { position:relative; z-index:10; flex-shrink:0; }
-        #pb-serie-slots { display:flex; gap:6px; align-items:center; flex-shrink:0; padding:0 10px; }
-        .pb-slot { width:138px; min-height:218px; border:2px dashed #2c2c2c; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative; transition:border-color 0.14s,background 0.14s; background:rgba(255,255,255,0.007); }
+        #pb-grid-center { display:flex; flex-direction:column; gap:8px; transform-origin:center top; transition:transform 0.18s; }
+        /* Parallel row (top of grid) */
+        #pb-parallel-row { display:flex; gap:6px; padding:8px 10px 10px; background:rgba(240,192,64,0.03); border:1px solid #2a2a12; border-radius:10px; min-height:52px; align-items:flex-end; flex-wrap:nowrap; }
+        .pb-parallel-drop { width:130px; min-height:52px; border:2px dashed #f0c04033; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#f0c04044; font-size:1.6em; flex-shrink:0; transition:all 0.15s; cursor:default; }
+        .pb-parallel-drop.drag-over { border-color:#f0c040; background:rgba(240,192,64,0.1); color:#f0c040; }
+        /* Serie grid 6×6 */
+        #pb-serie-grid { display:grid; grid-template-columns:repeat(6,130px); gap:6px; }
+        .pb-slot { width:130px; min-height:208px; border:2px dashed #2c2c2c; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative; transition:border-color 0.14s,background 0.14s; background:rgba(255,255,255,0.007); }
         .pb-slot.occupied { border-style:solid; border-color:transparent; background:transparent; justify-content:flex-start; }
         .pb-slot.drag-over { border-color:#4e9af1 !important; border-style:solid !important; background:rgba(78,154,241,0.09) !important; }
         .pb-slot .pb-pedal { margin:0; }
@@ -1092,18 +1097,18 @@
         .pb-jack-in  { left:-8px; }
         .pb-jack-out { right:-8px; }
         /* Pedals */
-        .pb-pedal { position:relative; z-index:10; flex-shrink:0; margin:0 8px; display:flex; flex-direction:column; align-items:center; }
+        .pb-pedal { position:relative; z-index:10; flex-shrink:0; margin:0; display:flex; flex-direction:column; align-items:center; width:100%; }
         .pb-pedal.dragging { opacity:0.3; }
         .pb-pedal.drag-over { filter:brightness(1.4); outline:2px dashed #4e9af1; border-radius:12px; }
-        .pb-drag-handle { width:120px; text-align:center; color:#445; font-size:1.15em; cursor:grab; padding:3px 0 2px; line-height:1; user-select:none; letter-spacing:2px; transition:color 0.15s; border-radius:6px 6px 0 0; }
+        .pb-drag-handle { width:100%; text-align:center; color:#445; font-size:1.1em; cursor:grab; padding:3px 0 2px; line-height:1; user-select:none; letter-spacing:2px; transition:color 0.15s; border-radius:6px 6px 0 0; }
         .pb-drag-handle:hover { color:#8ab; background:rgba(255,255,255,0.06); }
         .pb-drag-handle:active { cursor:grabbing; }
-        .pb-pedal-body { width:120px; border-radius:8px 8px 0 0; padding:10px 8px 8px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.12); position:relative; user-select:none; }
+        .pb-pedal-body { width:100%; box-sizing:border-box; border-radius:8px 8px 0 0; padding:10px 8px 8px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.12); position:relative; user-select:none; }
         .pb-pedal-parallel .pb-pedal-body { border-style:dashed !important; opacity:0.82; }
         .pb-pedal-icon { display:flex; align-items:center; justify-content:center; }
         .pb-pedal-icon svg { width:100%; height:100%; display:block; filter:drop-shadow(0 0 4px currentColor); }
         .pb-pedal-led { width:8px; height:8px; border-radius:50%; margin:0 auto 6px; box-shadow:0 0 6px currentColor; }
-        .pb-parallel-btn { width:120px; background:#0f1a28; border:none; border-radius:0 0 10px 10px; padding:6px 0; font-size:0.68em; cursor:pointer; color:#556; display:block; border-top:1px solid rgba(255,255,255,0.05); transition:all 0.18s; letter-spacing:0.3px; }
+        .pb-parallel-btn { width:100%; background:#0f1a28; border:none; border-radius:0 0 10px 10px; padding:6px 0; font-size:0.68em; cursor:pointer; color:#556; display:block; border-top:1px solid rgba(255,255,255,0.05); transition:all 0.18s; letter-spacing:0.3px; }
         .pb-parallel-btn:hover { background:#1a2a40; color:#aab; }
         .pb-parallel-btn.active { color:#f0c040; background:#2a2000; border-top:1px solid #4a3800; font-weight:700; }
         .pb-appliq-row { display:flex; gap:2px; justify-content:center; margin:4px 0 2px; }
@@ -4339,15 +4344,22 @@
                         </div>
                         <div id="pb-board">
                             <svg id="pb-cable-svg"></svg>
-                            <!-- Zone parallèle (au-dessus) -->
-                            <div id="pb-parallel-zone">
-                                <div class="pb-pz-header">⇌ Zone parallèle — câbles de ENTRÉE à SORTIE</div>
-                                <div id="pb-parallel-pedals"></div>
+                            <!-- Barre de contrôle : zoom -->
+                            <div id="pb-board-controls">
+                                <button class="pb-zoom-btn" onclick="pbZoom(-1)" title="Zoom arrière">−</button>
+                                <span id="pb-zoom-label">100%</span>
+                                <button class="pb-zoom-btn" onclick="pbZoom(1)" title="Zoom avant">+</button>
+                                <span style="margin-left:10px;font-size:0.75em;opacity:0.4;">⇌ ligne du haut = parallèle &nbsp;|&nbsp; grille 6×6 = série</span>
                             </div>
-                            <!-- Ligne série : ENTRÉE + 60 cases + SORTIE -->
-                            <div id="pb-serie-row">
+                            <!-- ENTRÉE [grille] SORTIE -->
+                            <div id="pb-grid-wrap">
                                 <div id="pb-endpoint-ampli" class="pb-endpoint-fixed"></div>
-                                <div id="pb-serie-slots"></div>
+                                <div id="pb-grid-center">
+                                    <!-- Ligne parallèle (6 emplacements) -->
+                                    <div id="pb-parallel-row"></div>
+                                    <!-- Grille série 6×6 (36 emplacements) -->
+                                    <div id="pb-serie-grid"></div>
+                                </div>
                                 <div id="pb-endpoint-baffle" class="pb-endpoint-fixed"></div>
                             </div>
                         </div>
@@ -6580,6 +6592,18 @@
 
         let pbPedals = [];  // { id, type, label, value, unit, coutUnit, color, ledColor }
         let _pbDrag = null;
+        let _pbZoomIdx = 3;
+        const _PB_ZOOM_LEVELS = [0.45, 0.6, 0.75, 1.0, 1.2, 1.4];
+
+        function pbZoom(dir) {
+            _pbZoomIdx = Math.max(0, Math.min(_PB_ZOOM_LEVELS.length - 1, _pbZoomIdx + dir));
+            const s = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            const el = document.getElementById('pb-grid-center');
+            if (el) el.style.transform = `scale(${s})`;
+            const lbl = document.getElementById('pb-zoom-label');
+            if (lbl) lbl.textContent = Math.round(s * 100) + '%';
+            requestAnimationFrame(pbDrawCables);
+        }
 
         function pbStartDrag(e, id) {
             if (e.button !== 0) return;
@@ -6615,9 +6639,9 @@
                     return;
                 }
             }
-            const pzone = document.getElementById('pb-parallel-zone');
-            if (pzone) {
-                const r = pzone.getBoundingClientRect();
+            const prow = document.getElementById('pb-parallel-row');
+            if (prow) {
+                const r = prow.getBoundingClientRect();
                 if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
                     const pdz = document.getElementById('pb-parallel-drop-zone');
                     if (pdz) pdz.classList.add('drag-over');
@@ -6765,9 +6789,9 @@
             let nextSlot = 0;
             pbPedals.forEach(p => {
                 if (!p.parallel && p.slot === undefined) {
-                    while (usedSlots.has(nextSlot)) nextSlot++;
-                    p.slot = nextSlot;
-                    usedSlots.add(nextSlot++);
+                    while (usedSlots.has(nextSlot) && nextSlot < 36) nextSlot++;
+                    if (nextSlot < 36) { p.slot = nextSlot; usedSlots.add(nextSlot++); }
+                    else p.parallel = true; // overflow → move to parallel zone
                 }
             });
 
@@ -6803,7 +6827,7 @@
             let slot = undefined;
             if (!isParallel) {
                 const usedSlots = new Set(pbPedals.filter(p => !p.parallel && p.slot !== undefined).map(p => p.slot));
-                for (let i = 0; i < 60; i++) { if (!usedSlots.has(i)) { slot = i; break; } }
+                for (let i = 0; i < 36; i++) { if (!usedSlots.has(i)) { slot = i; break; } }
             }
             pbPedals.push({
                 id: Date.now(), type, label: label || type,
@@ -6820,7 +6844,7 @@
             if (!p) return;
             if (p.parallel) {
                 const usedSlots = new Set(pbPedals.filter(q => !q.parallel && q.slot !== undefined).map(q => q.slot));
-                for (let i = 0; i < 60; i++) { if (!usedSlots.has(i)) { p.slot = i; break; } }
+                for (let i = 0; i < 36; i++) { if (!usedSlots.has(i)) { p.slot = i; break; } }
                 p.parallel = false;
             } else {
                 p.parallel = true;
@@ -6923,7 +6947,7 @@
             const p = pbPedals.find(x => String(x.id) === String(id));
             if (!p || p.parallel || p.slot === undefined) return;
             const newSlot = p.slot + dir;
-            if (newSlot < 0 || newSlot >= 60) return;
+            if (newSlot < 0 || newSlot >= 36) return;
             const occupant = pbPedals.find(q => !q.parallel && q.slot === newSlot && String(q.id) !== String(id));
             if (occupant) occupant.slot = p.slot;
             p.slot = newSlot;
@@ -7058,8 +7082,8 @@
                 return el;
             }
 
-            // ── Zone parallèle ──────────────────────────────────────
-            const ppEl = document.getElementById('pb-parallel-pedals');
+            // ── Zone parallèle (ligne du haut) ──────────────────────
+            const ppEl = document.getElementById('pb-parallel-row');
             if (ppEl) {
                 ppEl.innerHTML = '';
                 pbPedals.filter(p => p.parallel).forEach(p => ppEl.appendChild(makePedalEl(p)));
@@ -7098,13 +7122,13 @@
                     </div>`;
             }
 
-            // ── 60 slots série ──────────────────────────────────────
-            const slotsEl = document.getElementById('pb-serie-slots');
+            // ── Grille série 6×6 (36 slots) ─────────────────────────
+            const slotsEl = document.getElementById('pb-serie-grid');
             if (slotsEl) {
                 slotsEl.innerHTML = '';
                 const slotMap = {};
                 pbPedals.filter(p => !p.parallel && p.slot !== undefined).forEach(p => { slotMap[p.slot] = p; });
-                for (let i = 0; i < 60; i++) {
+                for (let i = 0; i < 36; i++) {
                     const slotDiv = document.createElement('div');
                     slotDiv.className = 'pb-slot';
                     slotDiv.dataset.slot = String(i);
@@ -7156,8 +7180,8 @@
             // ── Série: ENTRÉE → occupied slots in order → SORTIE ────
             let prev = ampliJack;
             let colIdx = 0;
-            for (let i = 0; i < 60; i++) {
-                const pedalEl = document.querySelector(`.pb-slot[data-slot="${i}"] .pb-pedal`);
+            for (let i = 0; i < 36; i++) {
+                const pedalEl = document.querySelector(`#pb-serie-grid .pb-slot[data-slot="${i}"] .pb-pedal`);
                 if (!pedalEl) continue;
                 const jIn  = elXY(pedalEl.querySelector('.pb-jack-in'));
                 const jOut = elXY(pedalEl.querySelector('.pb-jack-out'));
@@ -7167,7 +7191,7 @@
             addCable(prev, baffleJack, PB_CABLE_COLORS[colIdx % PB_CABLE_COLORS.length], +1);
 
             // ── Parallel: ENTRÉE → each parallel pedal → SORTIE ─────
-            document.querySelectorAll('#pb-parallel-pedals .pb-pedal').forEach((pedalEl, idx) => {
+            document.querySelectorAll('#pb-parallel-row .pb-pedal').forEach((pedalEl, idx) => {
                 const jIn  = elXY(pedalEl.querySelector('.pb-jack-in'));
                 const jOut = elXY(pedalEl.querySelector('.pb-jack-out'));
                 const arcMag = -(0.8 + idx * 0.35);
