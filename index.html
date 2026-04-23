@@ -1071,9 +1071,9 @@
         .pb-zoom-btn { width:26px; height:26px; border-radius:6px; border:1px solid #2a3a50; background:#1a2a3a; color:#c8d8e8; cursor:pointer; font-size:1.05em; line-height:1; display:flex; align-items:center; justify-content:center; transition:background 0.12s; }
         .pb-zoom-btn:hover { background:#2a3a5a; color:#fff; }
         #pb-zoom-label { min-width:38px; text-align:center; font-weight:700; color:#7ac4ff; font-size:0.85em; }
-        #pb-grid-wrap { display:flex; align-items:center; justify-content:center; padding:24px 20px; flex:1; overflow:auto; }
-        .pb-endpoint-fixed { position:relative; z-index:10; flex-shrink:0; }
-        #pb-grid-center { display:flex; flex-direction:row; align-items:center; gap:16px; transform-origin:center center; transition:transform 0.18s; }
+        #pb-grid-wrap { display:flex; align-items:flex-start; justify-content:center; padding:24px 20px; flex:1; overflow:auto; }
+        .pb-endpoint-fixed { position:relative; z-index:10; flex-shrink:0; align-self:center; height:fit-content; }
+        #pb-grid-center { display:flex; flex-direction:row; align-items:center; gap:16px; transform-origin:top center; transition:transform 0.18s; }
         #pb-grid-col { display:flex; flex-direction:column; gap:8px; }
         /* Parallel row (top of grid) */
         #pb-parallel-row { display:flex; gap:6px; padding:8px 10px 10px; background:rgba(240,192,64,0.03); border:1px solid #2a2a12; border-radius:10px; min-height:52px; align-items:flex-end; flex-wrap:nowrap; }
@@ -6770,16 +6770,16 @@
             if (!document.getElementById('pb-recap-popup')) {
                 const pop = document.createElement('div');
                 pop.id = 'pb-recap-popup';
-                pop.style.cssText = 'display:block;position:fixed;bottom:20px;right:20px;z-index:9999;background:#fff;border-radius:12px;box-shadow:0 4px 32px rgba(0,0,0,0.22);width:230px;font-size:0.88em;user-select:none;';
+                pop.style.cssText = 'display:block;position:fixed;bottom:16px;right:16px;z-index:9999;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.18);width:170px;font-size:0.78em;user-select:none;';
                 pop.innerHTML = `
-                    <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:12px 12px 0 0;background:#f6f9fc;">
-                        <span style="font-weight:700;color:#2d3e50;font-size:0.95em;">📊 Récap live</span>
+                    <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:10px 10px 0 0;background:#f6f9fc;">
+                        <span style="font-weight:700;color:#2d3e50;font-size:0.9em;">📊 Récap live</span>
                     </div>
-                    <div style="padding:10px 14px 14px;">
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Temps :</span><span id="pb-recap-temps" style="font-weight:600;color:#2d3e50;">—</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix revient :</span><span id="pb-recap-cout" style="font-weight:600;color:#2d3e50;">—</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix vente :</span><span id="pb-recap-vente" style="font-weight:700;color:#27ae60;">—</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;"><span style="color:#7a8e9a;">Marge :</span><span id="pb-recap-marge" style="font-weight:600;color:#2d3e50;">—</span></div>
+                    <div style="padding:7px 10px 10px;">
+                        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Temps :</span><span id="pb-recap-temps" style="font-weight:600;color:#2d3e50;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix revient :</span><span id="pb-recap-cout" style="font-weight:600;color:#2d3e50;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix vente :</span><span id="pb-recap-vente" style="font-weight:700;color:#27ae60;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#7a8e9a;">Marge :</span><span id="pb-recap-marge" style="font-weight:600;color:#2d3e50;">—</span></div>
                     </div>`;
                 document.body.appendChild(pop);
                 pbMakeDraggable(pop, document.getElementById('pb-recap-popup-hdr'));
