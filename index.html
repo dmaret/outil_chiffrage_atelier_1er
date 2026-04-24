@@ -7404,17 +7404,21 @@
             }
             addCable(prev, baffleJack, PB_CABLE_COLORS[colIdx % PB_CABLE_COLORS.length], +1);
 
-            // ── Parallèle: ENTRÉE → chaque → SORTIE (arc vers le haut) ──
-            pbPedals.filter(p => p.parallel).forEach((p, idx) => {
-                const pedalEl = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
-                if (!pedalEl) return;
-                const jIn  = getJackPos(pedalEl.querySelector('.pb-jack-in'));
-                const jOut = getJackPos(pedalEl.querySelector('.pb-jack-out'));
-                if (!jIn || !jOut) return;
-                const arcMag = -(0.8 + idx * 0.35);
-                addCable(ampliJack, jIn,   '#f0c040', arcMag, 3.5, 0.72);
-                addCable(jOut, baffleJack, '#f0c040', arcMag, 3.5, 0.72);
-            });
+            // ── Parallèle: chaîne ENTRÉE → par1 → par2 → … → SORTIE (triés par X) ──
+            const parallelOrdered = pbPedals.filter(p => p.parallel).sort((a, b) => a.x - b.x);
+            if (parallelOrdered.length > 0) {
+                let prev = ampliJack;
+                for (const p of parallelOrdered) {
+                    const pedalEl = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
+                    if (!pedalEl) continue;
+                    const jIn  = getJackPos(pedalEl.querySelector('.pb-jack-in'));
+                    const jOut = getJackPos(pedalEl.querySelector('.pb-jack-out'));
+                    if (!jIn || !jOut) continue;
+                    addCable(prev, jIn, '#f0c040', -1, 3.5, 0.72);
+                    prev = jOut;
+                }
+                addCable(prev, baffleJack, '#f0c040', -1, 3.5, 0.72);
+            }
 
             svg.setAttribute('width', '2000');
             svg.setAttribute('height', '900');
