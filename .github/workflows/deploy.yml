@@ -2,28 +2,174 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'claude/**'
+      - 'preview/**'
+      - 'feature/**'
+      - 'dev/**'
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
+  pull-requests: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Checkout source branch
+        uses: actions/checkout@v4
         with:
-          path: .
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          path: source
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+        continue-on-error: true
+
+      - name: Prepare gh-pages directory
+        run: |
+          if [ ! -d "gh-pages/.git" ]; then
+            echo "gh-pages branch does not exist yet, initializing..."
+            mkdir -p gh-pages
+            cd gh-pages
+            git init
+            git checkout -b gh-pages
+            cd ..
+          fi
+
+      - name: Compute target directory
+        id: target
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          SAFE_BRANCH=$(echo "$BRANCH" | sed 's|/|-|g' | tr '[:upper:]' '[:lower:]')
+          if [ "$BRANCH" = "main" ]; then
+            TARGET_DIR="gh-pages"
+            PREVIEW_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          else
+            TARGET_DIR="gh-pages/preview/$SAFE_BRANCH"
+            PREVIEW_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/preview/$SAFE_BRANCH/"
+          fi
+          echo "target_dir=$TARGET_DIR" >> $GITHUB_OUTPUT
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "safe_branch=$SAFE_BRANCH" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Copy site files
+        run: |
+          mkdir -p "${{ steps.target.outputs.target_dir }}"
+          rsync -av --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='preview' \
+            source/ "${{ steps.target.outputs.target_dir }}/"
+
+      - name: Generate preview index
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd gh-pages
+          mkdir -p preview
+          cat > preview/index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html lang="fr"><head><meta charset="UTF-8">
+          <title>Previews - Atelier La Pallanterie</title>
+          <style>body{font-family:system-ui;max-width:800px;margin:40px auto;padding:20px;background:#f0f4f8;}
+          h1{color:#6b8fa3}.branch{background:white;padding:15px;margin:10px 0;border-radius:8px;border-left:4px solid #a8d5e2;}
+          a{color:#2980b9;text-decoration:none;font-weight:600}a:hover{text-decoration:underline}</style>
+          </head><body><h1>🔍 Previews de branches</h1>
+          <p>Liens vers les versions de preview des branches actives :</p>
+          <div id="list"></div>
+          <script>
+          fetch('.').then(r=>r.text()).then(html=>{
+            const parser=new DOMParser();const doc=parser.parseFromString(html,'text/html');
+            const links=Array.from(doc.querySelectorAll('a')).filter(a=>a.href.endsWith('/')&&!a.href.includes('..'));
+            document.getElementById('list').innerHTML=links.map(a=>
+              `<div class="branch"><a href="${a.getAttribute('href')}">🌿 ${a.textContent.replace('/','')}</a></div>`
+            ).join('')||'<p>Aucune preview active.</p>';
+          });
+          </script></body></html>
+          HTMLEOF
+
+      - name: Commit and push to gh-pages
+        run: |
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Deploy ${{ steps.target.outputs.branch }} [skip ci]"
+            if git rev-parse --verify origin/gh-pages > /dev/null 2>&1; then
+              git push origin gh-pages
+            else
+              git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" || true
+              git push -u origin gh-pages
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.target.outputs.preview_url }}';
+            const branch = '${{ steps.target.outputs.branch }}';
+            const body = `🔍 **Preview déployée !**\n\n🌿 Branche : \`${branch}\`\n🔗 Lien : ${url}\n\n⏱️ Disponible sous ~1 min après le déploiement.`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes('Preview déployée'));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body
+              });
+            }
+
+      - name: Display preview URL
+        run: |
+          echo "::notice title=Preview URL::${{ steps.target.outputs.preview_url }}"
+          echo "🌐 Preview disponible à : ${{ steps.target.outputs.preview_url }}"
+
+  cleanup-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+        continue-on-error: true
+
+      - name: Remove preview directory
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          SAFE_BRANCH=$(echo "$BRANCH" | sed 's|/|-|g' | tr '[:upper:]' '[:lower:]')
+          if [ -d "preview/$SAFE_BRANCH" ]; then
+            rm -rf "preview/$SAFE_BRANCH"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Cleanup preview for $BRANCH [skip ci]" || true
+            git push || true
+          fi
