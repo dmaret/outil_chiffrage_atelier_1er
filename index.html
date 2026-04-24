@@ -1159,6 +1159,41 @@
         }
 
         /* ── Training Module Overlay ─────────────────────────────────── */
+        /* ── Procédures ───────────────────────────────────────────────── */
+        #procedures { padding:0; display:flex; flex-direction:column; }
+        .proc-header { display:flex; align-items:center; gap:12px; padding:12px 18px; background:#0d1117; border-bottom:1px solid #1e2433; flex-wrap:wrap; }
+        .proc-subnav { display:flex; gap:6px; }
+        .proc-subnav-btn { padding:5px 15px; border-radius:20px; border:1px solid #2a3a50; background:#1a2a3a; color:#a0b8d0; cursor:pointer; font-size:0.82em; transition:all 0.15s; }
+        .proc-subnav-btn.active { background:#2a5a8a; color:#e0f0ff; border-color:#4a8ac0; }
+        .proc-section { display:none; padding:16px 20px; flex:1; }
+        .proc-section.active { display:block; }
+        .proc-card { background:#131825; border:1px solid #1e2a3a; border-radius:10px; padding:12px 16px; margin-bottom:8px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .proc-card-type { padding:3px 10px; border-radius:12px; font-size:0.75em; font-weight:700; flex-shrink:0; }
+        .proc-card-type.cea { background:#1a3a2a; color:#4fc070; border:1px solid #2a5a3a; }
+        .proc-card-type.client { background:#1a2a3a; color:#4a9af0; border:1px solid #2a4a6a; }
+        .proc-editor-layout { display:grid; grid-template-columns:230px 1fr; gap:14px; min-height:460px; }
+        .proc-palette { background:#0d1117; border:1px solid #1e2a3a; border-radius:10px; padding:10px; overflow-y:auto; max-height:560px; }
+        .proc-palette-item { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:7px; cursor:pointer; font-size:0.8em; color:#a0b8d0; transition:background 0.12s; user-select:none; }
+        .proc-palette-item:hover { background:#1a2a3a; }
+        .proc-steps-box { background:#0d1117; border:1px solid #1e2a3a; border-radius:10px; padding:14px; overflow-y:auto; max-height:560px; }
+        .proc-step { display:flex; align-items:center; gap:10px; background:#131825; border:1px solid #1e2a3a; border-radius:8px; padding:9px 12px; margin-bottom:7px; cursor:grab; }
+        .proc-step:active { cursor:grabbing; opacity:0.7; }
+        .proc-step-num { width:22px; height:22px; border-radius:50%; background:#1e3a5a; color:#6ab0f0; font-size:0.78em; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .proc-step-del { background:none; border:none; color:#f88; cursor:pointer; font-size:0.85em; opacity:0.55; padding:3px 5px; flex-shrink:0; }
+        .proc-step-del:hover { opacity:1; }
+        .proc-comp-grid { display:grid; grid-template-columns:1fr 48px 1fr; align-items:start; }
+        .proc-comp-hdr { text-align:center; padding:9px 12px; border-radius:8px 8px 0 0; font-weight:700; font-size:0.85em; }
+        .proc-comp-hdr.cea { background:#1a3a2a; color:#4fc070; }
+        .proc-comp-hdr.client { background:#1a2a3a; color:#4a9af0; }
+        .proc-comp-hdr.mid { background:#0d1117; }
+        .proc-comp-step { padding:7px 10px; margin:2px 0; border-radius:7px; font-size:0.82em; display:flex; align-items:center; gap:7px; min-height:38px; }
+        .proc-comp-step.match  { background:#0e2a0e; border:1px solid #1a4a1a; color:#70d070; }
+        .proc-comp-step.moved  { background:#2a2a0a; border:1px solid #5a5a0a; color:#d0c040; }
+        .proc-comp-step.missing{ background:#2a0e0e; border:1px solid #5a1a1a; color:#d06060; opacity:0.8; font-style:italic; }
+        .proc-comp-step.extra  { background:#0e0e2a; border:1px solid #1a1a5a; color:#6070d0; }
+        .proc-comp-step.empty  { opacity:0.2; min-height:38px; }
+        .proc-comp-mid { display:flex; align-items:center; justify-content:center; margin:2px 0; min-height:38px; font-size:1.1em; }
+
         .training-overlay {
             position: fixed; inset: 0; z-index: 10000;
             background: rgba(0, 0, 0, 0.5);
@@ -2991,6 +3026,7 @@
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
                 <button class="tab" onclick="switchTab('formation-logistique')">🏭 Formation</button>
+                <button class="tab" onclick="switchTab('procedures')">📋 Procédures</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
             <button class="btn btn-secondary btn-small" onclick="resetTabOrder()" title="Remettre les onglets dans leur ordre d'origine" style="margin-left:12px;">↺ Réinitialiser</button>
@@ -4495,6 +4531,96 @@
                 </div>
             </div>
 
+            <!-- ══════════ PROCÉDURES ══════════ -->
+            <div id="procedures" class="tab-content">
+                <div class="proc-header">
+                    <span style="font-weight:700;font-size:1em;color:#e0f0ff;">📋 Procédures</span>
+                    <div class="proc-subnav">
+                        <button class="proc-subnav-btn active" id="proc-nav-liste"       onclick="procShowSection('liste')">📋 Mes procédures</button>
+                        <button class="proc-subnav-btn"        id="proc-nav-editeur"     onclick="procShowSection('editeur')">✏️ Éditeur</button>
+                        <button class="proc-subnav-btn"        id="proc-nav-comparateur" onclick="procShowSection('comparateur')">🔍 Comparateur</button>
+                    </div>
+                    <div style="margin-left:auto;display:flex;gap:8px;">
+                        <button class="btn btn-small" onclick="procNewProcedure('cea')"    style="background:#1a3a2a;color:#4fc070;border-color:#2a5a3a;">+ Procédure CEA</button>
+                        <button class="btn btn-small" onclick="procNewProcedure('client')" style="background:#1a2a3a;color:#4a9af0;border-color:#2a4a6a;">+ Procédure Client</button>
+                    </div>
+                </div>
+
+                <!-- LISTE -->
+                <div id="proc-liste" class="proc-section active">
+                    <div id="proc-liste-content"></div>
+                </div>
+
+                <!-- ÉDITEUR -->
+                <div id="proc-editeur" class="proc-section">
+                    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+                        <span id="proc-edit-type-badge" class="proc-card-type cea">CEA</span>
+                        <input id="proc-edit-nom" type="text" placeholder="Nom de la procédure…"
+                               style="flex:1;min-width:180px;padding:7px 12px;border-radius:7px;border:1px solid #2a3a50;background:#0d1117;color:#e0f0ff;font-size:0.88em;">
+                        <label style="font-size:0.82em;color:#6a8aa8;white-space:nowrap;">Mode :
+                            <select id="proc-edit-mode" onchange="procUpdateMode()"
+                                    style="padding:5px 10px;border-radius:7px;border:1px solid #2a3a50;background:#0d1117;color:#e0f0ff;font-size:0.85em;margin-left:4px;">
+                                <option value="reel">Réel</option>
+                                <option value="entrainement">Entraînement (fake)</option>
+                            </select>
+                        </label>
+                        <span id="proc-edit-client-wrap" style="display:flex;gap:6px;align-items:center;">
+                            <select id="proc-edit-client" onchange="procLoadPrestations()"
+                                    style="padding:5px 10px;border-radius:7px;border:1px solid #2a3a50;background:#0d1117;color:#e0f0ff;font-size:0.85em;">
+                                <option value="">— Client —</option>
+                            </select>
+                            <select id="proc-edit-prestation"
+                                    style="padding:5px 10px;border-radius:7px;border:1px solid #2a3a50;background:#0d1117;color:#e0f0ff;font-size:0.85em;">
+                                <option value="">— Commande —</option>
+                            </select>
+                        </span>
+                        <button onclick="procSaveProcedure()"
+                                style="padding:7px 18px;border-radius:8px;border:none;background:#2a5a3a;color:#80e080;font-weight:700;cursor:pointer;white-space:nowrap;">💾 Enregistrer</button>
+                    </div>
+                    <div class="proc-editor-layout">
+                        <div class="proc-palette">
+                            <div style="font-size:0.72em;color:#4a7a9a;font-weight:700;letter-spacing:1px;margin-bottom:8px;">CATALOGUE GESTES</div>
+                            <div id="proc-palette-list"></div>
+                        </div>
+                        <div class="proc-steps-box">
+                            <div style="font-size:0.72em;color:#4a7a9a;font-weight:700;letter-spacing:1px;margin-bottom:10px;">
+                                ÉTAPES <span id="proc-steps-count" style="color:#4a9af0;font-weight:400;"></span>
+                                <span style="float:right;opacity:0.5;font-weight:400;">Glisser pour réordonner</span>
+                            </div>
+                            <div id="proc-steps-list">
+                                <div style="color:#4a6a8a;font-size:0.85em;padding:24px;text-align:center;">
+                                    Cliquez sur un geste dans la palette pour l'ajouter
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMPARATEUR -->
+                <div id="proc-comparateur" class="proc-section">
+                    <div style="display:flex;gap:14px;margin-bottom:16px;align-items:flex-end;flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:0.72em;color:#4fc070;font-weight:700;margin-bottom:4px;">PROCÉDURE CEA (référence)</div>
+                            <select id="proc-comp-cea"
+                                    style="padding:7px 12px;border-radius:7px;border:1px solid #2a5a3a;background:#0d1117;color:#e0f0ff;font-size:0.85em;min-width:200px;">
+                                <option value="">— Sélectionner —</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div style="font-size:0.72em;color:#4a9af0;font-weight:700;margin-bottom:4px;">PROCÉDURE CLIENT (observée)</div>
+                            <select id="proc-comp-client"
+                                    style="padding:7px 12px;border-radius:7px;border:1px solid #2a4a6a;background:#0d1117;color:#e0f0ff;font-size:0.85em;min-width:200px;">
+                                <option value="">— Sélectionner —</option>
+                            </select>
+                        </div>
+                        <button onclick="procRunComparison()"
+                                style="padding:8px 22px;border-radius:8px;border:none;background:#2a3a5a;color:#a0c0e0;font-weight:700;cursor:pointer;">🔍 Comparer</button>
+                    </div>
+                    <div id="proc-comp-result"></div>
+                </div>
+            </div>
+            <!-- ══════════ /PROCÉDURES ══════════ -->
+
             <div id="accompagnement" class="tab-content">
 
                 <!-- ── Navigation sous-onglets ── -->
@@ -5783,6 +5909,7 @@
 
         let recentGestes = [];     // 10 derniers codes utilisés
         let clientsData = {};      // {nom: {tel, email, adresse, notes, tarifSpecial}}
+        let proceduresData = [];   // procédures CEA / client pour comparateur
         let beneficiaires = [];    // profils des personnes en accompagnement
         let jalons = [];           // jalons liés aux bénéficiaires et/ou prestations
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
@@ -6408,6 +6535,7 @@
             try { if (savedRecent) recentGestes = JSON.parse(savedRecent); } catch(e) { console.error('Error loading recent gestures:', e); }
             const savedClientsData = localStorage.getItem('clientsData');
             try { if (savedClientsData) clientsData = JSON.parse(savedClientsData); } catch(e) { console.error('Error loading clients data:', e); }
+            try { const sp = localStorage.getItem('proceduresData'); if (sp) proceduresData = JSON.parse(sp); } catch(e) {}
             try { const sb = localStorage.getItem('beneficiaires'); if (sb) beneficiaires = JSON.parse(sb); } catch(e) {}
             try { const sj = localStorage.getItem('jalons');        if (sj) jalons        = JSON.parse(sj); } catch(e) {}
             const savedTheme = localStorage.getItem('themePrefs');
@@ -7626,6 +7754,345 @@
             if (sub === 'outils') renderFichesRapides();
         }
 
+        // ══════════════════════════════════════════════════════════════
+        // PROCÉDURES — CEA / Client — Comparateur what-if
+        // ══════════════════════════════════════════════════════════════
+
+        function saveProcedures() {
+            localStorage.setItem('proceduresData', JSON.stringify(proceduresData));
+        }
+
+        let _procCurrentId   = null;
+        let _procCurrentType = 'cea';
+        let _procEditSteps   = [];
+
+        function renderProceduresTab() {
+            procFillPalette();
+            procFillClientSelect();
+            procFillCompSelects();
+            procRenderListe();
+            procShowSection('liste');
+        }
+
+        function procShowSection(s) {
+            ['liste', 'editeur', 'comparateur'].forEach(n => {
+                document.getElementById('proc-' + n)?.classList.toggle('active', n === s);
+                document.getElementById('proc-nav-' + n)?.classList.toggle('active', n === s);
+            });
+        }
+
+        function procNewProcedure(type) {
+            _procCurrentId   = null;
+            _procCurrentType = type;
+            _procEditSteps   = [];
+            const badge = document.getElementById('proc-edit-type-badge');
+            if (badge) { badge.textContent = type === 'cea' ? 'CEA' : 'CLIENT'; badge.className = 'proc-card-type ' + type; }
+            if (document.getElementById('proc-edit-nom'))  document.getElementById('proc-edit-nom').value = '';
+            if (document.getElementById('proc-edit-mode')) document.getElementById('proc-edit-mode').value = 'reel';
+            procUpdateMode();
+            procFillClientSelect();
+            procFillPalette();
+            procRenderSteps();
+            procShowSection('editeur');
+        }
+
+        function procAddStep(gesteCode) {
+            const g = (catalogueGestes || []).find(g => g.code === gesteCode);
+            if (!g) return;
+            _procEditSteps.push({
+                id: Date.now() + '_' + Math.floor(Math.random() * 9999),
+                gesteCode: g.code,
+                label: g.description || g.code,
+                categorie: g.categorie || 'default',
+                notes: ''
+            });
+            procRenderSteps();
+        }
+
+        function procRemoveStep(sid) {
+            _procEditSteps = _procEditSteps.filter(s => String(s.id) !== String(sid));
+            procRenderSteps();
+        }
+
+        function procRenderSteps() {
+            const el    = document.getElementById('proc-steps-list');
+            const count = document.getElementById('proc-steps-count');
+            if (!el) return;
+            if (count) count.textContent = _procEditSteps.length
+                ? `(${_procEditSteps.length} étape${_procEditSteps.length > 1 ? 's' : ''})`
+                : '';
+            if (!_procEditSteps.length) {
+                el.innerHTML = `<div style="color:#4a6a8a;font-size:0.85em;padding:24px;text-align:center;">Cliquez sur un geste dans la palette pour l'ajouter</div>`;
+                return;
+            }
+            el.innerHTML = _procEditSteps.map((s, i) => {
+                const icon = (PB_GESTE_ICONS[s.categorie] || PB_GESTE_ICONS['default']).replace(/currentColor/g, '#6ab0f0');
+                return `<div class="proc-step" draggable="true" data-sid="${s.id}">
+                    <div class="proc-step-num">${i + 1}</div>
+                    <span style="width:28px;height:28px;display:block;flex-shrink:0;">${icon}</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:0.86em;color:#c8d8e8;font-weight:600;">${escapeHtml(s.label)}</div>
+                        <div style="font-size:0.74em;color:#5a8aaa;">${escapeHtml(s.gesteCode)}</div>
+                    </div>
+                    <button class="proc-step-del" onclick="procRemoveStep('${s.id}')" title="Supprimer">✕</button>
+                </div>`;
+            }).join('');
+            procInitStepDrag();
+        }
+
+        function procInitStepDrag() {
+            const list = document.getElementById('proc-steps-list');
+            if (!list) return;
+            let dragged = null;
+            list.querySelectorAll('.proc-step').forEach(el => {
+                el.addEventListener('dragstart', () => { dragged = el; setTimeout(() => el.style.opacity = '0.4', 0); });
+                el.addEventListener('dragend',   () => { el.style.opacity = '1'; dragged = null; });
+                el.addEventListener('dragover',  e => {
+                    e.preventDefault();
+                    if (!dragged || dragged === el) return;
+                    const mid = el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2;
+                    list.insertBefore(dragged, e.clientY < mid ? el : el.nextSibling);
+                });
+            });
+            list.addEventListener('drop', e => {
+                e.preventDefault();
+                const sids = [...list.querySelectorAll('.proc-step')].map(el => el.dataset.sid);
+                _procEditSteps = sids.map(sid => _procEditSteps.find(s => String(s.id) === String(sid))).filter(Boolean);
+                procRenderSteps();
+            });
+        }
+
+        function procFillPalette() {
+            const el = document.getElementById('proc-palette-list');
+            if (!el) return;
+            const groups = {};
+            (catalogueGestes || []).forEach(g => {
+                const cat = g.categorie || 'default';
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push(g);
+            });
+            el.innerHTML = Object.entries(groups).map(([cat, gestes]) => {
+                const catIcon = (PB_GESTE_ICONS[cat] || PB_GESTE_ICONS['default']).replace(/currentColor/g, '#6ab0f0');
+                return `<div style="margin-bottom:4px;">
+                    <div style="font-size:0.7em;color:#3a6a8a;font-weight:700;letter-spacing:1px;padding:5px 0 3px;">${cat.toUpperCase()}</div>
+                    ${gestes.map(g => {
+                        const desc = (g.description || g.code).slice(0, 32);
+                        return `<div class="proc-palette-item" onclick="procAddStep('${g.code}')" title="${escapeHtml(g.description || g.code)}">
+                            <span style="width:20px;height:20px;display:block;flex-shrink:0;">${catIcon}</span>
+                            <span>[${escapeHtml(g.code)}] ${escapeHtml(desc)}</span>
+                        </div>`;
+                    }).join('')}
+                </div>`;
+            }).join('');
+        }
+
+        function procFillClientSelect() {
+            const sel = document.getElementById('proc-edit-client');
+            if (!sel) return;
+            const clients = Object.keys(clientsData || {}).sort();
+            sel.innerHTML = '<option value="">— Client —</option>' +
+                clients.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+        }
+
+        function procLoadPrestations() {
+            const client = document.getElementById('proc-edit-client')?.value;
+            const sel    = document.getElementById('proc-edit-prestation');
+            if (!sel) return;
+            const prests = (prestationsSauvegardees || [])
+                .filter(p => p.client === client)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            sel.innerHTML = '<option value="">— Commande —</option>' +
+                prests.map(p => `<option value="${p.id}">${escapeHtml(p.prestation || p.reference || 'Prestation')} (${p.date || ''})</option>`).join('');
+        }
+
+        function procUpdateMode() {
+            const mode = document.getElementById('proc-edit-mode')?.value;
+            const wrap = document.getElementById('proc-edit-client-wrap');
+            if (wrap) wrap.style.display = mode === 'entrainement' ? 'none' : 'flex';
+        }
+
+        function procSaveProcedure() {
+            const nom = document.getElementById('proc-edit-nom')?.value.trim();
+            if (!nom) { alert('Donnez un nom à la procédure.'); return; }
+            const mode        = document.getElementById('proc-edit-mode')?.value || 'reel';
+            const clientNom   = document.getElementById('proc-edit-client')?.value || null;
+            const prestationId = document.getElementById('proc-edit-prestation')?.value || null;
+            const proc = {
+                id: _procCurrentId || Date.now(),
+                nom, type: _procCurrentType, mode,
+                clientNom:    mode === 'reel' ? clientNom    : null,
+                prestationId: mode === 'reel' ? prestationId : null,
+                steps: _procEditSteps.map((s, i) => ({ ...s, ordre: i })),
+                updatedAt: new Date().toISOString()
+            };
+            if (_procCurrentId) {
+                const idx = proceduresData.findIndex(p => String(p.id) === String(_procCurrentId));
+                if (idx >= 0) proceduresData[idx] = proc; else proceduresData.push(proc);
+            } else {
+                proc.createdAt = proc.updatedAt;
+                proceduresData.push(proc);
+            }
+            saveProcedures();
+            procFillCompSelects();
+            procRenderListe();
+            procShowSection('liste');
+        }
+
+        function procEditProcedure(id) {
+            const proc = proceduresData.find(p => String(p.id) === String(id));
+            if (!proc) return;
+            _procCurrentId   = proc.id;
+            _procCurrentType = proc.type;
+            _procEditSteps   = proc.steps.map(s => ({ ...s }));
+            const badge = document.getElementById('proc-edit-type-badge');
+            if (badge) { badge.textContent = proc.type === 'cea' ? 'CEA' : 'CLIENT'; badge.className = 'proc-card-type ' + proc.type; }
+            document.getElementById('proc-edit-nom').value  = proc.nom;
+            document.getElementById('proc-edit-mode').value = proc.mode || 'reel';
+            procUpdateMode();
+            procFillClientSelect();
+            if (proc.clientNom) {
+                document.getElementById('proc-edit-client').value = proc.clientNom;
+                procLoadPrestations();
+                if (proc.prestationId) setTimeout(() => {
+                    document.getElementById('proc-edit-prestation').value = proc.prestationId;
+                }, 60);
+            }
+            procFillPalette();
+            procRenderSteps();
+            procShowSection('editeur');
+        }
+
+        function procDeleteProcedure(id) {
+            if (!confirm('Supprimer cette procédure ?')) return;
+            proceduresData = proceduresData.filter(p => String(p.id) !== String(id));
+            saveProcedures();
+            procFillCompSelects();
+            procRenderListe();
+        }
+
+        function procRenderListe() {
+            const el = document.getElementById('proc-liste-content');
+            if (!el) return;
+            if (!proceduresData.length) {
+                el.innerHTML = `<div style="padding:48px;text-align:center;color:#4a6a8a;">
+                    <div style="font-size:2.5em;margin-bottom:12px;">📋</div>
+                    <div style="font-size:0.95em;">Aucune procédure.<br>Créez une <strong style="color:#4fc070;">Procédure CEA</strong> (référence) ou une <strong style="color:#4a9af0;">Procédure Client</strong> (observée).</div>
+                </div>`;
+                return;
+            }
+            const ceas    = proceduresData.filter(p => p.type === 'cea');
+            const clients = proceduresData.filter(p => p.type === 'client');
+            const renderGroup = (list, label, color) => !list.length ? '' : `
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:0.72em;font-weight:700;letter-spacing:1px;color:${color};margin-bottom:8px;">${label} (${list.length})</div>
+                    ${list.map(p => `<div class="proc-card">
+                        <span class="proc-card-type ${p.type}">${p.type === 'cea' ? 'CEA' : 'CLIENT'}${p.mode === 'entrainement' ? ' 🎓' : ''}</span>
+                        <span style="flex:1;font-weight:600;color:#c8d8e8;font-size:0.92em;">${escapeHtml(p.nom)}</span>
+                        ${p.clientNom ? `<span style="font-size:0.78em;color:#5a8aaa;">👤 ${escapeHtml(p.clientNom)}</span>` : ''}
+                        <span style="font-size:0.76em;color:#3a5a7a;">${p.steps.length} étape${p.steps.length > 1 ? 's' : ''}</span>
+                        <button class="btn btn-small" onclick="procEditProcedure('${p.id}')" style="padding:3px 10px;">✏️ Éditer</button>
+                        <button class="btn btn-small" onclick="procDeleteProcedure('${p.id}')" style="padding:3px 10px;color:#f88;border-color:#5a2a2a;">🗑️</button>
+                    </div>`).join('')}
+                </div>`;
+            el.innerHTML = renderGroup(ceas, 'PROCÉDURES CEA — RÉFÉRENCE', '#4fc070') +
+                           renderGroup(clients, 'PROCÉDURES CLIENT — OBSERVÉES', '#4a9af0');
+        }
+
+        function procFillCompSelects() {
+            const cSel = document.getElementById('proc-comp-cea');
+            const pSel = document.getElementById('proc-comp-client');
+            if (!cSel || !pSel) return;
+            const ceas    = proceduresData.filter(p => p.type === 'cea');
+            const clients = proceduresData.filter(p => p.type === 'client');
+            cSel.innerHTML = '<option value="">— Procédure CEA —</option>' +
+                ceas.map(p => `<option value="${p.id}">${escapeHtml(p.nom)}</option>`).join('');
+            pSel.innerHTML = '<option value="">— Procédure Client —</option>' +
+                clients.map(p => `<option value="${p.id}">${escapeHtml(p.nom)}</option>`).join('');
+        }
+
+        function procRunComparison() {
+            const ceaId    = document.getElementById('proc-comp-cea')?.value;
+            const clientId = document.getElementById('proc-comp-client')?.value;
+            if (!ceaId || !clientId) { alert('Sélectionnez les deux procédures à comparer.'); return; }
+            const cea    = proceduresData.find(p => String(p.id) === String(ceaId));
+            const client = proceduresData.find(p => String(p.id) === String(clientId));
+            if (!cea || !client) return;
+
+            const ceaSteps    = cea.steps;
+            const clientSteps = client.steps;
+            const clientCodes = clientSteps.map(s => s.gesteCode);
+
+            const rows = [];
+            const usedClient = new Set();
+
+            // Match each CEA step to its client counterpart
+            ceaSteps.forEach((cs, ci) => {
+                const ci_in_client = clientCodes.indexOf(cs.gesteCode);
+                if (ci_in_client >= 0 && !usedClient.has(ci_in_client)) {
+                    rows.push({
+                        cea: cs, client: clientSteps[ci_in_client],
+                        status: Math.abs(ci - ci_in_client) === 0 ? 'match' : 'moved',
+                        ceaOrder: ci, clientOrder: ci_in_client
+                    });
+                    usedClient.add(ci_in_client);
+                } else {
+                    rows.push({ cea: cs, client: null, status: 'missing', ceaOrder: ci, clientOrder: -1 });
+                }
+            });
+            // Extra steps in client not matched
+            clientSteps.forEach((cs, ci) => {
+                if (!usedClient.has(ci))
+                    rows.push({ cea: null, client: cs, status: 'extra', ceaOrder: -1, clientOrder: ci });
+            });
+            rows.sort((a, b) => {
+                if (a.ceaOrder >= 0 && b.ceaOrder >= 0) return a.ceaOrder - b.ceaOrder;
+                if (a.ceaOrder >= 0) return -1;
+                if (b.ceaOrder >= 0) return 1;
+                return a.clientOrder - b.clientOrder;
+            });
+
+            const matchCount   = rows.filter(r => r.status === 'match').length;
+            const movedCount   = rows.filter(r => r.status === 'moved').length;
+            const missingCount = rows.filter(r => r.status === 'missing').length;
+            const extraCount   = rows.filter(r => r.status === 'extra').length;
+            const total        = ceaSteps.length || 1;
+            const score        = Math.round((matchCount / total) * 100);
+
+            const stepHtml = (s, type, status) => {
+                if (!s) return `<div class="proc-comp-step empty">—</div>`;
+                const col  = type === 'cea' ? '#5ac07a' : '#5aaaf0';
+                const icon = (PB_GESTE_ICONS[s.categorie] || PB_GESTE_ICONS['default']).replace(/currentColor/g, col);
+                return `<div class="proc-comp-step ${status}">
+                    <span style="width:20px;height:20px;display:block;flex-shrink:0;">${icon}</span>
+                    <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(s.label)}</span>
+                </div>`;
+            };
+            const midIcon = { match: '<span style="color:#2a8a2a;">✓</span>', moved: '<span style="color:#8a8a1a;">↕</span>', missing: '<span style="color:#8a1a1a;">✗</span>', extra: '<span style="color:#1a1a8a;">+</span>' };
+
+            const el = document.getElementById('proc-comp-result');
+            el.innerHTML = `
+                <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+                    <span style="background:#1a3a1a;color:#4fc070;padding:4px 12px;border-radius:12px;font-size:0.8em;">✓ ${matchCount} identiques</span>
+                    <span style="background:#2a2a0a;color:#d0c040;padding:4px 12px;border-radius:12px;font-size:0.8em;">↕ ${movedCount} déplacés</span>
+                    <span style="background:#2a0e0e;color:#d06060;padding:4px 12px;border-radius:12px;font-size:0.8em;">✗ ${missingCount} manquants</span>
+                    ${extraCount ? `<span style="background:#0e0e2a;color:#6070d0;padding:4px 12px;border-radius:12px;font-size:0.8em;">+ ${extraCount} extras client</span>` : ''}
+                    <span style="margin-left:auto;font-size:1em;font-weight:700;color:${score>=80?'#4fc070':score>=50?'#d0c040':'#d06060'};">Score : ${score}%</span>
+                </div>
+                <div class="proc-comp-grid">
+                    <div class="proc-comp-hdr cea">${escapeHtml(cea.nom)}</div>
+                    <div class="proc-comp-hdr mid"></div>
+                    <div class="proc-comp-hdr client">${escapeHtml(client.nom)}</div>
+                    ${rows.map(r => `
+                        ${stepHtml(r.cea, 'cea', r.status)}
+                        <div class="proc-comp-mid">${midIcon[r.status] || ''}</div>
+                        ${stepHtml(r.client, 'client', r.status)}
+                    `).join('')}
+                </div>`;
+            procShowSection('comparateur');
+        }
+
+        // ══════════════════════════════════════════════════════════════
+
         function renderAccompagnement() {
             // Default to suivi panel on first open
             const anyVisible = [...document.querySelectorAll('.accomp-sub-panel')].some(p => p.style.display !== 'none');
@@ -7948,6 +8415,7 @@
             else if (tabName === 'historique')          renderHistory();
             else if (tabName === 'gantt')               { loadGanttPrestSelect(); renderGantt(); }
             else if (tabName === 'formation-logistique') renderFormationLogistiqueApprenants();
+            else if (tabName === 'procedures') renderProceduresTab();
             // Show/hide recap popup (always runs after the tab switch)
             const _pbPop = document.getElementById('pb-recap-popup');
             if (_pbPop) _pbPop.style.display = tabName === 'pedalboard' ? 'block' : 'none';
