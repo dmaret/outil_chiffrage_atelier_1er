@@ -7267,7 +7267,27 @@
                 el.querySelector('.pb-drag-handle').addEventListener('mousedown', e => pbStartDrag(e, p.id));
                 el.querySelector('.pb-pedal-body').addEventListener('mousedown', e => {
                     if (e.target.closest('button, input, select, a')) return;
-                    pbStartDrag(e, p.id);
+                    const startX = e.clientX, startY = e.clientY;
+                    const startPx = p.x ?? 0, startPy = p.y ?? 0;
+                    let started = false;
+                    const onMove = m => {
+                        if (started) return;
+                        if (Math.abs(m.clientX - startX) < 4 && Math.abs(m.clientY - startY) < 4) return;
+                        started = true;
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onUp);
+                        _pbDrag = { p, el, startMx: startX, startMy: startY, startPx, startPy };
+                        el.style.zIndex = '1000'; el.style.opacity = '0.85';
+                        el.style.transform = 'rotate(1.5deg) scale(1.03)';
+                        document.addEventListener('mousemove', _pbDragMove);
+                        document.addEventListener('mouseup', _pbDragEnd);
+                    };
+                    const onUp = () => {
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onUp);
+                    };
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
                 });
                 el.querySelector('.pb-pedal-del').addEventListener('click', () => pbRemovePedal(String(p.id)));
                 el.querySelectorAll('.pb-step-btn').forEach(btn => btn.addEventListener('click', e => {
