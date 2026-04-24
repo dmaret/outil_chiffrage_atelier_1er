@@ -21,9 +21,9 @@
     <meta name="apple-mobile-web-app-title" content="Atelier LP">
     <meta name="theme-color" content="#6b8fa3">
     <link rel="manifest" href="manifest.json">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -2956,16 +2956,16 @@
             <p>Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations</p>
             <span id="saveIndicator"><span class="autosave-dot" id="autosaveDot"></span>💾 Sauvegardé à l'instant</span>
             <div class="header-icons">
-                <div id="onlineIndicator" title="Statut de connexion">
+                <div id="onlineIndicator" title="Statut de connexion" role="status" aria-live="polite" aria-label="Statut de connexion">
                     <span class="dot"></span><span id="onlineLabel">En ligne</span>
                 </div>
-                <div id="headerAuthBadge" style="display:none;background:rgba(255,255,255,0.30);border:1.5px solid rgba(255,255,255,0.55);border-radius:20px;padding:5px 13px;font-size:0.82em;font-weight:800;cursor:pointer;backdrop-filter:blur(4px);color:#2d3e50;white-space:nowrap;transition:background 0.2s;" onclick="doLogout()" title="Connecté — cliquer pour se déconnecter"><span id="headerAuthBadgeText">🔐</span></div>
-                <button onclick="document.getElementById('docModal').style.display='flex'" title="Documentation">📖</button>
-                <button onclick="document.getElementById('shortcutsModal').style.display='flex'" title="Aide raccourcis clavier">?</button>
-                <button onclick="openGlobalSearch()" title="Recherche globale (Ctrl+F)">🔍</button>
-                <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
-                <button id="darkModeToggle" onclick="toggleDarkMode()" title="Mode sombre" style="font-size:1.3em;">🌙</button>
-                <button id="btnPresentation" onclick="togglePresentation()" title="Mode présentation client">🖥️</button>
+                <div id="headerAuthBadge" style="display:none;background:rgba(255,255,255,0.30);border:1.5px solid rgba(255,255,255,0.55);border-radius:20px;padding:5px 13px;font-size:0.82em;font-weight:800;cursor:pointer;backdrop-filter:blur(4px);color:#2d3e50;white-space:nowrap;transition:background 0.2s;" onclick="doLogout()" title="Connecté — cliquer pour se déconnecter" role="button" tabindex="0" aria-label="Profil utilisateur, appuyer pour se déconnecter"><span id="headerAuthBadgeText">🔐</span></div>
+                <button onclick="document.getElementById('docModal').style.display='flex'" title="Documentation" aria-label="Ouvrir la documentation">📖</button>
+                <button onclick="document.getElementById('shortcutsModal').style.display='flex'" title="Aide raccourcis clavier" aria-label="Afficher les raccourcis clavier">?</button>
+                <button onclick="openGlobalSearch()" title="Recherche globale (Ctrl+F)" aria-label="Recherche globale">🔍</button>
+                <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran" aria-label="Activer le plein écran">⛶</button>
+                <button id="darkModeToggle" onclick="toggleDarkMode()" title="Mode sombre" style="font-size:1.3em;" aria-label="Basculer le mode sombre" aria-pressed="false">🌙</button>
+                <button id="btnPresentation" onclick="togglePresentation()" title="Mode présentation client" aria-label="Activer le mode présentation">🖥️</button>
             </div>
         </div>
 
@@ -5488,10 +5488,9 @@
 
         function loadEmailWebhooksConfig() {
             try {
-                const saved = localStorage.getItem('emailWebhooksConfig');
+                const saved = sessionStorage.getItem('emailWebhooksConfig');
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    // Decrypt the API key if it was stored encrypted
                     if (parsed.apiKey) {
                         parsed.apiKey = decryptApiKey(parsed.apiKey);
                     }
@@ -5503,12 +5502,11 @@
         }
 
         function saveEmailWebhooksConfig() {
-            // Create a copy with encrypted API key before saving
             const configToSave = JSON.parse(JSON.stringify(emailWebhooksConfig));
             if (configToSave.apiKey) {
                 configToSave.apiKey = encryptApiKey(configToSave.apiKey);
             }
-            localStorage.setItem('emailWebhooksConfig', JSON.stringify(configToSave));
+            sessionStorage.setItem('emailWebhooksConfig', JSON.stringify(configToSave));
             logAction('Mise à jour configuration webhooks email', 'UPDATE');
         }
 
@@ -5630,9 +5628,8 @@
                     user_action: { subject: '[{action_type}] {description}', enabled: false, recipients: 'admin' }
                 }
             };
-            localStorage.removeItem('emailWebhooksConfig');
+            sessionStorage.removeItem('emailWebhooksConfig');
             syncEmailWebhooksUI();
-            toast('✓ Configuration webhooks réinitialisée', 'success');
             logAction('Réinitialisation configuration webhooks email', 'UPDATE');
             toast('✅ Configuration réinitialisée', 'success');
         }
@@ -6772,16 +6769,17 @@
             const pc = document.getElementById('pb-palette-conso');
             if (pg) pg.innerHTML = (catalogueGestes||[]).slice(0,40).map(g => {
                 const mins = Math.round((g.temps||60)/60) || 1;
-                const shortDesc = (g.description||g.code).slice(0,36);
+                const shortDesc = escapeHtml((g.description||g.code).slice(0,36));
                 const catIcon = (PB_GESTE_ICONS[g.categorie] || PB_GESTE_ICONS['default']).replace(/currentColor/g,'#4e9af1');
-                return `<button class="pb-palette-btn" data-code="${g.code}" onclick="pbAddGesteFromCode(this.dataset.code)" title="[${g.code}] ${g.description||''} — ${mins} min" style="display:flex;align-items:center;gap:7px;padding:5px 8px;">
+                return `<button class="pb-palette-btn" data-code="${escapeHtml(g.code)}" onclick="pbAddGesteFromCode(this.dataset.code)" title="[${escapeHtml(g.code)}] ${escapeHtml(g.description||'')} — ${mins} min" style="display:flex;align-items:center;gap:7px;padding:5px 8px;">
                     <span style="flex-shrink:0;width:32px;height:26px;display:block;">${catIcon}</span>
-                    <span style="min-width:0;"><strong style="font-size:0.84em;display:block;">[${g.code}]</strong><span style="font-size:0.78em;opacity:0.72;line-height:1.3;">${shortDesc}</span></span>
+                    <span style="min-width:0;"><strong style="font-size:0.84em;display:block;">[${escapeHtml(g.code)}]</strong><span style="font-size:0.78em;opacity:0.72;line-height:1.3;">${shortDesc}</span></span>
                 </button>`;
             }).join('');
-            if (pc) pc.innerHTML = (catalogueConsommables||[]).slice(0,20).map(c =>
-                `<button class="pb-palette-btn" onclick="pbAddPedal('consommable',${JSON.stringify(c.nom||c.designation||'Conso').replace(/"/g,"'")},${c.prixUnitaire||0},1)" title="${c.nom||c.designation||''}">🟢 ${c.nom||c.designation||'Consommable'}</button>`
-            ).join('');
+            if (pc) pc.innerHTML = (catalogueConsommables||[]).slice(0,20).map(c => {
+                const nom = escapeHtml(c.nom||c.designation||'Consommable');
+                return `<button class="pb-palette-btn" onclick="pbAddPedal('consommable',${JSON.stringify(nom)},${c.prixUnitaire||0},1)" title="${nom}">🟢 ${nom}</button>`;
+            }).join('');
             pbRender();
         }
 
@@ -15758,7 +15756,7 @@
         function encryptApiKey(apiKey) {
             if (!apiKey) return '';
             try {
-                // Simple shift cipher: rotate each character by 13
+                // XOR cipher: rotate each character by fixed value
                 const shifted = apiKey.split('').map(char =>
                     String.fromCharCode(char.charCodeAt(0) ^ 0x5A)
                 ).join('');
@@ -15775,7 +15773,7 @@
             try {
                 // Base64 decode
                 const shifted = atob(encryptedKey);
-                // Reverse the shift cipher
+                // Reverse the XOR cipher
                 return shifted.split('').map(char =>
                     String.fromCharCode(char.charCodeAt(0) ^ 0x5A)
                 ).join('');
