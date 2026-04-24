@@ -6356,6 +6356,7 @@
 
         function saveToStorage() {
             localStorage.setItem('pbPedals', JSON.stringify(pbPedals));
+            localStorage.setItem('pbEndpointPos', JSON.stringify(_pbEndpointPos));
             localStorage.setItem('configAtelier', JSON.stringify(config));
             localStorage.setItem('catalogueGestes', JSON.stringify(catalogueGestes));
             localStorage.setItem('catalogueConsommables', JSON.stringify(catalogueConsommables));
@@ -6681,6 +6682,8 @@
 
         let pbPedals = [];  // { id, type, label, value, unit, coutUnit, color, ledColor }
         let _pbDrag = null;
+        let _pbEndpointDrag = null;
+        let _pbEndpointPos = { ampli: {x:30, y:350}, baffle: {x:1830, y:350} };
         let _pbZoomIdx = 3;
         const _PB_ZOOM_LEVELS = [0.45, 0.6, 0.75, 1.0, 1.2, 1.4];
 
@@ -6729,6 +6732,41 @@
             document.removeEventListener('mouseup', _pbDragEnd);
             saveToStorage();
         }
+
+        function pbStartEndpointDrag(e, which) {
+            if (e.button !== 0) return;
+            e.preventDefault(); e.stopPropagation();
+            const elId = which === 'ampli' ? 'pb-endpoint-ampli' : 'pb-endpoint-baffle';
+            const el = document.getElementById(elId);
+            if (!el) return;
+            const pos = _pbEndpointPos[which];
+            _pbEndpointDrag = { which, el, startMx: e.clientX, startMy: e.clientY, startPx: pos.x, startPy: pos.y };
+            el.style.zIndex = '1001'; el.style.opacity = '0.85';
+            document.addEventListener('mousemove', _pbEndpointDragMove);
+            document.addEventListener('mouseup', _pbEndpointDragEnd);
+        }
+        function _pbEndpointDragMove(e) {
+            if (!_pbEndpointDrag) return;
+            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            const d = _pbEndpointDrag;
+            const newX = d.startPx + (e.clientX - d.startMx) / scale;
+            const newY = d.startPy + (e.clientY - d.startMy) / scale;
+            _pbEndpointPos[d.which].x = newX;
+            _pbEndpointPos[d.which].y = newY;
+            d.el.style.left = newX + 'px';
+            d.el.style.top  = newY + 'px';
+            requestAnimationFrame(pbDrawCables);
+        }
+        function _pbEndpointDragEnd() {
+            if (!_pbEndpointDrag) return;
+            _pbEndpointDrag.el.style.zIndex = '';
+            _pbEndpointDrag.el.style.opacity = '';
+            _pbEndpointDrag = null;
+            document.removeEventListener('mousemove', _pbEndpointDragMove);
+            document.removeEventListener('mouseup', _pbEndpointDragEnd);
+            saveToStorage();
+        }
+
         const PB_CABLE_COLORS = ['#e74c3c','#f0c040','#27ae60','#4e9af1','#e67e22','#9b59b6','#1abc9c','#e84393'];
         const PB_PEDAL_STYLES = {
             geste:       { bg:'#1a2a4a', border:'#2a4a80', led:'#4e9af1', foot:'#2a3a6a' },
@@ -6820,6 +6858,8 @@
         function pbInit() {
             // Load saved pedals
             try { const s = localStorage.getItem('pbPedals'); if (s) pbPedals = JSON.parse(s); } catch(e) {}
+            // Load saved endpoint positions
+            try { const ep = localStorage.getItem('pbEndpointPos'); if (ep) _pbEndpointPos = JSON.parse(ep); } catch(e) {}
             // Inject recap popup into <body> once (escapes CSS transform of tab-content)
             if (!document.getElementById('pb-recap-popup')) {
                 const pop = document.createElement('div');
@@ -7135,8 +7175,9 @@
             // ENTRÉE endpoint
             const ampliEl = document.getElementById('pb-endpoint-ampli');
             if (ampliEl) {
-                ampliEl.style.left = '30px';
-                ampliEl.style.top  = '350px';
+                ampliEl.style.left   = _pbEndpointPos.ampli.x + 'px';
+                ampliEl.style.top    = _pbEndpointPos.ampli.y + 'px';
+                ampliEl.style.cursor = 'grab';
                 ampliEl.innerHTML = `
                     <div class="pb-ampli-body">
                         <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
@@ -7145,13 +7186,15 @@
                         <div id="pb-ampli-client" style="font-size:0.65em;margin-top:4px;opacity:0.6;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${document.getElementById('pb-client')?.value||''}</div>
                     </div>
                     <div class="pb-jack pb-jack-out"></div>`;
+                ampliEl.addEventListener('mousedown', e => pbStartEndpointDrag(e, 'ampli'));
             }
 
             // SORTIE endpoint
             const baffleEl = document.getElementById('pb-endpoint-baffle');
             if (baffleEl) {
-                baffleEl.style.left = '1830px';
-                baffleEl.style.top  = '350px';
+                baffleEl.style.left   = _pbEndpointPos.baffle.x + 'px';
+                baffleEl.style.top    = _pbEndpointPos.baffle.y + 'px';
+                baffleEl.style.cursor = 'grab';
                 baffleEl.innerHTML = `
                     <div class="pb-jack pb-jack-in"></div>
                     <div class="pb-baffle-body">
@@ -7161,6 +7204,7 @@
                         <div class="pb-total-line" id="pb-total-cout" style="margin-top:8px;font-size:0.72em;">Coût : —</div>
                         <div class="pb-total-big" id="pb-total-vente" style="font-size:0.88em;">—</div>
                     </div>`;
+                baffleEl.addEventListener('mousedown', e => pbStartEndpointDrag(e, 'baffle'));
             }
 
             // Render all pedals
@@ -7278,7 +7322,7 @@
         function renderPedalboard() {
             pbInit();
             window.addEventListener('resize', () => requestAnimationFrame(pbDrawCables));
-            document.getElementById('pb-board')?.addEventListener('scroll', () => requestAnimationFrame(pbDrawCables));
+            document.getElementById('pb-board-scroll')?.addEventListener('scroll', () => requestAnimationFrame(pbDrawCables));
         }
 
         // ── Fiches d'intervention rapide ──────────────────────
