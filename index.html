@@ -17684,7 +17684,10 @@
 
             el.innerHTML = `
                 <div class="onboarding-card">
-                    <button class="onboarding-dismiss" onclick="dismissOnboarding()" title="Masquer">✕</button>
+                    <div style="float:right;display:flex;gap:6px;align-items:center;">
+                        <button onclick="resetOnboarding()" title="Réinitialiser" style="background:none;border:none;font-size:0.82em;color:#8090a0;cursor:pointer;padding:0 2px;">🔄</button>
+                        <button class="onboarding-dismiss" onclick="dismissOnboarding()" title="Masquer">✕</button>
+                    </div>
                     <h3>🚀 Premiers pas — ${doneCount}/${steps.length}</h3>
                     <div style="color:#567;font-size:0.88em;">Quelques réglages pour démarrer en douceur.</div>
                     <div class="onboarding-progress"><div class="onboarding-progress-bar" style="width:${pct}%;"></div></div>
