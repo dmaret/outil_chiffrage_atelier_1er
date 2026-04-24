@@ -17648,7 +17648,10 @@
         function renderOnboardingChecklist() {
             const el = document.getElementById('onboardingChecklist');
             if (!el) return;
-            if (localStorage.getItem('onboardingDismissed') === '1') { el.innerHTML = ''; return; }
+            if (localStorage.getItem('onboardingDismissed') === '1') {
+                el.innerHTML = `<div style="text-align:right;margin-bottom:6px;"><button onclick="resetOnboarding()" style="background:none;border:none;color:#a0b8cc;font-size:0.78em;cursor:pointer;padding:2px 6px;border-radius:4px;" title="Réafficher les premiers pas">🔄 Premiers pas</button></div>`;
+                return;
+            }
 
             const coutsOk = !!(config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard));
             const catalogueOk = Array.isArray(catalogueGestes) && catalogueGestes.length > 0;
@@ -17691,8 +17694,7 @@
         }
         function dismissOnboarding() {
             localStorage.setItem('onboardingDismissed', '1');
-            const el = document.getElementById('onboardingChecklist');
-            if (el) el.innerHTML = '';
+            renderOnboardingChecklist();
         }
 
         function resetOnboarding() {
