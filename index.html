@@ -3390,13 +3390,16 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Type</label>
-                            <select id="typeMouvement">
+                            <select id="typeMouvement" onchange="adaptMouvementForm()">
                                 <option value="">Chargement...</option>
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="refProduitGroup">
                             <label>Référence</label>
                             <input type="text" id="refProduit" placeholder="Ex: COSM-001">
+                            <select id="refProduitSelect" style="display:none;margin-top:4px;">
+                                <option value="">-- Choisir un article --</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Quantité</label>
@@ -3423,6 +3426,14 @@
                         <div class="form-group">
                             <label>Date</label>
                             <input type="date" id="dateMouvement">
+                        </div>
+                    </div>
+                    <div class="form-row" id="destEmplRow" style="display:none;">
+                        <div class="form-group">
+                            <label>Emplacement destination</label>
+                            <select id="destEmplacementStock">
+                                <option value="">-- Choisir destination --</option>
+                            </select>
                         </div>
                     </div>
                     <button class="btn" id="btnSaveMouvement" onclick="addMouvement()">➕ Enregistrer</button>
@@ -3733,12 +3744,33 @@
                 </div>
 
                 <div class="section">
-                    <h2>📥 Import catalogue CSV</h2>
-                    <div class="import-drop-zone" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleCsvDrop(event)">
-                        <p>📄 Cliquez ou glissez un fichier CSV ici</p>
-                        <p style="font-size:0.8em;margin-top:4px;">Format attendu : code,categorie,description,temps,coef,difficulte,notes</p>
+                    <h2>📦 Modèle · Import · Export</h2>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
+                        <!-- Panneau Modèle -->
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Téléchargez le modèle avec les colonnes attendues et des exemples.</p>
+                            <button class="btn btn-secondary btn-small" onclick="downloadGestesTemplate()">⬇ Télécharger le modèle</button>
+                        </div>
+                        <!-- Panneau Import -->
+                        <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                            <div class="import-drop-zone" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleCsvDrop(event)" style="margin:0;">
+                                <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                <p style="font-size:0.8em;margin-top:4px;">Format : code,categorie,description,temps,coef,notes</p>
+                            </div>
+                            <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="importCatalogueCSV(this)">
+                        </div>
+                        <!-- Panneau Export -->
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez le catalogue complet au format CSV.</p>
+                            <button class="btn btn-small" onclick="exportCatalogueCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter le catalogue</button>
+                        </div>
                     </div>
-                    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="importCatalogueCSV(this)">
                 </div>
 
                 <div class="section">
@@ -3861,6 +3893,33 @@
                         </div>
                     </div>
                     <button class="btn" data-perm="manage_consommables" onclick="addConsommable()">➕ Ajouter</button>
+                </div>
+
+                <div class="section">
+                    <h2>📦 Modèle · Import · Export</h2>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : nom, unite, prix, designation</p>
+                            <button class="btn btn-secondary btn-small" onclick="downloadConsommablesTemplate()">⬇ Télécharger le modèle</button>
+                        </div>
+                        <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                            <div class="import-drop-zone" id="consomDropZone" onclick="document.getElementById('consomCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleConsomCsvDrop(event)" style="margin:0;">
+                                <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                <p style="font-size:0.8em;margin-top:4px;">Format : nom,unite,prix,designation</p>
+                            </div>
+                            <input type="file" id="consomCsvInput" accept=".csv" style="display:none" onchange="importConsommablesCSV(this)">
+                        </div>
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez la liste des consommables.</p>
+                            <button class="btn btn-small" onclick="exportConsommablesCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter les consommables</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="section">
@@ -4408,6 +4467,28 @@
                     <div style="display:flex;gap:8px;justify-content:flex-end;">
                         <button onclick="document.getElementById('pb-newgeste-modal').style.display='none'" style="padding:9px 20px;border-radius:8px;border:1px solid #dde;background:#f8fafc;cursor:pointer;font-size:0.9em;">Annuler</button>
                         <button onclick="pbSaveNewGeste()" style="padding:9px 20px;border-radius:8px;border:none;background:#27ae60;color:#fff;font-weight:600;cursor:pointer;font-size:0.9em;">Ajouter au board</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal édition de note -->
+            <div id="pb-note-modal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;">
+                <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                        <h3 style="margin:0;font-size:1.05em;color:#2d3e50;">✎ Éditer la note</h3>
+                        <button onclick="document.getElementById('pb-note-modal').style.display='none'" style="background:none;border:none;font-size:1.3em;cursor:pointer;color:#9ab;">×</button>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:0.82em;font-weight:600;color:#4a6a7a;display:block;margin-bottom:4px;">Titre de la note</label>
+                        <input id="pb-note-label" type="text" placeholder="Ex: Consigne client" style="width:100%;padding:8px;border:1px solid #d0dae8;border-radius:8px;font-size:0.92em;box-sizing:border-box;">
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <label style="font-size:0.82em;font-weight:600;color:#4a6a7a;display:block;margin-bottom:4px;">Contenu</label>
+                        <textarea id="pb-note-text" rows="5" placeholder="Texte de la note..." style="width:100%;padding:8px;border:1px solid #d0dae8;border-radius:8px;font-size:0.92em;resize:vertical;box-sizing:border-box;"></textarea>
+                    </div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button onclick="document.getElementById('pb-note-modal').style.display='none'" style="padding:9px 20px;border-radius:8px;border:1px solid #dde;background:#f8fafc;cursor:pointer;font-size:0.9em;">Annuler</button>
+                        <button onclick="pbSaveNote()" style="padding:9px 20px;border-radius:8px;border:none;background:#f0c040;color:#2a2010;font-weight:600;cursor:pointer;font-size:0.9em;">💾 Enregistrer</button>
                     </div>
                 </div>
             </div>
@@ -7018,6 +7099,25 @@
             pbInit(); // refresh palette
         }
 
+        let _pbEditNoteId = null;
+        function pbEditNote(id) {
+            const p = pbPedals.find(x => String(x.id) === String(id));
+            if (!p) return;
+            _pbEditNoteId = String(id);
+            document.getElementById('pb-note-label').value = p.label || 'Note';
+            document.getElementById('pb-note-text').value  = p.noteText || '';
+            document.getElementById('pb-note-modal').style.display = 'flex';
+        }
+        function pbSaveNote() {
+            const p = pbPedals.find(x => String(x.id) === String(_pbEditNoteId));
+            if (!p) return;
+            p.label    = document.getElementById('pb-note-label').value.trim() || 'Note';
+            p.noteText = document.getElementById('pb-note-text').value;
+            document.getElementById('pb-note-modal').style.display = 'none';
+            localStorage.setItem('pbPedals', JSON.stringify(pbPedals));
+            pbRender();
+        }
+
         function pbMovePedal(id, dir) {
             const p = pbPedals.find(x => String(x.id) === String(id));
             if (!p) return;
@@ -7144,7 +7244,10 @@
                             <button class="pb-appliq-btn${p.perPiece !== false ? ' active' : ''}" data-pbid="${p.id}" data-appliq="true">/pce</button>
                             <button class="pb-appliq-btn${p.perPiece === false ? ' active' : ''}" data-pbid="${p.id}" data-appliq="false">×lot</button>
                         </div>
-                        ` : `<div style="font-size:0.65em;color:#8a9ab0;margin:4px 0;" id="pbval-${p.id}"></div>`}
+                        ` : `
+                        <div id="pbval-${p.id}" style="font-size:0.78em;color:#e8e0b0;margin:4px 2px 6px;min-height:28px;text-align:center;word-break:break-word;white-space:pre-wrap;line-height:1.35;">${escapeHtml(p.noteText || '')}</div>
+                        <button onclick="pbEditNote('${p.id}')" style="background:rgba(240,192,64,0.18);border:1px solid rgba(240,192,64,0.4);border-radius:5px;color:#f0c040;cursor:pointer;font-size:0.68em;padding:3px 10px;width:100%;">✎ Éditer</button>
+                        `}
                     </div>
                     <button class="pb-parallel-btn${p.parallel?' active':''}" data-pbid="${p.id}" data-action="toggle-parallel">${p.parallel ? '⇌ PARALLÈLE' : '▶ SÉRIE'}</button>
                     <div class="pb-jack pb-jack-in"></div>
@@ -11905,7 +12008,15 @@
             if (!m) return;
             editingMouvementId = id;
             document.getElementById('typeMouvement').value = m.type;
-            document.getElementById('refProduit').value = m.ref;
+            adaptMouvementForm();
+            if (m.type === 'sortie' || m.type === 'transfert') {
+                document.getElementById('refProduitSelect').value = m.ref;
+            } else {
+                document.getElementById('refProduit').value = m.ref;
+            }
+            if (m.type === 'transfert' && m.destEmplacement) {
+                document.getElementById('destEmplacementStock').value = m.destEmplacement;
+            }
             document.getElementById('qteMouvement').value = m.qte;
             document.getElementById('uniteMouvement').value = m.unite;
             document.getElementById('emplacementStock').value = m.emplacement;
@@ -11920,8 +12031,12 @@
         function cancelEditMouvement() {
             editingMouvementId = null;
             document.getElementById('refProduit').value = '';
+            const sel = document.getElementById('refProduitSelect');
+            if (sel) sel.value = '';
             document.getElementById('qteMouvement').value = '1';
             document.getElementById('prixUnitaire').value = '';
+            const destSel = document.getElementById('destEmplacementStock');
+            if (destSel) destSel.value = '';
             document.getElementById('btnSaveMouvement').textContent = '➕ Enregistrer';
             document.getElementById('btnSaveMouvement').style.background = '';
             document.getElementById('btnCancelEdit').style.display = 'none';
@@ -11943,21 +12058,45 @@
                     }
                     stockActuel[m.ref].total -= m.qte;
                     if (stockActuel[m.ref].total <= 0) delete stockActuel[m.ref];
+                } else if (m.type === 'transfert' && stockActuel[m.ref] && m.destEmplacement) {
+                    let reste = m.qte;
+                    const lotsAjouter = [];
+                    for (const lot of stockActuel[m.ref].lots) {
+                        if (reste <= 0) break;
+                        const dispo = (!m.emplacement || lot.emplacement === m.emplacement) ? lot.qte : 0;
+                        if (dispo <= 0) continue;
+                        const pris = Math.min(dispo, reste);
+                        lotsAjouter.push({ date: lot.date, qte: pris, prix: lot.prix, emplacement: m.destEmplacement });
+                        lot.qte -= pris;
+                        reste -= pris;
+                    }
+                    stockActuel[m.ref].lots = stockActuel[m.ref].lots.filter(l => l.qte > 0);
+                    lotsAjouter.forEach(l => stockActuel[m.ref].lots.push(l));
+                    stockActuel[m.ref].lots.sort((a, b) => new Date(a.date) - new Date(b.date));
                 }
             });
         }
 
         function addMouvement() {
             const type = document.getElementById('typeMouvement').value;
-            const ref = document.getElementById('refProduit').value.trim();
+            const ref = getRefMouvement();
             const qte = parseFloat(document.getElementById('qteMouvement').value);
             const unite = document.getElementById('uniteMouvement').value;
             const emplacement = document.getElementById('emplacementStock').value;
             const prix = parseFloat(document.getElementById('prixUnitaire').value || 0);
             const date = document.getElementById('dateMouvement').value;
+            const destEmpl = type === 'transfert' ? (document.getElementById('destEmplacementStock')?.value || '') : '';
 
             if (!ref || qte <= 0) {
                 toast('Merci de remplir Référence et Quantité', 'warning');
+                return;
+            }
+            if ((type === 'sortie' || type === 'transfert') && !stockActuel[ref]) {
+                toast(`❌ Article "${ref}" introuvable en stock`, 'danger');
+                return;
+            }
+            if (type === 'transfert' && !destEmpl) {
+                toast('Merci de choisir un emplacement de destination', 'warning');
                 return;
             }
 
@@ -11965,7 +12104,7 @@
                 // Mode modification : remplacer le mouvement existant
                 const idx = mouvements.findIndex(m => m.id === editingMouvementId);
                 if (idx !== -1) {
-                    mouvements[idx] = { id: editingMouvementId, type, date, ref, qte, unite, emplacement, prix };
+                    mouvements[idx] = { id: editingMouvementId, type, date, ref, qte, unite, emplacement, destEmplacement: destEmpl || undefined, prix };
                 }
                 recalculerStock();
                 cancelEditMouvement();
@@ -11985,11 +12124,12 @@
                 qte: qte,
                 unite: unite,
                 emplacement: emplacement,
+                destEmplacement: destEmpl || undefined,
                 prix: prix
             };
 
             mouvements.push(mouvement);
-            logAction(`Mouvement stock : ${type} — ${ref} × ${qte} ${unite}`);
+            logAction(`Mouvement stock : ${type} — ${ref} × ${qte} ${unite}${destEmpl ? ' → ' + destEmpl : ''}`);
 
             if (type === 'entree') {
                 if (!stockActuel[ref]) {
@@ -12014,6 +12154,25 @@
                     if (stockActuel[ref].total <= 0) {
                         delete stockActuel[ref];
                     }
+                }
+            } else if (type === 'transfert' && stockActuel[ref]) {
+                // Déplacer des lots FIFO de l'emplacement source vers la destination
+                let reste = qte;
+                const lotsAjouter = [];
+                for (const lot of stockActuel[ref].lots) {
+                    if (reste <= 0) break;
+                    const dispo = (!emplacement || lot.emplacement === emplacement) ? lot.qte : 0;
+                    if (dispo <= 0) continue;
+                    const pris = Math.min(dispo, reste);
+                    lotsAjouter.push({ date: lot.date, qte: pris, prix: lot.prix, emplacement: destEmpl });
+                    lot.qte -= pris;
+                    reste -= pris;
+                }
+                stockActuel[ref].lots = stockActuel[ref].lots.filter(l => l.qte > 0);
+                lotsAjouter.forEach(l => stockActuel[ref].lots.push(l));
+                stockActuel[ref].lots.sort((a, b) => new Date(a.date) - new Date(b.date));
+                if (reste > 0) {
+                    toast(`⚠️ Seulement ${qte - reste} unité(s) transférée(s) (stock insuffisant à la source)`, 'warning');
                 }
             }
             
@@ -13111,12 +13270,54 @@
                 if (currentUnite) selUnite.value = currentUnite;
             }
 
-            // Emplacement
+            // Emplacement source
             const selEmpl = document.getElementById('emplacementStock');
             if (selEmpl) {
                 const currentEmpl = selEmpl.value;
                 selEmpl.innerHTML = configEmplacements.map(e => `<option value="${e}">${e}</option>`).join('');
                 if (currentEmpl) selEmpl.value = currentEmpl;
+            }
+            // Emplacement destination (transfert)
+            const selDest = document.getElementById('destEmplacementStock');
+            if (selDest) {
+                const currentDest = selDest.value;
+                selDest.innerHTML = '<option value="">-- Choisir destination --</option>' +
+                    configEmplacements.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+                if (currentDest) selDest.value = currentDest;
+            }
+            adaptMouvementForm();
+        }
+
+        function getRefMouvement() {
+            const type = document.getElementById('typeMouvement')?.value || '';
+            if (type === 'sortie' || type === 'transfert') {
+                return document.getElementById('refProduitSelect')?.value?.trim() || '';
+            }
+            return document.getElementById('refProduit')?.value?.trim() || '';
+        }
+
+        function adaptMouvementForm() {
+            const type = document.getElementById('typeMouvement')?.value || '';
+            const refInput = document.getElementById('refProduit');
+            const refSelect = document.getElementById('refProduitSelect');
+            const destRow = document.getElementById('destEmplRow');
+            if (!refInput || !refSelect || !destRow) return;
+
+            const needExisting = type === 'sortie' || type === 'transfert';
+            refInput.style.display = needExisting ? 'none' : '';
+            refSelect.style.display = needExisting ? '' : 'none';
+            destRow.style.display = type === 'transfert' ? '' : 'none';
+
+            if (needExisting) {
+                const refs = Object.keys(stockActuel || {}).sort();
+                const prev = refSelect.value;
+                refSelect.innerHTML = '<option value="">-- Choisir un article --</option>' +
+                    refs.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)} (${stockActuel[r]?.total ?? 0})</option>`).join('');
+                if (prev && refSelect.querySelector(`option[value="${prev.replace(/"/g, '\\"')}"]`)) {
+                    refSelect.value = prev;
+                } else if (refInput.value) {
+                    refSelect.value = refInput.value;
+                }
             }
         }
 
@@ -17894,6 +18095,91 @@
             const el = document.createElement('div'); el.innerHTML = html;
             document.body.appendChild(el);
             html2pdf().set({ margin: 5, filename: `fiche-geste-${g.code}.pdf`, jsPDF: { format: 'a5', orientation: 'portrait' } }).from(el).save().then(() => document.body.removeChild(el));
+        }
+
+        function _downloadCSV(content, filename) {
+            const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadGestesTemplate() {
+            const header = 'code,categorie,description,temps,coef,notes';
+            const ex1 = 'REC-01,Réception,Réception marchandise (déchargement palette),180,1.2,Avec transpalette';
+            const ex2 = 'CTR-01,Contrôle,Contrôle qualité visuel,60,1.0,';
+            _downloadCSV([header, ex1, ex2].join('\n'), 'modele_gestes.csv');
+        }
+
+        function exportCatalogueCSV() {
+            if (!catalogueGestes.length) { toast('Catalogue vide', 'warning'); return; }
+            const header = 'code,categorie,description,temps,coef,notes';
+            const rows = catalogueGestes.map(g =>
+                [g.code, g.categorie, g.description, g.temps, g.coef || 1, g.notes || '']
+                    .map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')
+            );
+            _downloadCSV([header, ...rows].join('\n'), `catalogue_gestes_${new Date().toISOString().slice(0,10)}.csv`);
+            toast('✅ Catalogue exporté', 'success');
+        }
+
+        function downloadConsommablesTemplate() {
+            const header = 'nom,unite,prix,designation';
+            const ex1 = 'Étiquette A4,pièce,0.05,Étiquette thermique format A4';
+            const ex2 = 'Film plastique,mètre,0.20,Film rétractable transparent';
+            _downloadCSV([header, ex1, ex2].join('\n'), 'modele_consommables.csv');
+        }
+
+        function exportConsommablesCSV() {
+            if (!catalogueConsommables.length) { toast('Catalogue vide', 'warning'); return; }
+            const header = 'nom,unite,prix,designation';
+            const rows = catalogueConsommables.map(c =>
+                [c.nom || c.designation || '', c.unite || 'pièce', c.prixUnitaire ?? c.prix ?? 0, c.designation || c.nom || '']
+                    .map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')
+            );
+            _downloadCSV([header, ...rows].join('\n'), `consommables_${new Date().toISOString().slice(0,10)}.csv`);
+            toast('✅ Consommables exportés', 'success');
+        }
+
+        function handleConsomCsvDrop(e) {
+            e.preventDefault();
+            document.getElementById('consomDropZone').style.background = '';
+            const file = e.dataTransfer.files[0];
+            if (!file) return;
+            importConsommablesCSV({ files: [file] });
+        }
+
+        function importConsommablesCSV(input) {
+            const file = input.files ? input.files[0] : input;
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const lines = e.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+                if (lines.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+                const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim().toLowerCase());
+                const iNom  = headers.indexOf('nom');
+                const iUnit = headers.indexOf('unite');
+                const iPrix = headers.indexOf('prix');
+                const iDes  = headers.indexOf('designation');
+                if (iNom < 0 || iPrix < 0) { toast('Colonnes "nom" et "prix" requises', 'danger'); return; }
+                let added = 0;
+                lines.slice(1).forEach(line => {
+                    const cols = line.split(',').map(c => c.replace(/^"|"$/g,'').trim());
+                    const nom  = cols[iNom]  || '';
+                    const unite= iUnit >= 0 ? (cols[iUnit] || 'pièce') : 'pièce';
+                    const prix = parseFloat(cols[iPrix]) || 0;
+                    const des  = iDes >= 0 ? (cols[iDes] || nom) : nom;
+                    if (!nom) return;
+                    if (!catalogueConsommables.find(c => (c.nom || c.designation) === nom)) {
+                        catalogueConsommables.push({ nom, designation: des, unite, prixUnitaire: prix });
+                        added++;
+                    }
+                });
+                localStorage.setItem('catalogueConsommables', JSON.stringify(catalogueConsommables));
+                renderConsommables();
+                toast(`✅ ${added} consommable(s) importé(s)`, 'success');
+                if (input.value !== undefined) input.value = '';
+            };
+            reader.readAsText(file, 'utf-8');
         }
 
         function imprimerToutCatalogue() {
