@@ -209,8 +209,16 @@
         .tab[data-group-color]:hover { border-bottom-color: var(--tab-group-color, transparent); }
         .tabs-group-sep { display:inline-block; width:3px; height:32px; border-radius:2px; background:var(--sep-color,#ccc); opacity:0.45; vertical-align:middle; flex-shrink:0; }
         /* Editor rows for tabGroups */
-        .tg-row { display:flex; align-items:center; gap:8px; background:var(--color-bg-alt); border:1px solid var(--color-border); border-radius:8px; padding:8px 12px; margin-bottom:6px; flex-wrap:wrap; }
-        .tg-color-swatch { width:20px; height:20px; border-radius:50%; flex-shrink:0; border:2px solid rgba(0,0,0,0.2); }
+        .tg-row { background:var(--color-bg-alt); border:1px solid var(--color-border); border-radius:10px; margin-bottom:8px; overflow:hidden; }
+        .tg-row-header { display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; user-select:none; }
+        .tg-row-header:hover { background:var(--color-border-light); }
+        .tg-color-swatch { width:18px; height:18px; border-radius:50%; flex-shrink:0; border:2px solid rgba(0,0,0,0.15); }
+        .tg-row-body { display:none; padding:10px 14px 14px; border-top:1px solid var(--color-border); }
+        .tg-row-body.open { display:block; }
+        .tg-checkbox-grid { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+        .tg-check-label { display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:6px; border:1px solid var(--color-border); background:var(--color-bg); font-size:0.82em; cursor:pointer; transition:background 0.12s; }
+        .tg-check-label:hover { background:var(--color-border-light); }
+        .tg-check-label input { width:14px; height:14px; accent-color:var(--tg-accent,#4a9af0); cursor:pointer; }
 
         body.admin-mode .tab:hover {
             background: linear-gradient(135deg, var(--color-border-light) 0%, var(--color-bg-from) 100%);
@@ -7844,22 +7852,76 @@
             const allTabs = [...document.querySelectorAll('.tab[onclick]')]
                 .map(btn => { const m = btn.getAttribute('onclick')?.match(/switchTab\('([^']+)'\)/); return m ? m[1] : null; })
                 .filter(Boolean);
+            // Tab label map for display
+            const tabLabels = {};
+            document.querySelectorAll('.tab[onclick]').forEach(btn => {
+                const m = btn.getAttribute('onclick')?.match(/switchTab\('([^']+)'\)/);
+                if (m) tabLabels[m[1]] = btn.textContent.trim().replace(/^\d+\s*/, '').slice(0, 24);
+            });
             el.innerHTML = tabGroups.map((g, gi) => `
-                <div class="tg-row">
-                    <div class="tg-color-swatch" style="background:${g.couleur};"></div>
-                    <input type="color" value="${g.couleur}" style="width:32px;height:28px;padding:0;border:none;border-radius:4px;cursor:pointer;"
-                           onchange="tabGroups[${gi}].couleur=this.value;document.querySelector('.tg-row:nth-child(${gi+1}) .tg-color-swatch').style.background=this.value;saveTabGroups();applyTabGroupColors();">
-                    <input type="text" value="${escapeHtml(g.nom)}" placeholder="Nom du groupe"
-                           style="padding:5px 10px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg);color:var(--color-text);font-size:0.85em;width:140px;"
-                           oninput="tabGroups[${gi}].nom=this.value;saveTabGroups();">
-                    <select multiple style="padding:4px 8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg);color:var(--color-text);font-size:0.82em;flex:1;min-height:54px;"
-                            onchange="tabGroups[${gi}].onglets=[...this.selectedOptions].map(o=>o.value);saveTabGroups();applyTabGroupColors();">
-                        ${allTabs.map(t => `<option value="${t}" ${g.onglets.includes(t)?'selected':''}>${t}</option>`).join('')}
-                    </select>
-                    <button class="btn btn-small" onclick="tabGroups.splice(${gi},1);saveTabGroups();applyTabGroupColors();tabGroupsRenderEditor();"
-                            style="color:#f88;border-color:#c44;padding:4px 8px;" title="Supprimer">🗑️</button>
+                <div class="tg-row" id="tg-row-${gi}">
+                    <div class="tg-row-header" onclick="tgToggle(${gi})">
+                        <div class="tg-color-swatch" id="tg-swatch-${gi}" style="background:${g.couleur};"></div>
+                        <input type="color" value="${g.couleur}" style="width:28px;height:24px;padding:0;border:none;border-radius:4px;cursor:pointer;flex-shrink:0;"
+                               onclick="event.stopPropagation()"
+                               oninput="tabGroups[${gi}].couleur=this.value;document.getElementById('tg-swatch-${gi}').style.background=this.value;saveTabGroups();applyTabGroupColors();">
+                        <input type="text" value="${escapeHtml(g.nom)}" placeholder="Nom du groupe"
+                               style="padding:4px 10px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg);color:var(--color-text);font-size:0.88em;font-weight:600;width:160px;flex-shrink:0;"
+                               onclick="event.stopPropagation()"
+                               oninput="tabGroups[${gi}].nom=this.value;saveTabGroups();">
+                        <span style="flex:1;font-size:0.78em;color:var(--color-text-muted);">${g.onglets.length} onglet${g.onglets.length>1?'s':''}</span>
+                        <span style="font-size:0.8em;color:var(--color-text-muted);" id="tg-chevron-${gi}">▶</span>
+                        <button class="btn btn-small" onclick="event.stopPropagation();tabGroups.splice(${gi},1);saveTabGroups();applyTabGroupColors();tabGroupsRenderEditor();"
+                                style="color:#f88;border-color:#c44;padding:3px 8px;" title="Supprimer">🗑️</button>
+                    </div>
+                    <div class="tg-row-body" id="tg-body-${gi}">
+                        <div style="font-size:0.75em;color:var(--color-text-muted);margin-bottom:6px;">Cochez les onglets à inclure dans ce groupe :</div>
+                        <div class="tg-checkbox-grid">
+                            ${allTabs.map(t => `
+                                <label class="tg-check-label" style="--tg-accent:${g.couleur};">
+                                    <input type="checkbox" ${g.onglets.includes(t)?'checked':''}
+                                           onchange="tgToggleTab(${gi},'${t}',this.checked)">
+                                    ${escapeHtml(tabLabels[t] || t)}
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
                 </div>
             `).join('');
+        }
+
+        function tgToggle(gi) {
+            const body = document.getElementById('tg-body-' + gi);
+            const chev = document.getElementById('tg-chevron-' + gi);
+            if (!body) return;
+            const open = body.classList.toggle('open');
+            if (chev) chev.textContent = open ? '▼' : '▶';
+        }
+
+        function tgToggleTab(gi, tabName, checked) {
+            if (checked) {
+                // Remove from any other group first
+                tabGroups.forEach((g, i) => { if (i !== gi) g.onglets = g.onglets.filter(t => t !== tabName); });
+                if (!tabGroups[gi].onglets.includes(tabName)) tabGroups[gi].onglets.push(tabName);
+            } else {
+                tabGroups[gi].onglets = tabGroups[gi].onglets.filter(t => t !== tabName);
+            }
+            // Update count display
+            const countEl = document.querySelector(`#tg-row-${gi} .tg-row-header span`);
+            if (countEl) countEl.textContent = `${tabGroups[gi].onglets.length} onglet${tabGroups[gi].onglets.length>1?'s':''}`;
+            // Uncheck same tab in other groups
+            if (checked) {
+                tabGroups.forEach((g, i) => {
+                    if (i !== gi) {
+                        const cb = document.querySelector(`#tg-body-${i} input[type=checkbox][onchange*="'${tabName}'"]`);
+                        if (cb) cb.checked = false;
+                        const c2 = document.querySelector(`#tg-row-${i} .tg-row-header span`);
+                        if (c2) c2.textContent = `${g.onglets.length} onglet${g.onglets.length>1?'s':''}`;
+                    }
+                });
+            }
+            saveTabGroups();
+            applyTabGroupColors();
         }
 
         function tabGroupsAddGroup() {
