@@ -9715,7 +9715,7 @@
             </div>`;
             const el = document.createElement('div'); el.innerHTML = html;
             document.body.appendChild(el);
-            html2pdf().set({margin:8, filename:`fiche-client-${clientNom.replace(/\s+/g,'-')}.pdf`, jsPDF:{format:'a4'}}).from(el).save().then(()=>document.body.removeChild(el));
+            html2pdf().set({margin:4, filename:`fiche-client-${clientNom.replace(/\s+/g,'-')}.pdf`, jsPDF:{format:'a4'}}).from(el).save().then(()=>document.body.removeChild(el));
         }
 
         // ============================================================
@@ -12177,46 +12177,46 @@
             });
 
             const html = `
-                <div style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:30px;color:#2d3e50;">
-                    <div style="background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%);padding:25px;border-radius:12px;margin-bottom:25px;text-align:center;">
-                        <h1 style="margin:0;font-size:1.6em;color:#2d3e50;">🏭 Atelier La Pallanterie</h1>
-                        <p style="margin:5px 0 0;opacity:0.8;">Fiche de prestation</p>
+                <div style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:12px 16px;color:#2d3e50;font-size:11px;">
+                    <div style="background:linear-gradient(135deg,#a8d5e2 0%,#c9b3d4 100%);padding:12px;border-radius:8px;margin-bottom:10px;text-align:center;">
+                        <h1 style="margin:0;font-size:1.3em;color:#2d3e50;">🏭 Atelier La Pallanterie</h1>
+                        <p style="margin:2px 0 0;opacity:0.8;font-size:0.9em;">Fiche de prestation</p>
                     </div>
 
-                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-                        <tr><td style="padding:6px 10px;font-weight:bold;width:150px;">Client</td><td style="padding:6px 10px;">${escapeHtml(p.client)}</td>
-                            <td style="padding:6px 10px;font-weight:bold;width:150px;">Date</td><td style="padding:6px 10px;">${date}</td></tr>
-                        <tr><td style="padding:6px 10px;font-weight:bold;">Prestation</td><td style="padding:6px 10px;">${escapeHtml(p.prestation)}</td>
-                            <td style="padding:6px 10px;font-weight:bold;">Référence</td><td style="padding:6px 10px;">${escapeHtml(p.reference)}</td></tr>
-                        <tr><td style="padding:6px 10px;font-weight:bold;">Responsable</td><td style="padding:6px 10px;">${escapeHtml(p.responsable || '-')}</td>
-                            <td style="padding:6px 10px;font-weight:bold;">Équipe</td><td style="padding:6px 10px;">${p.nbCEA} CEA + ${Math.round((p.nbMSP||0)*100)}% MSP</td></tr>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;font-size:0.9em;">
+                        <tr><td style="padding:3px 6px;font-weight:bold;width:90px;">Client</td><td style="padding:3px 6px;">${escapeHtml(p.client)}</td>
+                            <td style="padding:3px 6px;font-weight:bold;width:90px;">Date</td><td style="padding:3px 6px;">${date}</td></tr>
+                        <tr><td style="padding:3px 6px;font-weight:bold;">Prestation</td><td style="padding:3px 6px;">${escapeHtml(p.prestation)}</td>
+                            <td style="padding:3px 6px;font-weight:bold;">Référence</td><td style="padding:3px 6px;">${escapeHtml(p.reference)}</td></tr>
+                        <tr><td style="padding:3px 6px;font-weight:bold;">Responsable</td><td style="padding:3px 6px;">${escapeHtml(p.responsable || '-')}</td>
+                            <td style="padding:3px 6px;font-weight:bold;">Équipe</td><td style="padding:3px 6px;">${p.nbCEA} CEA + ${Math.round((p.nbMSP||0)*100)}% MSP</td></tr>
                     </table>
 
-                    ${gestesHtml ? `<h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-top:20px;">Détail des gestes</h3>
-                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-                        <thead><tr style="background:#a8d5e2;"><th style="padding:8px;text-align:left;">Code</th><th style="padding:8px;text-align:left;">Description</th><th style="padding:8px;">Qté</th><th style="padding:8px;">Temps/u</th><th style="padding:8px;">Total</th></tr></thead>
+                    ${gestesHtml ? `<h3 style="color:#6b8fa3;border-bottom:1px solid #a8d5e2;padding-bottom:3px;margin:6px 0 4px;font-size:0.95em;">Détail des gestes</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:6px;font-size:0.85em;">
+                        <thead><tr style="background:#a8d5e2;"><th style="padding:3px 4px;text-align:left;font-size:0.85em;">Code</th><th style="padding:3px 4px;text-align:left;">Desc</th><th style="padding:3px 4px;">Qté</th><th style="padding:3px 4px;">T/u</th><th style="padding:3px 4px;">Total</th></tr></thead>
                         <tbody>${gestesHtml}</tbody>
                     </table>` : ''}
 
-                    <h3 style="color:#6b8fa3;border-bottom:2px solid #a8d5e2;padding-bottom:8px;margin-top:20px;">Décomposition des coûts</h3>
-                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-                        <tr><td style="padding:6px 10px;">Main d'œuvre CEA</td><td style="padding:6px 10px;text-align:right;">${fmtCHF((p.coutMO||0))}</td></tr>
-                        <tr><td style="padding:6px 10px;">Encadrement MSP</td><td style="padding:6px 10px;text-align:right;">${fmtCHF((p.coutEncadrement||0))}</td></tr>
-                        <tr><td style="padding:6px 10px;">Consommables</td><td style="padding:6px 10px;text-align:right;">${fmtCHF((p.coutConsommables||0))}</td></tr>
-                        <tr><td style="padding:6px 10px;">Stockage</td><td style="padding:6px 10px;text-align:right;">${fmtCHF((p.coutStockage||0))}</td></tr>
-                        <tr style="font-weight:bold;border-top:2px solid #a8d5e2;"><td style="padding:8px 10px;">Prix de revient</td><td style="padding:8px 10px;text-align:right;">${fmtCHF((p.prixRevient||0))}</td></tr>
+                    <h3 style="color:#6b8fa3;border-bottom:1px solid #a8d5e2;padding-bottom:3px;margin:6px 0 4px;font-size:0.95em;">Décomposition des coûts</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;font-size:0.9em;">
+                        <tr><td style="padding:2px 6px;">Main d'œuvre CEA</td><td style="padding:2px 6px;text-align:right;">${fmtCHF((p.coutMO||0))}</td></tr>
+                        <tr><td style="padding:2px 6px;">Encadrement MSP</td><td style="padding:2px 6px;text-align:right;">${fmtCHF((p.coutEncadrement||0))}</td></tr>
+                        <tr><td style="padding:2px 6px;">Consommables</td><td style="padding:2px 6px;text-align:right;">${fmtCHF((p.coutConsommables||0))}</td></tr>
+                        <tr><td style="padding:2px 6px;">Stockage</td><td style="padding:2px 6px;text-align:right;">${fmtCHF((p.coutStockage||0))}</td></tr>
+                        <tr style="font-weight:bold;border-top:1px solid #a8d5e2;"><td style="padding:3px 6px;">Prix de revient</td><td style="padding:3px 6px;text-align:right;">${fmtCHF((p.prixRevient||0))}</td></tr>
                     </table>
 
-                    <div style="background:linear-gradient(135deg,#c9dff0 0%,#e0d4ed 100%);padding:20px;border-radius:10px;text-align:center;">
-                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
-                            <div><div style="font-size:0.8em;color:#5a7b8f;">Temps total</div><div style="font-size:1.4em;font-weight:bold;">${fmtNum((p.heures||0))} h</div></div>
-                            <div><div style="font-size:0.8em;color:#5a7b8f;">Marge</div><div style="font-size:1.4em;font-weight:bold;">${p.marge||0}%</div></div>
-                            <div><div style="font-size:0.8em;color:#5a7b8f;">Marge CHF</div><div style="font-size:1.4em;font-weight:bold;">${margeChfVal} CHF</div></div>
+                    <div style="background:linear-gradient(135deg,#c9dff0 0%,#e0d4ed 100%);padding:10px;border-radius:6px;text-align:center;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;">
+                            <div><div style="font-size:0.7em;color:#5a7b8f;">Temps total</div><div style="font-size:1.1em;font-weight:bold;">${fmtNum((p.heures||0))} h</div></div>
+                            <div><div style="font-size:0.7em;color:#5a7b8f;">Marge</div><div style="font-size:1.1em;font-weight:bold;">${p.marge||0}%</div></div>
+                            <div><div style="font-size:0.7em;color:#5a7b8f;">Marge CHF</div><div style="font-size:1.1em;font-weight:bold;">${margeChfVal}</div></div>
                         </div>
-                        <div style="font-size:0.9em;color:#5a7b8f;margin-bottom:5px;">PRIX DE VENTE</div>
-                        <div style="font-size:2.5em;font-weight:bold;color:#6b8fa3;">${fmtCHF((p.prixVente||0))}</div>
+                        <div style="font-size:0.8em;color:#5a7b8f;margin-bottom:3px;">PRIX DE VENTE</div>
+                        <div style="font-size:1.8em;font-weight:bold;color:#6b8fa3;">${fmtCHF((p.prixVente||0))}</div>
                     </div>
-                    <p style="text-align:center;font-size:0.75em;color:#aaa;margin-top:20px;">Généré le ${new Date().toLocaleDateString('fr-FR')} — Outil Atelier La Pallanterie</p>
+                    <p style="text-align:center;font-size:0.65em;color:#aaa;margin-top:8px;margin-bottom:0;">Généré le ${new Date().toLocaleDateString('fr-FR')} — Atelier La Pallanterie</p>
                 </div>`;
 
             const printZone = document.getElementById('printZone');
@@ -12259,48 +12259,48 @@
             const unite = p.unite || 'pièce';
             const prixPiece = nbPieces > 1 ? fmtNum((p.prixVente || 0) / nbPieces) : null;
 
-            const html = `<div id="devisPdfContent" style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:15px 25px;color:#2d3e50;font-size:11px;">
-                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:15px;">
-                    <div><h1 style="margin:0;color:#6b8fa3;font-size:1.6em;">🏭 Atelier La Pallanterie</h1>
-                    <p style="margin:2px 0 0;color:#8a99a8;font-size:0.85em;">Travail adapté • Services de qualité</p></div>
-                    <div style="text-align:right;"><div style="background:#6b8fa3;color:white;padding:6px 16px;border-radius:6px;font-weight:bold;font-size:1.1em;display:inline-block;">DEVIS</div>
-                    <p style="margin:4px 0 0;font-size:0.85em;color:#5a7b8f;">Réf: ${ref} — ${date}</p></div>
+            const html = `<div id="devisPdfContent" style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:10px 12px;color:#2d3e50;font-size:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                    <div><h1 style="margin:0;color:#6b8fa3;font-size:1.3em;">🏭 Atelier La Pallanterie</h1>
+                    <p style="margin:1px 0 0;color:#8a99a8;font-size:0.75em;">Travail adapté • Services de qualité</p></div>
+                    <div style="text-align:right;"><div style="background:#6b8fa3;color:white;padding:4px 10px;border-radius:4px;font-weight:bold;font-size:0.9em;display:inline-block;">DEVIS</div>
+                    <p style="margin:2px 0 0;font-size:0.75em;color:#5a7b8f;">Réf: ${ref} — ${date}</p></div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:6px;padding:8px 10px;">
-                        <div style="font-size:0.7em;text-transform:uppercase;color:#8a99a8;font-weight:600;">Client</div>
-                        <div style="font-size:1.05em;font-weight:bold;">${escapeHtml(p.client || '-')}</div></div>
-                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:6px;padding:8px 10px;">
-                        <div style="font-size:0.7em;text-transform:uppercase;color:#8a99a8;font-weight:600;">Prestation</div>
-                        <div style="font-size:1.05em;font-weight:bold;">${escapeHtml(p.prestation || '-')}</div>
-                        ${p.responsable ? `<div style="font-size:0.8em;color:#8a99a8;">Resp: ${escapeHtml(p.responsable)}</div>` : ''}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:4px;padding:5px 6px;">
+                        <div style="font-size:0.65em;text-transform:uppercase;color:#8a99a8;font-weight:600;">Client</div>
+                        <div style="font-size:0.9em;font-weight:bold;">${escapeHtml(p.client || '-')}</div></div>
+                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:4px;padding:5px 6px;">
+                        <div style="font-size:0.65em;text-transform:uppercase;color:#8a99a8;font-weight:600;">Prestation</div>
+                        <div style="font-size:0.9em;font-weight:bold;">${escapeHtml(p.prestation || '-')}</div>
+                        ${p.responsable ? `<div style="font-size:0.7em;color:#8a99a8;">Resp: ${escapeHtml(p.responsable)}</div>` : ''}</div>
                 </div>
-                ${gestesRows ? `<h3 style="color:#6b8fa3;border-bottom:1px solid #a8d5e2;padding-bottom:3px;margin:8px 0 4px;font-size:1em;">📋 Détail de la prestation</h3>
-                <table style="width:100%;border-collapse:collapse;font-size:0.95em;"><thead><tr style="background:#edf5fa;">
-                    <th style="padding:4px 6px;text-align:left;width:25px;">#</th><th style="padding:4px 6px;text-align:left;">Description</th>
-                    <th style="padding:4px 6px;text-align:center;">Qté</th><th style="padding:4px 6px;text-align:center;">Temps</th>
+                ${gestesRows ? `<h3 style="color:#6b8fa3;border-bottom:1px solid #a8d5e2;padding-bottom:2px;margin:5px 0 3px;font-size:0.85em;">📋 Détail de la prestation</h3>
+                <table style="width:100%;border-collapse:collapse;font-size:0.85em;"><thead><tr style="background:#edf5fa;">
+                    <th style="padding:2px 3px;text-align:left;width:20px;">#</th><th style="padding:2px 3px;text-align:left;font-size:0.8em;">Description</th>
+                    <th style="padding:2px 3px;text-align:center;font-size:0.8em;">Qté</th><th style="padding:2px 3px;text-align:center;font-size:0.8em;">Temps</th>
                 </tr></thead><tbody>${gestesRows}</tbody></table>` : ''}
-                ${consoRows ? `<h3 style="color:#6b8fa3;border-bottom:1px solid #a8d5e2;padding-bottom:3px;margin:10px 0 4px;font-size:1em;">🛒 Fournitures incluses</h3>
-                <table style="width:100%;border-collapse:collapse;font-size:0.95em;"><thead><tr style="background:#edf5fa;">
-                    <th style="padding:4px 6px;text-align:left;">Désignation</th><th style="padding:4px 6px;text-align:center;">Qté</th>
-                    <th style="padding:4px 6px;text-align:right;">Prix unit.</th></tr></thead><tbody>${consoRows}</tbody></table>` : ''}
-                <div style="margin-top:14px;background:linear-gradient(135deg,#e8f4f8,#f0e8f5);border-radius:10px;padding:14px;text-align:center;">
-                    <div style="font-size:0.8em;color:#5a7b8f;">Volume: ${nbPieces} ${unite}${nbPieces > 1 ? 's' : ''}</div>
-                    ${prixPiece ? `<div style="font-size:0.9em;color:#5a7b8f;">Prix unitaire: <strong>${prixPiece} CHF/${unite}</strong></div>` : ''}
-                    <div style="font-size:0.85em;color:#6b8fa3;margin-top:4px;">PRIX TOTAL</div>
-                    <div style="font-size:2.2em;font-weight:bold;color:#2d3e50;">${fmtCHF((p.prixVente||0))}</div>
-                    <div style="font-size:0.78em;color:#8a99a8;">HT — Temps estimé: ${(p.heures||0).toFixed(1)}h</div>
+                ${consoRows ? `<h3 style="color:#6b8fa3;border-bottom:1px solid #a8d5e2;padding-bottom:2px;margin:5px 0 3px;font-size:0.85em;">🛒 Fournitures incluses</h3>
+                <table style="width:100%;border-collapse:collapse;font-size:0.85em;"><thead><tr style="background:#edf5fa;">
+                    <th style="padding:2px 3px;text-align:left;font-size:0.8em;">Désignation</th><th style="padding:2px 3px;text-align:center;font-size:0.8em;">Qté</th>
+                    <th style="padding:2px 3px;text-align:right;font-size:0.8em;">Prix unit.</th></tr></thead><tbody>${consoRows}</tbody></table>` : ''}
+                <div style="margin-top:8px;background:linear-gradient(135deg,#e8f4f8,#f0e8f5);border-radius:6px;padding:8px;text-align:center;">
+                    <div style="font-size:0.7em;color:#5a7b8f;">Volume: ${nbPieces} ${unite}${nbPieces > 1 ? 's' : ''}</div>
+                    ${prixPiece ? `<div style="font-size:0.8em;color:#5a7b8f;">Prix unitaire: <strong>${prixPiece} CHF/${unite}</strong></div>` : ''}
+                    <div style="font-size:0.75em;color:#6b8fa3;margin-top:2px;">PRIX TOTAL</div>
+                    <div style="font-size:1.6em;font-weight:bold;color:#2d3e50;">${fmtCHF((p.prixVente||0))}</div>
+                    <div style="font-size:0.7em;color:#8a99a8;">HT — Temps estimé: ${(p.heures||0).toFixed(1)}h</div>
                 </div>
-                <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.85em;">
-                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:6px;padding:8px;"><strong>Conditions</strong><br>${conditions}</div>
-                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:6px;padding:8px;"><strong>Validité</strong><br>${validite}</div>
+                <div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.75em;">
+                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:4px;padding:5px;"><strong style="font-size:0.85em;">Conditions</strong><div>${conditions}</div></div>
+                    <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:4px;padding:5px;"><strong style="font-size:0.85em;">Validité</strong><div>${validite}</div></div>
                 </div>
-                <div style="margin-top:14px;border-top:1px solid #d5e3ed;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:0.78em;color:#8a99a8;">
-                    <div><strong style="color:#2d3e50;">Signature client</strong><br>
-                        <div style="border-bottom:1px solid #ccc;width:180px;height:30px;margin-top:4px;"></div>
-                        <div style="margin-top:3px;">Date: ___/___/______</div></div>
-                    <div style="text-align:right;"><strong style="color:#2d3e50;">Atelier La Pallanterie</strong><br>
-                        <div style="margin-top:6px;">Devis généré le ${new Date().toLocaleDateString('fr-FR')}</div></div>
+                <div style="margin-top:8px;border-top:1px solid #d5e3ed;padding-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.7em;color:#8a99a8;">
+                    <div><strong style="color:#2d3e50;font-size:0.8em;">Signature client</strong><br>
+                        <div style="border-bottom:1px solid #ccc;width:120px;height:20px;margin-top:2px;"></div>
+                        <div style="margin-top:2px;">Date: ___/___/______</div></div>
+                    <div style="text-align:right;"><strong style="color:#2d3e50;font-size:0.8em;">Atelier La Pallanterie</strong><br>
+                        <div style="margin-top:3px;">Devis généré le ${new Date().toLocaleDateString('fr-FR')}</div></div>
                 </div>
             </div>`;
 
@@ -12308,7 +12308,7 @@
             el.innerHTML = html;
             document.body.appendChild(el);
             html2pdf().set({
-                margin: [5, 8, 5, 8], filename: `Devis_${ref}_${p.client || 'client'}.pdf`,
+                margin: [3, 5, 3, 5], filename: `Devis_${ref}_${p.client || 'client'}.pdf`,
                 image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: 'avoid-all' }
@@ -17897,7 +17897,7 @@
             });
             const el = document.createElement('div'); el.style.cssText = 'padding:20px;'; el.innerHTML = allHtml;
             document.body.appendChild(el);
-            html2pdf().set({ margin: 10, filename: 'catalogue-gestes.pdf', jsPDF: { format: 'a4', orientation: 'portrait' } }).from(el).save().then(() => document.body.removeChild(el));
+            html2pdf().set({ margin: 5, filename: 'catalogue-gestes.pdf', jsPDF: { format: 'a4', orientation: 'portrait' } }).from(el).save().then(() => document.body.removeChild(el));
         }
 
         // ============================================================
@@ -18364,7 +18364,7 @@
             </div>`;
             const el = document.createElement('div'); el.innerHTML = html;
             document.body.appendChild(el);
-            html2pdf().set({margin:8, filename:`rapport-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}.pdf`, jsPDF:{format:'a4',orientation:'portrait'}}).from(el).save().then(()=>document.body.removeChild(el));
+            html2pdf().set({margin:4, filename:`rapport-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}.pdf`, jsPDF:{format:'a4',orientation:'portrait'}}).from(el).save().then(()=>document.body.removeChild(el));
         }
 
         // ═════════════════════════════════════════════════════════════════════
