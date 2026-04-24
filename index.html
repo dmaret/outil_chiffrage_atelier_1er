@@ -7386,8 +7386,8 @@
                 shadows.push(`<path d="${pathData}" stroke="rgba(0,0,0,0.28)" stroke-width="7" fill="none" stroke-linecap="round"/>`);
             };
 
-            const ampliJack  = { x: _pbEndpointPos.ampli.x + 60, y: _pbEndpointPos.ampli.y + 50 };
-            const baffleJack = { x: _pbEndpointPos.baffle.x - 10, y: _pbEndpointPos.baffle.y + 50 };
+            const ampliJack  = getJackPos(document.querySelector('#pb-endpoint-ampli .pb-jack-out'));
+            const baffleJack = getJackPos(document.querySelector('#pb-endpoint-baffle .pb-jack-in'));
 
             // ── Série: triés par X (gauche → droite) ────────────────
             const seriesOrdered = pbPedals.filter(p => !p.parallel).sort((a, b) => a.x - b.x);
