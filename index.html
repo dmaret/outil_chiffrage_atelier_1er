@@ -1072,7 +1072,8 @@
         .pb-zoom-btn:hover { background:#2a3a5a; color:#fff; }
         #pb-zoom-label { min-width:38px; text-align:center; font-weight:700; color:#7ac4ff; font-size:0.85em; }
         #pb-board-scroll { flex:1; overflow:auto; }
-        #pb-canvas { position:relative; width:2000px; height:900px; transform-origin:top left; transition:transform 0.18s; }
+        #pb-canvas { position:relative; width:2000px; height:900px; transform-origin:top left; transition:transform 0.18s; cursor:grab; }
+        #pb-canvas:active { cursor:grabbing; }
         .pb-endpoint-fixed { position:absolute; z-index:10; }
         /* Endpoint devices */
         .pb-endpoint { position:relative; z-index:10; flex-shrink:0; }
@@ -7467,6 +7468,36 @@
             pbInit();
             window.addEventListener('resize', () => requestAnimationFrame(pbDrawCables));
             document.getElementById('pb-board')?.addEventListener('scroll', () => requestAnimationFrame(pbDrawCables));
+            _pbInitPan();
+        }
+
+        let _pbPanActive = false;
+        function _pbInitPan() {
+            const scroll = document.getElementById('pb-board-scroll');
+            const canvas = document.getElementById('pb-canvas');
+            if (!scroll || !canvas || canvas._panBound) return;
+            canvas._panBound = true;
+            canvas.addEventListener('mousedown', e => {
+                if (e.button !== 0) return;
+                if (e.target !== canvas && e.target.id !== 'pb-cable-svg') return;
+                const startX = e.clientX + scroll.scrollLeft;
+                const startY = e.clientY + scroll.scrollTop;
+                canvas.style.cursor = 'grabbing';
+                _pbPanActive = true;
+                const onMove = m => {
+                    scroll.scrollLeft = startX - m.clientX;
+                    scroll.scrollTop  = startY - m.clientY;
+                };
+                const onUp = () => {
+                    _pbPanActive = false;
+                    canvas.style.cursor = '';
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                };
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+                e.preventDefault();
+            });
         }
 
         // ── Fiches d'intervention rapide ──────────────────────
