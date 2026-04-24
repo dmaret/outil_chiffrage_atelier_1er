@@ -7,6 +7,8 @@
 ## Sommaire
 
 1. [Présentation générale](#1-présentation-générale)
+   - [Flux global des activités](#11-flux-global-des-activités)
+   - [Vue par acteur](#12-vue-par-acteur)
 2. [Démarrage rapide](#2-démarrage-rapide)
 3. [Structure du projet](#3-structure-du-projet)
 4. [Modules fonctionnels](#4-modules-fonctionnels)
@@ -50,6 +52,136 @@
 L'outil permet de :
 - **Chiffrer** des prestations de services (coût de revient, prix de vente, marges)
 - **Gérer les stocks** avec valorisation FIFO automatique
+
+### 1.1 Flux global des activités
+
+```mermaid
+flowchart TD
+    %% ── Acteurs ──────────────────────────────────────────────
+    ADMIN(["👤 Admin"])
+    CEA(["👷 CEA"])
+    MSP(["🧑‍🏫 MSP"])
+    CLIENT(["🏭 Client / Bénéficiaire"])
+
+    %% ── Modules ──────────────────────────────────────────────
+    PARAM["⚙️ Paramétrage\nCoûts horaires, marges,\ncapacité atelier"]
+    CAT["📚 Catalogue Gestes\nBibliothèque de gestes\ncronométrés par catégorie"]
+    CONSO["🛒 Consommables\nArticles avec prix unitaires"]
+    STOCK["📦 Gestion Stock\nEmplacements · FIFO\nEntrée / Sortie / Transfert"]
+    CALC["💼 Calculateur\nChiffrage d'une prestation\n(coût + marge → prix vente)"]
+    CALCVIS["🖐️ Calculateur Visuel\nFlux de gestes en canvas\nSérie + Parallèle"]
+    PREST["📊 Prestations\nDevis · Validés · Facturés"]
+    CLIENTS["👥 Clients\nFiche · Historique · CA"]
+    STATS["📈 Stats\nRentabilité · Tendances\nRépartition statuts"]
+    GANTT["📅 Planification\nGantt des prestations\npar date début / fin"]
+    PROC["📋 Procédures\nProcédure CEA (référence)\nvs Procédure Client (observée)"]
+    FORM["🎓 Formation Admin\nApprenants · Modules\nProgression · Quiz"]
+    ACCOMP["🧠 Accompagnement\nBénéficiaires · Jalons\nThéorie & Analyse"]
+    DASH["🏠 Dashboard\nKPIs · Alertes · Pipeline\nDevis en attente"]
+
+    %% ── Flux administration ───────────────────────────────────
+    ADMIN -->|"Configure coûts & accès"| PARAM
+    ADMIN -->|"Gère le catalogue"| CAT
+    ADMIN -->|"Gère les consommables"| CONSO
+
+    %% ── Flux chiffrage ────────────────────────────────────────
+    PARAM -->|"Taux horaires CEA/MSP"| CALC
+    CAT -->|"Gestes sélectionnés"| CALC
+    CONSO -->|"Articles + prix"| CALC
+    CEA -->|"Compose la prestation"| CALC
+    CALC -->|"Enregistre"| PREST
+    CALCVIS -->|"💾 Sauver → prestation"| PREST
+    CEA -->|"Construit le flux visuel"| CALCVIS
+    CAT -->|"Palette de gestes"| CALCVIS
+
+    %% ── Flux stock ────────────────────────────────────────────
+    CONSO -->|"Référence articles"| STOCK
+    CEA -->|"Entrée / Sortie / Transfert"| STOCK
+    STOCK -->|"Alertes stock bas"| DASH
+
+    %% ── Flux commercial ───────────────────────────────────────
+    PREST -->|"Associée à un client"| CLIENTS
+    PREST -->|"Dates planifiées"| GANTT
+    PREST -->|"Alimente"| STATS
+    CLIENTS -->|"CA · Historique"| STATS
+    PREST -->|"Devis en attente"| DASH
+    STATS -->|"Vue synthèse"| DASH
+
+    %% ── Flux accompagnement / procédures ──────────────────────
+    CAT -->|"Gestes de référence"| PROC
+    CLIENTS -->|"Client associé"| PROC
+    PREST -->|"Commande liée"| PROC
+    CEA -->|"Encode procédure de référence"| PROC
+    MSP -->|"Observe et encode procédure client"| PROC
+    PROC -->|"Comparaison what-if\n✓ Identique ↕ Déplacé ✗ Manquant"| PROC
+
+    CEA -->|"Suit les bénéficiaires"| ACCOMP
+    MSP -->|"Accompagne · Jalons"| ACCOMP
+    CLIENT -->|"Bénéficiaire suivi"| ACCOMP
+
+    %% ── Flux formation ────────────────────────────────────────
+    CEA -->|"Inscrit à des modules"| FORM
+    MSP -->|"Valide la progression"| FORM
+    FORM -->|"Demandes en attente"| DASH
+
+    %% ── Styles ────────────────────────────────────────────────
+    classDef acteur    fill:#e8f4f8,stroke:#4a9af0,color:#1a3a5a,font-weight:bold
+    classDef module    fill:#f0f7ff,stroke:#7ab0d8,color:#1a2a40
+    classDef hub       fill:#eafff0,stroke:#4fc070,color:#1a3a2a,font-weight:bold
+    classDef procedure fill:#f5eeff,stroke:#9a60c0,color:#3a1a5a
+
+    class ADMIN,CEA,MSP,CLIENT acteur
+    class PARAM,CAT,CONSO,STOCK,CALCVIS,FORM,ACCOMP module
+    class CALC,PREST,CLIENTS,STATS,GANTT,DASH hub
+    class PROC procedure
+```
+
+### 1.2 Vue par acteur
+
+```mermaid
+flowchart LR
+    subgraph ADMIN_FLOW ["👤 Admin"]
+        direction TB
+        A1["⚙️ Paramétrage"]
+        A2["📚 Catalogue Gestes"]
+        A3["🛒 Consommables"]
+        A4["🗂️ Config & Groupes"]
+        A5["👥 Gestion accès"]
+    end
+
+    subgraph CEA_FLOW ["👷 CEA"]
+        direction TB
+        C1["💼 Calculateur"]
+        C2["🖐️ Calculateur Visuel"]
+        C3["📦 Stock"]
+        C4["📋 Procédure CEA"]
+        C5["📊 Prestations"]
+    end
+
+    subgraph MSP_FLOW ["🧑‍🏫 MSP"]
+        direction TB
+        M1["🧠 Accompagnement"]
+        M2["📋 Procédure Client"]
+        M3["🎓 Formation"]
+        M4["🔍 Comparateur"]
+    end
+
+    subgraph RESULTAT ["📈 Résultats"]
+        direction TB
+        R1["🏠 Dashboard"]
+        R2["📅 Planification"]
+        R3["📈 Stats"]
+    end
+
+    ADMIN_FLOW --> CEA_FLOW
+    CEA_FLOW --> RESULTAT
+    MSP_FLOW --> RESULTAT
+    C4 --- M2
+    M2 --> M4
+    C4 --> M4
+```
+
+
 - **Suivre les clients** et leur historique de prestations
 - **Planifier** les prestations via un diagramme de Gantt
 - **Analyser** la rentabilité et les performances via des tableaux de bord
