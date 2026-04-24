@@ -6659,6 +6659,7 @@
 
         let pbPedals = [];  // { id, type, label, value, unit, coutUnit, color, ledColor }
         let _pbDrag = null;
+        let _pbEndpointPos = { ampli: { x: 30, y: 350 }, baffle: { x: 1830, y: 350 } };
         let _pbZoomIdx = 3;
         const _PB_ZOOM_LEVELS = [0.45, 0.6, 0.75, 1.0, 1.2, 1.4];
 
@@ -6688,6 +6689,46 @@
         }
 
         let _pbDrawScheduled = false;
+        let _pbEndpointDrag = null;
+
+        function _pbStartEndpointDrag(e, epType) {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const el = document.getElementById(epType === 'ampli' ? 'pb-endpoint-ampli' : 'pb-endpoint-baffle');
+            if (!el) return;
+            _pbEndpointDrag = { type: epType, el, startMx: e.clientX, startMy: e.clientY, startPx: _pbEndpointPos[epType].x, startPy: _pbEndpointPos[epType].y };
+            el.style.zIndex = '1000';
+            el.style.opacity = '0.85';
+            document.addEventListener('mousemove', _pbDragEndpoint);
+            document.addEventListener('mouseup', _pbEndEndpointDrag);
+        }
+
+        function _pbDragEndpoint(e) {
+            if (!_pbEndpointDrag) return;
+            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            _pbEndpointPos[_pbEndpointDrag.type].x = _pbEndpointDrag.startPx + (e.clientX - _pbEndpointDrag.startMx) / scale;
+            _pbEndpointPos[_pbEndpointDrag.type].y = _pbEndpointDrag.startPy + (e.clientY - _pbEndpointDrag.startMy) / scale;
+            _pbEndpointDrag.el.style.left = _pbEndpointPos[_pbEndpointDrag.type].x + 'px';
+            _pbEndpointDrag.el.style.top  = _pbEndpointPos[_pbEndpointDrag.type].y + 'px';
+            if (!_pbDrawScheduled) {
+                _pbDrawScheduled = true;
+                requestAnimationFrame(() => {
+                    pbDrawCables();
+                    _pbDrawScheduled = false;
+                });
+            }
+        }
+
+        function _pbEndEndpointDrag() {
+            if (!_pbEndpointDrag) return;
+            _pbEndpointDrag.el.style.zIndex = '';
+            _pbEndpointDrag.el.style.opacity = '';
+            _pbEndpointDrag = null;
+            document.removeEventListener('mousemove', _pbDragEndpoint);
+            document.removeEventListener('mouseup', _pbEndEndpointDrag);
+        }
+
         function _pbDragMove(e) {
             if (!_pbDrag) return;
             const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
@@ -7134,32 +7175,34 @@
             // ENTRÉE endpoint
             const ampliEl = document.getElementById('pb-endpoint-ampli');
             if (ampliEl) {
-                ampliEl.style.left = '30px';
-                ampliEl.style.top  = '350px';
+                ampliEl.style.left = _pbEndpointPos.ampli.x + 'px';
+                ampliEl.style.top  = _pbEndpointPos.ampli.y + 'px';
                 ampliEl.innerHTML = `
-                    <div class="pb-ampli-body">
+                    <div class="pb-ampli-body" style="cursor:grab;">
                         <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
                         <div class="pb-endpoint-icon">🎸</div>
                         <div class="pb-endpoint-title">${document.getElementById('pb-title')?.value||'PROJET'}</div>
                         <div id="pb-ampli-client" style="font-size:0.65em;margin-top:4px;opacity:0.6;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${document.getElementById('pb-client')?.value||''}</div>
                     </div>
                     <div class="pb-jack pb-jack-out"></div>`;
+                ampliEl.addEventListener('mousedown', e => _pbStartEndpointDrag(e, 'ampli'));
             }
 
             // SORTIE endpoint
             const baffleEl = document.getElementById('pb-endpoint-baffle');
             if (baffleEl) {
-                baffleEl.style.left = '1830px';
-                baffleEl.style.top  = '350px';
+                baffleEl.style.left = _pbEndpointPos.baffle.x + 'px';
+                baffleEl.style.top  = _pbEndpointPos.baffle.y + 'px';
                 baffleEl.innerHTML = `
                     <div class="pb-jack pb-jack-in"></div>
-                    <div class="pb-baffle-body">
+                    <div class="pb-baffle-body" style="cursor:grab;">
                         <div class="pb-endpoint-label" style="color:#888;">SORTIE</div>
                         <div class="pb-endpoint-icon">📢</div>
                         <div class="pb-endpoint-title">TOTAL</div>
                         <div class="pb-total-line" id="pb-total-cout" style="margin-top:8px;font-size:0.72em;">Coût : —</div>
                         <div class="pb-total-big" id="pb-total-vente" style="font-size:0.88em;">—</div>
                     </div>`;
+                baffleEl.addEventListener('mousedown', e => _pbStartEndpointDrag(e, 'baffle'));
             }
 
             // Render all pedals
@@ -7178,15 +7221,19 @@
             const svg = document.getElementById('pb-cable-svg');
             const canvas = document.getElementById('pb-canvas');
             if (!svg || !canvas) return;
-            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
-            const cr = canvas.getBoundingClientRect();
 
             let paths = [], shadows = [];
 
-            const elXY = (el) => {
+            const getJackPos = (el) => {
                 if (!el) return null;
-                const r = el.getBoundingClientRect();
-                return { x: (r.left + r.width/2 - cr.left) / scale, y: (r.top + r.height/2 - cr.top) / scale };
+                const rect = el.getBoundingClientRect();
+                const parent = el.closest('.pb-pedal, [id^="pb-endpoint"]');
+                if (!parent) return null;
+                const parentRect = parent.getBoundingClientRect();
+                return {
+                    x: parseFloat(parent.style.left || 0) + (rect.left - parentRect.left) + rect.width / 2,
+                    y: parseFloat(parent.style.top || 0) + (rect.top - parentRect.top) + rect.height / 2
+                };
             };
 
             const addCable = (p1, p2, col, arcDir, w=5, op=0.85) => {
@@ -7199,8 +7246,8 @@
                 shadows.push(`<path d="${pathData}" stroke="rgba(0,0,0,0.28)" stroke-width="7" fill="none" stroke-linecap="round"/>`);
             };
 
-            const ampliJack  = elXY(document.querySelector('#pb-endpoint-ampli .pb-jack-out'));
-            const baffleJack = elXY(document.querySelector('#pb-endpoint-baffle .pb-jack-in'));
+            const ampliJack  = { x: _pbEndpointPos.ampli.x + 60, y: _pbEndpointPos.ampli.y + 50 };
+            const baffleJack = { x: _pbEndpointPos.baffle.x - 10, y: _pbEndpointPos.baffle.y + 50 };
 
             // ── Série: triés par X (gauche → droite) ────────────────
             const seriesOrdered = pbPedals.filter(p => !p.parallel).sort((a, b) => a.x - b.x);
@@ -7209,8 +7256,9 @@
             for (const p of seriesOrdered) {
                 const pedalEl = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
                 if (!pedalEl) continue;
-                const jIn  = elXY(pedalEl.querySelector('.pb-jack-in'));
-                const jOut = elXY(pedalEl.querySelector('.pb-jack-out'));
+                const jIn  = getJackPos(pedalEl.querySelector('.pb-jack-in'));
+                const jOut = getJackPos(pedalEl.querySelector('.pb-jack-out'));
+                if (!jIn || !jOut) continue;
                 addCable(prev, jIn, PB_CABLE_COLORS[colIdx++ % PB_CABLE_COLORS.length], +1);
                 prev = jOut;
             }
@@ -7220,8 +7268,9 @@
             pbPedals.filter(p => p.parallel).forEach((p, idx) => {
                 const pedalEl = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
                 if (!pedalEl) return;
-                const jIn  = elXY(pedalEl.querySelector('.pb-jack-in'));
-                const jOut = elXY(pedalEl.querySelector('.pb-jack-out'));
+                const jIn  = getJackPos(pedalEl.querySelector('.pb-jack-in'));
+                const jOut = getJackPos(pedalEl.querySelector('.pb-jack-out'));
+                if (!jIn || !jOut) return;
                 const arcMag = -(0.8 + idx * 0.35);
                 addCable(ampliJack, jIn,   '#f0c040', arcMag, 3.5, 0.72);
                 addCable(jOut, baffleJack, '#f0c040', arcMag, 3.5, 0.72);
@@ -24005,14 +24054,17 @@
 <div id="liveSummary" style="display:none;position:fixed;bottom:16px;right:16px;z-index:9500;background:rgba(255,255,255,0.98);border:1px solid #d0d7de;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.12);padding:12px 14px;min-width:230px;font-size:0.85em;backdrop-filter:blur(6px);" aria-live="polite">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <strong style="color:#6b8fa3;font-size:0.95em;">📊 Récap live</strong>
-        <button onclick="document.getElementById('liveSummary').style.display='none';" title="Masquer" style="background:none;border:none;cursor:pointer;color:#999;font-size:1em;line-height:1;padding:0 2px;">×</button>
+        <div style="display:flex;gap:4px;">
+            <button id="liveToggle" onclick="toggleLiveCollapse()" title="Réduire/Agrandir" style="background:none;border:none;cursor:pointer;color:#999;font-size:0.9em;line-height:1;padding:0 4px;transition:color 0.2s;">−</button>
+            <button onclick="document.getElementById('liveSummary').style.display='none';" title="Masquer" style="background:none;border:none;cursor:pointer;color:#999;font-size:1em;line-height:1;padding:0 2px;">×</button>
+        </div>
     </div>
-    <div style="display:grid;grid-template-columns:auto auto;gap:4px 10px;">
+    <div id="liveContent" style="display:grid;grid-template-columns:auto auto;gap:4px 10px;transition:opacity 0.2s;">
         <span style="color:#666;">Temps :</span><span id="liveTemps" style="font-weight:600;text-align:right;">—</span>
         <span style="color:#666;">Prix revient :</span><span id="livePR" style="font-weight:600;text-align:right;">—</span>
         <span style="color:#666;">Prix vente :</span><span id="livePV" style="font-weight:600;text-align:right;color:#27ae60;">—</span>
     </div>
-    <div style="margin-top:8px;">
+    <div id="liveMargeSection" style="margin-top:8px;transition:opacity 0.2s;">
         <div style="display:flex;justify-content:space-between;font-size:0.78em;color:#666;margin-bottom:3px;">
             <span>Marge</span><span id="liveMargePct">—</span>
         </div>
@@ -24021,5 +24073,24 @@
         </div>
     </div>
 </div>
+
+<script>
+let _liveCollapsed = false;
+function toggleLiveCollapse() {
+    const content = document.getElementById('liveContent');
+    const marge = document.getElementById('liveMargeSection');
+    const btn = document.getElementById('liveToggle');
+    _liveCollapsed = !_liveCollapsed;
+    content.style.opacity = _liveCollapsed ? '0' : '1';
+    content.style.height = _liveCollapsed ? '0' : 'auto';
+    content.style.overflow = _liveCollapsed ? 'hidden' : 'visible';
+    marge.style.opacity = _liveCollapsed ? '0' : '1';
+    marge.style.height = _liveCollapsed ? '0' : 'auto';
+    marge.style.overflow = _liveCollapsed ? 'hidden' : 'visible';
+    marge.style.marginTop = _liveCollapsed ? '0' : '8px';
+    btn.textContent = _liveCollapsed ? '+' : '−';
+    btn.style.color = _liveCollapsed ? '#6b8fa3' : '#999';
+}
+</script>
 </body>
 </html>
