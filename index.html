@@ -4346,8 +4346,8 @@
                             <input id="pb-client" placeholder="Client…" style="flex:1;min-width:120px;" oninput="pbCalcTotal()">
                             <input id="pb-title"  placeholder="Intitulé de la prestation…" style="flex:2;min-width:180px;">
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">marge %</span>
-                            <input id="pb-marge"  type="number" style="width:55px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
-                            <input id="pb-nbpieces" type="number" style="width:55px;" value="1" min="1" oninput="pbCalcTotal()">
+                            <input id="pb-marge"  type="number" style="width:80px;min-width:80px;padding-right:4px;text-align:right;" value="30" min="0" max="99" oninput="pbCalcTotal()" aria-label="Pourcentage de marge">
+                            <input id="pb-nbpieces" type="number" style="width:90px;min-width:90px;padding-right:4px;text-align:right;" value="1" min="1" max="999999" oninput="pbCalcTotal()" aria-label="Nombre de pièces">
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">pcs</span>
                             <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver</button>
                         </div>
@@ -9791,8 +9791,8 @@
                 <td><input type="text" id="edit-code-${code}" value="${g.code}" style="width:80px;"></td>
                 <td><select id="edit-cat-${code}">${cats.map(c => `<option ${c===g.categorie?'selected':''}>${c}</option>`).join('')}<option ${!cats.includes(g.categorie)?'selected':''}>${g.categorie}</option></select></td>
                 <td><input type="text" id="edit-desc-${code}" value="${g.description.replace(/"/g,'&quot;')}" style="width:100%;min-width:160px;"></td>
-                <td><input type="number" id="edit-temps-${code}" value="${g.temps}" style="width:65px;"></td>
-                <td><input type="number" id="edit-coef-${code}" value="${g.coef}" step="0.05" style="width:55px;"></td>
+                <td><input type="number" id="edit-temps-${code}" value="${g.temps}" style="width:80px;min-width:80px;text-align:right;"></td>
+                <td><input type="number" id="edit-coef-${code}" value="${g.coef}" step="0.05" style="width:75px;min-width:75px;text-align:right;"></td>
                 <td style="color:#aaa;font-size:0.85em;">${Math.round(g.temps * g.coef)}</td>
                 <td><input type="text" id="edit-notes-${code}" value="${(g.notes||'').replace(/"/g,'&quot;')}" placeholder="Notes..." style="width:100%;"></td>
                 <td style="white-space:nowrap;">
