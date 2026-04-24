@@ -26,6 +26,7 @@
    - [Planification](#414-planification-)
    - [Formation Admin](#415-formation-admin-)
    - [Formation Logistique](#416-formation-logistique-)
+   - [Calculateur visuel](#417-calculateur-visuel-)
 5. [Calculs et méthodes financières](#5-calculs-et-méthodes-financières)
 6. [Import / Export de données](#6-import--export-de-données)
 7. [Raccourcis clavier](#7-raccourcis-clavier)
@@ -102,7 +103,7 @@ L'application est intentionnellement contenue dans un **seul fichier HTML** pour
 
 ## 4. Modules fonctionnels
 
-L'interface est organisée en **16 onglets** accessibles via la barre de navigation en haut de page. Selon le profil actif, certains onglets peuvent être masqués. En mode administrateur, les onglets sont réorganisables par glisser-déposer.
+L'interface est organisée en **17 onglets** accessibles via la barre de navigation en haut de page. Selon le profil actif, certains onglets peuvent être masqués. En mode administrateur, les onglets sont réorganisables par glisser-déposer.
 
 ---
 
@@ -470,6 +471,43 @@ Module pédagogique dédié à la découverte des systèmes logistiques et techn
 
 **Apprenants :**
 - Affichage des apprenants assignés à cette formation (gérés depuis l'onglet Formation Admin)
+
+---
+
+### 4.17 Calculateur visuel 🖐️
+
+Outil de chiffrage visuel par glisser-déposer, conçu pour construire une prestation en positionnant des **blocs-gestes** sur un canvas libre.
+
+**Fonctionnement :**
+- Chaque geste, MSP ou consommable est représenté par une **carte** déplaçable sur la grille
+- Les cartes s'enchaînent en **série** (flux principal) ou peuvent être placées en **parallèle** (tâches simultanées)
+- Un stepper `−` / `+` sur chaque carte règle la quantité (nombre de fois, durée, qté)
+- Boutons `/pce` et `×lot` pour indiquer si le geste se répète par pièce ou par lot
+
+**Paramètres de la barre supérieure :**
+
+| Champ | Description |
+|-------|-------------|
+| Client | Identifiant du client |
+| Intitulé | Nom de la prestation |
+| Marge % | Taux de marge appliqué |
+| Nb pièces | Quantité totale de pièces du lot |
+
+**Calcul automatique :**
+- Coût de revient total (série + parallèle)
+- Prix de vente après marge
+- Récap bas de page : temps CEA, coût, prix/pce
+
+**Export :**
+- Bouton **💾 Sauver** : enregistre la prestation dans la liste des Prestations avec tous les gestes et paramètres
+
+**Zoom :**
+- Boutons `−` / `+` pour ajuster la taille du canvas (50 % à 150 %)
+
+**Palette :**
+- Filtrage par catégorie (Gestes, MSP, Consommables)
+- Recherche textuelle
+- Ajout à la volée avec **➕ Créer un geste**
 
 ---
 

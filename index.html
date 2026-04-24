@@ -1110,7 +1110,7 @@
         .pb-step-btn { width:24px; height:24px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.08); color:#ccd; cursor:pointer; font-size:1em; line-height:1; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.12s; }
         .pb-step-btn:hover { background:rgba(255,255,255,0.18); }
         .pb-step-btn:active { background:rgba(255,255,255,0.28); transform:scale(0.92); }
-        .pb-step-val { font-size:0.65em; color:#c8d8e8; min-width:52px; text-align:center; line-height:1.25; }
+        .pb-step-val { font-size:0.82em; color:#c8d8e8; min-width:68px; text-align:center; line-height:1.25; }
         #pb-recap { background:#080c14; border-top:1px solid #1a2a40; padding:0; max-height:200px; overflow-y:auto; flex-shrink:0; }
         #pb-recap table { width:100%; border-collapse:collapse; font-size:0.78em; }
         #pb-recap td, #pb-recap th { padding:4px 8px; border-bottom:1px solid #141e2e; }
@@ -4347,7 +4347,7 @@
                             <input id="pb-title"  placeholder="Intitulé de la prestation…" style="flex:2;min-width:180px;">
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">marge %</span>
                             <input id="pb-marge"  type="number" style="width:55px;" value="30" min="0" max="99" oninput="pbCalcTotal()">
-                            <input id="pb-nbpieces" type="number" style="width:55px;" value="1" min="1" oninput="pbCalcTotal()">
+                            <input id="pb-nbpieces" type="number" style="width:76px;" value="1" min="1" oninput="pbCalcTotal()">
                             <span style="font-size:0.78em;color:#8a9ab0;white-space:nowrap;">pcs</span>
                             <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver</button>
                         </div>
@@ -7133,13 +7133,13 @@
                         ${p.desc && !isGeste ? `<div style="font-size:0.52em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${escapeHtml(p.desc)}]</div>` : ''}
                         <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:3px auto 2px;width:52px;height:38px;">${svgIcon}</div>
                         ${showStepper ? `
-                        <div style="font-size:0.55em;color:#6a8aaa;margin-bottom:2px;text-align:center;">${isGeste ? 'nb de fois' : p.type === 'msp' ? 'durée' : 'qté'}</div>
+                        <div style="font-size:0.68em;color:#6a8aaa;margin-bottom:2px;text-align:center;">${isGeste ? 'nb de fois' : p.type === 'msp' ? 'durée' : 'qté'}</div>
                         <div class="pb-stepper">
                             <button class="pb-step-btn" data-pbid="${p.id}" data-step="${-stepSize}" data-min="${stepMin}" data-max="${stepMax}">−</button>
                             <div class="pb-step-val" id="pbval-${p.id}">${_pbFormatVal(p)}</div>
                             <button class="pb-step-btn" data-pbid="${p.id}" data-step="${stepSize}" data-min="${stepMin}" data-max="${stepMax}">+</button>
                         </div>
-                        <div id="pbtotalmin-${p.id}" style="font-size:0.58em;color:#8a9ab0;text-align:center;margin-top:2px;">${isGeste && p.value > 1 ? `= ${totalMin} min` : ''}</div>
+                        <div id="pbtotalmin-${p.id}" style="font-size:0.72em;color:#8a9ab0;text-align:center;margin-top:2px;">${isGeste && p.value > 1 ? `= ${totalMin} min` : ''}</div>
                         <div class="pb-appliq-row">
                             <button class="pb-appliq-btn${p.perPiece !== false ? ' active' : ''}" data-pbid="${p.id}" data-appliq="true">/pce</button>
                             <button class="pb-appliq-btn${p.perPiece === false ? ' active' : ''}" data-pbid="${p.id}" data-appliq="false">×lot</button>
