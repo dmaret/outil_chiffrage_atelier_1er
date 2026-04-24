@@ -7460,7 +7460,7 @@
             prestationsSauvegardees.push(newP);
             saveToStorage();
             toast(`✅ "${titre}" sauvegardé — ${nbPieces} pce${nbPieces>1?'s':''} · CHF ${prixVente.toFixed(2)}`, 'success');
-            switchTab('prestations');
+            switchTab('prestations', true);
         }
 
         function renderPedalboard() {
@@ -7869,13 +7869,13 @@
 
         // ════════════════════════════════════════════════════════
 
-        function switchTab(tabName) {
+        function switchTab(tabName, skipConfirm = false) {
             // Ignore le clic si on vient de terminer un drag d'onglet
             if (_tabDragJustEnded) return;
 
             // Avertir si on quitte le pédalboard avec du travail en cours
             const _activeTab = document.querySelector('.tab-content.active')?.id;
-            if (_activeTab === 'pedalboard' && tabName !== 'pedalboard') {
+            if (!skipConfirm && _activeTab === 'pedalboard' && tabName !== 'pedalboard') {
                 const _hasWork = pbPedals.length > 0;
                 if (_hasWork && !confirm('Session Pédalboard en cours. Quitter sans sauvegarder ?')) return;
             }
