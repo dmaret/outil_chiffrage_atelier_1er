@@ -6935,10 +6935,11 @@
                 pop.id = 'pb-recap-popup';
                 pop.style.cssText = 'display:block;position:fixed;bottom:16px;right:16px;z-index:9999;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.18);width:170px;font-size:0.78em;user-select:none;';
                 pop.innerHTML = `
-                    <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:10px 10px 0 0;background:#f6f9fc;">
+                    <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:10px 10px 0 0;background:#f6f9fc;">
                         <span style="font-weight:700;color:#2d3e50;font-size:0.9em;">📊 Récap live</span>
+                        <button id="pb-recap-toggle" onclick="pbToggleRecap()" title="Réduire" style="background:none;border:none;cursor:pointer;color:#8a9ab0;font-size:1em;padding:0 0 0 6px;line-height:1;">−</button>
                     </div>
-                    <div style="padding:7px 10px 10px;">
+                    <div id="pb-recap-body" style="padding:7px 10px 10px;">
                         <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Temps :</span><span id="pb-recap-temps" style="font-weight:600;color:#2d3e50;">—</span></div>
                         <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix revient :</span><span id="pb-recap-cout" style="font-weight:600;color:#2d3e50;">—</span></div>
                         <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix vente :</span><span id="pb-recap-vente" style="font-weight:700;color:#27ae60;">—</span></div>
@@ -7053,6 +7054,16 @@
                 document.addEventListener('mouseup',up);
                 e.preventDefault();
             });
+        }
+
+        function pbToggleRecap() {
+            const body = document.getElementById('pb-recap-body');
+            const btn  = document.getElementById('pb-recap-toggle');
+            if (!body || !btn) return;
+            const collapsed = body.style.display === 'none';
+            body.style.display = collapsed ? '' : 'none';
+            btn.textContent   = collapsed ? '−' : '+';
+            btn.title         = collapsed ? 'Réduire' : 'Agrandir';
         }
 
         // ── Création de geste personnalisé ──
