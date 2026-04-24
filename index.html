@@ -921,6 +921,10 @@
         body.dark-mode .tab:hover { background: #1e2d3d; }
         body.dark-mode .tab.active { background: #1e2530; color: #a8d5e2; border-bottom-color: #a8d5e2; }
         body.dark-mode .section { background: #1a2535; border-left-color: #2a6a82; }
+        body.dark-mode .onboarding-card { background:#1a2535 !important; border-color:#2a4a6a !important; }
+        body.dark-mode .onboarding-card h3 { color:#a8d5e2 !important; }
+        body.dark-mode .onboarding-progress { background:#243040 !important; }
+        body.dark-mode .onboarding-check-row { color:#cdd6e0; }
         body.dark-mode .section h2 { color: #a8d5e2; }
         body.dark-mode .section h3 { color: #8aacbc; }
         body.dark-mode label { color: #cdd6e0; }
@@ -2209,6 +2213,24 @@
         body[data-theme="terminal"] #prestationsListSummary { color:#6e7681; font-size:0.78em; letter-spacing:0.5px; }
         body[data-theme="terminal"] #batchBar { background:#161b22; border-color:#ffd60a; }
         body[data-theme="terminal"] #batchCount { color:#ffd60a; }
+        /* ── Onboarding / premiers pas ── */
+        body[data-theme="terminal"] .onboarding-card { background:#161b22 !important; border-color:#30363d !important; box-shadow:none !important; }
+        body[data-theme="terminal"] .onboarding-card h3 { color:#30d158 !important; }
+        body[data-theme="terminal"] .onboarding-progress { background:#21262d !important; }
+        body[data-theme="terminal"] .onboarding-check-row .chk { background:#21262d !important; border-color:#30363d !important; }
+        body[data-theme="terminal"] .onboarding-check-row.done .chk { background:#30d158 !important; border-color:#30d158 !important; }
+        body[data-theme="terminal"] .onboarding-check-row.todo .chk { background:#161b22 !important; border-color:#ffd60a !important; }
+        body[data-theme="terminal"] .onboarding-check-row { color:#e6edf3; }
+        body[data-theme="terminal"] .onboarding-check-row.done .label { color:#484f58 !important; }
+        body[data-theme="terminal"] .onboarding-dismiss { color:#6e7681 !important; background:transparent !important; }
+        /* ── Alertes dashboard (inline backgrounds) ── */
+        body[data-theme="terminal"] #dashAlertesList > div,
+        body[data-theme="terminal"] #dashDevisList > div { background:#161b22 !important; border-color:#30363d !important; color:#e6edf3 !important; }
+        /* ── Prestation cards inline white bg ── */
+        body[data-theme="terminal"] [data-prest-id],
+        body[data-theme="terminal"] #dashDevisList [style*="background"] { background:#161b22 !important; border-left-color:#30d158 !important; }
+        /* ── Training requests ── */
+        body[data-theme="terminal"] #dashFormationRequestsList > div { background:#161b22 !important; border-color:#30363d !important; color:#e6edf3 !important; }
 
         /* ── Lignes gestes / consommables / stock ── */
         body[data-theme="terminal"] .geste-line,
@@ -5284,7 +5306,7 @@
 
             <!-- ONGLET DASHBOARD -->
             <div id="dashboard" class="tab-content active">
-              <div class="section" style="background:#e8f4f8;border-left:4px solid #4caf50;">
+              <div class="section" style="border-left:4px solid #4caf50;">
                 <h2 style="color:#4caf50;">🏠 Dashboard — Accueil</h2>
                 <p style="color:#666;font-size:0.95em;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
               </div>
