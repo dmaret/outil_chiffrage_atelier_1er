@@ -17430,6 +17430,12 @@
             if (el) el.innerHTML = '';
         }
 
+        function resetOnboarding() {
+            localStorage.removeItem('onboardingDismissed');
+            renderOnboardingChecklist();
+            toast('✅ Checklist réinitialisée! Les premiers pas s\'affichent à nouveau.', 'success');
+        }
+
         // ─────────────────────────────────────────────────────────
         // Badges d'alertes sur onglets
         // ─────────────────────────────────────────────────────────
@@ -17492,7 +17498,8 @@
             { section: 'Actions', icon: '🌙', label: 'Basculer mode sombre', run: () => { if (typeof toggleDarkMode === 'function') toggleDarkMode(); } },
             { section: 'Actions', icon: '💾', label: 'Exporter sauvegarde JSON', run: () => { if (typeof exportDataJSON === 'function') exportDataJSON(); else switchTab('config'); } },
             { section: 'Actions', icon: '↩️', label: 'Annuler la dernière action', run: () => { if (typeof undoLastAction === 'function') undoLastAction(); } },
-            { section: 'Actions', icon: '↪️', label: 'Refaire', run: () => { if (typeof redoLastAction === 'function') redoLastAction(); } }
+            { section: 'Actions', icon: '↪️', label: 'Refaire', run: () => { if (typeof redoLastAction === 'function') redoLastAction(); } },
+            { section: 'Actions', icon: '🚀', label: 'Réinitialiser la checklist Premiers pas', run: () => { if (typeof resetOnboarding === 'function') resetOnboarding(); } }
         ];
         let _cmdPaletteActiveIdx = 0;
         let _cmdPaletteFiltered = [];
