@@ -11475,20 +11475,35 @@
 
         function applyBatchStatut() {
             if (!checkPermission('edit_prestation')) return;
-            const statut = document.getElementById('batchStatut')?.value;
-            if (!statut) { toast('Choisissez un statut dans la liste.', 'warning'); return; }
             const ids = [...window._batchSelected];
-            if (ids.length === 0) return;
+            if (ids.length === 0) {
+                toast('⚠️ Sélectionnez au moins une prestation.', 'warning');
+                return;
+            }
+            const statut = document.getElementById('batchStatut')?.value;
+            if (!statut || statut === '') {
+                toast('⚠️ Choisissez un statut dans la liste déroulante.', 'warning');
+                return;
+            }
             pushUndoSnapshot(`Changement statut en lot (${ids.length} prestations)`);
+            let updated = 0;
             ids.forEach(id => {
-                const p = prestationsSauvegardees.find(x => x.id === id);
-                if (p) p.statut = statut;
+                const p = prestationsSauvegardees.find(x => x.id === id || String(x.id) === String(id));
+                if (p) {
+                    p.statut = statut;
+                    updated++;
+                }
             });
+            if (updated === 0) {
+                toast('❌ Aucune prestation n\'a pu être mise à jour.', 'error');
+                return;
+            }
             saveToStorage();
             clearBatchSelection();
+            document.getElementById('batchStatut').value = '';
             renderPrestations();
             updateStats();
-            toast(`✅ Statut mis à jour pour ${ids.length} prestation(s).`, 'success');
+            toast(`✅ Statut mis à jour pour ${updated} prestation(s).`, 'success');
         }
 
         function deletePrestation(id) {
