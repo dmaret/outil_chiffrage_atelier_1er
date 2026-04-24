@@ -221,11 +221,16 @@ Suivi des entrées, sorties et transferts de stock avec valorisation automatique
 #### Mouvements de stock
 
 Chaque mouvement enregistre :
-- Type (entrée, sortie, transfert)
+- Type (entrée, sortie, transfert, inventaire)
 - Article et quantité
 - Emplacement source/destination
 - Date et responsable
 - Coût unitaire (pour les entrées)
+
+Le formulaire s'adapte selon le type sélectionné :
+- **Entrée** : référence libre, emplacement, prix unitaire
+- **Sortie** : liste déroulante des articles **existants en stock** (avec quantité disponible)
+- **Transfert** : article existant + emplacement source + emplacement **destination** — les lots sont déplacés en FIFO sans modifier le total
 
 #### Stock actuel
 
@@ -293,10 +298,14 @@ Bibliothèque de toutes les activités élémentaires de l'atelier.
 
 **Le fichier `catalogue_gestes_import.csv`** contient 43 gestes pré-définis prêts à l'import.
 
-**Import CSV :**
-1. Accéder à l'onglet Gestes
-2. Glisser-déposer le fichier CSV ou utiliser le bouton d'import
-3. Les gestes sont intégrés au catalogue existant
+**Panneau Modèle / Import / Export (3 colonnes) :**
+| Panneau | Action |
+|---------|--------|
+| 📋 Modèle | Télécharge un fichier CSV d'exemple (`modele_gestes.csv`) |
+| 📥 Import | Zone drag-and-drop ou clic pour importer un CSV |
+| 📤 Export | Exporte le catalogue complet au format CSV |
+
+Format CSV : `code,categorie,description,temps,coef,notes`
 
 ---
 
@@ -304,9 +313,15 @@ Bibliothèque de toutes les activités élémentaires de l'atelier.
 
 Catalogue des matières et fournitures utilisées dans les prestations.
 
-- Ajouter des articles avec désignation, référence, coût unitaire et unité
-- Réutiliser directement depuis le Calculateur
-- Gérer les fournisseurs et conditionnements
+- Ajouter des articles avec désignation, coût unitaire et unité
+- Réutiliser directement depuis le Calculateur et le Calculateur visuel
+
+**Panneau Modèle / Import / Export (3 colonnes) :**
+| Panneau | Action |
+|---------|--------|
+| 📋 Modèle | Télécharge un fichier CSV d'exemple (`modele_consommables.csv`) |
+| 📥 Import | Import CSV — colonnes : `nom,unite,prix,designation` |
+| 📤 Export | Exporte la liste complète des consommables au format CSV |
 
 ---
 
@@ -479,10 +494,15 @@ Module pédagogique dédié à la découverte des systèmes logistiques et techn
 Outil de chiffrage visuel par glisser-déposer, conçu pour construire une prestation en positionnant des **blocs-gestes** sur un canvas libre.
 
 **Fonctionnement :**
-- Chaque geste, MSP ou consommable est représenté par une **carte** déplaçable sur la grille
+- Chaque geste, MSP, consommable ou note est représenté par une **carte** sur le canvas
 - Les cartes s'enchaînent en **série** (flux principal) ou peuvent être placées en **parallèle** (tâches simultanées)
 - Un stepper `−` / `+` sur chaque carte règle la quantité (nombre de fois, durée, qté)
 - Boutons `/pce` et `×lot` pour indiquer si le geste se répète par pièce ou par lot
+
+**Navigation du canvas :**
+- **Glisser le fond** (zone sombre ou câbles) pour déplacer la vue (pan)
+- **Glisser une carte** depuis n'importe quelle zone de son corps (hors boutons)
+- **Zoom** `−` / `+` pour ajuster la taille de 50 % à 150 %
 
 **Paramètres de la barre supérieure :**
 
@@ -491,18 +511,20 @@ Outil de chiffrage visuel par glisser-déposer, conçu pour construire une prest
 | Client | Identifiant du client |
 | Intitulé | Nom de la prestation |
 | Marge % | Taux de marge appliqué |
-| Nb pièces | Quantité totale de pièces du lot |
+| Nb pièces | Quantité totale de pièces du lot (jusqu'à 5 chiffres) |
 
-**Calcul automatique :**
-- Coût de revient total (série + parallèle)
-- Prix de vente après marge
-- Récap bas de page : temps CEA, coût, prix/pce
+**Récap live :**
+- Panneau flottant en bas à droite, déplaçable par glisser
+- Affiche en temps réel : Temps, Prix revient, Prix vente, Marge
+- Bouton **−** pour réduire / **+** pour agrandir
 
-**Export :**
-- Bouton **💾 Sauver** : enregistre la prestation dans la liste des Prestations avec tous les gestes et paramètres
+**Cartes Note :**
+- Ajoutées depuis la palette (📝 Note / Commentaire)
+- Bouton **✎ Éditer** : ouvre un modal pour saisir titre et contenu
+- Le texte sauvegardé s'affiche directement sur la carte
 
-**Zoom :**
-- Boutons `−` / `+` pour ajuster la taille du canvas (50 % à 150 %)
+**Sauvegarde :**
+- Bouton **💾 Sauver** : enregistre la prestation dans l'onglet Prestations sans dialogue de confirmation
 
 **Palette :**
 - Filtrage par catégorie (Gestes, MSP, Consommables)
