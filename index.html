@@ -1072,7 +1072,7 @@
         .pb-zoom-btn:hover { background:#2a3a5a; color:#fff; }
         #pb-zoom-label { min-width:38px; text-align:center; font-weight:700; color:#7ac4ff; font-size:0.85em; }
         #pb-board-scroll { flex:1; overflow:auto; }
-        #pb-canvas { position:relative; width:2000px; height:900px; transform-origin:top left; transition:transform 0.18s; cursor:grab; }
+        #pb-canvas { position:relative; width:3000px; height:1800px; transform-origin:top left; transition:transform 0.18s; cursor:grab; }
         #pb-canvas:active { cursor:grabbing; }
         .pb-endpoint-fixed { position:absolute; z-index:10; }
         /* Endpoint devices */
@@ -6742,7 +6742,7 @@
 
         let pbPedals = [];  // { id, type, label, value, unit, coutUnit, color, ledColor }
         let _pbDrag = null;
-        let _pbEndpointPos = { ampli: { x: 30, y: 350 }, baffle: { x: 1830, y: 350 } };
+        let _pbEndpointPos = { ampli: { x: 60, y: 550 }, baffle: { x: 2700, y: 550 } };
         let _pbZoomIdx = 3;
         const _PB_ZOOM_LEVELS = [0.45, 0.6, 0.75, 1.0, 1.2, 1.4];
 
@@ -7420,8 +7420,8 @@
                 addCable(prev, baffleJack, '#f0c040', -1, 3.5, 0.72);
             }
 
-            svg.setAttribute('width', '2000');
-            svg.setAttribute('height', '900');
+            svg.setAttribute('width', '3000');
+            svg.setAttribute('height', '1800');
             svg.innerHTML = shadows.join('') + paths.join('');
         }
 
