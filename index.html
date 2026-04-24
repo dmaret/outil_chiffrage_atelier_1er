@@ -2984,7 +2984,7 @@
                 <button class="tab" onclick="switchTab('clients')">👥 Clients</button>
                 <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
                 <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
-                <button class="tab" onclick="switchTab('pedalboard')">🎸 Pédalboard</button>
+                <button class="tab" onclick="switchTab('pedalboard')">🖐️ Calculateur visuel</button>
                 <button class="tab admin-only" onclick="switchTab('accompagnement')">🧠 Accompagnement</button>
                 <button class="tab admin-only" onclick="switchTab('historique')">📝 Historique</button>
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
@@ -5231,7 +5231,7 @@
             {key:'clients',        label:'👥 Clients'},
             {key:'stats',          label:'📈 Stats'},
             {key:'config',         label:'⚙️ Config'},
-            {key:'pedalboard',     label:'🎸 Pédalboard'},
+            {key:'pedalboard',     label:'🖐️ Calculateur visuel'},
     {key:'accompagnement', label:'🧠 Accompagnement',  adminOnly:true},
             {key:'historique',     label:'📝 Historique',      adminOnly:true},
             {key:'gantt',          label:'📅 Planification'},
@@ -7007,7 +7007,7 @@
             const temps = parseInt(document.getElementById('pb-ng-temps')?.value||60);
             const cat   = (document.getElementById('pb-ng-categorie')?.value||'').trim();
             if (!code || !desc) { toast('Code et description requis', 'error'); return; }
-            const g = { code, categorie: cat||'default', description: desc, temps, coef:1, notes:'🎸 Geste personnalisé' };
+            const g = { code, categorie: cat||'default', description: desc, temps, coef:1, notes:'👆 Geste personnalisé' };
             if (!catalogueGestes.find(x => x.code === code)) {
                 catalogueGestes.push(g);
                 localStorage.setItem('catalogueGestes', JSON.stringify(catalogueGestes));
@@ -7180,7 +7180,7 @@
                 ampliEl.innerHTML = `
                     <div class="pb-ampli-body" style="cursor:grab;">
                         <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
-                        <div class="pb-endpoint-icon">🎸</div>
+                        <div class="pb-endpoint-icon">👆</div>
                         <div class="pb-endpoint-title">${document.getElementById('pb-title')?.value||'PROJET'}</div>
                         <div id="pb-ampli-client" style="font-size:0.65em;margin-top:4px;opacity:0.6;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${document.getElementById('pb-client')?.value||''}</div>
                     </div>
@@ -7316,7 +7316,7 @@
                 date: new Date().toISOString().split('T')[0],
                 statut: 'brouillon', prixVente, prixRevient: cout,
                 nbPieces, marge: Math.round(marge*100), margeChf: prixVente - cout,
-                gestes, description: `🎸 Pédalboard · ${nbPieces} pce${nbPieces>1?'s':''}`,
+                gestes, description: `Calculateur visuel · ${nbPieces} pce${nbPieces>1?'s':''}`,
             };
             prestationsSauvegardees.push(newP);
             saveToStorage();
