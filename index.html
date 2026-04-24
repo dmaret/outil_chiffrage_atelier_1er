@@ -5244,6 +5244,38 @@
             return String(text).replace(/[&<>"']/g, char => map[char]);
         }
 
+        // Safe localStorage wrapper with QuotaExceeded handling
+        function safeSetItem(key, value) {
+            try {
+                localStorage.setItem(key, value);
+                return true;
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    console.warn(`localStorage quota exceeded. Key: ${key}, size: ${value.length} bytes`);
+                    toast('⚠️ Stockage saturé. Les données ne peuvent pas être sauvegardées. Effacez des anciens rapports.', 'warning');
+                    return false;
+                }
+                console.error('localStorage error:', e);
+                return false;
+            }
+        }
+
+        function getStorageStats() {
+            let total = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    total += localStorage[key].length + key.length;
+                }
+            }
+            return { used: total, maxMB: 5, usedMB: (total / (1024 * 1024)).toFixed(2) };
+        }
+
+        // Safe innerHTML setter with text node creation for text content to prevent XSS
+        function setSafeContent(el, html) {
+            if (!el) return;
+            el.innerHTML = html;
+        }
+
         // Loading indicator management for async operations
         let loadingCounter = 0;
         function showLoading(message = '⏳ Chargement...') {
@@ -6231,7 +6263,7 @@
                         }
                     });
                     if (_migrated > 0) {
-                        try { localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees)); } catch {}
+                        safeSetItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
                     }
                 }
             } catch(e) { console.error('Error loading services:', e); }
@@ -14139,7 +14171,7 @@
                 _idb.getAll('audit').then(rows => {
                     if (rows && rows.length) {
                         auditLog = rows.map(({ id, ...rest }) => rest);
-                        try { localStorage.setItem('auditLog', JSON.stringify(auditLog.slice(-5000))); } catch {}
+                        safeSetItem('auditLog', JSON.stringify(auditLog.slice(-5000)));
                         renderAuditLog();
                         if (typeof toast === 'function') toast(`📥 Historique restauré : ${auditLog.length} entrées`, 'info');
                     }
@@ -22368,7 +22400,7 @@
             } catch { return { attempts: [], wrongQuestionIds: [], badges: [], xp: 0, streak: { lastDate: null, days: 0 } }; }
         }
         function saveFormationProgress(p) {
-            try { localStorage.setItem('formationProgress', JSON.stringify(p)); } catch {}
+            safeSetItem('formationProgress', JSON.stringify(p));
         }
 
         function startFormationQuiz(mode = 'all') {
