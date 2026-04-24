@@ -5302,6 +5302,31 @@
             }
         }
 
+        // Robust API fetch with retry logic, timeout, and error handling
+        async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+            const { timeout = 10000, retryDelay = 1000, ...fetchOptions } = options;
+            let lastError;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), timeout);
+                    const response = await fetch(url, { ...fetchOptions, signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    return response;
+                } catch (e) {
+                    lastError = e;
+                    if (attempt < maxRetries - 1) {
+                        const delay = retryDelay * Math.pow(2, attempt);
+                        console.warn(`API call failed (attempt ${attempt + 1}/${maxRetries}). Retrying in ${delay}ms:`, e.message);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+            console.error(`API call failed after ${maxRetries} attempts:`, lastError);
+            throw lastError;
+        }
+
         // Real-time form field validation
         function validateField(fieldId, validator, errorMessage) {
             const field = document.getElementById(fieldId);
@@ -5560,21 +5585,25 @@
                 recipients: template.recipients.split(',').map(r => r.trim())
             };
 
-            // Send webhook
-            fetch(emailWebhooksConfig.webhookUrl, {
+            // Send webhook with retry logic
+            fetchWithRetry(emailWebhooksConfig.webhookUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${emailWebhooksConfig.apiKey}`,
                     'X-Webhook-Event': eventType
                 },
-                body: JSON.stringify(payload)
-            }).then(resp => {
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                body: JSON.stringify(payload),
+                timeout: 8000,
+                retryDelay: 2000
+            }, 2).then(resp => resp.json()).then(() => {
                 logAction(`Webhook email déclenché: ${eventType}`, 'INFO');
             }).catch(err => {
                 console.error('Webhook email error:', err);
                 logAction(`Erreur webhook email: ${eventType} - ${err.message}`, 'ERROR');
+                if (typeof toast === 'function') {
+                    toast(`⚠️ Webhook ${eventType} échoué. Vérifiez la configuration.`, 'warning');
+                }
             });
         }
 
