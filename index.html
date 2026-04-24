@@ -6687,6 +6687,7 @@
             document.addEventListener('mouseup', _pbDragEnd);
         }
 
+        let _pbDrawScheduled = false;
         function _pbDragMove(e) {
             if (!_pbDrag) return;
             const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
@@ -6694,7 +6695,13 @@
             _pbDrag.p.y = _pbDrag.startPy + (e.clientY - _pbDrag.startMy) / scale;
             _pbDrag.el.style.left = _pbDrag.p.x + 'px';
             _pbDrag.el.style.top  = _pbDrag.p.y + 'px';
-            requestAnimationFrame(pbDrawCables);
+            if (!_pbDrawScheduled) {
+                _pbDrawScheduled = true;
+                requestAnimationFrame(() => {
+                    pbDrawCables();
+                    _pbDrawScheduled = false;
+                });
+            }
         }
 
         function _pbDragEnd() {
@@ -6705,6 +6712,8 @@
             _pbDrag = null;
             document.removeEventListener('mousemove', _pbDragMove);
             document.removeEventListener('mouseup', _pbDragEnd);
+            _pbDrawScheduled = false;
+            pbCalcTotal();
             saveToStorage();
         }
         const PB_CABLE_COLORS = ['#e74c3c','#f0c040','#27ae60','#4e9af1','#e67e22','#9b59b6','#1abc9c','#e84393'];
@@ -7076,30 +7085,42 @@
                 el.innerHTML = `
                     <div class="pb-drag-handle" data-dragid="${p.id}">⠿ ⠿</div>
                     <div class="pb-pedal-body" style="background:${p.color};border:2px solid ${p.border};color:#dde;position:relative;">
-                        <button class="pb-pedal-del" onclick="pbRemovePedal('${p.id}')" title="Retirer">✕</button>
+                        <button class="pb-pedal-del" data-pbid="${p.id}" title="Retirer">✕</button>
                         <div style="background:${p.led};width:8px;height:8px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px ${p.led};"></div>
-                        <div class="pb-pedal-name">${p.label}</div>
+                        <div class="pb-pedal-name">${escapeHtml(p.label)}</div>
                         ${isGeste ? `<div style="font-size:0.7em;color:${p.led};font-weight:700;margin-bottom:2px;">${p.tempsUnit||1} min</div>` : ''}
-                        ${p.desc && !isGeste ? `<div style="font-size:0.52em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${p.desc}]</div>` : ''}
+                        ${p.desc && !isGeste ? `<div style="font-size:0.52em;color:${p.led};letter-spacing:0.8px;font-weight:700;margin-bottom:2px;">[${escapeHtml(p.desc)}]</div>` : ''}
                         <div class="pb-pedal-icon" style="color:${p.led};opacity:0.85;margin:3px auto 2px;width:52px;height:38px;">${svgIcon}</div>
                         ${showStepper ? `
                         <div style="font-size:0.55em;color:#6a8aaa;margin-bottom:2px;text-align:center;">${isGeste ? 'nb de fois' : p.type === 'msp' ? 'durée' : 'qté'}</div>
                         <div class="pb-stepper">
-                            <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${-stepSize},${stepMin},${stepMax})">−</button>
+                            <button class="pb-step-btn" data-pbid="${p.id}" data-step="${-stepSize}" data-min="${stepMin}" data-max="${stepMax}">−</button>
                             <div class="pb-step-val" id="pbval-${p.id}">${_pbFormatVal(p)}</div>
-                            <button class="pb-step-btn" onclick="pbStepValue('${p.id}',${stepSize},${stepMin},${stepMax})">+</button>
+                            <button class="pb-step-btn" data-pbid="${p.id}" data-step="${stepSize}" data-min="${stepMin}" data-max="${stepMax}">+</button>
                         </div>
                         <div id="pbtotalmin-${p.id}" style="font-size:0.58em;color:#8a9ab0;text-align:center;margin-top:2px;">${isGeste && p.value > 1 ? `= ${totalMin} min` : ''}</div>
                         <div class="pb-appliq-row">
-                            <button class="pb-appliq-btn${p.perPiece !== false ? ' active' : ''}" data-pp="true" onclick="pbSetAppliq('${p.id}',true)">/pce</button>
-                            <button class="pb-appliq-btn${p.perPiece === false ? ' active' : ''}" data-pp="false" onclick="pbSetAppliq('${p.id}',false)">×lot</button>
+                            <button class="pb-appliq-btn${p.perPiece !== false ? ' active' : ''}" data-pbid="${p.id}" data-appliq="true">/pce</button>
+                            <button class="pb-appliq-btn${p.perPiece === false ? ' active' : ''}" data-pbid="${p.id}" data-appliq="false">×lot</button>
                         </div>
                         ` : `<div style="font-size:0.65em;color:#8a9ab0;margin:4px 0;" id="pbval-${p.id}"></div>`}
                     </div>
-                    <button class="pb-parallel-btn${p.parallel?' active':''}" onclick="pbToggleParallel('${p.id}')">${p.parallel ? '⇌ PARALLÈLE' : '▶ SÉRIE'}</button>
+                    <button class="pb-parallel-btn${p.parallel?' active':''}" data-pbid="${p.id}" data-action="toggle-parallel">${p.parallel ? '⇌ PARALLÈLE' : '▶ SÉRIE'}</button>
                     <div class="pb-jack pb-jack-in"></div>
                     <div class="pb-jack pb-jack-out"></div>`;
                 el.querySelector('.pb-drag-handle').addEventListener('mousedown', e => pbStartDrag(e, p.id));
+                el.querySelector('.pb-pedal-del').addEventListener('click', () => pbRemovePedal(String(p.id)));
+                el.querySelectorAll('.pb-step-btn').forEach(btn => btn.addEventListener('click', e => {
+                    const pbid = e.target.dataset.pbid;
+                    const step = parseInt(e.target.dataset.step);
+                    const min = parseInt(e.target.dataset.min);
+                    const max = parseInt(e.target.dataset.max);
+                    pbStepValue(pbid, step, min, max);
+                }));
+                el.querySelectorAll('.pb-appliq-btn').forEach(btn => btn.addEventListener('click', e => {
+                    pbSetAppliq(e.target.dataset.pbid, e.target.dataset.appliq === 'true');
+                }));
+                el.querySelector('.pb-parallel-btn').addEventListener('click', () => pbToggleParallel(String(p.id)));
                 return el;
             }
 
@@ -7160,7 +7181,7 @@
             const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
             const cr = canvas.getBoundingClientRect();
 
-            let paths = '', shadows = '';
+            let paths = [], shadows = [];
 
             const elXY = (el) => {
                 if (!el) return null;
@@ -7171,10 +7192,11 @@
             const addCable = (p1, p2, col, arcDir, w=5, op=0.85) => {
                 if (!p1 || !p2) return;
                 const sag = (30 + Math.abs(p2.x - p1.x) * 0.14) * arcDir;
-                paths   += `<path d="M${p1.x},${p1.y} C${p1.x+30},${p1.y+sag} ${p2.x-30},${p2.y+sag} ${p2.x},${p2.y}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="${op}"/>`;
-                paths   += `<circle cx="${p1.x}" cy="${p1.y}" r="5" fill="${col}" opacity="${op}"/>`;
-                paths   += `<circle cx="${p2.x}" cy="${p2.y}" r="5" fill="${col}" opacity="${op}"/>`;
-                shadows += `<path d="M${p1.x},${p1.y} C${p1.x+30},${p1.y+sag+4} ${p2.x-30},${p2.y+sag+4} ${p2.x},${p2.y}" stroke="rgba(0,0,0,0.28)" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+                const pathData = `M${Math.round(p1.x)},${Math.round(p1.y)} C${Math.round(p1.x+30)},${Math.round(p1.y+sag)} ${Math.round(p2.x-30)},${Math.round(p2.y+sag)} ${Math.round(p2.x)},${Math.round(p2.y)}`;
+                paths.push(`<path d="${pathData}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="${op}"/>`);
+                paths.push(`<circle cx="${Math.round(p1.x)}" cy="${Math.round(p1.y)}" r="5" fill="${col}" opacity="${op}"/>`);
+                paths.push(`<circle cx="${Math.round(p2.x)}" cy="${Math.round(p2.y)}" r="5" fill="${col}" opacity="${op}"/>`);
+                shadows.push(`<path d="${pathData}" stroke="rgba(0,0,0,0.28)" stroke-width="7" fill="none" stroke-linecap="round"/>`);
             };
 
             const ampliJack  = elXY(document.querySelector('#pb-endpoint-ampli .pb-jack-out'));
@@ -7207,7 +7229,7 @@
 
             svg.setAttribute('width', '2000');
             svg.setAttribute('height', '900');
-            svg.innerHTML = shadows + paths;
+            svg.innerHTML = shadows.join('') + paths.join('');
         }
 
         function pbClear() {
