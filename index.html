@@ -203,6 +203,14 @@
             color: var(--color-primary-dark);
             border-bottom: 3px solid var(--color-primary);
         }
+        /* ── Groupes d'onglets — intercalaire couleur ── */
+        .tab[data-group-color] { border-bottom: 3px solid var(--tab-group-color, transparent); position:relative; }
+        .tab[data-group-color].active { border-bottom-color: var(--tab-group-color, var(--color-primary)); color: var(--tab-group-color, var(--color-primary-dark)); }
+        .tab[data-group-color]:hover { border-bottom-color: var(--tab-group-color, transparent); }
+        .tabs-group-sep { display:inline-block; width:3px; height:32px; border-radius:2px; background:var(--sep-color,#ccc); opacity:0.45; vertical-align:middle; flex-shrink:0; }
+        /* Editor rows for tabGroups */
+        .tg-row { display:flex; align-items:center; gap:8px; background:var(--color-bg-alt); border:1px solid var(--color-border); border-radius:8px; padding:8px 12px; margin-bottom:6px; flex-wrap:wrap; }
+        .tg-color-swatch { width:20px; height:20px; border-radius:50%; flex-shrink:0; border:2px solid rgba(0,0,0,0.2); }
 
         body.admin-mode .tab:hover {
             background: linear-gradient(135deg, var(--color-border-light) 0%, var(--color-bg-from) 100%);
@@ -4155,6 +4163,17 @@
                     <div id="pinStatus" style="margin-top:10px;font-size:0.9em;color:#7a9db1;"></div>
                 </div>
 
+                <!-- ── Groupes d'onglets (admin only) ── -->
+                <div class="section admin-only" style="border-left-color:#7a8fa6;">
+                    <h2>🗂️ Groupes d'onglets</h2>
+                    <div class="info-box">Organisez les onglets par groupes colorés. Chaque groupe affiche une bande de couleur sous ses onglets — comme les intercalaires d'un classeur. Modifiez les noms, couleurs et affectations.</div>
+                    <div id="tabGroupsEditor" style="margin-top:14px;"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-small" onclick="tabGroupsAddGroup()">➕ Nouveau groupe</button>
+                        <button class="btn btn-secondary btn-small" onclick="tabGroupsReset()">↺ Réinitialiser</button>
+                    </div>
+                </div>
+
                 <div class="section" style="border-left-color:#a8d5e2;">
                     <h2>🖥️ Modes d'affichage</h2>
                     <div class="info-box">Personnalisez l'interface selon vos préférences. Les réglages sont sauvegardés automatiquement.</div>
@@ -5913,6 +5932,16 @@
         let beneficiaires = [];    // profils des personnes en accompagnement
         let jalons = [];           // jalons liés aux bénéficiaires et/ou prestations
         let themePrefs = { theme: 'classique', font: 'Segoe UI', radius: 'round' };
+        const TAB_GROUPS_DEFAULT = [
+            { id: 'g1', nom: 'Tableau de bord', couleur: '#7a8fa6', onglets: ['dashboard'] },
+            { id: 'g2', nom: 'Chiffrage',        couleur: '#4a9af0', onglets: ['calculateur','prestations','clients','stats'] },
+            { id: 'g3', nom: 'Stock & Conso',   couleur: '#4fc070', onglets: ['stock','consommables'] },
+            { id: 'g4', nom: 'Catalogue',        couleur: '#f0a840', onglets: ['catalogue','parametrage'] },
+            { id: 'g5', nom: 'Formation',        couleur: '#c070f0', onglets: ['formation','formation-logistique','procedures'] },
+            { id: 'g6', nom: 'Planification',    couleur: '#f06070', onglets: ['gantt','pedalboard'] },
+            { id: 'g7', nom: 'Admin',            couleur: '#a06040', onglets: ['config','assistant','accompagnement','historique'] },
+        ];
+        let tabGroups = JSON.parse(JSON.stringify(TAB_GROUPS_DEFAULT));
         let stockMinTemplates = {};  // Stock min templates
         const THEMES = {
             classique: {
@@ -6536,11 +6565,13 @@
             const savedClientsData = localStorage.getItem('clientsData');
             try { if (savedClientsData) clientsData = JSON.parse(savedClientsData); } catch(e) { console.error('Error loading clients data:', e); }
             try { const sp = localStorage.getItem('proceduresData'); if (sp) proceduresData = JSON.parse(sp); } catch(e) {}
+            try { const sg = localStorage.getItem('tabGroups'); if (sg) tabGroups = JSON.parse(sg); } catch(e) {}
             try { const sb = localStorage.getItem('beneficiaires'); if (sb) beneficiaires = JSON.parse(sb); } catch(e) {}
             try { const sj = localStorage.getItem('jalons');        if (sj) jalons        = JSON.parse(sj); } catch(e) {}
             const savedTheme = localStorage.getItem('themePrefs');
             try { if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme)); } catch(e) { console.error('Error loading theme preferences:', e); }
             loadConfig();
+            requestAnimationFrame(applyTabGroupColors);
         }
 
         function saveToStorage() {
@@ -7758,6 +7789,97 @@
         // PROCÉDURES — CEA / Client — Comparateur what-if
         // ══════════════════════════════════════════════════════════════
 
+        // ══════════════════════════════════════════════════════════════
+        // GROUPES D'ONGLETS — intercalaires couleur
+        // ══════════════════════════════════════════════════════════════
+
+        function saveTabGroups() {
+            localStorage.setItem('tabGroups', JSON.stringify(tabGroups));
+        }
+
+        function tabGroupOf(tabName) {
+            return tabGroups.find(g => g.onglets.includes(tabName));
+        }
+
+        function applyTabGroupColors() {
+            document.querySelectorAll('.tab[onclick]').forEach(btn => {
+                const m = btn.getAttribute('onclick')?.match(/switchTab\('([^']+)'\)/);
+                if (!m) return;
+                const tabName = m[1];
+                const grp = tabGroupOf(tabName);
+                if (grp) {
+                    btn.setAttribute('data-group-color', grp.couleur);
+                    btn.style.setProperty('--tab-group-color', grp.couleur);
+                } else {
+                    btn.removeAttribute('data-group-color');
+                    btn.style.removeProperty('--tab-group-color');
+                }
+            });
+            // Insert separators between groups in the tab bar
+            const tabBar = document.querySelector('.tabs');
+            if (!tabBar) return;
+            // Remove existing separators
+            tabBar.querySelectorAll('.tabs-group-sep').forEach(el => el.remove());
+            // Insert a separator when the group changes between consecutive tabs
+            const tabBtns = [...tabBar.querySelectorAll('.tab')];
+            let prevGroup = null;
+            tabBtns.forEach(btn => {
+                const m = btn.getAttribute('onclick')?.match(/switchTab\('([^']+)'\)/);
+                const tabName = m ? m[1] : null;
+                const grp = tabName ? tabGroupOf(tabName) : null;
+                const grpId = grp ? grp.id : null;
+                if (prevGroup !== null && grpId !== prevGroup) {
+                    const sep = document.createElement('span');
+                    sep.className = 'tabs-group-sep';
+                    sep.style.setProperty('--sep-color', grp ? grp.couleur : '#ccc');
+                    tabBar.insertBefore(sep, btn);
+                }
+                prevGroup = grpId;
+            });
+        }
+
+        function tabGroupsRenderEditor() {
+            const el = document.getElementById('tabGroupsEditor');
+            if (!el) return;
+            const allTabs = [...document.querySelectorAll('.tab[onclick]')]
+                .map(btn => { const m = btn.getAttribute('onclick')?.match(/switchTab\('([^']+)'\)/); return m ? m[1] : null; })
+                .filter(Boolean);
+            el.innerHTML = tabGroups.map((g, gi) => `
+                <div class="tg-row">
+                    <div class="tg-color-swatch" style="background:${g.couleur};"></div>
+                    <input type="color" value="${g.couleur}" style="width:32px;height:28px;padding:0;border:none;border-radius:4px;cursor:pointer;"
+                           onchange="tabGroups[${gi}].couleur=this.value;document.querySelector('.tg-row:nth-child(${gi+1}) .tg-color-swatch').style.background=this.value;saveTabGroups();applyTabGroupColors();">
+                    <input type="text" value="${escapeHtml(g.nom)}" placeholder="Nom du groupe"
+                           style="padding:5px 10px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg);color:var(--color-text);font-size:0.85em;width:140px;"
+                           oninput="tabGroups[${gi}].nom=this.value;saveTabGroups();">
+                    <select multiple style="padding:4px 8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg);color:var(--color-text);font-size:0.82em;flex:1;min-height:54px;"
+                            onchange="tabGroups[${gi}].onglets=[...this.selectedOptions].map(o=>o.value);saveTabGroups();applyTabGroupColors();">
+                        ${allTabs.map(t => `<option value="${t}" ${g.onglets.includes(t)?'selected':''}>${t}</option>`).join('')}
+                    </select>
+                    <button class="btn btn-small" onclick="tabGroups.splice(${gi},1);saveTabGroups();applyTabGroupColors();tabGroupsRenderEditor();"
+                            style="color:#f88;border-color:#c44;padding:4px 8px;" title="Supprimer">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function tabGroupsAddGroup() {
+            const colors = ['#e84a5f','#f0a840','#4fc070','#4a9af0','#c070f0','#f06090','#40c0c0'];
+            tabGroups.push({ id: 'g_' + Date.now(), nom: 'Nouveau groupe', couleur: colors[tabGroups.length % colors.length], onglets: [] });
+            saveTabGroups();
+            applyTabGroupColors();
+            tabGroupsRenderEditor();
+        }
+
+        function tabGroupsReset() {
+            if (!confirm('Réinitialiser les groupes par défaut ?')) return;
+            tabGroups = JSON.parse(JSON.stringify(TAB_GROUPS_DEFAULT));
+            saveTabGroups();
+            applyTabGroupColors();
+            tabGroupsRenderEditor();
+        }
+
+        // ══════════════════════════════════════════════════════════════
+
         function saveProcedures() {
             localStorage.setItem('proceduresData', JSON.stringify(proceduresData));
         }
@@ -8409,7 +8531,7 @@
                 checkAndShowAlerts();
             }
             else if (tabName === 'parametrage') loadConfig();
-            else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); }
+            else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); }
             else if (tabName === 'pedalboard')          renderPedalboard();
             else if (tabName === 'accompagnement')      renderAccompagnement();
             else if (tabName === 'historique')          renderHistory();
