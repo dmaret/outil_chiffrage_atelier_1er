@@ -1071,20 +1071,9 @@
         .pb-zoom-btn { width:26px; height:26px; border-radius:6px; border:1px solid #2a3a50; background:#1a2a3a; color:#c8d8e8; cursor:pointer; font-size:1.05em; line-height:1; display:flex; align-items:center; justify-content:center; transition:background 0.12s; }
         .pb-zoom-btn:hover { background:#2a3a5a; color:#fff; }
         #pb-zoom-label { min-width:38px; text-align:center; font-weight:700; color:#7ac4ff; font-size:0.85em; }
-        #pb-grid-wrap { display:flex; align-items:center; justify-content:center; padding:24px 20px; flex:1; overflow:auto; gap:20px; }
-        .pb-endpoint-fixed { position:relative; z-index:10; flex-shrink:0; }
-        #pb-grid-center { display:flex; flex-direction:column; gap:8px; transform-origin:center top; transition:transform 0.18s; }
-        /* Parallel row (top of grid) */
-        #pb-parallel-row { display:flex; gap:6px; padding:8px 10px 10px; background:rgba(240,192,64,0.03); border:1px solid #2a2a12; border-radius:10px; min-height:52px; align-items:flex-end; flex-wrap:nowrap; }
-        .pb-parallel-drop { width:130px; min-height:52px; border:2px dashed #f0c04033; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#f0c04044; font-size:1.6em; flex-shrink:0; transition:all 0.15s; cursor:default; }
-        .pb-parallel-drop.drag-over { border-color:#f0c040; background:rgba(240,192,64,0.1); color:#f0c040; }
-        /* Serie grid 6×6 */
-        #pb-serie-grid { display:grid; grid-template-columns:repeat(6,130px); gap:6px; }
-        .pb-slot { width:130px; min-height:208px; border:2px dashed #2c2c2c; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative; transition:border-color 0.14s,background 0.14s; background:rgba(255,255,255,0.007); }
-        .pb-slot.occupied { border-style:solid; border-color:transparent; background:transparent; justify-content:flex-start; }
-        .pb-slot.drag-over { border-color:#4e9af1 !important; border-style:solid !important; background:rgba(78,154,241,0.09) !important; }
-        .pb-slot .pb-pedal { margin:0; }
-        .pb-slot-num { font-size:0.6em; color:#2a2a2a; font-weight:700; user-select:none; }
+        #pb-board-scroll { flex:1; overflow:auto; }
+        #pb-canvas { position:relative; width:2000px; height:900px; transform-origin:top left; transition:transform 0.18s; }
+        .pb-endpoint-fixed { position:absolute; z-index:10; }
         /* Endpoint devices */
         .pb-endpoint { position:relative; z-index:10; flex-shrink:0; }
         .pb-ampli-body { width:120px; background:linear-gradient(160deg,#c8b47a,#a89050); border:3px solid #7a6030; border-radius:10px 10px 14px 14px; padding:14px 10px 16px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2); }
@@ -1097,7 +1086,7 @@
         .pb-jack-in  { left:-8px; }
         .pb-jack-out { right:-8px; }
         /* Pedals */
-        .pb-pedal { position:relative; z-index:10; flex-shrink:0; margin:0; display:flex; flex-direction:column; align-items:center; width:100%; }
+        .pb-pedal { position:absolute; z-index:10; margin:0; display:flex; flex-direction:column; align-items:center; width:130px; cursor:default; user-select:none; }
         .pb-pedal.dragging { opacity:0.3; }
         .pb-pedal.drag-over { filter:brightness(1.4); outline:2px dashed #4e9af1; border-radius:12px; }
         .pb-drag-handle { width:100%; text-align:center; color:#445; font-size:1.1em; cursor:grab; padding:3px 0 2px; line-height:1; user-select:none; letter-spacing:2px; transition:color 0.15s; border-radius:6px 6px 0 0; }
@@ -2168,6 +2157,30 @@
         body[data-theme="terminal"] #batchBar { background:#161b22; border-color:#ffd60a; }
         body[data-theme="terminal"] #batchCount { color:#ffd60a; }
 
+        /* ── Lignes gestes / consommables / stock ── */
+        body[data-theme="terminal"] .geste-line,
+        body[data-theme="terminal"] .consommable-line,
+        body[data-theme="terminal"] .stock-line {
+            background: #161b22 !important;
+            border-color: #30363d !important;
+            box-shadow: none !important;
+        }
+        body[data-theme="terminal"] .geste-line:hover { border-color:#30d158 !important; }
+        body[data-theme="terminal"] .geste-line.drag-over { border-color:#9a5abf !important; background:#1c1130 !important; }
+        body[data-theme="terminal"] .geste-notes-area textarea { background:#0d1117 !important; border-color:#30363d !important; color:#e6edf3 !important; }
+        body[data-theme="terminal"] .notes-internes-display { background:#161b22 !important; color:#ffd60a !important; border-color:#ffd60a !important; }
+        body[data-theme="terminal"] .suivi-reel-panel,
+        body[data-theme="terminal"] .revisions-panel { background:#161b22 !important; border-color:#30363d !important; color:#8b949e !important; }
+        body[data-theme="terminal"] .bundle-btn { background:#161b22 !important; color:#c084fc !important; border-color:#6e40c9 !important; }
+        body[data-theme="terminal"] .total-box { background:#161b22 !important; border-color:#30d158 !important; }
+        body[data-theme="terminal"] .total-box .label { color:#6e7681 !important; }
+        body[data-theme="terminal"] .total-box .value,
+        body[data-theme="terminal"] .total-box h3 { color:#30d158 !important; }
+        body[data-theme="terminal"] .relances-panel { background:#161b22 !important; border-color:#30363d !important; }
+        body[data-theme="terminal"] .relances-panel h4 { color:#8b949e !important; }
+        body[data-theme="terminal"] .modal-box { background:#161b22 !important; border-color:#30363d !important; color:#e6edf3 !important; }
+        body[data-theme="terminal"] .modal-box h3 { color:#8b949e !important; }
+
         /* ── Effet scanlines subtil ── */
         body[data-theme="terminal"] .container::after {
             content: '';
@@ -2188,6 +2201,85 @@
             animation: terminal-blink 1s infinite;
             color: #30d158;
         }
+
+        /* ─────────────────────────────────────────────────────── */
+
+        /* ══════════════════════════════════════════════════════ */
+        /* Thème AS-400 (IBM mainframe / green-on-dark)           */
+        /* ══════════════════════════════════════════════════════ */
+        body[data-theme="as400"] .geste-line,
+        body[data-theme="as400"] .consommable-line,
+        body[data-theme="as400"] .stock-line {
+            background: #121829 !important;
+            border-color: #2a3850 !important;
+            box-shadow: none !important;
+        }
+        body[data-theme="as400"] .geste-line:hover { border-color:#00c864 !important; }
+        body[data-theme="as400"] .geste-line.drag-over { border-color:#00c864 !important; background:#0a1a10 !important; }
+        body[data-theme="as400"] .geste-notes-area textarea { background:#0a0e27 !important; border-color:#2a3850 !important; color:#00ff00 !important; }
+        body[data-theme="as400"] .notes-internes-display { background:#121829 !important; color:#00c864 !important; border-color:#00c864 !important; }
+        body[data-theme="as400"] .suivi-reel-panel,
+        body[data-theme="as400"] .revisions-panel { background:#121829 !important; border-color:#2a3850 !important; color:#66cc66 !important; }
+        body[data-theme="as400"] .bundle-btn { background:#121829 !important; color:#00c864 !important; border-color:#00c864 !important; }
+        body[data-theme="as400"] .total-box { background:#121829 !important; border-color:#00c864 !important; }
+        body[data-theme="as400"] .total-box .label { color:#66cc66 !important; }
+        body[data-theme="as400"] .total-box .value,
+        body[data-theme="as400"] .total-box h3 { color:#00ff00 !important; }
+        body[data-theme="as400"] .section { background:#121829 !important; border-color:#2a3850 !important; }
+        body[data-theme="as400"] .stat-card { background:#0f1432 !important; border-color:#2a3850 !important; }
+        body[data-theme="as400"] .stat-card:hover { border-color:#00c864 !important; }
+        body[data-theme="as400"] .stat-card .label { color:#66cc66 !important; }
+        body[data-theme="as400"] .stat-card .value { color:#00ff00 !important; }
+        body[data-theme="as400"] input,
+        body[data-theme="as400"] select,
+        body[data-theme="as400"] textarea { background:#0a0e27 !important; border-color:#2a3850 !important; color:#00ff00 !important; }
+        body[data-theme="as400"] input:focus,
+        body[data-theme="as400"] select:focus,
+        body[data-theme="as400"] textarea:focus { border-color:#00c864 !important; outline:none !important; }
+        body[data-theme="as400"] .batchBar { background:#121829 !important; border-color:#00c864 !important; }
+        body[data-theme="as400"] .relances-panel { background:#121829 !important; border-color:#2a3850 !important; }
+        body[data-theme="as400"] .relances-panel h4 { color:#66cc66 !important; }
+        body[data-theme="as400"] .modal-box { background:#121829 !important; border-color:#2a3850 !important; color:#00ff00 !important; }
+        body[data-theme="as400"] .modal-box h3 { color:#66cc66 !important; }
+
+        /* ══════════════════════════════════════════════════════ */
+        /* Thème C64 (Commodore 64 / yellow-on-blue)             */
+        /* ══════════════════════════════════════════════════════ */
+        body[data-theme="c64"] .geste-line,
+        body[data-theme="c64"] .consommable-line,
+        body[data-theme="c64"] .stock-line {
+            background: #2a2a66 !important;
+            border-color: #5555dd !important;
+            box-shadow: none !important;
+        }
+        body[data-theme="c64"] .geste-line:hover { border-color:#ffff00 !important; }
+        body[data-theme="c64"] .geste-line.drag-over { border-color:#ffff00 !important; background:#1a1a44 !important; }
+        body[data-theme="c64"] .geste-notes-area textarea { background:#0a0a26 !important; border-color:#5555dd !important; color:#ffff00 !important; }
+        body[data-theme="c64"] .notes-internes-display { background:#2a2a66 !important; color:#ffff00 !important; border-color:#ffff00 !important; }
+        body[data-theme="c64"] .suivi-reel-panel,
+        body[data-theme="c64"] .revisions-panel { background:#2a2a66 !important; border-color:#5555dd !important; color:#9999ff !important; }
+        body[data-theme="c64"] .bundle-btn { background:#2a2a66 !important; color:#ffff00 !important; border-color:#ffff00 !important; }
+        body[data-theme="c64"] .total-box { background:#2a2a66 !important; border-color:#3668ff !important; }
+        body[data-theme="c64"] .total-box .label { color:#9999ff !important; }
+        body[data-theme="c64"] .total-box .value,
+        body[data-theme="c64"] .total-box h3 { color:#ffff00 !important; }
+        body[data-theme="c64"] .section { background:#2a2a66 !important; border-color:#5555dd !important; }
+        body[data-theme="c64"] .stat-card { background:#1a1a4d !important; border-color:#5555dd !important; }
+        body[data-theme="c64"] .stat-card:hover { border-color:#ffff00 !important; }
+        body[data-theme="c64"] .stat-card .label { color:#9999ff !important; }
+        body[data-theme="c64"] .stat-card .value { color:#ffff00 !important; }
+        body[data-theme="c64"] input,
+        body[data-theme="c64"] select,
+        body[data-theme="c64"] textarea { background:#0a0a26 !important; border-color:#5555dd !important; color:#ffff00 !important; }
+        body[data-theme="c64"] input:focus,
+        body[data-theme="c64"] select:focus,
+        body[data-theme="c64"] textarea:focus { border-color:#ffff00 !important; outline:none !important; }
+        body[data-theme="c64"] #batchBar { background:#2a2a66 !important; border-color:#ffff00 !important; }
+        body[data-theme="c64"] #batchCount { color:#ffff00 !important; }
+        body[data-theme="c64"] .relances-panel { background:#2a2a66 !important; border-color:#5555dd !important; }
+        body[data-theme="c64"] .relances-panel h4 { color:#9999ff !important; }
+        body[data-theme="c64"] .modal-box { background:#1a1a4d !important; border-color:#5555dd !important; color:#ffff00 !important; }
+        body[data-theme="c64"] .modal-box h3 { color:#9999ff !important; }
 
         /* ─────────────────────────────────────────────────────── */
 
@@ -4343,24 +4435,20 @@
                             <button class="btn btn-success btn-small" onclick="pbSaveAsPrestation()">💾 Sauver</button>
                         </div>
                         <div id="pb-board">
-                            <svg id="pb-cable-svg"></svg>
                             <!-- Barre de contrôle : zoom -->
                             <div id="pb-board-controls">
                                 <button class="pb-zoom-btn" onclick="pbZoom(-1)" title="Zoom arrière">−</button>
                                 <span id="pb-zoom-label">100%</span>
                                 <button class="pb-zoom-btn" onclick="pbZoom(1)" title="Zoom avant">+</button>
-                                <span style="margin-left:10px;font-size:0.75em;opacity:0.4;">⇌ ligne du haut = parallèle &nbsp;|&nbsp; grille 6×6 = série</span>
+                                <span style="margin-left:10px;font-size:0.75em;opacity:0.4;">⇌ haut = parallèle &nbsp;|&nbsp; milieu = série &nbsp;|&nbsp; glisser pour déplacer</span>
                             </div>
-                            <!-- ENTRÉE [grille] SORTIE -->
-                            <div id="pb-grid-wrap">
-                                <div id="pb-endpoint-ampli" class="pb-endpoint-fixed"></div>
-                                <div id="pb-grid-center">
-                                    <!-- Ligne parallèle (6 emplacements) -->
-                                    <div id="pb-parallel-row"></div>
-                                    <!-- Grille série 6×6 (36 emplacements) -->
-                                    <div id="pb-serie-grid"></div>
+                            <!-- Canvas libre -->
+                            <div id="pb-board-scroll">
+                                <div id="pb-canvas">
+                                    <svg id="pb-cable-svg"></svg>
+                                    <div id="pb-endpoint-ampli" class="pb-endpoint-fixed"></div>
+                                    <div id="pb-endpoint-baffle" class="pb-endpoint-fixed"></div>
                                 </div>
-                                <div id="pb-endpoint-baffle" class="pb-endpoint-fixed"></div>
                             </div>
                         </div>
                     </div>
@@ -6267,6 +6355,7 @@
         }
 
         function saveToStorage() {
+            localStorage.setItem('pbPedals', JSON.stringify(pbPedals));
             localStorage.setItem('configAtelier', JSON.stringify(config));
             localStorage.setItem('catalogueGestes', JSON.stringify(catalogueGestes));
             localStorage.setItem('catalogueConsommables', JSON.stringify(catalogueConsommables));
@@ -6598,7 +6687,7 @@
         function pbZoom(dir) {
             _pbZoomIdx = Math.max(0, Math.min(_PB_ZOOM_LEVELS.length - 1, _pbZoomIdx + dir));
             const s = _PB_ZOOM_LEVELS[_pbZoomIdx];
-            const el = document.getElementById('pb-grid-center');
+            const el = document.getElementById('pb-canvas');
             if (el) el.style.transform = `scale(${s})`;
             const lbl = document.getElementById('pb-zoom-label');
             if (lbl) lbl.textContent = Math.round(s * 100) + '%';
@@ -6609,70 +6698,36 @@
             if (e.button !== 0) return;
             e.preventDefault();
             e.stopPropagation();
+            const p = pbPedals.find(q => String(q.id) === String(id));
             const el = document.querySelector(`.pb-pedal[data-id="${id}"]`);
-            if (!el) return;
-            const br = el.getBoundingClientRect();
-            const ghost = el.cloneNode(true);
-            ghost.style.cssText = `position:fixed;top:${br.top}px;left:${br.left}px;width:${br.width}px;opacity:0.82;pointer-events:none;z-index:99999;transform:rotate(2deg) scale(1.04);box-shadow:0 16px 48px rgba(0,0,0,0.7);`;
-            document.body.appendChild(ghost);
-            el.classList.add('dragging');
-            _pbDrag = { id: String(id), ghost, el, gx: br.left, gy: br.top, mx: e.clientX, my: e.clientY, overTarget: null };
+            if (!p || !el) return;
+            _pbDrag = { p, el, startMx: e.clientX, startMy: e.clientY, startPx: p.x, startPy: p.y };
+            el.style.zIndex = '1000';
+            el.style.opacity = '0.85';
+            el.style.transform = 'rotate(1.5deg) scale(1.03)';
             document.addEventListener('mousemove', _pbDragMove);
             document.addEventListener('mouseup', _pbDragEnd);
         }
 
         function _pbDragMove(e) {
             if (!_pbDrag) return;
-            _pbDrag.gx += e.clientX - _pbDrag.mx;
-            _pbDrag.gy += e.clientY - _pbDrag.my;
-            _pbDrag.mx = e.clientX; _pbDrag.my = e.clientY;
-            _pbDrag.ghost.style.left = _pbDrag.gx + 'px';
-            _pbDrag.ghost.style.top  = _pbDrag.gy + 'px';
-            document.querySelectorAll('.pb-slot.drag-over,.pb-parallel-drop.drag-over').forEach(el => el.classList.remove('drag-over'));
-            _pbDrag.overTarget = null;
-            const cx = e.clientX, cy = e.clientY;
-            for (const slot of document.querySelectorAll('.pb-slot')) {
-                const r = slot.getBoundingClientRect();
-                if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
-                    slot.classList.add('drag-over');
-                    _pbDrag.overTarget = { type: 'slot', idx: parseInt(slot.dataset.slot) };
-                    return;
-                }
-            }
-            const prow = document.getElementById('pb-parallel-row');
-            if (prow) {
-                const r = prow.getBoundingClientRect();
-                if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
-                    const pdz = document.getElementById('pb-parallel-drop-zone');
-                    if (pdz) pdz.classList.add('drag-over');
-                    _pbDrag.overTarget = { type: 'parallel' };
-                }
-            }
+            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            _pbDrag.p.x = _pbDrag.startPx + (e.clientX - _pbDrag.startMx) / scale;
+            _pbDrag.p.y = _pbDrag.startPy + (e.clientY - _pbDrag.startMy) / scale;
+            _pbDrag.el.style.left = _pbDrag.p.x + 'px';
+            _pbDrag.el.style.top  = _pbDrag.p.y + 'px';
+            requestAnimationFrame(pbDrawCables);
         }
 
-        function _pbDragEnd(e) {
+        function _pbDragEnd() {
             if (!_pbDrag) return;
-            const target = _pbDrag.overTarget;
-            _pbDrag.ghost.remove();
-            document.querySelectorAll('.pb-slot.drag-over,.pb-parallel-drop.drag-over').forEach(el => el.classList.remove('drag-over'));
-            document.querySelectorAll('.pb-pedal.dragging').forEach(el => el.classList.remove('dragging'));
-            const draggedPedal = pbPedals.find(p => String(p.id) === _pbDrag.id);
-            if (target && draggedPedal) {
-                if (target.type === 'slot') {
-                    const toSlot = target.idx;
-                    const occupant = pbPedals.find(p => !p.parallel && p.slot === toSlot && String(p.id) !== _pbDrag.id);
-                    if (occupant) occupant.slot = draggedPedal.slot;
-                    draggedPedal.slot = toSlot;
-                    draggedPedal.parallel = false;
-                } else if (target.type === 'parallel') {
-                    draggedPedal.parallel = true;
-                    draggedPedal.slot = undefined;
-                }
-            }
+            _pbDrag.el.style.zIndex = '';
+            _pbDrag.el.style.opacity = '';
+            _pbDrag.el.style.transform = '';
             _pbDrag = null;
             document.removeEventListener('mousemove', _pbDragMove);
             document.removeEventListener('mouseup', _pbDragEnd);
-            pbRender();
+            saveToStorage();
         }
         const PB_CABLE_COLORS = ['#e74c3c','#f0c040','#27ae60','#4e9af1','#e67e22','#9b59b6','#1abc9c','#e84393'];
         const PB_PEDAL_STYLES = {
@@ -6763,35 +6818,35 @@
         };
 
         function pbInit() {
+            // Load saved pedals
+            try { const s = localStorage.getItem('pbPedals'); if (s) pbPedals = JSON.parse(s); } catch(e) {}
             // Inject recap popup into <body> once (escapes CSS transform of tab-content)
             if (!document.getElementById('pb-recap-popup')) {
                 const pop = document.createElement('div');
                 pop.id = 'pb-recap-popup';
-                pop.style.cssText = 'display:block;position:fixed;bottom:20px;right:20px;z-index:9999;background:#fff;border-radius:12px;box-shadow:0 4px 32px rgba(0,0,0,0.22);width:230px;font-size:0.88em;user-select:none;';
+                pop.style.cssText = 'display:block;position:fixed;bottom:16px;right:16px;z-index:9999;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.18);width:170px;font-size:0.78em;user-select:none;';
                 pop.innerHTML = `
-                    <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:12px 12px 0 0;background:#f6f9fc;">
-                        <span style="font-weight:700;color:#2d3e50;font-size:0.95em;">📊 Récap live</span>
+                    <div id="pb-recap-popup-hdr" style="display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid #eef2f8;cursor:grab;border-radius:10px 10px 0 0;background:#f6f9fc;">
+                        <span style="font-weight:700;color:#2d3e50;font-size:0.9em;">📊 Récap live</span>
                     </div>
-                    <div style="padding:10px 14px 14px;">
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Temps :</span><span id="pb-recap-temps" style="font-weight:600;color:#2d3e50;">—</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix revient :</span><span id="pb-recap-cout" style="font-weight:600;color:#2d3e50;">—</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix vente :</span><span id="pb-recap-vente" style="font-weight:700;color:#27ae60;">—</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;"><span style="color:#7a8e9a;">Marge :</span><span id="pb-recap-marge" style="font-weight:600;color:#2d3e50;">—</span></div>
+                    <div style="padding:7px 10px 10px;">
+                        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Temps :</span><span id="pb-recap-temps" style="font-weight:600;color:#2d3e50;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix revient :</span><span id="pb-recap-cout" style="font-weight:600;color:#2d3e50;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#7a8e9a;">Prix vente :</span><span id="pb-recap-vente" style="font-weight:700;color:#27ae60;">—</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#7a8e9a;">Marge :</span><span id="pb-recap-marge" style="font-weight:600;color:#2d3e50;">—</span></div>
                     </div>`;
                 document.body.appendChild(pop);
                 pbMakeDraggable(pop, document.getElementById('pb-recap-popup-hdr'));
             }
 
-            // Migrate: remove legacy ampli/baffle entries (now fixed endpoints in HTML)
+            // Migrate: remove legacy ampli/baffle entries
             pbPedals = pbPedals.filter(p => p.type !== 'ampli' && p.type !== 'baffle');
-            // Migrate: assign slots to existing pedals that don't have one yet
-            const usedSlots = new Set(pbPedals.filter(p => !p.parallel && p.slot !== undefined).map(p => p.slot));
-            let nextSlot = 0;
+            // Migrate: assign x,y to pedals that don't have positions yet
+            let sIdx = 0, pIdx = 0;
             pbPedals.forEach(p => {
-                if (!p.parallel && p.slot === undefined) {
-                    while (usedSlots.has(nextSlot) && nextSlot < 36) nextSlot++;
-                    if (nextSlot < 36) { p.slot = nextSlot; usedSlots.add(nextSlot++); }
-                    else p.parallel = true; // overflow → move to parallel zone
+                if (p.x === undefined) {
+                    if (p.parallel) { p.x = 400 + pIdx * 170; p.y = 80; pIdx++; }
+                    else            { p.x = 400 + sIdx * 170; p.y = 360; sIdx++; }
                 }
             });
 
@@ -6824,16 +6879,14 @@
         function pbAddPedal(type, label, coutUnit, value, desc, categorie, tempsUnit) {
             const st = PB_PEDAL_STYLES[type] || PB_PEDAL_STYLES.note;
             const isParallel = type === 'msp' || type === 'note';
-            let slot = undefined;
-            if (!isParallel) {
-                const usedSlots = new Set(pbPedals.filter(p => !p.parallel && p.slot !== undefined).map(p => p.slot));
-                for (let i = 0; i < 36; i++) { if (!usedSlots.has(i)) { slot = i; break; } }
-            }
+            const count = pbPedals.filter(p => p.parallel === isParallel).length;
+            const x = 400 + count * 170;
+            const y = isParallel ? 80 : 360;
             pbPedals.push({
                 id: Date.now(), type, label: label || type,
                 desc: desc || '', categorie: categorie || '',
                 value: value || 1, tempsUnit: tempsUnit || 1,
-                coutUnit: coutUnit || 0, parallel: isParallel, perPiece: true, slot,
+                coutUnit: coutUnit || 0, parallel: isParallel, perPiece: true, x, y,
                 color: st.bg, border: st.border, led: st.led, foot: st.foot,
             });
             pbRender();
@@ -6842,14 +6895,8 @@
         function pbToggleParallel(id) {
             const p = pbPedals.find(x => String(x.id) === String(id));
             if (!p) return;
-            if (p.parallel) {
-                const usedSlots = new Set(pbPedals.filter(q => !q.parallel && q.slot !== undefined).map(q => q.slot));
-                for (let i = 0; i < 36; i++) { if (!usedSlots.has(i)) { p.slot = i; break; } }
-                p.parallel = false;
-            } else {
-                p.parallel = true;
-                p.slot = undefined;
-            }
+            p.parallel = !p.parallel;
+            p.y = p.parallel ? 80 : 360;
             pbRender();
         }
 
@@ -6945,12 +6992,8 @@
 
         function pbMovePedal(id, dir) {
             const p = pbPedals.find(x => String(x.id) === String(id));
-            if (!p || p.parallel || p.slot === undefined) return;
-            const newSlot = p.slot + dir;
-            if (newSlot < 0 || newSlot >= 36) return;
-            const occupant = pbPedals.find(q => !q.parallel && q.slot === newSlot && String(q.id) !== String(id));
-            if (occupant) occupant.slot = p.slot;
-            p.slot = newSlot;
+            if (!p) return;
+            p.x = (p.x ?? 400) + dir * 170;
             pbRender();
         }
 
@@ -7082,22 +7125,18 @@
                 return el;
             }
 
-            // ── Zone parallèle (ligne du haut) ──────────────────────
-            const ppEl = document.getElementById('pb-parallel-row');
-            if (ppEl) {
-                ppEl.innerHTML = '';
-                pbPedals.filter(p => p.parallel).forEach(p => ppEl.appendChild(makePedalEl(p)));
-                const drop = document.createElement('div');
-                drop.className = 'pb-parallel-drop';
-                drop.id = 'pb-parallel-drop-zone';
-                drop.textContent = '+';
-                drop.title = 'Déposer ici pour passer en parallèle';
-                ppEl.appendChild(drop);
-            }
+            // ── Canvas libre : endpoints + pédales en position absolue ──
+            const canvas = document.getElementById('pb-canvas');
+            if (!canvas) return;
 
-            // ── ENTRÉE endpoint ─────────────────────────────────────
+            // Remove existing pedals (keep svg + endpoints)
+            canvas.querySelectorAll('.pb-pedal').forEach(el => el.remove());
+
+            // ENTRÉE endpoint
             const ampliEl = document.getElementById('pb-endpoint-ampli');
             if (ampliEl) {
+                ampliEl.style.left = '30px';
+                ampliEl.style.top  = '350px';
                 ampliEl.innerHTML = `
                     <div class="pb-ampli-body">
                         <div class="pb-endpoint-label" style="color:#7a5a20;">ENTRÉE</div>
@@ -7108,9 +7147,11 @@
                     <div class="pb-jack pb-jack-out"></div>`;
             }
 
-            // ── SORTIE endpoint ──────────────────────────────────────
+            // SORTIE endpoint
             const baffleEl = document.getElementById('pb-endpoint-baffle');
             if (baffleEl) {
+                baffleEl.style.left = '1830px';
+                baffleEl.style.top  = '350px';
                 baffleEl.innerHTML = `
                     <div class="pb-jack pb-jack-in"></div>
                     <div class="pb-baffle-body">
@@ -7122,29 +7163,13 @@
                     </div>`;
             }
 
-            // ── Grille série 6×6 (36 slots) ─────────────────────────
-            const slotsEl = document.getElementById('pb-serie-grid');
-            if (slotsEl) {
-                slotsEl.innerHTML = '';
-                const slotMap = {};
-                pbPedals.filter(p => !p.parallel && p.slot !== undefined).forEach(p => { slotMap[p.slot] = p; });
-                for (let i = 0; i < 36; i++) {
-                    const slotDiv = document.createElement('div');
-                    slotDiv.className = 'pb-slot';
-                    slotDiv.dataset.slot = String(i);
-                    const p = slotMap[i];
-                    if (p) {
-                        slotDiv.classList.add('occupied');
-                        slotDiv.appendChild(makePedalEl(p));
-                    } else {
-                        const num = document.createElement('span');
-                        num.className = 'pb-slot-num';
-                        num.textContent = String(i + 1);
-                        slotDiv.appendChild(num);
-                    }
-                    slotsEl.appendChild(slotDiv);
-                }
-            }
+            // Render all pedals
+            pbPedals.forEach(p => {
+                const el = makePedalEl(p);
+                el.style.left = (p.x ?? 400) + 'px';
+                el.style.top  = (p.y ?? 360) + 'px';
+                canvas.appendChild(el);
+            });
 
             pbCalcTotal();
             requestAnimationFrame(pbDrawCables);
@@ -7152,17 +7177,17 @@
 
         function pbDrawCables() {
             const svg = document.getElementById('pb-cable-svg');
-            const board = document.getElementById('pb-board');
-            if (!svg || !board) return;
-            const br = board.getBoundingClientRect();
-            const sl = board.scrollLeft, st = board.scrollTop;
+            const canvas = document.getElementById('pb-canvas');
+            if (!svg || !canvas) return;
+            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            const cr = canvas.getBoundingClientRect();
 
             let paths = '', shadows = '';
 
             const elXY = (el) => {
                 if (!el) return null;
                 const r = el.getBoundingClientRect();
-                return { x: r.left + r.width/2 - br.left + sl, y: r.top + r.height/2 - br.top + st };
+                return { x: (r.left + r.width/2 - cr.left) / scale, y: (r.top + r.height/2 - cr.top) / scale };
             };
 
             const addCable = (p1, p2, col, arcDir, w=5, op=0.85) => {
@@ -7177,11 +7202,12 @@
             const ampliJack  = elXY(document.querySelector('#pb-endpoint-ampli .pb-jack-out'));
             const baffleJack = elXY(document.querySelector('#pb-endpoint-baffle .pb-jack-in'));
 
-            // ── Série: ENTRÉE → occupied slots in order → SORTIE ────
+            // ── Série: triés par X (gauche → droite) ────────────────
+            const seriesOrdered = pbPedals.filter(p => !p.parallel).sort((a, b) => a.x - b.x);
             let prev = ampliJack;
             let colIdx = 0;
-            for (let i = 0; i < 36; i++) {
-                const pedalEl = document.querySelector(`#pb-serie-grid .pb-slot[data-slot="${i}"] .pb-pedal`);
+            for (const p of seriesOrdered) {
+                const pedalEl = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
                 if (!pedalEl) continue;
                 const jIn  = elXY(pedalEl.querySelector('.pb-jack-in'));
                 const jOut = elXY(pedalEl.querySelector('.pb-jack-out'));
@@ -7190,8 +7216,10 @@
             }
             addCable(prev, baffleJack, PB_CABLE_COLORS[colIdx % PB_CABLE_COLORS.length], +1);
 
-            // ── Parallel: ENTRÉE → each parallel pedal → SORTIE ─────
-            document.querySelectorAll('#pb-parallel-row .pb-pedal').forEach((pedalEl, idx) => {
+            // ── Parallèle: ENTRÉE → chaque → SORTIE (arc vers le haut) ──
+            pbPedals.filter(p => p.parallel).forEach((p, idx) => {
+                const pedalEl = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
+                if (!pedalEl) return;
                 const jIn  = elXY(pedalEl.querySelector('.pb-jack-in'));
                 const jOut = elXY(pedalEl.querySelector('.pb-jack-out'));
                 const arcMag = -(0.8 + idx * 0.35);
@@ -7199,8 +7227,8 @@
                 addCable(jOut, baffleJack, '#f0c040', arcMag, 3.5, 0.72);
             });
 
-            svg.setAttribute('width',  board.scrollWidth  || board.clientWidth);
-            svg.setAttribute('height', board.scrollHeight || board.clientHeight);
+            svg.setAttribute('width', '2000');
+            svg.setAttribute('height', '900');
             svg.innerHTML = shadows + paths;
         }
 
