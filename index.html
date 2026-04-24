@@ -2157,6 +2157,26 @@
         body[data-theme="terminal"] #batchBar { background:#161b22; border-color:#ffd60a; }
         body[data-theme="terminal"] #batchCount { color:#ffd60a; }
 
+        /* ── Lignes gestes / consommables / stock ── */
+        body[data-theme="terminal"] .geste-line,
+        body[data-theme="terminal"] .consommable-line,
+        body[data-theme="terminal"] .stock-line {
+            background: #161b22 !important;
+            border-color: #30363d !important;
+            box-shadow: none !important;
+        }
+        body[data-theme="terminal"] .geste-line:hover { border-color:#30d158 !important; }
+        body[data-theme="terminal"] .geste-line.drag-over { border-color:#9a5abf !important; background:#1c1130 !important; }
+        body[data-theme="terminal"] .geste-notes-area textarea { background:#0d1117 !important; border-color:#30363d !important; color:#e6edf3 !important; }
+        body[data-theme="terminal"] .notes-internes-display { background:#161b22 !important; color:#ffd60a !important; border-color:#ffd60a !important; }
+        body[data-theme="terminal"] .suivi-reel-panel,
+        body[data-theme="terminal"] .revisions-panel { background:#161b22 !important; border-color:#30363d !important; color:#8b949e !important; }
+        body[data-theme="terminal"] .bundle-btn { background:#161b22 !important; color:#c084fc !important; border-color:#6e40c9 !important; }
+        body[data-theme="terminal"] .total-box { background:#161b22 !important; border-color:#30d158 !important; }
+        body[data-theme="terminal"] .total-box .label { color:#6e7681 !important; }
+        body[data-theme="terminal"] .total-box .value,
+        body[data-theme="terminal"] .total-box h3 { color:#30d158 !important; }
+
         /* ── Effet scanlines subtil ── */
         body[data-theme="terminal"] .container::after {
             content: '';
