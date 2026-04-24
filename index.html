@@ -9875,6 +9875,8 @@
             const btnCancel = document.getElementById('btnCancelEditPrestation');
             if (btnSave) { btnSave.textContent = '💾 Enregistrer'; btnSave.style.background = ''; }
             if (btnCancel) btnCancel.style.display = 'none';
+            const modelSection = document.querySelector('#calculateur .section[style*="c9b3d4"]');
+            if (modelSection) modelSection.style.display = '';
 
             document.getElementById('client').value = '';
             document.getElementById('prestation').value = '';
@@ -10191,6 +10193,8 @@
             const btnCancel = document.getElementById('btnCancelEditPrestation');
             if (btnSave) { btnSave.textContent = '💾 Mettre à jour'; btnSave.style.background = '#a8e2c0'; }
             if (btnCancel) btnCancel.style.display = 'inline-block';
+            const modelSection = document.querySelector('#calculateur .section[style*="c9b3d4"]');
+            if (modelSection) modelSection.style.display = 'none';
 
             // Remplir les champs infos
             document.getElementById('client').value = p.client || '';
