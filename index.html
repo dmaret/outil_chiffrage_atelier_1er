@@ -7605,13 +7605,18 @@
 
             const getJackPos = (el) => {
                 if (!el) return null;
-                const rect = el.getBoundingClientRect();
                 const parent = el.closest('.pb-pedal, [id^="pb-endpoint"]');
                 if (!parent) return null;
-                const parentRect = parent.getBoundingClientRect();
+                const px = parseFloat(parent.style.left || 0);
+                const py = parseFloat(parent.style.top  || 0);
+                const pw = parent.offsetWidth;
+                const ph = parent.offsetHeight;
+                // jack: width=14px, left:-8px (in) or right:-8px (out)
+                // centre x = px - 8 + 7 (in) | px + pw + 8 - 7 (out)
+                const isIn = el.classList.contains('pb-jack-in');
                 return {
-                    x: parseFloat(parent.style.left || 0) + (rect.left - parentRect.left) + rect.width / 2,
-                    y: parseFloat(parent.style.top || 0) + (rect.top - parentRect.top) + rect.height / 2
+                    x: isIn ? px - 1 : px + pw + 1,
+                    y: py + ph / 2
                 };
             };
 
