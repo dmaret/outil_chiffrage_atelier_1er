@@ -4013,7 +4013,16 @@
                 </div>
 
                 <div class="section">
-                    <h2>Liste consommables</h2>
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                        <h2 style="margin:0;">Liste consommables</h2>
+                        <div id="consomBulkBar" style="display:none;align-items:center;gap:8px;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:6px 14px;font-size:0.88em;">
+                            <span id="consomSelCount" style="font-weight:700;color:#856404;"></span>
+                            <button onclick="_consomDeleteSelected()" style="background:#e74c3c;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85em;">🗑 Supprimer</button>
+                            <button onclick="_consomExportSelected()" style="background:#2980b9;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85em;">📤 Exporter</button>
+                            <button onclick="_consomAdjustPriceSelected()" style="background:#27ae60;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85em;">✏️ Ajuster prix</button>
+                            <button onclick="_consomClearSelection()" style="background:none;border:none;color:#856404;cursor:pointer;font-size:1em;padding:0 4px;">✕</button>
+                        </div>
+                    </div>
                     <div id="consommablesTable"></div>
                 </div>
             </div>
@@ -12047,21 +12056,101 @@
 
         function renderConsommablesTable() {
             const container = document.getElementById('consommablesTable');
-            
+            if (!catalogueConsommables.length) {
+                container.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Aucun consommable. Ajoutez-en un ou importez un CSV.</p>';
+                return;
+            }
             let html = `<table><thead><tr>
-                <th>Nom</th><th>Unité</th><th>Prix (CHF)</th>
+                <th style="width:36px;"><input type="checkbox" id="consomCheckAll" title="Tout sélectionner" onchange="_consomToggleAll(this.checked)"></th>
+                <th>Nom</th><th>Unité</th><th>Prix (CHF)</th><th style="width:80px;">Actions</th>
             </tr></thead><tbody>`;
-            
             catalogueConsommables.forEach((c, idx) => {
                 html += `<tr>
-                    <td>${c.nom}</td>
-                    <td>${c.unite}</td>
+                    <td><input type="checkbox" class="consom-chk" data-idx="${idx}" onchange="_consomUpdateBulkBar()"></td>
+                    <td>${escapeHtml(c.nom)}${c.designation ? `<div style="font-size:0.78em;color:#aaa;">${escapeHtml(c.designation)}</div>` : ''}</td>
+                    <td>${escapeHtml(c.unite)}</td>
                     <td>${fmtNum(c.prix)}</td>
+                    <td><button onclick="_consomDelete(${idx})" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:0.95em;" title="Supprimer">🗑</button></td>
                 </tr>`;
             });
-            
             html += '</tbody></table>';
             container.innerHTML = html;
+            _consomUpdateBulkBar();
+        }
+
+        function _consomGetSelected() {
+            return [...document.querySelectorAll('.consom-chk:checked')].map(cb => parseInt(cb.dataset.idx));
+        }
+        function _consomToggleAll(checked) {
+            document.querySelectorAll('.consom-chk').forEach(cb => cb.checked = checked);
+            _consomUpdateBulkBar();
+        }
+        function _consomClearSelection() {
+            document.querySelectorAll('.consom-chk').forEach(cb => cb.checked = false);
+            const all = document.getElementById('consomCheckAll');
+            if (all) all.checked = false;
+            _consomUpdateBulkBar();
+        }
+        function _consomUpdateBulkBar() {
+            const sel = _consomGetSelected();
+            const bar = document.getElementById('consomBulkBar');
+            const cnt = document.getElementById('consomSelCount');
+            if (!bar) return;
+            if (sel.length > 0) {
+                bar.style.display = 'flex';
+                cnt.textContent = `${sel.length} sélectionné${sel.length > 1 ? 's' : ''}`;
+            } else {
+                bar.style.display = 'none';
+            }
+            const all = document.getElementById('consomCheckAll');
+            if (all) all.checked = sel.length === catalogueConsommables.length && catalogueConsommables.length > 0;
+        }
+        function _consomDelete(idx) {
+            if (!confirm(`Supprimer "${catalogueConsommables[idx]?.nom}" ?`)) return;
+            catalogueConsommables.splice(idx, 1);
+            saveToStorage();
+            renderConsommablesTable();
+            toast('Consommable supprimé', 'success');
+        }
+        function _consomDeleteSelected() {
+            const idxs = _consomGetSelected().sort((a,b) => b - a);
+            if (!idxs.length) return;
+            if (!confirm(`Supprimer ${idxs.length} consommable${idxs.length > 1 ? 's' : ''} ?`)) return;
+            idxs.forEach(i => catalogueConsommables.splice(i, 1));
+            saveToStorage();
+            renderConsommablesTable();
+            toast(`${idxs.length} consommable${idxs.length > 1 ? 's supprimés' : ' supprimé'}`, 'success');
+        }
+        function _consomExportSelected() {
+            const idxs = _consomGetSelected();
+            if (!idxs.length) return;
+            const rows = idxs.map(i => {
+                const c = catalogueConsommables[i];
+                return `"${(c.nom||'').replace(/"/g,'""')}","${c.unite||''}","${c.prix||0}","${(c.designation||'').replace(/"/g,'""')}"`;
+            });
+            const csv = 'nom,unite,prix,designation\n' + rows.join('\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+            a.download = 'consommables-selection.csv';
+            a.click();
+        }
+        function _consomAdjustPriceSelected() {
+            const idxs = _consomGetSelected();
+            if (!idxs.length) return;
+            const pct = prompt(`Ajuster le prix de ${idxs.length} article${idxs.length > 1 ? 's' : ''} :\nEntrez un % (ex: +10 pour +10%, -5 pour -5%, ou =2.50 pour fixer à 2.50 CHF)`);
+            if (!pct) return;
+            if (pct.startsWith('=')) {
+                const fixed = parseFloat(pct.slice(1));
+                if (isNaN(fixed)) return toast('Valeur invalide', 'warning');
+                idxs.forEach(i => catalogueConsommables[i].prix = fixed);
+            } else {
+                const factor = parseFloat(pct);
+                if (isNaN(factor)) return toast('Valeur invalide', 'warning');
+                idxs.forEach(i => catalogueConsommables[i].prix = Math.round(catalogueConsommables[i].prix * (1 + factor/100) * 100) / 100);
+            }
+            saveToStorage();
+            renderConsommablesTable();
+            toast(`Prix mis à jour pour ${idxs.length} article${idxs.length > 1 ? 's' : ''}`, 'success');
         }
 
         function getStatutBadgeHtml(statut) {
