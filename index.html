@@ -3788,12 +3788,8 @@
                     <h2>Ajouter un nouveau geste</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Code geste</label>
-                            <input type="text" id="newCode" placeholder="Ex: REC-01">
-                        </div>
-                        <div class="form-group">
                             <label>Catégorie</label>
-                            <select id="newCategorie">
+                            <select id="newCategorie" onchange="autoGesteCode()">
                                 <option>Réception</option>
                                 <option>Contrôle</option>
                                 <option>Étiquetage</option>
@@ -3803,6 +3799,10 @@
                                 <option>Expédition</option>
                                 <option>Administratif</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Code geste <span id="autoCodeHint" style="font-size:0.78em;color:#27ae60;font-weight:400;"></span></label>
+                            <input type="text" id="newCode" placeholder="Ex: REC-01" oninput="document.getElementById('autoCodeHint').textContent=''">
                         </div>
                         <div class="form-group">
                             <label>Description</label>
@@ -8606,7 +8606,7 @@
             if (tabEl) tabEl.classList.add('active');
 
             if (tabName === 'dashboard') renderDashboard();
-            else if (tabName === 'catalogue') renderCatalogue();
+            else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
             else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); }
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
@@ -10706,6 +10706,37 @@
             container.innerHTML = html;
         }
 
+        const _GESTE_PREFIXES = {
+            'Réception':     'REC',
+            'Contrôle':      'CTR',
+            'Étiquetage':    'ETQ',
+            'Assemblage':    'ASM',
+            'Stockage':      'STK',
+            'Préparation':   'PRE',
+            'Expédition':    'EXP',
+            'Administratif': 'ADM'
+        };
+
+        function autoGesteCode() {
+            const cat = document.getElementById('newCategorie')?.value;
+            const codeField = document.getElementById('newCode');
+            const hint = document.getElementById('autoCodeHint');
+            if (!cat || !codeField) return;
+            const prefix = _GESTE_PREFIXES[cat];
+            if (!prefix) return;
+            // Trouver le prochain numéro disponible
+            const existing = (catalogueGestes || [])
+                .map(g => g.code)
+                .filter(c => c.startsWith(prefix + '-'))
+                .map(c => parseInt(c.slice(prefix.length + 1)))
+                .filter(n => !isNaN(n));
+            let next = 1;
+            while (existing.includes(next)) next++;
+            const suggested = `${prefix}-${String(next).padStart(2, '0')}`;
+            codeField.value = suggested;
+            if (hint) hint.textContent = '(auto)';
+        }
+
         function addGeste() {
             // Check permission
             if (!checkPermission('manage_gestes')) {
@@ -10744,12 +10775,12 @@
             saveToStorage();
             renderCatalogue();
             
-            document.getElementById('newCode').value = '';
             document.getElementById('newDescription').value = '';
             document.getElementById('newTemps').value = '';
             document.getElementById('newCoef').value = '1.0';
             document.getElementById('newNotes').value = '';
-            
+            autoGesteCode(); // régénère le prochain code disponible
+
             toast('✅ Geste ajouté au catalogue!', 'success');
         }
 
