@@ -15173,7 +15173,7 @@
                 </div>` : ''}
 
                 <!-- SIGNATURES -->
-                <div style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:48px;">
+                <div class="pdf-no-break" style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:48px;break-inside:avoid;page-break-inside:avoid;">
                     <div style="text-align:center;">
                         <p style="font-size:0.78em;color:#7a9db1;margin-bottom:8px;font-weight:600;">Pour l'Atelier La Pallanterie</p>
                         <div style="border-bottom:1px solid #bbb;height:52px;margin-bottom:6px;"></div>
@@ -15187,7 +15187,7 @@
                 </div>
 
                 <!-- FOOTER -->
-                <div style="text-align:center;font-size:0.75em;color:#aaa;border-top:1px solid #eee;padding-top:14px;margin-top:20px;">
+                <div class="pdf-no-break" style="text-align:center;font-size:0.75em;color:#aaa;border-top:1px solid #eee;padding-top:14px;margin-top:20px;padding-bottom:8px;break-inside:avoid;page-break-inside:avoid;">
                     ${devisNum} — Émis le ${dateStr} — Atelier La Pallanterie | © MARET Davie<br>
                     Devis valable jusqu'au ${dateValiditeStr || '30 jours après émission'} — Conditions de paiement : ${condPaiement}
                     <div style="margin-top:8px;font-size:0.9em;color:#bbb;border-top:1px dashed #eee;padding-top:6px;">
@@ -15212,11 +15212,11 @@
                 el.innerHTML = html;
                 document.body.appendChild(el);
                 html2pdf().set({
-                    margin: 10,
+                    margin: [10, 10, 18, 10],
                     filename: `devis-${devisNum}.pdf`,
-                    html2canvas: { scale: 2 },
-                    jsPDF: { format: pp.format || 'a4', orientation: pp.orientation || 'portrait' },
-                    pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: pp.format || 'a4', orientation: pp.orientation || 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.pdf-no-break'] }
                 }).from(el).save().then(() => document.body.removeChild(el));
             } else {
                 const printZone = document.getElementById('printZone');
