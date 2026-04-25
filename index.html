@@ -164,19 +164,28 @@
         .header h1 { font-size: 2em; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 1.05em; }
         
-        .tabs-wrapper { position:relative; background:var(--color-bg-alt); border-bottom:2px solid var(--color-border); }
+        .tabs-wrapper { position:relative; background:var(--color-bg-alt); border-bottom:2px solid var(--color-border); display:flex; align-items:stretch; }
+        .nav-arrow-btn {
+            flex-shrink:0; border:none; background:none; cursor:pointer;
+            font-size:1.2em; color:var(--color-primary-dark); padding:0 8px;
+            transition:color 0.15s, background 0.15s; line-height:1;
+        }
+        .nav-arrow-btn:hover:not(:disabled) { background:var(--color-primary); color:#fff; }
+        .nav-arrow-btn:disabled { color:#bbb; cursor:default; }
         .tabs-scroll-btn {
-            position:absolute; top:0; bottom:0; width:40px;
+            flex-shrink:0; width:30px;
             border:none; cursor:pointer; font-size:1.4em; font-weight:bold; color:var(--color-primary-dark);
             z-index:10; display:flex; align-items:center; justify-content:center;
-            transition:opacity 0.2s;
+            transition:opacity 0.2s; background:var(--color-bg-alt);
         }
-        .tabs-scroll-btn.left  { left:0;  background:linear-gradient(to right,  var(--color-bg-alt) 80%, transparent); }
-        .tabs-scroll-btn.right { right:0; background:linear-gradient(to left,   var(--color-bg-alt) 80%, transparent); }
+        .tabs-scroll-btn.left  { }
+        .tabs-scroll-btn.right { }
         .tabs-scroll-btn.hidden { opacity:0; pointer-events:none; }
         .tabs-scroll-btn:hover { color:var(--color-text); }
         .tabs {
             display: flex;
+            flex: 1 1 0;
+            min-width: 0;
             background: var(--color-bg-alt);
             overflow-x: auto;
             scrollbar-width: none;
@@ -3045,6 +3054,8 @@
         </div>
 
         <div class="tabs-wrapper">
+            <button id="navBtnBack" class="nav-arrow-btn" onclick="navBack()" title="Onglet précédent (Alt+←)" disabled>&#8592;</button>
+            <button id="navBtnFwd"  class="nav-arrow-btn" onclick="navForward()" title="Onglet suivant (Alt+→)" disabled>&#8594;</button>
             <button class="tabs-scroll-btn left" id="tabScrollLeft" onclick="scrollTabs(-150)">&#8249;</button>
             <div class="tabs" id="tabsBar">
                 <button class="tab active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
@@ -6478,6 +6489,9 @@
                 // Ferme également toutes les modales génériques ouvertes
                 document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
             }
+            // Alt+← / Alt+→ : navigation historique onglets
+            if (e.altKey && !mod && e.key === 'ArrowLeft')  { e.preventDefault(); navBack(); }
+            if (e.altKey && !mod && e.key === 'ArrowRight') { e.preventDefault(); navForward(); }
             // Ctrl/⌘+Z : annuler ; Ctrl/⌘+Shift+Z ou Ctrl+Y : rétablir
             if (mod && (e.key === 'z' || e.key === 'Z')) {
                 const tag = document.activeElement?.tagName;
@@ -6799,6 +6813,42 @@
         let draggedSection = null;
         let _tabDragSrc = null;
         let _tabDragJustEnded = false;
+
+        // ── Navigation historique ──────────────────────────────────
+        let _navHistory = ['dashboard'];
+        let _navIdx = 0;
+        let _navSkip = false;
+
+        function _navPush(tabName) {
+            if (_navSkip) return;
+            if (_navHistory[_navIdx] === tabName) return;
+            _navHistory = _navHistory.slice(0, _navIdx + 1);
+            _navHistory.push(tabName);
+            _navIdx = _navHistory.length - 1;
+            _navUpdateButtons();
+        }
+        function _navUpdateButtons() {
+            const b = document.getElementById('navBtnBack');
+            const f = document.getElementById('navBtnFwd');
+            if (b) b.disabled = _navIdx <= 0;
+            if (f) f.disabled = _navIdx >= _navHistory.length - 1;
+        }
+        function navBack() {
+            if (_navIdx <= 0) return;
+            _navIdx--;
+            _navSkip = true;
+            switchTab(_navHistory[_navIdx]);
+            _navSkip = false;
+            _navUpdateButtons();
+        }
+        function navForward() {
+            if (_navIdx >= _navHistory.length - 1) return;
+            _navIdx++;
+            _navSkip = true;
+            switchTab(_navHistory[_navIdx]);
+            _navSkip = false;
+            _navUpdateButtons();
+        }
 
         function initTabDragAndDropMode() {
             const bar = document.getElementById('tabsBar');
@@ -8635,6 +8685,7 @@
 
             updateBottomNavActive(tabName);
             updateBreadcrumbs(tabName);
+            _navPush(tabName);
         }
 
         // Met en surbrillance le bouton actif de la bottom-nav mobile
