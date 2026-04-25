@@ -13486,11 +13486,11 @@
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
 
+            // Réinitialise l'ID d'édition — IMPORTANT : sans ça la sauvegarde écraserait l'original
+            editingPrestationId = null;
+
             // Switch to calculateur tab
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab').classList.add('active');
-            document.getElementById('calculateur').classList.add('active');
+            switchTab('calculateur', true);
 
             // Fill in the form fields
             document.getElementById('client').value = p.client || '';
