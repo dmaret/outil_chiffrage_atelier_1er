@@ -3135,6 +3135,17 @@
                             <input type="date" id="date">
                         </div>
                     </div>
+                    <div class="form-row" style="background:#f0f8ff;border-radius:8px;padding:8px 12px;border:1px dashed #a8d5e2;">
+                        <div class="form-group">
+                            <label style="color:#5a7b8f;font-size:0.88em;">📅 Début prévu <span style="font-size:0.8em;font-weight:400;color:#a0b8cc;">(planification)</span></label>
+                            <input type="date" id="calcDateDebut" onchange="calcDateFin_autoEnd()">
+                        </div>
+                        <div class="form-group">
+                            <label style="color:#5a7b8f;font-size:0.88em;">📅 Fin prévue <span style="font-size:0.8em;font-weight:400;color:#a0b8cc;">(planification)</span></label>
+                            <input type="date" id="calcDateFin">
+                        </div>
+                        <div style="align-self:flex-end;font-size:0.78em;color:#a0b8cc;padding-bottom:6px;">Aparaît en grisé dans la Planification (simulation de charge)</div>
+                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nb CEA</label>
@@ -9881,6 +9892,8 @@
                 tempsCoordMin: parseFloat(document.getElementById('tempsCoordMin')?.value || 0),
                 tempsPrepMin: parseFloat(document.getElementById('tempsPrepMin')?.value || 0),
                 tempsNettoyageMin: parseFloat(document.getElementById('tempsNettoyageMin')?.value || 0),
+                dateDebut: document.getElementById('calcDateDebut')?.value || null,
+                dateFin:   document.getElementById('calcDateFin')?.value   || null,
                 attachments: currentAttachments,
                 statut: 'devis'
             };
@@ -9892,8 +9905,9 @@
                     prest.statut = old.statut;
                     prest.heuresReelles = old.heuresReelles;
                     prest.notesReel = old.notesReel;
-                    prest.dateDebut = old.dateDebut;
-                    prest.dateFin = old.dateFin;
+                    // Priorité aux dates saisies dans le formulaire, sinon conserver les anciennes
+                    prest.dateDebut = prest.dateDebut || old.dateDebut || null;
+                    prest.dateFin   = prest.dateFin   || old.dateFin   || null;
                     // Historique des révisions
                     prest.revisions = [...(old.revisions || []), {
                         version: (old.revisions || []).length + 1,
@@ -9933,6 +9947,8 @@
             document.getElementById('prestation').value = '';
             document.getElementById('reference').value = '';
             document.getElementById('date').valueAsDate = new Date();
+            const _rd = document.getElementById('calcDateDebut'); if (_rd) _rd.value = '';
+            const _rf = document.getElementById('calcDateFin');   if (_rf) _rf.value = '';
             document.getElementById('nbCEA').value = '1';
             document.getElementById('nbMSP').value = '50';
             document.getElementById('nbPieces').value = '1';
@@ -10252,6 +10268,10 @@
             document.getElementById('prestation').value = p.prestation || '';
             document.getElementById('reference').value = p.reference || '';
             if (p.date) document.getElementById('date').value = p.date;
+            const _deb = document.getElementById('calcDateDebut');
+            const _fin = document.getElementById('calcDateFin');
+            if (_deb) _deb.value = p.dateDebut || '';
+            if (_fin) _fin.value = p.dateFin || '';
             document.getElementById('nbCEA').value = p.nbCEA || 1;
             document.getElementById('nbMSP').value = p.nbMSP !== undefined ? Math.round(p.nbMSP * 100) : 50;
             document.getElementById('nbPieces').value = p.nbPieces || 1;
@@ -13497,6 +13517,10 @@
             document.getElementById('prestation').value = p.prestation || '';
             document.getElementById('reference').value = (p.reference || '') + ' (copie)';
             document.getElementById('date').valueAsDate = new Date();
+            const _deb2 = document.getElementById('calcDateDebut');
+            const _fin2 = document.getElementById('calcDateFin');
+            if (_deb2) _deb2.value = p.dateDebut || '';
+            if (_fin2) _fin2.value = p.dateFin || '';
             document.getElementById('nbCEA').value = p.nbCEA || 1;
             document.getElementById('nbMSP').value = p.nbMSP !== undefined ? Math.round(p.nbMSP * 100) : 50;
             document.getElementById('nbPieces').value = p.nbPieces || 1;
@@ -17988,6 +18012,17 @@
             return d;
         }
 
+        function calcDateFin_autoEnd() {
+            const deb = document.getElementById('calcDateDebut')?.value;
+            const fin = document.getElementById('calcDateFin');
+            if (!deb || !fin || fin.value) return;
+            // Pré-remplit la fin à J+5 ouvrés si non saisie
+            const d = new Date(deb);
+            let count = 0;
+            while (count < 5) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) count++; }
+            fin.value = d.toISOString().split('T')[0];
+        }
+
         function renderGantt() {
             const container = document.getElementById('ganttChart');
             if (!container) return;
@@ -18103,15 +18138,23 @@
 
                     const borderRadius = isStart && isEnd ? '6px' : isStart ? '6px 0 0 6px' : isEnd ? '0 6px 6px 0' : '0';
                     const showBar = inRange && !isWeekend;
+                    const isProvisoire = ['devis','brouillon','soumis'].includes(statut);
+                    const barStyle = isProvisoire
+                        ? `background:repeating-linear-gradient(45deg,${color}55,${color}55 4px,${color}22 4px,${color}22 8px);border:1px dashed ${color};opacity:0.75;`
+                        : `background:${color};opacity:0.88;`;
                     html += `<td style="padding:2px 0;${isWeekend ? 'background:repeating-linear-gradient(135deg,#f0e6e6,#f0e6e6 3px,#f8f0f0 3px,#f8f0f0 6px);' : ''}">
-                        ${showBar ? `<div onclick="editPrestation(${p.id})" style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};cursor:pointer;" title="${pNameFull} — ${escapeHtml(statutLabels[statut]||statut)} (cliquer pour ouvrir)"></div>` : ''}
+                        ${showBar ? `<div onclick="editPrestation(${p.id})" style="height:22px;${barStyle}border-radius:${borderRadius};cursor:pointer;" title="${pNameFull} — ${escapeHtml(statutLabels[statut]||statut)}${isProvisoire?' (prévu)':''} (cliquer pour ouvrir)"></div>` : ''}
                     </td>`;
                 });
                 html += `</tr>`;
             });
 
             html += `</tbody></table></div>
-            <div class="gantt-legend" style="margin-top:12px;flex-wrap:wrap;gap:12px;">
+            <div style="margin-top:8px;display:flex;gap:16px;align-items:center;font-size:0.78em;color:#7a9db1;">
+                <span><span style="display:inline-block;width:18px;height:10px;background:#6b8fa3;border-radius:2px;vertical-align:middle;"></span> Confirmé</span>
+                <span><span style="display:inline-block;width:18px;height:10px;background:repeating-linear-gradient(45deg,#6b8fa366,#6b8fa366 4px,#6b8fa322 4px,#6b8fa322 8px);border:1px dashed #6b8fa3;border-radius:2px;vertical-align:middle;"></span> Prévisionnel (devis/brouillon/soumis)</span>
+            </div>
+            <div class="gantt-legend" style="margin-top:8px;flex-wrap:wrap;gap:12px;">
                 <span style="font-weight:600;color:#5a7b8f;">Projets :</span>
                 ${prests.map(p => `<span style="display:flex;align-items:center;gap:5px;font-size:0.82em;">
                     <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${projectColors[p.id]};"></span>
