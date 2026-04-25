@@ -7746,6 +7746,14 @@
                 document.addEventListener('mouseup', onUp);
                 e.preventDefault();
             });
+
+            // Zoom molette / pinch trackpad : Ctrl+scroll ou ctrlKey (pinch)
+            scroll.addEventListener('wheel', e => {
+                if (!e.ctrlKey) return;
+                e.preventDefault();
+                const dir = e.deltaY < 0 ? 1 : -1;
+                pbZoom(dir);
+            }, { passive: false });
         }
 
         // ── Fiches d'intervention rapide ──────────────────────
