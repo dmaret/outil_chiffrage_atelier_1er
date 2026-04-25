@@ -5247,167 +5247,131 @@
                     <p style="color:#666;margin-bottom:20px;font-size:0.95em;">Termes essentiels à connaître :</p>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;">
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#27ae60;">SKU</strong> - Stock Keeping Unit</span>
-                                <a href="https://fr.wikipedia.org/wiki/Unit%C3%A9_de_gestion_des_stocks" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Numéro unique d'identification pour chaque variante de produit (taille, couleur, conditionnement).</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Ex : REF-CAT-001 — lié au code-barres EAN/GS1</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">SKU - Stock Keeping Unit</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Numéro unique d'identification pour chaque variante de produit (taille, couleur, conditionnement).</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Ex : REF-CAT-001 — lié au code-barres EAN/GS1</div>
+                            <a href="https://fr.wikipedia.org/wiki/Unit%C3%A9_de_gestion_des_stocks" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#27ae60;">Picking</strong>
-                                <a href="https://fr.wikipedia.org/wiki/Pr%C3%A9paration_de_commandes" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Prélèvement de produits en entrepôt pour préparer une commande client.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Méthodes : voice picking, pick-to-light, batch picking, zone picking</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Picking</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Prélèvement de produits en entrepôt pour préparer une commande client.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Méthodes : voice picking, pick-to-light, batch picking, zone picking</div>
+                            <a href="https://fr.wikipedia.org/wiki/Pr%C3%A9paration_de_commandes" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#27ae60;">Palettisation</strong>
-                                <a href="https://fr.wikipedia.org/wiki/Palette_(logistique)" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Groupage de cartons/articles sur une palette pour transport et stockage.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Palette EUR : 80×120 cm — charge max ~1 500 kg</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Palettisation</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Groupage de cartons/articles sur une palette pour transport et stockage.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Palette EUR : 80×120 cm — charge max ~1 500 kg</div>
+                            <a href="https://fr.wikipedia.org/wiki/Palette_(logistique)" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#27ae60;">FIFO</strong> - First In, First Out</span>
-                                <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_FIFO" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Premier article entré = premier sorti. Garantit la rotation et évite les produits périmés.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Obligatoire en alimentaire et pharmaceutique</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">FIFO - First In, First Out</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Premier article entré = premier sorti. Garantit la rotation et évite les produits périmés.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Obligatoire en alimentaire et pharmaceutique</div>
+                            <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_FIFO" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#27ae60;">FEFO</strong> - First Expire, First Out</span>
-                                <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_FEFO" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Priorité aux produits dont la date d'expiration est la plus proche, quel que soit leur ordre d'arrivée.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Réglementation CE 178/2002 — traçabilité alimentaire</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">FEFO - First Expire, First Out</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Priorité aux produits dont la date d'expiration est la plus proche, quel que soit leur ordre d'arrivée.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Réglementation CE 178/2002 — traçabilité alimentaire</div>
+                            <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_FEFO" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#27ae60;">Chaîne de froid</strong>
-                                <a href="https://fr.wikipedia.org/wiki/Cha%C3%AEne_du_froid" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Maintien continu de la température de produits périssables de la production au client.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Frais : 0–4 °C &nbsp;|&nbsp; Surgelés : &lt; −18 °C &nbsp;|&nbsp; Ambiant contrôlé : 15–25 °C</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Chaîne de froid</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Maintien continu de la température de produits périssables de la production au client.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Frais : 0–4 °C &nbsp;|&nbsp; Surgelés : &lt; −18 °C &nbsp;|&nbsp; Ambiant : 15–25 °C</div>
+                            <a href="https://fr.wikipedia.org/wiki/Cha%C3%AEne_du_froid" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#27ae60;">Flux Tendu</strong>
-                                <a href="https://fr.wikipedia.org/wiki/Flux_tendu" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Livraison synchronisée à la demande réelle pour minimiser les stocks intermédiaires.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Inventé par Toyota (Taiichi Ohno, 1950s) — pilier du Lean Manufacturing</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Flux Tendu</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Livraison synchronisée à la demande réelle pour minimiser les stocks intermédiaires.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Inventé par Toyota (Taiichi Ohno, 1950s) — pilier du Lean Manufacturing</div>
+                            <a href="https://fr.wikipedia.org/wiki/Flux_tendu" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#27ae60;">Taux de service</strong>
-                                <a href="https://fr.wikipedia.org/wiki/Taux_de_service" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Pourcentage de commandes livrées à temps, au complet et sans erreur.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Formule : commandes OK / commandes totales × 100 — Objectif &gt; 98 %</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Taux de service</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Pourcentage de commandes livrées à temps, au complet et sans erreur.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Formule : commandes OK / commandes totales × 100 — Objectif &gt; 98 %</div>
+                            <a href="https://fr.wikipedia.org/wiki/Taux_de_service" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#27ae60;">Rotation de stock</strong>
-                                <a href="https://fr.wikipedia.org/wiki/Rotation_des_stocks" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Nombre de fois qu'un stock se renouvelle entièrement sur une période donnée.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Formule : CA annuel / stock moyen — Plus c'est élevé, mieux c'est</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Rotation de stock</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Nombre de fois qu'un stock se renouvelle entièrement sur une période donnée.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Formule : CA annuel / stock moyen — Plus c'est élevé, mieux c'est</div>
+                            <a href="https://fr.wikipedia.org/wiki/Rotation_des_stocks" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#27ae60;">Lead time</strong>
-                                <a href="https://fr.wikipedia.org/wiki/D%C3%A9lai_de_livraison" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Délai total entre la passation d'une commande et sa réception effective.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">= délai fournisseur + transit + réception/contrôle entrepôt</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Lead time</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Délai total entre la passation d'une commande et sa réception effective.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">= délai fournisseur + transit + réception/contrôle entrepôt</div>
+                            <a href="https://fr.wikipedia.org/wiki/D%C3%A9lai_de_livraison" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#27ae60;">EDI</strong> - Échange de Données Informatisé</span>
-                                <a href="https://fr.wikipedia.org/wiki/%C3%89change_de_donn%C3%A9es_informatique" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Transmission automatique et standardisée de documents commerciaux entre systèmes.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Standards : EDIFACT, XML/AS2 — bons de commande, factures, ASN</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">EDI - Échange de Données Informatisé</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Transmission automatique et standardisée de documents commerciaux entre systèmes.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Standards : EDIFACT, XML/AS2 — bons de commande, factures, ASN</div>
+                            <a href="https://fr.wikipedia.org/wiki/%C3%89change_de_donn%C3%A9es_informatique" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#27ae60;">Transpallet / Chariot élévateur</strong>
-                                <a href="https://fr.wikipedia.org/wiki/Chariot_%C3%A9l%C3%A9vateur" target="_blank" rel="noopener" title="Wikipedia" style="color:#27ae60;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Équipements de manutention pour déplacer et élever des palettes ou charges lourdes.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;">Types : manuel, électrique, frontal, rétractable, CACES requis en France</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Transpallet / Chariot élévateur</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Équipements de manutention pour déplacer et élever des palettes ou charges lourdes.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Types : manuel, électrique, frontal, rétractable — CACES requis en France</div>
+                            <a href="https://fr.wikipedia.org/wiki/Chariot_%C3%A9l%C3%A9vateur" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
                         <!-- NOUVEAUX TERMES -->
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <strong style="color:#1a8a5a;">Cross-docking</strong>
-                                <a href="https://fr.wikipedia.org/wiki/Cross-docking" target="_blank" rel="noopener" title="Wikipedia" style="color:#1a8a5a;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Transit de marchandises sans stockage : les produits reçus sont immédiatement réorientés vers les quais de départ.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;">Réduit les coûts de stockage de 30–50 % — utilisé par Walmart, Lidl</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">Cross-docking</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Transit de marchandises sans stockage : les produits reçus sont immédiatement réorientés vers les quais de départ.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Réduit les coûts de stockage de 30–50 % — utilisé par Walmart, Lidl</div>
+                            <a href="https://fr.wikipedia.org/wiki/Cross-docking" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#1a8a5a;">Analyse ABC</strong> - Loi de Pareto</span>
-                                <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_ABC_(logistique)" target="_blank" rel="noopener" title="Wikipedia" style="color:#1a8a5a;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Classification des articles par valeur/fréquence pour prioriser la gestion du stock.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;">A : 20 % articles = 80 % valeur &nbsp;|&nbsp; B : 30 % &nbsp;|&nbsp; C : 50 % articles à faible valeur</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">Analyse ABC - Loi de Pareto</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Classification des articles par valeur/fréquence pour prioriser la gestion du stock.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">A : 20 % articles = 80 % valeur &nbsp;|&nbsp; B : 30 % &nbsp;|&nbsp; C : 50 % à faible valeur</div>
+                            <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_ABC_(logistique)" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#1a8a5a;">Stock de sécurité</strong></span>
-                                <a href="https://fr.wikipedia.org/wiki/Stock_de_s%C3%A9curit%C3%A9" target="_blank" rel="noopener" title="Wikipedia" style="color:#1a8a5a;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Quantité tampon conservée pour absorber les variations de demande ou les retards fournisseur.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;">Formule : Z × σ_demande × √Lead time — lié au niveau de service cible</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">Stock de sécurité</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Quantité tampon conservée pour absorber les variations de demande ou les retards fournisseur.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Formule : Z × σ_demande × √Lead time — lié au niveau de service cible</div>
+                            <a href="https://fr.wikipedia.org/wiki/Stock_de_s%C3%A9curit%C3%A9" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#1a8a5a;">3PL / 4PL</strong> - Logistique externalisée</span>
-                                <a href="https://fr.wikipedia.org/wiki/Logistique_tierce_partie" target="_blank" rel="noopener" title="Wikipedia" style="color:#1a8a5a;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Externalisation partielle (3PL) ou totale (4PL) de la chaîne logistique à un prestataire spécialisé.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;">Ex 3PL : Geodis, FM Logistic &nbsp;|&nbsp; Ex 4PL : Accenture Supply Chain</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">3PL / 4PL - Logistique externalisée</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Externalisation partielle (3PL) ou totale (4PL) de la chaîne logistique à un prestataire spécialisé.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Ex 3PL : Geodis, FM Logistic &nbsp;|&nbsp; Ex 4PL : Accenture Supply Chain</div>
+                            <a href="https://fr.wikipedia.org/wiki/Logistique_tierce_partie" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#1a8a5a;">MRP</strong> - Material Requirements Planning</span>
-                                <a href="https://fr.wikipedia.org/wiki/Planification_des_besoins_en_composants" target="_blank" rel="noopener" title="Wikipedia" style="color:#1a8a5a;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Calcul automatique des besoins en composants et matières à partir du plan de production.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;">MRP II intègre la capacité machines — souvent intégré dans l'ERP</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">MRP - Material Requirements Planning</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Calcul automatique des besoins en composants et matières à partir du plan de production.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">MRP II intègre la capacité machines — souvent intégré dans l'ERP</div>
+                            <a href="https://fr.wikipedia.org/wiki/Planification_des_besoins_en_composants" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;">
-                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
-                                <span><strong style="color:#1a8a5a;">Slotting</strong> - Optimisation des emplacements</span>
-                                <a href="https://fr.wikipedia.org/wiki/Gestion_des_entrep%C3%B4ts" target="_blank" rel="noopener" title="Wikipedia" style="color:#1a8a5a;font-size:0.8em;text-decoration:none;opacity:0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🔗</a>
-                            </div>
-                            <span style="color:#666;font-size:0.9em;">Affectation optimale des articles dans l'entrepôt selon leur fréquence de picking et leur poids.</span>
-                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;">Articles A → zone dorée (1,0–1,5 m de hauteur) — réduit les déplacements de 20–40 %</div>
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">Slotting - Optimisation des emplacements</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Affectation optimale des articles dans l'entrepôt selon leur fréquence de picking et leur poids.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Articles A → zone dorée (1,0–1,5 m) — réduit les déplacements de 20–40 %</div>
+                            <a href="https://fr.wikipedia.org/wiki/Gestion_des_entrep%C3%B4ts" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
 
                     </div>
