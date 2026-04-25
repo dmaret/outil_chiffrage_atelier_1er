@@ -3880,14 +3880,12 @@
             <!-- ONGLET FORMATION -->
             <div id="formation" class="tab-content">
                 <div class="section" style="background:#f0f8ff;border-left:4px solid #2980b9;">
-                    <h2>📚 Formations à suivre</h2>
-                    <p style="color:#7a9db1;margin-bottom:12px;">Sélectionnez un apprenant pour voir ses formations assignées</p>
-                    <div class="form-row">
-                        <select id="learnerTrainingSelect" onchange="showLearnerTrainings();" style="padding:8px;border:1px solid #ddd;border-radius:4px;flex:1;">
-                            <option value="">-- Sélectionner un apprenant --</option>
-                        </select>
-                    </div>
-                    <div id="learnerTrainingsContainer" style="margin-top:16px;"></div>
+                    <h2>🎓 Assigner des formations</h2>
+                    <p style="color:#7a9db1;margin-bottom:12px;">Sélectionnez un apprenant pour lui assigner des modules de formation et des documents</p>
+                    <select id="adminLearnerSelect" onchange="renderAdminFormationAssign()" style="padding:9px;border:1px solid #c8e0f4;border-radius:8px;width:100%;max-width:400px;font-size:0.95em;">
+                        <option value="">-- Sélectionner un apprenant --</option>
+                    </select>
+                    <div id="adminFormationAssignContainer"></div>
                 </div>
 
                 <div class="section">
@@ -5037,69 +5035,14 @@
 
             <!-- ONGLET FORMATION LOGISTIQUE -->
             <div id="formation-logistique" class="tab-content">
-                <!-- HERO INTRO -->
+                <!-- SÉLECTION APPRENANT -->
                 <div class="section" style="background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border-left:4px solid #6b8fa3;">
-                    <h2 style="margin-bottom:8px;">🏭 Formation Logistique</h2>
-                    <p style="color:#666;margin:0;max-width:700px;">Découvrez les différents systèmes logistiques et technologies utilisés en industrie. Maîtrisez les concepts clés de la supply chain et de la gestion d'entrepôt.</p>
-                </div>
-
-                <!-- APPRENANTS ASSIGNÉS -->
-                <div class="section" style="background:#e8f5e9;border-left:4px solid #27ae60;">
-                    <h3 style="margin-top:0;color:#27ae60;">👥 Apprenants assignés à cette formation</h3>
-                    <div id="assignedLearnersContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;"></div>
-                </div>
-
-                <!-- QUIZ INTERACTIF -->
-                <div class="section" style="background:#fffaed;border-left:4px solid #e67e22;">
-                    <h2>🧠 Quiz - Testez vos Connaissances</h2>
-                    <p style="color:#666;margin-bottom:20px;font-size:0.95em;">Testez votre compréhension des systèmes logistiques :</p>
-
-                    <div id="quizContainer" style="display:block;">
-                        <div id="quizQuestionsWrapper" style="display:none;">
-                            <div id="quizQuestions"></div>
-                        </div>
-                        <div id="quizStartButtons" style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-                            <button class="btn btn-primary" onclick="startFormationQuiz('all')" style="background:#e67e22;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🎯 Démarrer Quiz</button>
-                            <button class="btn" onclick="startFormationQuiz('adaptive')" style="background:#2980b9;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🧠 Quiz adaptatif</button>
-                            <button class="btn" onclick="openFormationDashboard()" style="background:#6b8fa3;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">📊 Ma progression</button>
-                            <button class="btn btn-secondary" onclick="resetFormationQuiz()" style="background:#bdc3c7;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">↻ Réinitialiser</button>
-                        </div>
-                    </div>
-
-                    <div id="quizResults" style="display:none;background:white;padding:20px;border-radius:10px;border:2px solid #e67e22;margin-top:15px;">
-                        <h3 style="color:#e67e22;margin-top:0;">📊 Vos Résultats</h3>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:15px;">
-                            <div style="padding:15px;background:#fffaed;border-radius:8px;text-align:center;">
-                                <div style="font-size:2em;font-weight:bold;color:#e67e22;" id="quizScoreDisplay">0/10</div>
-                                <div style="color:#666;font-size:0.9em;">Score</div>
-                            </div>
-                            <div style="padding:15px;background:#fffaed;border-radius:8px;text-align:center;">
-                                <div style="font-size:2em;font-weight:bold;color:#e67e22;" id="quizPercentDisplay">0%</div>
-                                <div style="color:#666;font-size:0.9em;">Réussite</div>
-                            </div>
-                        </div>
-                        <div id="quizFeedback" style="color:#666;line-height:1.6;margin-bottom:15px;"></div>
-                        <button class="btn btn-primary" onclick="resetFormationQuiz()" style="background:#e67e22;border:none;color:white;padding:10px 20px;border-radius:8px;cursor:pointer;">Recommencer</button>
-                    </div>
-                </div>
-
-                <!-- DEMANDE DE FORMATION -->
-                <div class="section" style="background:#f0f8f5;border-left:4px solid #27ae60;">
-                    <h2>📚 Demander une formation</h2>
-                    <p style="color:#7a9db1;margin-bottom:12px;">Vous souhaitez vous former? Demandez une formation en sélectionnant le domaine qui vous intéresse</p>
-                    <div class="form-row">
-                        <select id="trainingCategoryRequest" style="padding:8px;border:1px solid #ddd;border-radius:4px;flex:1;">
-                            <option value="">-- Sélectionner un domaine de formation --</option>
-                            <option value="Logistique - WMS">📦 Logistique - WMS (Warehouse Management System)</option>
-                            <option value="Logistique - ERP">🏢 Logistique - ERP (Enterprise Resource Planning)</option>
-                            <option value="Logistique - TMS">🚚 Logistique - TMS (Transport Management System)</option>
-                            <option value="Automatisation - Convoyeurs">⚙️ Automatisation - Convoyeurs & AGV</option>
-                            <option value="RFID & Traçabilité">📡 RFID & Traçabilité</option>
-                            <option value="Méthodes - Kanban">📋 Méthodes - Kanban & Lean</option>
-                            <option value="Organisation - 5S">🧹 Organisation - 5S (Poste de travail)</option>
-                        </select>
-                        <button class="btn" onclick="requestFormationTraining()" style="background:#27ae60;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;">✉️ Demander</button>
-                    </div>
+                    <h2 style="margin-bottom:6px;">🏭 Mes Formations</h2>
+                    <p style="color:#666;margin:0 0 16px;font-size:0.95em;">Sélectionnez votre nom pour accéder à votre parcours de formation.</p>
+                    <select id="learnerFormationSelect" onchange="renderLearnerFormations()" style="padding:10px 14px;border:1px solid #c0d8e8;border-radius:8px;width:100%;max-width:420px;font-size:1em;background:white;">
+                        <option value="">-- Qui êtes-vous ? --</option>
+                    </select>
+                    <div id="learnerFormationsContainer"></div>
                 </div>
 
                 <!-- SYSTÈMES LOGISTIQUES -->
@@ -8664,7 +8607,7 @@
 
             if (tabName === 'dashboard') renderDashboard();
             else if (tabName === 'catalogue') renderCatalogue();
-            else if (tabName === 'formation') { updateLearnerTrainingSelector(); renderLearners(); renderReferenceDocuments(); }
+            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); }
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
             else if (tabName === 'clients') renderClients();
@@ -8683,7 +8626,7 @@
             else if (tabName === 'accompagnement')      renderAccompagnement();
             else if (tabName === 'historique')          renderHistory();
             else if (tabName === 'gantt')               { loadGanttPrestSelect(); renderGantt(); }
-            else if (tabName === 'formation-logistique') renderFormationLogistiqueApprenants();
+            else if (tabName === 'formation-logistique') { updateFormationSelectors(); renderLearnerFormations(); }
             else if (tabName === 'procedures') renderProceduresTab();
             // Show/hide recap popup (always runs after the tab switch)
             const _pbPop = document.getElementById('pb-recap-popup');
@@ -10919,19 +10862,21 @@
                 category: category,
                 startDate: startDate,
                 progress: {},
-                assignedDocuments: [] // Liste des IDs de documents assignés
+                assignedDocuments: [],
+                assignedFormations: [], // domains assignés par l'admin
+                quizResults: {}         // { [domain]: { score, total, date, pct } }
             };
 
             learnersList.push(learner);
             saveFormationData();
-            updateLearnerTrainingSelector();
+            updateFormationSelectors();
             renderLearners();
 
             document.getElementById('learnerName').value = '';
             document.getElementById('learnerCategory').value = '';
             document.getElementById('learnerStartDate').value = '';
 
-            toast(`✅ ${name} ajouté à la formation`, 'success');
+            toast(`✅ ${name} ajouté·e à la liste des apprenants`, 'success');
             logAction(`Ajout apprenant formation: ${name} (${category})`, 'CREATE');
         }
 
@@ -11059,11 +11004,7 @@
         }
 
         function updateLearnerTrainingSelector() {
-            const select = document.getElementById('learnerTrainingSelect');
-            if (!select) return;
-
-            select.innerHTML = '<option value="">-- Sélectionner un apprenant --</option>' +
-                learnersList.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+            updateFormationSelectors();
         }
 
         function showLearnerTrainings() {
@@ -11225,72 +11166,141 @@
             `;
         }
 
-        function renderFormationLogistiqueApprenants() {
-            const container = document.getElementById('assignedLearnersContainer');
-            if (!container) return;
+        // ── Nouveau flux formation ─────────────────────────────────────────
 
-            // Get all learners assigned to Formation Logistique
-            const apprenants = learnersList.filter(learner => {
-                // Check if this learner has any Logistique formation assigned
-                const hasLogistiqueFormation = trainingRequests.some(req =>
-                    req.assignedTo === learner.name &&
-                    req.status === 'approved' &&
-                    (req.category.includes('Logistique') || req.category.includes('logistique') ||
-                     req.category.includes('Automatisation') || req.category.includes('RFID') ||
-                     req.category.includes('Kanban') || req.category.includes('5S') || req.category.includes('Organisation'))
-                );
-                return hasLogistiqueFormation;
+        // Met à jour les deux sélecteurs (admin + apprenant)
+        function updateFormationSelectors() {
+            ['adminLearnerSelect','learnerFormationSelect'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                const val = sel.value;
+                sel.innerHTML = `<option value="">${id === 'adminLearnerSelect' ? '-- Sélectionner un apprenant --' : '-- Qui êtes-vous ? --'}</option>`
+                    + learnersList.map(l => `<option value="${l.id}">${escapeHtml(l.name)} (${escapeHtml(l.category)})</option>`).join('');
+                if (val) sel.value = val;
             });
+        }
 
-            if (apprenants.length === 0) {
-                container.innerHTML = '<p style="color:#999;font-style:italic;padding:16px;grid-column:1/-1;">Aucun apprenant assigné à la formation Logistique pour le moment.</p>';
+        // ADMIN : assigne / retire un domaine de formation à un apprenant
+        function assignLearnerDomain(learnerId, domain, checked) {
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.assignedFormations) l.assignedFormations = [];
+            if (checked && !l.assignedFormations.includes(domain)) l.assignedFormations.push(domain);
+            else if (!checked) l.assignedFormations = l.assignedFormations.filter(d => d !== domain);
+            saveFormationData();
+            renderAdminFormationAssign();
+        }
+
+        // ADMIN : affiche le panneau d'assignation pour l'apprenant sélectionné
+        function renderAdminFormationAssign() {
+            const sel = document.getElementById('adminLearnerSelect');
+            const container = document.getElementById('adminFormationAssignContainer');
+            if (!sel || !container) return;
+            const learnerId = sel.value;
+            if (!learnerId) { container.innerHTML = ''; return; }
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.assignedFormations) l.assignedFormations = [];
+            if (!l.assignedDocuments) l.assignedDocuments = [];
+            const domains = typeof FORMATION_DOMAINS !== 'undefined' ? FORMATION_DOMAINS : {};
+            const domainHtml = Object.entries(domains).map(([key, d]) => {
+                const on = l.assignedFormations.includes(key);
+                const res = (l.quizResults || {})[key];
+                const badge = res ? `<span style="font-size:0.72em;padding:2px 6px;border-radius:10px;background:${res.pct>=80?'#27ae60':res.pct>=60?'#e67e22':'#e74c3c'};color:white;margin-left:6px;">${res.pct}%</span>` : '';
+                return `<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid ${on?'#2980b9':'#dde'};background:${on?'#e8f4ff':'#fafafa'};cursor:pointer;transition:all 0.15s;">
+                    <input type="checkbox" ${on?'checked':''} onchange="assignLearnerDomain('${l.id}','${key}',this.checked)">
+                    <span style="font-size:1.1em;">${d.icon}</span>
+                    <span style="font-weight:${on?'600':'400'};color:${on?'#2980b9':'#555'};">${d.label}</span>${badge}
+                </label>`;
+            }).join('');
+            const docHtml = referenceDocuments.length ? referenceDocuments.map(doc => {
+                const on = l.assignedDocuments.includes(doc.id);
+                const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
+                return `<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:6px;border:1px solid ${on?'#27ae60':'#dde'};background:${on?'#e8f9f0':'#fafafa'};cursor:pointer;font-size:0.85em;">
+                    <input type="checkbox" ${on?'checked':''} onchange="toggleDocumentAssignment('${l.id}',${doc.id},this.checked)">
+                    ${ico} ${escapeHtml(doc.title)}
+                </label>`;
+            }).join('') : '<p style="color:#aaa;font-size:0.85em;margin:0;">Aucun document — ajoutez-en ci-dessous.</p>';
+            container.innerHTML = `
+                <div style="margin-top:16px;padding:16px;background:#f8fbff;border-radius:10px;border:1px solid #c8e0f4;">
+                    <h4 style="margin:0 0 12px;color:#2980b9;">📚 Modules de formation — ${escapeHtml(l.name)}</h4>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:16px;">${domainHtml}</div>
+                    <h4 style="margin:0 0 8px;color:#2980b9;">📎 Documents accessibles</h4>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;">${docHtml}</div>
+                </div>`;
+        }
+
+        // APPRENANT : affiche ses formations assignées
+        function renderLearnerFormations() {
+            const sel = document.getElementById('learnerFormationSelect');
+            const container = document.getElementById('learnerFormationsContainer');
+            if (!sel || !container) return;
+            const learnerId = sel.value;
+            if (!learnerId) {
+                container.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Sélectionnez votre nom pour accéder à vos formations.</p>';
+                return;
+            }
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.assignedFormations) l.assignedFormations = [];
+            if (!l.quizResults) l.quizResults = {};
+            const domains = typeof FORMATION_DOMAINS !== 'undefined' ? FORMATION_DOMAINS : {};
+            const docs = (l.assignedDocuments || []).map(id => referenceDocuments.find(d => d.id == id)).filter(Boolean);
+
+            if (l.assignedFormations.length === 0) {
+                container.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;">
+                    <div style="font-size:2.5em;margin-bottom:8px;">🎓</div>
+                    <p>Aucune formation assignée pour le moment.<br>Contactez votre responsable.</p>
+                </div>`;
                 return;
             }
 
-            container.innerHTML = apprenants.map(learner => {
-                const formations = trainingRequests.filter(r =>
-                    r.assignedTo === learner.name &&
-                    r.status === 'approved' &&
-                    (r.category.includes('Logistique') || r.category.includes('Automatisation') ||
-                     r.category.includes('RFID') || r.category.includes('Kanban') ||
-                     r.category.includes('5S') || r.category.includes('Organisation'))
-                );
-
-                return `
-                    <div style="background:white;border-radius:8px;padding:16px;border-left:4px solid #27ae60;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
-                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
-                            <div>
-                                <h4 style="margin:0 0 4px;color:#27ae60;">${learner.name}</h4>
-                                <p style="margin:0;font-size:0.85em;color:#666;">📚 ${learner.category}</p>
-                            </div>
-                            <div style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:0.8em;font-weight:600;">
-                                ${formations.length} formation(s)
-                            </div>
-                        </div>
-                        <div style="border-top:1px solid #eee;padding-top:10px;">
-                            ${formations.map(f => {
-                                const stages = [
-                                    { label: 'Demandée', emoji: '⏳', completed: true },
-                                    { label: 'Approuvée', emoji: '✅', completed: f.status === 'approved' },
-                                    { label: 'Quiz', emoji: '🎯', completed: f.quizCompletedAt !== undefined && f.quizCompletedAt !== null }
-                                ];
-                                return `
-                                    <div style="margin-bottom:8px;padding:8px;background:#f5f5f5;border-radius:6px;">
-                                        <div style="font-size:0.9em;font-weight:600;color:#333;margin-bottom:6px;">📖 ${f.category}</div>
-                                        <div style="display:flex;gap:6px;font-size:1.2em;">
-                                            ${stages.map((s, idx) => `
-                                                <span title="${s.label}" style="opacity:${s.completed ? '1' : '0.3'};cursor:help;">
-                                                    ${s.emoji}
-                                                </span>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
+            const cards = l.assignedFormations.map(key => {
+                const d = domains[key];
+                if (!d) return '';
+                const res = l.quizResults[key];
+                const pct = res ? res.pct : null;
+                const statusColor = pct === null ? '#a0b0c0' : pct >= 80 ? '#27ae60' : pct >= 60 ? '#e67e22' : '#e74c3c';
+                const statusLabel = pct === null ? '⬜ Non commencé' : pct >= 80 ? '✅ Réussi' : pct >= 60 ? '⚠️ À améliorer' : '❌ À refaire';
+                return `<div style="background:white;border-radius:12px;padding:18px;border:2px solid ${statusColor};box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;flex-direction:column;gap:10px;">
+                    <div style="font-size:2.2em;">${d.icon}</div>
+                    <div>
+                        <div style="font-weight:700;color:#2d3e50;font-size:1em;">${d.label}</div>
+                        <div style="font-size:0.8em;color:${statusColor};font-weight:600;margin-top:4px;">${statusLabel}${pct !== null ? ` — ${pct}%` : ''}</div>
                     </div>
-                `;
+                    ${pct !== null ? `<div style="background:#eee;border-radius:4px;height:6px;"><div style="background:${statusColor};width:${pct}%;height:100%;border-radius:4px;"></div></div>` : ''}
+                    ${res ? `<div style="font-size:0.78em;color:#999;">Dernier essai : ${new Date(res.date).toLocaleDateString('fr-FR')} — ${res.score}/${res.total}</div>` : ''}
+                    <button onclick="_startLearnerQuiz('${l.id}','${key}')" style="width:100%;padding:9px;border-radius:8px;border:none;background:${pct===null?'#e67e22':pct>=80?'#27ae60':'#2980b9'};color:white;cursor:pointer;font-weight:700;font-size:0.88em;">
+                        ${pct === null ? '🎯 Commencer' : '🔄 Refaire le quiz'}
+                    </button>
+                </div>`;
             }).join('');
+
+            const docsHtml = docs.length ? `<div style="margin-top:20px;padding:14px;background:#f5f9fc;border-radius:10px;border-left:3px solid #a8d5e2;">
+                <h4 style="margin:0 0 10px;color:#5a7b8f;">📎 Mes documents</h4>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    ${docs.map(doc => {
+                        const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
+                        return `<a href="${doc.url||'#'}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.85em;">${ico} ${escapeHtml(doc.title)}</a>`;
+                    }).join('')}
+                </div>
+            </div>` : '';
+
+            container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:16px;">${cards}</div>${docsHtml}`;
+        }
+
+        // Démarre le quiz pour un apprenant + domaine précis
+        let _currentQuizLearnerId = null;
+        let _currentQuizDomain = null;
+        function _startLearnerQuiz(learnerId, domain) {
+            _currentQuizLearnerId = learnerId;
+            _currentQuizDomain = domain;
+            startFormationQuiz('domain:' + domain);
+        }
+
+        // LEGACY : conservé pour compatibilité
+        function renderFormationLogistiqueApprenants() {
+            renderLearnerFormations();
         }
 
         function selectLearner(learnerId) {
@@ -23966,7 +23976,23 @@
             };
             const { xpGained, newBadges, progress } = updateFormationProgress(attempt);
 
-            // Save quiz completion to trainingRequests
+            // Sauvegarde le résultat sur l'apprenant courant
+            if (_currentQuizLearnerId && _currentQuizDomain) {
+                const l = learnersList.find(x => String(x.id) === String(_currentQuizLearnerId));
+                if (l) {
+                    if (!l.quizResults) l.quizResults = {};
+                    l.quizResults[_currentQuizDomain] = {
+                        score: formationQuizState.score,
+                        total,
+                        pct: percent,
+                        date: new Date().toISOString()
+                    };
+                    saveFormationData();
+                    renderLearnerFormations();
+                    renderLearners();
+                }
+            }
+            // Compatibilité ancien système trainingRequests
             if (currentFormationId) {
                 const formation = trainingRequests.find(r => r.id === currentFormationId);
                 if (formation && !formation.quizCompletedAt) {
@@ -23974,8 +24000,6 @@
                     formation.quizScore = formationQuizState.score;
                     formation.quizTotal = total;
                     saveFormationData();
-                    renderLearners();
-                    renderFormationLogistiqueApprenants();
                 }
             }
 
