@@ -8691,6 +8691,19 @@
             updateBottomNavActive(tabName);
             updateBreadcrumbs(tabName);
             _navPush(tabName);
+
+            // Déverrouille les étapes onboarding correspondantes au tab visité
+            try {
+                const _obMap = { catalogue:'catalogue', clients:'clients', calculateur:'prest', prestations:'prest', config:'config', parametrage:'config' };
+                const _obKey = _obMap[tabName];
+                if (_obKey) {
+                    let _obHide = JSON.parse(localStorage.getItem('onboardingForceHide') || '[]');
+                    if (_obHide.includes(_obKey)) {
+                        localStorage.setItem('onboardingForceHide', JSON.stringify(_obHide.filter(k => k !== _obKey)));
+                        renderOnboardingChecklist();
+                    }
+                }
+            } catch(e) {}
         }
 
         // Met en surbrillance le bouton actif de la bottom-nav mobile
@@ -18458,11 +18471,14 @@
                 return;
             }
 
-            const coutsOk = !!(config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard));
-            const catalogueOk = Array.isArray(catalogueGestes) && catalogueGestes.length > 0;
-            const clientsOk = typeof clientsData === 'object' && clientsData !== null && Object.keys(clientsData).length > 0;
-            const prestOk = Array.isArray(prestationsSauvegardees) && prestationsSauvegardees.length > 0;
-            const exportOk = !!localStorage.getItem('lastExportDate');
+            let _obHide = [];
+            try { _obHide = JSON.parse(localStorage.getItem('onboardingForceHide') || '[]'); } catch(e) {}
+
+            const coutsOk   = !!(config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard)) && !_obHide.includes('config');
+            const catalogueOk = Array.isArray(catalogueGestes) && catalogueGestes.length > 0 && !_obHide.includes('catalogue');
+            const clientsOk = typeof clientsData === 'object' && clientsData !== null && Object.keys(clientsData).length > 0 && !_obHide.includes('clients');
+            const prestOk   = Array.isArray(prestationsSauvegardees) && prestationsSauvegardees.length > 0 && !_obHide.includes('prest');
+            const exportOk  = !!localStorage.getItem('lastExportDate') && !_obHide.includes('export');
 
             const steps = [
                 { done: coutsOk, label: 'Configurer les coûts horaires', cta: 'Config', tab: 'config' },
@@ -18507,8 +18523,17 @@
 
         function resetOnboarding() {
             localStorage.removeItem('onboardingDismissed');
+            // Marquer les étapes déjà faites comme "à refaire" — elles se décocheront
+            // automatiquement quand l'utilisateur revisite l'onglet correspondant
+            const hide = [];
+            if (config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard)) hide.push('config');
+            if (Array.isArray(catalogueGestes) && catalogueGestes.length > 0) hide.push('catalogue');
+            if (typeof clientsData === 'object' && clientsData !== null && Object.keys(clientsData).length > 0) hide.push('clients');
+            if (Array.isArray(prestationsSauvegardees) && prestationsSauvegardees.length > 0) hide.push('prest');
+            if (localStorage.getItem('lastExportDate')) hide.push('export');
+            localStorage.setItem('onboardingForceHide', JSON.stringify(hide));
             renderOnboardingChecklist();
-            toast('✅ Checklist réinitialisée! Les premiers pas s\'affichent à nouveau.', 'success');
+            toast('✅ Checklist réinitialisée — revisitez chaque onglet pour revalider les étapes.', 'success');
         }
 
         // ─────────────────────────────────────────────────────────
