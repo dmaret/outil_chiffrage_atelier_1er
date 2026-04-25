@@ -166,12 +166,12 @@
         
         .tabs-wrapper { position:relative; background:var(--color-bg-alt); border-bottom:2px solid var(--color-border); display:flex; align-items:stretch; }
         .nav-arrow-btn {
-            flex-shrink:0; border:none; background:none; cursor:pointer;
-            font-size:1.2em; color:var(--color-primary-dark); padding:0 8px;
-            transition:color 0.15s, background 0.15s; line-height:1;
+            border:none; background:rgba(255,255,255,0.18); cursor:pointer;
+            font-size:1.1em; color:rgba(255,255,255,0.85); padding:4px 8px;
+            border-radius:6px; transition:color 0.15s, background 0.15s; line-height:1;
         }
-        .nav-arrow-btn:hover:not(:disabled) { background:var(--color-primary); color:#fff; }
-        .nav-arrow-btn:disabled { color:#bbb; cursor:default; }
+        .nav-arrow-btn:hover:not(:disabled) { background:rgba(255,255,255,0.35); color:#fff; }
+        .nav-arrow-btn:disabled { color:rgba(255,255,255,0.3); cursor:default; }
         .tabs-scroll-btn {
             flex-shrink:0; width:30px;
             border:none; cursor:pointer; font-size:1.4em; font-weight:bold; color:var(--color-primary-dark);
@@ -3050,12 +3050,12 @@
                 <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
                 <button id="darkModeToggle" onclick="toggleDarkMode()" title="Mode sombre" style="font-size:1.3em;">🌙</button>
                 <button id="btnPresentation" onclick="togglePresentation()" title="Mode présentation client">🖥️</button>
+                <button id="navBtnBack" class="nav-arrow-btn" onclick="navBack()" title="Onglet précédent (Alt+←)" disabled>&#8592;</button>
+                <button id="navBtnFwd"  class="nav-arrow-btn" onclick="navForward()" title="Onglet suivant (Alt+→)" disabled>&#8594;</button>
             </div>
         </div>
 
         <div class="tabs-wrapper">
-            <button id="navBtnBack" class="nav-arrow-btn" onclick="navBack()" title="Onglet précédent (Alt+←)" disabled>&#8592;</button>
-            <button id="navBtnFwd"  class="nav-arrow-btn" onclick="navForward()" title="Onglet suivant (Alt+→)" disabled>&#8594;</button>
             <button class="tabs-scroll-btn left" id="tabScrollLeft" onclick="scrollTabs(-150)">&#8249;</button>
             <div class="tabs" id="tabsBar">
                 <button class="tab active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
@@ -3078,7 +3078,6 @@
                 <button class="tab" onclick="switchTab('procedures')">📋 Procédures</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
-            <button class="btn btn-secondary btn-small" onclick="resetTabOrder()" title="Remettre les onglets dans leur ordre d'origine" style="margin-left:12px;">↺ Réinitialiser</button>
             <div class="tab-profile-badge" id="tabProfileBadge">
                 🔐 <span id="tabProfileBadgeName"></span>
                 <span class="badge-close" onclick="doLogout()" title="Se déconnecter">🚪</span>
