@@ -7854,19 +7854,48 @@
             switchTab('prestations', true);
         }
 
+        function pbFitView() {
+            const scroll = document.getElementById('pb-board-scroll');
+            if (!scroll) return;
+            const ampliEl  = document.getElementById('pb-endpoint-ampli');
+            const baffleEl = document.getElementById('pb-endpoint-baffle');
+            const pts = [
+                { x: _pbEndpointPos.ampli.x,  y: _pbEndpointPos.ampli.y,
+                  w: ampliEl  ? ampliEl.offsetWidth  : 84, h: ampliEl  ? ampliEl.offsetHeight : 100 },
+                { x: _pbEndpointPos.baffle.x, y: _pbEndpointPos.baffle.y,
+                  w: baffleEl ? baffleEl.offsetWidth : 84, h: baffleEl ? baffleEl.offsetHeight : 100 },
+            ];
+            pbPedals.forEach(p => {
+                const el = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
+                pts.push({ x: p.x, y: p.y, w: el ? el.offsetWidth : 170, h: el ? el.offsetHeight : 110 });
+            });
+            const pad = 70;
+            const minX = Math.min(...pts.map(p => p.x)) - pad;
+            const minY = Math.min(...pts.map(p => p.y)) - pad;
+            const maxX = Math.max(...pts.map(p => p.x + p.w)) + pad;
+            const maxY = Math.max(...pts.map(p => p.y + p.h)) + pad;
+            const targetScale = Math.min(scroll.clientWidth / (maxX - minX), scroll.clientHeight / (maxY - minY), 1.0);
+            let bestIdx = 0;
+            _PB_ZOOM_LEVELS.forEach((s, i) => {
+                if (Math.abs(s - targetScale) < Math.abs(_PB_ZOOM_LEVELS[bestIdx] - targetScale)) bestIdx = i;
+            });
+            _pbZoomIdx = bestIdx;
+            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            const canvasEl = document.getElementById('pb-canvas');
+            if (canvasEl) canvasEl.style.transform = `scale(${scale})`;
+            const lbl = document.getElementById('pb-zoom-label');
+            if (lbl) lbl.textContent = Math.round(scale * 100) + '%';
+            pbScrollToCanvasPoint((minX + maxX) / 2, (minY + maxY) / 2);
+            requestAnimationFrame(pbDrawCables);
+        }
+
         function renderPedalboard() {
             pbInit();
             window.addEventListener('resize', () => requestAnimationFrame(pbDrawCables));
             document.getElementById('pb-board')?.addEventListener('scroll', () => requestAnimationFrame(pbDrawCables));
             _pbInitPan();
-            // Centre sur ENTRÉE PROJET au premier affichage, puis sur le dernier ajouté si existant
-            requestAnimationFrame(() => {
-                if (_pbLastAddedId && pbPedals.find(x => String(x.id) === String(_pbLastAddedId))) {
-                    pbScrollToFocus();
-                } else {
-                    pbScrollToEntree();
-                }
-            });
+            // Vue globale à l'ouverture : zoom auto-fit sur tout le contenu
+            requestAnimationFrame(pbFitView);
         }
 
         let _pbPanActive = false;
