@@ -7048,6 +7048,36 @@
         let _pbEndpointPos = { ampli: { x: 300, y: 870 }, baffle: { x: 2550, y: 870 } };
         let _pbZoomIdx = 3;
         const _PB_ZOOM_LEVELS = [0.45, 0.6, 0.75, 1.0, 1.2, 1.4];
+        let _pbLastAddedId = null;
+
+        function pbScrollToCanvasPoint(cx, cy) {
+            const scroll = document.getElementById('pb-board-scroll');
+            if (!scroll) return;
+            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            scroll.scrollLeft = cx * scale - scroll.clientWidth / 2;
+            scroll.scrollTop  = cy * scale - scroll.clientHeight / 2;
+        }
+
+        function pbScrollToEntree() {
+            const el = document.getElementById('pb-endpoint-ampli');
+            const w = el ? el.offsetWidth : 80;
+            const h = el ? el.offsetHeight : 120;
+            pbScrollToCanvasPoint(_pbEndpointPos.ampli.x + w / 2, _pbEndpointPos.ampli.y + h / 2);
+        }
+
+        function pbScrollToFocus() {
+            if (_pbLastAddedId) {
+                const p = pbPedals.find(x => String(x.id) === String(_pbLastAddedId));
+                if (p) {
+                    const el = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
+                    const w = el ? el.offsetWidth : 170;
+                    const h = el ? el.offsetHeight : 110;
+                    pbScrollToCanvasPoint(p.x + w / 2, p.y + h / 2);
+                    return;
+                }
+            }
+            pbScrollToEntree();
+        }
 
         function pbZoom(dir) {
             _pbZoomIdx = Math.max(0, Math.min(_PB_ZOOM_LEVELS.length - 1, _pbZoomIdx + dir));
@@ -7056,7 +7086,7 @@
             if (el) el.style.transform = `scale(${s})`;
             const lbl = document.getElementById('pb-zoom-label');
             if (lbl) lbl.textContent = Math.round(s * 100) + '%';
-            requestAnimationFrame(pbDrawCables);
+            requestAnimationFrame(() => { pbDrawCables(); pbScrollToFocus(); });
         }
 
         function pbStartDrag(e, id) {
@@ -7297,14 +7327,17 @@
             const count = pbPedals.filter(p => p.parallel === isParallel).length;
             const x = 700 + count * 190;
             const y = isParallel ? 620 : 870;
+            const newId = Date.now();
             pbPedals.push({
-                id: Date.now(), type, label: label || type,
+                id: newId, type, label: label || type,
                 desc: desc || '', categorie: categorie || '',
                 value: value || 1, tempsUnit: tempsUnit || 1,
                 coutUnit: coutUnit || 0, parallel: isParallel, perPiece: true, x, y,
                 color: st.bg, border: st.border, led: st.led, foot: st.foot,
             });
+            _pbLastAddedId = newId;
             pbRender();
+            requestAnimationFrame(pbScrollToFocus);
         }
 
         function pbToggleParallel(id) {
@@ -7781,6 +7814,14 @@
             window.addEventListener('resize', () => requestAnimationFrame(pbDrawCables));
             document.getElementById('pb-board')?.addEventListener('scroll', () => requestAnimationFrame(pbDrawCables));
             _pbInitPan();
+            // Centre sur ENTRÉE PROJET au premier affichage, puis sur le dernier ajouté si existant
+            requestAnimationFrame(() => {
+                if (_pbLastAddedId && pbPedals.find(x => String(x.id) === String(_pbLastAddedId))) {
+                    pbScrollToFocus();
+                } else {
+                    pbScrollToEntree();
+                }
+            });
         }
 
         let _pbPanActive = false;
