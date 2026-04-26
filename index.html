@@ -1292,6 +1292,34 @@
         .apprenant-tile:hover { transform:translateY(-5px); box-shadow:0 10px 30px rgba(0,0,0,0.2); }
         .apprenant-tile .tile-icon { font-size:2.8em; line-height:1; }
         #btnModeApprenant.apprenant-on { background:rgba(255,255,255,0.55) !important; box-shadow:0 0 0 2px rgba(255,255,255,0.9); }
+        /* ── Flux d'apprentissage ─────────────────────────────────────── */
+        .flux-card { background:white; border-radius:16px; padding:20px 22px 16px; box-shadow:0 3px 14px rgba(0,0,0,0.09); border-top:5px solid #4e9af1; }
+        .flux-card-desc { font-size:0.82em; color:#888; margin:2px 0 14px; }
+        .flux-steps-row { display:flex; align-items:flex-start; gap:0; flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; }
+        .flux-step-node { display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; }
+        .flux-step-btn { width:52px; height:52px; border-radius:50%; border:3px solid #ddd; display:flex; align-items:center; justify-content:center; font-size:1.35em; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; background:#fafafa; }
+        .flux-step-btn:not([disabled]):hover { transform:scale(1.1); box-shadow:0 4px 14px rgba(0,0,0,0.18); }
+        .flux-step-btn[disabled] { filter:grayscale(1) opacity(0.45); cursor:not-allowed; }
+        .flux-step-btn.fs-available { border-color:#2980b9; background:#e8f4ff; animation:fpulse 2.2s ease-in-out infinite; }
+        .flux-step-btn.fs-done { background:#edfaf3; border-color:#27ae60; }
+        .flux-step-btn.fs-badge { background:linear-gradient(135deg,#fff9e6,#fde8c0); border-color:#e6a817; animation:fpulse-gold 2.2s ease-in-out infinite; }
+        .flux-step-btn.fs-badge.fs-done { animation:none; }
+        .flux-step-label { font-size:0.69em; font-weight:700; text-align:center; color:#3d4d5c; max-width:78px; line-height:1.25; }
+        .flux-step-dur { font-size:0.6em; color:#bbb; text-align:center; }
+        .flux-connector { width:26px; flex-shrink:0; height:3px; background:#e0e6ed; align-self:center; margin-bottom:25px; position:relative; }
+        .flux-connector::after { content:''; position:absolute; right:-6px; top:-5px; border:5px solid transparent; border-left:8px solid #e0e6ed; }
+        .flux-pbar { height:5px; border-radius:3px; background:#eee; margin-top:12px; overflow:hidden; }
+        .flux-pbar-fill { height:100%; border-radius:3px; transition:width 0.5s; }
+        @keyframes fpulse { 0%,100%{box-shadow:0 0 0 0 rgba(41,128,185,0.3)} 60%{box-shadow:0 0 0 8px rgba(41,128,185,0)} }
+        @keyframes fpulse-gold { 0%,100%{box-shadow:0 0 0 0 rgba(230,168,23,0.3)} 60%{box-shadow:0 0 0 8px rgba(230,168,23,0)} }
+        /* ── Lecture modal ─────────────────────────────────────────────── */
+        #fluxLectureModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:5500; align-items:center; justify-content:center; padding:16px; }
+        #fluxLectureBox { background:white; border-radius:20px; max-width:680px; width:100%; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 12px 48px rgba(0,0,0,0.25); }
+        #fluxLectureBody { overflow-y:auto; padding:24px 30px 20px; font-size:0.93em; line-height:1.75; color:#2d3e50; }
+        #fluxLectureBody h3 { color:#2980b9; margin:0 0 12px; font-size:1.1em; }
+        #fluxLectureBody ul { padding-left:20px; margin:8px 0 14px; }
+        #fluxLectureBody li { margin-bottom:5px; }
+        #fluxLectureBody .key-box { background:#f0f8ff; border-left:4px solid #2980b9; padding:10px 16px; border-radius:6px; margin:14px 0 4px; font-weight:600; font-size:0.95em; }
 
         /* Historique */
         .history-table { font-size: 0.85em; }
@@ -3034,6 +3062,24 @@
         </div>
     </div>
 
+    <!-- Flux d'apprentissage — Lecture modal -->
+    <div id="fluxLectureModal" onclick="if(event.target===this)_fluxCloseLecture()">
+        <div id="fluxLectureBox">
+            <div style="padding:18px 24px 14px;border-bottom:1px solid #e8eef3;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span id="fluxLectureIcon" style="font-size:1.8em;">📖</span>
+                    <h3 id="fluxLectureTitle" style="margin:0;color:#2980b9;font-size:1.1em;">Lecture</h3>
+                </div>
+                <button onclick="_fluxCloseLecture()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#9aa;line-height:1;" title="Fermer">&times;</button>
+            </div>
+            <div id="fluxLectureBody"></div>
+            <div style="padding:16px 24px;border-top:1px solid #e8eef3;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;">
+                <button onclick="_fluxCloseLecture()" style="padding:9px 20px;border-radius:9px;border:1px solid #dde;background:#f8fafc;cursor:pointer;font-size:0.9em;color:#555;">Fermer</button>
+                <button id="fluxLectureValBtn" onclick="_fluxValidateLecture()" style="padding:9px 22px;border-radius:9px;border:none;background:linear-gradient(135deg,#27ae60,#1a9050);color:white;cursor:pointer;font-size:0.95em;font-weight:700;">✅ J'ai compris — Continuer</button>
+            </div>
+        </div>
+    </div>
+
     <div id="shortcutsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:5000;align-items:center;justify-content:center;">
         <div style="background:white;border-radius:16px;padding:28px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
             <h3 style="margin:0 0 16px;color:#6b8fa3;">⌨️ Raccourcis clavier</h3>
@@ -3120,6 +3166,10 @@
             <button class="apprenant-tile" style="background:linear-gradient(135deg,#8e44ad,#5b2c82);" onclick="switchTab('formation-logistique');setTimeout(()=>document.querySelector('#formation-logistique .section:nth-child(2)')?.scrollIntoView({behavior:'smooth'}),400)">
                 <span class="tile-icon">📚</span>
                 <span>Apprendre</span>
+            </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#e67e22,#c0610d);" onclick="switchTab('formation-logistique');setTimeout(()=>{document.getElementById('flux-section')?.scrollIntoView({behavior:'smooth'})},400)">
+                <span class="tile-icon">🚀</span>
+                <span>Mes Parcours</span>
             </button>
             <button class="apprenant-tile" style="background:linear-gradient(135deg,#7f8c8d,#555f60);" onclick="if(confirm('Quitter le Mode Apprenant et revenir en mode Admin ?'))toggleModeApprenant()">
                 <span class="tile-icon">🔓</span>
@@ -11523,10 +11573,12 @@
             const domains = typeof FORMATION_DOMAINS !== 'undefined' ? FORMATION_DOMAINS : {};
             const docs = (l.assignedDocuments || []).map(id => referenceDocuments.find(d => d.id == id)).filter(Boolean);
 
+            const flowsHtml = renderLearnerFlowsHtml(l);
+
             if (l.assignedFormations.length === 0) {
-                container.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;">
-                    <div style="font-size:2.5em;margin-bottom:8px;">🎓</div>
-                    <p>Aucune formation assignée pour le moment.<br>Contactez votre responsable.</p>
+                container.innerHTML = `${flowsHtml}<div style="text-align:center;padding:20px 30px;color:#aaa;margin-top:10px;">
+                    <div style="font-size:2em;margin-bottom:6px;">📋</div>
+                    <p style="font-size:0.9em;">Aucun quiz de domaine assigné.<br>Commencez par les parcours ci-dessus !</p>
                 </div>`;
                 return;
             }
@@ -11562,7 +11614,296 @@
                 </div>
             </div>` : '';
 
-            container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:16px;">${cards}</div>${docsHtml}`;
+            const quizSection = `<div style="margin-top:26px;">
+                    <h3 style="color:#5a7b8f;font-size:0.95em;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:6px;">❓ Mes Quiz de domaine</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">${cards}</div>
+                </div>`;
+
+            container.innerHTML = `${flowsHtml}${quizSection}${docsHtml}`;
+        }
+
+        // ── Flux d'apprentissage ──────────────────────────────────────────────
+        const LEARNING_FLOWS = [
+            {
+                id: 'wms_basics', label: 'Découverte du WMS', icon: '📦', color: '#4e9af1',
+                desc: 'Les fondamentaux des systèmes de gestion d\'entrepôt',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'C\'est quoi le WMS ?', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz Systèmes', icon: '❓', dur: '5 min', domain: 'systemes', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Badge WMS', icon: '🏅', dur: '' }
+                ]
+            },
+            {
+                id: 'stock_methods', label: 'Méthodes de stock', icon: '🔄', color: '#27ae60',
+                desc: 'FIFO, FEFO, Kanban : maîtriser les flux de marchandises',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'FIFO / FEFO / Kanban', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz Méthodes', icon: '❓', dur: '5 min', domain: 'methodes', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Expert Méthodes', icon: '🏅', dur: '' }
+                ]
+            },
+            {
+                id: 'operations', label: 'Opérations entrepôt', icon: '🏭', color: '#e67e22',
+                desc: 'Réception, picking, emballage, expédition — le cycle complet',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'Le cycle entrepôt', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz Opérations', icon: '❓', dur: '5 min', domain: 'operations', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Opérateur Expert', icon: '🏅', dur: '' }
+                ]
+            },
+            {
+                id: 'kpi_logistique', label: 'KPI Logistiques', icon: '📊', color: '#8e44ad',
+                desc: 'Comprendre et interpréter les indicateurs clés de performance',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'Les KPI essentiels', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz KPI', icon: '❓', dur: '5 min', domain: 'kpi', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Analyste KPI', icon: '🏅', dur: '' }
+                ]
+            },
+            {
+                id: 'grands_comptes', label: 'Grands Comptes', icon: '🏬', color: '#c0392b',
+                desc: 'Amazon, Décathlon, Carrefour : comment les leaders organisent leur logistique',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'Les grands acteurs', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz Retailers', icon: '❓', dur: '5 min', domain: 'retailers', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Expert Retail', icon: '🏅', dur: '' }
+                ]
+            }
+        ];
+
+        const FLOW_LECTURES = {
+            wms_basics: {
+                title: 'WMS — Warehouse Management System',
+                icon: '📦',
+                html: `<h3>📦 Le WMS, c'est quoi ?</h3>
+                    <p>Un <strong>WMS (Warehouse Management System)</strong> est un logiciel spécialisé qui pilote toutes les opérations d'un entrepôt en temps réel.</p>
+                    <ul>
+                        <li><strong>Réception</strong> — enregistre les marchandises à l'arrivée, contrôle les quantités</li>
+                        <li><strong>Stockage</strong> — attribue automatiquement les emplacements optimaux</li>
+                        <li><strong>Picking</strong> — génère des ordres de prélèvement pour les préparateurs</li>
+                        <li><strong>Expédition</strong> — vérifie et valide les colis avant départ</li>
+                        <li><strong>Inventaire</strong> — suivi en temps réel des stocks et des mouvements</li>
+                    </ul>
+                    <h3>🏭 Exemples de WMS utilisés en industrie</h3>
+                    <ul>
+                        <li><strong>SAP WM / EWM</strong> — leader mondial, intégré à l'ERP SAP</li>
+                        <li><strong>Reflex WMS</strong> — solution française très répandue</li>
+                        <li><strong>Manhattan Associates</strong> — orienté grands comptes e-commerce</li>
+                        <li><strong>Generix</strong> — fort en France et Europe</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : le WMS optimise l'entrepôt, l'ERP gère l'entreprise entière, le TMS gère le transport. Ces 3 systèmes sont souvent connectés.</div>`
+            },
+            stock_methods: {
+                title: 'Méthodes de gestion des stocks',
+                icon: '🔄',
+                html: `<h3>🔄 Les grandes méthodes de rotation</h3>
+                    <ul>
+                        <li><strong>FIFO</strong> (First In, First Out) — Premier entré, premier sorti. La règle de base pour produits standards.</li>
+                        <li><strong>FEFO</strong> (First Expire, First Out) — Priorité à la date d'expiration la plus proche. Obligatoire pour les produits alimentaires et pharmaceutiques.</li>
+                        <li><strong>LIFO</strong> (Last In, First Out) — Dernier entré, premier sorti. Rare en physique, parfois utilisé en comptabilité.</li>
+                    </ul>
+                    <h3>📋 Kanban & Flux Tendu</h3>
+                    <ul>
+                        <li><strong>Kanban</strong> — système de cartes visuelles pour déclencher le réapprovisionnement uniquement quand le stock atteint un seuil.</li>
+                        <li><strong>Flux Tendu (Just-in-Time)</strong> — livraison synchronisée à la demande réelle, stock minimum. Inventé par Toyota.</li>
+                        <li><strong>5S</strong> — méthode d'organisation du poste de travail : Supprimer, Situer, Nettoyer, Standardiser, Suivre.</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : FEFO est prioritaire sur FIFO dès qu'il y a une date d'expiration. Kanban évite le sur-stockage en commandant juste ce qu'il faut.</div>`
+            },
+            operations: {
+                title: 'Opérations entrepôt — Le cycle complet',
+                icon: '🏭',
+                html: `<h3>🏭 Le cycle de l'entrepôt</h3>
+                    <p>Un entrepôt logistique suit toujours le même cycle fondamental :</p>
+                    <ul>
+                        <li><strong>1. Réception</strong> — déchargement, contrôle qualité/quantité, enregistrement dans le WMS</li>
+                        <li><strong>2. Mise en stock</strong> — rangement à l'emplacement attribué (fixe ou dynamique)</li>
+                        <li><strong>3. Picking</strong> — prélèvement des articles selon les commandes clients</li>
+                        <li><strong>4. Packing</strong> — emballage, étiquetage, conditionnement</li>
+                        <li><strong>5. Expédition</strong> — chargement, remise au transporteur, génération des BL</li>
+                    </ul>
+                    <h3>⚡ Méthodes de picking</h3>
+                    <ul>
+                        <li><strong>Pick &amp; Pack</strong> — une commande à la fois, du picking jusqu'au colis. Simple mais lent.</li>
+                        <li><strong>Batch Picking</strong> — plusieurs commandes en parallèle sur le même chemin. Gain de temps significatif.</li>
+                        <li><strong>Zone Picking</strong> — chaque opérateur est responsable d'une zone. Efficace pour grands entrepôts.</li>
+                        <li><strong>Voice Picking</strong> — guidage par casque audio. Réduit les erreurs, libère les mains.</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : le picking représente souvent 50-70% du coût opérationnel d'un entrepôt. L'optimiser est prioritaire.</div>`
+            },
+            kpi_logistique: {
+                title: 'KPI Logistiques — Les indicateurs clés',
+                icon: '📊',
+                html: `<h3>📊 Les KPI essentiels à connaître</h3>
+                    <ul>
+                        <li><strong>OTIF</strong> (On Time In Full) — % de commandes livrées à temps et complètes. Objectif : &gt;95%</li>
+                        <li><strong>Taux de service</strong> — % de commandes satisfaites sans rupture.</li>
+                        <li><strong>Taux de remplissage</strong> — % d'espace utilisé dans un véhicule ou entrepôt.</li>
+                        <li><strong>Coût par picking</strong> — coût unitaire d'une opération de prélèvement.</li>
+                        <li><strong>Taux de rotation des stocks</strong> — Ventes ÷ Stock moyen. Mesure combien de fois le stock est renouvelé par an.</li>
+                        <li><strong>Taux d'erreur de préparation</strong> — % de commandes préparées avec erreur. Objectif : &lt;0,5%</li>
+                    </ul>
+                    <h3>📈 Comment les utiliser ?</h3>
+                    <ul>
+                        <li>Définir des <strong>objectifs cibles</strong> clairs pour chaque KPI</li>
+                        <li>Afficher les résultats en <strong>temps réel</strong> sur un tableau de bord</li>
+                        <li>Analyser les <strong>écarts</strong> et déclencher des actions correctives</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : un KPI sans cible est inutile. Toujours définir un objectif et une fréquence de mesure.</div>`
+            },
+            grands_comptes: {
+                title: 'Grands Comptes — La logistique des leaders',
+                icon: '🏬',
+                html: `<h3>🏬 Amazon — Le géant du e-commerce</h3>
+                    <ul>
+                        <li>WMS propriétaire + <strong>robots Kiva</strong> (rachetés 775M$ en 2012)</li>
+                        <li>Les robots déplacent les rayonnages vers les opérateurs → 3× plus rapide</li>
+                        <li>Livraison J+1 grâce à 150+ entrepôts stratégiquement positionnés</li>
+                        <li>Algorithme de prédiction de la demande pour pré-positionner les stocks</li>
+                    </ul>
+                    <h3>⚽ Décathlon — Le sport au meilleur coût</h3>
+                    <ul>
+                        <li>Puce <strong>RFID sur chaque article</strong> — inventaire instantané, caisse sans scan individuel</li>
+                        <li>Intégration WMS-ERP-TMS complète pour optimiser les flux monde entier</li>
+                    </ul>
+                    <h3>🛒 Carrefour — La grande distribution</h3>
+                    <ul>
+                        <li>Cross-docking : les produits frais transitent sans stockage (entrepôt = hub de transit)</li>
+                        <li>Flux poussés pour promotions (anticipation), flux tirés pour le quotidien</li>
+                        <li>Réseau de 200+ entrepôts en France avec centralisation régionale</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : les leaders combinent technologie (WMS, RFID, robots) et organisation humaine optimisée. La tech amplifie l'efficacité, elle ne remplace pas l'expertise terrain.</div>`
+            }
+        };
+
+        let _fluxCurrentLearnerId = null;
+        let _fluxCurrentFlowId = null;
+        let _fluxPendingLectureStep = null;
+        let _fluxPendingQuizStep = null;
+
+        function renderLearnerFlowsHtml(l) {
+            if (!l.flowProgress) l.flowProgress = {};
+            const completedFlows = LEARNING_FLOWS.filter(f => {
+                const prog = l.flowProgress[f.id] || [];
+                return f.steps.every((_, i) => prog.includes(i));
+            }).length;
+            const globalPct = LEARNING_FLOWS.length ? Math.round((completedFlows / LEARNING_FLOWS.length) * 100) : 0;
+
+            const flowCards = LEARNING_FLOWS.map(flow => {
+                const prog = l.flowProgress[flow.id] || [];
+                const doneCount = prog.length;
+                const pct = Math.round((doneCount / flow.steps.length) * 100);
+                const allDone = doneCount === flow.steps.length;
+
+                const stepsHtml = flow.steps.map((step, idx) => {
+                    const done = prog.includes(idx);
+                    const prevDone = idx === 0 || prog.includes(idx - 1);
+                    const available = !done && prevDone;
+                    let cls = done ? (step.type === 'badge' ? 'fs-badge fs-done' : 'fs-done')
+                                   : available ? (step.type === 'badge' ? 'fs-badge' : 'fs-available') : '';
+                    const disabled = (!done && !available) ? 'disabled' : '';
+                    const onclick = disabled ? '' : `onclick="_fluxStepClick('${l.id}','${flow.id}',${idx})"`;
+                    const connector = idx < flow.steps.length - 1 ? `<div class="flux-connector"></div>` : '';
+                    const tip = done ? ' ✅' : available ? ' — Cliquer pour commencer' : ' 🔒 Bloqué';
+                    return `<div class="flux-step-node">
+                        <button class="flux-step-btn ${cls}" ${disabled} ${onclick} title="${step.label}${tip}">${step.icon}</button>
+                        <div class="flux-step-label">${step.label}</div>
+                        <div class="flux-step-dur">${step.dur || (done ? '✅' : '')}</div>
+                    </div>${connector}`;
+                }).join('');
+
+                return `<div class="flux-card" style="border-top-color:${flow.color};">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px;">
+                        <span style="font-size:1.8em;">${flow.icon}</span>
+                        <div>
+                            <div style="font-weight:700;color:#2d3e50;font-size:1em;">${flow.label}</div>
+                            ${allDone ? '<div style="font-size:0.74em;color:#27ae60;font-weight:700;">🏅 Parcours complété !</div>'
+                                      : `<div style="font-size:0.74em;color:#aaa;">${doneCount}/${flow.steps.length} étapes</div>`}
+                        </div>
+                    </div>
+                    <div class="flux-card-desc">${flow.desc}</div>
+                    <div class="flux-steps-row">${stepsHtml}</div>
+                    <div class="flux-pbar"><div class="flux-pbar-fill" style="width:${pct}%;background:${flow.color};"></div></div>
+                </div>`;
+            }).join('');
+
+            return `<div id="flux-section" style="margin-top:18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                    <h3 style="margin:0;color:#e67e22;font-size:1em;font-weight:700;display:flex;align-items:center;gap:7px;">🚀 Mes Parcours d'Apprentissage</h3>
+                    <span style="font-size:0.8em;color:#888;font-weight:600;">${completedFlows}/${LEARNING_FLOWS.length} parcours — ${globalPct}% global</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;">${flowCards}</div>
+            </div>`;
+        }
+
+        function _fluxStepClick(learnerId, flowId, stepIdx) {
+            const flow = LEARNING_FLOWS.find(f => f.id === flowId);
+            if (!flow) return;
+            const step = flow.steps[stepIdx];
+            if (!step) return;
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.flowProgress) l.flowProgress = {};
+            const prog = l.flowProgress[flowId] || [];
+            if (prog.includes(stepIdx)) return;
+
+            _fluxCurrentLearnerId = learnerId;
+            _fluxCurrentFlowId = flowId;
+
+            if (step.type === 'lecture') {
+                _fluxOpenLecture(flowId, learnerId, stepIdx);
+            } else if (step.type === 'quiz') {
+                _currentQuizLearnerId = learnerId;
+                _currentQuizDomain = step.domain;
+                _fluxPendingQuizStep = stepIdx;
+                startFormationQuiz('domain:' + step.domain);
+            } else if (step.type === 'badge') {
+                _fluxMarkStepDone(learnerId, flowId, stepIdx);
+            }
+        }
+
+        function _fluxOpenLecture(flowId, learnerId, stepIdx) {
+            _fluxCurrentLearnerId = learnerId;
+            _fluxCurrentFlowId = flowId;
+            _fluxPendingLectureStep = stepIdx;
+            const lec = FLOW_LECTURES[flowId];
+            if (!lec) return;
+            document.getElementById('fluxLectureIcon').textContent = lec.icon;
+            document.getElementById('fluxLectureTitle').textContent = lec.title;
+            document.getElementById('fluxLectureBody').innerHTML = lec.html;
+            document.getElementById('fluxLectureModal').style.display = 'flex';
+        }
+
+        function _fluxCloseLecture() {
+            document.getElementById('fluxLectureModal').style.display = 'none';
+        }
+
+        function _fluxValidateLecture() {
+            _fluxCloseLecture();
+            if (_fluxCurrentLearnerId && _fluxCurrentFlowId && _fluxPendingLectureStep !== null) {
+                _fluxMarkStepDone(_fluxCurrentLearnerId, _fluxCurrentFlowId, _fluxPendingLectureStep);
+            }
+            _fluxPendingLectureStep = null;
+        }
+
+        function _fluxMarkStepDone(learnerId, flowId, stepIdx) {
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.flowProgress) l.flowProgress = {};
+            if (!l.flowProgress[flowId]) l.flowProgress[flowId] = [];
+            if (!l.flowProgress[flowId].includes(stepIdx)) {
+                l.flowProgress[flowId].push(stepIdx);
+                const flow = LEARNING_FLOWS.find(f => f.id === flowId);
+                if (flow && stepIdx === flow.steps.length - 2) {
+                    const badgeIdx = flow.steps.length - 1;
+                    if (!l.flowProgress[flowId].includes(badgeIdx)) {
+                        l.flowProgress[flowId].push(badgeIdx);
+                        setTimeout(() => { if (typeof toast === 'function') toast(`🏅 Badge "${flow.label}" obtenu !`, 'success'); }, 400);
+                    }
+                }
+            }
+            saveFormationData();
+            renderLearnerFormations();
         }
 
         // Démarre le quiz pour un apprenant + domaine précis
@@ -24410,8 +24751,13 @@
                         pct: percent,
                         date: new Date().toISOString()
                     };
-                    saveFormationData();
-                    renderLearnerFormations();
+                    if (typeof _fluxPendingQuizStep === 'number' && _fluxCurrentFlowId && percent >= 60) {
+                        _fluxMarkStepDone(String(l.id), _fluxCurrentFlowId, _fluxPendingQuizStep);
+                        _fluxPendingQuizStep = null;
+                    } else {
+                        saveFormationData();
+                        renderLearnerFormations();
+                    }
                     renderLearners();
                 }
             }
