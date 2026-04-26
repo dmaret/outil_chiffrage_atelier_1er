@@ -1285,13 +1285,11 @@
         body.mode-apprenant .tabs-wrapper { display:none; }
         body.mode-apprenant .proc-client-only { display:none !important; }
         body.mode-apprenant #onboardingChecklist { display:none !important; }
-        /* Dashboard épuré pour Mode Apprenant — masque tout le business */
-        body.mode-apprenant #dashboard .section { display:none !important; }
-        body.mode-apprenant #dashboardKpis { display:none !important; }
-        body.mode-apprenant #dashGridDevisAlertes { display:none !important; }
-        body.mode-apprenant #dashGridTopStats { display:none !important; }
-        /* Réaffiche uniquement le module Formation */
-        body.mode-apprenant #dashFormationModule { display:block !important; }
+        /* Dashboard — masque initial pour Mode Apprenant (JS surcharge via inline style) */
+        body.mode-apprenant #dashboard .section { display:none; }
+        body.mode-apprenant #dashboardKpis { display:none; }
+        body.mode-apprenant #dashGridDevisAlertes { display:none; }
+        body.mode-apprenant #dashGridTopStats { display:none; }
         body.mode-apprenant #breadcrumbs { display:none !important; }
         body.mode-apprenant #presentationNav { display:none !important; }
         body.mode-apprenant #apprenant-welcome { display:block !important; }
@@ -5485,7 +5483,7 @@
                     </div>
                 </div>
               </div>
-              <div class="section" style="border-left:4px solid #4caf50;">
+              <div id="dashSectionHeader" class="section" style="border-left:4px solid #4caf50;">
                 <h2 style="color:#4caf50;">🏠 Dashboard — Accueil</h2>
                 <p style="color:#666;font-size:0.95em;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
               </div>
@@ -5501,24 +5499,22 @@
                   <div id="dashAlertesList"></div>
                 </div>
               </div>
-              <div class="section" style="margin-top:20px;">
+              <div id="dashSectionFormation" class="section" style="margin-top:20px;">
                 <h2>📚 Demandes de Formation</h2>
                 <div id="dashFormationRequestsList"></div>
               </div>
-              <div class="section" style="margin-top:20px;">
+              <div id="dashSectionPipeline" class="section" style="margin-top:20px;">
                 <h2>📈 Pipeline CA (3 prochains mois)</h2>
                 <div id="dashPipelineChart"></div>
               </div>
-              <div class="section" style="margin-top:20px;">
+              <div id="dashSectionTopClients" class="section" style="margin-top:20px;">
                 <h2>🏆 Top clients — CA 12 mois</h2>
                 <div id="dashClientChart"></div>
               </div>
-
-              <div class="section" style="margin-top:20px;">
+              <div id="dashSectionCAEvolution" class="section" style="margin-top:20px;">
                 <h2>📊 Évolution CA — 12 derniers mois</h2>
                 <div id="dashCAEvolution"></div>
               </div>
-
               <div id="dashGridTopStats" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
                 <div class="section">
                   <h2>🥇 Top prestations — Rentabilité</h2>
@@ -5529,12 +5525,10 @@
                   <div id="dashStatutRepartition"></div>
                 </div>
               </div>
-
-              <div class="section" style="margin-top:20px;">
+              <div id="dashSectionMarge" class="section" style="margin-top:20px;">
                 <h2>💰 Marge moyenne — Tendance 6 mois</h2>
                 <div id="dashMargeEvolution"></div>
               </div>
-
               <!-- MODULE FORMATION LOGISTIQUE -->
               <div id="dashFormationModule" class="section" style="margin-top:20px;background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border:none;padding:0;overflow:hidden;border-radius:12px;">
                 <div style="padding:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
@@ -5554,12 +5548,12 @@
                 </div>
               </div>
 
-              <div class="section" style="margin-top:20px;">
+              <div id="dashSectionEstime" class="section" style="margin-top:20px;">
                 <h2>⏱️ Précision des estimations — Estimé vs Réel</h2>
                 <div id="dashEstimeVsReel"></div>
               </div>
 
-              <div class="section" style="margin-top:20px;">
+              <div id="dashSectionRelances" class="section" style="margin-top:20px;">
                 <h2>🔔 Relances devis — Suivi commercial</h2>
                 <div id="dashRelancesDevis"></div>
               </div>
@@ -5801,11 +5795,28 @@
         // IMPORTANT: Default credentials have been removed for security.
         // Passwords must be configured by the user on first login.
         // See admin panel for user management.
+        const DASHBOARD_WIDGETS = [
+            { id: 'dashboardKpis',        label: '📊 KPIs — CA, devis, heures, taux',      display: '' },
+            { id: 'dashGridDevisAlertes', label: '📋 Devis en attente & Alertes',            display: 'grid' },
+            { id: 'dashSectionFormation', label: '📚 Demandes de Formation',                 display: 'block' },
+            { id: 'dashSectionPipeline',  label: '📈 Pipeline CA (3 prochains mois)',        display: 'block' },
+            { id: 'dashSectionTopClients',label: '🏆 Top clients — CA 12 mois',             display: 'block' },
+            { id: 'dashSectionCAEvolution',label:'📊 Évolution CA — 12 derniers mois',      display: 'block' },
+            { id: 'dashGridTopStats',     label: '🥇 Top prestations & Répartition statuts', display: 'grid' },
+            { id: 'dashSectionMarge',     label: '💰 Marge moyenne — Tendance 6 mois',      display: 'block' },
+            { id: 'dashFormationModule',  label: '🏭 Module Formation Logistique',           display: 'block' },
+            { id: 'dashSectionEstime',    label: '⏱️ Précision des estimations — Estimé vs Réel', display: 'block' },
+            { id: 'dashSectionRelances',  label: '🔔 Relances devis — Suivi commercial',    display: 'block' },
+        ];
+        const _ALL_DASH_WIDGET_IDS = DASHBOARD_WIDGETS.map(w => w.id);
+
         const DEFAULT_AUTH_GROUPS = [
             { id: 'cea', name: 'CEA', passwordHash: null,
-              tabs: ['dashboard','stats','formation-logistique','procedures'] },
+              tabs: ['dashboard','stats','formation-logistique','procedures'],
+              dashWidgets: ['dashFormationModule'] },
             { id: 'asp', name: 'ASP', passwordHash: null,
-              tabs: ['dashboard','stats','formation-logistique','procedures','stock','consommables'] },
+              tabs: ['dashboard','stats','formation-logistique','procedures','stock','consommables'],
+              dashWidgets: ['dashFormationModule'] },
             { id: 'msp', name: 'MSP', passwordHash: null,
               tabs: ['dashboard','stock','consommables','stats','parametrage','formation','logistique'] },
             { id: 'admin', name: 'ADMIN', passwordHash: null, tabs: ['*'] },
@@ -17490,11 +17501,11 @@
                     authGroups.push({ ...def });
                 }
             });
-            // Force-sync tabs for CEA/ASP to enforce current access policy
+            // Force-sync tabs + dashWidgets for CEA/ASP to enforce current access policy
             ['cea','asp'].forEach(id => {
                 const g = authGroups.find(x => x.id === id);
                 const def = DEFAULT_AUTH_GROUPS.find(x => x.id === id);
-                if (g && def) g.tabs = def.tabs;
+                if (g && def) { g.tabs = def.tabs; if (!g.dashWidgets) g.dashWidgets = def.dashWidgets; }
             });
             saveAuthGroups();
             // Populate login select
@@ -18215,6 +18226,21 @@
                 }
             }
             setTimeout(updateTabScrollBtns, 50);
+            applyDashboardWidgets(group);
+        }
+
+        function applyDashboardWidgets(group) {
+            const isAdmin = !group || group.id === 'admin' || (group.tabs && group.tabs[0] === '*');
+            const allowed = isAdmin ? _ALL_DASH_WIDGET_IDS : (group.dashWidgets || []);
+            DASHBOARD_WIDGETS.forEach(w => {
+                const el = document.getElementById(w.id);
+                if (!el) return;
+                if (isAdmin || allowed.includes(w.id)) {
+                    el.style.display = w.display || '';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
         }
 
         function renderAuthGroups() { renderRbacMatrix(); }
@@ -18269,7 +18295,46 @@
             });
 
             html += `</tbody></table>`;
+
+            // ── Tableau widgets dashboard ──────────────────────────────
+            html += `<h4 style="margin:22px 0 8px;color:#6b8fa3;font-size:0.9em;font-weight:700;display:flex;align-items:center;gap:6px;">
+                🖥️ Widgets du Dashboard <span style="font-size:0.8em;color:#aaa;font-weight:400;">(cochez ce que chaque groupe peut voir)</span>
+            </h4>`;
+            html += `<table style="border-collapse:collapse;width:100%;min-width:500px;font-size:0.88em;">
+                <thead><tr style="background:#f0f4f8;">
+                    <th style="text-align:left;padding:8px 12px;border:1px solid #dde3ea;min-width:240px;">Widget</th>`;
+            groups.forEach(g => {
+                html += `<th style="text-align:center;padding:6px 10px;border:1px solid #dde3ea;white-space:nowrap;font-weight:700;">${g.name}</th>`;
+            });
+            html += `<th style="text-align:center;padding:6px 10px;border:1px solid #dde3ea;background:#fff8ee;white-space:nowrap;color:#f39c12;font-weight:700;">ADMIN</th></tr></thead><tbody>`;
+            DASHBOARD_WIDGETS.forEach((w, idx) => {
+                const rowBg = idx % 2 === 0 ? '#ffffff' : '#fafcfe';
+                html += `<tr style="background:${rowBg};">
+                    <td style="padding:7px 12px;border:1px solid #dde3ea;font-size:0.92em;">${w.label}</td>`;
+                groups.forEach(g => {
+                    const allowed = g.dashWidgets || [];
+                    const on = allowed.includes(w.id);
+                    html += `<td style="text-align:center;padding:7px;border:1px solid #dde3ea;">
+                        <input type="checkbox" ${on ? 'checked' : ''}
+                            onchange="toggleDashWidget('${g.id}','${w.id}',this.checked)"
+                            style="width:16px;height:16px;accent-color:#27ae60;cursor:pointer;">
+                    </td>`;
+                });
+                html += `<td style="text-align:center;padding:7px;border:1px solid #dde3ea;background:#fff8ee;">
+                    <span style="color:#f39c12;font-size:1.1em;" title="Admin voit tout">★</span>
+                </td></tr>`;
+            });
+            html += `</tbody></table>`;
             container.innerHTML = html;
+        }
+
+        function toggleDashWidget(groupId, widgetId, checked) {
+            const group = authGroups.find(g => g.id === groupId);
+            if (!group) return;
+            if (!group.dashWidgets) group.dashWidgets = [];
+            if (checked) { if (!group.dashWidgets.includes(widgetId)) group.dashWidgets.push(widgetId); }
+            else { group.dashWidgets = group.dashWidgets.filter(id => id !== widgetId); }
+            saveAuthGroups();
         }
 
         function toggleRbacCell(groupId, tabKey, checked) {
