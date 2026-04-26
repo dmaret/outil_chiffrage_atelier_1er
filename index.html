@@ -10655,7 +10655,7 @@
                 const isVideo = att.type.startsWith('video/');
                 let preview = '';
                 if (isImage) {
-                    preview = `<img src="${att.data}" alt="${att.name}">`;
+                    preview = `<img src="${att.data}" alt="${att.name}" loading="lazy">`;
                 } else if (isVideo) {
                     preview = `<video src="${att.data}"></video>`;
                 } else {
