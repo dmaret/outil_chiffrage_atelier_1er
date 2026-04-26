@@ -14180,10 +14180,10 @@
         }
 
         (function initModeApprenant() {
-            // Auto-active si la session en cours est CEA
+            // Auto-active si la session en cours est CEA ou ASP
             try {
                 const sess = JSON.parse(sessionStorage.getItem('authSession') || 'null');
-                if (sess && sess.id === 'cea') {
+                if (sess && ['cea','asp'].includes(sess.id)) {
                     document.body.classList.add('mode-apprenant');
                     const btn = document.getElementById('btnModeApprenant');
                     if (btn) btn.classList.add('apprenant-on');
@@ -15267,8 +15267,10 @@
         }
         // Update indicator every 30 seconds
         setInterval(updateSaveIndicator, 30000);
-        // Autosave every 60 seconds if dirty
-        setInterval(autosaveNow, 60000);
+        // Autosave every 15 seconds if dirty
+        setInterval(autosaveNow, 15000);
+        // Force save on page close / reload
+        window.addEventListener('beforeunload', () => { if (_autosaveDirty) saveToStorage(); });
 
         // ── Tabs scroll arrows ─────────────────────────────────────
         function scrollTabs(delta) {
@@ -17809,12 +17811,12 @@
             currentUserSession = { id: group.id, name: group.name, role: group.id };
             logAction(`Connexion en tant que ${group.name}`, 'LOGIN');
             updateUIPermissions();
-            // Mode Apprenant automatique pour le groupe CEA
-            const isCea = group.id === 'cea';
-            document.body.classList.toggle('mode-apprenant', isCea);
+            // Mode Apprenant automatique pour les groupes CEA et ASP
+            const isApprenant = ['cea','asp'].includes(group.id);
+            document.body.classList.toggle('mode-apprenant', isApprenant);
             const maBtnH = document.getElementById('btnModeApprenant');
-            if (maBtnH) maBtnH.classList.toggle('apprenant-on', isCea);
-            if (isCea) switchTab('dashboard');
+            if (maBtnH) maBtnH.classList.toggle('apprenant-on', isApprenant);
+            if (isApprenant) switchTab('dashboard');
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
