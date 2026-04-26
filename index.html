@@ -81,6 +81,22 @@
             --border-radius-lg: 20px;
             --border-radius-md: 12px;
             --border-radius-sm: 8px;
+            --border-radius-pill: 999px;
+
+            /* Spacing scale — préférer ces variables aux valeurs en dur */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 10px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-2xl: 28px;
+
+            /* Couleurs supplémentaires (extraites de duplications fréquentes) */
+            --color-success-alt: #30d158;
+            --color-on-primary: #fff;
+            --color-overlay: rgba(0,0,0,0.5);
+            --shadow-card: 0 10px 40px rgba(150,150,180,0.15);
+            --shadow-modal: 0 15px 50px rgba(0,0,0,0.25);
         }
 
         /* A11y — focus visible contrasté pour la navigation clavier.
@@ -2499,9 +2515,9 @@
 </head>
 <body>
     <!-- PIN Modal: Protection d'accès simple à l'application -->
-    <div id="pinModal">
+    <div id="pinModal" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
         <div id="pinModalBox">
-            <h2>🔐 Accès protégé</h2>
+            <h2 id="pinModalTitle">🔐 Accès protégé</h2>
             <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Code PIN pour déverrouiller l'application<br><small style="font-size:0.85em;color:#a8c5d3;">(Optionnel • Configurable en admin)</small></p>
             <input type="password" id="pinInput" placeholder="PIN" maxlength="8" aria-label="Code PIN" onkeydown="if(event.key==='Enter') checkPin()">
             <div id="pinError"></div>
@@ -2518,12 +2534,18 @@
             <h3>✏️ Créer un nouveau geste</h3>
             <div class="form-row" style="flex-direction:column;gap:10px;">
                 <div class="form-group">
-                    <label>Code (ex: ASS-20)</label>
-                    <input type="text" id="qg-code" placeholder="XXX-00" style="text-transform:uppercase;">
+                    <label for="qg-code">Code (ex: ASS-20)</label>
+                    <input type="text" id="qg-code" placeholder="XXX-00" style="text-transform:uppercase;"
+                           required maxlength="10" pattern="[A-Za-z]{2,4}-[0-9]{1,3}"
+                           title="Format attendu : 2 à 4 lettres, un tiret, 1 à 3 chiffres (ex: ASS-20)"
+                           aria-describedby="qg-code-hint">
+                    <small id="qg-code-hint" style="color:#7a9db1;font-size:0.75em;">Format : 2–4 lettres + tiret + 1–3 chiffres</small>
                 </div>
                 <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" id="qg-desc" placeholder="Description du geste">
+                    <label for="qg-desc">Description</label>
+                    <input type="text" id="qg-desc" placeholder="Description du geste"
+                           required maxlength="200" minlength="3"
+                           title="Description du geste (3 à 200 caractères)">
                 </div>
                 <div class="form-group">
                     <label>Catégorie</label>
@@ -2545,8 +2567,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Notes</label>
-                    <input type="text" id="qg-notes" placeholder="Remarques, précautions...">
+                    <label for="qg-notes">Notes</label>
+                    <input type="text" id="qg-notes" placeholder="Remarques, précautions..." maxlength="500">
                 </div>
             </div>
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;">
@@ -3070,14 +3092,14 @@
     </div>
 
     <!-- Flux d'apprentissage — Lecture modal -->
-    <div id="fluxLectureModal" onclick="if(event.target===this)_fluxCloseLecture()">
+    <div id="fluxLectureModal" role="dialog" aria-modal="true" aria-labelledby="fluxLectureTitle" onclick="if(event.target===this)_fluxCloseLecture()">
         <div id="fluxLectureBox">
             <div style="padding:18px 24px 14px;border-bottom:1px solid #e8eef3;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
                 <div style="display:flex;align-items:center;gap:10px;">
                     <span id="fluxLectureIcon" style="font-size:1.8em;">📖</span>
                     <h3 id="fluxLectureTitle" style="margin:0;color:#2980b9;font-size:1.1em;">Lecture</h3>
                 </div>
-                <button onclick="_fluxCloseLecture()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#9aa;line-height:1;" title="Fermer">&times;</button>
+                <button onclick="_fluxCloseLecture()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#9aa;line-height:1;" title="Fermer" aria-label="Fermer la modale">&times;</button>
             </div>
             <div id="fluxLectureBody"></div>
             <div style="padding:16px 24px;border-top:1px solid #e8eef3;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;">
@@ -3087,9 +3109,9 @@
         </div>
     </div>
 
-    <div id="shortcutsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:5000;align-items:center;justify-content:center;">
+    <div id="shortcutsModal" role="dialog" aria-modal="true" aria-labelledby="shortcutsModalTitle" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:5000;align-items:center;justify-content:center;">
         <div style="background:white;border-radius:16px;padding:28px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
-            <h3 style="margin:0 0 16px;color:#6b8fa3;">⌨️ Raccourcis clavier</h3>
+            <h3 id="shortcutsModalTitle" style="margin:0 0 16px;color:#6b8fa3;">⌨️ Raccourcis clavier</h3>
             <table style="width:100%;border-collapse:collapse;font-size:0.9em;">
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+K</kbd></td><td>Palette de commandes (recherche rapide)</td></tr>
                 <tr><td style="padding:6px 0;"><kbd>Ctrl+G</kbd></td><td>Ajouter un geste</td></tr>
@@ -5578,10 +5600,10 @@
     </div>
     <!-- Paiement Modal -->
     <!-- Comparateur de prestations -->
-    <div id="compareModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:5000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeCompareModal()">
+    <div id="compareModal" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:5000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeCompareModal()">
         <div style="background:white;border-radius:16px;padding:24px;max-width:800px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 15px 50px rgba(0,0,0,0.25);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h3 style="margin:0;color:#2d3e50;">📊 Comparateur de prestations</h3>
+                <h3 id="compareModalTitle" style="margin:0;color:#2d3e50;">📊 Comparateur de prestations</h3>
                 <button class="btn btn-secondary btn-small" onclick="closeCompareModal()">× Fermer</button>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -5592,9 +5614,9 @@
         </div>
     </div>
 
-    <div id="paiementModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;">
+    <div id="paiementModal" role="dialog" aria-modal="true" aria-labelledby="paiementModalTitle" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;">
       <div style="background:#fff;border-radius:16px;padding:30px;max-width:400px;width:90%;">
-        <h3 style="color:#6b8fa3;margin-bottom:20px;">💶 Suivi paiement</h3>
+        <h3 id="paiementModalTitle" style="color:#6b8fa3;margin-bottom:20px;">💶 Suivi paiement</h3>
         <div class="form-group" style="margin-bottom:12px;"><label>Date facturation</label><input type="date" id="paiDateFacturation"></div>
         <div class="form-group" style="margin-bottom:12px;"><label>Date encaissement</label><input type="date" id="paiDateEncaissement" oninput="updateDelaiPaiement()"></div>
         <div class="form-group" style="margin-bottom:12px;"><label>Notes</label><input type="text" id="paiNotes" placeholder="Ex: Virement reçu"></div>
@@ -5699,6 +5721,86 @@
                 console.error('localStorage error:', e);
                 return false;
             }
+        }
+
+        /**
+         * Sérialise et persiste une valeur en localStorage en JSON.
+         * Renvoie false si le quota est dépassé ou si la sérialisation échoue.
+         * @param {string} key
+         * @param {*} value
+         * @returns {boolean}
+         */
+        function safeJSONSet(key, value) {
+            try {
+                return safeSetItem(key, JSON.stringify(value));
+            } catch (e) {
+                console.error('safeJSONSet serialization failed:', key, e);
+                return false;
+            }
+        }
+
+        /**
+         * Lit une valeur JSON en localStorage. Renvoie `fallback` si la clé est
+         * absente ou si le contenu est corrompu (parse error).
+         * @param {string} key
+         * @param {*} [fallback=null]
+         * @returns {*}
+         */
+        function safeJSONGet(key, fallback = null) {
+            const raw = localStorage.getItem(key);
+            if (raw === null) return fallback;
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                console.warn('safeJSONGet parse error, fallback used:', key, e);
+                return fallback;
+            }
+        }
+
+        /**
+         * Ferme une modale en masquant son élément racine.
+         * Centralise le pattern `getElementById(id).style.display = 'none'`
+         * dupliqué une trentaine de fois dans le code.
+         * @param {string} id
+         */
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+
+        /**
+         * Affiche une modale (display:flex par défaut, configurable).
+         * @param {string} id
+         * @param {string} [display='flex']
+         */
+        function openModal(id, display = 'flex') {
+            const el = document.getElementById(id);
+            if (el) el.style.display = display;
+        }
+
+        /**
+         * Récupère et nettoie la valeur d'un champ form. Trim automatique.
+         * Renvoie `defaultVal` si l'élément n'existe pas ou est vide après trim.
+         * @param {string} id
+         * @param {string} [defaultVal='']
+         * @returns {string}
+         */
+        function getInputValue(id, defaultVal = '') {
+            const el = document.getElementById(id);
+            if (!el) return defaultVal;
+            const v = (el.value || '').trim();
+            return v === '' ? defaultVal : v;
+        }
+
+        /**
+         * Valide une chaîne contre une regex. Utile en amont d'un save pour
+         * empêcher la persistance d'inputs invalides (ex: code geste mal formé).
+         * @param {string} value
+         * @param {RegExp} pattern
+         * @returns {boolean}
+         */
+        function isValidPattern(value, pattern) {
+            return typeof value === 'string' && pattern.test(value);
         }
 
         function getStorageStats() {
@@ -6528,6 +6630,15 @@
         //   };
         const MIGRATIONS = {};
 
+        /**
+         * Applique les migrations de schéma localStorage entre versions de l'app.
+         * Lit la version stockée sous SCHEMA_VERSION_KEY, exécute en séquence les
+         * migrations dans MIGRATIONS dont l'index est > version stockée, puis
+         * met à jour SCHEMA_VERSION_KEY à APP_SCHEMA_VERSION.
+         * Cas spécial : installation vierge (localStorage vide) — la version
+         * courante est posée directement, sans exécuter de migration.
+         * @returns {void}
+         */
         function migrateLocalStorage() {
             const stored = parseInt(localStorage.getItem(SCHEMA_VERSION_KEY) || '0', 10);
             // Installation vierge (aucune clé existante) : on pose directement la version courante.
@@ -6731,6 +6842,14 @@
             }
         });
 
+        /**
+         * Hydrate l'état applicatif depuis localStorage : config, catalogues
+         * (gestes, consommables), prestations sauvegardées, stock, pédales,
+         * historiques. Tolère l'absence de clés (premier lancement) et les
+         * JSON corrompus (fallback aux valeurs par défaut). À appeler une
+         * seule fois au démarrage, après migrateLocalStorage().
+         * @returns {void}
+         */
         function loadFromStorage() {
             const savedConfig = localStorage.getItem('configAtelier');
             const savedCatalogue = localStorage.getItem('catalogueGestes');
@@ -6809,6 +6928,13 @@
             requestAnimationFrame(applyTabGroupColors);
         }
 
+        /**
+         * Persiste l'état applicatif global en localStorage (pédales, config,
+         * catalogues, prestations, stock). Appelée par l'autosave et après
+         * chaque mutation significative. En cas de quota dépassé, safeSetItem
+         * notifie l'utilisateur via un toast.
+         * @returns {void}
+         */
         function saveToStorage() {
             localStorage.setItem('pbPedals', JSON.stringify(pbPedals));
             localStorage.setItem('configAtelier', JSON.stringify(config));
@@ -9881,6 +10007,15 @@
             if (lh) lh.textContent = `Gestes et consommables × nb ${u}s`;
         }
 
+        /**
+         * Recalcule l'ensemble des totaux affichés du calculateur de prestation :
+         * temps total (par pièce et lot), coût main-d'œuvre, coût consommables,
+         * prix de revient, marge appliquée et prix de vente final.
+         * Lit les inputs DOM (gesteLines, nbPieces, taux horaires…) et écrit
+         * directement dans les nœuds d'affichage. Aucun side-effect localStorage —
+         * la persistance est déclenchée séparément par saveToStorage().
+         * @returns {void}
+         */
         function calculateTotal() {
             const nbPieces = Math.max(1, parseFloat(document.getElementById('nbPieces')?.value || 1));
             let secondesParPiece = 0, secondesLot = 0;
@@ -16168,6 +16303,13 @@
             return { html: finalHtml, pp, devisNum, client };
         }
 
+        /**
+         * Construit le HTML du devis via buildDevisHtml() puis ouvre la fenêtre
+         * d'impression du navigateur (génération PDF côté client). Ferme au
+         * passage les modales d'aperçu et de préférences. Incrémente le compteur
+         * de numérotation des devis et l'archive dans l'historique.
+         * @returns {void}
+         */
         function genererDevis() {
             const built = buildDevisHtml({ preview: false });
             if (!built) return;
