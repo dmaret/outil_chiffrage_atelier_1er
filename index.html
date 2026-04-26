@@ -1283,6 +1283,7 @@
 
         /* Mode Apprenant ASP */
         body.mode-apprenant .tabs-wrapper { display:none; }
+        body.mode-apprenant .proc-client-only { display:none !important; }
         body.mode-apprenant #breadcrumbs { display:none !important; }
         body.mode-apprenant #presentationNav { display:none !important; }
         body.mode-apprenant #apprenant-welcome { display:block !important; }
@@ -3171,6 +3172,10 @@
                 <span class="tile-icon">🚀</span>
                 <span>Mes Parcours</span>
             </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#1abc9c,#0e8f75);" onclick="switchTab('procedures')">
+                <span class="tile-icon">📋</span>
+                <span>Procédures</span>
+            </button>
             <button class="apprenant-tile" style="background:linear-gradient(135deg,#7f8c8d,#555f60);" onclick="if(confirm('Quitter le Mode Apprenant et revenir en mode Admin ?'))toggleModeApprenant()">
                 <span class="tile-icon">🔓</span>
                 <span>Mode Admin</span>
@@ -4708,7 +4713,7 @@
                     </div>
                     <div style="margin-left:auto;display:flex;gap:8px;">
                         <button class="btn btn-small" onclick="procNewProcedure('cea')"    style="background:#1a3a2a;color:#4fc070;border-color:#2a5a3a;">+ Procédure CEA</button>
-                        <button class="btn btn-small" onclick="procNewProcedure('client')" style="background:#1a2a3a;color:#4a9af0;border-color:#2a4a6a;">+ Procédure Client</button>
+                        <button class="btn btn-small proc-client-only" onclick="procNewProcedure('client')" style="background:#1a2a3a;color:#4a9af0;border-color:#2a4a6a;">+ Procédure Client</button>
                     </div>
                 </div>
 
@@ -5794,9 +5799,9 @@
         // See admin panel for user management.
         const DEFAULT_AUTH_GROUPS = [
             { id: 'cea', name: 'CEA', passwordHash: null,
-              tabs: ['dashboard','assistant','calculateur','prestations','clients','stats','catalogue','formation','logistique','gantt'] },
+              tabs: ['dashboard','stats','formation-logistique','procedures'] },
             { id: 'asp', name: 'ASP', passwordHash: null,
-              tabs: ['dashboard','assistant','calculateur','stock','consommables','catalogue','formation','logistique','gantt'] },
+              tabs: ['dashboard','stats','formation-logistique','procedures','stock','consommables'] },
             { id: 'msp', name: 'MSP', passwordHash: null,
               tabs: ['dashboard','stock','consommables','stats','parametrage','formation','logistique'] },
             { id: 'admin', name: 'ADMIN', passwordHash: null, tabs: ['*'] },
@@ -5824,19 +5829,20 @@
                 manage_users: true
             },
             'cea': {
-                create_prestation: true,
-                edit_prestation: true,
+                create_prestation: false,
+                edit_prestation: false,
                 delete_prestation: false,
-                create_client: true,
-                edit_client: true,
+                create_client: false,
+                edit_client: false,
                 delete_client: false,
                 manage_stock: false,
                 manage_consommables: false,
                 manage_gestes: false,
                 manage_config: false,
-                view_audit: true,
-                export_data: true,
-                manage_users: false
+                view_audit: false,
+                export_data: false,
+                manage_users: false,
+                create_cea_procedure: true
             },
             'msp': {
                 create_prestation: false,
@@ -5854,8 +5860,8 @@
                 manage_users: false
             },
             'asp': {
-                create_prestation: true,
-                edit_prestation: true,
+                create_prestation: false,
+                edit_prestation: false,
                 delete_prestation: false,
                 create_client: false,
                 edit_client: false,
@@ -5866,7 +5872,8 @@
                 manage_config: false,
                 view_audit: false,
                 export_data: false,
-                manage_users: false
+                manage_users: false,
+                create_cea_procedure: true
             }
         };
 
@@ -17478,6 +17485,12 @@
                 if (!authGroups.find(g => g.id === def.id)) {
                     authGroups.push({ ...def });
                 }
+            });
+            // Force-sync tabs for CEA/ASP to enforce current access policy
+            ['cea','asp'].forEach(id => {
+                const g = authGroups.find(x => x.id === id);
+                const def = DEFAULT_AUTH_GROUPS.find(x => x.id === id);
+                if (g && def) g.tabs = def.tabs;
             });
             saveAuthGroups();
             // Populate login select
