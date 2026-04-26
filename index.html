@@ -4057,6 +4057,16 @@
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
                     <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
                 </div>
+
+                <!-- ÉDITEUR DE LIENS FORMATION -->
+                <div class="section admin-section" style="display:none;border-left:4px solid #27ae60;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
+                        <h2 style="margin:0;">🔗 Liens des cartes de formation <span style="background:#27ae60;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                        <button class="btn btn-small btn-secondary" onclick="_flinkResetAll()" title="Remettre tous les liens par défaut">↺ Réinitialiser</button>
+                    </div>
+                    <p style="font-size:0.83em;color:#7a9db1;margin-bottom:14px;">Modifiez les liens Wikipedia et les URLs de vidéos pour chaque carte du module Formation. Collez l'URL d'une vidéo YouTube vérifiée pour remplacer la recherche par défaut.</p>
+                    <div id="flinkAdminTable"></div>
+                </div>
             </div>
 
             <!-- ONGLET CONSOMMABLES -->
@@ -8934,7 +8944,7 @@
             else if (tabName === 'accompagnement')      renderAccompagnement();
             else if (tabName === 'historique')          renderHistory();
             else if (tabName === 'gantt')               { loadGanttPrestSelect(); renderGantt(); }
-            else if (tabName === 'formation-logistique') { updateFormationSelectors(); renderLearnerFormations(); }
+            else if (tabName === 'formation-logistique') { updateFormationSelectors(); renderLearnerFormations(); initFormationLinks(); }
             else if (tabName === 'procedures') renderProceduresTab();
             // Show/hide recap popup (always runs after the tab switch)
             const _pbPop = document.getElementById('pb-recap-popup');
@@ -11642,6 +11652,161 @@
                 </div>`;
 
             container.innerHTML = `${flowsHtml}${quizSection}${docsHtml}`;
+        }
+
+        // ── Liens cartes formation ────────────────────────────────────────────
+        const FORMATION_CARD_LINKS_DEFAULT = {
+            wms:          { label:'WMS',               wiki:'https://fr.wikipedia.org/wiki/Warehouse_management_system',                    video:'https://www.youtube.com/results?search_query=WMS+gestion+entrepôt+logistique+explication' },
+            erp:          { label:'ERP',               wiki:'https://fr.wikipedia.org/wiki/Progiciel_de_gestion_intégré',                   video:'https://www.youtube.com/results?search_query=ERP+logistique+explication+français' },
+            tms:          { label:'TMS',               wiki:'https://fr.wikipedia.org/wiki/Transport_management_system',                    video:'https://www.youtube.com/results?search_query=TMS+transport+management+logistique' },
+            agv:          { label:'AGV / Robots',      wiki:'https://fr.wikipedia.org/wiki/Véhicule_à_guidage_automatique',                 video:'https://www.youtube.com/results?search_query=AGV+robot+entrepôt+automatisation+logistique' },
+            rfid:         { label:'RFID',              wiki:'https://fr.wikipedia.org/wiki/Radio-identification',                           video:'https://www.youtube.com/results?search_query=RFID+traçabilité+logistique+entrepôt' },
+            fifo_sys:     { label:'FIFO (Systèmes)',   wiki:'https://fr.wikipedia.org/wiki/Méthode_FIFO',                                   video:'https://www.youtube.com/results?search_query=FIFO+FEFO+gestion+stock+logistique' },
+            kanban:       { label:'Kanban',            wiki:'https://fr.wikipedia.org/wiki/Kanban',                                         video:'https://www.youtube.com/results?search_query=kanban+logistique+méthode+explication+français' },
+            s5:           { label:'5S',                wiki:'https://fr.wikipedia.org/wiki/5S_(méthode)',                                   video:'https://www.youtube.com/results?search_query=5S+méthode+organisation+logistique+entrepôt' },
+            supply_chain: { label:'Supply Chain',      wiki:'https://fr.wikipedia.org/wiki/Supply_chain',                                   video:'https://www.youtube.com/results?search_query=supply+chain+logistique+explication+français' },
+            kpis:         { label:'KPI',               wiki:'https://fr.wikipedia.org/wiki/Indicateur_clé_de_performance',                  video:'https://www.youtube.com/results?search_query=KPI+logistique+indicateurs+performance+entrepôt' },
+            flux_tendu:   { label:'Flux Tendu',        wiki:'https://fr.wikipedia.org/wiki/Flux_tendu',                                     video:'https://www.youtube.com/results?search_query=flux+tendu+just+in+time+logistique+explication' },
+            tracabilite:  { label:'Traçabilité',       wiki:'https://fr.wikipedia.org/wiki/Traçabilité',                                    video:'https://www.youtube.com/results?search_query=traçabilité+logistique+entrepôt+explication' },
+            amazon:       { label:'Amazon',            wiki:'https://fr.wikipedia.org/wiki/Amazon_(entreprise)',                             video:'https://www.youtube.com/results?search_query=amazon+entrepôt+robot+logistique+kiva' },
+            decathlon:    { label:'Décathlon',         wiki:'https://fr.wikipedia.org/wiki/Decathlon_(entreprise)',                          video:'https://www.youtube.com/results?search_query=décathlon+logistique+RFID+entrepôt' },
+            carrefour:    { label:'Carrefour',         wiki:'https://fr.wikipedia.org/wiki/Carrefour_(enseigne)',                            video:'https://www.youtube.com/results?search_query=carrefour+logistique+supply+chain+entrepôt' },
+            dhl:          { label:'DHL',               wiki:'https://fr.wikipedia.org/wiki/DHL',                                            video:'https://www.youtube.com/results?search_query=DHL+entrepôt+logistique+automatisation' },
+            gl_sku:       { label:'SKU (Glossaire)',   wiki:'https://fr.wikipedia.org/wiki/Unité_de_gestion_des_stocks',                    video:'https://www.youtube.com/results?search_query=SKU+référence+gestion+stock+logistique' },
+            gl_picking:   { label:'Picking (Glossaire)',wiki:'https://fr.wikipedia.org/wiki/Préparation_de_commandes',                      video:'https://www.youtube.com/results?search_query=picking+entrepôt+méthodes+logistique' },
+            gl_palette:   { label:'Palette (Glossaire)',wiki:'https://fr.wikipedia.org/wiki/Palette_(logistique)',                           video:'https://www.youtube.com/results?search_query=palette+logistique+entrepôt+manutention' },
+            gl_fifo:      { label:'FIFO (Glossaire)',  wiki:'https://fr.wikipedia.org/wiki/Méthode_FIFO',                                   video:'https://www.youtube.com/results?search_query=FIFO+FEFO+rotation+stock+logistique' },
+        };
+
+        // Mapping : fragment d'URL Wikipedia → clé de carte
+        const FLINK_WIKI_PATTERNS = [
+            ['Warehouse_management_system', 'wms'],
+            ['Progiciel_de_gestion',        'erp'],
+            ['Transport_management',        'tms'],
+            ['guidage_automatique',         'agv'],
+            ['Radio-identification',        'rfid'],
+            ['nit%C3%A9_de_gestion',        'gl_sku'],   // SKU avant FIFO pour éviter collision
+            ['paration_de_commandes',       'gl_picking'],
+            ['Palette_',                    'gl_palette'],
+            ['M%C3%A9thode_FIFO',           'fifo_sys'], // systèmes (premier match)
+            ['Kanban',                      'kanban'],
+            ['5S_',                         's5'],
+            ['Supply_chain',                'supply_chain'],
+            ['Indicateur_cl%C3%A9',         'kpis'],
+            ['Flux_tendu',                  'flux_tendu'],
+            ['Tra%C3%A7abilit%C3%A9',       'tracabilite'],
+            ['Amazon_',                     'amazon'],
+            ['Decathlon_',                  'decathlon'],
+            ['Carrefour_',                  'carrefour'],
+            ['DHL',                         'dhl'],
+        ];
+
+        function _flinkGet() {
+            const stored = JSON.parse(localStorage.getItem('formationCardLinks') || '{}');
+            const result = {};
+            Object.keys(FORMATION_CARD_LINKS_DEFAULT).forEach(k => {
+                result[k] = { ...FORMATION_CARD_LINKS_DEFAULT[k], ...(stored[k] || {}) };
+            });
+            return result;
+        }
+
+        function _flinkSave(key, type, url) {
+            const stored = JSON.parse(localStorage.getItem('formationCardLinks') || '{}');
+            if (!stored[key]) stored[key] = {};
+            stored[key][type] = url;
+            localStorage.setItem('formationCardLinks', JSON.stringify(stored));
+        }
+
+        function _flinkResetAll() {
+            if (!confirm('Remettre tous les liens par défaut ?')) return;
+            localStorage.removeItem('formationCardLinks');
+            initFormationLinks();
+            renderFlinkAdmin();
+            if (typeof toast === 'function') toast('Liens réinitialisés', 'success');
+        }
+
+        function initFormationLinks() {
+            const links = _flinkGet();
+            const container = document.getElementById('formation-logistique');
+            if (!container) return;
+
+            // Supprimer les anciens boutons vidéo injectés
+            container.querySelectorAll('[data-flink-video]').forEach(el => el.remove());
+
+            // Scanner tous les liens Wikipedia de la section formation
+            container.querySelectorAll('a[href*="wikipedia"]').forEach(wikiEl => {
+                const href = decodeURIComponent(wikiEl.href);
+                let cardKey = null;
+                for (const [pattern, key] of FLINK_WIKI_PATTERNS) {
+                    if (href.includes(decodeURIComponent(pattern))) { cardKey = key; break; }
+                }
+                if (!cardKey) return;
+
+                // Mettre à jour le lien wiki si overridé
+                const linkData = links[cardKey];
+                if (linkData?.wiki) wikiEl.href = linkData.wiki;
+                wikiEl.setAttribute('data-flink', cardKey);
+
+                // Injecter bouton vidéo si une URL est définie
+                const videoUrl = linkData?.video;
+                if (!videoUrl) return;
+                const vEl = document.createElement('a');
+                vEl.href = videoUrl;
+                vEl.target = '_blank';
+                vEl.rel = 'noopener';
+                vEl.setAttribute('data-flink-video', cardKey);
+                vEl.style.cssText = 'display:inline-flex;align-items:center;gap:4px;color:#c0392b;font-size:0.82em;font-weight:600;text-decoration:none;padding:5px 10px;border:1px solid #f5c0c0;border-radius:6px;width:fit-content;margin-top:6px;transition:background 0.2s;';
+                vEl.innerHTML = '🎥 Vidéo';
+                vEl.onmouseover = () => { vEl.style.background = '#fff5f5'; };
+                vEl.onmouseout  = () => { vEl.style.background = 'transparent'; };
+                wikiEl.insertAdjacentElement('afterend', vEl);
+            });
+        }
+
+        function renderFlinkAdmin() {
+            const container = document.getElementById('flinkAdminTable');
+            if (!container) return;
+            const links = _flinkGet();
+            const sections = [
+                { title: '📦 Systèmes Logistiques', keys: ['wms','erp','tms','agv','rfid','fifo_sys','kanban','s5'] },
+                { title: '💡 Concepts Clés', keys: ['supply_chain','kpis','flux_tendu','tracabilite'] },
+                { title: '🏬 Cas d\'Études', keys: ['amazon','decathlon','carrefour','dhl'] },
+                { title: '📖 Glossaire', keys: ['gl_sku','gl_picking','gl_palette','gl_fifo'] },
+            ];
+            let html = '';
+            sections.forEach(sec => {
+                html += `<div style="margin-bottom:20px;">
+                    <h4 style="margin:0 0 10px;color:#5a7b8f;font-size:0.9em;border-bottom:1px solid #e0e8f0;padding-bottom:6px;">${sec.title}</h4>
+                    <div style="display:flex;flex-direction:column;gap:8px;">`;
+                sec.keys.forEach(key => {
+                    const d = links[key];
+                    const def = FORMATION_CARD_LINKS_DEFAULT[key];
+                    const wikiChanged = d.wiki !== def.wiki;
+                    const videoChanged = d.video !== def.video;
+                    html += `<div style="display:grid;grid-template-columns:130px 1fr 1fr;gap:8px;align-items:center;padding:8px 10px;background:${wikiChanged||videoChanged?'#fffdf0':'#fafcff'};border-radius:8px;border:1px solid ${wikiChanged||videoChanged?'#f5e0a0':'#e0e8f0'};">
+                        <div style="font-size:0.82em;font-weight:700;color:#3d4d5c;">${d.label}</div>
+                        <div style="display:flex;flex-direction:column;gap:3px;">
+                            <label style="font-size:0.7em;color:#999;font-weight:600;">🔗 Wikipedia</label>
+                            <input type="url" value="${escapeHtml(d.wiki)}" placeholder="URL Wikipedia…"
+                                style="padding:5px 8px;border:1px solid ${wikiChanged?'#e6a817':'#dde'};border-radius:6px;font-size:0.78em;width:100%;box-sizing:border-box;"
+                                onchange="_flinkSave('${key}','wiki',this.value);initFormationLinks();"
+                                title="URL Wikipedia par défaut : ${escapeHtml(def.wiki)}">
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:3px;">
+                            <label style="font-size:0.7em;color:#999;font-weight:600;">🎥 Vidéo</label>
+                            <div style="display:flex;gap:4px;">
+                                <input type="url" value="${escapeHtml(d.video)}" placeholder="URL YouTube…"
+                                    style="flex:1;padding:5px 8px;border:1px solid ${videoChanged?'#e6a817':'#dde'};border-radius:6px;font-size:0.78em;box-sizing:border-box;"
+                                    onchange="_flinkSave('${key}','video',this.value);initFormationLinks();"
+                                    title="Par défaut : recherche YouTube automatique">
+                                <a href="${escapeHtml(d.video)}" target="_blank" style="padding:4px 7px;border:1px solid #dde;border-radius:6px;color:#c0392b;font-size:0.85em;text-decoration:none;flex-shrink:0;" title="Tester le lien">▶</a>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
         }
 
         // ── Flux d'apprentissage ──────────────────────────────────────────────
@@ -14964,6 +15129,7 @@
             renderTabProfiles();
             renderAuthGroups();
             renderLoginConfigAdmin();
+            renderFlinkAdmin();
         }
 
         function hideAdminSections() {
