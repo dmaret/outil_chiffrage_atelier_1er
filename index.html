@@ -18262,12 +18262,12 @@
                 const pNameFull = escapeHtml(p.prestation);
                 const pNameShort = escapeHtml((p.prestation || '').length > 22 ? (p.prestation || '').slice(0,20)+'…' : (p.prestation || ''));
                 html += `<tr>
-                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${pNameFull}">
+                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${pNameFull} — cliquer pour ouvrir">
                         <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;vertical-align:middle;"></span>
-                        <strong>${pNameShort}</strong>
-                        <button onclick="duplicatePrestation(${p.id})" style="background:none;border:none;cursor:pointer;font-size:0.8em;padding:1px 3px;" title="Dupliquer">📋</button>
+                        <button onclick="editPrestation(${p.id})" style="background:none;border:none;cursor:pointer;padding:0;font-size:1em;color:inherit;font-weight:700;text-decoration:underline dotted #a0b8c8;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='inherit'" title="Ouvrir la prestation">${pNameShort}</button>
+                        <button onclick="duplicatePrestation(${p.id})" style="background:none;border:none;cursor:pointer;font-size:0.8em;padding:1px 3px;opacity:0.5;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'" title="Dupliquer">📋</button>
                     </td>
-                    <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;">${escapeHtml(p.client)}</td>`;
+                    <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;cursor:pointer;" onclick="editPrestation(${p.id})" title="Ouvrir la prestation">${escapeHtml(p.client)}</td>`;
 
                 let inRange = false;
                 dayInfos.forEach(({dayObj, isWeekend}) => {
@@ -18298,7 +18298,7 @@
             </div>
             <div class="gantt-legend" style="margin-top:8px;flex-wrap:wrap;gap:12px;">
                 <span style="font-weight:600;color:#5a7b8f;">Projets :</span>
-                ${prests.map(p => `<span style="display:flex;align-items:center;gap:5px;font-size:0.82em;">
+                ${prests.map(p => `<span onclick="editPrestation(${p.id})" style="display:flex;align-items:center;gap:5px;font-size:0.82em;cursor:pointer;padding:3px 7px;border-radius:6px;transition:background 0.15s;" onmouseover="this.style.background='#eef4f8'" onmouseout="this.style.background='transparent'" title="Ouvrir ${escapeHtml(p.prestation||'')}">
                     <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${projectColors[p.id]};"></span>
                     ${escapeHtml((p.prestation || '').length > 18 ? (p.prestation || '').slice(0,16)+'…' : (p.prestation || ''))}
                     <span style="color:#aaa;font-size:0.88em;">(${escapeHtml(statutLabels[p.statut||'devis']||p.statut)})</span>
