@@ -11676,6 +11676,19 @@
             gl_picking:   { label:'Picking (Glossaire)',wiki:'https://fr.wikipedia.org/wiki/Préparation_de_commandes',                      video:'https://www.youtube.com/results?search_query=picking+entrepôt+méthodes+logistique' },
             gl_palette:   { label:'Palette (Glossaire)',wiki:'https://fr.wikipedia.org/wiki/Palette_(logistique)',                           video:'https://www.youtube.com/results?search_query=palette+logistique+entrepôt+manutention' },
             gl_fifo:      { label:'FIFO (Glossaire)',  wiki:'https://fr.wikipedia.org/wiki/Méthode_FIFO',                                   video:'https://www.youtube.com/results?search_query=FIFO+FEFO+rotation+stock+logistique' },
+            fefo:         { label:'FEFO',              wiki:'https://fr.wikipedia.org/wiki/Méthode_FEFO',                                   video:'https://www.youtube.com/results?search_query=FEFO+first+expire+gestion+stock+alimentaire' },
+            chaine_froid: { label:'Chaîne de froid',  wiki:'https://fr.wikipedia.org/wiki/Chaîne_du_froid',                                 video:'https://www.youtube.com/results?search_query=chaîne+du+froid+logistique+agroalimentaire' },
+            taux_service: { label:'Taux de service',  wiki:'https://fr.wikipedia.org/wiki/Taux_de_service',                                 video:'https://www.youtube.com/results?search_query=taux+de+service+logistique+calcul+explication' },
+            rotation_stock:{ label:'Rotation de stock',wiki:'https://fr.wikipedia.org/wiki/Rotation_des_stocks',                            video:'https://www.youtube.com/results?search_query=rotation+des+stocks+logistique+calcul+indicateur' },
+            lead_time:    { label:'Lead time',         wiki:'https://fr.wikipedia.org/wiki/Délai_de_livraison',                              video:'https://www.youtube.com/results?search_query=lead+time+délai+approvisionnement+logistique' },
+            edi:          { label:'EDI',               wiki:'https://fr.wikipedia.org/wiki/Échange_de_données_informatique',                 video:'https://www.youtube.com/results?search_query=EDI+échange+données+informatisé+logistique+explication' },
+            chariot:      { label:'Chariot élévateur', wiki:'https://fr.wikipedia.org/wiki/Chariot_élévateur',                              video:'https://www.youtube.com/results?search_query=chariot+élévateur+CACES+logistique+entrepôt' },
+            cross_dock:   { label:'Cross-docking',    wiki:'https://fr.wikipedia.org/wiki/Cross-docking',                                   video:'https://www.youtube.com/results?search_query=cross+docking+logistique+entrepôt+explication' },
+            abc_pareto:   { label:'Analyse ABC',       wiki:'https://fr.wikipedia.org/wiki/Méthode_ABC_(logistique)',                        video:'https://www.youtube.com/results?search_query=analyse+ABC+Pareto+gestion+stock+logistique' },
+            stock_secu:   { label:'Stock de sécurité', wiki:'https://fr.wikipedia.org/wiki/Stock_de_sécurité',                              video:'https://www.youtube.com/results?search_query=stock+de+sécurité+calcul+formule+logistique' },
+            tpl_4pl:      { label:'3PL / 4PL',         wiki:'https://fr.wikipedia.org/wiki/Logistique_tierce_partie',                       video:'https://www.youtube.com/results?search_query=3PL+4PL+logistique+externalisée+prestataire' },
+            mrp:          { label:'MRP',               wiki:'https://fr.wikipedia.org/wiki/Planification_des_besoins_en_composants',         video:'https://www.youtube.com/results?search_query=MRP+planification+besoins+production+logistique' },
+            slotting:     { label:'Slotting',          wiki:'https://fr.wikipedia.org/wiki/Gestion_des_entrepôts',                          video:'https://www.youtube.com/results?search_query=slotting+optimisation+entrepôt+emplacements+logistique' },
         };
 
         // Mapping : fragment d'URL Wikipedia → clé de carte
@@ -11699,6 +11712,19 @@
             ['Decathlon_',                  'decathlon'],
             ['Carrefour_',                  'carrefour'],
             ['DHL',                         'dhl'],
+            ['M%C3%A9thode_FEFO',           'fefo'],
+            ['Cha%C3%AEne_du_froid',        'chaine_froid'],
+            ['Taux_de_service',             'taux_service'],
+            ['Rotation_des_stocks',         'rotation_stock'],
+            ['lai_de_livraison',            'lead_time'],
+            ['change_de_donn',              'edi'],
+            ['Chariot_%C3%A9l%C3%A9',       'chariot'],
+            ['Cross-docking',               'cross_dock'],
+            ['thode_ABC',                   'abc_pareto'],
+            ['Stock_de_s%C3%A9',            'stock_secu'],
+            ['tierce_partie',               'tpl_4pl'],
+            ['besoins_en_composants',       'mrp'],
+            ['Gestion_des_entrep',          'slotting'],
         ];
 
         function _flinkGet() {
@@ -11772,6 +11798,7 @@
                 { title: '💡 Concepts Clés', keys: ['supply_chain','kpis','flux_tendu','tracabilite'] },
                 { title: '🏬 Cas d\'Études', keys: ['amazon','decathlon','carrefour','dhl'] },
                 { title: '📖 Glossaire', keys: ['gl_sku','gl_picking','gl_palette','gl_fifo'] },
+                { title: '🏭 Opérations & Méthodes', keys: ['fefo','chaine_froid','taux_service','rotation_stock','lead_time','edi','chariot','cross_dock','abc_pareto','stock_secu','tpl_4pl','mrp','slotting'] },
             ];
             let html = '';
             sections.forEach(sec => {
