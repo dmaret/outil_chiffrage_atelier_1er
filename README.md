@@ -42,6 +42,7 @@
 15. [Système de Formation (Phase 1)](#15-système-de-formation-phase-1)
 16. [Conditions d'utilisation](#16-conditions-dutilisation)
 17. [✨ Confort & raccourcis UX *(Avril 2026)*](#17--confort--raccourcis-ux-avril-2026)
+18. [♿ Accessibilité & qualité du code *(Avril 2026)*](#18--accessibilité--qualité-du-code-avril-2026)
 
 ---
 
@@ -1072,6 +1073,69 @@ Trois vagues successives d'améliorations pour rendre l'outil plus rassurant, ra
 - **Skeleton screens** : animation shimmer sur les KPIs et listes du Dashboard avant le premier rendu, pour éviter le flash de contenu vide. Helper `showSkeleton(id, rows)`.
 
 > 🔎 **Astuce :** la palette `Ctrl+K` est le moyen le plus rapide d'accéder à n'importe quelle fonction sans quitter le clavier.
+
+---
+
+## 18. ♿ Accessibilité & qualité du code *(Avril 2026)*
+
+### 18.1 Accessibilité (ARIA)
+
+- **Modales** : `role="dialog"` + `aria-modal="true"` + `aria-labelledby` sur 15 modales (PIN, création geste, options PDF, lecture flux d'apprentissage, raccourcis clavier, comparateur, suivi paiement, etc.). Les lecteurs d'écran annoncent désormais correctement l'ouverture d'une modale et son titre.
+- **Boutons-icône** : `aria-label` ajouté sur les boutons de fermeture qui n'avaient que `&times;` ou un emoji (lecteurs d'écran lisent maintenant « Fermer la modale »).
+- **Focus visible** (déjà en place) : `:focus-visible` contrasté pour la navigation clavier, sans régression visuelle pour les utilisateurs souris.
+- **Validation HTML5 + labels** : tous les champs critiques sont liés à un `<label for=...>` et à un `aria-describedby` qui pointe vers un hint visuel ; les messages d'erreur natifs du navigateur sont annoncés par les technologies d'assistance.
+
+### 18.2 Validation des inputs
+
+Le formulaire **création rapide de geste** durcit ses inputs en HTML5 natif :
+
+| Champ | Contraintes |
+|---|---|
+| `qg-code` | `required`, `pattern="[A-Za-z]{2,4}-[0-9]{1,3}"`, `maxlength="10"` |
+| `qg-desc` | `required`, `minlength="3"`, `maxlength="200"` |
+| `qg-notes` | `maxlength="500"` |
+| `qg-temps` | `min="0"`, `step="0.5"` (déjà présent) |
+| `qg-coef` | `min="0.5"`, `max="3"`, `step="0.1"` (déjà présent) |
+
+Aucun code mal formé ne peut plus être sauvegardé en localStorage.
+
+### 18.3 Helpers JS de déduplication
+
+Six helpers exposés à côté de `safeSetItem` pour centraliser les patterns récurrents :
+
+| Helper | Signature | Rôle |
+|---|---|---|
+| `safeJSONSet` | `(key, value) → boolean` | Sérialise + persiste avec gestion quota |
+| `safeJSONGet` | `(key, fallback=null) → any` | Lit + parse JSON, fallback si corrompu |
+| `openModal` | `(id, display='flex')` | Affiche une modale par id |
+| `closeModal` | `(id)` | Masque une modale par id |
+| `getInputValue` | `(id, defaultVal='') → string` | `value.trim()` ou défaut |
+| `isValidPattern` | `(value, regex) → boolean` | Validation regex |
+
+Adoption progressive : les call-sites existants ne sont pas réécrits.
+
+### 18.4 Variables CSS supplémentaires
+
+Échelle d'espacement et tokens visuels canoniques disponibles dans `:root` :
+
+```css
+--space-xs: 4px;   --space-sm: 8px;   --space-md: 10px;
+--space-lg: 16px;  --space-xl: 20px;  --space-2xl: 28px;
+--border-radius-pill: 999px;
+--shadow-card:  0 10px 40px rgba(150,150,180,0.15);
+--shadow-modal: 0 15px 50px rgba(0,0,0,0.25);
+--color-success-alt: #30d158;
+--color-on-primary:  #fff;
+--color-overlay:     rgba(0,0,0,0.5);
+```
+
+### 18.5 Documentation JSDoc
+
+JSDoc `@param` / `@returns` sur les 5 fonctions critiques de l'app : `migrateLocalStorage`, `loadFromStorage`, `saveToStorage`, `calculateTotal`, `genererDevis`. Les contrats, side-effects et invariants sont explicités pour faciliter la maintenance future.
+
+### 18.6 Performance
+
+- **Lazy loading** : `loading="lazy"` sur les previews d'images dans les attachements (évite de précharger les pièces jointes hors-écran).
 
 ---
 
