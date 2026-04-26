@@ -1281,6 +1281,18 @@
         .gantt-legend { display: flex; gap: 16px; align-items: center; margin-top: 12px; font-size: 0.82em; }
         .gantt-legend-dot { width: 16px; height: 16px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 4px; }
 
+        /* Mode Apprenant ASP */
+        body.mode-apprenant .tabs-wrapper { display:none; }
+        body.mode-apprenant #breadcrumbs { display:none !important; }
+        body.mode-apprenant #presentationNav { display:none !important; }
+        body.mode-apprenant #apprenant-welcome { display:block !important; }
+        #apprenant-nav { display:none; padding:28px 20px 20px; background:var(--color-bg); gap:18px; justify-content:center; flex-wrap:wrap; }
+        body.mode-apprenant #apprenant-nav { display:flex; }
+        .apprenant-tile { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; width:190px; height:170px; border-radius:22px; cursor:pointer; font-weight:700; font-size:1.05em; text-align:center; border:none; transition:transform 0.15s, box-shadow 0.15s; box-shadow:0 4px 20px rgba(0,0,0,0.12); padding:20px; color:white; }
+        .apprenant-tile:hover { transform:translateY(-5px); box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+        .apprenant-tile .tile-icon { font-size:2.8em; line-height:1; }
+        #btnModeApprenant.apprenant-on { background:rgba(255,255,255,0.55) !important; box-shadow:0 0 0 2px rgba(255,255,255,0.9); }
+
         /* Historique */
         .history-table { font-size: 0.85em; }
         .history-table td:first-child { white-space: nowrap; color: var(--color-text-muted); }
@@ -3056,6 +3068,7 @@
                 <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
                 <button id="darkModeToggle" onclick="toggleDarkMode()" title="Mode sombre" style="font-size:1.3em;">🌙</button>
                 <button id="btnPresentation" onclick="togglePresentation()" title="Mode présentation client">🖥️</button>
+                <button id="btnModeApprenant" onclick="toggleModeApprenant()" title="Mode Apprenant ASP" style="font-size:1.15em;">🎓</button>
                 <button id="navBtnBack" class="nav-arrow-btn" onclick="navBack()" title="Onglet précédent (Alt+←)" disabled>&#8592;</button>
                 <button id="navBtnFwd"  class="nav-arrow-btn" onclick="navForward()" title="Onglet suivant (Alt+→)" disabled>&#8594;</button>
             </div>
@@ -3093,6 +3106,26 @@
 
         <!-- Barre de navigation mode présentation -->
         <div id="presentationNav"></div>
+
+        <!-- Navigation Mode Apprenant ASP -->
+        <div id="apprenant-nav">
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#4e9af1,#2d6cb5);" onclick="switchTab('dashboard')">
+                <span class="tile-icon">🏠</span>
+                <span>Mon Accueil</span>
+            </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#27ae60,#1a7a40);" onclick="switchTab('formation-logistique');setTimeout(()=>document.getElementById('learnerFormationSelect')?.focus(),400)">
+                <span class="tile-icon">🎓</span>
+                <span>Mes Formations</span>
+            </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#8e44ad,#5b2c82);" onclick="switchTab('formation-logistique');setTimeout(()=>document.querySelector('#formation-logistique .section:nth-child(2)')?.scrollIntoView({behavior:'smooth'}),400)">
+                <span class="tile-icon">📚</span>
+                <span>Apprendre</span>
+            </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#7f8c8d,#555f60);" onclick="if(confirm('Quitter le Mode Apprenant et revenir en mode Admin ?'))toggleModeApprenant()">
+                <span class="tile-icon">🔓</span>
+                <span>Mode Admin</span>
+            </button>
+        </div>
 
         <!-- Fil d'Ariane contextuel -->
         <div id="breadcrumbs" class="breadcrumbs" style="display:none;"></div>
@@ -5381,6 +5414,18 @@
 
             <!-- ONGLET DASHBOARD -->
             <div id="dashboard" class="tab-content active">
+              <!-- Bannière Mode Apprenant (visible uniquement en mode-apprenant) -->
+              <div id="apprenant-welcome" style="display:none;">
+                <div style="background:linear-gradient(135deg,#4e9af1,#27ae60);color:white;border-radius:20px;padding:36px;margin-bottom:24px;text-align:center;box-shadow:0 8px 32px rgba(78,154,241,0.25);">
+                    <div style="font-size:3.5em;margin-bottom:12px;">👋</div>
+                    <h2 style="margin:0 0 10px;font-size:1.7em;font-weight:800;">Bienvenue !</h2>
+                    <p style="margin:0;opacity:0.95;font-size:1.05em;">Utilise les boutons ci-dessus pour accéder à ta formation ou à tes ressources.</p>
+                    <div style="display:flex;justify-content:center;gap:14px;margin-top:22px;flex-wrap:wrap;">
+                        <button onclick="switchTab('formation-logistique');setTimeout(()=>document.getElementById('learnerFormationSelect')?.focus(),400)" style="background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.7);color:white;font-size:1em;font-weight:700;padding:10px 22px;border-radius:12px;cursor:pointer;">🎓 Mes Formations</button>
+                        <button onclick="switchTab('formation-logistique');setTimeout(()=>document.querySelector('#formation-logistique .section:nth-child(2)')?.scrollIntoView({behavior:'smooth'}),400)" style="background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.7);color:white;font-size:1em;font-weight:700;padding:10px 22px;border-radius:12px;cursor:pointer;">📚 Apprendre</button>
+                    </div>
+                </div>
+              </div>
               <div class="section" style="border-left:4px solid #4caf50;">
                 <h2 style="color:#4caf50;">🏠 Dashboard — Accueil</h2>
                 <p style="color:#666;font-size:0.95em;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
@@ -14120,6 +14165,27 @@
             btn.textContent = isDark ? '☀️' : '🌙';
             localStorage.setItem('darkMode', isDark ? '1' : '0');
         }
+
+        function toggleModeApprenant() {
+            const isOn = document.body.classList.toggle('mode-apprenant');
+            localStorage.setItem('modeApprenant', isOn ? '1' : '0');
+            const btn = document.getElementById('btnModeApprenant');
+            if (btn) btn.classList.toggle('apprenant-on', isOn);
+            if (isOn) {
+                switchTab('dashboard');
+                if (typeof toast === 'function') toast('🎓 Mode Apprenant activé', 'info');
+            } else {
+                if (typeof toast === 'function') toast('🔓 Mode Admin restauré', 'info');
+            }
+        }
+
+        (function initModeApprenant() {
+            if (localStorage.getItem('modeApprenant') === '1') {
+                document.body.classList.add('mode-apprenant');
+                const btn = document.getElementById('btnModeApprenant');
+                if (btn) btn.classList.add('apprenant-on');
+            }
+        })();
 
         // Init dark mode from storage
         // Si aucune préférence enregistrée, suit le thème système (prefers-color-scheme)
