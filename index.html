@@ -14180,6 +14180,17 @@
         }
 
         (function initModeApprenant() {
+            // Auto-active si la session en cours est CEA
+            try {
+                const sess = JSON.parse(sessionStorage.getItem('authSession') || 'null');
+                if (sess && sess.id === 'cea') {
+                    document.body.classList.add('mode-apprenant');
+                    const btn = document.getElementById('btnModeApprenant');
+                    if (btn) btn.classList.add('apprenant-on');
+                    return;
+                }
+            } catch(e) {}
+            // Sinon : respecter le toggle manuel
             if (localStorage.getItem('modeApprenant') === '1') {
                 document.body.classList.add('mode-apprenant');
                 const btn = document.getElementById('btnModeApprenant');
@@ -17407,6 +17418,10 @@
             // Remove admin mode
             document.body.classList.remove('admin-mode');
             hideAdminSections();
+            // Désactiver le mode apprenant à la déconnexion
+            document.body.classList.remove('mode-apprenant');
+            const maBtnL = document.getElementById('btnModeApprenant');
+            if (maBtnL) maBtnL.classList.remove('apprenant-on');
             isSuperUser = false;
             // Hide badges
             document.getElementById('tabProfileBadge')?.classList.remove('visible');
@@ -17794,6 +17809,12 @@
             currentUserSession = { id: group.id, name: group.name, role: group.id };
             logAction(`Connexion en tant que ${group.name}`, 'LOGIN');
             updateUIPermissions();
+            // Mode Apprenant automatique pour le groupe CEA
+            const isCea = group.id === 'cea';
+            document.body.classList.toggle('mode-apprenant', isCea);
+            const maBtnH = document.getElementById('btnModeApprenant');
+            if (maBtnH) maBtnH.classList.toggle('apprenant-on', isCea);
+            if (isCea) switchTab('dashboard');
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
