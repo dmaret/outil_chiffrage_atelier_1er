@@ -130,19 +130,25 @@
             right: 15px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         .header-icons button {
             background: rgba(255,255,255,0.25);
             border: none;
             border-radius: 50%;
-            width: 42px;
-            height: 42px;
-            font-size: 1.2em;
+            width: 38px;
+            height: 38px;
+            font-size: 1.1em;
             cursor: pointer;
             transition: background 0.3s;
         }
         .header-icons button:hover { background: rgba(255,255,255,0.45); }
+        .header-icons .nav-arrow-btn {
+            width: 32px; height: 32px; font-size: 1em;
+            background: rgba(255,255,255,0.15);
+        }
+        .header-icons .nav-arrow-btn:hover:not(:disabled) { background: rgba(255,255,255,0.40); }
+        .header-icons .nav-arrow-btn:disabled { color: rgba(255,255,255,0.25); cursor: default; }
 
         #onlineIndicator {
             display: flex; align-items: center; gap: 5px;
@@ -166,12 +172,12 @@
         
         .tabs-wrapper { position:relative; background:var(--color-bg-alt); border-bottom:2px solid var(--color-border); display:flex; align-items:stretch; }
         .nav-arrow-btn {
-            flex-shrink:0; border:none; background:none; cursor:pointer;
-            font-size:1.2em; color:var(--color-primary-dark); padding:0 8px;
-            transition:color 0.15s, background 0.15s; line-height:1;
+            border:none; background:rgba(255,255,255,0.18); cursor:pointer;
+            font-size:1.1em; color:rgba(255,255,255,0.85); padding:4px 8px;
+            border-radius:6px; transition:color 0.15s, background 0.15s; line-height:1;
         }
-        .nav-arrow-btn:hover:not(:disabled) { background:var(--color-primary); color:#fff; }
-        .nav-arrow-btn:disabled { color:#bbb; cursor:default; }
+        .nav-arrow-btn:hover:not(:disabled) { background:rgba(255,255,255,0.35); color:#fff; }
+        .nav-arrow-btn:disabled { color:rgba(255,255,255,0.3); cursor:default; }
         .tabs-scroll-btn {
             flex-shrink:0; width:30px;
             border:none; cursor:pointer; font-size:1.4em; font-weight:bold; color:var(--color-primary-dark);
@@ -1274,6 +1280,46 @@
         .gantt-today-col { background: rgba(168,213,226,0.2); }
         .gantt-legend { display: flex; gap: 16px; align-items: center; margin-top: 12px; font-size: 0.82em; }
         .gantt-legend-dot { width: 16px; height: 16px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 4px; }
+
+        /* Mode Apprenant ASP */
+        body.mode-apprenant .tabs-wrapper { display:none; }
+        body.mode-apprenant #breadcrumbs { display:none !important; }
+        body.mode-apprenant #presentationNav { display:none !important; }
+        body.mode-apprenant #apprenant-welcome { display:block !important; }
+        #apprenant-nav { display:none; padding:28px 20px 20px; background:var(--color-bg); gap:18px; justify-content:center; flex-wrap:wrap; }
+        body.mode-apprenant #apprenant-nav { display:flex; }
+        .apprenant-tile { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; width:190px; height:170px; border-radius:22px; cursor:pointer; font-weight:700; font-size:1.05em; text-align:center; border:none; transition:transform 0.15s, box-shadow 0.15s; box-shadow:0 4px 20px rgba(0,0,0,0.12); padding:20px; color:white; }
+        .apprenant-tile:hover { transform:translateY(-5px); box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+        .apprenant-tile .tile-icon { font-size:2.8em; line-height:1; }
+        #btnModeApprenant.apprenant-on { background:rgba(255,255,255,0.55) !important; box-shadow:0 0 0 2px rgba(255,255,255,0.9); }
+        /* ── Flux d'apprentissage ─────────────────────────────────────── */
+        .flux-card { background:white; border-radius:16px; padding:20px 22px 16px; box-shadow:0 3px 14px rgba(0,0,0,0.09); border-top:5px solid #4e9af1; }
+        .flux-card-desc { font-size:0.82em; color:#888; margin:2px 0 14px; }
+        .flux-steps-row { display:flex; align-items:flex-start; gap:0; flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; }
+        .flux-step-node { display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; }
+        .flux-step-btn { width:52px; height:52px; border-radius:50%; border:3px solid #ddd; display:flex; align-items:center; justify-content:center; font-size:1.35em; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; background:#fafafa; }
+        .flux-step-btn:not([disabled]):hover { transform:scale(1.1); box-shadow:0 4px 14px rgba(0,0,0,0.18); }
+        .flux-step-btn[disabled] { filter:grayscale(1) opacity(0.45); cursor:not-allowed; }
+        .flux-step-btn.fs-available { border-color:#2980b9; background:#e8f4ff; animation:fpulse 2.2s ease-in-out infinite; }
+        .flux-step-btn.fs-done { background:#edfaf3; border-color:#27ae60; }
+        .flux-step-btn.fs-badge { background:linear-gradient(135deg,#fff9e6,#fde8c0); border-color:#e6a817; animation:fpulse-gold 2.2s ease-in-out infinite; }
+        .flux-step-btn.fs-badge.fs-done { animation:none; }
+        .flux-step-label { font-size:0.69em; font-weight:700; text-align:center; color:#3d4d5c; max-width:78px; line-height:1.25; }
+        .flux-step-dur { font-size:0.6em; color:#bbb; text-align:center; }
+        .flux-connector { width:26px; flex-shrink:0; height:3px; background:#e0e6ed; align-self:center; margin-bottom:25px; position:relative; }
+        .flux-connector::after { content:''; position:absolute; right:-6px; top:-5px; border:5px solid transparent; border-left:8px solid #e0e6ed; }
+        .flux-pbar { height:5px; border-radius:3px; background:#eee; margin-top:12px; overflow:hidden; }
+        .flux-pbar-fill { height:100%; border-radius:3px; transition:width 0.5s; }
+        @keyframes fpulse { 0%,100%{box-shadow:0 0 0 0 rgba(41,128,185,0.3)} 60%{box-shadow:0 0 0 8px rgba(41,128,185,0)} }
+        @keyframes fpulse-gold { 0%,100%{box-shadow:0 0 0 0 rgba(230,168,23,0.3)} 60%{box-shadow:0 0 0 8px rgba(230,168,23,0)} }
+        /* ── Lecture modal ─────────────────────────────────────────────── */
+        #fluxLectureModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:5500; align-items:center; justify-content:center; padding:16px; }
+        #fluxLectureBox { background:white; border-radius:20px; max-width:680px; width:100%; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 12px 48px rgba(0,0,0,0.25); }
+        #fluxLectureBody { overflow-y:auto; padding:24px 30px 20px; font-size:0.93em; line-height:1.75; color:#2d3e50; }
+        #fluxLectureBody h3 { color:#2980b9; margin:0 0 12px; font-size:1.1em; }
+        #fluxLectureBody ul { padding-left:20px; margin:8px 0 14px; }
+        #fluxLectureBody li { margin-bottom:5px; }
+        #fluxLectureBody .key-box { background:#f0f8ff; border-left:4px solid #2980b9; padding:10px 16px; border-radius:6px; margin:14px 0 4px; font-weight:600; font-size:0.95em; }
 
         /* Historique */
         .history-table { font-size: 0.85em; }
@@ -3016,6 +3062,24 @@
         </div>
     </div>
 
+    <!-- Flux d'apprentissage — Lecture modal -->
+    <div id="fluxLectureModal" onclick="if(event.target===this)_fluxCloseLecture()">
+        <div id="fluxLectureBox">
+            <div style="padding:18px 24px 14px;border-bottom:1px solid #e8eef3;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span id="fluxLectureIcon" style="font-size:1.8em;">📖</span>
+                    <h3 id="fluxLectureTitle" style="margin:0;color:#2980b9;font-size:1.1em;">Lecture</h3>
+                </div>
+                <button onclick="_fluxCloseLecture()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#9aa;line-height:1;" title="Fermer">&times;</button>
+            </div>
+            <div id="fluxLectureBody"></div>
+            <div style="padding:16px 24px;border-top:1px solid #e8eef3;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;">
+                <button onclick="_fluxCloseLecture()" style="padding:9px 20px;border-radius:9px;border:1px solid #dde;background:#f8fafc;cursor:pointer;font-size:0.9em;color:#555;">Fermer</button>
+                <button id="fluxLectureValBtn" onclick="_fluxValidateLecture()" style="padding:9px 22px;border-radius:9px;border:none;background:linear-gradient(135deg,#27ae60,#1a9050);color:white;cursor:pointer;font-size:0.95em;font-weight:700;">✅ J'ai compris — Continuer</button>
+            </div>
+        </div>
+    </div>
+
     <div id="shortcutsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:5000;align-items:center;justify-content:center;">
         <div style="background:white;border-radius:16px;padding:28px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
             <h3 style="margin:0 0 16px;color:#6b8fa3;">⌨️ Raccourcis clavier</h3>
@@ -3050,12 +3114,13 @@
                 <button id="btnFullscreen" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
                 <button id="darkModeToggle" onclick="toggleDarkMode()" title="Mode sombre" style="font-size:1.3em;">🌙</button>
                 <button id="btnPresentation" onclick="togglePresentation()" title="Mode présentation client">🖥️</button>
+                <button id="btnModeApprenant" onclick="toggleModeApprenant()" title="Mode Apprenant ASP" style="font-size:1.15em;">🎓</button>
+                <button id="navBtnBack" class="nav-arrow-btn" onclick="navBack()" title="Onglet précédent (Alt+←)" disabled>&#8592;</button>
+                <button id="navBtnFwd"  class="nav-arrow-btn" onclick="navForward()" title="Onglet suivant (Alt+→)" disabled>&#8594;</button>
             </div>
         </div>
 
         <div class="tabs-wrapper">
-            <button id="navBtnBack" class="nav-arrow-btn" onclick="navBack()" title="Onglet précédent (Alt+←)" disabled>&#8592;</button>
-            <button id="navBtnFwd"  class="nav-arrow-btn" onclick="navForward()" title="Onglet suivant (Alt+→)" disabled>&#8594;</button>
             <button class="tabs-scroll-btn left" id="tabScrollLeft" onclick="scrollTabs(-150)">&#8249;</button>
             <div class="tabs" id="tabsBar">
                 <button class="tab active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
@@ -3078,7 +3143,6 @@
                 <button class="tab" onclick="switchTab('procedures')">📋 Procédures</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
-            <button class="btn btn-secondary btn-small" onclick="resetTabOrder()" title="Remettre les onglets dans leur ordre d'origine" style="margin-left:12px;">↺ Réinitialiser</button>
             <div class="tab-profile-badge" id="tabProfileBadge">
                 🔐 <span id="tabProfileBadgeName"></span>
                 <span class="badge-close" onclick="doLogout()" title="Se déconnecter">🚪</span>
@@ -3088,6 +3152,30 @@
 
         <!-- Barre de navigation mode présentation -->
         <div id="presentationNav"></div>
+
+        <!-- Navigation Mode Apprenant ASP -->
+        <div id="apprenant-nav">
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#4e9af1,#2d6cb5);" onclick="switchTab('dashboard')">
+                <span class="tile-icon">🏠</span>
+                <span>Mon Accueil</span>
+            </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#27ae60,#1a7a40);" onclick="switchTab('formation-logistique');setTimeout(()=>document.getElementById('learnerFormationSelect')?.focus(),400)">
+                <span class="tile-icon">🎓</span>
+                <span>Mes Formations</span>
+            </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#8e44ad,#5b2c82);" onclick="switchTab('formation-logistique');setTimeout(()=>document.querySelector('#formation-logistique .section:nth-child(2)')?.scrollIntoView({behavior:'smooth'}),400)">
+                <span class="tile-icon">📚</span>
+                <span>Apprendre</span>
+            </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#e67e22,#c0610d);" onclick="switchTab('formation-logistique');setTimeout(()=>{document.getElementById('flux-section')?.scrollIntoView({behavior:'smooth'})},400)">
+                <span class="tile-icon">🚀</span>
+                <span>Mes Parcours</span>
+            </button>
+            <button class="apprenant-tile" style="background:linear-gradient(135deg,#7f8c8d,#555f60);" onclick="if(confirm('Quitter le Mode Apprenant et revenir en mode Admin ?'))toggleModeApprenant()">
+                <span class="tile-icon">🔓</span>
+                <span>Mode Admin</span>
+            </button>
+        </div>
 
         <!-- Fil d'Ariane contextuel -->
         <div id="breadcrumbs" class="breadcrumbs" style="display:none;"></div>
@@ -3129,6 +3217,17 @@
                             <label>Date</label>
                             <input type="date" id="date">
                         </div>
+                    </div>
+                    <div class="form-row" style="background:#f0f8ff;border-radius:8px;padding:8px 12px;border:1px dashed #a8d5e2;">
+                        <div class="form-group">
+                            <label style="color:#5a7b8f;font-size:0.88em;">📅 Début prévu <span style="font-size:0.8em;font-weight:400;color:#a0b8cc;">(planification)</span></label>
+                            <input type="date" id="calcDateDebut" onchange="calcDateFin_autoEnd()">
+                        </div>
+                        <div class="form-group">
+                            <label style="color:#5a7b8f;font-size:0.88em;">📅 Fin prévue <span style="font-size:0.8em;font-weight:400;color:#a0b8cc;">(planification)</span></label>
+                            <input type="date" id="calcDateFin">
+                        </div>
+                        <div style="align-self:flex-end;font-size:0.78em;color:#a0b8cc;padding-bottom:6px;">Aparaît en grisé dans la Planification (simulation de charge)</div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -3783,12 +3882,8 @@
                     <h2>Ajouter un nouveau geste</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Code geste</label>
-                            <input type="text" id="newCode" placeholder="Ex: REC-01">
-                        </div>
-                        <div class="form-group">
                             <label>Catégorie</label>
-                            <select id="newCategorie">
+                            <select id="newCategorie" onchange="autoGesteCode()">
                                 <option>Réception</option>
                                 <option>Contrôle</option>
                                 <option>Étiquetage</option>
@@ -3798,6 +3893,10 @@
                                 <option>Expédition</option>
                                 <option>Administratif</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Code geste <span id="autoCodeHint" style="font-size:0.78em;color:#27ae60;font-weight:400;"></span></label>
+                            <input type="text" id="newCode" placeholder="Ex: REC-01" oninput="document.getElementById('autoCodeHint').textContent=''">
                         </div>
                         <div class="form-group">
                             <label>Description</label>
@@ -3875,14 +3974,12 @@
             <!-- ONGLET FORMATION -->
             <div id="formation" class="tab-content">
                 <div class="section" style="background:#f0f8ff;border-left:4px solid #2980b9;">
-                    <h2>📚 Formations à suivre</h2>
-                    <p style="color:#7a9db1;margin-bottom:12px;">Sélectionnez un apprenant pour voir ses formations assignées</p>
-                    <div class="form-row">
-                        <select id="learnerTrainingSelect" onchange="showLearnerTrainings();" style="padding:8px;border:1px solid #ddd;border-radius:4px;flex:1;">
-                            <option value="">-- Sélectionner un apprenant --</option>
-                        </select>
-                    </div>
-                    <div id="learnerTrainingsContainer" style="margin-top:16px;"></div>
+                    <h2>🎓 Assigner des formations</h2>
+                    <p style="color:#7a9db1;margin-bottom:12px;">Sélectionnez un apprenant pour lui assigner des modules de formation et des documents</p>
+                    <select id="adminLearnerSelect" onchange="renderAdminFormationAssign()" style="padding:9px;border:1px solid #c8e0f4;border-radius:8px;width:100%;max-width:400px;font-size:0.95em;">
+                        <option value="">-- Sélectionner un apprenant --</option>
+                    </select>
+                    <div id="adminFormationAssignContainer"></div>
                 </div>
 
                 <div class="section">
@@ -4010,7 +4107,16 @@
                 </div>
 
                 <div class="section">
-                    <h2>Liste consommables</h2>
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                        <h2 style="margin:0;">Liste consommables</h2>
+                        <div id="consomBulkBar" style="display:none;align-items:center;gap:8px;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:6px 14px;font-size:0.88em;">
+                            <span id="consomSelCount" style="font-weight:700;color:#856404;"></span>
+                            <button onclick="_consomDeleteSelected()" style="background:#e74c3c;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85em;">🗑 Supprimer</button>
+                            <button onclick="_consomExportSelected()" style="background:#2980b9;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85em;">📤 Exporter</button>
+                            <button onclick="_consomAdjustPriceSelected()" style="background:#27ae60;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85em;">✏️ Ajuster prix</button>
+                            <button onclick="_consomClearSelection()" style="background:none;border:none;color:#856404;cursor:pointer;font-size:1em;padding:0 4px;">✕</button>
+                        </div>
+                    </div>
                     <div id="consommablesTable"></div>
                 </div>
             </div>
@@ -5032,69 +5138,14 @@
 
             <!-- ONGLET FORMATION LOGISTIQUE -->
             <div id="formation-logistique" class="tab-content">
-                <!-- HERO INTRO -->
+                <!-- SÉLECTION APPRENANT -->
                 <div class="section" style="background:linear-gradient(135deg,#e8f4f8,#f5e6f0);border-left:4px solid #6b8fa3;">
-                    <h2 style="margin-bottom:8px;">🏭 Formation Logistique</h2>
-                    <p style="color:#666;margin:0;max-width:700px;">Découvrez les différents systèmes logistiques et technologies utilisés en industrie. Maîtrisez les concepts clés de la supply chain et de la gestion d'entrepôt.</p>
-                </div>
-
-                <!-- APPRENANTS ASSIGNÉS -->
-                <div class="section" style="background:#e8f5e9;border-left:4px solid #27ae60;">
-                    <h3 style="margin-top:0;color:#27ae60;">👥 Apprenants assignés à cette formation</h3>
-                    <div id="assignedLearnersContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;"></div>
-                </div>
-
-                <!-- QUIZ INTERACTIF -->
-                <div class="section" style="background:#fffaed;border-left:4px solid #e67e22;">
-                    <h2>🧠 Quiz - Testez vos Connaissances</h2>
-                    <p style="color:#666;margin-bottom:20px;font-size:0.95em;">Testez votre compréhension des systèmes logistiques :</p>
-
-                    <div id="quizContainer" style="display:block;">
-                        <div id="quizQuestionsWrapper" style="display:none;">
-                            <div id="quizQuestions"></div>
-                        </div>
-                        <div id="quizStartButtons" style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-                            <button class="btn btn-primary" onclick="startFormationQuiz('all')" style="background:#e67e22;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🎯 Démarrer Quiz</button>
-                            <button class="btn" onclick="startFormationQuiz('adaptive')" style="background:#2980b9;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">🧠 Quiz adaptatif</button>
-                            <button class="btn" onclick="openFormationDashboard()" style="background:#6b8fa3;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">📊 Ma progression</button>
-                            <button class="btn btn-secondary" onclick="resetFormationQuiz()" style="background:#bdc3c7;border:none;color:white;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">↻ Réinitialiser</button>
-                        </div>
-                    </div>
-
-                    <div id="quizResults" style="display:none;background:white;padding:20px;border-radius:10px;border:2px solid #e67e22;margin-top:15px;">
-                        <h3 style="color:#e67e22;margin-top:0;">📊 Vos Résultats</h3>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:15px;">
-                            <div style="padding:15px;background:#fffaed;border-radius:8px;text-align:center;">
-                                <div style="font-size:2em;font-weight:bold;color:#e67e22;" id="quizScoreDisplay">0/10</div>
-                                <div style="color:#666;font-size:0.9em;">Score</div>
-                            </div>
-                            <div style="padding:15px;background:#fffaed;border-radius:8px;text-align:center;">
-                                <div style="font-size:2em;font-weight:bold;color:#e67e22;" id="quizPercentDisplay">0%</div>
-                                <div style="color:#666;font-size:0.9em;">Réussite</div>
-                            </div>
-                        </div>
-                        <div id="quizFeedback" style="color:#666;line-height:1.6;margin-bottom:15px;"></div>
-                        <button class="btn btn-primary" onclick="resetFormationQuiz()" style="background:#e67e22;border:none;color:white;padding:10px 20px;border-radius:8px;cursor:pointer;">Recommencer</button>
-                    </div>
-                </div>
-
-                <!-- DEMANDE DE FORMATION -->
-                <div class="section" style="background:#f0f8f5;border-left:4px solid #27ae60;">
-                    <h2>📚 Demander une formation</h2>
-                    <p style="color:#7a9db1;margin-bottom:12px;">Vous souhaitez vous former? Demandez une formation en sélectionnant le domaine qui vous intéresse</p>
-                    <div class="form-row">
-                        <select id="trainingCategoryRequest" style="padding:8px;border:1px solid #ddd;border-radius:4px;flex:1;">
-                            <option value="">-- Sélectionner un domaine de formation --</option>
-                            <option value="Logistique - WMS">📦 Logistique - WMS (Warehouse Management System)</option>
-                            <option value="Logistique - ERP">🏢 Logistique - ERP (Enterprise Resource Planning)</option>
-                            <option value="Logistique - TMS">🚚 Logistique - TMS (Transport Management System)</option>
-                            <option value="Automatisation - Convoyeurs">⚙️ Automatisation - Convoyeurs & AGV</option>
-                            <option value="RFID & Traçabilité">📡 RFID & Traçabilité</option>
-                            <option value="Méthodes - Kanban">📋 Méthodes - Kanban & Lean</option>
-                            <option value="Organisation - 5S">🧹 Organisation - 5S (Poste de travail)</option>
-                        </select>
-                        <button class="btn" onclick="requestFormationTraining()" style="background:#27ae60;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;">✉️ Demander</button>
-                    </div>
+                    <h2 style="margin-bottom:6px;">🏭 Mes Formations</h2>
+                    <p style="color:#666;margin:0 0 16px;font-size:0.95em;">Sélectionnez votre nom pour accéder à votre parcours de formation.</p>
+                    <select id="learnerFormationSelect" onchange="renderLearnerFormations()" style="padding:10px 14px;border:1px solid #c0d8e8;border-radius:8px;width:100%;max-width:420px;font-size:1em;background:white;">
+                        <option value="">-- Qui êtes-vous ? --</option>
+                    </select>
+                    <div id="learnerFormationsContainer"></div>
                 </div>
 
                 <!-- SYSTÈMES LOGISTIQUES -->
@@ -5198,21 +5249,25 @@
                 <div class="section" style="background:#f0f8ff;border-left:4px solid #2980b9;">
                     <h2>💡 Concepts Clés à Retenir</h2>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;">
-                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;flex-direction:column;">
                             <h4 style="color:#2980b9;margin-top:0;">Supply Chain</h4>
-                            <p style="color:#666;font-size:0.9em;margin:5px 0;">Ensemble des flux (matières, informations, finances) du fournisseur au client final.</p>
+                            <p style="color:#666;font-size:0.9em;margin:5px 0 12px;flex:1;">Ensemble des flux (matières, informations, finances) du fournisseur au client final.</p>
+                            <a href="https://fr.wikipedia.org/wiki/Supply_chain" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#2980b9;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #d4e8ff;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0f8ff'" onmouseout="this.style.background='transparent'">🔗 En savoir plus</a>
                         </div>
-                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;flex-direction:column;">
                             <h4 style="color:#2980b9;margin-top:0;">KPI Logistique</h4>
-                            <p style="color:#666;font-size:0.9em;margin:5px 0;">Indicateurs : délai, coût, qualité, taux de service, rotation des stocks.</p>
+                            <p style="color:#666;font-size:0.9em;margin:5px 0 12px;flex:1;">Indicateurs : délai, coût, qualité, taux de service, rotation des stocks.</p>
+                            <a href="https://fr.wikipedia.org/wiki/Indicateur_cl%C3%A9_de_performance" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#2980b9;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #d4e8ff;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0f8ff'" onmouseout="this.style.background='transparent'">🔗 En savoir plus</a>
                         </div>
-                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;flex-direction:column;">
                             <h4 style="color:#2980b9;margin-top:0;">Flux Tendu</h4>
-                            <p style="color:#666;font-size:0.9em;margin:5px 0;">Production et livraison juste-à-temps pour minimiser les stocks et les coûts.</p>
+                            <p style="color:#666;font-size:0.9em;margin:5px 0 12px;flex:1;">Production et livraison juste-à-temps pour minimiser les stocks et les coûts.</p>
+                            <a href="https://fr.wikipedia.org/wiki/Flux_tendu" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#2980b9;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #d4e8ff;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0f8ff'" onmouseout="this.style.background='transparent'">🔗 En savoir plus</a>
                         </div>
-                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                        <div style="padding:15px;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;flex-direction:column;">
                             <h4 style="color:#2980b9;margin-top:0;">Traçabilité</h4>
-                            <p style="color:#666;font-size:0.9em;margin:5px 0;">Capacité à suivre un article/palette tout au long de son parcours logistique.</p>
+                            <p style="color:#666;font-size:0.9em;margin:5px 0 12px;flex:1;">Capacité à suivre un article/palette tout au long de son parcours logistique.</p>
+                            <a href="https://fr.wikipedia.org/wiki/Tra%C3%A7abilit%C3%A9" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#2980b9;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #d4e8ff;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0f8ff'" onmouseout="this.style.background='transparent'">🔗 En savoir plus</a>
                         </div>
                     </div>
                 </div>
@@ -5224,43 +5279,47 @@
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
 
                         <!-- AMAZON WMS -->
-                        <div style="background:white;border-radius:10px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+                        <div style="background:white;border-radius:10px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.08);display:flex;flex-direction:column;">
                             <h4 style="color:#f39c12;margin-top:0;">📦 Amazon - WMS & Automation</h4>
-                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.5;">
+                            <p style="color:#666;font-size:0.9em;margin:0 0 12px;line-height:1.5;flex:1;">
                                 <strong>Défi :</strong> Gérer 150+ entrepôts mondiaux avec millions de SKU<br>
                                 <strong>Solution :</strong> WMS propriétaire + robots Kiva AGV<br>
                                 <strong>Résultat :</strong> Livraison 24-48h, précision 99.9%
                             </p>
+                            <a href="https://fr.wikipedia.org/wiki/Amazon_(entreprise)" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#f39c12;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #f5d4a8;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#fffaf2'" onmouseout="this.style.background='transparent'">🔗 En savoir plus</a>
                         </div>
 
                         <!-- DECATHLON KANBAN -->
-                        <div style="background:white;border-radius:10px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+                        <div style="background:white;border-radius:10px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.08);display:flex;flex-direction:column;">
                             <h4 style="color:#f39c12;margin-top:0;">🏪 Decathlon - Kanban & 5S</h4>
-                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.5;">
+                            <p style="color:#666;font-size:0.9em;margin:0 0 12px;line-height:1.5;flex:1;">
                                 <strong>Défi :</strong> 50+ catégories, flux ultra-rapide<br>
                                 <strong>Solution :</strong> Kanban visuel, zones de picking 5S optimisées<br>
                                 <strong>Résultat :</strong> Rotation rapide, zéro rupture
                             </p>
+                            <a href="https://fr.wikipedia.org/wiki/Decathlon_(entreprise)" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#f39c12;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #f5d4a8;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#fffaf2'" onmouseout="this.style.background='transparent'">🔗 En savoir plus</a>
                         </div>
 
                         <!-- CARREFOUR ERP -->
-                        <div style="background:white;border-radius:10px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+                        <div style="background:white;border-radius:10px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.08);display:flex;flex-direction:column;">
                             <h4 style="color:#f39c12;margin-top:0;">🏬 Carrefour - ERP & FIFO</h4>
-                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.5;">
+                            <p style="color:#666;font-size:0.9em;margin:0 0 12px;line-height:1.5;flex:1;">
                                 <strong>Défi :</strong> Traçabilité alimentaire critique (FIFO/FEFO)<br>
                                 <strong>Solution :</strong> ERP intégré + gestion dates expiration<br>
                                 <strong>Résultat :</strong> Conformité 100%, zéro perte produits
                             </p>
+                            <a href="https://fr.wikipedia.org/wiki/Carrefour_(enseigne)" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#f39c12;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #f5d4a8;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#fffaf2'" onmouseout="this.style.background='transparent'">🔗 En savoir plus</a>
                         </div>
 
                         <!-- DPDK TMS -->
-                        <div style="background:white;border-radius:10px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+                        <div style="background:white;border-radius:10px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,0.08);display:flex;flex-direction:column;">
                             <h4 style="color:#f39c12;margin-top:0;">🚚 DPD/DHL - TMS & RFID</h4>
-                            <p style="color:#666;font-size:0.9em;margin:0;line-height:1.5;">
+                            <p style="color:#666;font-size:0.9em;margin:0 0 12px;line-height:1.5;flex:1;">
                                 <strong>Défi :</strong> Optimiser 10k+ livraisons/jour en Europe<br>
                                 <strong>Solution :</strong> TMS avancé + suivi RFID temps réel<br>
                                 <strong>Résultat :</strong> -15% coûts transport, +95% satisfaction
                             </p>
+                            <a href="https://fr.wikipedia.org/wiki/DHL" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#f39c12;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #f5d4a8;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#fffaf2'" onmouseout="this.style.background='transparent'">🔗 En savoir plus</a>
                         </div>
                     </div>
                 </div>
@@ -5270,54 +5329,134 @@
                     <h2>📚 Glossaire Logistique</h2>
                     <p style="color:#666;margin-bottom:20px;font-size:0.95em;">Termes essentiels à connaître :</p>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;">
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">SKU</strong> - Stock Keeping Unit<br>
-                            <span style="color:#666;font-size:0.9em;">Numéro unique d'identification pour chaque variante de produit</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">SKU - Stock Keeping Unit</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Numéro unique d'identification pour chaque variante de produit (taille, couleur, conditionnement).</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Ex : REF-CAT-001 — lié au code-barres EAN/GS1</div>
+                            <a href="https://fr.wikipedia.org/wiki/Unit%C3%A9_de_gestion_des_stocks" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">Picking</strong><br>
-                            <span style="color:#666;font-size:0.9em;">Opération de sélection/prélèvement de produits en entrepôt selon une commande</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Picking</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Prélèvement de produits en entrepôt pour préparer une commande client.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Méthodes : voice picking, pick-to-light, batch picking, zone picking</div>
+                            <a href="https://fr.wikipedia.org/wiki/Pr%C3%A9paration_de_commandes" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">Palettisation</strong><br>
-                            <span style="color:#666;font-size:0.9em;">Groupage de cartons/articles sur une palette pour transport/stockage</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Palettisation</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Groupage de cartons/articles sur une palette pour transport et stockage.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Palette EUR : 80×120 cm — charge max ~1 500 kg</div>
+                            <a href="https://fr.wikipedia.org/wiki/Palette_(logistique)" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">FIFO</strong> - First In, First Out<br>
-                            <span style="color:#666;font-size:0.9em;">Méthode : premier article entré est premier sorti (rotation des stocks)</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">FIFO - First In, First Out</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Premier article entré = premier sorti. Garantit la rotation et évite les produits périmés.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Obligatoire en alimentaire et pharmaceutique</div>
+                            <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_FIFO" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">FEFO</strong> - First Expire, First Out<br>
-                            <span style="color:#666;font-size:0.9em;">Priorité à la date d'expiration (secteur alimentaire/pharma)</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">FEFO - First Expire, First Out</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Priorité aux produits dont la date d'expiration est la plus proche, quel que soit leur ordre d'arrivée.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Réglementation CE 178/2002 — traçabilité alimentaire</div>
+                            <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_FEFO" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">Chaîne de froid</strong><br>
-                            <span style="color:#666;font-size:0.9em;">Maîtrise de la température pour produits périssables (frais, surgelés)</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Chaîne de froid</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Maintien continu de la température de produits périssables de la production au client.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Frais : 0–4 °C &nbsp;|&nbsp; Surgelés : &lt; −18 °C &nbsp;|&nbsp; Ambiant : 15–25 °C</div>
+                            <a href="https://fr.wikipedia.org/wiki/Cha%C3%AEne_du_froid" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">Flux Tendu</strong><br>
-                            <span style="color:#666;font-size:0.9em;">Juste-à-temps : livraison synchrone à la demande, zéro stock excédentaire</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Flux Tendu</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Livraison synchronisée à la demande réelle pour minimiser les stocks intermédiaires.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Inventé par Toyota (Taiichi Ohno, 1950s) — pilier du Lean Manufacturing</div>
+                            <a href="https://fr.wikipedia.org/wiki/Flux_tendu" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">Taux de service</strong><br>
-                            <span style="color:#666;font-size:0.9em;">% de commandes livrées à temps et au complet</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Taux de service</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Pourcentage de commandes livrées à temps, au complet et sans erreur.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Formule : commandes OK / commandes totales × 100 — Objectif &gt; 98 %</div>
+                            <a href="https://fr.wikipedia.org/wiki/Taux_de_service" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">Rotation de stock</strong><br>
-                            <span style="color:#666;font-size:0.9em;">Nombre de fois qu'un stock se renouvelle sur une période (mensuelle/annuelle)</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Rotation de stock</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Nombre de fois qu'un stock se renouvelle entièrement sur une période donnée.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Formule : CA annuel / stock moyen — Plus c'est élevé, mieux c'est</div>
+                            <a href="https://fr.wikipedia.org/wiki/Rotation_des_stocks" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">Lead time</strong><br>
-                            <span style="color:#666;font-size:0.9em;">Délai entre passation de commande et réception</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Lead time</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Délai total entre la passation d'une commande et sa réception effective.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">= délai fournisseur + transit + réception/contrôle entrepôt</div>
+                            <a href="https://fr.wikipedia.org/wiki/D%C3%A9lai_de_livraison" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">EDI</strong> - Échange de Données Informatisé<br>
-                            <span style="color:#666;font-size:0.9em;">Transmission automatique de données entre systèmes informatiques</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">EDI - Échange de Données Informatisé</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Transmission automatique et standardisée de documents commerciaux entre systèmes.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Standards : EDIFACT, XML/AS2 — bons de commande, factures, ASN</div>
+                            <a href="https://fr.wikipedia.org/wiki/%C3%89change_de_donn%C3%A9es_informatique" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
-                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;">
-                            <strong style="color:#27ae60;">Transpallet / Chariot élévateur</strong><br>
-                            <span style="color:#666;font-size:0.9em;">Équipements de manutention pour déplacer palettes/charges</span>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #27ae60;display:flex;flex-direction:column;">
+                            <strong style="color:#27ae60;margin-bottom:3px;">Transpallet / Chariot élévateur</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Équipements de manutention pour déplacer et élever des palettes ou charges lourdes.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f8fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Types : manuel, électrique, frontal, rétractable — CACES requis en France</div>
+                            <a href="https://fr.wikipedia.org/wiki/Chariot_%C3%A9l%C3%A9vateur" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#27ae60;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #b8e5d0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#f0fff8'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
                         </div>
+
+                        <!-- NOUVEAUX TERMES -->
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">Cross-docking</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Transit de marchandises sans stockage : les produits reçus sont immédiatement réorientés vers les quais de départ.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Réduit les coûts de stockage de 30–50 % — utilisé par Walmart, Lidl</div>
+                            <a href="https://fr.wikipedia.org/wiki/Cross-docking" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
+                        </div>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">Analyse ABC - Loi de Pareto</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Classification des articles par valeur/fréquence pour prioriser la gestion du stock.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">A : 20 % articles = 80 % valeur &nbsp;|&nbsp; B : 30 % &nbsp;|&nbsp; C : 50 % à faible valeur</div>
+                            <a href="https://fr.wikipedia.org/wiki/M%C3%A9thode_ABC_(logistique)" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
+                        </div>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">Stock de sécurité</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Quantité tampon conservée pour absorber les variations de demande ou les retards fournisseur.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Formule : Z × σ_demande × √Lead time — lié au niveau de service cible</div>
+                            <a href="https://fr.wikipedia.org/wiki/Stock_de_s%C3%A9curit%C3%A9" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
+                        </div>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">3PL / 4PL - Logistique externalisée</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Externalisation partielle (3PL) ou totale (4PL) de la chaîne logistique à un prestataire spécialisé.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Ex 3PL : Geodis, FM Logistic &nbsp;|&nbsp; Ex 4PL : Accenture Supply Chain</div>
+                            <a href="https://fr.wikipedia.org/wiki/Logistique_tierce_partie" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
+                        </div>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">MRP - Material Requirements Planning</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Calcul automatique des besoins en composants et matières à partir du plan de production.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">MRP II intègre la capacité machines — souvent intégré dans l'ERP</div>
+                            <a href="https://fr.wikipedia.org/wiki/Planification_des_besoins_en_composants" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
+                        </div>
+
+                        <div style="padding:12px 15px;background:white;border-radius:8px;border-left:3px solid #1a8a5a;display:flex;flex-direction:column;">
+                            <strong style="color:#1a8a5a;margin-bottom:3px;">Slotting - Optimisation des emplacements</strong>
+                            <span style="color:#666;font-size:0.9em;flex:1;">Affectation optimale des articles dans l'entrepôt selon leur fréquence de picking et leur poids.</span>
+                            <div style="margin-top:6px;font-size:0.82em;color:#888;background:#f0fff8;padding:4px 8px;border-radius:4px;margin-bottom:8px;">Articles A → zone dorée (1,0–1,5 m) — réduit les déplacements de 20–40 %</div>
+                            <a href="https://fr.wikipedia.org/wiki/Gestion_des_entrep%C3%B4ts" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#1a8a5a;font-size:0.8em;font-weight:600;text-decoration:none;padding:4px 8px;border:1px solid #a0d8b0;border-radius:5px;width:fit-content;" onmouseover="this.style.background='#e8fff2'" onmouseout="this.style.background='transparent'">🔗 Wikipedia</a>
+                        </div>
+
                     </div>
                 </div>
 
@@ -5325,6 +5464,18 @@
 
             <!-- ONGLET DASHBOARD -->
             <div id="dashboard" class="tab-content active">
+              <!-- Bannière Mode Apprenant (visible uniquement en mode-apprenant) -->
+              <div id="apprenant-welcome" style="display:none;">
+                <div style="background:linear-gradient(135deg,#4e9af1,#27ae60);color:white;border-radius:20px;padding:36px;margin-bottom:24px;text-align:center;box-shadow:0 8px 32px rgba(78,154,241,0.25);">
+                    <div style="font-size:3.5em;margin-bottom:12px;">👋</div>
+                    <h2 style="margin:0 0 10px;font-size:1.7em;font-weight:800;">Bienvenue !</h2>
+                    <p style="margin:0;opacity:0.95;font-size:1.05em;">Utilise les boutons ci-dessus pour accéder à ta formation ou à tes ressources.</p>
+                    <div style="display:flex;justify-content:center;gap:14px;margin-top:22px;flex-wrap:wrap;">
+                        <button onclick="switchTab('formation-logistique');setTimeout(()=>document.getElementById('learnerFormationSelect')?.focus(),400)" style="background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.7);color:white;font-size:1em;font-weight:700;padding:10px 22px;border-radius:12px;cursor:pointer;">🎓 Mes Formations</button>
+                        <button onclick="switchTab('formation-logistique');setTimeout(()=>document.querySelector('#formation-logistique .section:nth-child(2)')?.scrollIntoView({behavior:'smooth'}),400)" style="background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.7);color:white;font-size:1em;font-weight:700;padding:10px 22px;border-radius:12px;cursor:pointer;">📚 Apprendre</button>
+                    </div>
+                </div>
+              </div>
               <div class="section" style="border-left:4px solid #4caf50;">
                 <h2 style="color:#4caf50;">🏠 Dashboard — Accueil</h2>
                 <p style="color:#666;font-size:0.95em;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
@@ -6992,6 +7143,36 @@
         let _pbEndpointPos = { ampli: { x: 300, y: 870 }, baffle: { x: 2550, y: 870 } };
         let _pbZoomIdx = 3;
         const _PB_ZOOM_LEVELS = [0.45, 0.6, 0.75, 1.0, 1.2, 1.4];
+        let _pbLastAddedId = null;
+
+        function pbScrollToCanvasPoint(cx, cy) {
+            const scroll = document.getElementById('pb-board-scroll');
+            if (!scroll) return;
+            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            scroll.scrollLeft = cx * scale - scroll.clientWidth / 2;
+            scroll.scrollTop  = cy * scale - scroll.clientHeight / 2;
+        }
+
+        function pbScrollToEntree() {
+            const el = document.getElementById('pb-endpoint-ampli');
+            const w = el ? el.offsetWidth : 80;
+            const h = el ? el.offsetHeight : 120;
+            pbScrollToCanvasPoint(_pbEndpointPos.ampli.x + w / 2, _pbEndpointPos.ampli.y + h / 2);
+        }
+
+        function pbScrollToFocus() {
+            if (_pbLastAddedId) {
+                const p = pbPedals.find(x => String(x.id) === String(_pbLastAddedId));
+                if (p) {
+                    const el = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
+                    const w = el ? el.offsetWidth : 170;
+                    const h = el ? el.offsetHeight : 110;
+                    pbScrollToCanvasPoint(p.x + w / 2, p.y + h / 2);
+                    return;
+                }
+            }
+            pbScrollToEntree();
+        }
 
         function pbZoom(dir) {
             _pbZoomIdx = Math.max(0, Math.min(_PB_ZOOM_LEVELS.length - 1, _pbZoomIdx + dir));
@@ -7000,7 +7181,7 @@
             if (el) el.style.transform = `scale(${s})`;
             const lbl = document.getElementById('pb-zoom-label');
             if (lbl) lbl.textContent = Math.round(s * 100) + '%';
-            requestAnimationFrame(pbDrawCables);
+            requestAnimationFrame(() => { pbDrawCables(); pbScrollToFocus(); });
         }
 
         function pbStartDrag(e, id) {
@@ -7241,14 +7422,17 @@
             const count = pbPedals.filter(p => p.parallel === isParallel).length;
             const x = 700 + count * 190;
             const y = isParallel ? 620 : 870;
+            const newId = Date.now();
             pbPedals.push({
-                id: Date.now(), type, label: label || type,
+                id: newId, type, label: label || type,
                 desc: desc || '', categorie: categorie || '',
                 value: value || 1, tempsUnit: tempsUnit || 1,
                 coutUnit: coutUnit || 0, parallel: isParallel, perPiece: true, x, y,
                 color: st.bg, border: st.border, led: st.led, foot: st.foot,
             });
+            _pbLastAddedId = newId;
             pbRender();
+            requestAnimationFrame(pbScrollToFocus);
         }
 
         function pbToggleParallel(id) {
@@ -7720,11 +7904,48 @@
             switchTab('prestations', true);
         }
 
+        function pbFitView() {
+            const scroll = document.getElementById('pb-board-scroll');
+            if (!scroll) return;
+            const ampliEl  = document.getElementById('pb-endpoint-ampli');
+            const baffleEl = document.getElementById('pb-endpoint-baffle');
+            const pts = [
+                { x: _pbEndpointPos.ampli.x,  y: _pbEndpointPos.ampli.y,
+                  w: ampliEl  ? ampliEl.offsetWidth  : 84, h: ampliEl  ? ampliEl.offsetHeight : 100 },
+                { x: _pbEndpointPos.baffle.x, y: _pbEndpointPos.baffle.y,
+                  w: baffleEl ? baffleEl.offsetWidth : 84, h: baffleEl ? baffleEl.offsetHeight : 100 },
+            ];
+            pbPedals.forEach(p => {
+                const el = document.querySelector(`.pb-pedal[data-id="${p.id}"]`);
+                pts.push({ x: p.x, y: p.y, w: el ? el.offsetWidth : 170, h: el ? el.offsetHeight : 110 });
+            });
+            const pad = 70;
+            const minX = Math.min(...pts.map(p => p.x)) - pad;
+            const minY = Math.min(...pts.map(p => p.y)) - pad;
+            const maxX = Math.max(...pts.map(p => p.x + p.w)) + pad;
+            const maxY = Math.max(...pts.map(p => p.y + p.h)) + pad;
+            const targetScale = Math.min(scroll.clientWidth / (maxX - minX), scroll.clientHeight / (maxY - minY), 1.0);
+            let bestIdx = 0;
+            _PB_ZOOM_LEVELS.forEach((s, i) => {
+                if (Math.abs(s - targetScale) < Math.abs(_PB_ZOOM_LEVELS[bestIdx] - targetScale)) bestIdx = i;
+            });
+            _pbZoomIdx = bestIdx;
+            const scale = _PB_ZOOM_LEVELS[_pbZoomIdx];
+            const canvasEl = document.getElementById('pb-canvas');
+            if (canvasEl) canvasEl.style.transform = `scale(${scale})`;
+            const lbl = document.getElementById('pb-zoom-label');
+            if (lbl) lbl.textContent = Math.round(scale * 100) + '%';
+            pbScrollToCanvasPoint((minX + maxX) / 2, (minY + maxY) / 2);
+            requestAnimationFrame(pbDrawCables);
+        }
+
         function renderPedalboard() {
             pbInit();
             window.addEventListener('resize', () => requestAnimationFrame(pbDrawCables));
             document.getElementById('pb-board')?.addEventListener('scroll', () => requestAnimationFrame(pbDrawCables));
             _pbInitPan();
+            // Vue globale à l'ouverture : zoom auto-fit sur tout le contenu
+            requestAnimationFrame(pbFitView);
         }
 
         let _pbPanActive = false;
@@ -7754,6 +7975,14 @@
                 document.addEventListener('mouseup', onUp);
                 e.preventDefault();
             });
+
+            // Zoom molette / pinch trackpad : Ctrl+scroll ou ctrlKey (pinch)
+            scroll.addEventListener('wheel', e => {
+                if (!e.ctrlKey) return;
+                e.preventDefault();
+                const dir = e.deltaY < 0 ? 1 : -1;
+                pbZoom(dir);
+            }, { passive: false });
         }
 
         // ── Fiches d'intervention rapide ──────────────────────
@@ -8663,8 +8892,8 @@
             if (tabEl) tabEl.classList.add('active');
 
             if (tabName === 'dashboard') renderDashboard();
-            else if (tabName === 'catalogue') renderCatalogue();
-            else if (tabName === 'formation') { updateLearnerTrainingSelector(); renderLearners(); renderReferenceDocuments(); }
+            else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
+            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); }
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
             else if (tabName === 'clients') renderClients();
@@ -8683,7 +8912,7 @@
             else if (tabName === 'accompagnement')      renderAccompagnement();
             else if (tabName === 'historique')          renderHistory();
             else if (tabName === 'gantt')               { loadGanttPrestSelect(); renderGantt(); }
-            else if (tabName === 'formation-logistique') renderFormationLogistiqueApprenants();
+            else if (tabName === 'formation-logistique') { updateFormationSelectors(); renderLearnerFormations(); }
             else if (tabName === 'procedures') renderProceduresTab();
             // Show/hide recap popup (always runs after the tab switch)
             const _pbPop = document.getElementById('pb-recap-popup');
@@ -8699,6 +8928,19 @@
             updateBottomNavActive(tabName);
             updateBreadcrumbs(tabName);
             _navPush(tabName);
+
+            // Déverrouille les étapes onboarding correspondantes au tab visité
+            try {
+                const _obMap = { catalogue:'catalogue', clients:'clients', calculateur:'prest', prestations:'prest', config:'config', parametrage:'config' };
+                const _obKey = _obMap[tabName];
+                if (_obKey) {
+                    let _obHide = JSON.parse(localStorage.getItem('onboardingForceHide') || '[]');
+                    if (_obHide.includes(_obKey)) {
+                        localStorage.setItem('onboardingForceHide', JSON.stringify(_obHide.filter(k => k !== _obKey)));
+                        renderOnboardingChecklist();
+                    }
+                }
+            } catch(e) {}
         }
 
         // Met en surbrillance le bouton actif de la bottom-nav mobile
@@ -9916,6 +10158,8 @@
                 tempsCoordMin: parseFloat(document.getElementById('tempsCoordMin')?.value || 0),
                 tempsPrepMin: parseFloat(document.getElementById('tempsPrepMin')?.value || 0),
                 tempsNettoyageMin: parseFloat(document.getElementById('tempsNettoyageMin')?.value || 0),
+                dateDebut: document.getElementById('calcDateDebut')?.value || null,
+                dateFin:   document.getElementById('calcDateFin')?.value   || null,
                 attachments: currentAttachments,
                 statut: 'devis'
             };
@@ -9927,8 +10171,9 @@
                     prest.statut = old.statut;
                     prest.heuresReelles = old.heuresReelles;
                     prest.notesReel = old.notesReel;
-                    prest.dateDebut = old.dateDebut;
-                    prest.dateFin = old.dateFin;
+                    // Priorité aux dates saisies dans le formulaire, sinon conserver les anciennes
+                    prest.dateDebut = prest.dateDebut || old.dateDebut || null;
+                    prest.dateFin   = prest.dateFin   || old.dateFin   || null;
                     // Historique des révisions
                     prest.revisions = [...(old.revisions || []), {
                         version: (old.revisions || []).length + 1,
@@ -9968,6 +10213,8 @@
             document.getElementById('prestation').value = '';
             document.getElementById('reference').value = '';
             document.getElementById('date').valueAsDate = new Date();
+            const _rd = document.getElementById('calcDateDebut'); if (_rd) _rd.value = '';
+            const _rf = document.getElementById('calcDateFin');   if (_rf) _rf.value = '';
             document.getElementById('nbCEA').value = '1';
             document.getElementById('nbMSP').value = '50';
             document.getElementById('nbPieces').value = '1';
@@ -10287,6 +10534,10 @@
             document.getElementById('prestation').value = p.prestation || '';
             document.getElementById('reference').value = p.reference || '';
             if (p.date) document.getElementById('date').value = p.date;
+            const _deb = document.getElementById('calcDateDebut');
+            const _fin = document.getElementById('calcDateFin');
+            if (_deb) _deb.value = p.dateDebut || '';
+            if (_fin) _fin.value = p.dateFin || '';
             document.getElementById('nbCEA').value = p.nbCEA || 1;
             document.getElementById('nbMSP').value = p.nbMSP !== undefined ? Math.round(p.nbMSP * 100) : 50;
             document.getElementById('nbPieces').value = p.nbPieces || 1;
@@ -10750,6 +11001,37 @@
             container.innerHTML = html;
         }
 
+        const _GESTE_PREFIXES = {
+            'Réception':     'REC',
+            'Contrôle':      'CTR',
+            'Étiquetage':    'ETQ',
+            'Assemblage':    'ASM',
+            'Stockage':      'STK',
+            'Préparation':   'PRE',
+            'Expédition':    'EXP',
+            'Administratif': 'ADM'
+        };
+
+        function autoGesteCode() {
+            const cat = document.getElementById('newCategorie')?.value;
+            const codeField = document.getElementById('newCode');
+            const hint = document.getElementById('autoCodeHint');
+            if (!cat || !codeField) return;
+            const prefix = _GESTE_PREFIXES[cat];
+            if (!prefix) return;
+            // Trouver le prochain numéro disponible
+            const existing = (catalogueGestes || [])
+                .map(g => g.code)
+                .filter(c => c.startsWith(prefix + '-'))
+                .map(c => parseInt(c.slice(prefix.length + 1)))
+                .filter(n => !isNaN(n));
+            let next = 1;
+            while (existing.includes(next)) next++;
+            const suggested = `${prefix}-${String(next).padStart(2, '0')}`;
+            codeField.value = suggested;
+            if (hint) hint.textContent = '(auto)';
+        }
+
         function addGeste() {
             // Check permission
             if (!checkPermission('manage_gestes')) {
@@ -10788,12 +11070,12 @@
             saveToStorage();
             renderCatalogue();
             
-            document.getElementById('newCode').value = '';
             document.getElementById('newDescription').value = '';
             document.getElementById('newTemps').value = '';
             document.getElementById('newCoef').value = '1.0';
             document.getElementById('newNotes').value = '';
-            
+            autoGesteCode(); // régénère le prochain code disponible
+
             toast('✅ Geste ajouté au catalogue!', 'success');
         }
 
@@ -10906,19 +11188,21 @@
                 category: category,
                 startDate: startDate,
                 progress: {},
-                assignedDocuments: [] // Liste des IDs de documents assignés
+                assignedDocuments: [],
+                assignedFormations: [], // domains assignés par l'admin
+                quizResults: {}         // { [domain]: { score, total, date, pct } }
             };
 
             learnersList.push(learner);
             saveFormationData();
-            updateLearnerTrainingSelector();
+            updateFormationSelectors();
             renderLearners();
 
             document.getElementById('learnerName').value = '';
             document.getElementById('learnerCategory').value = '';
             document.getElementById('learnerStartDate').value = '';
 
-            toast(`✅ ${name} ajouté à la formation`, 'success');
+            toast(`✅ ${name} ajouté·e à la liste des apprenants`, 'success');
             logAction(`Ajout apprenant formation: ${name} (${category})`, 'CREATE');
         }
 
@@ -11046,11 +11330,7 @@
         }
 
         function updateLearnerTrainingSelector() {
-            const select = document.getElementById('learnerTrainingSelect');
-            if (!select) return;
-
-            select.innerHTML = '<option value="">-- Sélectionner un apprenant --</option>' +
-                learnersList.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+            updateFormationSelectors();
         }
 
         function showLearnerTrainings() {
@@ -11212,72 +11492,432 @@
             `;
         }
 
-        function renderFormationLogistiqueApprenants() {
-            const container = document.getElementById('assignedLearnersContainer');
-            if (!container) return;
+        // ── Nouveau flux formation ─────────────────────────────────────────
 
-            // Get all learners assigned to Formation Logistique
-            const apprenants = learnersList.filter(learner => {
-                // Check if this learner has any Logistique formation assigned
-                const hasLogistiqueFormation = trainingRequests.some(req =>
-                    req.assignedTo === learner.name &&
-                    req.status === 'approved' &&
-                    (req.category.includes('Logistique') || req.category.includes('logistique') ||
-                     req.category.includes('Automatisation') || req.category.includes('RFID') ||
-                     req.category.includes('Kanban') || req.category.includes('5S') || req.category.includes('Organisation'))
-                );
-                return hasLogistiqueFormation;
+        // Met à jour les deux sélecteurs (admin + apprenant)
+        function updateFormationSelectors() {
+            ['adminLearnerSelect','learnerFormationSelect'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                const val = sel.value;
+                sel.innerHTML = `<option value="">${id === 'adminLearnerSelect' ? '-- Sélectionner un apprenant --' : '-- Qui êtes-vous ? --'}</option>`
+                    + learnersList.map(l => `<option value="${l.id}">${escapeHtml(l.name)} (${escapeHtml(l.category)})</option>`).join('');
+                if (val) sel.value = val;
             });
+        }
 
-            if (apprenants.length === 0) {
-                container.innerHTML = '<p style="color:#999;font-style:italic;padding:16px;grid-column:1/-1;">Aucun apprenant assigné à la formation Logistique pour le moment.</p>';
+        // ADMIN : assigne / retire un domaine de formation à un apprenant
+        function assignLearnerDomain(learnerId, domain, checked) {
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.assignedFormations) l.assignedFormations = [];
+            if (checked && !l.assignedFormations.includes(domain)) l.assignedFormations.push(domain);
+            else if (!checked) l.assignedFormations = l.assignedFormations.filter(d => d !== domain);
+            saveFormationData();
+            renderAdminFormationAssign();
+        }
+
+        // ADMIN : affiche le panneau d'assignation pour l'apprenant sélectionné
+        function renderAdminFormationAssign() {
+            const sel = document.getElementById('adminLearnerSelect');
+            const container = document.getElementById('adminFormationAssignContainer');
+            if (!sel || !container) return;
+            const learnerId = sel.value;
+            if (!learnerId) { container.innerHTML = ''; return; }
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.assignedFormations) l.assignedFormations = [];
+            if (!l.assignedDocuments) l.assignedDocuments = [];
+            const domains = typeof FORMATION_DOMAINS !== 'undefined' ? FORMATION_DOMAINS : {};
+            const domainHtml = Object.entries(domains).map(([key, d]) => {
+                const on = l.assignedFormations.includes(key);
+                const res = (l.quizResults || {})[key];
+                const badge = res ? `<span style="font-size:0.72em;padding:2px 6px;border-radius:10px;background:${res.pct>=80?'#27ae60':res.pct>=60?'#e67e22':'#e74c3c'};color:white;margin-left:6px;">${res.pct}%</span>` : '';
+                return `<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid ${on?'#2980b9':'#dde'};background:${on?'#e8f4ff':'#fafafa'};cursor:pointer;transition:all 0.15s;">
+                    <input type="checkbox" ${on?'checked':''} onchange="assignLearnerDomain('${l.id}','${key}',this.checked)">
+                    <span style="font-size:1.1em;">${d.icon}</span>
+                    <span style="font-weight:${on?'600':'400'};color:${on?'#2980b9':'#555'};">${d.label}</span>${badge}
+                </label>`;
+            }).join('');
+            const docHtml = referenceDocuments.length ? referenceDocuments.map(doc => {
+                const on = l.assignedDocuments.includes(doc.id);
+                const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
+                return `<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:6px;border:1px solid ${on?'#27ae60':'#dde'};background:${on?'#e8f9f0':'#fafafa'};cursor:pointer;font-size:0.85em;">
+                    <input type="checkbox" ${on?'checked':''} onchange="toggleDocumentAssignment('${l.id}',${doc.id},this.checked)">
+                    ${ico} ${escapeHtml(doc.title)}
+                </label>`;
+            }).join('') : '<p style="color:#aaa;font-size:0.85em;margin:0;">Aucun document — ajoutez-en ci-dessous.</p>';
+            container.innerHTML = `
+                <div style="margin-top:16px;padding:16px;background:#f8fbff;border-radius:10px;border:1px solid #c8e0f4;">
+                    <h4 style="margin:0 0 12px;color:#2980b9;">📚 Modules de formation — ${escapeHtml(l.name)}</h4>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:16px;">${domainHtml}</div>
+                    <h4 style="margin:0 0 8px;color:#2980b9;">📎 Documents accessibles</h4>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;">${docHtml}</div>
+                </div>`;
+        }
+
+        // APPRENANT : affiche ses formations assignées
+        function renderLearnerFormations() {
+            const sel = document.getElementById('learnerFormationSelect');
+            const container = document.getElementById('learnerFormationsContainer');
+            if (!sel || !container) return;
+            const learnerId = sel.value;
+            if (!learnerId) {
+                container.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Sélectionnez votre nom pour accéder à vos formations.</p>';
+                return;
+            }
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.assignedFormations) l.assignedFormations = [];
+            if (!l.quizResults) l.quizResults = {};
+            const domains = typeof FORMATION_DOMAINS !== 'undefined' ? FORMATION_DOMAINS : {};
+            const docs = (l.assignedDocuments || []).map(id => referenceDocuments.find(d => d.id == id)).filter(Boolean);
+
+            const flowsHtml = renderLearnerFlowsHtml(l);
+
+            if (l.assignedFormations.length === 0) {
+                container.innerHTML = `${flowsHtml}<div style="text-align:center;padding:20px 30px;color:#aaa;margin-top:10px;">
+                    <div style="font-size:2em;margin-bottom:6px;">📋</div>
+                    <p style="font-size:0.9em;">Aucun quiz de domaine assigné.<br>Commencez par les parcours ci-dessus !</p>
+                </div>`;
                 return;
             }
 
-            container.innerHTML = apprenants.map(learner => {
-                const formations = trainingRequests.filter(r =>
-                    r.assignedTo === learner.name &&
-                    r.status === 'approved' &&
-                    (r.category.includes('Logistique') || r.category.includes('Automatisation') ||
-                     r.category.includes('RFID') || r.category.includes('Kanban') ||
-                     r.category.includes('5S') || r.category.includes('Organisation'))
-                );
+            const cards = l.assignedFormations.map(key => {
+                const d = domains[key];
+                if (!d) return '';
+                const res = l.quizResults[key];
+                const pct = res ? res.pct : null;
+                const statusColor = pct === null ? '#a0b0c0' : pct >= 80 ? '#27ae60' : pct >= 60 ? '#e67e22' : '#e74c3c';
+                const statusLabel = pct === null ? '⬜ Non commencé' : pct >= 80 ? '✅ Réussi' : pct >= 60 ? '⚠️ À améliorer' : '❌ À refaire';
+                return `<div style="background:white;border-radius:12px;padding:18px;border:2px solid ${statusColor};box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;flex-direction:column;gap:10px;">
+                    <div style="font-size:2.2em;">${d.icon}</div>
+                    <div>
+                        <div style="font-weight:700;color:#2d3e50;font-size:1em;">${d.label}</div>
+                        <div style="font-size:0.8em;color:${statusColor};font-weight:600;margin-top:4px;">${statusLabel}${pct !== null ? ` — ${pct}%` : ''}</div>
+                    </div>
+                    ${pct !== null ? `<div style="background:#eee;border-radius:4px;height:6px;"><div style="background:${statusColor};width:${pct}%;height:100%;border-radius:4px;"></div></div>` : ''}
+                    ${res ? `<div style="font-size:0.78em;color:#999;">Dernier essai : ${new Date(res.date).toLocaleDateString('fr-FR')} — ${res.score}/${res.total}</div>` : ''}
+                    <button onclick="_startLearnerQuiz('${l.id}','${key}')" style="width:100%;padding:9px;border-radius:8px;border:none;background:${pct===null?'#e67e22':pct>=80?'#27ae60':'#2980b9'};color:white;cursor:pointer;font-weight:700;font-size:0.88em;">
+                        ${pct === null ? '🎯 Commencer' : '🔄 Refaire le quiz'}
+                    </button>
+                </div>`;
+            }).join('');
 
-                return `
-                    <div style="background:white;border-radius:8px;padding:16px;border-left:4px solid #27ae60;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
-                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
-                            <div>
-                                <h4 style="margin:0 0 4px;color:#27ae60;">${learner.name}</h4>
-                                <p style="margin:0;font-size:0.85em;color:#666;">📚 ${learner.category}</p>
-                            </div>
-                            <div style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:0.8em;font-weight:600;">
-                                ${formations.length} formation(s)
-                            </div>
-                        </div>
-                        <div style="border-top:1px solid #eee;padding-top:10px;">
-                            ${formations.map(f => {
-                                const stages = [
-                                    { label: 'Demandée', emoji: '⏳', completed: true },
-                                    { label: 'Approuvée', emoji: '✅', completed: f.status === 'approved' },
-                                    { label: 'Quiz', emoji: '🎯', completed: f.quizCompletedAt !== undefined && f.quizCompletedAt !== null }
-                                ];
-                                return `
-                                    <div style="margin-bottom:8px;padding:8px;background:#f5f5f5;border-radius:6px;">
-                                        <div style="font-size:0.9em;font-weight:600;color:#333;margin-bottom:6px;">📖 ${f.category}</div>
-                                        <div style="display:flex;gap:6px;font-size:1.2em;">
-                                            ${stages.map((s, idx) => `
-                                                <span title="${s.label}" style="opacity:${s.completed ? '1' : '0.3'};cursor:help;">
-                                                    ${s.emoji}
-                                                </span>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
+            const docsHtml = docs.length ? `<div style="margin-top:20px;padding:14px;background:#f5f9fc;border-radius:10px;border-left:3px solid #a8d5e2;">
+                <h4 style="margin:0 0 10px;color:#5a7b8f;">📎 Mes documents</h4>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    ${docs.map(doc => {
+                        const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
+                        return `<a href="${doc.url||'#'}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.85em;">${ico} ${escapeHtml(doc.title)}</a>`;
+                    }).join('')}
+                </div>
+            </div>` : '';
+
+            const quizSection = `<div style="margin-top:26px;">
+                    <h3 style="color:#5a7b8f;font-size:0.95em;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:6px;">❓ Mes Quiz de domaine</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">${cards}</div>
+                </div>`;
+
+            container.innerHTML = `${flowsHtml}${quizSection}${docsHtml}`;
+        }
+
+        // ── Flux d'apprentissage ──────────────────────────────────────────────
+        const LEARNING_FLOWS = [
+            {
+                id: 'wms_basics', label: 'Découverte du WMS', icon: '📦', color: '#4e9af1',
+                desc: 'Les fondamentaux des systèmes de gestion d\'entrepôt',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'C\'est quoi le WMS ?', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz Systèmes', icon: '❓', dur: '5 min', domain: 'systemes', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Badge WMS', icon: '🏅', dur: '' }
+                ]
+            },
+            {
+                id: 'stock_methods', label: 'Méthodes de stock', icon: '🔄', color: '#27ae60',
+                desc: 'FIFO, FEFO, Kanban : maîtriser les flux de marchandises',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'FIFO / FEFO / Kanban', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz Méthodes', icon: '❓', dur: '5 min', domain: 'methodes', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Expert Méthodes', icon: '🏅', dur: '' }
+                ]
+            },
+            {
+                id: 'operations', label: 'Opérations entrepôt', icon: '🏭', color: '#e67e22',
+                desc: 'Réception, picking, emballage, expédition — le cycle complet',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'Le cycle entrepôt', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz Opérations', icon: '❓', dur: '5 min', domain: 'operations', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Opérateur Expert', icon: '🏅', dur: '' }
+                ]
+            },
+            {
+                id: 'kpi_logistique', label: 'KPI Logistiques', icon: '📊', color: '#8e44ad',
+                desc: 'Comprendre et interpréter les indicateurs clés de performance',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'Les KPI essentiels', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz KPI', icon: '❓', dur: '5 min', domain: 'kpi', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Analyste KPI', icon: '🏅', dur: '' }
+                ]
+            },
+            {
+                id: 'grands_comptes', label: 'Grands Comptes', icon: '🏬', color: '#c0392b',
+                desc: 'Amazon, Décathlon, Carrefour : comment les leaders organisent leur logistique',
+                steps: [
+                    { id: 's1', type: 'lecture', label: 'Les grands acteurs', icon: '📖', dur: '5 min' },
+                    { id: 's2', type: 'quiz', label: 'Quiz Retailers', icon: '❓', dur: '5 min', domain: 'retailers', minScore: 60 },
+                    { id: 's3', type: 'badge', label: 'Expert Retail', icon: '🏅', dur: '' }
+                ]
+            }
+        ];
+
+        const FLOW_LECTURES = {
+            wms_basics: {
+                title: 'WMS — Warehouse Management System',
+                icon: '📦',
+                html: `<h3>📦 Le WMS, c'est quoi ?</h3>
+                    <p>Un <strong>WMS (Warehouse Management System)</strong> est un logiciel spécialisé qui pilote toutes les opérations d'un entrepôt en temps réel.</p>
+                    <ul>
+                        <li><strong>Réception</strong> — enregistre les marchandises à l'arrivée, contrôle les quantités</li>
+                        <li><strong>Stockage</strong> — attribue automatiquement les emplacements optimaux</li>
+                        <li><strong>Picking</strong> — génère des ordres de prélèvement pour les préparateurs</li>
+                        <li><strong>Expédition</strong> — vérifie et valide les colis avant départ</li>
+                        <li><strong>Inventaire</strong> — suivi en temps réel des stocks et des mouvements</li>
+                    </ul>
+                    <h3>🏭 Exemples de WMS utilisés en industrie</h3>
+                    <ul>
+                        <li><strong>SAP WM / EWM</strong> — leader mondial, intégré à l'ERP SAP</li>
+                        <li><strong>Reflex WMS</strong> — solution française très répandue</li>
+                        <li><strong>Manhattan Associates</strong> — orienté grands comptes e-commerce</li>
+                        <li><strong>Generix</strong> — fort en France et Europe</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : le WMS optimise l'entrepôt, l'ERP gère l'entreprise entière, le TMS gère le transport. Ces 3 systèmes sont souvent connectés.</div>`
+            },
+            stock_methods: {
+                title: 'Méthodes de gestion des stocks',
+                icon: '🔄',
+                html: `<h3>🔄 Les grandes méthodes de rotation</h3>
+                    <ul>
+                        <li><strong>FIFO</strong> (First In, First Out) — Premier entré, premier sorti. La règle de base pour produits standards.</li>
+                        <li><strong>FEFO</strong> (First Expire, First Out) — Priorité à la date d'expiration la plus proche. Obligatoire pour les produits alimentaires et pharmaceutiques.</li>
+                        <li><strong>LIFO</strong> (Last In, First Out) — Dernier entré, premier sorti. Rare en physique, parfois utilisé en comptabilité.</li>
+                    </ul>
+                    <h3>📋 Kanban & Flux Tendu</h3>
+                    <ul>
+                        <li><strong>Kanban</strong> — système de cartes visuelles pour déclencher le réapprovisionnement uniquement quand le stock atteint un seuil.</li>
+                        <li><strong>Flux Tendu (Just-in-Time)</strong> — livraison synchronisée à la demande réelle, stock minimum. Inventé par Toyota.</li>
+                        <li><strong>5S</strong> — méthode d'organisation du poste de travail : Supprimer, Situer, Nettoyer, Standardiser, Suivre.</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : FEFO est prioritaire sur FIFO dès qu'il y a une date d'expiration. Kanban évite le sur-stockage en commandant juste ce qu'il faut.</div>`
+            },
+            operations: {
+                title: 'Opérations entrepôt — Le cycle complet',
+                icon: '🏭',
+                html: `<h3>🏭 Le cycle de l'entrepôt</h3>
+                    <p>Un entrepôt logistique suit toujours le même cycle fondamental :</p>
+                    <ul>
+                        <li><strong>1. Réception</strong> — déchargement, contrôle qualité/quantité, enregistrement dans le WMS</li>
+                        <li><strong>2. Mise en stock</strong> — rangement à l'emplacement attribué (fixe ou dynamique)</li>
+                        <li><strong>3. Picking</strong> — prélèvement des articles selon les commandes clients</li>
+                        <li><strong>4. Packing</strong> — emballage, étiquetage, conditionnement</li>
+                        <li><strong>5. Expédition</strong> — chargement, remise au transporteur, génération des BL</li>
+                    </ul>
+                    <h3>⚡ Méthodes de picking</h3>
+                    <ul>
+                        <li><strong>Pick &amp; Pack</strong> — une commande à la fois, du picking jusqu'au colis. Simple mais lent.</li>
+                        <li><strong>Batch Picking</strong> — plusieurs commandes en parallèle sur le même chemin. Gain de temps significatif.</li>
+                        <li><strong>Zone Picking</strong> — chaque opérateur est responsable d'une zone. Efficace pour grands entrepôts.</li>
+                        <li><strong>Voice Picking</strong> — guidage par casque audio. Réduit les erreurs, libère les mains.</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : le picking représente souvent 50-70% du coût opérationnel d'un entrepôt. L'optimiser est prioritaire.</div>`
+            },
+            kpi_logistique: {
+                title: 'KPI Logistiques — Les indicateurs clés',
+                icon: '📊',
+                html: `<h3>📊 Les KPI essentiels à connaître</h3>
+                    <ul>
+                        <li><strong>OTIF</strong> (On Time In Full) — % de commandes livrées à temps et complètes. Objectif : &gt;95%</li>
+                        <li><strong>Taux de service</strong> — % de commandes satisfaites sans rupture.</li>
+                        <li><strong>Taux de remplissage</strong> — % d'espace utilisé dans un véhicule ou entrepôt.</li>
+                        <li><strong>Coût par picking</strong> — coût unitaire d'une opération de prélèvement.</li>
+                        <li><strong>Taux de rotation des stocks</strong> — Ventes ÷ Stock moyen. Mesure combien de fois le stock est renouvelé par an.</li>
+                        <li><strong>Taux d'erreur de préparation</strong> — % de commandes préparées avec erreur. Objectif : &lt;0,5%</li>
+                    </ul>
+                    <h3>📈 Comment les utiliser ?</h3>
+                    <ul>
+                        <li>Définir des <strong>objectifs cibles</strong> clairs pour chaque KPI</li>
+                        <li>Afficher les résultats en <strong>temps réel</strong> sur un tableau de bord</li>
+                        <li>Analyser les <strong>écarts</strong> et déclencher des actions correctives</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : un KPI sans cible est inutile. Toujours définir un objectif et une fréquence de mesure.</div>`
+            },
+            grands_comptes: {
+                title: 'Grands Comptes — La logistique des leaders',
+                icon: '🏬',
+                html: `<h3>🏬 Amazon — Le géant du e-commerce</h3>
+                    <ul>
+                        <li>WMS propriétaire + <strong>robots Kiva</strong> (rachetés 775M$ en 2012)</li>
+                        <li>Les robots déplacent les rayonnages vers les opérateurs → 3× plus rapide</li>
+                        <li>Livraison J+1 grâce à 150+ entrepôts stratégiquement positionnés</li>
+                        <li>Algorithme de prédiction de la demande pour pré-positionner les stocks</li>
+                    </ul>
+                    <h3>⚽ Décathlon — Le sport au meilleur coût</h3>
+                    <ul>
+                        <li>Puce <strong>RFID sur chaque article</strong> — inventaire instantané, caisse sans scan individuel</li>
+                        <li>Intégration WMS-ERP-TMS complète pour optimiser les flux monde entier</li>
+                    </ul>
+                    <h3>🛒 Carrefour — La grande distribution</h3>
+                    <ul>
+                        <li>Cross-docking : les produits frais transitent sans stockage (entrepôt = hub de transit)</li>
+                        <li>Flux poussés pour promotions (anticipation), flux tirés pour le quotidien</li>
+                        <li>Réseau de 200+ entrepôts en France avec centralisation régionale</li>
+                    </ul>
+                    <div class="key-box">💡 À retenir : les leaders combinent technologie (WMS, RFID, robots) et organisation humaine optimisée. La tech amplifie l'efficacité, elle ne remplace pas l'expertise terrain.</div>`
+            }
+        };
+
+        let _fluxCurrentLearnerId = null;
+        let _fluxCurrentFlowId = null;
+        let _fluxPendingLectureStep = null;
+        let _fluxPendingQuizStep = null;
+
+        function renderLearnerFlowsHtml(l) {
+            if (!l.flowProgress) l.flowProgress = {};
+            const completedFlows = LEARNING_FLOWS.filter(f => {
+                const prog = l.flowProgress[f.id] || [];
+                return f.steps.every((_, i) => prog.includes(i));
+            }).length;
+            const globalPct = LEARNING_FLOWS.length ? Math.round((completedFlows / LEARNING_FLOWS.length) * 100) : 0;
+
+            const flowCards = LEARNING_FLOWS.map(flow => {
+                const prog = l.flowProgress[flow.id] || [];
+                const doneCount = prog.length;
+                const pct = Math.round((doneCount / flow.steps.length) * 100);
+                const allDone = doneCount === flow.steps.length;
+
+                const stepsHtml = flow.steps.map((step, idx) => {
+                    const done = prog.includes(idx);
+                    const prevDone = idx === 0 || prog.includes(idx - 1);
+                    const available = !done && prevDone;
+                    let cls = done ? (step.type === 'badge' ? 'fs-badge fs-done' : 'fs-done')
+                                   : available ? (step.type === 'badge' ? 'fs-badge' : 'fs-available') : '';
+                    const disabled = (!done && !available) ? 'disabled' : '';
+                    const onclick = disabled ? '' : `onclick="_fluxStepClick('${l.id}','${flow.id}',${idx})"`;
+                    const connector = idx < flow.steps.length - 1 ? `<div class="flux-connector"></div>` : '';
+                    const tip = done ? ' ✅' : available ? ' — Cliquer pour commencer' : ' 🔒 Bloqué';
+                    return `<div class="flux-step-node">
+                        <button class="flux-step-btn ${cls}" ${disabled} ${onclick} title="${step.label}${tip}">${step.icon}</button>
+                        <div class="flux-step-label">${step.label}</div>
+                        <div class="flux-step-dur">${step.dur || (done ? '✅' : '')}</div>
+                    </div>${connector}`;
+                }).join('');
+
+                return `<div class="flux-card" style="border-top-color:${flow.color};">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px;">
+                        <span style="font-size:1.8em;">${flow.icon}</span>
+                        <div>
+                            <div style="font-weight:700;color:#2d3e50;font-size:1em;">${flow.label}</div>
+                            ${allDone ? '<div style="font-size:0.74em;color:#27ae60;font-weight:700;">🏅 Parcours complété !</div>'
+                                      : `<div style="font-size:0.74em;color:#aaa;">${doneCount}/${flow.steps.length} étapes</div>`}
                         </div>
                     </div>
-                `;
+                    <div class="flux-card-desc">${flow.desc}</div>
+                    <div class="flux-steps-row">${stepsHtml}</div>
+                    <div class="flux-pbar"><div class="flux-pbar-fill" style="width:${pct}%;background:${flow.color};"></div></div>
+                </div>`;
             }).join('');
+
+            return `<div id="flux-section" style="margin-top:18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                    <h3 style="margin:0;color:#e67e22;font-size:1em;font-weight:700;display:flex;align-items:center;gap:7px;">🚀 Mes Parcours d'Apprentissage</h3>
+                    <span style="font-size:0.8em;color:#888;font-weight:600;">${completedFlows}/${LEARNING_FLOWS.length} parcours — ${globalPct}% global</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;">${flowCards}</div>
+            </div>`;
+        }
+
+        function _fluxStepClick(learnerId, flowId, stepIdx) {
+            const flow = LEARNING_FLOWS.find(f => f.id === flowId);
+            if (!flow) return;
+            const step = flow.steps[stepIdx];
+            if (!step) return;
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.flowProgress) l.flowProgress = {};
+            const prog = l.flowProgress[flowId] || [];
+            if (prog.includes(stepIdx)) return;
+
+            _fluxCurrentLearnerId = learnerId;
+            _fluxCurrentFlowId = flowId;
+
+            if (step.type === 'lecture') {
+                _fluxOpenLecture(flowId, learnerId, stepIdx);
+            } else if (step.type === 'quiz') {
+                _currentQuizLearnerId = learnerId;
+                _currentQuizDomain = step.domain;
+                _fluxPendingQuizStep = stepIdx;
+                startFormationQuiz('domain:' + step.domain);
+            } else if (step.type === 'badge') {
+                _fluxMarkStepDone(learnerId, flowId, stepIdx);
+            }
+        }
+
+        function _fluxOpenLecture(flowId, learnerId, stepIdx) {
+            _fluxCurrentLearnerId = learnerId;
+            _fluxCurrentFlowId = flowId;
+            _fluxPendingLectureStep = stepIdx;
+            const lec = FLOW_LECTURES[flowId];
+            if (!lec) return;
+            document.getElementById('fluxLectureIcon').textContent = lec.icon;
+            document.getElementById('fluxLectureTitle').textContent = lec.title;
+            document.getElementById('fluxLectureBody').innerHTML = lec.html;
+            document.getElementById('fluxLectureModal').style.display = 'flex';
+        }
+
+        function _fluxCloseLecture() {
+            document.getElementById('fluxLectureModal').style.display = 'none';
+        }
+
+        function _fluxValidateLecture() {
+            _fluxCloseLecture();
+            if (_fluxCurrentLearnerId && _fluxCurrentFlowId && _fluxPendingLectureStep !== null) {
+                _fluxMarkStepDone(_fluxCurrentLearnerId, _fluxCurrentFlowId, _fluxPendingLectureStep);
+            }
+            _fluxPendingLectureStep = null;
+        }
+
+        function _fluxMarkStepDone(learnerId, flowId, stepIdx) {
+            const l = learnersList.find(x => String(x.id) === String(learnerId));
+            if (!l) return;
+            if (!l.flowProgress) l.flowProgress = {};
+            if (!l.flowProgress[flowId]) l.flowProgress[flowId] = [];
+            if (!l.flowProgress[flowId].includes(stepIdx)) {
+                l.flowProgress[flowId].push(stepIdx);
+                const flow = LEARNING_FLOWS.find(f => f.id === flowId);
+                if (flow && stepIdx === flow.steps.length - 2) {
+                    const badgeIdx = flow.steps.length - 1;
+                    if (!l.flowProgress[flowId].includes(badgeIdx)) {
+                        l.flowProgress[flowId].push(badgeIdx);
+                        setTimeout(() => { if (typeof toast === 'function') toast(`🏅 Badge "${flow.label}" obtenu !`, 'success'); }, 400);
+                    }
+                }
+            }
+            saveFormationData();
+            renderLearnerFormations();
+        }
+
+        // Démarre le quiz pour un apprenant + domaine précis
+        let _currentQuizLearnerId = null;
+        let _currentQuizDomain = null;
+        function _startLearnerQuiz(learnerId, domain) {
+            _currentQuizLearnerId = learnerId;
+            _currentQuizDomain = domain;
+            startFormationQuiz('domain:' + domain);
+        }
+
+        // LEGACY : conservé pour compatibilité
+        function renderFormationLogistiqueApprenants() {
+            renderLearnerFormations();
         }
 
         function selectLearner(learnerId) {
@@ -11993,21 +12633,101 @@
 
         function renderConsommablesTable() {
             const container = document.getElementById('consommablesTable');
-            
+            if (!catalogueConsommables.length) {
+                container.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Aucun consommable. Ajoutez-en un ou importez un CSV.</p>';
+                return;
+            }
             let html = `<table><thead><tr>
-                <th>Nom</th><th>Unité</th><th>Prix (CHF)</th>
+                <th style="width:36px;"><input type="checkbox" id="consomCheckAll" title="Tout sélectionner" onchange="_consomToggleAll(this.checked)"></th>
+                <th>Nom</th><th>Unité</th><th>Prix (CHF)</th><th style="width:80px;">Actions</th>
             </tr></thead><tbody>`;
-            
             catalogueConsommables.forEach((c, idx) => {
                 html += `<tr>
-                    <td>${c.nom}</td>
-                    <td>${c.unite}</td>
+                    <td><input type="checkbox" class="consom-chk" data-idx="${idx}" onchange="_consomUpdateBulkBar()"></td>
+                    <td>${escapeHtml(c.nom)}${c.designation ? `<div style="font-size:0.78em;color:#aaa;">${escapeHtml(c.designation)}</div>` : ''}</td>
+                    <td>${escapeHtml(c.unite)}</td>
                     <td>${fmtNum(c.prix)}</td>
+                    <td><button onclick="_consomDelete(${idx})" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:0.95em;" title="Supprimer">🗑</button></td>
                 </tr>`;
             });
-            
             html += '</tbody></table>';
             container.innerHTML = html;
+            _consomUpdateBulkBar();
+        }
+
+        function _consomGetSelected() {
+            return [...document.querySelectorAll('.consom-chk:checked')].map(cb => parseInt(cb.dataset.idx));
+        }
+        function _consomToggleAll(checked) {
+            document.querySelectorAll('.consom-chk').forEach(cb => cb.checked = checked);
+            _consomUpdateBulkBar();
+        }
+        function _consomClearSelection() {
+            document.querySelectorAll('.consom-chk').forEach(cb => cb.checked = false);
+            const all = document.getElementById('consomCheckAll');
+            if (all) all.checked = false;
+            _consomUpdateBulkBar();
+        }
+        function _consomUpdateBulkBar() {
+            const sel = _consomGetSelected();
+            const bar = document.getElementById('consomBulkBar');
+            const cnt = document.getElementById('consomSelCount');
+            if (!bar) return;
+            if (sel.length > 0) {
+                bar.style.display = 'flex';
+                cnt.textContent = `${sel.length} sélectionné${sel.length > 1 ? 's' : ''}`;
+            } else {
+                bar.style.display = 'none';
+            }
+            const all = document.getElementById('consomCheckAll');
+            if (all) all.checked = sel.length === catalogueConsommables.length && catalogueConsommables.length > 0;
+        }
+        function _consomDelete(idx) {
+            if (!confirm(`Supprimer "${catalogueConsommables[idx]?.nom}" ?`)) return;
+            catalogueConsommables.splice(idx, 1);
+            saveToStorage();
+            renderConsommablesTable();
+            toast('Consommable supprimé', 'success');
+        }
+        function _consomDeleteSelected() {
+            const idxs = _consomGetSelected().sort((a,b) => b - a);
+            if (!idxs.length) return;
+            if (!confirm(`Supprimer ${idxs.length} consommable${idxs.length > 1 ? 's' : ''} ?`)) return;
+            idxs.forEach(i => catalogueConsommables.splice(i, 1));
+            saveToStorage();
+            renderConsommablesTable();
+            toast(`${idxs.length} consommable${idxs.length > 1 ? 's supprimés' : ' supprimé'}`, 'success');
+        }
+        function _consomExportSelected() {
+            const idxs = _consomGetSelected();
+            if (!idxs.length) return;
+            const rows = idxs.map(i => {
+                const c = catalogueConsommables[i];
+                return `"${(c.nom||'').replace(/"/g,'""')}","${c.unite||''}","${c.prix||0}","${(c.designation||'').replace(/"/g,'""')}"`;
+            });
+            const csv = 'nom,unite,prix,designation\n' + rows.join('\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+            a.download = 'consommables-selection.csv';
+            a.click();
+        }
+        function _consomAdjustPriceSelected() {
+            const idxs = _consomGetSelected();
+            if (!idxs.length) return;
+            const pct = prompt(`Ajuster le prix de ${idxs.length} article${idxs.length > 1 ? 's' : ''} :\nEntrez un % (ex: +10 pour +10%, -5 pour -5%, ou =2.50 pour fixer à 2.50 CHF)`);
+            if (!pct) return;
+            if (pct.startsWith('=')) {
+                const fixed = parseFloat(pct.slice(1));
+                if (isNaN(fixed)) return toast('Valeur invalide', 'warning');
+                idxs.forEach(i => catalogueConsommables[i].prix = fixed);
+            } else {
+                const factor = parseFloat(pct);
+                if (isNaN(factor)) return toast('Valeur invalide', 'warning');
+                idxs.forEach(i => catalogueConsommables[i].prix = Math.round(catalogueConsommables[i].prix * (1 + factor/100) * 100) / 100);
+            }
+            saveToStorage();
+            renderConsommablesTable();
+            toast(`Prix mis à jour pour ${idxs.length} article${idxs.length > 1 ? 's' : ''}`, 'success');
         }
 
         function getStatutBadgeHtml(statut) {
@@ -13343,17 +14063,21 @@
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
 
+            // Réinitialise l'ID d'édition — IMPORTANT : sans ça la sauvegarde écraserait l'original
+            editingPrestationId = null;
+
             // Switch to calculateur tab
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab').classList.add('active');
-            document.getElementById('calculateur').classList.add('active');
+            switchTab('calculateur', true);
 
             // Fill in the form fields
             document.getElementById('client').value = p.client || '';
             document.getElementById('prestation').value = p.prestation || '';
             document.getElementById('reference').value = (p.reference || '') + ' (copie)';
             document.getElementById('date').valueAsDate = new Date();
+            const _deb2 = document.getElementById('calcDateDebut');
+            const _fin2 = document.getElementById('calcDateFin');
+            if (_deb2) _deb2.value = p.dateDebut || '';
+            if (_fin2) _fin2.value = p.dateFin || '';
             document.getElementById('nbCEA').value = p.nbCEA || 1;
             document.getElementById('nbMSP').value = p.nbMSP !== undefined ? Math.round(p.nbMSP * 100) : 50;
             document.getElementById('nbPieces').value = p.nbPieces || 1;
@@ -13811,6 +14535,38 @@
             btn.textContent = isDark ? '☀️' : '🌙';
             localStorage.setItem('darkMode', isDark ? '1' : '0');
         }
+
+        function toggleModeApprenant() {
+            const isOn = document.body.classList.toggle('mode-apprenant');
+            localStorage.setItem('modeApprenant', isOn ? '1' : '0');
+            const btn = document.getElementById('btnModeApprenant');
+            if (btn) btn.classList.toggle('apprenant-on', isOn);
+            if (isOn) {
+                switchTab('dashboard');
+                if (typeof toast === 'function') toast('🎓 Mode Apprenant activé', 'info');
+            } else {
+                if (typeof toast === 'function') toast('🔓 Mode Admin restauré', 'info');
+            }
+        }
+
+        (function initModeApprenant() {
+            // Auto-active si la session en cours est CEA ou ASP
+            try {
+                const sess = JSON.parse(sessionStorage.getItem('authSession') || 'null');
+                if (sess && ['cea','asp'].includes(sess.id)) {
+                    document.body.classList.add('mode-apprenant');
+                    const btn = document.getElementById('btnModeApprenant');
+                    if (btn) btn.classList.add('apprenant-on');
+                    return;
+                }
+            } catch(e) {}
+            // Sinon : respecter le toggle manuel
+            if (localStorage.getItem('modeApprenant') === '1') {
+                document.body.classList.add('mode-apprenant');
+                const btn = document.getElementById('btnModeApprenant');
+                if (btn) btn.classList.add('apprenant-on');
+            }
+        })();
 
         // Init dark mode from storage
         // Si aucune préférence enregistrée, suit le thème système (prefers-color-scheme)
@@ -14881,8 +15637,10 @@
         }
         // Update indicator every 30 seconds
         setInterval(updateSaveIndicator, 30000);
-        // Autosave every 60 seconds if dirty
-        setInterval(autosaveNow, 60000);
+        // Autosave every 15 seconds if dirty
+        setInterval(autosaveNow, 15000);
+        // Force save on page close / reload
+        window.addEventListener('beforeunload', () => { if (_autosaveDirty) saveToStorage(); });
 
         // ── Tabs scroll arrows ─────────────────────────────────────
         function scrollTabs(delta) {
@@ -15168,7 +15926,7 @@
                 </div>` : ''}
 
                 <!-- SIGNATURES -->
-                <div style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:48px;">
+                <div class="pdf-no-break" style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:48px;break-inside:avoid;page-break-inside:avoid;">
                     <div style="text-align:center;">
                         <p style="font-size:0.78em;color:#7a9db1;margin-bottom:8px;font-weight:600;">Pour l'Atelier La Pallanterie</p>
                         <div style="border-bottom:1px solid #bbb;height:52px;margin-bottom:6px;"></div>
@@ -15182,7 +15940,7 @@
                 </div>
 
                 <!-- FOOTER -->
-                <div style="text-align:center;font-size:0.75em;color:#aaa;border-top:1px solid #eee;padding-top:14px;margin-top:20px;">
+                <div class="pdf-no-break" style="text-align:center;font-size:0.75em;color:#aaa;border-top:1px solid #eee;padding-top:14px;margin-top:20px;padding-bottom:8px;break-inside:avoid;page-break-inside:avoid;">
                     ${devisNum} — Émis le ${dateStr} — Atelier La Pallanterie | © MARET Davie<br>
                     Devis valable jusqu'au ${dateValiditeStr || '30 jours après émission'} — Conditions de paiement : ${condPaiement}
                     <div style="margin-top:8px;font-size:0.9em;color:#bbb;border-top:1px dashed #eee;padding-top:6px;">
@@ -15207,11 +15965,11 @@
                 el.innerHTML = html;
                 document.body.appendChild(el);
                 html2pdf().set({
-                    margin: 10,
+                    margin: [10, 10, 18, 10],
                     filename: `devis-${devisNum}.pdf`,
-                    html2canvas: { scale: 2 },
-                    jsPDF: { format: pp.format || 'a4', orientation: pp.orientation || 'portrait' },
-                    pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: pp.format || 'a4', orientation: pp.orientation || 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.pdf-no-break'] }
                 }).from(el).save().then(() => document.body.removeChild(el));
             } else {
                 const printZone = document.getElementById('printZone');
@@ -17032,6 +17790,10 @@
             // Remove admin mode
             document.body.classList.remove('admin-mode');
             hideAdminSections();
+            // Désactiver le mode apprenant à la déconnexion
+            document.body.classList.remove('mode-apprenant');
+            const maBtnL = document.getElementById('btnModeApprenant');
+            if (maBtnL) maBtnL.classList.remove('apprenant-on');
             isSuperUser = false;
             // Hide badges
             document.getElementById('tabProfileBadge')?.classList.remove('visible');
@@ -17419,6 +18181,12 @@
             currentUserSession = { id: group.id, name: group.name, role: group.id };
             logAction(`Connexion en tant que ${group.name}`, 'LOGIN');
             updateUIPermissions();
+            // Mode Apprenant automatique pour les groupes CEA et ASP
+            const isApprenant = ['cea','asp'].includes(group.id);
+            document.body.classList.toggle('mode-apprenant', isApprenant);
+            const maBtnH = document.getElementById('btnModeApprenant');
+            if (maBtnH) maBtnH.classList.toggle('apprenant-on', isApprenant);
+            if (isApprenant) switchTab('dashboard');
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
@@ -17845,6 +18613,17 @@
             return d;
         }
 
+        function calcDateFin_autoEnd() {
+            const deb = document.getElementById('calcDateDebut')?.value;
+            const fin = document.getElementById('calcDateFin');
+            if (!deb || !fin || fin.value) return;
+            // Pré-remplit la fin à J+5 ouvrés si non saisie
+            const d = new Date(deb);
+            let count = 0;
+            while (count < 5) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) count++; }
+            fin.value = d.toISOString().split('T')[0];
+        }
+
         function renderGantt() {
             const container = document.getElementById('ganttChart');
             if (!container) return;
@@ -17942,12 +18721,12 @@
                 const pNameFull = escapeHtml(p.prestation);
                 const pNameShort = escapeHtml((p.prestation || '').length > 22 ? (p.prestation || '').slice(0,20)+'…' : (p.prestation || ''));
                 html += `<tr>
-                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${pNameFull}">
+                    <td style="padding:4px 10px;white-space:nowrap;font-size:0.82em;" title="${pNameFull} — cliquer pour ouvrir">
                         <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;vertical-align:middle;"></span>
-                        <strong>${pNameShort}</strong>
-                        <button onclick="duplicatePrestation(${p.id})" style="background:none;border:none;cursor:pointer;font-size:0.8em;padding:1px 3px;" title="Dupliquer">📋</button>
+                        <button onclick="editPrestation(${p.id})" style="background:none;border:none;cursor:pointer;padding:0;font-size:1em;color:inherit;font-weight:700;text-decoration:underline dotted #a0b8c8;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='inherit'" title="Ouvrir la prestation">${pNameShort}</button>
+                        <button onclick="duplicatePrestation(${p.id})" style="background:none;border:none;cursor:pointer;font-size:0.8em;padding:1px 3px;opacity:0.5;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'" title="Dupliquer">📋</button>
                     </td>
-                    <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;">${escapeHtml(p.client)}</td>`;
+                    <td style="padding:4px 6px;font-size:0.78em;color:#7a9db1;cursor:pointer;" onclick="editPrestation(${p.id})" title="Ouvrir la prestation">${escapeHtml(p.client)}</td>`;
 
                 let inRange = false;
                 dayInfos.forEach(({dayObj, isWeekend}) => {
@@ -17960,17 +18739,25 @@
 
                     const borderRadius = isStart && isEnd ? '6px' : isStart ? '6px 0 0 6px' : isEnd ? '0 6px 6px 0' : '0';
                     const showBar = inRange && !isWeekend;
+                    const isProvisoire = ['devis','brouillon','soumis'].includes(statut);
+                    const barStyle = isProvisoire
+                        ? `background:repeating-linear-gradient(45deg,${color}55,${color}55 4px,${color}22 4px,${color}22 8px);border:1px dashed ${color};opacity:0.75;`
+                        : `background:${color};opacity:0.88;`;
                     html += `<td style="padding:2px 0;${isWeekend ? 'background:repeating-linear-gradient(135deg,#f0e6e6,#f0e6e6 3px,#f8f0f0 3px,#f8f0f0 6px);' : ''}">
-                        ${showBar ? `<div onclick="editPrestation(${p.id})" style="height:22px;background:${color};border-radius:${borderRadius};opacity:0.85;border-top:2px solid ${color};border-bottom:2px solid ${color};cursor:pointer;" title="${pNameFull} — ${escapeHtml(statutLabels[statut]||statut)} (cliquer pour ouvrir)"></div>` : ''}
+                        ${showBar ? `<div onclick="editPrestation(${p.id})" style="height:22px;${barStyle}border-radius:${borderRadius};cursor:pointer;" title="${pNameFull} — ${escapeHtml(statutLabels[statut]||statut)}${isProvisoire?' (prévu)':''} (cliquer pour ouvrir)"></div>` : ''}
                     </td>`;
                 });
                 html += `</tr>`;
             });
 
             html += `</tbody></table></div>
-            <div class="gantt-legend" style="margin-top:12px;flex-wrap:wrap;gap:12px;">
+            <div style="margin-top:8px;display:flex;gap:16px;align-items:center;font-size:0.78em;color:#7a9db1;">
+                <span><span style="display:inline-block;width:18px;height:10px;background:#6b8fa3;border-radius:2px;vertical-align:middle;"></span> Confirmé</span>
+                <span><span style="display:inline-block;width:18px;height:10px;background:repeating-linear-gradient(45deg,#6b8fa366,#6b8fa366 4px,#6b8fa322 4px,#6b8fa322 8px);border:1px dashed #6b8fa3;border-radius:2px;vertical-align:middle;"></span> Prévisionnel (devis/brouillon/soumis)</span>
+            </div>
+            <div class="gantt-legend" style="margin-top:8px;flex-wrap:wrap;gap:12px;">
                 <span style="font-weight:600;color:#5a7b8f;">Projets :</span>
-                ${prests.map(p => `<span style="display:flex;align-items:center;gap:5px;font-size:0.82em;">
+                ${prests.map(p => `<span onclick="editPrestation(${p.id})" style="display:flex;align-items:center;gap:5px;font-size:0.82em;cursor:pointer;padding:3px 7px;border-radius:6px;transition:background 0.15s;" onmouseover="this.style.background='#eef4f8'" onmouseout="this.style.background='transparent'" title="Ouvrir ${escapeHtml(p.prestation||'')}">
                     <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${projectColors[p.id]};"></span>
                     ${escapeHtml((p.prestation || '').length > 18 ? (p.prestation || '').slice(0,16)+'…' : (p.prestation || ''))}
                     <span style="color:#aaa;font-size:0.88em;">(${escapeHtml(statutLabels[p.statut||'devis']||p.statut)})</span>
@@ -18466,11 +19253,14 @@
                 return;
             }
 
-            const coutsOk = !!(config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard));
-            const catalogueOk = Array.isArray(catalogueGestes) && catalogueGestes.length > 0;
-            const clientsOk = typeof clientsData === 'object' && clientsData !== null && Object.keys(clientsData).length > 0;
-            const prestOk = Array.isArray(prestationsSauvegardees) && prestationsSauvegardees.length > 0;
-            const exportOk = !!localStorage.getItem('lastExportDate');
+            let _obHide = [];
+            try { _obHide = JSON.parse(localStorage.getItem('onboardingForceHide') || '[]'); } catch(e) {}
+
+            const coutsOk   = !!(config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard)) && !_obHide.includes('config');
+            const catalogueOk = Array.isArray(catalogueGestes) && catalogueGestes.length > 0 && !_obHide.includes('catalogue');
+            const clientsOk = typeof clientsData === 'object' && clientsData !== null && Object.keys(clientsData).length > 0 && !_obHide.includes('clients');
+            const prestOk   = Array.isArray(prestationsSauvegardees) && prestationsSauvegardees.length > 0 && !_obHide.includes('prest');
+            const exportOk  = !!localStorage.getItem('lastExportDate') && !_obHide.includes('export');
 
             const steps = [
                 { done: coutsOk, label: 'Configurer les coûts horaires', cta: 'Config', tab: 'config' },
@@ -18515,8 +19305,17 @@
 
         function resetOnboarding() {
             localStorage.removeItem('onboardingDismissed');
+            // Marquer les étapes déjà faites comme "à refaire" — elles se décocheront
+            // automatiquement quand l'utilisateur revisite l'onglet correspondant
+            const hide = [];
+            if (config && (config.coutHoraireAdmin || config.coutHoraireTechnique || config.coutHoraireStandard)) hide.push('config');
+            if (Array.isArray(catalogueGestes) && catalogueGestes.length > 0) hide.push('catalogue');
+            if (typeof clientsData === 'object' && clientsData !== null && Object.keys(clientsData).length > 0) hide.push('clients');
+            if (Array.isArray(prestationsSauvegardees) && prestationsSauvegardees.length > 0) hide.push('prest');
+            if (localStorage.getItem('lastExportDate')) hide.push('export');
+            localStorage.setItem('onboardingForceHide', JSON.stringify(hide));
             renderOnboardingChecklist();
-            toast('✅ Checklist réinitialisée! Les premiers pas s\'affichent à nouveau.', 'success');
+            toast('✅ Checklist réinitialisée — revisitez chaque onglet pour revalider les étapes.', 'success');
         }
 
         // ─────────────────────────────────────────────────────────
@@ -23941,7 +24740,28 @@
             };
             const { xpGained, newBadges, progress } = updateFormationProgress(attempt);
 
-            // Save quiz completion to trainingRequests
+            // Sauvegarde le résultat sur l'apprenant courant
+            if (_currentQuizLearnerId && _currentQuizDomain) {
+                const l = learnersList.find(x => String(x.id) === String(_currentQuizLearnerId));
+                if (l) {
+                    if (!l.quizResults) l.quizResults = {};
+                    l.quizResults[_currentQuizDomain] = {
+                        score: formationQuizState.score,
+                        total,
+                        pct: percent,
+                        date: new Date().toISOString()
+                    };
+                    if (typeof _fluxPendingQuizStep === 'number' && _fluxCurrentFlowId && percent >= 60) {
+                        _fluxMarkStepDone(String(l.id), _fluxCurrentFlowId, _fluxPendingQuizStep);
+                        _fluxPendingQuizStep = null;
+                    } else {
+                        saveFormationData();
+                        renderLearnerFormations();
+                    }
+                    renderLearners();
+                }
+            }
+            // Compatibilité ancien système trainingRequests
             if (currentFormationId) {
                 const formation = trainingRequests.find(r => r.id === currentFormationId);
                 if (formation && !formation.quizCompletedAt) {
@@ -23949,8 +24769,6 @@
                     formation.quizScore = formationQuizState.score;
                     formation.quizTotal = total;
                     saveFormationData();
-                    renderLearners();
-                    renderFormationLogistiqueApprenants();
                 }
             }
 
