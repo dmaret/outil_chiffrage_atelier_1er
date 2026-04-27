@@ -2085,6 +2085,51 @@
         body.dark-mode #analyseResultat .result-theory { color:#d0a0f0; }
         body.dark-mode #analyseResultat .result-posture { background:#2a1540; border-left-color:#8e44ad; color:#c090e0; }
 
+        /* Guide & Flux de travail (v2.9) — visuel inspiré du Gantt */
+        .guide-pill { background:#fff; border:1.5px solid var(--color-border); color:var(--color-text); font-size:0.88em; padding:6px 14px; border-radius:8px; cursor:pointer; transition:all 0.15s; }
+        .guide-pill:hover { border-color:var(--color-primary); background:var(--color-bg-alt); }
+        .guide-pill.active { background:var(--color-primary); color:#fff; border-color:var(--color-primary-dark); }
+        .guide-block { margin-bottom:28px; padding:18px 18px 14px; background:var(--color-section-bg); border-radius:14px; border:1px solid var(--color-border-light); }
+        .guide-block-title { margin:0 0 4px; color:var(--color-primary-dark); font-size:1.05em; }
+        .guide-block-sub   { font-size:0.9em; color:var(--color-text-muted); margin:0 0 14px; }
+        .guide-flow {
+            display:flex; align-items:stretch; gap:0; flex-wrap:wrap; padding:6px 0;
+        }
+        .guide-card {
+            position:relative; min-width:170px; max-width:220px; flex:0 1 200px;
+            padding:14px 12px 10px; background:#fff; border:1.5px solid var(--color-border);
+            border-top:3px solid var(--c, var(--color-primary));
+            border-radius:10px; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            box-shadow:0 2px 6px rgba(150,150,180,0.06);
+            display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;
+        }
+        .guide-card:hover { transform:translateY(-2px); box-shadow:0 4px 14px rgba(150,150,180,0.18); border-color:var(--c, var(--color-primary)); }
+        .guide-card .guide-num {
+            position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+            background:var(--c, var(--color-primary)); color:#fff;
+            width:24px; height:24px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:0.85em; font-weight:700; box-shadow:0 2px 4px rgba(0,0,0,0.15);
+        }
+        .guide-card .guide-icon { font-size:1.7em; line-height:1; margin-top:6px; }
+        .guide-card strong { color:var(--color-text); font-size:0.92em; }
+        .guide-card small  { color:var(--color-text-muted); font-size:0.78em; line-height:1.3; }
+        .guide-arrow {
+            display:flex; align-items:center; justify-content:center;
+            min-width:28px; padding:0 4px; color:var(--color-primary-dark); font-size:1.4em;
+            align-self:center; opacity:0.7;
+        }
+        .guide-tip {
+            margin-top:14px; padding:10px 14px;
+            background:var(--color-info-bg, #ebf5fb); color:var(--color-text);
+            border-left:3px solid var(--color-info); border-radius:6px;
+            font-size:0.88em;
+        }
+        body.dark-mode .guide-pill { background:#1e2530; color:#cdd6e0; border-color:#2a3a4a; }
+        body.dark-mode .guide-pill:hover { background:#1a2535; }
+        body.dark-mode .guide-card { background:#1e2530; color:#cdd6e0; border-color:#2a3a4a; }
+        body.dark-mode .guide-tip  { background:#1a2a35; color:#cdd6e0; }
+
         /* Parcours d'accompagnement — vue flux (v2.8) */
         .parcours-benef-block { margin-bottom:28px; padding:16px; background:var(--color-section-bg); border-radius:14px; border:1px solid var(--color-border-light); }
         .parcours-benef-header { display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap; }
@@ -3236,6 +3281,7 @@
                 <button class="tab" onclick="switchTab('gantt')">📅 Planification</button>
                 <button class="tab" onclick="switchTab('formation-logistique')">🏭 Formation</button>
                 <button class="tab" onclick="switchTab('procedures')">📋 Procédures</button>
+                <button class="tab" onclick="switchTab('guide')">📖 Guide</button>
             </div>
             <span class="tabs-drag-hint" title="Glissez les onglets pour les réorganiser">↔ réorganisable</span>
             <div class="tab-profile-badge" id="tabProfileBadge">
@@ -4955,6 +5001,270 @@
                 </div>
             </div>
             <!-- ══════════ /PROCÉDURES ══════════ -->
+
+            <!-- ══════════════════════════════════════════════════════
+                 GUIDE — Aide & Flux de travail (v2.9)
+                 Cartes numérotées + flèches, à la manière du module Gantt
+                 ══════════════════════════════════════════════════════ -->
+            <div id="guide" class="tab-content">
+                <div class="section">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+                        <h2 style="margin:0;">📖 Aide & Flux de travail</h2>
+                        <small style="color:var(--color-text-muted);">Clique sur une étape pour ouvrir directement la vue concernée.</small>
+                    </div>
+
+                    <!-- Pills de section -->
+                    <div id="guideSectionPills" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px;">
+                        <button class="btn guide-pill" data-sec="demarrer"  onclick="switchGuideSection('demarrer')">🚀 Démarrer</button>
+                        <button class="btn guide-pill" data-sec="quotidien" onclick="switchGuideSection('quotidien')">📅 Quotidien</button>
+                        <button class="btn guide-pill" data-sec="workflow"  onclick="switchGuideSection('workflow')">✅ Workflow approbation</button>
+                        <button class="btn guide-pill" data-sec="suivi"     onclick="switchGuideSection('suivi')">💶 Suivi & paiement</button>
+                        <button class="btn guide-pill" data-sec="securite"  onclick="switchGuideSection('securite')">🛡️ Sauvegarde & sécurité</button>
+                        <button class="btn guide-pill" data-sec="raccourcis" onclick="switchGuideSection('raccourcis')">⌨️ Raccourcis</button>
+                        <button class="btn guide-pill" data-sec="nouveautes" onclick="switchGuideSection('nouveautes')">✨ Nouveautés</button>
+                    </div>
+
+                    <!-- Section : Démarrer -->
+                    <div class="guide-section" id="guide-sec-demarrer">
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">1 · Mise en place de la structure <em>(une seule fois)</em></h3>
+                            <p class="guide-block-sub">Configure les éléments permanents avant de créer ton premier devis.</p>
+                            <div class="guide-flow">
+                                <div class="guide-card" style="--c:#9a70b8;" onclick="switchTab('parametrage')">
+                                    <span class="guide-num">1</span><span class="guide-icon">⚙️</span>
+                                    <strong>Paramétrage</strong>
+                                    <small>Coûts horaires CEA &amp; MSP, frais généraux, marge par défaut</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#9a70b8;" onclick="switchTab('catalogue')">
+                                    <span class="guide-num">2</span><span class="guide-icon">📚</span>
+                                    <strong>Catalogue gestes</strong>
+                                    <small>Bibliothèque réutilisable : durée, coefficient, catégorie</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#9a70b8;" onclick="switchTab('consommables')">
+                                    <span class="guide-num">3</span><span class="guide-icon">🛒</span>
+                                    <strong>Consommables</strong>
+                                    <small>Fournitures, prix unitaires, quantités</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#9a70b8;" onclick="switchTab('clients')">
+                                    <span class="guide-num">4</span><span class="guide-icon">👥</span>
+                                    <strong>Clients</strong>
+                                    <small>Coordonnées, tarif spécial, historique</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#9a70b8;" onclick="switchTab('stock')">
+                                    <span class="guide-num">5</span><span class="guide-icon">📦</span>
+                                    <strong>Stock initial</strong>
+                                    <small>Inventaire de départ, seuils minimums, FIFO</small>
+                                </div>
+                            </div>
+                            <div class="guide-tip">💡 Ces données sont réutilisées par tous tes devis. Configure-les une fois, puis pioche dedans à chaque nouvelle prestation.</div>
+                        </div>
+
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">2 · Créer un premier devis</h3>
+                            <p class="guide-block-sub">Flux principal — répété pour chaque nouvelle prestation.</p>
+                            <div class="guide-flow">
+                                <div class="guide-card" style="--c:#3498db;" onclick="switchTab('calculateur')">
+                                    <span class="guide-num">1</span><span class="guide-icon">⚡</span>
+                                    <strong>Template</strong>
+                                    <small>Choisis un préset sectoriel ou pars vide</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#3498db;" onclick="switchTab('calculateur')">
+                                    <span class="guide-num">2</span><span class="guide-icon">📝</span>
+                                    <strong>Infos prestation</strong>
+                                    <small>Client, intitulé, référence, équipage CEA/MSP</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#3498db;" onclick="switchTab('calculateur')">
+                                    <span class="guide-num">3</span><span class="guide-icon">📚</span>
+                                    <strong>Gestes</strong>
+                                    <small>Pioche dans le catalogue ou crée à la volée</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#3498db;" onclick="switchTab('calculateur')">
+                                    <span class="guide-num">4</span><span class="guide-icon">👁️</span>
+                                    <strong>Aperçu live</strong>
+                                    <small>FAB 👁️ en bas à droite — devis en temps réel</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#3498db;" onclick="switchTab('calculateur')">
+                                    <span class="guide-num">5</span><span class="guide-icon">📨</span>
+                                    <strong>PDF / Sauvegarde</strong>
+                                    <small>Génère le devis client + enregistre en historique</small>
+                                </div>
+                            </div>
+                            <div class="guide-tip">💡 Astuce : <kbd>Ctrl+S</kbd> sauvegarde la prestation à n'importe quel moment, <kbd>Ctrl+P</kbd> génère le PDF.</div>
+                        </div>
+                    </div>
+
+                    <!-- Section : Quotidien -->
+                    <div class="guide-section" id="guide-sec-quotidien" style="display:none;">
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">📅 Tâches quotidiennes</h3>
+                            <p class="guide-block-sub">Ton rituel d'utilisation au jour le jour.</p>
+                            <div class="guide-flow">
+                                <div class="guide-card" style="--c:#27ae60;" onclick="switchTab('dashboard')">
+                                    <span class="guide-num">1</span><span class="guide-icon">🏠</span>
+                                    <strong>Dashboard</strong>
+                                    <small>KPIs, devis en attente, alertes du jour</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#27ae60;" onclick="switchTab('prestations')">
+                                    <span class="guide-num">2</span><span class="guide-icon">📊</span>
+                                    <strong>Prestations</strong>
+                                    <small>Filtres, statuts, bulk actions sur sélection</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#27ae60;" onclick="switchTab('stock')">
+                                    <span class="guide-num">3</span><span class="guide-icon">📦</span>
+                                    <strong>Stock</strong>
+                                    <small>Mouvements, alertes seuils, valorisation FIFO</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#27ae60;" onclick="switchTab('gantt')">
+                                    <span class="guide-num">4</span><span class="guide-icon">📅</span>
+                                    <strong>Planification</strong>
+                                    <small>Gantt, capacité hebdo, conflits</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#27ae60;" onclick="switchTab('historique')">
+                                    <span class="guide-num">5</span><span class="guide-icon">📝</span>
+                                    <strong>Historique</strong>
+                                    <small>Audit trail, qui a fait quoi quand</small>
+                                </div>
+                            </div>
+                            <div class="guide-tip">💡 <kbd>Ctrl+K</kbd> ouvre la palette de commandes — recherche rapide n'importe où dans l'app.</div>
+                        </div>
+                    </div>
+
+                    <!-- Section : Workflow approbation -->
+                    <div class="guide-section" id="guide-sec-workflow" style="display:none;">
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">✅ Workflow d'approbation</h3>
+                            <p class="guide-block-sub">Cycle de validation indépendant du statut métier (devis/facturé). Permissions RBAC : <code>request_approval</code> (MSP+ADMIN) · <code>approve_prestation</code> (ADMIN seul).</p>
+                            <div class="guide-flow">
+                                <div class="guide-card" style="--c:#95a5a6;">
+                                    <span class="guide-num">1</span><span class="guide-icon">📝</span>
+                                    <strong>Brouillon</strong>
+                                    <small>État initial — modifiable librement</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#f39c12;" onclick="switchTab('prestations')">
+                                    <span class="guide-num">2</span><span class="guide-icon">✋</span>
+                                    <strong>Demander validation</strong>
+                                    <small>Bouton ✋ dans la liste — passe en pending_review</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#27ae60;" onclick="switchTab('dashboard')">
+                                    <span class="guide-num">3</span><span class="guide-icon">✅</span>
+                                    <strong>Approuver / Rejeter</strong>
+                                    <small>Widget Dashboard ⏳ ou liste prestations</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#3498db;" onclick="switchTab('dashboard')">
+                                    <span class="guide-num">4</span><span class="guide-icon">📈</span>
+                                    <strong>Stats</strong>
+                                    <small>Taux d'approbation, délai moyen, top approbateurs</small>
+                                </div>
+                            </div>
+                            <div class="guide-tip">💡 Bulk : sélectionne plusieurs prestations, applique l'action en lot via la batchBar (un seul motif pour les rejets multiples).</div>
+                        </div>
+                    </div>
+
+                    <!-- Section : Suivi & paiement -->
+                    <div class="guide-section" id="guide-sec-suivi" style="display:none;">
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">💶 Cycle d'une prestation</h3>
+                            <p class="guide-block-sub">Du brouillon au paiement encaissé.</p>
+                            <div class="guide-flow">
+                                <div class="guide-card" style="--c:#95a5a6;"><span class="guide-num">1</span><span class="guide-icon">⬜</span><strong>Brouillon</strong><small>Travail en cours</small></div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#f1c40f;"><span class="guide-num">2</span><span class="guide-icon">🟡</span><strong>Devis</strong><small>Envoyé au client</small></div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#e67e22;"><span class="guide-num">3</span><span class="guide-icon">🟠</span><strong>Soumis</strong><small>En attente de réponse</small></div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#3498db;"><span class="guide-num">4</span><span class="guide-icon">🔵</span><strong>Accepté</strong><small>Validé client</small></div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#9a70b8;"><span class="guide-num">5</span><span class="guide-icon">🟣</span><strong>En cours</strong><small>Production</small></div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#27ae60;"><span class="guide-num">6</span><span class="guide-icon">🟢</span><strong>Terminé</strong><small>Livré</small></div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#2980b9;" onclick="switchTab('prestations')"><span class="guide-num">7</span><span class="guide-icon">💙</span><strong>Facturé</strong><small>Bouton 💶 → suivi paiement</small></div>
+                            </div>
+                            <div class="guide-tip">💡 Une fois en <strong>Facturé</strong>, le bouton <strong>💶 Paiement</strong> apparaît : saisis date facturation/encaissement. Un paiement non encaissé après 45 jours déclenche une alerte sur le dashboard (et une notif si activées).</div>
+                        </div>
+                    </div>
+
+                    <!-- Section : Sauvegarde & sécurité -->
+                    <div class="guide-section" id="guide-sec-securite" style="display:none;">
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">🛡️ Mettre tes données à l'abri</h3>
+                            <p class="guide-block-sub">3 mécanismes complémentaires — utilise-les ensemble.</p>
+                            <div class="guide-flow">
+                                <div class="guide-card" style="--c:#27ae60;" onclick="switchTab('config')">
+                                    <span class="guide-num">1</span><span class="guide-icon">💾</span>
+                                    <strong>Auto-backup</strong>
+                                    <small>Active le toggle — 3 snapshots tournants en localStorage</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#9a70b8;" onclick="switchTab('config')">
+                                    <span class="guide-num">2</span><span class="guide-icon">🔐</span>
+                                    <strong>Export chiffré</strong>
+                                    <small>AES-GCM 256 + PBKDF2. Pour transmettre/uploader sans risque</small>
+                                </div>
+                                <span class="guide-arrow">→</span>
+                                <div class="guide-card" style="--c:#3498db;" onclick="switchTab('config')">
+                                    <span class="guide-num">3</span><span class="guide-icon">🔔</span>
+                                    <strong>Notifications</strong>
+                                    <small>Alertes système : stock bas, devis expirés, paiements en retard</small>
+                                </div>
+                            </div>
+                            <div class="guide-tip">💡 Pour une sauvegarde hors-machine : clique « 🔐 Export chiffré » → mot de passe → fichier <code>.encbackup</code> à stocker sur clé USB ou cloud sans crainte.</div>
+                        </div>
+                    </div>
+
+                    <!-- Section : Raccourcis -->
+                    <div class="guide-section" id="guide-sec-raccourcis" style="display:none;">
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">⌨️ Raccourcis clavier essentiels</h3>
+                            <table style="width:100%;border-collapse:collapse;font-size:0.92em;margin-top:8px;">
+                                <tr><td style="padding:6px 12px;width:140px;"><kbd>Ctrl+K</kbd></td><td>Palette de commandes (recherche rapide)</td></tr>
+                                <tr><td style="padding:6px 12px;"><kbd>Ctrl+G</kbd></td><td>Ajouter un geste à la prestation en cours</td></tr>
+                                <tr><td style="padding:6px 12px;"><kbd>Ctrl+D</kbd></td><td>Dupliquer le dernier geste</td></tr>
+                                <tr><td style="padding:6px 12px;"><kbd>Ctrl+Z</kbd></td><td>Annuler la dernière action (y compris bulk delete)</td></tr>
+                                <tr><td style="padding:6px 12px;"><kbd>Ctrl+S</kbd></td><td>Sauvegarder la prestation</td></tr>
+                                <tr><td style="padding:6px 12px;"><kbd>Ctrl+P</kbd></td><td>Générer le devis PDF / Imprimer</td></tr>
+                                <tr><td style="padding:6px 12px;"><kbd>Ctrl+F</kbd></td><td>Recherche globale</td></tr>
+                                <tr><td style="padding:6px 12px;"><kbd>Esc</kbd></td><td>Fermer la modale active</td></tr>
+                                <tr><td style="padding:6px 12px;"><kbd>?</kbd></td><td>Cette aide rapide</td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Section : Nouveautés -->
+                    <div class="guide-section" id="guide-sec-nouveautes" style="display:none;">
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">✨ Quoi de neuf récemment</h3>
+                            <ul style="line-height:1.7;font-size:0.95em;padding-left:20px;">
+                                <li><strong>v2.8</strong> · 🌊 Vue Parcours dans Accompagnement (cartes flux)</li>
+                                <li><strong>v2.7</strong> · 📈 Stats d'approbation sur le dashboard (taux, délai, top approbateurs)</li>
+                                <li><strong>v2.6</strong> · 📦 Bulk actions sur prestations sélectionnées</li>
+                                <li><strong>v2.5</strong> · ⏳ Widget Dashboard « Approbations en attente » + filtre liste · 🎓 Carte Formation CEA &amp; stats configurables sur l'écran de connexion</li>
+                                <li><strong>v2.4</strong> · 🔐 Backup chiffré + 💾 Auto-backup + 🔔 Notifications + ✅ Workflow d'approbation</li>
+                                <li><strong>v2.3</strong> · 📊 Charts Chart.js sur dashboard · 🎨 Comparateur diff coloré · 👁️ Aperçu devis live · ⚡ Templates sectoriels</li>
+                                <li><strong>v2.2</strong> · ♿ ARIA + validation HTML5 + JSDoc + variables CSS</li>
+                                <li><strong>v2.1</strong> · 📅 Exclusion weekends Gantt · Devis PDF compact</li>
+                            </ul>
+                            <p style="font-size:0.85em;color:var(--color-text-muted);margin-top:12px;">Détails complets dans les fichiers <code>RELEASE_v2.x.md</code> du dépôt.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ══════════ /GUIDE ══════════ -->
 
             <div id="accompagnement" class="tab-content">
 
@@ -8477,6 +8787,26 @@
             if (sub === 'croise')   renderVueCroisee();
             if (sub === 'outils')   renderFichesRapides();
         }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Guide & Flux de travail (v2.9) — onglet d'aide visuel
+        // ═══════════════════════════════════════════════════════════
+        /**
+         * Bascule entre les sections du Guide (Démarrer / Quotidien /
+         * Workflow / Suivi / Sécurité / Raccourcis / Nouveautés).
+         * @param {string} sec - identifiant court (sans préfixe "guide-sec-")
+         */
+        function switchGuideSection(sec) {
+            document.querySelectorAll('.guide-pill').forEach(p => p.classList.toggle('active', p.dataset.sec === sec));
+            document.querySelectorAll('.guide-section').forEach(s => s.style.display = 'none');
+            const target = document.getElementById('guide-sec-' + sec);
+            if (target) target.style.display = '';
+        }
+
+        // Section par défaut au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            try { switchGuideSection('demarrer'); } catch (e) {}
+        });
 
         // ═══════════════════════════════════════════════════════════
         //  Parcours d'accompagnement — vue flux (v2.8)

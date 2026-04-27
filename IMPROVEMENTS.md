@@ -2,6 +2,17 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-26 — v2.9 Onglet Guide & Flux de travail
+
+- **Nouvel onglet « 📖 Guide »** dans la barre principale, inspiré du visuel « Aide & Flux » du module Gantt.
+- 7 sections accessibles via pills : 🚀 Démarrer · 📅 Quotidien · ✅ Workflow approbation · 💶 Suivi & paiement · 🛡️ Sauvegarde & sécurité · ⌨️ Raccourcis · ✨ Nouveautés.
+- Cartes numérotées colorées (badge rond + emoji + titre + description) reliées par des flèches `→`, cliquables pour ouvrir l'onglet correspondant.
+- Tip-boxes (💡) entre les flow blocks pour les bonnes pratiques.
+- Couvre tout le cycle de vie d'une prestation (brouillon → facturé encaissé) + workflow d'approbation + sécurité.
+- Compatible dark mode.
+
+---
+
 ## 2026-04-26 — v2.8 Vue Parcours dans Accompagnement
 
 - **Nouveau sous-onglet « 🌊 Parcours »** dans le module Accompagnement, à côté de Bénéficiaires/Jalons/Vue croisée/Outils.
