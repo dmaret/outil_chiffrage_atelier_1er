@@ -43,6 +43,7 @@
 16. [Conditions d'utilisation](#16-conditions-dutilisation)
 17. [✨ Confort & raccourcis UX *(Avril 2026)*](#17--confort--raccourcis-ux-avril-2026)
 18. [♿ Accessibilité & qualité du code *(Avril 2026)*](#18--accessibilité--qualité-du-code-avril-2026)
+19. [🎨 Visuel & productivité *(v2.3 — Avril 2026)*](#19--visuel--productivité-v23--avril-2026)
 
 ---
 
@@ -1136,6 +1137,58 @@ JSDoc `@param` / `@returns` sur les 5 fonctions critiques de l'app : `migrateLoc
 ### 18.6 Performance
 
 - **Lazy loading** : `loading="lazy"` sur les previews d'images dans les attachements (évite de précharger les pièces jointes hors-écran).
+
+---
+
+## 19. 🎨 Visuel & productivité *(v2.3 — Avril 2026)*
+
+### 19.1 ⚡ Templates sectoriels de prestation
+
+Affichés en grille au-dessus du formulaire **Calculateur**. Un clic pré-remplit prestation, référence, nombre de pièces, équipage CEA/MSP, unité et notes internes.
+
+| Template | Secteur | Pré-remplit |
+|---|---|---|
+| 🔌 Assemblage électronique standard | Industrie | 50 pièces, 2 CEA, 30% MSP |
+| ✉️ Mise sous pli volumineuse | Logistique | 1000 plis, 3 CEA, 25% MSP |
+| 📦 Kit de conditionnement | Logistique | 200 kits, 2 CEA, 30% MSP |
+| 🔍 Contrôle qualité visuel | Industrie | 500 pièces, 1 CEA, 50% MSP |
+| 🏷️ Étiquetage produit | Logistique | 800 pièces, 2 CEA, 30% MSP |
+| 📥 Réception et mise en stock | Logistique | 100 palettes, 1 CEA, 60% MSP |
+
+Confirmation demandée si des champs sont déjà remplis. Cartes accessibles (`role="button"`, `tabindex`, navigation Enter/Space).
+
+### 19.2 🎨 Comparateur de devis avec diff coloré
+
+Le comparateur affiche désormais une colonne **Δ (B − A)** :
+
+- ▲ **vert** = B est meilleure que A
+- ▼ **rouge** = B est moins bonne
+- = **gris** = identique
+
+Le delta est en valeur absolue + pourcentage (ex : `▲ 250 CHF (+12.5%)`). Pour le **prix unitaire**, le sens est inversé (« moins cher » = mieux).
+
+### 19.3 📊 Graphiques KPI sur le dashboard
+
+Section « Tendances » avec trois visualisations [Chart.js 4.4.1](https://www.chartjs.org/) :
+
+- **CA confirmé sur 6 mois** — bar chart, somme des `prixVente` des prestations `valide` + `facture`.
+- **Répartition par statut** — donut, couleurs sémantiques (orange = devis, vert = validé, bleu = facturé, rouge = annulé, gris = refusé).
+- **Top 5 clients** par CA cumulé — barres horizontales.
+
+Cache d'instances (`_dashCharts`) avec `destroy()` avant re-render pour éviter les fuites mémoire. Tolérant à l'absence de Chart.js (CDN bloquée → section vide, pas de crash).
+
+### 19.4 👁️ Aperçu devis live (sidebar WYSIWYG)
+
+Bouton flottant **FAB 👁️** en bas à droite, **uniquement visible sur l'onglet Calculateur**. Cliquer ouvre un panneau slide-in à droite (380 px).
+
+- Aperçu rendu via `buildDevisHtml({ preview: true })`
+- Refresh **debouncé 200 ms** sur chaque modification du formulaire ou des gestes
+- État (ouvert / fermé) **persisté en localStorage** sous `liveDevisPreviewOpen`
+- Se ferme automatiquement en quittant l'onglet calculateur
+
+### 19.5 🌙 Dark mode étendu
+
+Le mode sombre (existant depuis v2.0) couvre désormais les composants ajoutés en v2.2 et v2.3 : `.modal-box`, `#pinModalBox`, `#fluxLectureBox`, `#qg-code-hint`, `.compare-diff-*`, `.devis-preview-pane`, `.preset-template-card`.
 
 ---
 
