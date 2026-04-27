@@ -2,6 +2,15 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-26 — v2.6 Bulk actions
+
+- **Approbation en lot** : 3 boutons (✋ Demander validation / ✅ Approuver / ❌ Rejeter) dans la barre de sélection multiple. Filtrage automatique par état compatible (skip silencieux des prestations déjà dans le bon état). Motif unique demandé pour le rejet en lot.
+- **Suppression en lot** avec double confirmation et undo via Ctrl+Z (snapshot via `pushUndoSnapshot`).
+- **Export sélection** en CSV ou Excel — réutilise les fonctions d'export existantes via substitution temporaire de la liste source.
+- Tous les boutons portent `data-perm` — auto-cachés pour les utilisateurs sans permission. Audit log à chaque opération.
+
+---
+
 ## 2026-04-26 — v2.5 Workflow & écran d'accueil avancé
 
 ### Nouvelles fonctionnalités

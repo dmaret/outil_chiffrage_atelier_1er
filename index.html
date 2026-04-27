@@ -4261,6 +4261,15 @@
                             <option value="facture">💙 Facturé</option>
                         </select>
                         <button class="btn btn-small btn-success" onclick="applyBatchStatut()">✔ Appliquer</button>
+                        <span style="display:inline-block;width:1px;height:20px;background:var(--color-border);"></span>
+                        <button class="btn btn-small" onclick="applyBatchApproval('request')" title="Demander la validation pour les prestations sélectionnées" data-perm="request_approval">✋ Demander validation</button>
+                        <button class="btn btn-small btn-success" onclick="applyBatchApproval('approve')" title="Approuver les prestations sélectionnées" data-perm="approve_prestation">✅ Approuver</button>
+                        <button class="btn btn-small" onclick="applyBatchApproval('reject')" title="Rejeter avec un motif unique" data-perm="approve_prestation" style="color:var(--color-danger);">❌ Rejeter</button>
+                        <span style="display:inline-block;width:1px;height:20px;background:var(--color-border);"></span>
+                        <button class="btn btn-small" onclick="applyBatchExport('csv')" title="Exporter la sélection en CSV">📥 CSV</button>
+                        <button class="btn btn-small" onclick="applyBatchExport('xlsx')" title="Exporter la sélection en Excel" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">📊 Excel</button>
+                        <button class="btn btn-small" onclick="applyBatchDelete()" title="Supprimer toutes les prestations sélectionnées" data-perm="delete_prestation" style="color:var(--color-danger);">🗑️ Supprimer</button>
+                        <span style="display:inline-block;width:1px;height:20px;background:var(--color-border);"></span>
                         <button class="btn btn-small" onclick="selectAllPrestations()" style="background:#fff3cd;border-color:#ffc107;color:#856404;">☑ Tout sélectionner (page)</button>
                         <button class="btn btn-small btn-secondary" onclick="clearBatchSelection()">✖ Désélectionner</button>
                     </div>
@@ -13924,6 +13933,131 @@
             renderPrestations();
             updateStats();
             toast(`✅ Statut mis à jour pour ${updated} prestation(s).`, 'success');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Bulk actions sur prestations sélectionnées (v2.6)
+        // ═══════════════════════════════════════════════════════════
+
+        /**
+         * Applique une transition d'approbation sur toutes les prestations
+         * sélectionnées en lot. Vérifie la permission, ignore les transitions
+         * non autorisées par état (ex : approuver une prestation déjà approved
+         * est ignoré silencieusement). Demande un motif unique si action='reject'.
+         * @param {'request'|'approve'|'reject'} action
+         */
+        function applyBatchApproval(action) {
+            const perm = action === 'request' ? 'request_approval' : 'approve_prestation';
+            if (!checkPermission(perm)) return;
+            const ids = [...window._batchSelected];
+            if (ids.length === 0) {
+                toast('⚠️ Sélectionnez au moins une prestation.', 'warning');
+                return;
+            }
+            const items = ids.map(id => prestationsSauvegardees.find(x => x.id === id || String(x.id) === String(id))).filter(Boolean);
+
+            // Filtrage par états valides pour la transition
+            const valid = items.filter(p => {
+                const s = p.approvalState || 'approved';
+                if (action === 'request') return s === 'draft' || s === 'rejected';
+                if (action === 'approve') return s === 'pending_review' || s === 'draft';
+                if (action === 'reject')  return s === 'pending_review';
+                return false;
+            });
+            const skipped = items.length - valid.length;
+            if (valid.length === 0) {
+                toast(`⚠️ Aucune des ${items.length} prestations sélectionnées n'est dans un état permettant cette action.`, 'warning');
+                return;
+            }
+
+            let reason = null;
+            if (action === 'reject') {
+                reason = prompt(`Motif du rejet pour les ${valid.length} prestation(s) sélectionnée(s) :`);
+                if (reason == null) return; // annulé
+                reason = (reason || '').slice(0, 500);
+            }
+
+            const now = new Date().toISOString();
+            let session = {};
+            try { session = JSON.parse(sessionStorage.getItem('authSession') || '{}'); } catch (e) {}
+
+            pushUndoSnapshot && pushUndoSnapshot(`Approbation en lot (${valid.length} prestations)`);
+            valid.forEach(p => {
+                if (action === 'request') {
+                    p.approvalState = 'pending_review';
+                    p.approvalRequestedAt = now;
+                } else if (action === 'approve') {
+                    p.approvalState = 'approved';
+                    p.approvedAt = now;
+                    p.approvedBy = session.id || null;
+                } else if (action === 'reject') {
+                    p.approvalState = 'rejected';
+                    p.approvalRejectionReason = reason;
+                    p.approvalRejectedAt = now;
+                }
+            });
+            saveToStorage();
+            clearBatchSelection();
+            renderPrestations();
+            try { renderPendingApprovals(); } catch (e) {}
+            const verbe = { request:'demande(s) envoyée(s)', approve:'approbation(s)', reject:'rejet(s)' }[action];
+            const skipMsg = skipped > 0 ? ` (${skipped} ignorée(s) — état incompatible)` : '';
+            toast(`✅ ${valid.length} ${verbe}${skipMsg}`, 'success');
+            if (typeof logAction === 'function') logAction(`Bulk ${action} approbation : ${valid.length} prestations${reason ? ' — motif: ' + reason : ''}`, 'approval');
+        }
+
+        /**
+         * Suppression en lot avec double confirmation (le nombre rappelle l'enjeu).
+         */
+        function applyBatchDelete() {
+            if (!checkPermission('delete_prestation')) return;
+            const ids = [...window._batchSelected];
+            if (ids.length === 0) {
+                toast('⚠️ Sélectionnez au moins une prestation.', 'warning');
+                return;
+            }
+            if (!confirm(`Supprimer ${ids.length} prestation(s) ? Cette action est irréversible (mais récupérable via Ctrl+Z dans la session courante).`)) return;
+
+            pushUndoSnapshot && pushUndoSnapshot(`Suppression en lot (${ids.length} prestations)`);
+            const before = prestationsSauvegardees.length;
+            const idSet = new Set(ids.map(String));
+            prestationsSauvegardees = prestationsSauvegardees.filter(p => !idSet.has(String(p.id)));
+            const removed = before - prestationsSauvegardees.length;
+            saveToStorage();
+            clearBatchSelection();
+            renderPrestations();
+            try { renderPendingApprovals(); } catch (e) {}
+            updateStats && updateStats();
+            toast(`🗑️ ${removed} prestation(s) supprimée(s) — Ctrl+Z pour annuler`, 'success');
+            if (typeof logAction === 'function') logAction(`Bulk delete : ${removed} prestations`, 'delete');
+        }
+
+        /**
+         * Exporte uniquement la sélection en CSV ou XLSX. Délègue aux fonctions
+         * d'export existantes en filtrant temporairement la liste source.
+         * @param {'csv'|'xlsx'} format
+         */
+        function applyBatchExport(format) {
+            const ids = [...window._batchSelected];
+            if (ids.length === 0) {
+                toast('⚠️ Sélectionnez au moins une prestation.', 'warning');
+                return;
+            }
+            const idSet = new Set(ids.map(String));
+            const subset = prestationsSauvegardees.filter(p => idSet.has(String(p.id)));
+            // Substitution temporaire pour réutiliser la logique d'export existante
+            const original = prestationsSauvegardees;
+            prestationsSauvegardees = subset;
+            try {
+                if (format === 'xlsx' && typeof exportPrestationsXLSX === 'function') exportPrestationsXLSX();
+                else if (typeof exportPrestationsCSV === 'function') exportPrestationsCSV();
+                toast(`📥 ${subset.length} prestation(s) exportée(s)`, 'success');
+            } catch (e) {
+                console.error('applyBatchExport failed:', e);
+                toast('❌ Échec de l\'export : ' + e.message, 'danger');
+            } finally {
+                prestationsSauvegardees = original;
+            }
         }
 
         function deletePrestation(id) {
