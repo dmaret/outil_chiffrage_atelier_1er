@@ -46,6 +46,7 @@
 17. [✨ Confort & raccourcis UX *(Avril 2026)*](#17--confort--raccourcis-ux-avril-2026)
 18. [♿ Accessibilité & qualité du code *(Avril 2026)*](#18--accessibilité--qualité-du-code-avril-2026)
 19. [🎨 Visuel & productivité *(v2.3 — Avril 2026)*](#19--visuel--productivité-v23--avril-2026)
+20. [🛡️ Robustesse des données *(v2.4 — Avril 2026)*](#20-️-robustesse-des-données-v24--avril-2026)
 
 ---
 
@@ -1191,6 +1192,74 @@ Bouton flottant **FAB 👁️** en bas à droite, **uniquement visible sur l'ong
 ### 19.5 🌙 Dark mode étendu
 
 Le mode sombre (existant depuis v2.0) couvre désormais les composants ajoutés en v2.2 et v2.3 : `.modal-box`, `#pinModalBox`, `#fluxLectureBox`, `#qg-code-hint`, `.compare-diff-*`, `.devis-preview-pane`, `.preset-template-card`.
+
+---
+
+## 20. 🛡️ Robustesse des données *(v2.4 — Avril 2026)*
+
+### 20.1 🔐 Backup chiffré (Web Crypto AES-GCM)
+
+Bouton **« 🔐 Export chiffré »** dans Paramétrage → Sauvegarde & Restauration. Demande un mot de passe (8 car. min, double saisie), produit un fichier `.encbackup` chiffré en AES-GCM 256 bits avec dérivation de clé PBKDF2-SHA256 sur 200 000 itérations.
+
+L'import est **transparent** : l'app détecte automatiquement si un fichier est chiffré (présence de `alg: 'AES-GCM-256'`) et demande le mot de passe à la volée. Mauvais mot de passe → toast d'erreur, pas de crash.
+
+> 💡 Utilise l'export chiffré si tu veux **transmettre une sauvegarde** par email, cloud, clé USB partagée. Pour une sauvegarde locale rapide, l'export JSON simple suffit.
+
+### 20.2 💾 Sauvegardes automatiques en arrière-plan
+
+Toggle **Activer** + intervalle **1h / 6h / 24h** dans Paramétrage. L'app crée un snapshot horodaté en `localStorage` à intervalle régulier, en gardant les **3 plus récents** (purge auto des anciens).
+
+Chaque snapshot est listé avec :
+- 📁 Date + taille en Ko
+- ↻ **Restaurer** (avec confirmation)
+- 📤 **Exporter** (en JSON brut, à réutiliser ailleurs)
+- 🗑️ **Supprimer**
+
+> ⚠️ Les auto-snapshots sont stockés **en clair** dans le localStorage. La sécurité est celle de ta machine. Pour un transfert, utilise plutôt « Export chiffré ».
+
+### 20.3 🔔 Notifications navigateur
+
+Toggle dans Paramétrage qui demande la permission au navigateur. Une fois activées, les **alertes critiques** déclenchent une notification système même quand l'onglet est en arrière-plan :
+
+- 📦 Stock bas
+- 📋 Devis expirés
+- ⚡ Surcharge de capacité hebdomadaire
+- 💶 **Paiements en retard de plus de 45 jours** (nouveau)
+
+**Anti-spam** : chaque alerte est limitée à **1 notification par jour par signature** (clé `notifSentHistory` en localStorage). Le bouton « 🧪 Tester » force une notification immédiate pour vérifier que ça fonctionne.
+
+Si le navigateur bloque les notifications, le badge d'état le signale clairement et indique comment les débloquer.
+
+### 20.4 ✅ Workflow d'approbation
+
+Nouveau champ `approvalState` sur les prestations, **orthogonal au `statut` métier** (devis / accepté / facturé…) :
+
+| État | Badge | Quand |
+|---|---|---|
+| `approved` | ✅ Validée | Défaut — opérationnel |
+| `draft` | 📝 Brouillon | En cours, pas encore soumis |
+| `pending_review` | ⏳ Relecture | Soumis, en attente |
+| `rejected` | ❌ Rejetée | Refusé, motif obligatoire |
+
+**Permissions RBAC** :
+- `request_approval` (MSP + ADMIN) — passer de `draft` ou `rejected` → `pending_review`
+- `approve_prestation` (ADMIN seul) — passer de `pending_review` → `approved` ou `rejected`
+
+**Boutons contextuels** dans la liste des prestations selon l'état + le rôle :
+
+| État courant | Boutons visibles si permission |
+|---|---|
+| `draft` ou `rejected` | ✋ Demander validation |
+| `pending_review` | ✅ Approuver / ❌ Rejeter |
+| `approved` | (aucun — état terminal positif) |
+
+Toutes les transitions sont **auditées** dans `auditLog` avec horodatage et utilisateur. Le motif de rejet est conservé dans `approvalRejectionReason` (max 500 car.).
+
+**Migration zéro** : les prestations sans `approvalState` sont traitées comme `approved`. Aucune action requise sur les données existantes.
+
+### 20.5 Note technique
+
+La **migration `localStorage` → `IndexedDB`** est volontairement différée à une session dédiée. Elle toucherait les 162 call-sites de `localStorage` du code et nécessite une stratégie de transition (dual-write, conversion sync→async) qu'on ne peut pas combiner à d'autres features sans risque de régression silencieuse. Elle reste planifiée pour le **Lot 3** technique.
 
 ---
 
