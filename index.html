@@ -4287,12 +4287,51 @@
                     <h2>Sauvegarde & Restauration</h2>
                     <div class="info-box">Exportez toutes vos données (prestations, gestes, consommables, stock, config) en JSON, ou importez depuis une sauvegarde précédente.</div>
                     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
-                        <button class="btn btn-success" onclick="exportJSON()">📤 Exporter données (JSON)</button>
-                        <label class="btn btn-secondary" style="cursor:pointer;margin-top:8px;">
-                            📥 Importer données (JSON)
-                            <input type="file" accept=".json" style="display:none;" onchange="importJSON(this)">
+                        <button class="btn btn-success" onclick="exportJSON()">📤 Exporter (JSON)</button>
+                        <button class="btn" onclick="exportJSONEncrypted()" title="Export protégé par mot de passe (AES-GCM 256, PBKDF2 200k itérations)">🔐 Export chiffré</button>
+                        <label class="btn btn-secondary" style="cursor:pointer;">
+                            📥 Importer (JSON ou chiffré)
+                            <input type="file" accept=".json,.encbackup" style="display:none;" onchange="importJSONAuto(this)">
                         </label>
                     </div>
+
+                    <!-- Sauvegardes automatiques (v2.4) -->
+                    <div style="margin-top:14px;padding:12px;background:var(--color-bg-alt);border-radius:8px;border:1px dashed var(--color-border);">
+                        <h3 style="margin:0 0 8px;color:var(--color-primary-dark);font-size:0.95em;">⏱️ Sauvegarde automatique en arrière-plan</h3>
+                        <p style="font-size:0.82em;color:var(--color-text-muted);margin-bottom:10px;">
+                            Conserve jusqu'à 3 snapshots horodatés de tes données dans le navigateur (localStorage). Restaurable en un clic depuis cette page. Sauvegardes en clair sur ta machine — utilise <strong>Export chiffré</strong> si tu veux les transmettre/uploader.
+                        </p>
+                        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+                            <label class="print-check"><input type="checkbox" id="autoBackupEnabled" onchange="updateAutoBackupSettings()"> Activer</label>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:0.9em;">Intervalle :
+                                <select id="autoBackupInterval" onchange="updateAutoBackupSettings()">
+                                    <option value="3600000">1 heure</option>
+                                    <option value="21600000" selected>6 heures</option>
+                                    <option value="86400000">24 heures</option>
+                                </select>
+                            </label>
+                            <button class="btn btn-small" onclick="performAutoBackup(true)">💾 Sauvegarder maintenant</button>
+                            <button class="btn btn-small" onclick="renderAutoBackupList()">🔍 Lister</button>
+                        </div>
+                        <div id="autoBackupList" style="margin-top:10px;font-size:0.85em;"></div>
+                    </div>
+                </div>
+
+                <!-- Notifications navigateur (v2.4) -->
+                <div class="section">
+                    <h2>🔔 Notifications navigateur</h2>
+                    <div class="info-box">
+                        Reçois une notification système (en plus du bandeau in-app) quand des alertes critiques sont détectées : stocks bas, devis expirés, paiements en retard de plus de 45 jours.
+                    </div>
+                    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+                        <label class="print-check"><input type="checkbox" id="notifEnabled" onchange="toggleAppNotifications(this)"> Activer</label>
+                        <span id="notifPermissionStatus" style="font-size:0.85em;color:var(--color-text-muted);"></span>
+                        <button class="btn btn-small" onclick="testAppNotification()">🧪 Tester</button>
+                    </div>
+                    <small style="display:block;margin-top:8px;color:var(--color-text-muted);">
+                        Les notifications fonctionnent même si l'onglet est en arrière-plan, tant que le navigateur tourne.
+                        Seules les alertes <strong>critiques</strong> déclenchent une notification (max 1 par alerte/jour, anti-spam).
+                    </small>
                 </div>
 
                 <!-- SECTION THÈME -->
@@ -6038,7 +6077,9 @@
                 manage_config: true,
                 view_audit: true,
                 export_data: true,
-                manage_users: true
+                manage_users: true,
+                request_approval: true,
+                approve_prestation: true
             },
             'cea': {
                 create_prestation: false,
@@ -6069,7 +6110,9 @@
                 manage_config: false,
                 view_audit: true,
                 export_data: true,
-                manage_users: false
+                manage_users: false,
+                request_approval: true,
+                approve_prestation: false
             },
             'asp': {
                 create_prestation: false,
@@ -13345,6 +13388,113 @@
             return `<span class="badge ${s.cls}" title="Cliquer pour passer à l'étape suivante">${s.label}</span>`;
         }
 
+        // ═══════════════════════════════════════════════════════════
+        //  Workflow d'approbation (v2.4) — orthogonal au statut métier
+        // ═══════════════════════════════════════════════════════════
+        // Les prestations ont un `approvalState` distinct du `statut` métier :
+        //   - 'approved' (défaut, rétro-compatible)  → publiée, opérationnelle
+        //   - 'draft'                                  → brouillon non soumis
+        //   - 'pending_review'                         → soumise, en attente
+        //   - 'rejected'                               → rejetée, retour brouillon
+        // Les transitions sont auditées et respectent le RBAC :
+        //   - request_approval : MSP + ADMIN  (draft → pending_review)
+        //   - approve_prestation : ADMIN seul (pending → approved | rejected)
+
+        const APPROVAL_BADGE = {
+            approved:        { label:'✅ Validée',   cls:'badge-statut-accepte' },
+            draft:           { label:'📝 Brouillon', cls:'badge-statut-brouillon' },
+            pending_review:  { label:'⏳ Relecture', cls:'badge-statut-soumis' },
+            rejected:        { label:'❌ Rejetée',   cls:'badge-statut-annule' },
+        };
+
+        function getApprovalBadgeHtml(state) {
+            const s = APPROVAL_BADGE[state || 'approved'];
+            return `<span class="badge ${s.cls}" style="margin-left:4px;" title="État d'approbation">${s.label}</span>`;
+        }
+
+        /**
+         * Demande la validation d'une prestation. Permission requise : request_approval.
+         * Transition autorisée depuis 'draft' ou 'rejected' → 'pending_review'.
+         * @param {string|number} id
+         */
+        function requestPrestationApproval(id) {
+            if (!checkPermission('request_approval')) return;
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const current = p.approvalState || 'approved';
+            if (current === 'approved' || current === 'pending_review') {
+                toast('Cette prestation est déjà ' + APPROVAL_BADGE[current].label.toLowerCase(), 'info');
+                return;
+            }
+            p.approvalState = 'pending_review';
+            p.approvalRequestedAt = new Date().toISOString();
+            saveToStorage();
+            renderPrestations();
+            if (typeof logAction === 'function') logAction(`Validation demandée — ${p.client||''} ${p.prestation||''}`.trim(), 'approval');
+            toast('⏳ Validation demandée', 'success');
+        }
+
+        /**
+         * Approuve une prestation. Permission requise : approve_prestation.
+         * Transition autorisée depuis 'pending_review' ou 'draft' → 'approved'.
+         * @param {string|number} id
+         */
+        function approvePrestation(id) {
+            if (!checkPermission('approve_prestation')) return;
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            p.approvalState = 'approved';
+            p.approvedAt = new Date().toISOString();
+            try {
+                const sess = JSON.parse(sessionStorage.getItem('authSession') || '{}');
+                p.approvedBy = sess.id || null;
+            } catch (e) {}
+            saveToStorage();
+            renderPrestations();
+            if (typeof logAction === 'function') logAction(`Prestation validée — ${p.client||''} ${p.prestation||''}`.trim(), 'approval');
+            toast('✅ Prestation validée', 'success');
+        }
+
+        /**
+         * Rejette une prestation et capture le motif. Permission requise : approve_prestation.
+         * @param {string|number} id
+         */
+        function rejectPrestation(id) {
+            if (!checkPermission('approve_prestation')) return;
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const reason = prompt('Motif du rejet (visible dans l\'audit) :');
+            if (reason == null) return; // annulé
+            p.approvalState = 'rejected';
+            p.approvalRejectionReason = (reason || '').slice(0, 500);
+            p.approvalRejectedAt = new Date().toISOString();
+            saveToStorage();
+            renderPrestations();
+            if (typeof logAction === 'function') logAction(`Prestation rejetée — ${p.client||''} : ${p.approvalRejectionReason}`, 'approval');
+            toast('❌ Prestation rejetée', 'warning');
+        }
+
+        /**
+         * Renvoie le HTML des boutons d'action d'approbation pour une prestation,
+         * filtrés selon l'état courant et les permissions de l'utilisateur.
+         * @param {object} p
+         * @returns {string}
+         */
+        function renderApprovalButtons(p) {
+            const state = p.approvalState || 'approved';
+            const can_request = typeof hasPermission === 'function' && hasPermission('request_approval');
+            const can_approve = typeof hasPermission === 'function' && hasPermission('approve_prestation');
+            let html = '';
+            if ((state === 'draft' || state === 'rejected') && can_request) {
+                html += `<button class="btn btn-small" title="Demander la validation" onclick="requestPrestationApproval(${JSON.stringify(p.id)})">✋ Demander validation</button> `;
+            }
+            if (state === 'pending_review' && can_approve) {
+                html += `<button class="btn btn-small btn-success" title="Approuver" onclick="approvePrestation(${JSON.stringify(p.id)})">✅ Approuver</button> `;
+                html += `<button class="btn btn-small" title="Rejeter avec motif" onclick="rejectPrestation(${JSON.stringify(p.id)})" style="color:var(--color-danger);">❌ Rejeter</button> `;
+            }
+            return html;
+        }
+
         function cycleStatut(id) {
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
@@ -13508,18 +13658,20 @@
                 const date = new Date(p.date).toLocaleDateString('fr-FR');
                 const margeChfVal = fmtNum((p.prixVente||0) - (p.prixRevient||0));
                 const statutBadge = getStatutBadgeHtml(p.statut || 'devis');
+                const approvalBadge = (p.approvalState && p.approvalState !== 'approved') ? getApprovalBadgeHtml(p.approvalState) : '';
                 const _dv = p.dateValidite ? new Date(p.dateValidite) : null;
                 const _daysLeft = _dv ? Math.ceil((_dv - _today) / 86400000) : null;
                 const expiryBadge = _daysLeft !== null && _daysLeft <= 7
                     ? `<span style="background:${_daysLeft <= 0 ? '#e74c3c' : '#e67e22'};color:white;border-radius:4px;padding:1px 6px;font-size:0.75em;margin-left:4px;">${_daysLeft <= 0 ? '⚠️ Expiré' : `⚠️ ${_daysLeft}j`}</span>`
                     : '';
+                const approvalBtns = renderApprovalButtons(p);
                 const isSelected = window._batchSelected.has(p.id);
                 html += `<div data-prest-id="${p.id}" style="background: linear-gradient(135deg, #fff 0%, #f7fcff 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #a8d5e2; box-shadow: 0 2px 8px rgba(168, 213, 226, 0.15);${isSelected?' outline:2px solid var(--color-primary);':''}">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap:wrap; gap:6px;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                             <input type="checkbox" id="batch-cb-${p.id}" ${isSelected?'checked':''} onchange="toggleBatchSelect(${p.id})" title="Sélectionner pour action en lot" style="width:16px;height:16px;cursor:pointer;accent-color:var(--color-primary-dark);">
                             <strong style="font-size: 1.1em; color: #6b8fa3;">${escapeHtml(p.prestation)}</strong>
-                            ${statutBadge}${expiryBadge}
+                            ${statutBadge}${approvalBadge}${expiryBadge}
                         </div>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
                             <select onchange="setStatutDirect(${p.id}, this.value)" style="font-size:0.82em;padding:3px 6px;border-radius:6px;border:1px solid #d5e3ed;background:#f7fbfd;cursor:pointer;">
@@ -13539,6 +13691,7 @@
                             <button class="btn btn-small" style="background:#f0f8e8;color:#4a8a2a;border:1px solid #b0d890;" onclick="copyPrestationToClient(${p.id})" title="Copier vers un autre client">👤 Copier client</button>
                             ${(p.statut === 'valide' || p.statut === 'facture') ? `<button class="btn btn-small" style="background:#f0e8f8;color:#7a5a9a;border:1px solid #c9b3d4;" onclick="programmerRecurrence(${p.id})" title="Créer récurrence">🔁 Récurrence</button>` : ''}
                             ${p.statut === 'facture' ? `<button class="btn btn-small" style="background:#f5fce8;color:#4a7a2a;border:1px solid #b8d890;" onclick="openPaiementModal(${p.id})" title="Suivi paiement">💶 Paiement</button>` : ''}
+                            ${approvalBtns}
                             ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
                         </div>
                     </div>
@@ -15078,6 +15231,391 @@
             URL.revokeObjectURL(url);
             localStorage.setItem('lastExportDate', new Date().toISOString());
         }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Backup chiffré (Web Crypto AES-GCM, v2.4)
+        // ═══════════════════════════════════════════════════════════
+
+        /** Snapshot complet de l'état applicatif (mêmes clés que exportJSON). */
+        function _buildBackupSnapshot() {
+            return {
+                version:1, exportDate:new Date().toISOString(),
+                config, catalogueGestes, catalogueConsommables,
+                prestationsSauvegardees, mouvements, stockActuel, stockMins,
+                clientsData: typeof clientsData !== 'undefined' ? clientsData : {}
+            };
+        }
+
+        const _b64Encode = bytes => btoa(String.fromCharCode.apply(null, bytes));
+        const _b64Decode = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+
+        /**
+         * Dérive une clé AES-GCM 256 bits depuis un mot de passe (PBKDF2-SHA256, 200k itérations).
+         * @param {string} password
+         * @param {Uint8Array} salt
+         * @returns {Promise<CryptoKey>}
+         */
+        async function _deriveBackupKey(password, salt) {
+            const enc = new TextEncoder();
+            const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+            return crypto.subtle.deriveKey(
+                { name:'PBKDF2', salt, iterations:200000, hash:'SHA-256' },
+                baseKey,
+                { name:'AES-GCM', length:256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        /**
+         * Chiffre une chaîne JSON avec un mot de passe. Renvoie une enveloppe
+         * sérialisable {v, salt, iv, ct} en base64.
+         * @param {string} jsonStr
+         * @param {string} password
+         * @returns {Promise<object>}
+         */
+        async function _encryptJSON(jsonStr, password) {
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const key = await _deriveBackupKey(password, salt);
+            const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, new TextEncoder().encode(jsonStr));
+            return { v:1, kdf:'PBKDF2-SHA256', iter:200000, alg:'AES-GCM-256',
+                     salt:_b64Encode(salt), iv:_b64Encode(iv), ct:_b64Encode(new Uint8Array(ct)) };
+        }
+
+        /**
+         * Déchiffre une enveloppe produite par `_encryptJSON`. Lance une exception
+         * si le mot de passe est faux ou si les données sont corrompues.
+         * @param {object} envelope
+         * @param {string} password
+         * @returns {Promise<string>} le JSON déchiffré
+         */
+        async function _decryptJSON(envelope, password) {
+            if (!envelope || envelope.alg !== 'AES-GCM-256') throw new Error('Format de sauvegarde non reconnu');
+            const salt = _b64Decode(envelope.salt);
+            const iv = _b64Decode(envelope.iv);
+            const ct = _b64Decode(envelope.ct);
+            const key = await _deriveBackupKey(password, salt);
+            const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, ct);
+            return new TextDecoder().decode(pt);
+        }
+
+        /** Exporte une sauvegarde chiffrée (.encbackup) protégée par mot de passe. */
+        async function exportJSONEncrypted() {
+            if (!checkPermission('export_data')) return;
+            if (!window.crypto || !crypto.subtle) {
+                toast('⚠️ Web Crypto API indisponible dans ce navigateur', 'danger');
+                return;
+            }
+            const password = prompt('Mot de passe pour chiffrer la sauvegarde\n(8 caractères minimum, à mémoriser !)');
+            if (password == null) return;
+            if (password.length < 8) { toast('Mot de passe trop court (8 car. minimum)', 'warning'); return; }
+            const confirm = prompt('Confirmez le mot de passe :');
+            if (confirm !== password) { toast('Les mots de passe ne correspondent pas', 'danger'); return; }
+            try {
+                showLoading('Chiffrement en cours…');
+                const env = await _encryptJSON(JSON.stringify(_buildBackupSnapshot()), password);
+                hideLoading();
+                const blob = new Blob([JSON.stringify(env, null, 2)], { type:'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `atelier_backup_${new Date().toISOString().slice(0,10)}.encbackup`;
+                a.click();
+                URL.revokeObjectURL(url);
+                localStorage.setItem('lastExportDate', new Date().toISOString());
+                toast('✅ Sauvegarde chiffrée téléchargée', 'success');
+                if (typeof logAction === 'function') logAction('Export sauvegarde chiffrée', 'export');
+            } catch (e) {
+                hideLoading();
+                console.error(e);
+                toast('❌ Échec du chiffrement : ' + (e.message || e), 'danger');
+            }
+        }
+
+        /** Routeur d'import : détecte automatiquement un fichier chiffré ou clair. */
+        function importJSONAuto(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                let raw = e.target.result;
+                let parsed;
+                try { parsed = JSON.parse(raw); } catch (err) {
+                    toast('Fichier invalide (JSON malformé)', 'danger');
+                    input.value = '';
+                    return;
+                }
+                if (parsed && parsed.alg === 'AES-GCM-256' && parsed.ct) {
+                    // Fichier chiffré
+                    const password = prompt('Mot de passe de la sauvegarde :');
+                    if (password == null) { input.value = ''; return; }
+                    try {
+                        showLoading('Déchiffrement…');
+                        const decrypted = await _decryptJSON(parsed, password);
+                        hideLoading();
+                        // Réinjection dans le flux d'import existant
+                        const fakeFile = new Blob([decrypted], { type:'application/json' });
+                        const fakeInput = { files: [fakeFile] };
+                        importJSON(fakeInput);
+                    } catch (err) {
+                        hideLoading();
+                        toast('❌ Mot de passe incorrect ou fichier corrompu', 'danger');
+                    }
+                } else {
+                    // Fichier en clair, on délègue à l'import existant
+                    importJSON(input);
+                }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Sauvegardes automatiques en localStorage (v2.4)
+        // ═══════════════════════════════════════════════════════════
+        const AUTO_BACKUP_PREFIX = 'autoBackup_';
+        const AUTO_BACKUP_KEEP = 3;
+        let _autoBackupTimer = null;
+
+        /**
+         * Crée un snapshot horodaté en localStorage et purge au-delà de
+         * AUTO_BACKUP_KEEP entrées les plus anciennes.
+         * @param {boolean} [manual=false] - true = déclenchement manuel
+         * @returns {boolean} succès
+         */
+        function performAutoBackup(manual = false) {
+            try {
+                const ts = Date.now();
+                const key = AUTO_BACKUP_PREFIX + ts;
+                const snap = _buildBackupSnapshot();
+                const ok = safeSetItem(key, JSON.stringify(snap));
+                if (!ok) {
+                    if (manual) toast('⚠️ Quota localStorage saturé. Exportez et nettoyez.', 'warning');
+                    return false;
+                }
+                // Purge des plus anciens
+                const keys = Object.keys(localStorage).filter(k => k.startsWith(AUTO_BACKUP_PREFIX)).sort();
+                while (keys.length > AUTO_BACKUP_KEEP) {
+                    localStorage.removeItem(keys.shift());
+                }
+                localStorage.setItem('lastAutoBackup', String(ts));
+                if (manual) {
+                    toast('💾 Sauvegarde locale créée', 'success');
+                    if (typeof logAction === 'function') logAction('Sauvegarde auto manuelle', 'export');
+                }
+                if (document.getElementById('autoBackupList')?.children.length > 0) renderAutoBackupList();
+                return true;
+            } catch (e) {
+                console.warn('performAutoBackup failed:', e);
+                if (manual) toast('❌ Échec de la sauvegarde : ' + e.message, 'danger');
+                return false;
+            }
+        }
+
+        /** Met à jour les préférences auto-backup et redémarre le timer. */
+        function updateAutoBackupSettings() {
+            const enabled = !!document.getElementById('autoBackupEnabled')?.checked;
+            const interval = parseInt(document.getElementById('autoBackupInterval')?.value || '21600000', 10);
+            try {
+                localStorage.setItem('autoBackupEnabled', enabled ? '1' : '0');
+                localStorage.setItem('autoBackupInterval', String(interval));
+            } catch (e) {}
+            scheduleAutoBackup();
+        }
+
+        function scheduleAutoBackup() {
+            if (_autoBackupTimer) { clearInterval(_autoBackupTimer); _autoBackupTimer = null; }
+            const enabled = localStorage.getItem('autoBackupEnabled') === '1';
+            if (!enabled) return;
+            const interval = parseInt(localStorage.getItem('autoBackupInterval') || '21600000', 10);
+            _autoBackupTimer = setInterval(() => performAutoBackup(false), interval);
+        }
+
+        /** Liste les sauvegardes locales avec actions Restaurer / Exporter / Supprimer. */
+        function renderAutoBackupList() {
+            const container = document.getElementById('autoBackupList');
+            if (!container) return;
+            const keys = Object.keys(localStorage).filter(k => k.startsWith(AUTO_BACKUP_PREFIX)).sort().reverse();
+            if (keys.length === 0) {
+                container.innerHTML = '<em style="color:var(--color-text-muted);">Aucune sauvegarde automatique pour le moment.</em>';
+                return;
+            }
+            container.innerHTML = keys.map(k => {
+                const ts = parseInt(k.replace(AUTO_BACKUP_PREFIX, ''), 10);
+                const d = new Date(ts);
+                const sizeKb = (localStorage.getItem(k) || '').length / 1024;
+                return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid var(--color-border-light);gap:8px;flex-wrap:wrap;">
+                    <span>📁 ${escapeHtml(d.toLocaleString('fr-CH'))} <small style="color:var(--color-text-muted);">(${sizeKb.toFixed(1)} Ko)</small></span>
+                    <span style="display:flex;gap:6px;">
+                        <button class="btn btn-small" onclick="restoreAutoBackup('${k}')">↻ Restaurer</button>
+                        <button class="btn btn-small btn-secondary" onclick="exportAutoBackup('${k}')">📤 Exporter</button>
+                        <button class="btn btn-small btn-secondary" onclick="deleteAutoBackup('${k}')" style="color:var(--color-danger);">🗑️</button>
+                    </span>
+                </div>`;
+            }).join('');
+        }
+
+        function restoreAutoBackup(key) {
+            const raw = localStorage.getItem(key);
+            if (!raw) return;
+            toastConfirm('Restaurer cette sauvegarde ? Toutes les données actuelles seront remplacées.', () => {
+                try {
+                    const fakeBlob = new Blob([raw], { type:'application/json' });
+                    importJSON({ files: [fakeBlob] });
+                } catch (e) { toast('❌ Échec : ' + e.message, 'danger'); }
+            });
+        }
+
+        function exportAutoBackup(key) {
+            const raw = localStorage.getItem(key);
+            if (!raw) return;
+            const ts = parseInt(key.replace(AUTO_BACKUP_PREFIX, ''), 10);
+            const blob = new Blob([raw], { type:'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `atelier_autobackup_${new Date(ts).toISOString().slice(0,19).replace(/:/g,'-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function deleteAutoBackup(key) {
+            toastConfirm('Supprimer cette sauvegarde ?', () => {
+                localStorage.removeItem(key);
+                renderAutoBackupList();
+            });
+        }
+
+        // Restauration des préférences au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const enabledEl = document.getElementById('autoBackupEnabled');
+                const intervalEl = document.getElementById('autoBackupInterval');
+                if (enabledEl) enabledEl.checked = localStorage.getItem('autoBackupEnabled') === '1';
+                if (intervalEl) intervalEl.value = localStorage.getItem('autoBackupInterval') || '21600000';
+                scheduleAutoBackup();
+            } catch (e) { console.warn('autoBackup init failed:', e); }
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        //  Notifications navigateur (v2.4)
+        // ═══════════════════════════════════════════════════════════
+        // Les alertes critiques sont throttlées : on garde une trace par jour
+        // et par signature pour éviter de spammer l'utilisateur s'il rouvre
+        // l'app plusieurs fois dans la journée.
+        const NOTIF_HISTORY_KEY = 'notifSentHistory';
+
+        function _notifPermissionLabel() {
+            if (!('Notification' in window)) return 'Non supporté par ce navigateur';
+            switch (Notification.permission) {
+                case 'granted': return '✅ Autorisées par le navigateur';
+                case 'denied':  return '⛔ Bloquées par le navigateur (à débloquer dans les paramètres du site)';
+                default:        return 'À autoriser au prochain test';
+            }
+        }
+
+        function _refreshNotifStatus() {
+            const el = document.getElementById('notifPermissionStatus');
+            if (el) el.textContent = _notifPermissionLabel();
+        }
+
+        /**
+         * Active/désactive les notifications. Demande la permission au navigateur
+         * si nécessaire. Persiste le réglage utilisateur dans localStorage.
+         * @param {HTMLInputElement} checkbox
+         */
+        async function toggleAppNotifications(checkbox) {
+            const wantEnabled = checkbox.checked;
+            if (wantEnabled) {
+                if (!('Notification' in window)) {
+                    toast('Notifications non supportées par ce navigateur', 'warning');
+                    checkbox.checked = false;
+                    return;
+                }
+                if (Notification.permission === 'default') {
+                    const result = await Notification.requestPermission();
+                    if (result !== 'granted') {
+                        toast('Permission refusée — vous pouvez l\'autoriser dans les paramètres du site', 'warning');
+                        checkbox.checked = false;
+                        localStorage.setItem('notifEnabled', '0');
+                        _refreshNotifStatus();
+                        return;
+                    }
+                } else if (Notification.permission === 'denied') {
+                    toast('Notifications bloquées — débloquez-les dans les paramètres du navigateur', 'warning');
+                    checkbox.checked = false;
+                    return;
+                }
+            }
+            localStorage.setItem('notifEnabled', wantEnabled ? '1' : '0');
+            _refreshNotifStatus();
+            toast(wantEnabled ? '🔔 Notifications activées' : '🔕 Notifications désactivées', 'info');
+        }
+
+        function testAppNotification() {
+            sendAppNotification('🧪 Test de notification', { body:'Si tu vois ce message, les notifications fonctionnent !', tag:'test', force:true });
+        }
+
+        /**
+         * Envoie une notification système si activée et autorisée.
+         * Anti-doublon : utilise `tag` + historique journalier pour ne pas
+         * répéter la même alerte plus d'une fois par jour.
+         * @param {string} title
+         * @param {object} [opts] - { body, tag, force }
+         * @returns {boolean} true si notification effectivement envoyée
+         */
+        function sendAppNotification(title, opts = {}) {
+            const enabled = localStorage.getItem('notifEnabled') === '1';
+            if (!enabled || !('Notification' in window) || Notification.permission !== 'granted') return false;
+            const tag = opts.tag || title;
+            if (!opts.force) {
+                const today = new Date().toISOString().slice(0, 10);
+                let hist = {};
+                try { hist = JSON.parse(localStorage.getItem(NOTIF_HISTORY_KEY) || '{}'); } catch (e) {}
+                if (hist[tag] === today) return false;
+                hist[tag] = today;
+                try { localStorage.setItem(NOTIF_HISTORY_KEY, JSON.stringify(hist)); } catch (e) {}
+            }
+            try {
+                new Notification(title, {
+                    body: opts.body || '',
+                    tag,
+                    icon: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ctext y=\'.9em\' font-size=\'90\'%3E🏭%3C/text%3E%3C/svg%3E',
+                    silent: false
+                });
+                return true;
+            } catch (e) {
+                console.warn('Notification failed:', e);
+                return false;
+            }
+        }
+
+        /**
+         * Détecte les paiements en retard de plus de 45 jours sur les
+         * prestations facturées sans encaissement enregistré.
+         * @returns {Array<object>} prestations en retard
+         */
+        function detectOverduePayments() {
+            const now = Date.now();
+            const SEUIL_RETARD_MS = 45 * 86400000;
+            return prestationsSauvegardees.filter(p => {
+                if (!p.dateFacturation) return false;
+                if (p.dateEncaissement) return false; // Déjà encaissé
+                const facturee = new Date(p.dateFacturation).getTime();
+                if (isNaN(facturee)) return false;
+                return (now - facturee) > SEUIL_RETARD_MS;
+            });
+        }
+
+        // Init du status au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const cb = document.getElementById('notifEnabled');
+                if (cb) cb.checked = localStorage.getItem('notifEnabled') === '1';
+                _refreshNotifStatus();
+            } catch (e) {}
+        });
 
         function importJSON(input) {
             const file = input.files[0];
@@ -20400,7 +20938,18 @@
                 .filter(p => p.statut === 'valide' && p.date >= fmtLocalDate(semDebut) && p.date <= fmtLocalDate(semFin))
                 .reduce((s, p) => s + (p.heures || 0), 0);
             const capHebdo = parseFloat(document.getElementById('capaciteHebdo')?.value || 35);
-            if (hSem > capHebdo) alertes.push({ danger: true, msg: `⚡ Surcharge capacité cette semaine : ${hSem.toFixed(1)}h / ${capHebdo}h` });
+            if (hSem > capHebdo) alertes.push({ danger: true, msg: `⚡ Surcharge capacité cette semaine : ${hSem.toFixed(1)}h / ${capHebdo}h`, tag:'overload' });
+
+            // Paiements en retard (v2.4) : facturés sans encaissement depuis > 45 jours
+            try {
+                const overdue = detectOverduePayments();
+                if (overdue.length > 0) {
+                    alertes.push({
+                        danger:true, tag:'overdue-payments',
+                        msg: `💶 ${overdue.length} paiement(s) en retard (>45j) : ${overdue.slice(0,3).map(p=>`<strong>${escapeHtml(p.client||p.reference||p.prestation)}</strong>`).join(', ')}${overdue.length > 3 ? '…' : ''}`
+                    });
+                }
+            } catch (e) { console.warn('detectOverduePayments failed:', e); }
 
             if (alertes.length === 0) {
                 banner.style.display = 'none';
@@ -20411,6 +20960,13 @@
                 banner.innerHTML = '<strong>' + (hasDanger ? '🔴 Alertes importantes' : '⚠️ Avertissements') + '</strong>' +
                     alertes.map(a => `<div class="alert-item">${a.msg}</div>`).join('');
                 banner.style.display = 'block';
+                // Notifications navigateur (v2.4) : seulement les alertes danger, throttlées par tag/jour
+                try {
+                    alertes.filter(a => a.danger).forEach(a => {
+                        const plain = (a.msg || '').replace(/<[^>]+>/g, '');
+                        sendAppNotification('Atelier — alerte', { body: plain, tag: a.tag || plain.slice(0, 40) });
+                    });
+                } catch (e) { console.warn('sendAppNotification failed:', e); }
             }
         }
 
