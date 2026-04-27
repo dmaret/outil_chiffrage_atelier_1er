@@ -48,6 +48,7 @@
 19. [🎨 Visuel & productivité *(v2.3 — Avril 2026)*](#19--visuel--productivité-v23--avril-2026)
 20. [🛡️ Robustesse des données *(v2.4 — Avril 2026)*](#20-️-robustesse-des-données-v24--avril-2026)
 21. [🚦 Workflow & écran d'accueil avancé *(v2.5 — Avril 2026)*](#21--workflow--écran-daccueil-avancé-v25--avril-2026)
+22. [📦 Bulk actions sur prestations *(v2.6 — Avril 2026)*](#22--bulk-actions-sur-prestations-v26--avril-2026)
 
 ---
 
@@ -1305,6 +1306,34 @@ Nouveau `<select>` dans les filtres de l'onglet Prestations, combinable avec les
 - ✅ Validée
 
 Permet à un ADMIN de retrouver instantanément toutes les prestations à valider, ou à un MSP de voir ses propres rejets à retravailler.
+
+---
+
+## 22. 📦 Bulk actions sur prestations *(v2.6 — Avril 2026)*
+
+La barre de sélection multiple (qui apparaît dès qu'on coche au moins une prestation) gagne **6 nouvelles actions** :
+
+### 22.1 Approbation en lot
+
+| Bouton | Permission | Transitions autorisées |
+|---|---|---|
+| ✋ Demander validation | `request_approval` | `draft` ou `rejected` → `pending_review` |
+| ✅ Approuver | `approve_prestation` | `pending_review` ou `draft` → `approved` |
+| ❌ Rejeter | `approve_prestation` | `pending_review` → `rejected` (avec motif unique) |
+
+Les prestations dans un état incompatible avec la transition demandée sont **ignorées silencieusement** (toast rappelle combien). Un motif unique est demandé une seule fois pour les rejets en lot — il s'applique à toutes les prestations rejetées.
+
+### 22.2 Suppression en lot
+
+Bouton 🗑️ Supprimer avec **double confirmation** + snapshot undo automatique. Récupérable via **Ctrl+Z** dans la session courante.
+
+### 22.3 Export sélection
+
+Boutons **📥 CSV** et **📊 Excel** qui exportent uniquement les prestations cochées (et non l'intégralité comme les boutons d'export du haut). Réutilisent la logique d'export existante via une substitution temporaire de la liste source.
+
+### 22.4 Permissions & audit
+
+Tous les boutons portent un attribut `data-perm` qui les **masque automatiquement** pour les utilisateurs sans la permission requise. Chaque opération en lot écrit une entrée dans l'audit log (`logAction`).
 
 ---
 
