@@ -2,6 +2,8 @@
 
 > **Chiffrage Financier • Gestion de Stock • Valorisation FIFO • Prestations**
 
+> 💻 **Travailler en local sans GitHub ?** → voir [UTILISATION_LOCALE.md](UTILISATION_LOCALE.md)
+
 ---
 
 ## Sommaire
