@@ -2,6 +2,20 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-26 — v2.5 Workflow & écran d'accueil avancé
+
+### Nouvelles fonctionnalités
+- **🎓 Carte Formation CEA** sur l'écran de connexion (4e widget configurable). Bouton d'accès direct à `formation-logistique`.
+- **📊 Statistiques rapides configurables** : 6 métriques au choix (Prestations, Clients, CA mois, Devis attente, Gestes catalogue, Consommables). Bug corrigé : l'ancienne carte affichait toujours 0/0/0 car liée à des variables inexistantes.
+- **⏳ Widget Dashboard « Approbations en attente »** : liste les prestations en `pending_review` et `rejected`, avec actions ✅/❌/↻ contextuelles selon les permissions. Inscrit dans `DASHBOARD_WIDGETS`.
+- **🔍 Filtre « Approbation »** dans la liste des prestations (en attente / brouillon / rejetée / validée).
+
+### Notes
+- La PR #90 (Formation CEA + stats config) avait été shippée sans doc — rattrapée ici.
+- Hooks ajoutés dans `requestPrestationApproval` / `approvePrestation` / `rejectPrestation` pour rafraîchir le widget dashboard à chaque transition.
+
+---
+
 ## 2026-04-26 — v2.4 Lot 2 robustesse données
 
 ### Nouvelles fonctionnalités

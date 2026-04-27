@@ -4225,6 +4225,13 @@
                         <select id="filtreClient" onchange="window._prestPage=0;renderPrestations()" style="flex:1;min-width:120px;">
                             <option value="">Tous clients</option>
                         </select>
+                        <select id="filtreApproval" onchange="window._prestPage=0;renderPrestations()" title="Filtrer par état d'approbation" style="flex:1;min-width:140px;">
+                            <option value="">Toutes approbations</option>
+                            <option value="pending_review">⏳ En attente de validation</option>
+                            <option value="draft">📝 Brouillon</option>
+                            <option value="rejected">❌ Rejetée</option>
+                            <option value="approved">✅ Validée</option>
+                        </select>
                         <label style="font-size:0.85em;color:#7a9db1;white-space:nowrap;">Du</label>
                         <input type="date" id="filtreDateDe" oninput="window._prestPage=0;renderPrestations()" style="flex:1;min-width:120px;">
                         <label style="font-size:0.85em;color:#7a9db1;white-space:nowrap;">Au</label>
@@ -5632,6 +5639,12 @@
                   <div id="dashAlertesList"></div>
                 </div>
               </div>
+              <!-- Approbations en attente (v2.5) -->
+              <div id="dashSectionApprovals" class="section" style="margin-top:20px;">
+                <h2>⏳ Approbations en attente</h2>
+                <div id="dashApprovalsList"></div>
+              </div>
+
               <div id="dashSectionFormation" class="section" style="margin-top:20px;">
                 <h2>📚 Demandes de Formation</h2>
                 <div id="dashFormationRequestsList"></div>
@@ -6034,6 +6047,7 @@
         const DASHBOARD_WIDGETS = [
             { id: 'dashboardKpis',        label: '📊 KPIs — CA, devis, heures, taux',      display: '' },
             { id: 'dashGridDevisAlertes', label: '📋 Devis en attente & Alertes',            display: 'grid' },
+            { id: 'dashSectionApprovals', label: '⏳ Approbations en attente',                display: 'block' },
             { id: 'dashSectionFormation', label: '📚 Demandes de Formation',                 display: 'block' },
             { id: 'dashSectionPipeline',  label: '📈 Pipeline CA (3 prochains mois)',        display: 'block' },
             { id: 'dashSectionTopClients',label: '🏆 Top clients — CA 12 mois',             display: 'block' },
@@ -13430,6 +13444,7 @@
             p.approvalRequestedAt = new Date().toISOString();
             saveToStorage();
             renderPrestations();
+            try { renderPendingApprovals(); } catch (e) {}
             if (typeof logAction === 'function') logAction(`Validation demandée — ${p.client||''} ${p.prestation||''}`.trim(), 'approval');
             toast('⏳ Validation demandée', 'success');
         }
@@ -13451,6 +13466,7 @@
             } catch (e) {}
             saveToStorage();
             renderPrestations();
+            try { renderPendingApprovals(); } catch (e) {}
             if (typeof logAction === 'function') logAction(`Prestation validée — ${p.client||''} ${p.prestation||''}`.trim(), 'approval');
             toast('✅ Prestation validée', 'success');
         }
@@ -13470,6 +13486,7 @@
             p.approvalRejectedAt = new Date().toISOString();
             saveToStorage();
             renderPrestations();
+            try { renderPendingApprovals(); } catch (e) {}
             if (typeof logAction === 'function') logAction(`Prestation rejetée — ${p.client||''} : ${p.approvalRejectionReason}`, 'approval');
             toast('❌ Prestation rejetée', 'warning');
         }
@@ -13570,6 +13587,7 @@
             const texte = (document.getElementById('filtreTexte')?.value || '').toLowerCase();
             const statut = document.getElementById('filtreStatut')?.value || '';
             const client = document.getElementById('filtreClient')?.value || '';
+            const approval = document.getElementById('filtreApproval')?.value || '';
 
             const sortF = window._prestSort || 'date';
             const sortD = window._prestSortDir !== undefined ? window._prestSortDir : -1;
@@ -13588,6 +13606,9 @@
             }
             if (statut) {
                 filtered = filtered.filter(p => (p.statut || 'devis') === statut);
+            }
+            if (approval) {
+                filtered = filtered.filter(p => (p.approvalState || 'approved') === approval);
             }
             if (client) {
                 filtered = filtered.filter(p => p.client === client);
@@ -20660,6 +20681,70 @@
             renderOnboardingChecklist();
             updateTabBadges();
             try { renderDashboardCharts(); } catch (e) { console.warn('renderDashboardCharts failed:', e); }
+            try { renderPendingApprovals(); } catch (e) { console.warn('renderPendingApprovals failed:', e); }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Widget Dashboard — Approbations en attente (v2.5)
+        // ═══════════════════════════════════════════════════════════
+        /**
+         * Liste les prestations en `pending_review` ou `rejected` directement
+         * sur le dashboard. Permet à un ADMIN d'approuver/rejeter en un clic
+         * sans naviguer vers l'onglet Prestations. Affiche aussi les
+         * prestations rejetées au demandeur pour qu'il les retravaille.
+         * @returns {void}
+         */
+        function renderPendingApprovals() {
+            const container = document.getElementById('dashApprovalsList');
+            if (!container) return;
+            if (typeof prestationsSauvegardees === 'undefined') return;
+
+            const pending = prestationsSauvegardees.filter(p => (p.approvalState || 'approved') === 'pending_review');
+            const rejected = prestationsSauvegardees.filter(p => (p.approvalState || 'approved') === 'rejected');
+
+            if (pending.length === 0 && rejected.length === 0) {
+                container.innerHTML = '<p style="color:var(--color-text-muted);font-style:italic;margin:0;">Aucune prestation en attente d\'approbation. ✅</p>';
+                return;
+            }
+
+            const can_approve = typeof hasPermission === 'function' && hasPermission('approve_prestation');
+
+            const renderRow = (p, kind) => {
+                const date = new Date(p.approvalRequestedAt || p.approvalRejectedAt || p.date).toLocaleDateString('fr-CH');
+                const badge = kind === 'pending'
+                    ? '<span class="badge badge-statut-soumis">⏳ En attente</span>'
+                    : '<span class="badge badge-statut-annule">❌ Rejetée</span>';
+                const amount = p.prixVente ? ` — <strong>${fmtCHF(p.prixVente)}</strong>` : '';
+                const reason = (kind === 'rejected' && p.approvalRejectionReason)
+                    ? `<div style="font-size:0.8em;color:var(--color-danger);margin-top:3px;">Motif : ${escapeHtml(p.approvalRejectionReason)}</div>`
+                    : '';
+                let actions = '';
+                if (kind === 'pending' && can_approve) {
+                    actions = `<button class="btn btn-small btn-success" onclick="approvePrestation(${JSON.stringify(p.id)})">✅ Approuver</button>
+                               <button class="btn btn-small" onclick="rejectPrestation(${JSON.stringify(p.id)})" style="color:var(--color-danger);">❌ Rejeter</button>`;
+                } else if (kind === 'rejected') {
+                    actions = `<button class="btn btn-small" onclick="requestPrestationApproval(${JSON.stringify(p.id)})">↻ Resoumettre</button>`;
+                }
+                return `<div style="padding:10px;border-bottom:1px solid var(--color-border-light);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+                    <div style="flex:1;min-width:240px;">
+                        <div style="font-weight:600;color:var(--color-primary-dark);">${escapeHtml(p.prestation || '—')} ${badge}</div>
+                        <div style="font-size:0.82em;color:var(--color-text-muted);">🏢 ${escapeHtml(p.client || '—')} — 📅 ${date}${amount}</div>
+                        ${reason}
+                    </div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">${actions}</div>
+                </div>`;
+            };
+
+            let html = '';
+            if (pending.length > 0) {
+                html += `<div style="margin-bottom:8px;font-size:0.85em;color:var(--color-text-muted);"><strong>${pending.length}</strong> en attente de validation</div>`;
+                html += pending.map(p => renderRow(p, 'pending')).join('');
+            }
+            if (rejected.length > 0) {
+                html += `<div style="margin:12px 0 8px;font-size:0.85em;color:var(--color-text-muted);"><strong>${rejected.length}</strong> rejetée(s) à retravailler</div>`;
+                html += rejected.map(p => renderRow(p, 'rejected')).join('');
+            }
+            container.innerHTML = html;
         }
 
         // ─────────────────────────────────────────────────────────
