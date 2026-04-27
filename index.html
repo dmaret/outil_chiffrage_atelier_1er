@@ -5654,6 +5654,12 @@
                 <div id="dashApprovalsList"></div>
               </div>
 
+              <!-- Statistiques d'approbation (v2.7) -->
+              <div id="dashSectionApprovalStats" class="section" style="margin-top:20px;">
+                <h2>📈 Statistiques d'approbation</h2>
+                <div id="dashApprovalStatsBody"></div>
+              </div>
+
               <div id="dashSectionFormation" class="section" style="margin-top:20px;">
                 <h2>📚 Demandes de Formation</h2>
                 <div id="dashFormationRequestsList"></div>
@@ -6057,6 +6063,7 @@
             { id: 'dashboardKpis',        label: '📊 KPIs — CA, devis, heures, taux',      display: '' },
             { id: 'dashGridDevisAlertes', label: '📋 Devis en attente & Alertes',            display: 'grid' },
             { id: 'dashSectionApprovals', label: '⏳ Approbations en attente',                display: 'block' },
+            { id: 'dashSectionApprovalStats', label: '📈 Statistiques d\'approbation',         display: 'block' },
             { id: 'dashSectionFormation', label: '📚 Demandes de Formation',                 display: 'block' },
             { id: 'dashSectionPipeline',  label: '📈 Pipeline CA (3 prochains mois)',        display: 'block' },
             { id: 'dashSectionTopClients',label: '🏆 Top clients — CA 12 mois',             display: 'block' },
@@ -13451,6 +13458,10 @@
             }
             p.approvalState = 'pending_review';
             p.approvalRequestedAt = new Date().toISOString();
+            try {
+                const sess = JSON.parse(sessionStorage.getItem('authSession') || '{}');
+                p.approvalRequestedBy = sess.id || null;
+            } catch (e) {}
             saveToStorage();
             renderPrestations();
             try { renderPendingApprovals(); } catch (e) {}
@@ -13986,6 +13997,7 @@
                 if (action === 'request') {
                     p.approvalState = 'pending_review';
                     p.approvalRequestedAt = now;
+                    p.approvalRequestedBy = session.id || null;
                 } else if (action === 'approve') {
                     p.approvalState = 'approved';
                     p.approvedAt = now;
@@ -20816,6 +20828,7 @@
             updateTabBadges();
             try { renderDashboardCharts(); } catch (e) { console.warn('renderDashboardCharts failed:', e); }
             try { renderPendingApprovals(); } catch (e) { console.warn('renderPendingApprovals failed:', e); }
+            try { renderApprovalStats(); } catch (e) { console.warn('renderApprovalStats failed:', e); }
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -20879,6 +20892,141 @@
                 html += rejected.map(p => renderRow(p, 'rejected')).join('');
             }
             container.innerHTML = html;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Statistiques d'approbation (v2.7) — agrégats sur le workflow
+        // ═══════════════════════════════════════════════════════════
+        let _approvalStatsChart = null;
+
+        /**
+         * Calcule et affiche les agrégats du workflow d'approbation :
+         * répartition par état, taux d'approbation (approved / décidées),
+         * temps moyen de validation, top approbateurs et derniers verdicts.
+         * Se base sur les champs approval* posés par les transitions.
+         * @returns {void}
+         */
+        function renderApprovalStats() {
+            const body = document.getElementById('dashApprovalStatsBody');
+            if (!body) return;
+            if (typeof prestationsSauvegardees === 'undefined') return;
+
+            // 1. Comptes par état
+            const counts = { approved:0, draft:0, pending_review:0, rejected:0 };
+            prestationsSauvegardees.forEach(p => {
+                const s = p.approvalState || 'approved';
+                if (counts[s] !== undefined) counts[s]++;
+            });
+            const total = prestationsSauvegardees.length;
+
+            // 2. Taux d'approbation (sur les prestations effectivement décidées)
+            const decided = counts.approved + counts.rejected;
+            const tauxApprobation = decided > 0 ? Math.round((counts.approved / decided) * 100) : null;
+
+            // 3. Temps moyen de validation (entre demande et décision)
+            const delays = [];
+            prestationsSauvegardees.forEach(p => {
+                if (!p.approvalRequestedAt) return;
+                const decisionTs = p.approvedAt || p.approvalRejectedAt;
+                if (!decisionTs) return;
+                const ms = new Date(decisionTs) - new Date(p.approvalRequestedAt);
+                if (ms > 0 && ms < 365 * 86400000) delays.push(ms);
+            });
+            const avgDelayH = delays.length > 0
+                ? (delays.reduce((s,v)=>s+v,0) / delays.length / 3600000)
+                : null;
+            const fmtDelay = h => {
+                if (h == null) return '—';
+                if (h < 1) return `${Math.round(h*60)} min`;
+                if (h < 48) return `${h.toFixed(1)} h`;
+                return `${(h/24).toFixed(1)} j`;
+            };
+
+            // 4. Top approbateurs
+            const approvers = {};
+            prestationsSauvegardees.forEach(p => {
+                if (p.approvedBy) approvers[p.approvedBy] = (approvers[p.approvedBy] || 0) + 1;
+            });
+            const topApprovers = Object.entries(approvers).sort((a,b) => b[1] - a[1]).slice(0, 3);
+
+            // 5. Derniers 5 verdicts
+            const decidedItems = prestationsSauvegardees
+                .filter(p => p.approvedAt || p.approvalRejectedAt)
+                .map(p => ({
+                    p,
+                    when: new Date(p.approvedAt || p.approvalRejectedAt),
+                    verdict: p.approvedAt ? 'approved' : 'rejected'
+                }))
+                .sort((a, b) => b.when - a.when)
+                .slice(0, 5);
+
+            // ── Rendu HTML ──
+            const kpiCard = (label, value, color) =>
+                `<div style="background:var(--color-bg-alt);border-radius:10px;padding:14px;text-align:center;">
+                    <div style="font-size:1.6em;font-weight:700;color:${color};line-height:1.1;">${value}</div>
+                    <div style="font-size:0.78em;color:var(--color-text-muted);margin-top:4px;">${escapeHtml(label)}</div>
+                </div>`;
+
+            const kpis = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;">
+                ${kpiCard('Taux d\'approbation', tauxApprobation != null ? tauxApprobation + '%' : '—', '#27ae60')}
+                ${kpiCard('Délai moyen décision', fmtDelay(avgDelayH), '#3498db')}
+                ${kpiCard('En attente', counts.pending_review, '#f39c12')}
+                ${kpiCard('Décidées', decided, '#9a70b8')}
+            </div>`;
+
+            const verdicts = decidedItems.length === 0
+                ? '<p style="color:var(--color-text-muted);font-style:italic;">Aucune décision enregistrée pour le moment.</p>'
+                : decidedItems.map(({p, when, verdict}) => {
+                    const icon = verdict === 'approved' ? '✅' : '❌';
+                    const color = verdict === 'approved' ? '#27ae60' : '#c0392b';
+                    return `<div style="padding:6px 0;border-bottom:1px solid var(--color-border-light);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span><strong style="color:${color};">${icon}</strong> ${escapeHtml(p.client||'—')} — ${escapeHtml(p.prestation||'—')}</span>
+                        <small style="color:var(--color-text-muted);">${escapeHtml(when.toLocaleString('fr-CH', {dateStyle:'short', timeStyle:'short'}))}</small>
+                    </div>`;
+                }).join('');
+
+            const approversHtml = topApprovers.length === 0
+                ? '<em style="color:var(--color-text-muted);">Aucun approbateur enregistré.</em>'
+                : '<ol style="margin:4px 0 0 18px;padding:0;">' + topApprovers.map(([id, n]) =>
+                    `<li><strong>${escapeHtml(id)}</strong> — ${n} approbation(s)</li>`
+                ).join('') + '</ol>';
+
+            body.innerHTML = `
+                ${kpis}
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                    <div>
+                        <h3 style="font-size:0.95em;color:var(--color-text-muted);margin:0 0 6px;">Répartition par état</h3>
+                        <div style="position:relative;height:180px;"><canvas id="chartApprovalSplit" aria-label="Répartition par état d'approbation"></canvas></div>
+                    </div>
+                    <div>
+                        <h3 style="font-size:0.95em;color:var(--color-text-muted);margin:0 0 6px;">Top approbateurs</h3>
+                        ${approversHtml}
+                        <h3 style="font-size:0.95em;color:var(--color-text-muted);margin:14px 0 6px;">Derniers verdicts</h3>
+                        ${verdicts}
+                    </div>
+                </div>
+                <small style="display:block;margin-top:10px;color:var(--color-text-muted);">Total prestations : <strong>${total}</strong> · Validées : <strong>${counts.approved}</strong> · Rejetées : <strong>${counts.rejected}</strong> · Brouillons : <strong>${counts.draft}</strong></small>
+            `;
+
+            // Chart Chart.js (donut) — recréé à chaque appel
+            if (typeof Chart !== 'undefined') {
+                const cv = document.getElementById('chartApprovalSplit');
+                if (cv) {
+                    if (_approvalStatsChart) _approvalStatsChart.destroy();
+                    _approvalStatsChart = new Chart(cv, {
+                        type:'doughnut',
+                        data:{
+                            labels:['Validées', 'En attente', 'Brouillon', 'Rejetées'],
+                            datasets:[{
+                                data:[counts.approved, counts.pending_review, counts.draft, counts.rejected],
+                                backgroundColor:['#27ae60','#f39c12','#95a5a6','#e74c3c'],
+                                borderWidth:2, borderColor:'#fff'
+                            }]
+                        },
+                        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:11 } } } } }
+                    });
+                }
+            }
         }
 
         // ─────────────────────────────────────────────────────────

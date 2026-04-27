@@ -2,6 +2,15 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-26 — v2.7 Statistiques d'approbation
+
+- **Nouveau widget Dashboard « 📈 Statistiques d'approbation »** : taux d'approbation, délai moyen de décision (en min/h/jours selon ordre de grandeur), nombre en attente, nombre décidées.
+- **Donut Chart.js** : répartition des prestations par état d'approbation.
+- **Top 3 approbateurs** + **5 derniers verdicts** avec horodatage formaté.
+- Capture du demandeur (`approvalRequestedBy`) ajoutée dans les transitions d'approbation et bulk actions, pour de futures stats par demandeur.
+
+---
+
 ## 2026-04-26 — v2.6 Bulk actions
 
 - **Approbation en lot** : 3 boutons (✋ Demander validation / ✅ Approuver / ❌ Rejeter) dans la barre de sélection multiple. Filtrage automatique par état compatible (skip silencieux des prestations déjà dans le bon état). Motif unique demandé pour le rejet en lot.
