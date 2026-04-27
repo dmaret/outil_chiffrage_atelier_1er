@@ -49,6 +49,7 @@
 20. [🛡️ Robustesse des données *(v2.4 — Avril 2026)*](#20-️-robustesse-des-données-v24--avril-2026)
 21. [🚦 Workflow & écran d'accueil avancé *(v2.5 — Avril 2026)*](#21--workflow--écran-daccueil-avancé-v25--avril-2026)
 22. [📦 Bulk actions sur prestations *(v2.6 — Avril 2026)*](#22--bulk-actions-sur-prestations-v26--avril-2026)
+23. [📈 Statistiques d'approbation *(v2.7 — Avril 2026)*](#23--statistiques-dapprobation-v27--avril-2026)
 
 ---
 
@@ -1334,6 +1335,39 @@ Boutons **📥 CSV** et **📊 Excel** qui exportent uniquement les prestations 
 ### 22.4 Permissions & audit
 
 Tous les boutons portent un attribut `data-perm` qui les **masque automatiquement** pour les utilisateurs sans la permission requise. Chaque opération en lot écrit une entrée dans l'audit log (`logAction`).
+
+---
+
+## 23. 📈 Statistiques d'approbation *(v2.7 — Avril 2026)*
+
+Nouvelle section sur le tableau de bord (inscrite dans `DASHBOARD_WIDGETS`) qui agrège l'activité du workflow d'approbation.
+
+### 23.1 KPIs
+
+Quatre cartes synthétiques :
+
+| KPI | Calcul |
+|---|---|
+| **Taux d'approbation** | `approved / (approved + rejected) × 100` (uniquement sur les prestations effectivement décidées) |
+| **Délai moyen de décision** | Moyenne entre `approvalRequestedAt` et `approvedAt`/`approvalRejectedAt`. Formaté en min / heures / jours selon l'ordre de grandeur |
+| **En attente** | Nombre de prestations en `pending_review` |
+| **Décidées** | `approved + rejected` |
+
+### 23.2 Donut Chart.js
+
+Répartition visuelle des prestations selon les 4 états (validées / en attente / brouillons / rejetées) avec couleurs sémantiques.
+
+### 23.3 Top approbateurs
+
+Top 3 des utilisateurs ayant approuvé le plus de prestations, basé sur le champ `approvedBy` capturé lors de chaque approbation (ainsi qu'en bulk).
+
+### 23.4 Derniers verdicts
+
+Les 5 dernières décisions (approbation ou rejet) horodatées au format suisse local. Permet à un superviseur de voir d'un coup d'œil l'activité récente.
+
+### 23.5 Capture du demandeur
+
+Les transitions de demande de validation (`requestPrestationApproval` + bulk `applyBatchApproval('request')`) capturent désormais `approvalRequestedBy` (id de l'utilisateur connecté), ouvrant la voie à de futures stats par demandeur.
 
 ---
 
