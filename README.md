@@ -47,6 +47,7 @@
 18. [♿ Accessibilité & qualité du code *(Avril 2026)*](#18--accessibilité--qualité-du-code-avril-2026)
 19. [🎨 Visuel & productivité *(v2.3 — Avril 2026)*](#19--visuel--productivité-v23--avril-2026)
 20. [🛡️ Robustesse des données *(v2.4 — Avril 2026)*](#20-️-robustesse-des-données-v24--avril-2026)
+21. [🚦 Workflow & écran d'accueil avancé *(v2.5 — Avril 2026)*](#21--workflow--écran-daccueil-avancé-v25--avril-2026)
 
 ---
 
@@ -1260,6 +1261,50 @@ Toutes les transitions sont **auditées** dans `auditLog` avec horodatage et uti
 ### 20.5 Note technique
 
 La **migration `localStorage` → `IndexedDB`** est volontairement différée à une session dédiée. Elle toucherait les 162 call-sites de `localStorage` du code et nécessite une stratégie de transition (dual-write, conversion sync→async) qu'on ne peut pas combiner à d'autres features sans risque de régression silencieuse. Elle reste planifiée pour le **Lot 3** technique.
+
+---
+
+## 21. 🚦 Workflow & écran d'accueil avancé *(v2.5 — Avril 2026)*
+
+### 21.1 🎓 Carte « Formation CEA » sur l'écran de connexion
+
+Quatrième widget configurable dans **Paramétrage → Écran d'accueil ADMIN**. Affiche un bouton « 🚀 Accéder à la formation » qui ferme l'overlay d'auth et ouvre directement l'onglet `formation-logistique`. Conçu pour les apprenants — accès rapide sans credentials admin.
+
+### 21.2 📊 Carte « Statistiques rapides » entièrement configurable
+
+Six métriques disponibles, l'admin coche celles à afficher sur l'écran de connexion :
+
+| Métrique | Source de données |
+|---|---|
+| Prestations | `prestationsSauvegardees.length` |
+| Clients | `Object.keys(clientsData).length` |
+| CA ce mois (CHF) | somme `prixVente` du mois (statut `valide`/`facture`) |
+| Devis en attente | filter `statut === 'devis'` |
+| Gestes au catalogue | `catalogueGestes.length` |
+| Consommables | `catalogueConsommables.length` |
+
+> 💡 Bug corrigé au passage : l'ancienne carte affichait toujours `0/0/0` car elle lisait des variables inexistantes. Désormais branchée sur les vraies sources.
+
+Sub-config UI dans Paramétrage avec toggles colorés. Fallback aux 3 métriques par défaut si aucune sélection. Choix persistés dans `loginConfig.statsMetrics`.
+
+### 21.3 ⏳ Widget Dashboard — Approbations en attente
+
+Nouvelle section sur le tableau de bord qui liste :
+
+- Les prestations en `pending_review` (boutons **✅ Approuver** / **❌ Rejeter** pour les ADMIN)
+- Les prestations `rejected` à retravailler (bouton **↻ Resoumettre** pour le demandeur)
+
+Affiche pour chaque ligne : titre, client, date de demande, montant, motif de rejet. Inscrit dans `DASHBOARD_WIDGETS` — masquable par groupe via le système de permissions widgets.
+
+### 21.4 🔍 Filtre « Approbation » dans la liste des prestations
+
+Nouveau `<select>` dans les filtres de l'onglet Prestations, combinable avec les filtres existants :
+- ⏳ En attente de validation
+- 📝 Brouillon
+- ❌ Rejetée
+- ✅ Validée
+
+Permet à un ADMIN de retrouver instantanément toutes les prestations à valider, ou à un MSP de voir ses propres rejets à retravailler.
 
 ---
 
