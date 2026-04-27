@@ -51,6 +51,7 @@
 22. [📦 Bulk actions sur prestations *(v2.6 — Avril 2026)*](#22--bulk-actions-sur-prestations-v26--avril-2026)
 23. [📈 Statistiques d'approbation *(v2.7 — Avril 2026)*](#23--statistiques-dapprobation-v27--avril-2026)
 24. [🌊 Vue Parcours dans Accompagnement *(v2.8 — Avril 2026)*](#24--vue-parcours-dans-accompagnement-v28--avril-2026)
+25. [📖 Onglet Guide & Flux de travail *(v2.9 — Avril 2026)*](#25--onglet-guide--flux-de-travail-v29--avril-2026)
 
 ---
 
@@ -1405,6 +1406,36 @@ Avatar initiale, nom complet, badge statut (en-cours / suspendu / en-bilan / sor
 ### 24.5 Dark mode
 
 Couvert dès la livraison — cartes et flèches restent lisibles en mode sombre.
+
+---
+
+## 25. 📖 Onglet Guide & Flux de travail *(v2.9 — Avril 2026)*
+
+Nouvel onglet **« 📖 Guide »** dans la barre principale du chiffrage, inspiré du visuel « Aide & Flux » du module Gantt. Présente le mode d'emploi de l'outil sous forme de **cartes numérotées et colorées**, reliées par des flèches `→`, **cliquables pour ouvrir directement la vue concernée**.
+
+### 25.1 Sept sections par pills
+
+| Pill | Contenu |
+|---|---|
+| 🚀 Démarrer | Mise en place initiale (config, gestes, consommables, clients, stock) + création d'un premier devis |
+| 📅 Quotidien | Rituel d'utilisation au jour le jour (Dashboard, Prestations, Stock, Planification, Historique) |
+| ✅ Workflow approbation | Cycle Brouillon → Demande → Approbation/Rejet → Stats |
+| 💶 Suivi & paiement | Cycle complet d'une prestation (Brouillon → Devis → Soumis → Accepté → En cours → Terminé → Facturé) |
+| 🛡️ Sauvegarde & sécurité | Auto-backup + Export chiffré + Notifications |
+| ⌨️ Raccourcis | Table des raccourcis clavier essentiels |
+| ✨ Nouveautés | Changelog visuel des dernières versions |
+
+### 25.2 Anatomie d'une carte
+
+Badge numéroté coloré en haut de carte, emoji icône, titre court en gras, description en petit. Clic = navigation vers l'onglet correspondant. Hover = surélévation + couleur d'accent.
+
+### 25.3 Tip-boxes
+
+Bandeaux 💡 informatifs entre les blocs (raccourcis utiles, bonnes pratiques, particularités).
+
+### 25.4 Compatible dark mode
+
+Couvert dès la livraison — pills, cartes et tip-boxes restent lisibles en mode sombre.
 
 ---
 
