@@ -50,6 +50,7 @@
 21. [🚦 Workflow & écran d'accueil avancé *(v2.5 — Avril 2026)*](#21--workflow--écran-daccueil-avancé-v25--avril-2026)
 22. [📦 Bulk actions sur prestations *(v2.6 — Avril 2026)*](#22--bulk-actions-sur-prestations-v26--avril-2026)
 23. [📈 Statistiques d'approbation *(v2.7 — Avril 2026)*](#23--statistiques-dapprobation-v27--avril-2026)
+24. [🌊 Vue Parcours dans Accompagnement *(v2.8 — Avril 2026)*](#24--vue-parcours-dans-accompagnement-v28--avril-2026)
 
 ---
 
@@ -1368,6 +1369,42 @@ Les 5 dernières décisions (approbation ou rejet) horodatées au format suisse 
 ### 23.5 Capture du demandeur
 
 Les transitions de demande de validation (`requestPrestationApproval` + bulk `applyBatchApproval('request')`) capturent désormais `approvalRequestedBy` (id de l'utilisateur connecté), ouvrant la voie à de futures stats par demandeur.
+
+---
+
+## 24. 🌊 Vue Parcours dans Accompagnement *(v2.8 — Avril 2026)*
+
+Nouveau sous-onglet **🌊 Parcours** dans le module Accompagnement, inspiré du visuel « Flux » du module Gantt. Remplace l'affichage en liste plate des jalons par une **vue chronologique en flux** beaucoup plus parlante.
+
+### 24.1 Concept
+
+Pour chaque bénéficiaire, ses **jalons** et ses **prestations liées** sont affichés en cartes connectées par des flèches en pointillés `>`, dans l'ordre chronologique. C'est le même schéma visuel que le Flux du Gantt (CNC 1 → CNC 2 → Découpe laser → Plieuse 1 …) appliqué au parcours d'accompagnement.
+
+### 24.2 Anatomie d'une carte
+
+| Élément | Contenu |
+|---|---|
+| Bordure gauche colorée | Couleur du type de jalon (vert progression, orange difficulté, bleu bilan, violet transition, jaune reconnaissance) ou bleu pour les prestations |
+| Type | 🎯 ou 📋 + libellé du type |
+| Titre | Nom du jalon ou de la prestation |
+| Date | 📅 + date + état temporel : **PASSÉ** / **AUJOURD'HUI** / **À VENIR** |
+| Style | Plein pour jalons, pointillé pour prestations |
+| Action | Cliquer ouvre le modal d'édition correspondant |
+
+Les événements à venir sont affichés avec une opacité réduite pour distinguer visuellement le passé du futur.
+
+### 24.3 Filtres
+
+- **Sélecteur bénéficiaire** : afficher tous ou un seul
+- **Toggle « Inclure prestations »** : si décoché, n'affiche que les jalons (vue purement clinique)
+
+### 24.4 Header bénéficiaire
+
+Avatar initiale, nom complet, badge statut (en-cours / suspendu / en-bilan / sorti) avec couleur, et **compteurs synthétiques** : N événement(s) — X passé(s) · Y aujourd'hui · Z à venir.
+
+### 24.5 Dark mode
+
+Couvert dès la livraison — cartes et flèches restent lisibles en mode sombre.
 
 ---
 

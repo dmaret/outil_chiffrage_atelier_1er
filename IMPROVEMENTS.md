@@ -2,6 +2,17 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-26 — v2.8 Vue Parcours dans Accompagnement
+
+- **Nouveau sous-onglet « 🌊 Parcours »** dans le module Accompagnement, à côté de Bénéficiaires/Jalons/Vue croisée/Outils.
+- Affiche pour chaque bénéficiaire un **flux horizontal** de cartes (jalons + prestations liées en option), connectées par des **flèches en pointillés**, dans l'esprit du Flux du module Gantt.
+- Chaque carte : couleur du type de jalon (progression/difficulté/bilan/transition/reconnaissance) ou bleu pour prestation, état temporel (PASSÉ/AUJOURD'HUI/À VENIR), titre + date. Cliquer ouvre directement le modal d'édition.
+- Filtre bénéficiaire + toggle « Inclure prestations ».
+- Header par bénéficiaire avec avatar initiale + badge statut + comptes (passés / aujourd'hui / à venir).
+- Compatible dark mode.
+
+---
+
 ## 2026-04-26 — v2.7 Statistiques d'approbation
 
 - **Nouveau widget Dashboard « 📈 Statistiques d'approbation »** : taux d'approbation, délai moyen de décision (en min/h/jours selon ordre de grandeur), nombre en attente, nombre décidées.

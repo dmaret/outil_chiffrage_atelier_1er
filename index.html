@@ -2085,6 +2085,39 @@
         body.dark-mode #analyseResultat .result-theory { color:#d0a0f0; }
         body.dark-mode #analyseResultat .result-posture { background:#2a1540; border-left-color:#8e44ad; color:#c090e0; }
 
+        /* Parcours d'accompagnement — vue flux (v2.8) */
+        .parcours-benef-block { margin-bottom:28px; padding:16px; background:var(--color-section-bg); border-radius:14px; border:1px solid var(--color-border-light); }
+        .parcours-benef-header { display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap; }
+        .parcours-benef-avatar { width:42px; height:42px; border-radius:50%; background:var(--color-bg-alt); display:flex; align-items:center; justify-content:center; font-size:1.2em; flex-shrink:0; }
+        .parcours-flow { display:flex; gap:0; align-items:stretch; flex-wrap:wrap; padding:8px 0; }
+        .parcours-card {
+            min-width:160px; max-width:220px; padding:10px 12px; border-radius:10px;
+            background:#fff; border:1.5px solid var(--color-border);
+            box-shadow:0 2px 6px rgba(150,150,180,0.08);
+            position:relative; flex-shrink:0;
+        }
+        .parcours-card.is-jalon { border-left-width:5px; }
+        .parcours-card.is-prestation { border-left-width:5px; border-style:dashed; background:#f7fbfd; }
+        .parcours-card-type { font-size:0.72em; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8; }
+        .parcours-card-title { font-weight:600; font-size:0.9em; margin:4px 0; color:var(--color-text); }
+        .parcours-card-date { font-size:0.75em; color:var(--color-text-muted); }
+        .parcours-arrow {
+            display:flex; align-items:center; justify-content:center;
+            min-width:32px; padding:0 6px; align-self:center;
+            color:var(--color-primary-dark); font-size:1.4em; line-height:1;
+            position:relative;
+        }
+        .parcours-arrow::before {
+            content:''; position:absolute; top:50%; left:0; right:0;
+            border-top:2px dashed var(--color-primary); transform:translateY(-50%);
+            z-index:0;
+        }
+        .parcours-arrow span { position:relative; z-index:1; background:var(--color-section-bg); padding:0 2px; }
+        .parcours-empty { padding:24px; text-align:center; color:var(--color-text-muted); font-style:italic; }
+        body.dark-mode .parcours-card { background:#1e2530; border-color:#2a3a4a; color:#cdd6e0; }
+        body.dark-mode .parcours-card.is-prestation { background:#151d28; }
+        body.dark-mode .parcours-arrow span { background:#1a2535; }
+
         /* Templates sectoriels — cartes preset (v2.3) */
         .preset-template-card:hover { border-color:var(--color-primary) !important; background:var(--color-bg-alt) !important; }
         .preset-template-card:focus-visible { outline:2px solid var(--color-info-dark); outline-offset:2px; }
@@ -4927,10 +4960,11 @@
 
                 <!-- ── Navigation sous-onglets ── -->
                 <div style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;border-bottom:2px solid #c8e6d0;padding-bottom:10px;">
-                    <button class="btn accomp-pill" data-sub="suivi"   onclick="switchAccompSub('suivi')"  style="background:#27ae60;color:#fff;border-color:#1e8449;">👤 Bénéficiaires</button>
-                    <button class="btn accomp-pill" data-sub="jalons"  onclick="switchAccompSub('jalons')">🎯 Jalons</button>
-                    <button class="btn accomp-pill" data-sub="croise"  onclick="switchAccompSub('croise')">🗺️ Vue croisée</button>
-                    <button class="btn accomp-pill" data-sub="outils"  onclick="switchAccompSub('outils')">🔬 Outils cliniques</button>
+                    <button class="btn accomp-pill" data-sub="suivi"    onclick="switchAccompSub('suivi')"  style="background:#27ae60;color:#fff;border-color:#1e8449;">👤 Bénéficiaires</button>
+                    <button class="btn accomp-pill" data-sub="jalons"   onclick="switchAccompSub('jalons')">🎯 Jalons</button>
+                    <button class="btn accomp-pill" data-sub="parcours" onclick="switchAccompSub('parcours')">🌊 Parcours</button>
+                    <button class="btn accomp-pill" data-sub="croise"   onclick="switchAccompSub('croise')">🗺️ Vue croisée</button>
+                    <button class="btn accomp-pill" data-sub="outils"   onclick="switchAccompSub('outils')">🔬 Outils cliniques</button>
                 </div>
 
                 <!-- ── Panneau : Suivi bénéficiaires ── -->
@@ -4955,6 +4989,26 @@
                             <option value="">— Tous les bénéficiaires —</option>
                         </select>
                         <div id="jalonsList"></div>
+                    </div>
+                </div>
+
+                <!-- ── Panneau : Parcours visuels (v2.8) ── -->
+                <div class="accomp-sub-panel" id="accomp-parcours" style="display:none;">
+                    <div class="section">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+                            <h2 style="margin:0;">🌊 Parcours d'accompagnement</h2>
+                            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                                <select id="parcoursBenefFilter" onchange="renderAccompagnementFlux()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;">
+                                    <option value="">— Tous les bénéficiaires —</option>
+                                </select>
+                                <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;color:#7a9db1;cursor:pointer;">
+                                    <input type="checkbox" id="parcoursShowPrestations" checked onchange="renderAccompagnementFlux()" style="accent-color:#27ae60;">
+                                    Inclure prestations
+                                </label>
+                            </div>
+                        </div>
+                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:16px;">Vue chronologique du parcours de chaque bénéficiaire — jalons et prestations enchaînés visuellement, comme un flux.</p>
+                        <div id="parcoursContent"></div>
                     </div>
                 </div>
 
@@ -8417,11 +8471,131 @@
             document.querySelectorAll('.accomp-sub-panel').forEach(p => p.style.display = 'none');
             const panel = document.getElementById('accomp-' + sub);
             if (panel) panel.style.display = '';
-            if (sub === 'suivi')  renderBeneficiaires();
-            if (sub === 'jalons') { _populateJalonBenefFilter(); renderJalons(); }
-            if (sub === 'croise') renderVueCroisee();
-            if (sub === 'outils') renderFichesRapides();
+            if (sub === 'suivi')    renderBeneficiaires();
+            if (sub === 'jalons')   { _populateJalonBenefFilter(); renderJalons(); }
+            if (sub === 'parcours') { _populateParcoursBenefFilter(); renderAccompagnementFlux(); }
+            if (sub === 'croise')   renderVueCroisee();
+            if (sub === 'outils')   renderFichesRapides();
         }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Parcours d'accompagnement — vue flux (v2.8)
+        // ═══════════════════════════════════════════════════════════
+
+        /** Peuple le filtre bénéficiaire de l'onglet Parcours. */
+        function _populateParcoursBenefFilter() {
+            const sel = document.getElementById('parcoursBenefFilter');
+            if (!sel) return;
+            const prev = sel.value;
+            sel.innerHTML = '<option value="">— Tous les bénéficiaires —</option>' +
+                beneficiaires.map(b => `<option value="${b.id}" ${String(b.id) === prev ? 'selected' : ''}>${escapeHtml(b.prenom||'')} ${escapeHtml(b.nom||'')}</option>`).join('');
+        }
+
+        /**
+         * Rend, pour un ou tous les bénéficiaires, leur parcours sous forme
+         * d'un flux horizontal de cartes (jalons + prestations liées) en
+         * ordre chronologique, connectées par des flèches en pointillés.
+         * @returns {void}
+         */
+        function renderAccompagnementFlux() {
+            const container = document.getElementById('parcoursContent');
+            if (!container) return;
+            const filterId = document.getElementById('parcoursBenefFilter')?.value || '';
+            const includePrestations = !!document.getElementById('parcoursShowPrestations')?.checked;
+
+            const targets = filterId
+                ? beneficiaires.filter(b => String(b.id) === String(filterId))
+                : beneficiaires;
+
+            if (targets.length === 0) {
+                container.innerHTML = `<div class="parcours-empty">
+                    <div style="font-size:2.5em;margin-bottom:8px;">🌊</div>
+                    <p>Aucun bénéficiaire à afficher.<br>Ajoutez-en un dans l'onglet « Bénéficiaires » pour visualiser son parcours.</p>
+                </div>`;
+                return;
+            }
+
+            const todayIso = new Date().toISOString().slice(0, 10);
+
+            container.innerHTML = targets.map(b => {
+                const st = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
+
+                // Collecte des événements : jalons + prestations liées (si activé)
+                const events = [];
+                jalons.filter(j => j.beneficiaireId === b.id).forEach(j => {
+                    const type = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                    events.push({
+                        kind:'jalon', date:j.date || '', sortDate:j.date || '9999-12-31',
+                        title:j.titre || '(sans titre)', subtitle:type.label,
+                        color:type.color, note:j.note,
+                        link:`openJalonModal(${j.id})`
+                    });
+                });
+                if (includePrestations) {
+                    prestationsSauvegardees
+                        .filter(p => String(p.beneficiaireId || '') === String(b.id))
+                        .forEach(p => {
+                            const dt = p.date || '';
+                            events.push({
+                                kind:'prestation', date:dt, sortDate:dt || '9999-12-31',
+                                title:p.prestation || p.client || 'Prestation',
+                                subtitle:`${p.client || '—'} · ${(p.statut || 'devis').toUpperCase()}`,
+                                color:'#4e9af1',
+                                link:`editPrestation(${JSON.stringify(p.id)})`
+                            });
+                        });
+                }
+                events.sort((a, b) => (a.sortDate < b.sortDate ? -1 : a.sortDate > b.sortDate ? 1 : 0));
+
+                // Carte vide
+                if (events.length === 0) {
+                    return `<div class="parcours-benef-block">
+                        <div class="parcours-benef-header">
+                            <div class="parcours-benef-avatar">${(b.prenom||'?')[0].toUpperCase()}</div>
+                            <div>
+                                <strong style="font-size:1.05em;">${escapeHtml(b.prenom||'')} ${escapeHtml(b.nom||'')}</strong>
+                                <span class="badge" style="background:${st.color}22;color:${st.color};margin-left:8px;padding:2px 9px;border-radius:10px;font-size:0.78em;font-weight:600;">${escapeHtml(st.label)}</span>
+                            </div>
+                        </div>
+                        <div class="parcours-empty">Aucun événement pour ce bénéficiaire. Créez un jalon dans l'onglet « Jalons ».</div>
+                    </div>`;
+                }
+
+                // Flux : carte → flèche → carte → ...
+                const flowHtml = events.map((ev, i) => {
+                    const isPast   = ev.date && ev.date < todayIso;
+                    const isToday  = ev.date === todayIso;
+                    const isFuture = ev.date && ev.date > todayIso;
+                    const stateLabel = isToday ? "AUJOURD'HUI" : isFuture ? 'À VENIR' : isPast ? 'PASSÉ' : '—';
+                    const stateOpacity = isFuture ? 0.7 : 1;
+                    const card = `<div class="parcours-card is-${ev.kind}" style="border-left-color:${ev.color};opacity:${stateOpacity};cursor:pointer;" onclick="${ev.link}" title="Cliquer pour ouvrir">
+                        <div class="parcours-card-type" style="color:${ev.color};">${ev.kind === 'jalon' ? '🎯' : '📋'} ${escapeHtml(ev.subtitle || '')}</div>
+                        <div class="parcours-card-title">${escapeHtml(ev.title)}</div>
+                        <div class="parcours-card-date">📅 ${escapeHtml(ev.date || '—')} · <em>${stateLabel}</em></div>
+                    </div>`;
+                    const arrow = i < events.length - 1 ? `<div class="parcours-arrow" aria-hidden="true"><span>›</span></div>` : '';
+                    return card + arrow;
+                }).join('');
+
+                return `<div class="parcours-benef-block">
+                    <div class="parcours-benef-header">
+                        <div class="parcours-benef-avatar">${(b.prenom||'?')[0].toUpperCase()}</div>
+                        <div style="flex:1;min-width:200px;">
+                            <strong style="font-size:1.05em;">${escapeHtml(b.prenom||'')} ${escapeHtml(b.nom||'')}</strong>
+                            <span class="badge" style="background:${st.color}22;color:${st.color};margin-left:8px;padding:2px 9px;border-radius:10px;font-size:0.78em;font-weight:600;">${escapeHtml(st.label)}</span>
+                            <div style="font-size:0.8em;color:var(--color-text-muted);margin-top:2px;">
+                                ${events.length} événement(s) ·
+                                ${events.filter(e => e.date && e.date < todayIso).length} passé(s) ·
+                                ${events.filter(e => e.date === todayIso).length} aujourd'hui ·
+                                ${events.filter(e => e.date && e.date > todayIso).length} à venir
+                            </div>
+                        </div>
+                    </div>
+                    <div class="parcours-flow">${flowHtml}</div>
+                </div>`;
+            }).join('');
+        }
+
 
         // ══════════════════════════════════════════════════════════════
         // PROCÉDURES — CEA / Client — Comparateur what-if
