@@ -2,6 +2,20 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-26 — v2.4 Lot 2 robustesse données
+
+### Nouvelles fonctionnalités
+- **🔐 Backup chiffré (AES-GCM 256 + PBKDF2 200k)** — bouton « Export chiffré » dans Paramétrage. Mot de passe en double saisie, fichier `.encbackup`. Import auto-détecte chiffré vs clair.
+- **💾 Sauvegardes automatiques** — toggle + intervalle 1h/6h/24h, max 3 snapshots rotatifs en localStorage avec actions Restaurer/Exporter/Supprimer.
+- **🔔 Notifications navigateur** — toggle, hook dans `checkAndShowAlerts`, throttle 1/jour/tag. Détection nouvelle des paiements en retard >45j.
+- **✅ Workflow d'approbation** — `approvalState` orthogonal au statut métier (`draft`/`pending_review`/`approved`/`rejected`). 2 nouvelles permissions RBAC (`request_approval`, `approve_prestation`). Transitions auditées avec motif sur rejet. Badge contextuel dans la liste.
+
+### Notes
+- Migration `localStorage` → `IndexedDB` **différée** au Lot 3 technique (touche 162 call-sites, trop risqué de bundler).
+- Tous les nouveaux appels protégés par `try/catch`.
+
+---
+
 ## 2026-04-26 — v2.3 Lot 1 visuel/UX
 
 ### Nouvelles fonctionnalités
