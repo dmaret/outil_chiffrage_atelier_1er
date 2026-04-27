@@ -2,6 +2,17 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-26 — v2.10 Refonte light de l'onglet Procédures
+
+- L'onglet Procédures avait un thème **sombre style "GitHub dark" / terminal** en dur dans la CSS, dissonant avec le reste de l'app qui est clair.
+- Réécriture complète des classes `.proc-*` (~30 règles) pour utiliser les variables `--color-*` du `:root` du thème principal.
+- Header avec gradient doux, sub-nav pills harmonisées avec le reste, cartes blanches avec bordure colorée gauche, badges CEA/CLIENT en versions light (vert pâle, bleu pâle).
+- Inputs/selects de la zone forcés en light via `#procedures input, select, textarea { ... !important }` — capture aussi les inline `background:#0d1117` historiques.
+- Comparateur : cellules `match/moved/missing/extra` redessinées en versions claires (vert/jaune/rouge/bleu pastel).
+- **Couverture dark mode** : règles `body.dark-mode .proc-*` ajoutées pour conserver la cohérence quand le mode sombre global est actif.
+
+---
+
 ## 2026-04-26 — v2.9 Onglet Guide & Flux de travail
 
 - **Nouvel onglet « 📖 Guide »** dans la barre principale, inspiré du visuel « Aide & Flux » du module Gantt.

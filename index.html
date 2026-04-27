@@ -1210,41 +1210,212 @@
             color: var(--color-text); background: var(--color-section-bg);
         }
 
-        /* ── Training Module Overlay ─────────────────────────────────── */
         /* ── Procédures ───────────────────────────────────────────────── */
+        /* Refonte v2.10 — alignement sur le thème clair de l'app, avec
+           couverture dark mode automatique via les variables --color-*. */
         #procedures.active { display:flex; flex-direction:column; }
-        .proc-header { display:flex; align-items:center; gap:12px; padding:12px 18px; background:#0d1117; border-bottom:1px solid #1e2433; flex-wrap:wrap; }
+
+        .proc-header {
+            display:flex; align-items:center; gap:14px;
+            padding:14px 18px; margin:0 0 16px;
+            background:linear-gradient(135deg, var(--color-bg-alt) 0%, var(--color-section-bg) 100%);
+            border:1px solid var(--color-border);
+            border-radius:14px;
+            box-shadow:0 2px 6px rgba(150,150,180,0.08);
+            flex-wrap:wrap;
+        }
+        .proc-header > span:first-child {
+            font-weight:700; font-size:1.05em; color:var(--color-primary-dark) !important;
+        }
+
         .proc-subnav { display:flex; gap:6px; }
-        .proc-subnav-btn { padding:5px 15px; border-radius:20px; border:1px solid #2a3a50; background:#1a2a3a; color:#a0b8d0; cursor:pointer; font-size:0.82em; transition:all 0.15s; }
-        .proc-subnav-btn.active { background:#2a5a8a; color:#e0f0ff; border-color:#4a8ac0; }
-        .proc-section { display:none; padding:16px 20px; flex:1; }
+        .proc-subnav-btn {
+            padding:6px 16px; border-radius:20px;
+            border:1.5px solid var(--color-border);
+            background:var(--color-surface); color:var(--color-text);
+            cursor:pointer; font-size:0.85em; font-weight:600;
+            transition:all 0.15s;
+        }
+        .proc-subnav-btn:hover {
+            border-color:var(--color-primary);
+            background:var(--color-bg-alt);
+        }
+        .proc-subnav-btn.active {
+            background:var(--color-primary);
+            color:var(--color-text);
+            border-color:var(--color-primary-dark);
+            box-shadow:0 2px 4px rgba(107,143,163,0.25);
+        }
+
+        .proc-section { display:none; padding:0 4px; flex:1; }
         .proc-section.active { display:block; }
-        .proc-card { background:#131825; border:1px solid #1e2a3a; border-radius:10px; padding:12px 16px; margin-bottom:8px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-        .proc-card-type { padding:3px 10px; border-radius:12px; font-size:0.75em; font-weight:700; flex-shrink:0; }
-        .proc-card-type.cea { background:#1a3a2a; color:#4fc070; border:1px solid #2a5a3a; }
-        .proc-card-type.client { background:#1a2a3a; color:#4a9af0; border:1px solid #2a4a6a; }
-        .proc-editor-layout { display:grid; grid-template-columns:230px 1fr; gap:14px; min-height:460px; }
-        .proc-palette { background:#0d1117; border:1px solid #1e2a3a; border-radius:10px; padding:10px; overflow-y:auto; max-height:560px; }
-        .proc-palette-item { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:7px; cursor:pointer; font-size:0.8em; color:#a0b8d0; transition:background 0.12s; user-select:none; }
-        .proc-palette-item:hover { background:#1a2a3a; }
-        .proc-steps-box { background:#0d1117; border:1px solid #1e2a3a; border-radius:10px; padding:14px; overflow-y:auto; max-height:560px; }
-        .proc-step { display:flex; align-items:center; gap:10px; background:#131825; border:1px solid #1e2a3a; border-radius:8px; padding:9px 12px; margin-bottom:7px; cursor:grab; }
+
+        .proc-card {
+            background:var(--color-surface);
+            border:1px solid var(--color-border);
+            border-left:4px solid var(--color-primary);
+            border-radius:10px;
+            padding:14px 16px; margin-bottom:10px;
+            display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+            transition:transform 0.12s, box-shadow 0.12s;
+        }
+        .proc-card:hover {
+            transform:translateY(-1px);
+            box-shadow:0 4px 12px rgba(150,150,180,0.15);
+        }
+        .proc-card-type {
+            padding:4px 12px; border-radius:14px;
+            font-size:0.72em; font-weight:700;
+            letter-spacing:0.5px; flex-shrink:0;
+        }
+        .proc-card-type.cea    { background:#eafaef; color:#1e8449; border:1px solid #b8e2c8; }
+        .proc-card-type.client { background:#ebf5fc; color:#2980b9; border:1px solid #b8d4ec; }
+
+        .proc-section-title {
+            font-size:0.78em; font-weight:700; letter-spacing:1px;
+            text-transform:uppercase;
+            color:var(--color-text-muted); margin:18px 0 10px;
+        }
+
+        .proc-editor-layout {
+            display:grid; grid-template-columns:240px 1fr; gap:16px;
+            min-height:460px;
+        }
+        .proc-palette {
+            background:var(--color-section-bg);
+            border:1px solid var(--color-border);
+            border-radius:10px; padding:12px;
+            overflow-y:auto; max-height:560px;
+        }
+        .proc-palette-item {
+            display:flex; align-items:center; gap:8px;
+            padding:7px 10px; border-radius:7px;
+            cursor:pointer; font-size:0.85em;
+            color:var(--color-text);
+            transition:background 0.12s, transform 0.12s;
+            user-select:none;
+        }
+        .proc-palette-item:hover {
+            background:var(--color-bg-alt);
+            transform:translateX(2px);
+        }
+        .proc-steps-box {
+            background:var(--color-section-bg);
+            border:1px solid var(--color-border);
+            border-radius:10px; padding:14px;
+            overflow-y:auto; max-height:560px;
+        }
+        .proc-step {
+            display:flex; align-items:center; gap:10px;
+            background:var(--color-surface);
+            border:1px solid var(--color-border);
+            border-radius:8px; padding:10px 12px;
+            margin-bottom:7px;
+            cursor:grab; transition:box-shadow 0.12s;
+        }
+        .proc-step:hover  { box-shadow:0 2px 6px rgba(150,150,180,0.15); }
         .proc-step:active { cursor:grabbing; opacity:0.7; }
-        .proc-step-num { width:22px; height:22px; border-radius:50%; background:#1e3a5a; color:#6ab0f0; font-size:0.78em; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .proc-step-del { background:none; border:none; color:#f88; cursor:pointer; font-size:0.85em; opacity:0.55; padding:3px 5px; flex-shrink:0; }
+        .proc-step-num {
+            width:24px; height:24px; border-radius:50%;
+            background:var(--color-primary);
+            color:var(--color-text);
+            font-size:0.8em; font-weight:700;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+            box-shadow:0 1px 3px rgba(0,0,0,0.1);
+        }
+        .proc-step-del {
+            background:none; border:none;
+            color:var(--color-danger); cursor:pointer;
+            font-size:0.95em; opacity:0.55; padding:3px 5px;
+            flex-shrink:0; transition:opacity 0.12s;
+        }
         .proc-step-del:hover { opacity:1; }
-        .proc-comp-grid { display:grid; grid-template-columns:1fr 48px 1fr; align-items:start; }
-        .proc-comp-hdr { text-align:center; padding:9px 12px; border-radius:8px 8px 0 0; font-weight:700; font-size:0.85em; }
-        .proc-comp-hdr.cea { background:#1a3a2a; color:#4fc070; }
-        .proc-comp-hdr.client { background:#1a2a3a; color:#4a9af0; }
-        .proc-comp-hdr.mid { background:#0d1117; }
-        .proc-comp-step { padding:7px 10px; margin:2px 0; border-radius:7px; font-size:0.82em; display:flex; align-items:center; gap:7px; min-height:38px; }
-        .proc-comp-step.match  { background:#0e2a0e; border:1px solid #1a4a1a; color:#70d070; }
-        .proc-comp-step.moved  { background:#2a2a0a; border:1px solid #5a5a0a; color:#d0c040; }
-        .proc-comp-step.missing{ background:#2a0e0e; border:1px solid #5a1a1a; color:#d06060; opacity:0.8; font-style:italic; }
-        .proc-comp-step.extra  { background:#0e0e2a; border:1px solid #1a1a5a; color:#6070d0; }
-        .proc-comp-step.empty  { opacity:0.2; min-height:38px; }
-        .proc-comp-mid { display:flex; align-items:center; justify-content:center; margin:2px 0; min-height:38px; font-size:1.1em; }
+
+        .proc-comp-grid {
+            display:grid; grid-template-columns:1fr 48px 1fr;
+            align-items:start;
+            background:var(--color-section-bg);
+            border:1px solid var(--color-border);
+            border-radius:10px; padding:12px;
+        }
+        .proc-comp-hdr {
+            text-align:center; padding:10px 12px;
+            border-radius:8px 8px 0 0;
+            font-weight:700; font-size:0.88em;
+        }
+        .proc-comp-hdr.cea    { background:#eafaef; color:#1e8449; }
+        .proc-comp-hdr.client { background:#ebf5fc; color:#2980b9; }
+        .proc-comp-hdr.mid    { background:transparent; }
+
+        .proc-comp-step {
+            padding:8px 12px; margin:3px 0;
+            border-radius:7px; font-size:0.85em;
+            display:flex; align-items:center; gap:8px;
+            min-height:38px;
+        }
+        .proc-comp-step.match    { background:#eafaef; border:1px solid #b8e2c8; color:#1e8449; }
+        .proc-comp-step.moved    { background:#fef9e7; border:1px solid #f9e79f; color:#9a7d0a; }
+        .proc-comp-step.missing  { background:#fadbd8; border:1px solid #f5b7b1; color:#a93226; opacity:0.85; font-style:italic; }
+        .proc-comp-step.extra    { background:#ebf5fc; border:1px solid #b8d4ec; color:#1f618d; }
+        .proc-comp-step.empty    { opacity:0.2; min-height:38px; }
+        .proc-comp-mid {
+            display:flex; align-items:center; justify-content:center;
+            margin:3px 0; min-height:38px; font-size:1.2em;
+            color:var(--color-text-muted);
+        }
+
+        /* Inputs/selects de la zone Procédures : surcharge pour rendu light */
+        #procedures input[type="text"],
+        #procedures input[type="number"],
+        #procedures select,
+        #procedures textarea {
+            background:var(--color-surface) !important;
+            color:var(--color-text) !important;
+            border:1px solid var(--color-border) !important;
+        }
+        #procedures input:focus,
+        #procedures select:focus,
+        #procedures textarea:focus {
+            border-color:var(--color-primary-dark) !important;
+            outline:none;
+        }
+        #procedures .proc-header > div:last-child .btn {
+            background:var(--color-surface);
+            border:1px solid var(--color-border);
+            color:var(--color-text);
+        }
+        #procedures .proc-header .btn:nth-of-type(1) {
+            border-color:#27ae60; color:#1e8449;
+        }
+        #procedures .proc-header .btn:nth-of-type(1):hover { background:#eafaef; }
+        #procedures .proc-header .btn:nth-of-type(2) {
+            border-color:#3498db; color:#2980b9;
+        }
+        #procedures .proc-header .btn:nth-of-type(2):hover { background:#ebf5fc; }
+
+        /* Dark mode : variante sombre cohérente avec le reste */
+        body.dark-mode .proc-header {
+            background:linear-gradient(135deg, #1a2535 0%, #1e2530 100%);
+            border-color:#2a3a4a;
+        }
+        body.dark-mode .proc-card,
+        body.dark-mode .proc-step {
+            background:#1e2530; border-color:#2a3a4a; color:#cdd6e0;
+        }
+        body.dark-mode .proc-palette,
+        body.dark-mode .proc-steps-box,
+        body.dark-mode .proc-comp-grid {
+            background:#151d28; border-color:#2a3a4a;
+        }
+        body.dark-mode .proc-subnav-btn {
+            background:#1e2530; color:#cdd6e0; border-color:#2a3a4a;
+        }
+        body.dark-mode .proc-subnav-btn.active {
+            background:#2a5a8a; color:#e0f0ff;
+        }
+        body.dark-mode .proc-card-type.cea    { background:#1a3a2a; color:#4fc070; border-color:#2a5a3a; }
+        body.dark-mode .proc-card-type.client { background:#1a2a3a; color:#4a9af0; border-color:#2a4a6a; }
 
         .training-overlay {
             position: fixed; inset: 0; z-index: 10000;
@@ -4915,15 +5086,15 @@
             <!-- ══════════ PROCÉDURES ══════════ -->
             <div id="procedures" class="tab-content">
                 <div class="proc-header">
-                    <span style="font-weight:700;font-size:1em;color:#e0f0ff;">📋 Procédures</span>
+                    <span>📋 Procédures</span>
                     <div class="proc-subnav">
                         <button class="proc-subnav-btn active" id="proc-nav-liste"       onclick="procShowSection('liste')">📋 Mes procédures</button>
                         <button class="proc-subnav-btn"        id="proc-nav-editeur"     onclick="procShowSection('editeur')">✏️ Éditeur</button>
                         <button class="proc-subnav-btn"        id="proc-nav-comparateur" onclick="procShowSection('comparateur')">🔍 Comparateur</button>
                     </div>
                     <div style="margin-left:auto;display:flex;gap:8px;">
-                        <button class="btn btn-small" onclick="procNewProcedure('cea')"    style="background:#1a3a2a;color:#4fc070;border-color:#2a5a3a;">+ Procédure CEA</button>
-                        <button class="btn btn-small proc-client-only" onclick="procNewProcedure('client')" style="background:#1a2a3a;color:#4a9af0;border-color:#2a4a6a;">+ Procédure Client</button>
+                        <button class="btn btn-small" onclick="procNewProcedure('cea')">+ Procédure CEA</button>
+                        <button class="btn btn-small proc-client-only" onclick="procNewProcedure('client')">+ Procédure Client</button>
                     </div>
                 </div>
 
@@ -4937,39 +5108,39 @@
                     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
                         <span id="proc-edit-type-badge" class="proc-card-type cea">CEA</span>
                         <input id="proc-edit-nom" type="text" placeholder="Nom de la procédure…"
-                               style="flex:1;min-width:180px;padding:7px 12px;border-radius:7px;border:1px solid #2a3a50;background:#0d1117;color:#e0f0ff;font-size:0.88em;">
-                        <label style="font-size:0.82em;color:#6a8aa8;white-space:nowrap;">Mode :
+                               style="flex:1;min-width:180px;padding:7px 12px;border-radius:7px;font-size:0.88em;">
+                        <label style="font-size:0.82em;color:var(--color-text-muted);white-space:nowrap;">Mode :
                             <select id="proc-edit-mode" onchange="procUpdateMode()"
-                                    style="padding:5px 10px;border-radius:7px;border:1px solid #2a3a50;background:#0d1117;color:#e0f0ff;font-size:0.85em;margin-left:4px;">
+                                    style="padding:5px 10px;border-radius:7px;font-size:0.85em;margin-left:4px;">
                                 <option value="reel">Réel</option>
                                 <option value="entrainement">Entraînement (fake)</option>
                             </select>
                         </label>
                         <span id="proc-edit-client-wrap" style="display:flex;gap:6px;align-items:center;">
                             <select id="proc-edit-client" onchange="procLoadPrestations()"
-                                    style="padding:5px 10px;border-radius:7px;border:1px solid #2a3a50;background:#0d1117;color:#e0f0ff;font-size:0.85em;">
+                                    style="padding:5px 10px;border-radius:7px;font-size:0.85em;">
                                 <option value="">— Client —</option>
                             </select>
                             <select id="proc-edit-prestation"
-                                    style="padding:5px 10px;border-radius:7px;border:1px solid #2a3a50;background:#0d1117;color:#e0f0ff;font-size:0.85em;">
+                                    style="padding:5px 10px;border-radius:7px;font-size:0.85em;">
                                 <option value="">— Commande —</option>
                             </select>
                         </span>
-                        <button onclick="procSaveProcedure()"
-                                style="padding:7px 18px;border-radius:8px;border:none;background:#2a5a3a;color:#80e080;font-weight:700;cursor:pointer;white-space:nowrap;">💾 Enregistrer</button>
+                        <button class="btn btn-success btn-small" onclick="procSaveProcedure()"
+                                style="white-space:nowrap;">💾 Enregistrer</button>
                     </div>
                     <div class="proc-editor-layout">
                         <div class="proc-palette">
-                            <div style="font-size:0.72em;color:#4a7a9a;font-weight:700;letter-spacing:1px;margin-bottom:8px;">CATALOGUE GESTES</div>
+                            <div class="proc-section-title">CATALOGUE GESTES</div>
                             <div id="proc-palette-list"></div>
                         </div>
                         <div class="proc-steps-box">
-                            <div style="font-size:0.72em;color:#4a7a9a;font-weight:700;letter-spacing:1px;margin-bottom:10px;">
-                                ÉTAPES <span id="proc-steps-count" style="color:#4a9af0;font-weight:400;"></span>
-                                <span style="float:right;opacity:0.5;font-weight:400;">Glisser pour réordonner</span>
+                            <div class="proc-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+                                <span>ÉTAPES <span id="proc-steps-count" style="color:var(--color-info);font-weight:400;text-transform:none;letter-spacing:0;"></span></span>
+                                <span style="opacity:0.6;font-weight:400;text-transform:none;letter-spacing:0;">Glisser pour réordonner</span>
                             </div>
                             <div id="proc-steps-list">
-                                <div style="color:#4a6a8a;font-size:0.85em;padding:24px;text-align:center;">
+                                <div style="color:var(--color-text-muted);font-size:0.85em;padding:24px;text-align:center;font-style:italic;">
                                     Cliquez sur un geste dans la palette pour l'ajouter
                                 </div>
                             </div>
@@ -4981,21 +5152,18 @@
                 <div id="proc-comparateur" class="proc-section">
                     <div style="display:flex;gap:14px;margin-bottom:16px;align-items:flex-end;flex-wrap:wrap;">
                         <div>
-                            <div style="font-size:0.72em;color:#4fc070;font-weight:700;margin-bottom:4px;">PROCÉDURE CEA (référence)</div>
-                            <select id="proc-comp-cea"
-                                    style="padding:7px 12px;border-radius:7px;border:1px solid #2a5a3a;background:#0d1117;color:#e0f0ff;font-size:0.85em;min-width:200px;">
+                            <div class="proc-section-title" style="color:#1e8449;margin:0 0 4px;">PROCÉDURE CEA (référence)</div>
+                            <select id="proc-comp-cea" style="padding:7px 12px;border-radius:7px;font-size:0.85em;min-width:200px;">
                                 <option value="">— Sélectionner —</option>
                             </select>
                         </div>
                         <div>
-                            <div style="font-size:0.72em;color:#4a9af0;font-weight:700;margin-bottom:4px;">PROCÉDURE CLIENT (observée)</div>
-                            <select id="proc-comp-client"
-                                    style="padding:7px 12px;border-radius:7px;border:1px solid #2a4a6a;background:#0d1117;color:#e0f0ff;font-size:0.85em;min-width:200px;">
+                            <div class="proc-section-title" style="color:#2980b9;margin:0 0 4px;">PROCÉDURE CLIENT (observée)</div>
+                            <select id="proc-comp-client" style="padding:7px 12px;border-radius:7px;font-size:0.85em;min-width:200px;">
                                 <option value="">— Sélectionner —</option>
                             </select>
                         </div>
-                        <button onclick="procRunComparison()"
-                                style="padding:8px 22px;border-radius:8px;border:none;background:#2a3a5a;color:#a0c0e0;font-weight:700;cursor:pointer;">🔍 Comparer</button>
+                        <button class="btn" onclick="procRunComparison()" style="padding:8px 22px;font-weight:700;">🔍 Comparer</button>
                     </div>
                     <div id="proc-comp-result"></div>
                 </div>
