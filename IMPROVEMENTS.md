@@ -1,5 +1,20 @@
 # Améliorations
 
+## 2026-04-26 — v2.3 Lot 1 visuel/UX
+
+### Nouvelles fonctionnalités
+- **⚡ Templates sectoriels** : 6 presets de prestation cliquables (assemblage électro, mise sous pli, kit conditionnement, contrôle qualité, étiquetage, réception/stock) au-dessus du formulaire calculateur. Pré-remplissent prestation/référence/nbPieces/nbCEA/MSP/unité + notes internes. Cartes accessibles (role=button, tabindex, Enter/Space).
+- **🎨 Comparateur de devis avec diff coloré** : nouvelle colonne Δ (B − A), flèches ▲/▼/=, code couleur, delta absolu et pourcentage. Sens inversé pour le prix unitaire (moins cher = mieux).
+- **📊 Charts dashboard (Chart.js 4.4.1)** : CA 6 mois (bar), statuts (donut), top 5 clients (barres horiz). Cache d'instances + destroy au re-render. Tolérant à l'absence du CDN.
+- **👁️ Aperçu devis live** : FAB sur l'onglet Calculateur, slide-in panel à droite, refresh debouncé 200 ms via `buildDevisHtml({preview:true})`. Persistance localStorage.
+- **🌙 Dark mode étendu** : couverture des composants v2.2 et v2.3 (modal-box, qg-code-hint, .compare-diff-*, .devis-preview-pane, .preset-template-card).
+
+### Notes
+- Le mode sombre était déjà entièrement implémenté côté toggle/persistance — la v2.3 étend juste sa couverture.
+- Tous les nouveaux appels protégés par `try/catch` pour qu'un échec d'une feature n'impacte pas le reste de l'app.
+
+---
+
 ## 2026-04-26 — Refactor structurel + accessibilité
 
 ### CSS
