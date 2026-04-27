@@ -24,6 +24,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -2084,6 +2085,38 @@
         body.dark-mode #analyseResultat .result-theory { color:#d0a0f0; }
         body.dark-mode #analyseResultat .result-posture { background:#2a1540; border-left-color:#8e44ad; color:#c090e0; }
 
+        /* Templates sectoriels — cartes preset (v2.3) */
+        .preset-template-card:hover { border-color:var(--color-primary) !important; background:var(--color-bg-alt) !important; }
+        .preset-template-card:focus-visible { outline:2px solid var(--color-info-dark); outline-offset:2px; }
+
+        /* Comparateur — diff coloré (v2.3) */
+        .compare-diff-pos { color:#1e8449; font-weight:600; }
+        .compare-diff-neg { color:#c0392b; font-weight:600; }
+        .compare-diff-eq  { color:#7a9db1; }
+        .compare-diff-row { padding:6px 10px; border-radius:6px; }
+        .compare-diff-row.changed { background:rgba(168,213,226,0.10); }
+
+        /* Aperçu devis WYSIWYG (v2.3) */
+        .devis-preview-pane {
+            position:sticky; top:12px; max-height:calc(100vh - 60px); overflow:auto;
+            background:#fff; border:1px solid var(--color-border); border-radius:10px;
+            padding:12px; font-size:0.78em; box-shadow:var(--shadow-card);
+        }
+        .devis-preview-pane h4 { margin:0 0 8px; color:var(--color-primary-dark); font-size:0.95em; }
+
+        /* Couvertures dark-mode pour les ajouts de la v2.2.0 */
+        body.dark-mode .modal-box,
+        body.dark-mode #pinModalBox,
+        body.dark-mode #fluxLectureBox { background:#1e2530; color:#cdd6e0; border-color:#2a3a4a; }
+        body.dark-mode small,
+        body.dark-mode #qg-code-hint { color:#7a9db1; }
+        body.dark-mode .compare-diff-pos { color:#7ed98a; }
+        body.dark-mode .compare-diff-neg { color:#ff6e6e; }
+        body.dark-mode .compare-diff-eq  { color:#8aacbc; }
+        body.dark-mode .devis-preview-pane { background:#151d28; border-color:#2a3a4a; color:#cdd6e0; }
+        body.dark-mode .preset-template-card { background:#1a2535; border-color:#2a4a6a; color:#cdd6e0; }
+        body.dark-mode .preset-template-card:hover { border-color:#a8d5e2; background:#1e2d3d; }
+
         /* ════════════════════════════════════════════════════════
            THÈME TERMINAL  —  ASCII / Monospace / Green-on-Black
            ════════════════════════════════════════════════════════ */
@@ -3225,6 +3258,15 @@
                         <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
                     </div>
                     <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                </div>
+
+                <!-- Templates sectoriels (v2.3) -->
+                <div class="section" style="padding-top:12px;padding-bottom:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+                        <h3 style="margin:0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
+                        <small style="color:#7a9db1;">Cliquez sur un template pour pré-remplir la prestation</small>
+                    </div>
+                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
                 </div>
 
                 <div class="section">
@@ -5521,6 +5563,26 @@
               </div>
               <div id="onboardingChecklist"></div>
               <div class="stats-grid" id="dashboardKpis"></div>
+
+              <!-- Graphiques KPI (Chart.js, v2.3) -->
+              <div id="dashCharts" class="section" style="margin-top:20px;">
+                <h2 style="color:#6b8fa3;margin-bottom:12px;">📊 Tendances</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
+                  <div>
+                    <h3 style="font-size:0.95em;color:#7a9db1;margin:0 0 6px;">CA confirmé — 6 derniers mois</h3>
+                    <div style="position:relative;height:220px;"><canvas id="chartCAMois" aria-label="Graphique CA mensuel"></canvas></div>
+                  </div>
+                  <div>
+                    <h3 style="font-size:0.95em;color:#7a9db1;margin:0 0 6px;">Répartition par statut</h3>
+                    <div style="position:relative;height:220px;"><canvas id="chartStatuts" aria-label="Graphique statuts prestations"></canvas></div>
+                  </div>
+                  <div>
+                    <h3 style="font-size:0.95em;color:#7a9db1;margin:0 0 6px;">Top 5 clients (CA cumulé)</h3>
+                    <div style="position:relative;height:220px;"><canvas id="chartTopClients" aria-label="Graphique top clients"></canvas></div>
+                  </div>
+                </div>
+              </div>
+
               <div id="dashGridDevisAlertes" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
                 <div class="section" id="dashDevisEnAttente">
                   <h2>📋 Devis en attente</h2>
@@ -5627,6 +5689,29 @@
         </div>
       </div>
     </div>
+
+    <!-- Aperçu devis live (v2.3) — FAB + slide-in pane -->
+    <button id="liveDevisFab" type="button" onclick="toggleLiveDevisPreview()"
+            aria-label="Afficher/masquer l'aperçu devis live"
+            style="display:none;position:fixed;right:20px;bottom:20px;z-index:5500;
+                   background:linear-gradient(135deg,#a8d5e2,#c9b3d4);color:#2d3e50;
+                   border:none;border-radius:50%;width:56px;height:56px;font-size:1.5em;
+                   cursor:pointer;box-shadow:0 6px 18px rgba(150,150,180,0.35);transition:transform 0.2s;"
+            title="Aperçu devis en temps réel">👁️</button>
+    <aside id="liveDevisPane" aria-label="Aperçu du devis en temps réel"
+           style="display:none;position:fixed;right:0;top:0;bottom:0;width:380px;max-width:90vw;
+                  z-index:5499;background:#fff;border-left:1px solid var(--color-border);
+                  box-shadow:-8px 0 24px rgba(0,0,0,0.10);transform:translateX(100%);
+                  transition:transform 0.25s ease-out;overflow:hidden;flex-direction:column;">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;background:var(--color-bg-alt);">
+            <strong style="color:var(--color-primary-dark);">👁️ Aperçu devis live</strong>
+            <button onclick="toggleLiveDevisPreview()" aria-label="Fermer l'aperçu"
+                    style="background:none;border:none;font-size:1.4em;cursor:pointer;color:#7a9db1;line-height:1;">&times;</button>
+        </div>
+        <div id="liveDevisPaneBody" class="devis-preview-pane" style="flex:1;border:none;border-radius:0;box-shadow:none;margin:0;padding:14px;overflow:auto;">
+            <p style="color:#7a9db1;text-align:center;font-style:italic;">Remplissez les informations de la prestation pour voir l'aperçu apparaître ici.</p>
+        </div>
+    </aside>
 
     <script>
         // === Helpers de formatage numérique (format suisse avec apostrophe ' comme séparateur de milliers) ===
@@ -9099,6 +9184,7 @@
                     }
                 }
             } catch(e) {}
+            try { updateLiveDevisFabVisibility(); } catch (e) {}
         }
 
         // Met en surbrillance le bouton actif de la bottom-nav mobile
@@ -10007,6 +10093,179 @@
             if (lh) lh.textContent = `Gestes et consommables × nb ${u}s`;
         }
 
+        // ═══════════════════════════════════════════════════════════
+        //  Aperçu devis live (v2.3) — sidebar temps réel
+        // ═══════════════════════════════════════════════════════════
+        let _liveDevisPreviewOpen = false;
+        let _liveDevisDebounce = null;
+
+        /**
+         * Affiche/masque le panneau d'aperçu devis live et persiste l'état.
+         * @returns {void}
+         */
+        function toggleLiveDevisPreview() {
+            _liveDevisPreviewOpen = !_liveDevisPreviewOpen;
+            const pane = document.getElementById('liveDevisPane');
+            if (!pane) return;
+            if (_liveDevisPreviewOpen) {
+                pane.style.display = 'flex';
+                requestAnimationFrame(() => { pane.style.transform = 'translateX(0)'; });
+                updateLiveDevisPreview();
+            } else {
+                pane.style.transform = 'translateX(100%)';
+                setTimeout(() => { pane.style.display = 'none'; }, 260);
+            }
+            try { localStorage.setItem('liveDevisPreviewOpen', _liveDevisPreviewOpen ? '1' : '0'); } catch (e) {}
+        }
+
+        /**
+         * Rafraîchit le contenu du panneau live à partir de buildDevisHtml.
+         * Debounce 200 ms pour éviter les recalculs excessifs pendant la frappe.
+         * @returns {void}
+         */
+        function updateLiveDevisPreview() {
+            if (!_liveDevisPreviewOpen) return;
+            clearTimeout(_liveDevisDebounce);
+            _liveDevisDebounce = setTimeout(() => {
+                const body = document.getElementById('liveDevisPaneBody');
+                if (!body || typeof buildDevisHtml !== 'function') return;
+                try {
+                    const built = buildDevisHtml({ preview:true });
+                    if (built && built.html) {
+                        body.innerHTML = built.html;
+                    } else {
+                        body.innerHTML = '<p style="color:#7a9db1;text-align:center;font-style:italic;">Remplissez Client + Prestation pour voir l\'aperçu.</p>';
+                    }
+                } catch (e) {
+                    body.innerHTML = `<p style="color:#c0392b;font-size:0.85em;">Erreur d'aperçu : ${escapeHtml(e.message || String(e))}</p>`;
+                }
+            }, 200);
+        }
+
+        /**
+         * Affiche/masque le bouton FAB selon que l'onglet calculateur est actif.
+         * Restaure aussi l'état d'ouverture du panneau depuis localStorage.
+         * @returns {void}
+         */
+        function updateLiveDevisFabVisibility() {
+            const fab = document.getElementById('liveDevisFab');
+            if (!fab) return;
+            const calc = document.getElementById('calculateur');
+            const isCalcActive = calc && calc.classList.contains('active');
+            fab.style.display = isCalcActive ? 'inline-block' : 'none';
+            if (!isCalcActive && _liveDevisPreviewOpen) {
+                // Ferme le panneau en quittant l'onglet calculateur
+                toggleLiveDevisPreview();
+            }
+        }
+
+        // Restauration de l'état + visibilité initiale au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                updateLiveDevisFabVisibility();
+                if (localStorage.getItem('liveDevisPreviewOpen') === '1') {
+                    // On ouvre seulement si on arrive sur le calculateur
+                    setTimeout(() => {
+                        if (document.getElementById('calculateur')?.classList.contains('active')) {
+                            toggleLiveDevisPreview();
+                        }
+                    }, 400);
+                }
+            } catch (e) { console.warn('liveDevisPreview init failed:', e); }
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        //  Templates sectoriels (v2.3) — presets de prestation
+        // ═══════════════════════════════════════════════════════════
+        /**
+         * Bibliothèque de templates pré-remplissables. Chaque entrée contient
+         * un sous-ensemble de champs du formulaire calculateur ; les champs
+         * absents ne sont PAS écrasés lors de l'application.
+         * @type {Array<{id:string, icon:string, label:string, sector:string, fields:Object, notes?:string}>}
+         */
+        const PRESTATION_TEMPLATES = [
+            { id:'assemblage-electro', icon:'🔌', label:'Assemblage électronique standard', sector:'Industrie',
+              fields:{ prestation:'Assemblage électronique standard', reference:'ASS-ELEC-', nbPieces:50, nbCEA:2, nbMSP:30, unite:'pièce' },
+              notes:'Câblage simple, soudure à l\'étain, contrôle visuel.' },
+            { id:'mise-sous-pli', icon:'✉️', label:'Mise sous pli volumineuse', sector:'Logistique',
+              fields:{ prestation:'Mise sous pli + adressage', reference:'MSP-', nbPieces:1000, nbCEA:3, nbMSP:25, unite:'pli' },
+              notes:'Pliage 3 volets, mise sous enveloppe, étiquetage.' },
+            { id:'kit-conditionnement', icon:'📦', label:'Kit de conditionnement', sector:'Logistique',
+              fields:{ prestation:'Préparation kit + emballage', reference:'KIT-', nbPieces:200, nbCEA:2, nbMSP:30, unite:'kit' },
+              notes:'Assemblage de plusieurs références, blister ou carton.' },
+            { id:'controle-qualite', icon:'🔍', label:'Contrôle qualité visuel', sector:'Industrie',
+              fields:{ prestation:'Contrôle qualité visuel + tri', reference:'CQ-', nbPieces:500, nbCEA:1, nbMSP:50, unite:'pièce' },
+              notes:'Inspection visuelle, tri conforme/non conforme.' },
+            { id:'etiquetage', icon:'🏷️', label:'Étiquetage produit', sector:'Logistique',
+              fields:{ prestation:'Étiquetage + reconditionnement', reference:'ETIQ-', nbPieces:800, nbCEA:2, nbMSP:30, unite:'pièce' },
+              notes:'Pose étiquettes adhésives, vérification code-barres.' },
+            { id:'reception-stock', icon:'📥', label:'Réception et mise en stock', sector:'Logistique',
+              fields:{ prestation:'Réception marchandises + stockage', reference:'REC-', nbPieces:100, nbCEA:1, nbMSP:60, unite:'palette' },
+              notes:'Déchargement, contrôle, rangement zone stockage.' },
+        ];
+
+        /**
+         * Rend la grille de cartes-templates dans #prestationTemplatesGrid.
+         * Chaque carte est un bouton accessible (role="button", tabindex,
+         * aria-label) qui appelle applyPrestationTemplate(id).
+         * @returns {void}
+         */
+        function renderPrestationTemplates() {
+            const grid = document.getElementById('prestationTemplatesGrid');
+            if (!grid) return;
+            grid.innerHTML = PRESTATION_TEMPLATES.map(t => `
+                <div class="preset-template-card" role="button" tabindex="0"
+                     aria-label="Appliquer le template ${escapeHtml(t.label)}"
+                     onclick="applyPrestationTemplate('${t.id}')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();applyPrestationTemplate('${t.id}');}"
+                     style="cursor:pointer;background:#fff;border:1px solid #d5e3ed;border-radius:10px;padding:10px 12px;transition:border-color 0.2s,background 0.2s;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                        <span style="font-size:1.4em;">${t.icon}</span>
+                        <strong style="font-size:0.9em;color:#2d3e50;">${escapeHtml(t.label)}</strong>
+                    </div>
+                    <div style="font-size:0.75em;color:#7a9db1;">${escapeHtml(t.sector)} • ${t.fields.nbPieces} ${escapeHtml(t.fields.unite || 'unité')}</div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Applique un template au formulaire calculateur. Demande confirmation
+         * si des champs déjà remplis vont être écrasés. Déclenche
+         * `calculateTotal()` à la fin pour rafraîchir les totaux.
+         * @param {string} templateId
+         * @returns {void}
+         */
+        function applyPrestationTemplate(templateId) {
+            const tpl = PRESTATION_TEMPLATES.find(t => t.id === templateId);
+            if (!tpl) return;
+            const overwriteKeys = Object.keys(tpl.fields).filter(k => {
+                const el = document.getElementById(k);
+                return el && (el.value || '').trim() !== '' && String(el.value) !== String(el.defaultValue || '');
+            });
+            if (overwriteKeys.length > 0) {
+                if (!confirm(`Le template "${tpl.label}" va écraser ${overwriteKeys.length} champ(s) déjà rempli(s). Continuer ?`)) return;
+            }
+            for (const [k, v] of Object.entries(tpl.fields)) {
+                const el = document.getElementById(k);
+                if (el) {
+                    el.value = v;
+                    el.dispatchEvent(new Event('input', { bubbles:true }));
+                    el.dispatchEvent(new Event('change', { bubbles:true }));
+                }
+            }
+            if (tpl.notes) {
+                const notes = document.getElementById('notesInternes');
+                if (notes && (notes.value || '').trim() === '') notes.value = tpl.notes;
+            }
+            if (typeof calculateTotal === 'function') calculateTotal();
+            if (typeof toast === 'function') toast(`✅ Template "${tpl.label}" appliqué`, 'success');
+        }
+
+        // Rendu initial des templates au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            try { renderPrestationTemplates(); } catch (e) { console.warn('renderPrestationTemplates failed:', e); }
+        });
+
         /**
          * Recalcule l'ensemble des totaux affichés du calculateur de prestation :
          * temps total (par pièce et lot), coût main-d'œuvre, coût consommables,
@@ -10155,6 +10414,7 @@
             updateVariantesPrix(prixRevient);
             updateLiveSummary({ totalHeures, prixRevient, prixVente, margePourcent, seuilMin });
             updateSaveButtonState();
+            try { updateLiveDevisPreview(); } catch (e) {}
         }
 
         // Validation progressive : grise le bouton Enregistrer tant que
@@ -10189,6 +10449,7 @@
                 btn.style.cursor = '';
                 btn.title = 'Enregistrer la prestation (⌘/Ctrl+S)';
             }
+            try { updateLiveDevisPreview(); } catch (e) {}
         }
 
         // Panneau récap live : mise à jour temps / coût / jauge marge
@@ -17660,37 +17921,99 @@
             modal.style.display = 'flex';
         }
         function closeCompareModal() { document.getElementById('compareModal').style.display = 'none'; }
+        /**
+         * Rend le tableau comparatif de deux prestations avec diff coloré.
+         * Pour chaque ligne numérique : flèche ▲/▼/=, delta absolu et %, classe
+         * CSS positive/négative selon que B est mieux que A. Pour les lignes
+         * texte, simple mise en évidence si différentes.
+         * @returns {void}
+         */
         function renderCompare() {
             const idA = document.getElementById('compareSelA')?.value;
             const idB = document.getElementById('compareSelB')?.value;
             const container = document.getElementById('compareResult');
-            if (!idA || !idB || idA === idB) { container.innerHTML = '<p style="color:#8aacbc;text-align:center;">Sélectionnez deux prestations différentes</p>'; return; }
+            if (!idA || !idB || idA === idB) {
+                container.innerHTML = '<p style="color:#8aacbc;text-align:center;">Sélectionnez deux prestations différentes</p>';
+                return;
+            }
             const pA = prestationsSauvegardees.find(p => String(p.id) === idA);
             const pB = prestationsSauvegardees.find(p => String(p.id) === idB);
             if (!pA || !pB) return;
+
+            // Définition des lignes : { label, vA, vB, type, lowerIsBetter? }
+            // - type='text'  → simple comparaison d'égalité
+            // - type='num'   → diff absolu + % + flèche ; lowerIsBetter inverse le sens
+            // - type='money' → idem num mais formaté en CHF
+            // - type='pct'   → idem num mais affiché en %
             const rows = [
-                ['Client', pA.client||'—', pB.client||'—'],
-                ['Prestation', pA.prestation||'—', pB.prestation||'—'],
-                ['Référence', pA.reference||'—', pB.reference||'—'],
-                ['Statut', pA.statut||'—', pB.statut||'—'],
-                ['Nb CEA', pA.nbCEA||'—', pB.nbCEA||'—'],
-                ['MSP (%)', pA.nbMSP != null ? Math.round(pA.nbMSP*100)+'%' : '—', pB.nbMSP != null ? Math.round(pB.nbMSP*100)+'%' : '—'],
-                ['Nb pièces', pA.nbPieces||'—', pB.nbPieces||'—'],
-                ['Prix total HT', fmtCHF(parseFloat(pA.prixTotal)||0), fmtCHF(parseFloat(pB.prixTotal)||0)],
-                ['Prix unit.', fmtNum(parseFloat(pA.prixUnitaire)||0, 4)+' CHF', fmtNum(parseFloat(pB.prixUnitaire)||0, 4)+' CHF'],
-                ['Marge %', (pA.margePercent||0)+'%', (pB.margePercent||0)+'%'],
-                ['Nb gestes', (pA.gestes||[]).length, (pB.gestes||[]).length],
+                { label:'Client',      vA:pA.client||'—',                          vB:pB.client||'—',                          type:'text' },
+                { label:'Prestation',  vA:pA.prestation||'—',                      vB:pB.prestation||'—',                      type:'text' },
+                { label:'Référence',   vA:pA.reference||'—',                       vB:pB.reference||'—',                       type:'text' },
+                { label:'Statut',      vA:pA.statut||'—',                          vB:pB.statut||'—',                          type:'text' },
+                { label:'Nb CEA',      vA:pA.nbCEA,                                vB:pB.nbCEA,                                type:'num' },
+                { label:'MSP',         vA:(pA.nbMSP||0)*100,                       vB:(pB.nbMSP||0)*100,                       type:'pct' },
+                { label:'Nb pièces',   vA:pA.nbPieces,                             vB:pB.nbPieces,                             type:'num' },
+                { label:'Prix total HT', vA:parseFloat(pA.prixTotal)||0,           vB:parseFloat(pB.prixTotal)||0,             type:'money' },
+                { label:'Prix unitaire', vA:parseFloat(pA.prixUnitaire)||0,        vB:parseFloat(pB.prixUnitaire)||0,          type:'money', lowerIsBetter:true, decimals:4 },
+                { label:'Marge %',     vA:pA.margePercent||0,                      vB:pB.margePercent||0,                      type:'pct' },
+                { label:'Nb gestes',   vA:(pA.gestes||[]).length,                  vB:(pB.gestes||[]).length,                  type:'num' },
             ];
-            const better = (a, b, lowerIsBetter=false) => {
-                const na = parseFloat(a); const nb = parseFloat(b);
-                if (isNaN(na)||isNaN(nb)) return ['',''];
-                return lowerIsBetter ? [na<=nb?'background:#eef8f3':'', nb<=na?'background:#eef8f3':''] : [na>=nb?'background:#eef8f3':'', nb>=na?'background:#eef8f3':''];
+
+            const fmtVal = (v, type, decimals) => {
+                if (v == null || v === '—') return '—';
+                if (type === 'money') return fmtCHF(v, decimals != null ? decimals : 2);
+                if (type === 'pct')   return Math.round(v) + '%';
+                return v;
             };
-            const highlights = [['',''],['',''],['',''],['',''],['',''],['',''],['',''],better(pA.prixTotal,pB.prixTotal),better(pA.prixUnitaire,pB.prixUnitaire,true),better(pA.margePercent,pB.margePercent),['','']];
-            container.innerHTML = `<table style="width:100%;font-size:0.88em;border-collapse:collapse;">
-                <thead><tr><th style="text-align:left;padding:8px;background:#f0f4f8;border-radius:6px 0 0 0;">Critère</th><th style="padding:8px;background:#edf5ff;text-align:center;">Prestation A</th><th style="padding:8px;background:#fff0f5;text-align:center;">Prestation B</th></tr></thead>
-                <tbody>${rows.map((r,i)=>`<tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;color:#6b8fa3;">${r[0]}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;${highlights[i][0]}">${r[1]}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;${highlights[i][1]}">${r[2]}</td></tr>`).join('')}
-                </tbody></table>`;
+
+            const renderRow = r => {
+                if (r.type === 'text') {
+                    const same = r.vA === r.vB;
+                    const cls = same ? 'compare-diff-eq' : '';
+                    return `<tr class="${same ? '' : 'compare-diff-row changed'}">
+                        <td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;color:#6b8fa3;">${escapeHtml(r.label)}</td>
+                        <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;" class="${cls}">${escapeHtml(String(r.vA))}</td>
+                        <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;" class="${cls}">${escapeHtml(String(r.vB))}</td>
+                        <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;color:#aaa;">—</td>
+                    </tr>`;
+                }
+                const a = Number(r.vA) || 0;
+                const b = Number(r.vB) || 0;
+                const delta = b - a;
+                const pct = a !== 0 ? (delta / a) * 100 : (b !== 0 ? 100 : 0);
+                const arrow = delta > 0 ? '▲' : delta < 0 ? '▼' : '=';
+                const isBetter = r.lowerIsBetter ? delta < 0 : delta > 0;
+                const isWorse  = r.lowerIsBetter ? delta > 0 : delta < 0;
+                const cls = delta === 0 ? 'compare-diff-eq' : (isBetter ? 'compare-diff-pos' : (isWorse ? 'compare-diff-neg' : ''));
+                const deltaStr = delta === 0
+                    ? '='
+                    : `${arrow} ${fmtVal(Math.abs(delta), r.type, r.decimals)}${a !== 0 ? ` (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%)` : ''}`;
+                return `<tr class="${delta !== 0 ? 'compare-diff-row changed' : ''}">
+                    <td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;color:#6b8fa3;">${escapeHtml(r.label)}</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${escapeHtml(fmtVal(r.vA, r.type, r.decimals))}</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${escapeHtml(fmtVal(r.vB, r.type, r.decimals))}</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;" class="${cls}">${deltaStr}</td>
+                </tr>`;
+            };
+
+            container.innerHTML = `
+                <table style="width:100%;font-size:0.88em;border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;padding:8px;background:#f0f4f8;border-radius:6px 0 0 0;">Critère</th>
+                            <th style="padding:8px;background:#edf5ff;text-align:center;">Prestation A</th>
+                            <th style="padding:8px;background:#fff0f5;text-align:center;">Prestation B</th>
+                            <th style="padding:8px;background:#f0f4f8;text-align:center;">Δ (B − A)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows.map(renderRow).join('')}</tbody>
+                </table>
+                <p style="margin:10px 4px 0;font-size:0.78em;color:#7a9db1;">
+                    <span class="compare-diff-pos">▲ vert</span> = B est meilleur ·
+                    <span class="compare-diff-neg">▼ rouge</span> = B est moins bon ·
+                    <span class="compare-diff-eq">= gris</span> = identique.
+                    Pour le prix unitaire, "moins cher" est meilleur.
+                </p>`;
         }
 
         // ── Mode présentation client ────────────────────────────
@@ -19225,6 +19548,89 @@
         // ============================================================
         // FEATURE 1 : Tableau de bord (Dashboard)
         // ============================================================
+
+        // Cache des instances Chart.js pour pouvoir les détruire/recréer
+        const _dashCharts = { caMois:null, statuts:null, topClients:null };
+
+        /**
+         * Rend les 3 graphiques du dashboard (CA mensuel, répartition par
+         * statut, top 5 clients). Détruit les instances précédentes pour
+         * éviter les fuites mémoire / superpositions au re-render.
+         * Tolère l'absence de Chart.js (CDN bloquée par exemple).
+         * @returns {void}
+         */
+        function renderDashboardCharts() {
+            if (typeof Chart === 'undefined') return;
+
+            // 1. CA confirmé sur les 6 derniers mois
+            const now = new Date();
+            const labels = [];
+            const values = [];
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                labels.push(d.toLocaleDateString('fr-FR', { month:'short', year:'2-digit' }));
+                const total = prestationsSauvegardees
+                    .filter(p => {
+                        const pd = new Date(p.date);
+                        return pd.getMonth() === d.getMonth()
+                            && pd.getFullYear() === d.getFullYear()
+                            && (p.statut === 'valide' || p.statut === 'facture');
+                    })
+                    .reduce((s, p) => s + (p.prixVente || 0), 0);
+                values.push(Math.round(total));
+            }
+            const cvCA = document.getElementById('chartCAMois');
+            if (cvCA) {
+                if (_dashCharts.caMois) _dashCharts.caMois.destroy();
+                _dashCharts.caMois = new Chart(cvCA, {
+                    type:'bar',
+                    data:{ labels, datasets:[{ label:'CA confirmé (CHF)', data:values, backgroundColor:'#a8d5e2', borderColor:'#6b8fa3', borderWidth:1 }] },
+                    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+                });
+            }
+
+            // 2. Répartition par statut (donut)
+            const statutCounts = {};
+            prestationsSauvegardees.forEach(p => {
+                const s = p.statut || 'devis';
+                statutCounts[s] = (statutCounts[s] || 0) + 1;
+            });
+            const sLabels = Object.keys(statutCounts);
+            const sValues = sLabels.map(k => statutCounts[k]);
+            const sColors = sLabels.map(k => ({
+                devis:'#f39c12', valide:'#27ae60', facture:'#3498db', annule:'#e74c3c', refuse:'#95a5a6'
+            }[k] || '#a8d5e2'));
+            const cvS = document.getElementById('chartStatuts');
+            if (cvS) {
+                if (_dashCharts.statuts) _dashCharts.statuts.destroy();
+                _dashCharts.statuts = new Chart(cvS, {
+                    type:'doughnut',
+                    data:{ labels:sLabels, datasets:[{ data:sValues, backgroundColor:sColors, borderWidth:2, borderColor:'#fff' }] },
+                    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:11 } } } } }
+                });
+            }
+
+            // 3. Top 5 clients par CA cumulé (toutes prestations confondues)
+            const clientCA = {};
+            prestationsSauvegardees.forEach(p => {
+                const c = (p.client || '—').trim() || '—';
+                clientCA[c] = (clientCA[c] || 0) + (p.prixVente || 0);
+            });
+            const top5 = Object.entries(clientCA).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const cvT = document.getElementById('chartTopClients');
+            if (cvT) {
+                if (_dashCharts.topClients) _dashCharts.topClients.destroy();
+                _dashCharts.topClients = new Chart(cvT, {
+                    type:'bar',
+                    data:{
+                        labels: top5.map(t => t[0]),
+                        datasets:[{ label:'CA total (CHF)', data: top5.map(t => Math.round(t[1])), backgroundColor:'#c9b3d4', borderColor:'#9a70b8', borderWidth:1 }]
+                    },
+                    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } }
+                });
+            }
+        }
+
         function renderDashboard() {
             const now = new Date();
             const thisMonth = now.getMonth();
@@ -19657,6 +20063,7 @@
             checkAndShowAlerts();
             renderOnboardingChecklist();
             updateTabBadges();
+            try { renderDashboardCharts(); } catch (e) { console.warn('renderDashboardCharts failed:', e); }
         }
 
         // ─────────────────────────────────────────────────────────
