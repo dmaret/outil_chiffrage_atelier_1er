@@ -1,5 +1,7 @@
 # Améliorations
 
+> 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
+
 ## 2026-04-26 — v2.3 Lot 1 visuel/UX
 
 ### Nouvelles fonctionnalités
