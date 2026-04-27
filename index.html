@@ -18761,9 +18761,29 @@
         })();
 
         const LOGIN_WIDGETS_DEF = [
-            { id: 'message',  icon: '💬', label: 'Message d\'accueil',              desc: 'Texte de bienvenue personnalisable' },
-            { id: 'training', icon: '📋', label: 'Offre de Prix / Assistant Gestes', desc: 'Module d\'entraînement aux gestes' },
-            { id: 'stats',    icon: '📊', label: 'Statistiques rapides',             desc: 'Chiffres clés de l\'atelier' },
+            { id: 'message',   icon: '💬', label: 'Message d\'accueil',                desc: 'Texte de bienvenue personnalisable' },
+            { id: 'training',  icon: '📋', label: 'Offre de Prix / Assistant Gestes',  desc: 'Module d\'entraînement aux gestes' },
+            { id: 'formation', icon: '🎓', label: 'Formation CEA',                     desc: 'Accès direct au module de formation logistique' },
+            { id: 'stats',     icon: '📊', label: 'Statistiques rapides',              desc: 'Chiffres clés de l\'atelier (configurables)' },
+        ];
+
+        // Métriques disponibles pour la carte « Statistiques rapides » (v2.5)
+        // Chaque entrée définit un compteur + sa couleur + sa fonction de calcul.
+        // L'admin choisit lesquelles afficher via les cases à cocher dans Paramétrage.
+        const LOGIN_STATS_METRICS = [
+            { id:'prestations_total', label:'Prestations',         color:'#4e9af1', compute: () => (typeof prestationsSauvegardees !== 'undefined' ? prestationsSauvegardees.length : 0) },
+            { id:'clients_total',     label:'Clients',             color:'#27ae60', compute: () => (typeof clientsData !== 'undefined' ? Object.keys(clientsData).length : 0) },
+            { id:'ca_mois',           label:'CA ce mois (CHF)',    color:'#f39c12', compute: () => {
+                if (typeof prestationsSauvegardees === 'undefined') return 0;
+                const now = new Date();
+                return Math.round(prestationsSauvegardees
+                    .filter(p => { const d = new Date(p.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && (p.statut === 'valide' || p.statut === 'facture'); })
+                    .reduce((s, p) => s + (p.prixVente || 0), 0));
+            }},
+            { id:'devis_attente',     label:'Devis en attente',    color:'#9a70b8', compute: () => (typeof prestationsSauvegardees !== 'undefined'
+                ? prestationsSauvegardees.filter(p => (p.statut || 'devis') === 'devis').length : 0) },
+            { id:'gestes_catalogue',  label:'Gestes au catalogue', color:'#3498db', compute: () => (typeof catalogueGestes !== 'undefined' ? catalogueGestes.length : 0) },
+            { id:'consommables_total',label:'Consommables',        color:'#e67e22', compute: () => (typeof catalogueConsommables !== 'undefined' ? catalogueConsommables.length : 0) },
         ];
 
         function renderLoginWidgets() {
@@ -18806,28 +18826,41 @@
                 </div>`;
             }
 
-            if (active.includes('stats')) {
-                const pCount = (typeof prestations !== 'undefined' ? prestations : []).length;
-                const cCount = (typeof clients    !== 'undefined' ? clients    : []).length;
-                const oCount = (typeof offres     !== 'undefined' ? offres     : []).length;
+            if (active.includes('formation')) {
                 html += `<div class="training-box">
-                    <div style="font-size:2.5em;margin-bottom:6px;">📊</div>
-                    <h2>Statistiques</h2>
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;">
-                        <div style="background:#f0f7ff;border-radius:12px;padding:14px;">
-                            <div style="font-size:1.8em;font-weight:700;color:#4e9af1;">${pCount}</div>
-                            <div style="font-size:0.8em;color:#6b8fa3;">Prestations</div>
-                        </div>
-                        <div style="background:#f0f7ff;border-radius:12px;padding:14px;">
-                            <div style="font-size:1.8em;font-weight:700;color:#27ae60;">${cCount}</div>
-                            <div style="font-size:0.8em;color:#6b8fa3;">Clients</div>
-                        </div>
-                        <div style="background:#f0f7ff;border-radius:12px;padding:14px;">
-                            <div style="font-size:1.8em;font-weight:700;color:#9a70b8;">${oCount}</div>
-                            <div style="font-size:0.8em;color:#6b8fa3;">Offres</div>
-                        </div>
-                    </div>
+                    <div style="font-size:2.5em;margin-bottom:6px;">🎓</div>
+                    <h2>Formation CEA</h2>
+                    <h3 style="font-size:1.1em;color:#27ae60;margin-bottom:12px;">Module logistique &amp; gestes</h3>
+                    <p class="training-subtitle">Parcours d'apprentissage : flux opérationnels, quiz, validation des compétences clés.</p>
+                    <button class="btn-training" style="background:linear-gradient(135deg,#27ae60,#1a7a40);" onclick="document.getElementById('authOverlay') && (document.getElementById('authOverlay').style.display='none'); switchTab('formation-logistique'); setTimeout(()=>document.getElementById('learnerFormationSelect')?.focus(), 400);">🚀 Accéder à la formation</button>
+                    <p class="training-footer">Réservé aux apprenants — accès direct sans connexion admin requise</p>
                 </div>`;
+            }
+
+            if (active.includes('stats')) {
+                // Métriques configurables (v2.5) — fallback aux 3 métriques par défaut
+                const selected = (loginConfig.statsMetrics && loginConfig.statsMetrics.length > 0)
+                    ? loginConfig.statsMetrics
+                    : ['prestations_total', 'clients_total', 'ca_mois'];
+                const cards = selected
+                    .map(id => LOGIN_STATS_METRICS.find(m => m.id === id))
+                    .filter(Boolean)
+                    .map(m => {
+                        let val;
+                        try { val = m.compute(); } catch (e) { val = '—'; }
+                        return `<div style="background:#f0f7ff;border-radius:12px;padding:14px;">
+                            <div style="font-size:1.6em;font-weight:700;color:${m.color};">${val}</div>
+                            <div style="font-size:0.8em;color:#6b8fa3;">${escapeHtml(m.label)}</div>
+                        </div>`;
+                    });
+                if (cards.length > 0) {
+                    const cols = Math.min(3, cards.length);
+                    html += `<div class="training-box">
+                        <div style="font-size:2.5em;margin-bottom:6px;">📊</div>
+                        <h2>Statistiques</h2>
+                        <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:10px;margin-top:16px;">${cards.join('')}</div>
+                    </div>`;
+                }
             }
 
             container.innerHTML = html;
@@ -18853,6 +18886,18 @@
             }).join('');
 
             const msgVisible = active.includes('message') ? '' : 'display:none;';
+            const statsVisible = active.includes('stats') ? '' : 'display:none;';
+            const selectedMetrics = (loginConfig.statsMetrics && loginConfig.statsMetrics.length > 0)
+                ? loginConfig.statsMetrics
+                : ['prestations_total', 'clients_total', 'ca_mois'];
+            const statsHtml = LOGIN_STATS_METRICS.map(m => {
+                const checked = selectedMetrics.includes(m.id);
+                return `<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;background:${checked?'#edfaf3':'#fff'};border:1px solid ${checked?'#27ae60':'#e0e8f0'};cursor:pointer;">
+                    <input type="checkbox" class="lstats-cb" value="${m.id}" ${checked?'checked':''} style="width:14px;height:14px;accent-color:#27ae60;cursor:pointer;">
+                    <span style="font-weight:600;color:${m.color};">${escapeHtml(m.label)}</span>
+                </label>`;
+            }).join('');
+
             container.innerHTML = `
                 <div style="margin-bottom:16px;">${widgetsHtml}</div>
                 <div id="loginMsgConfig" style="${msgVisible}padding:14px;background:#f0f7ff;border-radius:10px;border:1px solid #cce4f7;margin-bottom:16px;">
@@ -18863,6 +18908,11 @@
                     <label style="font-weight:600;font-size:0.9em;display:block;margin-top:10px;margin-bottom:6px;">Couleur de fond</label>
                     <input type="color" id="loginMsgBg" value="${loginConfig.messageBg || '#f0f7ff'}" style="width:50px;height:32px;border:none;cursor:pointer;border-radius:6px;">
                 </div>
+                <div id="loginStatsConfig" style="${statsVisible}padding:14px;background:#f0f7ff;border-radius:10px;border:1px solid #cce4f7;margin-bottom:16px;">
+                    <label style="font-weight:600;font-size:0.9em;display:block;margin-bottom:8px;">📊 Métriques à afficher dans la carte Statistiques</label>
+                    <small style="display:block;color:#7a9db1;margin-bottom:10px;">Cochez les chiffres clés à présenter (recommandé : 3 max pour rester lisible).</small>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;">${statsHtml}</div>
+                </div>
                 <button class="btn btn-success btn-small" onclick="saveLoginConfigAdmin()">💾 Sauvegarder</button>`;
         }
 
@@ -18870,17 +18920,25 @@
             const row = cb.closest('label');
             if (cb.checked) { row.style.background = '#edfaf3'; row.style.borderColor = '#27ae60'; }
             else            { row.style.background = '#f5f9fc'; row.style.borderColor = '#e0e8f0'; }
-            const msgCfg = document.getElementById('loginMsgConfig');
-            if (msgCfg && cb.value === 'message') msgCfg.style.display = cb.checked ? '' : 'none';
+            if (cb.value === 'message') {
+                const msgCfg = document.getElementById('loginMsgConfig');
+                if (msgCfg) msgCfg.style.display = cb.checked ? '' : 'none';
+            }
+            if (cb.value === 'stats') {
+                const statsCfg = document.getElementById('loginStatsConfig');
+                if (statsCfg) statsCfg.style.display = cb.checked ? '' : 'none';
+            }
         }
 
         function saveLoginConfigAdmin() {
             loginConfig.widgets     = [...document.querySelectorAll('.lwt-cb:checked')].map(cb => cb.value);
+            loginConfig.statsMetrics = [...document.querySelectorAll('.lstats-cb:checked')].map(cb => cb.value);
             loginConfig.messageTitle = document.getElementById('loginMsgTitle')?.value || '';
             loginConfig.messageText  = document.getElementById('loginMsgText')?.value  || '';
             loginConfig.messageBg    = document.getElementById('loginMsgBg')?.value    || '#f0f7ff';
             localStorage.setItem('loginConfig', JSON.stringify(loginConfig));
             renderLoginConfigAdmin();
+            renderLoginWidgets();
             toast('Configuration de l\'accueil sauvegardée', 'success');
         }
 
