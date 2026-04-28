@@ -3992,9 +3992,35 @@
                     <div class="info-box">Définissez un stock minimum par référence. Une alerte rouge s'affiche si le stock passe en dessous.</div>
                     <div id="stockMinTable"></div>
                     <div style="margin-top:12px;">
-                        <button class="btn btn-success" onclick="exportStockCSV()">📥 Export CSV</button>
                         <button class="btn btn-info" onclick="saveStockMinTemplate()">💾 Sauver comme modèle</button>
                         <button class="btn btn-info" onclick="loadStockMinTemplate()" id="loadTemplateBtn" style="display:none;">📂 Charger modèle</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>📦 Modèle · Import · Export — Stock</h2>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : reference, quantite, prix_unitaire, emplacement</p>
+                            <button class="btn btn-secondary btn-small" onclick="downloadStockTemplate()">⬇ Télécharger le modèle</button>
+                        </div>
+                        <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                            <div class="import-drop-zone" id="stockDropZone" onclick="document.getElementById('stockCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleStockCsvDrop(event)" style="margin:0;">
+                                <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                <p style="font-size:0.8em;margin-top:4px;">Crée des entrées de stock (FIFO)</p>
+                            </div>
+                            <input type="file" id="stockCsvInput" accept=".csv" style="display:none" onchange="importStockCSV(this)">
+                        </div>
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Inventaire complet avec valorisation FIFO.</p>
+                            <button class="btn btn-small" onclick="exportStockCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter le stock</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4530,6 +4556,33 @@
 
             <!-- ONGLET CLIENTS -->
             <div id="clients" class="tab-content">
+                <div class="section">
+                    <h2>📦 Modèle · Import · Export — Clients</h2>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : nom, tel, email, adresse, notes, tarif_special</p>
+                            <button class="btn btn-secondary btn-small" onclick="downloadClientsTemplate()">⬇ Télécharger le modèle</button>
+                        </div>
+                        <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                            <div class="import-drop-zone" id="clientsDropZone" onclick="document.getElementById('clientsCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleClientsCsvDrop(event)" style="margin:0;">
+                                <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                <p style="font-size:0.8em;margin-top:4px;">Format : nom,tel,email,adresse,notes,tarif_special</p>
+                            </div>
+                            <input type="file" id="clientsCsvInput" accept=".csv" style="display:none" onchange="importClientsCSV(this)">
+                        </div>
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez la liste des clients avec leurs coordonnées.</p>
+                            <button class="btn btn-small" onclick="exportClientsCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter les clients</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section">
                     <h2>Fiches clients</h2>
                     <div class="info-box">Synthèse automatique par client basée sur les prestations enregistrées. Cliquez sur un client pour voir son historique détaillé.</div>
@@ -5453,6 +5506,33 @@
                             <button class="btn btn-success btn-small" onclick="openBeneficiaireModal()">➕ Nouveau bénéficiaire</button>
                         </div>
                         <div id="beneficiairesList"></div>
+                    </div>
+
+                    <div class="section">
+                        <h2>📦 Modèle · Import · Export — Bénéficiaires</h2>
+                        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
+                            <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
+                                <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
+                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                                <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : prenom, nom, date_entree, statut, objectifs, notes</p>
+                                <button class="btn btn-secondary btn-small" onclick="downloadBeneficiairesTemplate()">⬇ Télécharger le modèle</button>
+                            </div>
+                            <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
+                                <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
+                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                                <div class="import-drop-zone" id="benefDropZone" onclick="document.getElementById('benefCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleBenefCsvDrop(event)" style="margin:0;">
+                                    <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                    <p style="font-size:0.8em;margin-top:4px;">Format : prenom,nom,date_entree,statut,objectifs,notes</p>
+                                </div>
+                                <input type="file" id="benefCsvInput" accept=".csv" style="display:none" onchange="importBeneficiairesCSV(this)">
+                            </div>
+                            <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
+                                <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
+                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                                <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez la liste des bénéficiaires avec leur profil.</p>
+                                <button class="btn btn-small" onclick="exportBeneficiairesCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter les bénéficiaires</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -22703,6 +22783,206 @@
                 toast(`⚠️ Lecture du fichier CSV annulée : ${file.name}`, 'warning');
             };
             reader.readAsText(file, 'UTF-8');
+        }
+
+        // ============================================================
+        // IMPORT / EXPORT CSV — STOCK
+        // ============================================================
+        function downloadStockTemplate() {
+            const header = 'reference,quantite,prix_unitaire,emplacement';
+            const ex1 = 'ETI-A4,500,0.05,Zone A';
+            const ex2 = 'FILM-1M,200,0.20,Zone B';
+            _downloadCSV([header, ex1, ex2].join('\n'), 'modele_stock.csv');
+        }
+
+        function handleStockCsvDrop(e) {
+            e.preventDefault();
+            document.getElementById('stockDropZone').style.background = '';
+            const file = e.dataTransfer.files[0];
+            if (file) importStockCSV({ files: [file] });
+        }
+
+        function importStockCSV(input) {
+            const file = input.files ? input.files[0] : input;
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const today = new Date().toISOString().split('T')[0];
+                    const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+                    if (lines.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+                    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+                    const iRef   = headers.indexOf('reference');
+                    const iQte   = headers.indexOf('quantite');
+                    const iPrix  = headers.indexOf('prix_unitaire');
+                    const iEmpl  = headers.indexOf('emplacement');
+                    if (iRef < 0 || iQte < 0) { toast('Colonnes "reference" et "quantite" requises', 'danger'); return; }
+                    let added = 0;
+                    lines.slice(1).forEach(line => {
+                        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                        const ref  = cols[iRef]  || '';
+                        const qte  = parseFloat(cols[iQte])  || 0;
+                        const prix = iPrix >= 0 ? (parseFloat(cols[iPrix]) || 0) : 0;
+                        const empl = iEmpl >= 0 ? (cols[iEmpl] || '') : '';
+                        if (!ref || qte <= 0) return;
+                        const mouvement = { id: Date.now() + added, type: 'entree', date: today, ref, qte, unite: 'pièce', emplacement: empl, prix };
+                        mouvements.push(mouvement);
+                        if (!stockActuel[ref]) stockActuel[ref] = { lots: [], total: 0 };
+                        stockActuel[ref].lots.push({ date: today, qte, prix, emplacement: empl });
+                        stockActuel[ref].total += qte;
+                        added++;
+                    });
+                    saveToStorage();
+                    renderMouvements();
+                    updateStockStats();
+                    toast(`✅ ${added} entrée(s) de stock importée(s)`, 'success');
+                } catch(err) { toast('Erreur lors de l\'import stock', 'error'); console.error(err); }
+                if (input.value !== undefined) input.value = '';
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        // ============================================================
+        // IMPORT / EXPORT CSV — CLIENTS
+        // ============================================================
+        function downloadClientsTemplate() {
+            const header = 'nom,tel,email,adresse,notes,tarif_special';
+            const ex1 = 'Entreprise Alpha,+41 21 000 00 01,contact@alpha.ch,Chemin des Rives 1 - 1000 Lausanne,,';
+            const ex2 = 'Société Bêta,+41 21 000 00 02,info@beta.ch,Rue du Centre 5 - 1200 Genève,Client prioritaire,95';
+            _downloadCSV([header, ex1, ex2].join('\n'), 'modele_clients.csv');
+        }
+
+        function exportClientsCSV() {
+            if (!Object.keys(clientsData || {}).length) { toast('Aucun client enregistré', 'warning'); return; }
+            const header = 'nom,tel,email,adresse,notes,tarif_special';
+            const rows = Object.entries(clientsData).map(([nom, c]) =>
+                [nom, c.tel || '', c.email || '', c.adresse || '', c.notes || '', c.tarifSpecial || '']
+                    .map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')
+            );
+            _downloadCSV([header, ...rows].join('\n'), `clients_${new Date().toISOString().slice(0, 10)}.csv`);
+            toast('✅ Clients exportés', 'success');
+        }
+
+        function handleClientsCsvDrop(e) {
+            e.preventDefault();
+            document.getElementById('clientsDropZone').style.background = '';
+            const file = e.dataTransfer.files[0];
+            if (file) importClientsCSV({ files: [file] });
+        }
+
+        function importClientsCSV(input) {
+            const file = input.files ? input.files[0] : input;
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+                    if (lines.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+                    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+                    const iNom   = headers.indexOf('nom');
+                    const iTel   = headers.indexOf('tel');
+                    const iEmail = headers.indexOf('email');
+                    const iAdr   = headers.indexOf('adresse');
+                    const iNotes = headers.indexOf('notes');
+                    const iTarif = headers.indexOf('tarif_special');
+                    if (iNom < 0) { toast('Colonne "nom" requise', 'danger'); return; }
+                    let added = 0, updated = 0;
+                    lines.slice(1).forEach(line => {
+                        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                        const nom = cols[iNom] || '';
+                        if (!nom) return;
+                        const existing = !!clientsData[nom];
+                        clientsData[nom] = {
+                            tel:         iTel   >= 0 ? cols[iTel]   : (clientsData[nom]?.tel   || ''),
+                            email:       iEmail >= 0 ? cols[iEmail] : (clientsData[nom]?.email || ''),
+                            adresse:     iAdr   >= 0 ? cols[iAdr]   : (clientsData[nom]?.adresse || ''),
+                            notes:       iNotes >= 0 ? cols[iNotes] : (clientsData[nom]?.notes || ''),
+                            tarifSpecial:iTarif >= 0 ? (parseFloat(cols[iTarif]) || '') : (clientsData[nom]?.tarifSpecial || ''),
+                        };
+                        existing ? updated++ : added++;
+                    });
+                    localStorage.setItem('clientsData', JSON.stringify(clientsData));
+                    renderClients();
+                    toast(`✅ ${added} client(s) ajouté(s), ${updated} mis à jour`, 'success');
+                } catch(err) { toast('Erreur lors de l\'import clients', 'error'); console.error(err); }
+                if (input.value !== undefined) input.value = '';
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        // ============================================================
+        // IMPORT / EXPORT CSV — BÉNÉFICIAIRES
+        // ============================================================
+        function downloadBeneficiairesTemplate() {
+            const header = 'prenom,nom,date_entree,statut,objectifs,notes';
+            const ex1 = 'Marie,Dupont,2026-01-15,en-cours,Développer autonomie en étiquetage,Bonne progression';
+            const ex2 = 'Jean,Martin,2025-09-01,termine,Maîtrise contrôle qualité,';
+            _downloadCSV([header, ex1, ex2].join('\n'), 'modele_beneficiaires.csv');
+        }
+
+        function exportBeneficiairesCSV() {
+            if (!beneficiaires.length) { toast('Aucun bénéficiaire enregistré', 'warning'); return; }
+            const header = 'prenom,nom,date_entree,statut,objectifs,notes';
+            const rows = beneficiaires.map(b =>
+                [b.prenom || '', b.nom || '', b.dateEntree || '', b.statut || '', b.objectifs || '', b.notes || '']
+                    .map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')
+            );
+            _downloadCSV([header, ...rows].join('\n'), `beneficiaires_${new Date().toISOString().slice(0, 10)}.csv`);
+            toast('✅ Bénéficiaires exportés', 'success');
+        }
+
+        function handleBenefCsvDrop(e) {
+            e.preventDefault();
+            document.getElementById('benefDropZone').style.background = '';
+            const file = e.dataTransfer.files[0];
+            if (file) importBeneficiairesCSV({ files: [file] });
+        }
+
+        function importBeneficiairesCSV(input) {
+            const file = input.files ? input.files[0] : input;
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+                    if (lines.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+                    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+                    const iPrenom  = headers.indexOf('prenom');
+                    const iNom     = headers.indexOf('nom');
+                    const iDate    = headers.indexOf('date_entree');
+                    const iStatut  = headers.indexOf('statut');
+                    const iObjecti = headers.indexOf('objectifs');
+                    const iNotes   = headers.indexOf('notes');
+                    if (iPrenom < 0 || iNom < 0) { toast('Colonnes "prenom" et "nom" requises', 'danger'); return; }
+                    let added = 0;
+                    lines.slice(1).forEach(line => {
+                        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                        const prenom = cols[iPrenom] || '';
+                        const nom    = cols[iNom]    || '';
+                        if (!prenom) return;
+                        const exists = beneficiaires.find(b => b.prenom === prenom && b.nom === nom);
+                        if (exists) return;
+                        beneficiaires.push({
+                            id:         Date.now() + added,
+                            prenom,
+                            nom,
+                            dateEntree: iDate    >= 0 ? cols[iDate]    : new Date().toISOString().split('T')[0],
+                            statut:     iStatut  >= 0 ? cols[iStatut]  : 'en-cours',
+                            objectifs:  iObjecti >= 0 ? cols[iObjecti] : '',
+                            notes:      iNotes   >= 0 ? cols[iNotes]   : '',
+                            avatar:     '👤',
+                            competences: [],
+                            prestationsIds: [],
+                        });
+                        added++;
+                    });
+                    saveBeneficiairesData();
+                    renderBeneficiaires();
+                    toast(`✅ ${added} bénéficiaire(s) importé(s)`, 'success');
+                } catch(err) { toast('Erreur lors de l\'import bénéficiaires', 'error'); console.error(err); }
+                if (input.value !== undefined) input.value = '';
+            };
+            reader.readAsText(file, 'utf-8');
         }
 
         // ============================================================
