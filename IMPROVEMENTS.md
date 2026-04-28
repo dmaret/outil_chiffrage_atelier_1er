@@ -2,6 +2,17 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-28 — v2.11 Import · Export · Modèle CSV sur tous les onglets base de données
+
+- **Stock** : nouveau bloc « 📦 Modèle · Import · Export » — modèle CSV (`reference, quantite, prix_unitaire, emplacement`), import par glisser-déposer ou sélection de fichier (crée des mouvements « entrée » FIFO), export inventaire complet. Remplace les anciens boutons inline.
+- **Clients** : bloc identique ajouté — modèle CSV (`nom, tel, email, adresse, notes, tarif_special`), import (ajout + mise à jour si le nom existe déjà), export de `clientsData` complet.
+- **Bénéficiaires** : bloc identique dans le sous-onglet Suivi — modèle CSV (`prenom, nom, date_entree, statut, objectifs, notes`), import (skip si le couple prénom+nom existe déjà), export complet.
+- Catalogue et Consommables avaient déjà le triplet — couverture maintenant **uniforme** sur tous les onglets base de données.
+- Tous les panneaux supportent le glisser-déposer (`ondrop`) et l'input fichier.
+- Dark mode couvert via les variables existantes (pas de nouveaux blocs CSS nécessaires).
+
+---
+
 ## 2026-04-26 — v2.10 Refonte light de l'onglet Procédures
 
 - L'onglet Procédures avait un thème **sombre style "GitHub dark" / terminal** en dur dans la CSS, dissonant avec le reste de l'app qui est clair.
