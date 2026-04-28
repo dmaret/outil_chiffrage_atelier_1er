@@ -2264,31 +2264,34 @@
         .guide-block-title { margin:0 0 4px; color:var(--color-primary-dark); font-size:1.05em; }
         .guide-block-sub   { font-size:0.9em; color:var(--color-text-muted); margin:0 0 14px; }
         .guide-flow {
-            display:flex; align-items:stretch; gap:0; flex-wrap:wrap; padding:6px 0;
+            display:flex; align-items:center; gap:0; flex-wrap:wrap; padding:14px 0 6px;
         }
         .guide-card {
-            position:relative; min-width:170px; max-width:220px; flex:0 1 200px;
-            padding:14px 12px 10px; background:#fff; border:1.5px solid var(--color-border);
-            border-top:3px solid var(--c, var(--color-primary));
-            border-radius:10px; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-            box-shadow:0 2px 6px rgba(150,150,180,0.06);
-            display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;
+            position:relative; min-width:150px; max-width:200px; flex:0 1 180px;
+            padding:18px 10px 12px; background:#fff;
+            border:2px solid #2d3e50;
+            border-radius:12px; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s;
+            box-shadow:3px 3px 0 #2d3e5022;
+            display:flex; flex-direction:column; align-items:center; text-align:center; gap:5px;
         }
-        .guide-card:hover { transform:translateY(-2px); box-shadow:0 4px 14px rgba(150,150,180,0.18); border-color:var(--c, var(--color-primary)); }
+        .guide-card:hover { transform:translateY(-3px); box-shadow:4px 6px 0 #2d3e5033; }
         .guide-card .guide-num {
-            position:absolute; top:-12px; left:50%; transform:translateX(-50%);
-            background:var(--c, var(--color-primary)); color:#fff;
-            width:24px; height:24px; border-radius:50%;
+            position:absolute; top:-16px; left:50%; transform:translateX(-50%);
+            background:#e74c3c; color:#fff;
+            width:32px; height:32px; border-radius:50%;
             display:flex; align-items:center; justify-content:center;
-            font-size:0.85em; font-weight:700; box-shadow:0 2px 4px rgba(0,0,0,0.15);
+            font-size:0.95em; font-weight:800;
+            border:3px solid #fff;
+            box-shadow:0 2px 6px rgba(231,76,60,0.35);
         }
-        .guide-card .guide-icon { font-size:1.7em; line-height:1; margin-top:6px; }
-        .guide-card strong { color:var(--color-text); font-size:0.92em; }
-        .guide-card small  { color:var(--color-text-muted); font-size:0.78em; line-height:1.3; }
+        .guide-card .guide-icon { font-size:2em; line-height:1; margin-top:4px; }
+        .guide-card strong { color:#2d3e50; font-size:0.9em; font-weight:700; }
+        .guide-card small  { color:var(--color-text-muted); font-size:0.76em; line-height:1.3; }
         .guide-arrow {
             display:flex; align-items:center; justify-content:center;
-            min-width:28px; padding:0 4px; color:var(--color-primary-dark); font-size:1.4em;
-            align-self:center; opacity:0.7;
+            min-width:44px; width:44px; height:24px; padding:0; align-self:center; font-size:0;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='24' viewBox='0 0 44 24' fill='none'%3E%3Cpath d='M0 12 Q7 3 14 12 Q21 21 28 12 Q35 3 42 12' stroke='%234e9af1' stroke-width='2' fill='none'/%3E%3Cpath d='M40 8 L44 12 L40 16' stroke='%234e9af1' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat:no-repeat; background-position:center; background-size:44px 24px;
         }
         .guide-tip {
             margin-top:14px; padding:10px 14px;
@@ -2298,41 +2301,59 @@
         }
         body.dark-mode .guide-pill { background:#1e2530; color:#cdd6e0; border-color:#2a3a4a; }
         body.dark-mode .guide-pill:hover { background:#1a2535; }
-        body.dark-mode .guide-card { background:#1e2530; color:#cdd6e0; border-color:#2a3a4a; }
+        body.dark-mode .guide-card { background:#1e2530; color:#cdd6e0; border-color:#7a9db1; box-shadow:3px 3px 0 #0a1520; }
+        body.dark-mode .guide-card strong { color:#cdd6e0; }
         body.dark-mode .guide-tip  { background:#1a2a35; color:#cdd6e0; }
 
-        /* Parcours d'accompagnement — vue flux (v2.8) */
+        /* Map-marker : cercle numéroté rouge style carte illustrée */
+        .map-marker {
+            width:28px; height:28px; border-radius:50%; background:#e74c3c; color:#fff;
+            display:flex; align-items:center; justify-content:center;
+            font-size:0.82em; font-weight:800; flex-shrink:0;
+            border:3px solid #fff; box-shadow:0 2px 6px rgba(231,76,60,0.4);
+        }
+
+        /* Parcours d'accompagnement — vue flux "carte illustrée" (v2.12) */
         .parcours-benef-block { margin-bottom:28px; padding:16px; background:var(--color-section-bg); border-radius:14px; border:1px solid var(--color-border-light); }
         .parcours-benef-header { display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap; }
         .parcours-benef-avatar { width:42px; height:42px; border-radius:50%; background:var(--color-bg-alt); display:flex; align-items:center; justify-content:center; font-size:1.2em; flex-shrink:0; }
-        .parcours-flow { display:flex; gap:0; align-items:stretch; flex-wrap:wrap; padding:8px 0; }
+        .parcours-flow { display:flex; gap:0; align-items:center; flex-wrap:wrap; padding:16px 0 8px; }
         .parcours-card {
-            min-width:160px; max-width:220px; padding:10px 12px; border-radius:10px;
-            background:#fff; border:1.5px solid var(--color-border);
-            box-shadow:0 2px 6px rgba(150,150,180,0.08);
-            position:relative; flex-shrink:0;
+            min-width:140px; max-width:200px; padding:18px 10px 10px; border-radius:12px;
+            background:#fff; border:2px solid #2d3e50;
+            box-shadow:3px 3px 0 #2d3e5018;
+            position:relative; flex-shrink:0; text-align:center;
+            cursor:pointer; transition:transform 0.15s, box-shadow 0.15s;
         }
-        .parcours-card.is-jalon { border-left-width:5px; }
-        .parcours-card.is-prestation { border-left-width:5px; border-style:dashed; background:#f7fbfd; }
-        .parcours-card-type { font-size:0.72em; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8; }
-        .parcours-card-title { font-weight:600; font-size:0.9em; margin:4px 0; color:var(--color-text); }
-        .parcours-card-date { font-size:0.75em; color:var(--color-text-muted); }
-        .parcours-arrow {
+        .parcours-card:hover { transform:translateY(-3px); box-shadow:4px 6px 0 #2d3e5030; }
+        .parcours-card .map-marker {
+            position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+        }
+        .parcours-card.is-jalon { border-color:#2d3e50; border-top:4px solid var(--card-color, #4e9af1); }
+        .parcours-card.is-prestation { border-color:#4e9af1; border-top:4px dashed #4e9af1; background:#f7fbfd; }
+        .parcours-card-icon { font-size:1.8em; margin-top:2px; line-height:1; }
+        .parcours-card-type { font-size:0.7em; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; opacity:0.75; margin-top:3px; }
+        .parcours-card-title { font-weight:700; font-size:0.88em; margin:4px 0 2px; color:#2d3e50; }
+        .parcours-card-date { font-size:0.72em; color:var(--color-text-muted); }
+        .parcours-state { font-size:0.68em; font-weight:700; letter-spacing:0.5px; padding:1px 6px; border-radius:4px; display:inline-block; margin-top:3px; }
+        .parcours-state.past   { background:#eaf5ea; color:#27ae60; }
+        .parcours-state.today  { background:#fff3cd; color:#e67e22; }
+        .parcours-state.future { background:#edf5ff; color:#4e9af1; }
+        .parcours-wavy-connector {
             display:flex; align-items:center; justify-content:center;
-            min-width:32px; padding:0 6px; align-self:center;
-            color:var(--color-primary-dark); font-size:1.4em; line-height:1;
-            position:relative;
+            width:44px; min-width:44px; flex-shrink:0; overflow:visible;
         }
-        .parcours-arrow::before {
-            content:''; position:absolute; top:50%; left:0; right:0;
-            border-top:2px dashed var(--color-primary); transform:translateY(-50%);
-            z-index:0;
-        }
-        .parcours-arrow span { position:relative; z-index:1; background:var(--color-section-bg); padding:0 2px; }
         .parcours-empty { padding:24px; text-align:center; color:var(--color-text-muted); font-style:italic; }
-        body.dark-mode .parcours-card { background:#1e2530; border-color:#2a3a4a; color:#cdd6e0; }
+        body.dark-mode .parcours-card { background:#1e2530; border-color:#7a9db1; color:#cdd6e0; box-shadow:3px 3px 0 #0a1520; }
         body.dark-mode .parcours-card.is-prestation { background:#151d28; }
-        body.dark-mode .parcours-arrow span { background:#1a2535; }
+        body.dark-mode .parcours-card-title { color:#cdd6e0; }
+
+        /* Gantt — vue carte (rails ondulés) */
+        .gantt-carte-rail { margin-bottom:18px; }
+        .gantt-carte-rail-label { font-size:0.82em; font-weight:700; color:#2d3e50; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:300px; }
+        .gantt-carte-rail-track { position:relative; height:36px; }
+        .gantt-carte-client { font-size:0.72em; color:var(--color-text-muted); margin-left:6px; }
+        body.dark-mode .gantt-carte-rail-label { color:#cdd6e0; }
 
         /* Templates sectoriels — cartes preset (v2.3) */
         .preset-template-card:hover { border-color:var(--color-primary) !important; background:var(--color-bg-alt) !important; }
@@ -5851,6 +5872,7 @@
                         <button class="btn btn-secondary btn-small" onclick="ganttNav(1)">Suiv. →</button>
                         <button class="btn btn-small" onclick="ganttOffset=0;renderGantt()">Aujourd'hui</button>
                         <button class="btn btn-small" onclick="ganttMode=ganttMode==='month'?'week':'month';ganttOffset=0;renderGantt()" id="btnGanttMode">📅 Vue semaine</button>
+                        <button class="btn btn-small" onclick="toggleGanttCarte()" id="btnGanttCarte" title="Vue carte illustrée — rails ondulés par projet">🗺️ Vue carte</button>
                         <select id="ganttFilter" onchange="renderGantt()" style="margin-left:auto;">
                             <option value="">Tous les statuts</option>
                             <option value="devis">Devis</option>
@@ -7249,6 +7271,7 @@
         let _dragSrcId = null;
         let mspActif = true;
         let ganttMode = 'month';
+        let ganttCarteMode = false;
         const STATUT_CONFIG = {
             'brouillon': { label:'⬜ Brouillon', cls:'badge-statut-brouillon' },
             'devis':     { label:'🟡 Devis',     cls:'badge-statut-devis' },
@@ -9139,20 +9162,32 @@
                     </div>`;
                 }
 
-                // Flux : carte → flèche → carte → ...
+                // Flux : carte illustrée → connecteur ondulé → carte → ...
                 const flowHtml = events.map((ev, i) => {
                     const isPast   = ev.date && ev.date < todayIso;
                     const isToday  = ev.date === todayIso;
                     const isFuture = ev.date && ev.date > todayIso;
+                    const stateClass = isToday ? 'today' : isFuture ? 'future' : isPast ? 'past' : '';
                     const stateLabel = isToday ? "AUJOURD'HUI" : isFuture ? 'À VENIR' : isPast ? 'PASSÉ' : '—';
-                    const stateOpacity = isFuture ? 0.7 : 1;
-                    const card = `<div class="parcours-card is-${ev.kind}" style="border-left-color:${ev.color};opacity:${stateOpacity};cursor:pointer;" onclick="${ev.link}" title="Cliquer pour ouvrir">
-                        <div class="parcours-card-type" style="color:${ev.color};">${ev.kind === 'jalon' ? '🎯' : '📋'} ${escapeHtml(ev.subtitle || '')}</div>
+                    const opacity = isFuture ? 0.7 : 1;
+                    const icon = ev.kind === 'jalon'
+                        ? { progression:'⚡', difficulte:'⚠️', bilan:'🔵', transition:'🌀', reconnaissance:'🏅' }[ev.subtitle?.toLowerCase().replace('é','e').replace('è','e')] || '🎯'
+                        : '📋';
+                    const card = `<div class="parcours-card is-${ev.kind}" style="--card-color:${ev.color};opacity:${opacity};" onclick="${ev.link}" title="Cliquer pour ouvrir">
+                        <div class="map-marker">${i + 1}</div>
+                        <div class="parcours-card-icon">${icon}</div>
+                        <div class="parcours-card-type" style="color:${ev.color};">${escapeHtml(ev.subtitle || '')}</div>
                         <div class="parcours-card-title">${escapeHtml(ev.title)}</div>
-                        <div class="parcours-card-date">📅 ${escapeHtml(ev.date || '—')} · <em>${stateLabel}</em></div>
+                        <div class="parcours-card-date">📅 ${escapeHtml(ev.date || '—')}</div>
+                        ${stateClass ? `<span class="parcours-state ${stateClass}">${stateLabel}</span>` : ''}
                     </div>`;
-                    const arrow = i < events.length - 1 ? `<div class="parcours-arrow" aria-hidden="true"><span>›</span></div>` : '';
-                    return card + arrow;
+                    const connector = i < events.length - 1 ? `<div class="parcours-wavy-connector" aria-hidden="true">
+                        <svg width="44" height="28" viewBox="0 0 44 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 14 Q7 4 14 14 Q21 24 28 14 Q35 4 42 14" stroke="${ev.color}" stroke-width="2.5" fill="none"/>
+                            <path d="M40 9 L44 14 L40 19" stroke="${ev.color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>` : '';
+                    return card + connector;
                 }).join('');
 
                 return `<div class="parcours-benef-block">
@@ -20756,6 +20791,88 @@
             renderGantt();
         }
 
+        function toggleGanttCarte() {
+            ganttCarteMode = !ganttCarteMode;
+            const btn = document.getElementById('btnGanttCarte');
+            if (btn) {
+                btn.textContent = ganttCarteMode ? '📊 Vue tableau' : '🗺️ Vue carte';
+                btn.style.background = ganttCarteMode ? 'var(--color-primary)' : '';
+                btn.style.color = ganttCarteMode ? '#fff' : '';
+            }
+            renderGantt();
+        }
+
+        function renderGanttCarte(prests, periodStart, periodEnd, projectColors) {
+            const container = document.getElementById('ganttChart');
+            if (!container || !prests.length) return;
+
+            const totalMs = periodEnd - periodStart;
+            const SVG_W = 560;
+
+            const toX = date => {
+                const d = date instanceof Date ? date : new Date(date);
+                const ratio = Math.min(1, Math.max(0, (d - periodStart) / totalMs));
+                return Math.round(ratio * SVG_W);
+            };
+
+            const JALON_TYPE_MAP = { progression:'⚡', difficulte:'⚠️', bilan:'🔵', transition:'🌀', reconnaissance:'🏅' };
+
+            const rows = prests.map((p, idx) => {
+                const color = projectColors[p.id] || '#4e9af1';
+                const today = new Date();
+                const dStart = new Date(p.dateDebut || p.date || today);
+                const estJours = Math.max(1, Math.ceil((p.heures || 1) / 8));
+                const dEnd = p.dateFin ? new Date(p.dateFin) : addWorkDays(dStart, estJours);
+
+                const x1 = toX(dStart);
+                const x2 = Math.max(x1 + 24, toX(dEnd));
+                const mid = Math.round((x1 + x2) / 2);
+                const amp = 7;
+
+                // Wavy path between x1 and x2 at y=18
+                const seg = Math.max(30, x2 - x1);
+                const waves = Math.max(1, Math.round(seg / 40));
+                let d = `M${x1} 18`;
+                for (let w = 0; w < waves; w++) {
+                    const sx = x1 + (w / waves) * seg;
+                    const ex = x1 + ((w + 1) / waves) * seg;
+                    const cy = 18 + (w % 2 === 0 ? -amp : amp);
+                    d += ` Q${Math.round((sx + ex) / 2)} ${cy} ${Math.round(ex)} 18`;
+                }
+
+                const isProvisoire = ['devis', 'brouillon', 'soumis'].includes(p.statut || 'devis');
+                const strokeDash = isProvisoire ? 'stroke-dasharray="6 3"' : '';
+                const name = (p.prestation || '').length > 28 ? (p.prestation || '').slice(0, 26) + '…' : (p.prestation || '');
+
+                return `<div class="gantt-carte-rail">
+                    <div class="gantt-carte-rail-label">
+                        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;vertical-align:middle;"></span>
+                        <strong>${escapeHtml(name)}</strong>
+                        <span class="gantt-carte-client">${escapeHtml(p.client || '')}</span>
+                    </div>
+                    <div class="gantt-carte-rail-track">
+                        <svg width="100%" viewBox="0 0 ${SVG_W} 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+                            <!-- fond période -->
+                            <rect x="${x1}" y="10" width="${x2 - x1}" height="16" rx="8" fill="${color}18"/>
+                            <!-- rail ondulé -->
+                            <path d="${d}" stroke="${color}" stroke-width="3" fill="none" ${strokeDash} stroke-linecap="round"/>
+                            <!-- marker start : cercle rouge numéroté -->
+                            <circle cx="${x1}" cy="18" r="11" fill="#e74c3c" stroke="#fff" stroke-width="2.5"/>
+                            <text x="${x1}" y="22" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">${idx + 1}</text>
+                            <!-- marker end : flag coloré -->
+                            <circle cx="${x2}" cy="18" r="7" fill="${color}" stroke="#fff" stroke-width="2"/>
+                            <text x="${x2}" y="22" text-anchor="middle" font-size="9" fill="#fff">⚑</text>
+                            <!-- date labels -->
+                            <text x="${x1}" y="35" text-anchor="middle" font-size="8" fill="#7a9db1">${dStart.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</text>
+                            <text x="${x2}" y="35" text-anchor="middle" font-size="8" fill="#7a9db1">${dEnd.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</text>
+                        </svg>
+                    </div>
+                </div>`;
+            }).join('');
+
+            container.innerHTML = `<div style="padding:10px 0 4px;">${rows}</div>`;
+        }
+
         // ============================================================
         // JOURS FÉRIÉS SUISSES (Genève + fédéraux)
         // ============================================================
@@ -20955,6 +21072,11 @@
 
             const projectColors = {};
             prests.forEach((p, i) => { projectColors[p.id] = GANTT_PALETTE[i % GANTT_PALETTE.length]; });
+
+            if (ganttCarteMode) {
+                renderGanttCarte(prests, periodStart, periodEnd, projectColors);
+                return;
+            }
 
             let html = `<div style="overflow-x:auto;"><table class="gantt-table">
                 <thead><tr>
