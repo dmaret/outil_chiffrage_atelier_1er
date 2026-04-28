@@ -2,6 +2,17 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-28 — v2.12 Style "carte illustrée" sur Parcours, Guide & Gantt
+
+Inspiré d'une carte touristique dessinée à la main : lignes ondulées, cercles numérotés rouges, pictogrammes gras.
+
+- **Parcours bénéficiaires** : nouveaux **cercles rouges numérotés** (`.map-marker`) en haut de chaque carte, **connecteurs SVG ondulés** colorés entre les événements (remplacent `›` en pointillés), grand **pictogramme central** par type de jalon (⚡⚠️🔵🌀🏅), badge état PASSÉ/AUJOURD'HUI/À VENIR.
+- **Guide** : `.guide-num` toujours **rouge #e74c3c en 32px** avec bordure blanche, flèches `→` remplacées par des **SVG ondulés bleus en `background-image`** CSS — aucune modification HTML requise grâce au `font-size:0` qui masque le texte.
+- **Gantt** : nouveau bouton **🗺️ Vue carte** — chaque prestation devient un **rail SVG ondulé** proportionnel à sa durée, avec cercle rouge numéroté au départ et flag coloré à l'arrivée. Pointillés pour les statuts provisoires (devis/brouillon).
+- Compatible dark mode (cartes en fond sombre, ombre adaptée).
+
+---
+
 ## 2026-04-28 — v2.11 Import · Export · Modèle CSV sur tous les onglets base de données
 
 - **Stock** : nouveau bloc « 📦 Modèle · Import · Export » — modèle CSV (`reference, quantite, prix_unitaire, emplacement`), import par glisser-déposer ou sélection de fichier (crée des mouvements « entrée » FIFO), export inventaire complet. Remplace les anciens boutons inline.

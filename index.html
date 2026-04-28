@@ -9125,9 +9125,12 @@
                 const events = [];
                 jalons.filter(j => j.beneficiaireId === b.id).forEach(j => {
                     const type = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                    const labelEmoji = type.label.match(/^\p{Extended_Pictographic}+/u)?.[0] || '🎯';
+                    const labelText  = type.label.replace(/^\p{Extended_Pictographic}+\s*/u, '');
                     events.push({
                         kind:'jalon', date:j.date || '', sortDate:j.date || '9999-12-31',
-                        title:j.titre || '(sans titre)', subtitle:type.label,
+                        title:j.titre || '(sans titre)', subtitle:labelText,
+                        icon:labelEmoji,
                         color:type.color, note:j.note,
                         link:`openJalonModal(${j.id})`
                     });
@@ -9141,6 +9144,7 @@
                                 kind:'prestation', date:dt, sortDate:dt || '9999-12-31',
                                 title:p.prestation || p.client || 'Prestation',
                                 subtitle:`${p.client || '—'} · ${(p.statut || 'devis').toUpperCase()}`,
+                                icon:'📋',
                                 color:'#4e9af1',
                                 link:`editPrestation(${JSON.stringify(p.id)})`
                             });
@@ -9170,9 +9174,7 @@
                     const stateClass = isToday ? 'today' : isFuture ? 'future' : isPast ? 'past' : '';
                     const stateLabel = isToday ? "AUJOURD'HUI" : isFuture ? 'À VENIR' : isPast ? 'PASSÉ' : '—';
                     const opacity = isFuture ? 0.7 : 1;
-                    const icon = ev.kind === 'jalon'
-                        ? { progression:'⚡', difficulte:'⚠️', bilan:'🔵', transition:'🌀', reconnaissance:'🏅' }[ev.subtitle?.toLowerCase().replace('é','e').replace('è','e')] || '🎯'
-                        : '📋';
+                    const icon = ev.icon || (ev.kind === 'prestation' ? '📋' : '🎯');
                     const card = `<div class="parcours-card is-${ev.kind}" style="--card-color:${ev.color};opacity:${opacity};" onclick="${ev.link}" title="Cliquer pour ouvrir">
                         <div class="map-marker">${i + 1}</div>
                         <div class="parcours-card-icon">${icon}</div>
@@ -20814,8 +20816,6 @@
                 const ratio = Math.min(1, Math.max(0, (d - periodStart) / totalMs));
                 return Math.round(ratio * SVG_W);
             };
-
-            const JALON_TYPE_MAP = { progression:'⚡', difficulte:'⚠️', bilan:'🔵', transition:'🌀', reconnaissance:'🏅' };
 
             const rows = prests.map((p, idx) => {
                 const color = projectColors[p.id] || '#4e9af1';
