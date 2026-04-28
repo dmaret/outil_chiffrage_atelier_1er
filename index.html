@@ -4023,24 +4023,30 @@
                     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
                         <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV / Excel</h3>
                             <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : reference, quantite, prix_unitaire, emplacement</p>
-                            <button class="btn btn-secondary btn-small" onclick="downloadStockTemplate()">⬇ Télécharger le modèle</button>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-secondary btn-small" onclick="downloadStockTemplate()">⬇ CSV</button>
+                                <button class="btn btn-small" onclick="downloadStockTemplateXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬇ Excel</button>
+                            </div>
                         </div>
                         <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV / Excel</h3>
                             <div class="import-drop-zone" id="stockDropZone" onclick="document.getElementById('stockCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleStockCsvDrop(event)" style="margin:0;">
-                                <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                <p>📄 Cliquez ou glissez un fichier CSV ou Excel ici</p>
                                 <p style="font-size:0.8em;margin-top:4px;">Crée des entrées de stock (FIFO)</p>
                             </div>
-                            <input type="file" id="stockCsvInput" accept=".csv" style="display:none" onchange="importStockCSV(this)">
+                            <input type="file" id="stockCsvInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importStockCSV(this)">
                         </div>
                         <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV / Excel</h3>
                             <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Inventaire complet avec valorisation FIFO.</p>
-                            <button class="btn btn-small" onclick="exportStockCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter le stock</button>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-small" onclick="exportStockCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ CSV</button>
+                                <button class="btn btn-small" onclick="exportStockXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬆ Excel</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4303,26 +4309,32 @@
                         <!-- Panneau Modèle -->
                         <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV / Excel</h3>
                             <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Téléchargez le modèle avec les colonnes attendues et des exemples.</p>
-                            <button class="btn btn-secondary btn-small" onclick="downloadGestesTemplate()">⬇ Télécharger le modèle</button>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-secondary btn-small" onclick="downloadGestesTemplate()">⬇ CSV</button>
+                                <button class="btn btn-small" onclick="downloadGestesTemplateXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬇ Excel</button>
+                            </div>
                         </div>
                         <!-- Panneau Import -->
                         <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV / Excel</h3>
                             <div class="import-drop-zone" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleCsvDrop(event)" style="margin:0;">
-                                <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                <p>📄 Cliquez ou glissez un fichier CSV ou Excel ici</p>
                                 <p style="font-size:0.8em;margin-top:4px;">Format : code,categorie,description,temps,coef,notes</p>
                             </div>
-                            <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="importCatalogueCSV(this)">
+                            <input type="file" id="csvFileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importCatalogueCSV(this)">
                         </div>
                         <!-- Panneau Export -->
                         <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
-                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez le catalogue complet au format CSV.</p>
-                            <button class="btn btn-small" onclick="exportCatalogueCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter le catalogue</button>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV / Excel</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez le catalogue complet.</p>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-small" onclick="exportCatalogueCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ CSV</button>
+                                <button class="btn btn-small" onclick="exportCatalogueXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬆ Excel</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4462,24 +4474,30 @@
                     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
                         <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV / Excel</h3>
                             <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : nom, unite, prix, designation</p>
-                            <button class="btn btn-secondary btn-small" onclick="downloadConsommablesTemplate()">⬇ Télécharger le modèle</button>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-secondary btn-small" onclick="downloadConsommablesTemplate()">⬇ CSV</button>
+                                <button class="btn btn-small" onclick="downloadConsommablesTemplateXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬇ Excel</button>
+                            </div>
                         </div>
                         <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV / Excel</h3>
                             <div class="import-drop-zone" id="consomDropZone" onclick="document.getElementById('consomCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleConsomCsvDrop(event)" style="margin:0;">
-                                <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                <p>📄 Cliquez ou glissez un fichier CSV ou Excel ici</p>
                                 <p style="font-size:0.8em;margin-top:4px;">Format : nom,unite,prix,designation</p>
                             </div>
-                            <input type="file" id="consomCsvInput" accept=".csv" style="display:none" onchange="importConsommablesCSV(this)">
+                            <input type="file" id="consomCsvInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importConsommablesCSV(this)">
                         </div>
                         <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV / Excel</h3>
                             <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez la liste des consommables.</p>
-                            <button class="btn btn-small" onclick="exportConsommablesCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter les consommables</button>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-small" onclick="exportConsommablesCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ CSV</button>
+                                <button class="btn btn-small" onclick="exportConsommablesXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬆ Excel</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4582,24 +4600,30 @@
                     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
                         <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV / Excel</h3>
                             <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : nom, tel, email, adresse, notes, tarif_special</p>
-                            <button class="btn btn-secondary btn-small" onclick="downloadClientsTemplate()">⬇ Télécharger le modèle</button>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-secondary btn-small" onclick="downloadClientsTemplate()">⬇ CSV</button>
+                                <button class="btn btn-small" onclick="downloadClientsTemplateXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬇ Excel</button>
+                            </div>
                         </div>
                         <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV / Excel</h3>
                             <div class="import-drop-zone" id="clientsDropZone" onclick="document.getElementById('clientsCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleClientsCsvDrop(event)" style="margin:0;">
-                                <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                <p>📄 Cliquez ou glissez un fichier CSV ou Excel ici</p>
                                 <p style="font-size:0.8em;margin-top:4px;">Format : nom,tel,email,adresse,notes,tarif_special</p>
                             </div>
-                            <input type="file" id="clientsCsvInput" accept=".csv" style="display:none" onchange="importClientsCSV(this)">
+                            <input type="file" id="clientsCsvInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importClientsCSV(this)">
                         </div>
                         <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
                             <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
-                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV / Excel</h3>
                             <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez la liste des clients avec leurs coordonnées.</p>
-                            <button class="btn btn-small" onclick="exportClientsCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter les clients</button>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-small" onclick="exportClientsCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ CSV</button>
+                                <button class="btn btn-small" onclick="exportClientsXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬆ Excel</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -5534,24 +5558,30 @@
                         <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
                             <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
                                 <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
-                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV</h3>
+                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV / Excel</h3>
                                 <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : prenom, nom, date_entree, statut, objectifs, notes</p>
-                                <button class="btn btn-secondary btn-small" onclick="downloadBeneficiairesTemplate()">⬇ Télécharger le modèle</button>
+                                <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                    <button class="btn btn-secondary btn-small" onclick="downloadBeneficiairesTemplate()">⬇ CSV</button>
+                                    <button class="btn btn-small" onclick="downloadBeneficiairesTemplateXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬇ Excel</button>
+                                </div>
                             </div>
                             <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
                                 <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
-                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV</h3>
+                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV / Excel</h3>
                                 <div class="import-drop-zone" id="benefDropZone" onclick="document.getElementById('benefCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleBenefCsvDrop(event)" style="margin:0;">
-                                    <p>📄 Cliquez ou glissez un fichier CSV ici</p>
+                                    <p>📄 Cliquez ou glissez un fichier CSV ou Excel ici</p>
                                     <p style="font-size:0.8em;margin-top:4px;">Format : prenom,nom,date_entree,statut,objectifs,notes</p>
                                 </div>
-                                <input type="file" id="benefCsvInput" accept=".csv" style="display:none" onchange="importBeneficiairesCSV(this)">
+                                <input type="file" id="benefCsvInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importBeneficiairesCSV(this)">
                             </div>
                             <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
                                 <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
-                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV</h3>
+                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV / Excel</h3>
                                 <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez la liste des bénéficiaires avec leur profil.</p>
-                                <button class="btn btn-small" onclick="exportBeneficiairesCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ Exporter les bénéficiaires</button>
+                                <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                    <button class="btn btn-small" onclick="exportBeneficiairesCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ CSV</button>
+                                    <button class="btn btn-small" onclick="exportBeneficiairesXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬆ Excel</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -22400,6 +22430,43 @@
             URL.revokeObjectURL(url);
         }
 
+        // ============================================================
+        // HELPERS EXCEL (SheetJS / XLSX)
+        // ============================================================
+        function _downloadXLSX(aoaData, sheetName, filename) {
+            if (typeof XLSX === 'undefined') { toast('📊 Export Excel non disponible.', 'error'); return; }
+            try {
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(aoaData);
+                XLSX.utils.book_append_sheet(wb, ws, (sheetName || 'Données').slice(0, 31));
+                XLSX.writeFile(wb, filename);
+            } catch (err) {
+                toast('Erreur export Excel', 'error');
+                console.error(err);
+            }
+        }
+
+        function _readXLSXAsAOA(file, callback) {
+            if (typeof XLSX === 'undefined') { toast('📊 Lecture Excel non disponible.', 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const wb = XLSX.read(e.target.result, { type: 'array' });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+                    callback(aoa.map(row => row.map(c => String(c ?? '').trim())));
+                } catch (err) {
+                    toast('Erreur lecture Excel', 'error');
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function _isXLSXFile(file) {
+            return file && /\.xlsx?$/i.test(file.name || '');
+        }
+
         function downloadGestesTemplate() {
             const header = 'code,categorie,description,temps,coef,notes';
             const ex1 = 'REC-01,Réception,Réception marchandise (déchargement palette),180,1.2,Avec transpalette';
@@ -22436,6 +22503,110 @@
             toast('✅ Consommables exportés', 'success');
         }
 
+        // ============================================================
+        // VERSIONS EXCEL — modèles + exports
+        // ============================================================
+        function downloadGestesTemplateXLSX() {
+            const aoa = [
+                ['code','categorie','description','temps','coef','notes'],
+                ['REC-01','Réception','Réception marchandise (déchargement palette)',180,1.2,'Avec transpalette'],
+                ['CTR-01','Contrôle','Contrôle qualité visuel',60,1.0,''],
+            ];
+            _downloadXLSX(aoa, 'Gestes', 'modele_gestes.xlsx');
+        }
+
+        function exportCatalogueXLSX() {
+            if (!catalogueGestes.length) { toast('Catalogue vide', 'warning'); return; }
+            const aoa = [['code','categorie','description','temps','coef','notes']];
+            catalogueGestes.forEach(g => aoa.push([g.code, g.categorie, g.description, g.temps, g.coef || 1, g.notes || '']));
+            _downloadXLSX(aoa, 'Catalogue gestes', `catalogue_gestes_${new Date().toISOString().slice(0,10)}.xlsx`);
+            toast('✅ Catalogue exporté (Excel)', 'success');
+        }
+
+        function downloadConsommablesTemplateXLSX() {
+            const aoa = [
+                ['nom','unite','prix','designation'],
+                ['Étiquette A4','pièce',0.05,'Étiquette thermique format A4'],
+                ['Film plastique','mètre',0.20,'Film rétractable transparent'],
+            ];
+            _downloadXLSX(aoa, 'Consommables', 'modele_consommables.xlsx');
+        }
+
+        function exportConsommablesXLSX() {
+            if (!catalogueConsommables.length) { toast('Catalogue vide', 'warning'); return; }
+            const aoa = [['nom','unite','prix','designation']];
+            catalogueConsommables.forEach(c => aoa.push([
+                c.nom || c.designation || '', c.unite || 'pièce',
+                c.prixUnitaire ?? c.prix ?? 0, c.designation || c.nom || ''
+            ]));
+            _downloadXLSX(aoa, 'Consommables', `consommables_${new Date().toISOString().slice(0,10)}.xlsx`);
+            toast('✅ Consommables exportés (Excel)', 'success');
+        }
+
+        function downloadStockTemplateXLSX() {
+            const aoa = [
+                ['reference','quantite','prix_unitaire','emplacement'],
+                ['ETI-A4',500,0.05,'Zone A'],
+                ['FILM-1M',200,0.20,'Zone B'],
+            ];
+            _downloadXLSX(aoa, 'Stock', 'modele_stock.xlsx');
+        }
+
+        function exportStockXLSX() {
+            if (typeof stockActuel !== 'object' || !Object.keys(stockActuel).length) {
+                toast('Stock vide', 'warning'); return;
+            }
+            const aoa = [['Référence','Quantité','Lots','Valeur (CHF)','Prix moyen','Emplacement principal','Stock min','Alerte']];
+            Object.entries(stockActuel).forEach(([ref, data]) => {
+                const valeur = data.lots.reduce((s, l) => s + l.qte * l.prix, 0);
+                const prixMoy = data.total > 0 ? valeur / data.total : 0;
+                const emplacement = data.lots.length > 0 ? data.lots[0].emplacement : '';
+                const min = (typeof stockMins === 'object' && stockMins[ref]) || 0;
+                const alerte = min > 0 && data.total < min ? 'OUI' : 'non';
+                aoa.push([ref, data.total, data.lots.length, +valeur.toFixed(2), +prixMoy.toFixed(2), emplacement, min, alerte]);
+            });
+            _downloadXLSX(aoa, 'Inventaire', `inventaire_${new Date().toISOString().slice(0,10)}.xlsx`);
+            toast('✅ Stock exporté (Excel)', 'success');
+        }
+
+        function downloadClientsTemplateXLSX() {
+            const aoa = [
+                ['nom','tel','email','adresse','notes','tarif_special'],
+                ['Entreprise Alpha','+41 21 000 00 01','contact@alpha.ch','Chemin des Rives 1 - 1000 Lausanne','',''],
+                ['Société Bêta','+41 21 000 00 02','info@beta.ch','Rue du Centre 5 - 1200 Genève','Client prioritaire',95],
+            ];
+            _downloadXLSX(aoa, 'Clients', 'modele_clients.xlsx');
+        }
+
+        function exportClientsXLSX() {
+            if (!Object.keys(clientsData || {}).length) { toast('Aucun client enregistré', 'warning'); return; }
+            const aoa = [['nom','tel','email','adresse','notes','tarif_special']];
+            Object.entries(clientsData).forEach(([nom, c]) => {
+                aoa.push([nom, c.tel || '', c.email || '', c.adresse || '', c.notes || '', c.tarifSpecial || '']);
+            });
+            _downloadXLSX(aoa, 'Clients', `clients_${new Date().toISOString().slice(0,10)}.xlsx`);
+            toast('✅ Clients exportés (Excel)', 'success');
+        }
+
+        function downloadBeneficiairesTemplateXLSX() {
+            const aoa = [
+                ['prenom','nom','date_entree','statut','objectifs','notes'],
+                ['Marie','Dupont','2026-01-15','en-cours','Développer autonomie en étiquetage','Bonne progression'],
+                ['Jean','Martin','2025-09-01','termine','Maîtrise contrôle qualité',''],
+            ];
+            _downloadXLSX(aoa, 'Bénéficiaires', 'modele_beneficiaires.xlsx');
+        }
+
+        function exportBeneficiairesXLSX() {
+            if (!beneficiaires.length) { toast('Aucun bénéficiaire enregistré', 'warning'); return; }
+            const aoa = [['prenom','nom','date_entree','statut','objectifs','notes']];
+            beneficiaires.forEach(b => aoa.push([
+                b.prenom || '', b.nom || '', b.dateEntree || '', b.statut || '', b.objectifs || '', b.notes || ''
+            ]));
+            _downloadXLSX(aoa, 'Bénéficiaires', `beneficiaires_${new Date().toISOString().slice(0,10)}.xlsx`);
+            toast('✅ Bénéficiaires exportés (Excel)', 'success');
+        }
+
         function handleConsomCsvDrop(e) {
             e.preventDefault();
             document.getElementById('consomDropZone').style.background = '';
@@ -22444,36 +22615,45 @@
             importConsommablesCSV({ files: [file] });
         }
 
+        function _applyConsommablesRows(rows) {
+            if (rows.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+            const headers = rows[0].map(h => String(h ?? '').trim().toLowerCase());
+            const iNom  = headers.indexOf('nom');
+            const iUnit = headers.indexOf('unite');
+            const iPrix = headers.indexOf('prix');
+            const iDes  = headers.indexOf('designation');
+            if (iNom < 0 || iPrix < 0) { toast('Colonnes "nom" et "prix" requises', 'danger'); return; }
+            let added = 0;
+            rows.slice(1).forEach(cols => {
+                const nom  = String(cols[iNom] ?? '').trim();
+                const unite= iUnit >= 0 ? (String(cols[iUnit] ?? '').trim() || 'pièce') : 'pièce';
+                const prix = parseFloat(cols[iPrix]) || 0;
+                const des  = iDes >= 0 ? (String(cols[iDes] ?? '').trim() || nom) : nom;
+                if (!nom) return;
+                if (!catalogueConsommables.find(c => (c.nom || c.designation) === nom)) {
+                    catalogueConsommables.push({ nom, designation: des, unite, prixUnitaire: prix });
+                    added++;
+                }
+            });
+            localStorage.setItem('catalogueConsommables', JSON.stringify(catalogueConsommables));
+            renderConsommables();
+            toast(`✅ ${added} consommable(s) importé(s)`, 'success');
+        }
+
         function importConsommablesCSV(input) {
             const file = input.files ? input.files[0] : input;
             if (!file) return;
+            const clearInput = () => { if (input.value !== undefined) input.value = ''; };
+            if (_isXLSXFile(file)) {
+                _readXLSXAsAOA(file, rows => { _applyConsommablesRows(rows); clearInput(); });
+                return;
+            }
             const reader = new FileReader();
             reader.onload = e => {
                 const lines = e.target.result.split('\n').map(l => l.trim()).filter(Boolean);
-                if (lines.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
-                const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim().toLowerCase());
-                const iNom  = headers.indexOf('nom');
-                const iUnit = headers.indexOf('unite');
-                const iPrix = headers.indexOf('prix');
-                const iDes  = headers.indexOf('designation');
-                if (iNom < 0 || iPrix < 0) { toast('Colonnes "nom" et "prix" requises', 'danger'); return; }
-                let added = 0;
-                lines.slice(1).forEach(line => {
-                    const cols = line.split(',').map(c => c.replace(/^"|"$/g,'').trim());
-                    const nom  = cols[iNom]  || '';
-                    const unite= iUnit >= 0 ? (cols[iUnit] || 'pièce') : 'pièce';
-                    const prix = parseFloat(cols[iPrix]) || 0;
-                    const des  = iDes >= 0 ? (cols[iDes] || nom) : nom;
-                    if (!nom) return;
-                    if (!catalogueConsommables.find(c => (c.nom || c.designation) === nom)) {
-                        catalogueConsommables.push({ nom, designation: des, unite, prixUnitaire: prix });
-                        added++;
-                    }
-                });
-                localStorage.setItem('catalogueConsommables', JSON.stringify(catalogueConsommables));
-                renderConsommables();
-                toast(`✅ ${added} consommable(s) importé(s)`, 'success');
-                if (input.value !== undefined) input.value = '';
+                const rows = lines.map(line => line.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+                _applyConsommablesRows(rows);
+                clearInput();
             };
             reader.readAsText(file, 'utf-8');
         }
@@ -22866,43 +23046,55 @@
             const file = e.dataTransfer.files[0];
             if (file) importCatalogueCSV({ files:[file] });
         }
+        function _applyCatalogueRows(rows) {
+            let added = 0, skipped = 0;
+            rows.forEach((cols, idx) => {
+                if (!cols || !cols.length) return;
+                const first = String(cols[0] ?? '').trim();
+                if (idx === 0 && first.toLowerCase().startsWith('code')) return; // skip header
+                if (cols.length < 3) { skipped++; return; }
+                const code        = String(cols[0] ?? '').trim();
+                const categorie   = String(cols[1] ?? '').trim();
+                const description = String(cols[2] ?? '').trim();
+                const temps       = cols[3];
+                const coef        = cols[4];
+                const difficulte  = cols[5];
+                const notes       = String(cols[6] ?? '').trim();
+                if (!code || !description) { skipped++; return; }
+                if (catalogueGestes.find(g => g.code === code)) { skipped++; return; }
+                catalogueGestes.push({
+                    code: code.toUpperCase(),
+                    categorie: categorie || 'Divers',
+                    description,
+                    temps: parseInt(temps) || 30,
+                    coef: parseFloat(coef) || 1.0,
+                    difficulte: parseInt(difficulte) || 1,
+                    notes: notes || ''
+                });
+                added++;
+            });
+            saveToStorage();
+            renderCatalogue();
+            document.querySelectorAll('.geste-select').forEach(sel => { const v = sel.value; sel.innerHTML = buildGesteOptions(v); sel.value = v; });
+            toast(`✅ ${added} geste(s) importé(s), ${skipped} ignoré(s)`, 'success');
+        }
+
         function importCatalogueCSV(input) {
             const file = input.files[0];
             if (!file) return;
+            if (_isXLSXFile(file)) {
+                _readXLSXAsAOA(file, _applyCatalogueRows);
+                return;
+            }
             const reader = new FileReader();
             reader.onload = e => {
-                const lines = e.target.result.split('\n').map(l=>l.trim()).filter(l=>l && !l.startsWith('#'));
-                let added = 0, skipped = 0;
-                lines.forEach((line, idx) => {
-                    if (idx === 0 && line.toLowerCase().startsWith('code')) return; // skip header
-                    const parts = line.split(',');
-                    if (parts.length < 4) { skipped++; return; }
-                    const [code, categorie, description, temps, coef, difficulte, ...notesParts] = parts;
-                    const notes = notesParts.join(',').trim();
-                    if (!code || !description) { skipped++; return; }
-                    if (catalogueGestes.find(g=>g.code===code.trim())) { skipped++; return; }
-                    catalogueGestes.push({
-                        code: code.trim().toUpperCase(),
-                        categorie: categorie?.trim()||'Divers',
-                        description: description.trim(),
-                        temps: parseInt(temps)||30,
-                        coef: parseFloat(coef)||1.0,
-                        difficulte: parseInt(difficulte)||1,
-                        notes: notes||''
-                    });
-                    added++;
-                });
-                saveToStorage();
-                renderCatalogue();
-                document.querySelectorAll('.geste-select').forEach(sel => { const v = sel.value; sel.innerHTML = buildGesteOptions(v); sel.value = v; });
-                toast(`✅ ${added} geste(s) importé(s), ${skipped} ignoré(s)`, 'success');
+                const lines = e.target.result.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+                const rows = lines.map(line => line.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+                _applyCatalogueRows(rows);
             };
             reader.onerror = () => {
-                toast(`❌ Erreur lors de la lecture du fichier CSV : ${file.name}`, 'error');
-                console.error('FileReader error for CSV:', file.name);
-            };
-            reader.onabort = () => {
-                toast(`⚠️ Lecture du fichier CSV annulée : ${file.name}`, 'warning');
+                toast(`❌ Erreur lors de la lecture du fichier : ${file.name}`, 'error');
+                console.error('FileReader error:', file.name);
             };
             reader.readAsText(file, 'UTF-8');
         }
@@ -22924,42 +23116,51 @@
             if (file) importStockCSV({ files: [file] });
         }
 
+        function _applyStockRows(rows) {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                if (rows.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+                const headers = rows[0].map(h => String(h ?? '').trim().toLowerCase());
+                const iRef  = headers.indexOf('reference');
+                const iQte  = headers.indexOf('quantite');
+                const iPrix = headers.indexOf('prix_unitaire');
+                const iEmpl = headers.indexOf('emplacement');
+                if (iRef < 0 || iQte < 0) { toast('Colonnes "reference" et "quantite" requises', 'danger'); return; }
+                let added = 0;
+                rows.slice(1).forEach(cols => {
+                    const ref  = String(cols[iRef] ?? '').trim();
+                    const qte  = parseFloat(cols[iQte]) || 0;
+                    const prix = iPrix >= 0 ? (parseFloat(cols[iPrix]) || 0) : 0;
+                    const empl = iEmpl >= 0 ? String(cols[iEmpl] ?? '').trim() : '';
+                    if (!ref || qte <= 0) return;
+                    const mouvement = { id: Date.now() + added, type: 'entree', date: today, ref, qte, unite: 'pièce', emplacement: empl, prix };
+                    mouvements.push(mouvement);
+                    if (!stockActuel[ref]) stockActuel[ref] = { lots: [], total: 0 };
+                    stockActuel[ref].lots.push({ date: today, qte, prix, emplacement: empl });
+                    stockActuel[ref].total += qte;
+                    added++;
+                });
+                saveToStorage();
+                renderMouvements();
+                updateStockStats();
+                toast(`✅ ${added} entrée(s) de stock importée(s)`, 'success');
+            } catch (err) { toast('Erreur lors de l\'import stock', 'error'); console.error(err); }
+        }
+
         function importStockCSV(input) {
             const file = input.files ? input.files[0] : input;
             if (!file) return;
+            const clearInput = () => { if (input.value !== undefined) input.value = ''; };
+            if (_isXLSXFile(file)) {
+                _readXLSXAsAOA(file, rows => { _applyStockRows(rows); clearInput(); });
+                return;
+            }
             const reader = new FileReader();
             reader.onload = ev => {
-                try {
-                    const today = new Date().toISOString().split('T')[0];
-                    const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
-                    if (lines.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
-                    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
-                    const iRef   = headers.indexOf('reference');
-                    const iQte   = headers.indexOf('quantite');
-                    const iPrix  = headers.indexOf('prix_unitaire');
-                    const iEmpl  = headers.indexOf('emplacement');
-                    if (iRef < 0 || iQte < 0) { toast('Colonnes "reference" et "quantite" requises', 'danger'); return; }
-                    let added = 0;
-                    lines.slice(1).forEach(line => {
-                        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
-                        const ref  = cols[iRef]  || '';
-                        const qte  = parseFloat(cols[iQte])  || 0;
-                        const prix = iPrix >= 0 ? (parseFloat(cols[iPrix]) || 0) : 0;
-                        const empl = iEmpl >= 0 ? (cols[iEmpl] || '') : '';
-                        if (!ref || qte <= 0) return;
-                        const mouvement = { id: Date.now() + added, type: 'entree', date: today, ref, qte, unite: 'pièce', emplacement: empl, prix };
-                        mouvements.push(mouvement);
-                        if (!stockActuel[ref]) stockActuel[ref] = { lots: [], total: 0 };
-                        stockActuel[ref].lots.push({ date: today, qte, prix, emplacement: empl });
-                        stockActuel[ref].total += qte;
-                        added++;
-                    });
-                    saveToStorage();
-                    renderMouvements();
-                    updateStockStats();
-                    toast(`✅ ${added} entrée(s) de stock importée(s)`, 'success');
-                } catch(err) { toast('Erreur lors de l\'import stock', 'error'); console.error(err); }
-                if (input.value !== undefined) input.value = '';
+                const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+                const rows = lines.map(line => line.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+                _applyStockRows(rows);
+                clearInput();
             };
             reader.readAsText(file, 'utf-8');
         }
@@ -22992,42 +23193,51 @@
             if (file) importClientsCSV({ files: [file] });
         }
 
+        function _applyClientsRows(rows) {
+            try {
+                if (rows.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+                const headers = rows[0].map(h => String(h ?? '').trim().toLowerCase());
+                const iNom   = headers.indexOf('nom');
+                const iTel   = headers.indexOf('tel');
+                const iEmail = headers.indexOf('email');
+                const iAdr   = headers.indexOf('adresse');
+                const iNotes = headers.indexOf('notes');
+                const iTarif = headers.indexOf('tarif_special');
+                if (iNom < 0) { toast('Colonne "nom" requise', 'danger'); return; }
+                let added = 0, updated = 0;
+                rows.slice(1).forEach(cols => {
+                    const nom = String(cols[iNom] ?? '').trim();
+                    if (!nom) return;
+                    const existing = !!clientsData[nom];
+                    clientsData[nom] = {
+                        tel:          iTel   >= 0 ? String(cols[iTel]   ?? '').trim() : (clientsData[nom]?.tel   || ''),
+                        email:        iEmail >= 0 ? String(cols[iEmail] ?? '').trim() : (clientsData[nom]?.email || ''),
+                        adresse:      iAdr   >= 0 ? String(cols[iAdr]   ?? '').trim() : (clientsData[nom]?.adresse || ''),
+                        notes:        iNotes >= 0 ? String(cols[iNotes] ?? '').trim() : (clientsData[nom]?.notes || ''),
+                        tarifSpecial: iTarif >= 0 ? (parseFloat(cols[iTarif]) || '')  : (clientsData[nom]?.tarifSpecial || ''),
+                    };
+                    existing ? updated++ : added++;
+                });
+                localStorage.setItem('clientsData', JSON.stringify(clientsData));
+                renderClients();
+                toast(`✅ ${added} client(s) ajouté(s), ${updated} mis à jour`, 'success');
+            } catch (err) { toast('Erreur lors de l\'import clients', 'error'); console.error(err); }
+        }
+
         function importClientsCSV(input) {
             const file = input.files ? input.files[0] : input;
             if (!file) return;
+            const clearInput = () => { if (input.value !== undefined) input.value = ''; };
+            if (_isXLSXFile(file)) {
+                _readXLSXAsAOA(file, rows => { _applyClientsRows(rows); clearInput(); });
+                return;
+            }
             const reader = new FileReader();
             reader.onload = ev => {
-                try {
-                    const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
-                    if (lines.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
-                    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
-                    const iNom   = headers.indexOf('nom');
-                    const iTel   = headers.indexOf('tel');
-                    const iEmail = headers.indexOf('email');
-                    const iAdr   = headers.indexOf('adresse');
-                    const iNotes = headers.indexOf('notes');
-                    const iTarif = headers.indexOf('tarif_special');
-                    if (iNom < 0) { toast('Colonne "nom" requise', 'danger'); return; }
-                    let added = 0, updated = 0;
-                    lines.slice(1).forEach(line => {
-                        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
-                        const nom = cols[iNom] || '';
-                        if (!nom) return;
-                        const existing = !!clientsData[nom];
-                        clientsData[nom] = {
-                            tel:         iTel   >= 0 ? cols[iTel]   : (clientsData[nom]?.tel   || ''),
-                            email:       iEmail >= 0 ? cols[iEmail] : (clientsData[nom]?.email || ''),
-                            adresse:     iAdr   >= 0 ? cols[iAdr]   : (clientsData[nom]?.adresse || ''),
-                            notes:       iNotes >= 0 ? cols[iNotes] : (clientsData[nom]?.notes || ''),
-                            tarifSpecial:iTarif >= 0 ? (parseFloat(cols[iTarif]) || '') : (clientsData[nom]?.tarifSpecial || ''),
-                        };
-                        existing ? updated++ : added++;
-                    });
-                    localStorage.setItem('clientsData', JSON.stringify(clientsData));
-                    renderClients();
-                    toast(`✅ ${added} client(s) ajouté(s), ${updated} mis à jour`, 'success');
-                } catch(err) { toast('Erreur lors de l\'import clients', 'error'); console.error(err); }
-                if (input.value !== undefined) input.value = '';
+                const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+                const rows = lines.map(line => line.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+                _applyClientsRows(rows);
+                clearInput();
             };
             reader.readAsText(file, 'utf-8');
         }
@@ -23060,49 +23270,58 @@
             if (file) importBeneficiairesCSV({ files: [file] });
         }
 
+        function _applyBeneficiairesRows(rows) {
+            try {
+                if (rows.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+                const headers = rows[0].map(h => String(h ?? '').trim().toLowerCase());
+                const iPrenom  = headers.indexOf('prenom');
+                const iNom     = headers.indexOf('nom');
+                const iDate    = headers.indexOf('date_entree');
+                const iStatut  = headers.indexOf('statut');
+                const iObjecti = headers.indexOf('objectifs');
+                const iNotes   = headers.indexOf('notes');
+                if (iPrenom < 0 || iNom < 0) { toast('Colonnes "prenom" et "nom" requises', 'danger'); return; }
+                let added = 0;
+                rows.slice(1).forEach(cols => {
+                    const prenom = String(cols[iPrenom] ?? '').trim();
+                    const nom    = String(cols[iNom]    ?? '').trim();
+                    if (!prenom) return;
+                    const exists = beneficiaires.find(b => b.prenom === prenom && b.nom === nom);
+                    if (exists) return;
+                    beneficiaires.push({
+                        id:         Date.now() + added,
+                        prenom,
+                        nom,
+                        dateEntree: iDate    >= 0 ? String(cols[iDate]    ?? '').trim() : new Date().toISOString().split('T')[0],
+                        statut:     iStatut  >= 0 ? String(cols[iStatut]  ?? '').trim() : 'en-cours',
+                        objectifs:  iObjecti >= 0 ? String(cols[iObjecti] ?? '').trim() : '',
+                        notes:      iNotes   >= 0 ? String(cols[iNotes]   ?? '').trim() : '',
+                        avatar:     '👤',
+                        competences: [],
+                        prestationsIds: [],
+                    });
+                    added++;
+                });
+                saveBeneficiairesData();
+                renderBeneficiaires();
+                toast(`✅ ${added} bénéficiaire(s) importé(s)`, 'success');
+            } catch (err) { toast('Erreur lors de l\'import bénéficiaires', 'error'); console.error(err); }
+        }
+
         function importBeneficiairesCSV(input) {
             const file = input.files ? input.files[0] : input;
             if (!file) return;
+            const clearInput = () => { if (input.value !== undefined) input.value = ''; };
+            if (_isXLSXFile(file)) {
+                _readXLSXAsAOA(file, rows => { _applyBeneficiairesRows(rows); clearInput(); });
+                return;
+            }
             const reader = new FileReader();
             reader.onload = ev => {
-                try {
-                    const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
-                    if (lines.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
-                    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
-                    const iPrenom  = headers.indexOf('prenom');
-                    const iNom     = headers.indexOf('nom');
-                    const iDate    = headers.indexOf('date_entree');
-                    const iStatut  = headers.indexOf('statut');
-                    const iObjecti = headers.indexOf('objectifs');
-                    const iNotes   = headers.indexOf('notes');
-                    if (iPrenom < 0 || iNom < 0) { toast('Colonnes "prenom" et "nom" requises', 'danger'); return; }
-                    let added = 0;
-                    lines.slice(1).forEach(line => {
-                        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
-                        const prenom = cols[iPrenom] || '';
-                        const nom    = cols[iNom]    || '';
-                        if (!prenom) return;
-                        const exists = beneficiaires.find(b => b.prenom === prenom && b.nom === nom);
-                        if (exists) return;
-                        beneficiaires.push({
-                            id:         Date.now() + added,
-                            prenom,
-                            nom,
-                            dateEntree: iDate    >= 0 ? cols[iDate]    : new Date().toISOString().split('T')[0],
-                            statut:     iStatut  >= 0 ? cols[iStatut]  : 'en-cours',
-                            objectifs:  iObjecti >= 0 ? cols[iObjecti] : '',
-                            notes:      iNotes   >= 0 ? cols[iNotes]   : '',
-                            avatar:     '👤',
-                            competences: [],
-                            prestationsIds: [],
-                        });
-                        added++;
-                    });
-                    saveBeneficiairesData();
-                    renderBeneficiaires();
-                    toast(`✅ ${added} bénéficiaire(s) importé(s)`, 'success');
-                } catch(err) { toast('Erreur lors de l\'import bénéficiaires', 'error'); console.error(err); }
-                if (input.value !== undefined) input.value = '';
+                const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+                const rows = lines.map(line => line.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+                _applyBeneficiairesRows(rows);
+                clearInput();
             };
             reader.readAsText(file, 'utf-8');
         }

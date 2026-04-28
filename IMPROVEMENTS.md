@@ -2,6 +2,17 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-28 — v2.13 Excel partout : modèle, import & export
+
+- Sur les 5 onglets BDD (Catalogue, Consommables, Stock, Clients, Bénéficiaires), chaque panneau **Modèle / Importer / Exporter** propose désormais **CSV ET Excel** côte à côte.
+- Bouton vert Excel (#1d6f42, couleur officielle Microsoft Excel) à côté du bouton bleu CSV — pas de toggle, juste 2 boutons côte à côte.
+- **Import** : `accept=".csv,.xlsx,.xls"` sur tous les inputs ; détection auto par extension via le helper `_isXLSXFile`. Le glisser-déposer accepte aussi les fichiers Excel.
+- 2 nouveaux helpers : `_downloadXLSX(aoa, sheet, filename)` + `_readXLSXAsAOA(file, callback)` — utilisent SheetJS déjà présent (CDN).
+- Refactor : extraction des `_applyXxxRows()` partagés entre les chemins CSV et XLSX (zéro duplication).
+- 10 nouvelles fonctions : `download<Entité>TemplateXLSX()` + `export<Entité>XLSX()` pour Gestes, Consommables, Stock, Clients, Bénéficiaires.
+
+---
+
 ## 2026-04-28 — v2.12 Style "carte illustrée" sur Parcours, Guide & Gantt
 
 Inspiré d'une carte touristique dessinée à la main : lignes ondulées, cercles numérotés rouges, pictogrammes gras.
