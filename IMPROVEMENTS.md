@@ -14,6 +14,14 @@
 
 Tous protégés par try/catch dans `renderDashboard()` — un échec d'une vue ne bloque pas le reste. Tous inscrits dans `DASHBOARD_WIDGETS` pour respecter les permissions par groupe.
 
+### Optimisations performance (reprise safe de la PR #102 abandonnée)
+
+- **`<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>`** ajouté → handshake TLS anticipé pour les 4 libs CDN (html2pdf, xlsx, three.js, Chart.js).
+- **`defer`** appliqué aux 4 scripts CDN → ne bloquent plus le parsing HTML, exécutés dans l'ordre juste avant `DOMContentLoaded`. Vérifié : aucun usage top-level de ces libs (toutes les inits passent par `DOMContentLoaded` / `load` / event handlers).
+- **`decoding="async"`** ajouté à l'`<img>` des aperçus d'attachements (en plus du `loading="lazy"` déjà présent).
+
+PR #102 (« minification + lazy loading ») fermée — sa base était figée sur `e582261` (~v2.3, 10 versions de retard), donc impossible à merger. Reset de `dev` sur main effectué pour repartir propre.
+
 ---
 
 ## 2026-04-28 — v2.13 Excel partout : modèle, import & export
