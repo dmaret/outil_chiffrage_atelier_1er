@@ -3234,6 +3234,120 @@
         }
         .btn-compare:hover { background: #ffe8cc !important; }
         body.dark-mode .btn-compare { background: #3a2a1e !important; color: #f0c898 !important; border-color: #6b4a2e !important; }
+
+        /* ── Timeline clinique (v2.19 — Module C) ──────────────────── */
+        #timelineModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(45, 35, 30, 0.55); backdrop-filter: blur(3px);
+            z-index: 10006; align-items: flex-start; justify-content: center;
+            overflow-y: auto; padding: 20px 12px;
+        }
+        #timelineModal.visible { display: flex; }
+        #timelineModalBox {
+            background: white; border-radius: 14px; max-width: 980px; width: 100%;
+            border: 2px solid var(--terra-accent);
+            box-shadow: 0 20px 50px rgba(45, 35, 30, 0.25);
+            display: flex; flex-direction: column;
+            max-height: calc(100vh - 40px);
+        }
+        #timelineModalHeader {
+            padding: 16px 18px; border-bottom: 2px solid var(--terra-accent);
+            display: flex; justify-content: space-between; align-items: flex-start;
+            background: linear-gradient(180deg, #fff8f3 0%, #fff 100%);
+            border-radius: 14px 14px 0 0; gap: 12px;
+        }
+        #timelineModalHeader h3 { margin: 0; color: var(--terra-dark); }
+        .timeline-patterns {
+            padding: 14px 18px; background: #faf6f0;
+            border-bottom: 1px solid #e8e0d6;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .timeline-pattern-card {
+            background: white; border: 2px solid #e8e0d6; border-radius: 10px;
+            padding: 8px 10px;
+        }
+        .timeline-pattern-card.emotion { border-color: #e6b4a0; }
+        .timeline-pattern-card.body { border-color: #c9b3d4; }
+        .timeline-pattern-card.dc { border-color: #f5cb73; }
+        .timeline-pattern-card.message { border-color: #a8c8f0; }
+        .timeline-pattern-title {
+            font-weight: 700; color: var(--terra-dark); font-size: 0.85em;
+            margin-bottom: 4px;
+        }
+        .timeline-pattern-list { font-size: 0.82em; color: #5a4830; }
+        .timeline-pattern-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 3px 0; gap: 8px;
+        }
+        .timeline-filters {
+            padding: 10px 18px; display: flex; gap: 6px; flex-wrap: wrap;
+            background: #fafafa; border-bottom: 1px solid #f0e8db;
+            font-size: 0.85em;
+        }
+        .timeline-filter {
+            padding: 4px 10px; border-radius: 14px; cursor: pointer;
+            background: white; border: 1.5px solid #d8d0c4;
+            color: #5a4830; font-weight: 600; transition: all 0.12s;
+        }
+        .timeline-filter:hover { transform: translateY(-1px); }
+        .timeline-filter.active { background: var(--terra-primary); color: white; border-color: var(--terra-primary); }
+        #timelineEvents {
+            padding: 16px; overflow-y: auto; flex: 1;
+            background: #fafafa; position: relative;
+        }
+        #timelineEvents::before {
+            content: ''; position: absolute;
+            left: 30px; top: 16px; bottom: 16px;
+            width: 2px; background: var(--terra-accent);
+        }
+        .timeline-event {
+            position: relative; padding: 10px 12px 10px 60px;
+            margin-bottom: 10px; background: white;
+            border-radius: 10px; border: 1.5px solid #e8e0d6;
+            font-size: 0.88em;
+        }
+        .timeline-event::before {
+            content: ''; position: absolute; left: 22px; top: 18px;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--terra-light); border: 2px solid var(--terra-primary);
+            z-index: 1;
+        }
+        .timeline-event-icon {
+            position: absolute; left: 16px; top: 14px;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: white; display: flex; align-items: center;
+            justify-content: center; font-size: 1em;
+            border: 2px solid var(--terra-primary); z-index: 2;
+        }
+        .timeline-event.type-emotion { border-left: 4px solid #e6b4a0; }
+        .timeline-event.type-emotion .timeline-event-icon { border-color: #e6b4a0; }
+        .timeline-event.type-observation { border-left: 4px solid #a8c8f0; }
+        .timeline-event.type-observation .timeline-event-icon { border-color: #a8c8f0; }
+        .timeline-event.type-message { border-left: 4px solid #b8e0c0; }
+        .timeline-event.type-message .timeline-event-icon { border-color: #b8e0c0; }
+        .timeline-event.type-double_contrainte { border-left: 4px solid #f5cb73; }
+        .timeline-event.type-double_contrainte .timeline-event-icon { border-color: #f5cb73; }
+        .timeline-event.type-ressenti_corporel { border-left: 4px solid #c9b3d4; }
+        .timeline-event.type-ressenti_corporel .timeline-event-icon { border-color: #c9b3d4; }
+        .timeline-event-meta {
+            font-size: 0.78em; color: #888; margin-bottom: 4px;
+        }
+        .timeline-event-content { color: #3a3530; line-height: 1.4; }
+        .timeline-event-content strong { color: var(--terra-dark); }
+        .timeline-empty {
+            padding: 40px 20px; text-align: center; color: #888;
+            font-size: 0.95em;
+        }
+        body.dark-mode #timelineModalBox { background: #2d2520; border-color: var(--terra-primary); }
+        body.dark-mode #timelineModalHeader { background: #2d2520; }
+        body.dark-mode .timeline-patterns { background: #1e1812; border-color: #3a322a; }
+        body.dark-mode .timeline-pattern-card { background: #2d2520; border-color: #3a322a; color: #f0ddd4; }
+        body.dark-mode .timeline-filters { background: #1e1812; }
+        body.dark-mode .timeline-filter { background: #2d2520; color: #f0ddd4; border-color: #3a322a; }
+        body.dark-mode #timelineEvents { background: #1e1812; }
+        body.dark-mode .timeline-event { background: #2d2520; color: #f0ddd4; border-color: #3a322a; }
+        body.dark-mode .timeline-event-icon { background: #2d2520; }
     </style>
 </head>
 <body>
@@ -10249,6 +10363,7 @@
                     </div>
                     <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
                         <button class="btn btn-small btn-success" onclick="openJalonModal(null,${b.id})" title="Ajouter un jalon pour ce bénéficiaire">🎯 Jalon</button>
+                        <button class="btn btn-small" style="background:#fff4e6;color:#b66a1f;border:1px solid #f0b87a;" onclick="openClinicalTimeline(${b.id})" title="Timeline clinique : émotions, observations, doubles contraintes, ressentis corporels">📊 Timeline</button>
                         <button class="btn btn-small btn-secondary" onclick="openBeneficiaireModal(${b.id})">✏️</button>
                         <button class="btn btn-small" onclick="deleteBeneficiaire(${b.id})" style="background:#e74c3c;color:#fff;border-color:#c0392b;">🗑</button>
                     </div>
@@ -30581,6 +30696,263 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ═══════════════════════════════════════════════════════════
+//  v2.19 — Timeline clinique (Module C — agrégation par bénéficiaire)
+// ═══════════════════════════════════════════════════════════
+let _currentTimelineBenefId = null;
+let _currentTimelineFilter = 'all';
+
+function openClinicalTimeline(beneficiaireId) {
+    try {
+        const b = beneficiaires.find(x => x.id === beneficiaireId);
+        if (!b) { toast('⚠️ Bénéficiaire introuvable', 'warning'); return; }
+        _currentTimelineBenefId = beneficiaireId;
+        _currentTimelineFilter = 'all';
+
+        const subtitle = document.getElementById('timelineSubtitle');
+        if (subtitle) subtitle.textContent = `${b.avatar || '👤'} ${b.prenom} ${b.nom} — ${b.objectifs || 'Suivi clinique'}`;
+
+        document.querySelectorAll('.timeline-filter').forEach(f => f.classList.toggle('active', f.dataset.filter === 'all'));
+
+        _renderClinicalTimeline();
+        document.getElementById('timelineModal').classList.add('visible');
+    } catch(e) { console.error('openClinicalTimeline:', e); toast('❌ Erreur ouverture timeline', 'error'); }
+}
+
+function closeClinicalTimeline() {
+    document.getElementById('timelineModal').classList.remove('visible');
+    _currentTimelineBenefId = null;
+}
+
+function _filterTimeline(type) {
+    _currentTimelineFilter = type;
+    document.querySelectorAll('.timeline-filter').forEach(f => f.classList.toggle('active', f.dataset.filter === type));
+    _renderClinicalTimeline();
+}
+
+function _getBeneficiaryClinicalInputs(beneficiaireId) {
+    if (!Array.isArray(clinicalInputs)) return [];
+
+    // Inputs directement liés au bénéficiaire
+    const directInputs = clinicalInputs.filter(ci =>
+        String(ci.beneficiaireId) === String(beneficiaireId)
+    );
+
+    // Inputs via les prestations associées au bénéficiaire
+    const benefPrestationIds = new Set();
+    if (Array.isArray(prestationsSauvegardees)) {
+        prestationsSauvegardees.forEach(p => {
+            if (Array.isArray(p.beneficiaires)) {
+                p.beneficiaires.forEach(pb => {
+                    if (String(pb.id) === String(beneficiaireId)) {
+                        benefPrestationIds.add(String(p.id));
+                    }
+                });
+            }
+        });
+    }
+    // Aussi via beneficiaires.prestationsIds
+    const b = beneficiaires.find(x => x.id === beneficiaireId);
+    if (b && Array.isArray(b.prestationsIds)) {
+        b.prestationsIds.forEach(pid => benefPrestationIds.add(String(pid)));
+    }
+
+    const indirectInputs = clinicalInputs.filter(ci =>
+        ci.prestationId &&
+        benefPrestationIds.has(String(ci.prestationId)) &&
+        String(ci.beneficiaireId) !== String(beneficiaireId)
+    );
+
+    // Combiner et dédupliquer
+    const seen = new Set();
+    return [...directInputs, ...indirectInputs].filter(ci => {
+        if (seen.has(ci.id)) return false;
+        seen.add(ci.id);
+        return true;
+    });
+}
+
+function _computeClinicalPatterns(inputs) {
+    const patterns = {
+        emotions: {},
+        bodyZones: {},
+        bodySensations: {},
+        doublesContraintes: 0,
+        messages: 0,
+        observations: 0
+    };
+
+    inputs.forEach(ci => {
+        if (ci.type === 'emotion' && ci.data?.emotion) {
+            const key = ci.data.emotion;
+            if (!patterns.emotions[key]) patterns.emotions[key] = { count: 0, intensitySum: 0 };
+            patterns.emotions[key].count++;
+            if (ci.data.intensity) patterns.emotions[key].intensitySum += ci.data.intensity;
+        } else if (ci.type === 'ressenti_corporel') {
+            if (ci.data?.zone) patterns.bodyZones[ci.data.zone] = (patterns.bodyZones[ci.data.zone] || 0) + 1;
+            if (ci.data?.sensationType) patterns.bodySensations[ci.data.sensationType] = (patterns.bodySensations[ci.data.sensationType] || 0) + 1;
+        } else if (ci.type === 'double_contrainte') {
+            patterns.doublesContraintes++;
+        } else if (ci.type === 'message') {
+            patterns.messages++;
+        } else if (ci.type === 'observation') {
+            patterns.observations++;
+        }
+    });
+
+    return patterns;
+}
+
+function _renderClinicalTimeline() {
+    if (!_currentTimelineBenefId) return;
+
+    const inputs = _getBeneficiaryClinicalInputs(_currentTimelineBenefId);
+    const patterns = _computeClinicalPatterns(inputs);
+
+    // Patterns
+    const patternsEl = document.getElementById('timelinePatterns');
+    if (patternsEl) {
+        const topEmotions = Object.entries(patterns.emotions)
+            .sort((a, b) => b[1].count - a[1].count)
+            .slice(0, 3);
+        const topBodyZones = Object.entries(patterns.bodyZones)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3);
+
+        let html = '';
+
+        if (topEmotions.length > 0) {
+            html += `<div class="timeline-pattern-card emotion">
+                <div class="timeline-pattern-title">😊 Top émotions</div>
+                <div class="timeline-pattern-list">
+                    ${topEmotions.map(([name, data]) => {
+                        const avg = data.intensitySum > 0 ? (data.intensitySum / data.count).toFixed(1) : '—';
+                        return `<div class="timeline-pattern-item">
+                            <span>${escapeHtml(name)}</span>
+                            <span style="color:#888;font-size:0.9em;">${data.count}× · ⭐${avg}</span>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+        }
+
+        if (topBodyZones.length > 0) {
+            html += `<div class="timeline-pattern-card body">
+                <div class="timeline-pattern-title">🤝 Top zones corporelles</div>
+                <div class="timeline-pattern-list">
+                    ${topBodyZones.map(([name, count]) => `
+                        <div class="timeline-pattern-item">
+                            <span>${escapeHtml(name)}</span>
+                            <span style="color:#888;font-size:0.9em;">${count}×</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        if (patterns.doublesContraintes > 0) {
+            html += `<div class="timeline-pattern-card dc">
+                <div class="timeline-pattern-title">🌀 Doubles contraintes</div>
+                <div class="timeline-pattern-list">
+                    <div style="font-size:1.4em;color:#a47a20;font-weight:700;">${patterns.doublesContraintes}</div>
+                    <div style="color:#888;">paradoxes signalés</div>
+                </div>
+            </div>`;
+        }
+
+        if (patterns.messages > 0 || patterns.observations > 0) {
+            html += `<div class="timeline-pattern-card message">
+                <div class="timeline-pattern-title">📨 Volumes</div>
+                <div class="timeline-pattern-list">
+                    <div class="timeline-pattern-item"><span>Messages</span><span>${patterns.messages}</span></div>
+                    <div class="timeline-pattern-item"><span>Observations</span><span>${patterns.observations}</span></div>
+                </div>
+            </div>`;
+        }
+
+        if (!html) {
+            html = `<div style="grid-column:1/-1;text-align:center;color:#888;padding:8px;font-size:0.9em;">
+                Pas encore de patterns détectés. Saisissez des observations cliniques via le bouton 🎭 sur les prestations.
+            </div>`;
+        }
+
+        patternsEl.innerHTML = html;
+    }
+
+    // Events (filtered)
+    const eventsEl = document.getElementById('timelineEvents');
+    if (eventsEl) {
+        const filtered = _currentTimelineFilter === 'all'
+            ? inputs
+            : inputs.filter(ci => ci.type === _currentTimelineFilter);
+
+        const sorted = [...filtered].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        if (sorted.length === 0) {
+            eventsEl.innerHTML = `<div class="timeline-empty">
+                <div style="font-size:2em;margin-bottom:8px;">📭</div>
+                <div>Aucune saisie clinique pour le moment.</div>
+                <div style="font-size:0.85em;margin-top:6px;">Utilisez le bouton 🎭 outils cliniques sur les prestations pour démarrer.</div>
+            </div>`;
+        } else {
+            eventsEl.innerHTML = sorted.map(ci => _renderTimelineEvent(ci)).join('');
+        }
+    }
+}
+
+function _renderTimelineEvent(ci) {
+    const d = new Date(ci.timestamp);
+    const dateStr = d.toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+    const timeStr = d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    const author = ci.author || 'Anonyme';
+    const prest = ci.prestationLabel || '—';
+
+    const typeIcons = {
+        'emotion': '😊', 'observation': '👁️', 'message': '📨',
+        'double_contrainte': '🌀', 'ressenti_corporel': '🤝'
+    };
+    const typeLabels = {
+        'emotion': 'Émotion', 'observation': 'Observation', 'message': 'Message reçu',
+        'double_contrainte': 'Double contrainte', 'ressenti_corporel': 'Ressenti corporel'
+    };
+    const icon = typeIcons[ci.type] || '🎭';
+    const typeLabel = typeLabels[ci.type] || ci.type;
+
+    let content = '';
+    const data = ci.data || {};
+
+    if (ci.type === 'emotion') {
+        const stars = data.intensity ? '⭐'.repeat(data.intensity) : '';
+        content = `<strong>${escapeHtml(data.emotion || '—')}</strong> ${stars}
+                   ${data.note ? `<div style="margin-top:4px;color:#666;font-style:italic;">« ${escapeHtml(data.note)} »</div>` : ''}`;
+    } else if (ci.type === 'observation') {
+        content = `${escapeHtml(data.observation || '—')}
+                   ${data.target ? `<div style="margin-top:4px;font-size:0.85em;color:#888;">Cible : ${escapeHtml(data.target)}</div>` : ''}`;
+    } else if (ci.type === 'message') {
+        content = `<strong>De :</strong> ${escapeHtml(data.from || '—')}
+                   <div style="margin-top:3px;">« ${escapeHtml(data.content || '—')} »</div>
+                   ${data.interpretation ? `<div style="margin-top:4px;font-size:0.88em;color:#666;font-style:italic;">→ ${escapeHtml(data.interpretation)}</div>` : ''}`;
+    } else if (ci.type === 'double_contrainte') {
+        content = `<strong>A :</strong> ${escapeHtml(data.injonctionA || '—')}<br>
+                   <strong>B :</strong> ${escapeHtml(data.injonctionB || '—')}
+                   ${data.source ? `<div style="margin-top:3px;font-size:0.85em;color:#888;">Source : ${escapeHtml(data.source)}</div>` : ''}
+                   ${data.note ? `<div style="margin-top:4px;color:#666;font-style:italic;">${escapeHtml(data.note)}</div>` : ''}`;
+    } else if (ci.type === 'ressenti_corporel') {
+        const stars = data.intensity ? '⭐'.repeat(data.intensity) : '';
+        content = `<strong>${escapeHtml(data.zone || '—')}</strong> — ${escapeHtml(data.sensationType || '—')} ${stars}
+                   ${data.note ? `<div style="margin-top:4px;color:#666;font-style:italic;">${escapeHtml(data.note)}</div>` : ''}`;
+    }
+
+    return `<div class="timeline-event type-${ci.type}">
+        <div class="timeline-event-icon">${icon}</div>
+        <div class="timeline-event-meta">
+            ${dateStr} · ${timeStr} · ${escapeHtml(typeLabel)} · ${escapeHtml(author)}
+            ${ci.prestationId ? `<br>📋 ${escapeHtml(prest)}` : ''}
+        </div>
+        <div class="timeline-event-content">${content}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
 //  v2.17 — Outils cliniques flottants (clinique du travail)
 // ═══════════════════════════════════════════════════════════
 let clinicalInputs = [];
@@ -30869,6 +31241,29 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="clinical-btn-secondary" onclick="addProcedureTemplate()">➕ Nouveau modèle</button>
             <button class="clinical-btn-primary" onclick="closeTemplateEditor()">Fermer</button>
         </div>
+    </div>
+</div>
+
+<!-- ── v2.19 — Timeline clinique (Module C) ──────────────────────── -->
+<div id="timelineModal" role="dialog" aria-modal="true" aria-labelledby="timelineModalTitle" onclick="if(event.target===this)closeClinicalTimeline()">
+    <div id="timelineModalBox">
+        <div id="timelineModalHeader">
+            <div>
+                <h3 id="timelineModalTitle">📊 Timeline clinique</h3>
+                <div id="timelineSubtitle" style="font-size:0.85em;color:#888;margin-top:3px;">—</div>
+            </div>
+            <button class="clinical-btn-secondary" onclick="closeClinicalTimeline()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+        </div>
+        <div id="timelinePatterns" class="timeline-patterns"></div>
+        <div id="timelineFilters" class="timeline-filters">
+            <span class="timeline-filter active" data-filter="all" onclick="_filterTimeline('all')">Tout</span>
+            <span class="timeline-filter" data-filter="emotion" onclick="_filterTimeline('emotion')">😊 Émotions</span>
+            <span class="timeline-filter" data-filter="observation" onclick="_filterTimeline('observation')">👁️ Observations</span>
+            <span class="timeline-filter" data-filter="message" onclick="_filterTimeline('message')">📨 Messages</span>
+            <span class="timeline-filter" data-filter="double_contrainte" onclick="_filterTimeline('double_contrainte')">🌀 Doubles contraintes</span>
+            <span class="timeline-filter" data-filter="ressenti_corporel" onclick="_filterTimeline('ressenti_corporel')">🤝 Ressentis corporels</span>
+        </div>
+        <div id="timelineEvents"></div>
     </div>
 </div>
 
