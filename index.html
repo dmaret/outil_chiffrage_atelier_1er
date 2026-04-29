@@ -2941,6 +2941,176 @@
         .sketch-node {
             animation: sketch-pulse 2s ease-in-out infinite;
         }
+
+        /* ── Outils cliniques flottants (v2.17) ───────────────────────── */
+        @keyframes clin-fab-pulse { 0%,100%{box-shadow:0 4px 16px rgba(201,120,102,0.4)} 50%{box-shadow:0 4px 24px rgba(201,120,102,0.65)} }
+        #clinicalFab {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c97866, #a45a52);
+            color: white;
+            font-size: 28px;
+            border: 3px solid white;
+            cursor: pointer;
+            z-index: 4500;
+            animation: clin-fab-pulse 2.4s ease-in-out infinite;
+            transition: transform 0.18s;
+        }
+        #clinicalFab:hover { transform: scale(1.08); }
+        #clinicalFab.active { display: block; }
+        #clinicalFabLabel {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: white;
+            border: 2px solid #c97866;
+            color: #a45a52;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.78em;
+            font-weight: 700;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+        }
+        #clinicalFab:hover #clinicalFabLabel { opacity: 1; }
+
+        #clinicalModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 5500;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        #clinicalModal.visible { display: flex; }
+        #clinicalModalBox {
+            background: var(--terra-bg);
+            border: 3px solid var(--terra-primary);
+            border-radius: 16px;
+            max-width: 560px;
+            width: 100%;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.25);
+        }
+        #clinicalModalHeader {
+            padding: 14px 18px;
+            border-bottom: 2px solid var(--terra-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #clinicalModalHeader h3 { color: var(--terra-dark); margin: 0; font-size: 1.05em; }
+        #clinicalModalContext { font-size: 0.78em; color: #888; margin-top: 2px; }
+        #clinicalTabs {
+            display: flex;
+            gap: 6px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--terra-accent);
+            overflow-x: auto;
+            background: rgba(255,255,255,0.5);
+        }
+        .clinical-tab {
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid var(--terra-accent);
+            color: var(--terra-dark);
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.12s;
+        }
+        .clinical-tab:hover { transform: translateY(-1px); }
+        .clinical-tab.active { background: var(--terra-primary); color: white; border-color: var(--terra-primary); }
+        #clinicalBody { padding: 16px 18px; overflow-y: auto; flex: 1; }
+        #clinicalBody label { display: block; margin: 10px 0 4px; font-weight: 600; color: var(--terra-dark); font-size: 0.88em; }
+        #clinicalBody input[type="text"], #clinicalBody textarea, #clinicalBody select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid var(--terra-accent);
+            border-radius: 8px;
+            font-size: 0.92em;
+            background: white;
+            color: #2d3e50;
+        }
+        #clinicalBody textarea { min-height: 70px; resize: vertical; font-family: inherit; }
+        .clinical-intensity { display: flex; gap: 6px; margin-top: 6px; }
+        .clinical-intensity button {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid var(--terra-accent);
+            border-radius: 8px;
+            background: white;
+            color: var(--terra-dark);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .clinical-intensity button.selected { background: var(--terra-primary); color: white; border-color: var(--terra-primary); }
+        .clinical-emotion-grid, .clinical-body-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .clinical-chip {
+            padding: 8px;
+            border: 2px solid var(--terra-accent);
+            border-radius: 8px;
+            background: white;
+            color: var(--terra-dark);
+            font-size: 0.85em;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: transform 0.12s;
+        }
+        .clinical-chip:hover { transform: translateY(-1px); }
+        .clinical-chip.selected { background: var(--terra-primary); color: white; border-color: var(--terra-primary); }
+        #clinicalActions {
+            padding: 12px 18px;
+            border-top: 2px solid var(--terra-accent);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            background: rgba(255,255,255,0.5);
+        }
+        .clinical-btn-primary {
+            background: var(--terra-primary);
+            color: white;
+            border: 2px solid var(--terra-dark);
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        .clinical-btn-primary:hover { transform: translateY(-1px); }
+        .clinical-btn-secondary {
+            background: white;
+            color: var(--terra-dark);
+            border: 2px solid var(--terra-accent);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        body.dark-mode #clinicalModalBox { background: #2d2520; border-color: var(--terra-primary); }
+        body.dark-mode #clinicalBody label { color: var(--terra-light); }
+        body.dark-mode #clinicalBody input, body.dark-mode #clinicalBody textarea, body.dark-mode #clinicalBody select { background: #1e1812; color: #f0ddd4; border-color: var(--terra-dark); }
     </style>
 </head>
 <body>
@@ -12047,6 +12217,11 @@
             switchTab('calculateur');
             window.scrollTo({top: 0, behavior: 'smooth'});
             toast('✏️ Édition : ' + p.prestation, 'info');
+            // v2.17 — active le contexte clinique sur la prestation éditée
+            try {
+                const benefId = (Array.isArray(p.beneficiaires) && p.beneficiaires[0]) ? (p.beneficiaires[0].id || null) : null;
+                setPrestationContext({ prestationId: p.id, label: `${p.prestation || '—'} · ${p.client || '—'}`, beneficiaireId: benefId, isCalculator: false });
+            } catch(e) {}
 
             // Mettre le bouton en mode "Mettre à jour"
             const btnSave = document.getElementById('btnSavePrestation');
@@ -29858,6 +30033,261 @@ function toggleLiveCollapse() {
     btn.textContent = _liveCollapsed ? '+' : '−';
     btn.style.color = _liveCollapsed ? '#6b8fa3' : '#999';
 }
+
+// ═══════════════════════════════════════════════════════════
+//  v2.17 — Outils cliniques flottants (clinique du travail)
+// ═══════════════════════════════════════════════════════════
+let clinicalInputs = [];
+let currentPrestationContext = null;  // { prestationId, label, beneficiaireId, isCalculator }
+let _clinicalActiveType = 'emotion';
+let _clinicalDraft = {};
+
+const CLINICAL_EMOTIONS = [
+    'Joie', 'Fierté', 'Plaisir', 'Surprise',
+    'Colère', 'Frustration', 'Agacement', 'Indignation',
+    'Peur', 'Inquiétude', 'Anxiété', 'Honte',
+    'Tristesse', 'Découragement', 'Lassitude', 'Solitude',
+    'Confusion', 'Dégoût', 'Soulagement', 'Indifférence'
+];
+const CLINICAL_BODY_ZONES = [
+    'Tête', 'Nuque/cou', 'Épaules', 'Poitrine',
+    'Ventre', 'Dos', 'Bras/mains', 'Jambes/pieds',
+    'Gorge', 'Yeux', 'Tout le corps'
+];
+
+function loadClinicalInputs() {
+    try {
+        const saved = JSON.parse(localStorage.getItem('clinicalInputs') || '[]');
+        clinicalInputs = Array.isArray(saved) ? saved : [];
+    } catch(e) { clinicalInputs = []; }
+}
+function saveClinicalInputs() {
+    try { localStorage.setItem('clinicalInputs', JSON.stringify(clinicalInputs)); } catch(e) { console.warn('saveClinicalInputs:', e); }
+}
+
+function setPrestationContext(ctx) {
+    currentPrestationContext = ctx;
+    const fab = document.getElementById('clinicalFab');
+    if (fab) fab.classList.toggle('active', !!ctx);
+}
+function clearPrestationContext() { setPrestationContext(null); }
+
+function _getActivePrestationLabel() {
+    const ctx = currentPrestationContext;
+    if (!ctx) return '—';
+    if (ctx.label) return ctx.label;
+    if (ctx.prestationId && Array.isArray(prestationsSauvegardees)) {
+        const p = prestationsSauvegardees.find(x => String(x.id) === String(ctx.prestationId));
+        if (p) return `${p.prestation || '—'} · ${p.client || '—'}`;
+    }
+    if (ctx.isCalculator) return 'Devis en cours (Calculateur)';
+    return '—';
+}
+
+function openClinicalModal() {
+    const m = document.getElementById('clinicalModal');
+    if (!m) return;
+    _clinicalDraft = {};
+    _clinicalActiveType = 'emotion';
+    document.querySelectorAll('.clinical-tab').forEach(t => t.classList.toggle('active', t.dataset.clintype === 'emotion'));
+    const ctxEl = document.getElementById('clinicalModalContext');
+    if (ctxEl) ctxEl.textContent = '🎯 Contexte : ' + _getActivePrestationLabel();
+    _renderClinicalForm();
+    m.classList.add('visible');
+}
+function closeClinicalModal() {
+    const m = document.getElementById('clinicalModal');
+    if (m) m.classList.remove('visible');
+    _clinicalDraft = {};
+}
+function switchClinicalTab(type) {
+    _clinicalActiveType = type;
+    _clinicalDraft = {};
+    document.querySelectorAll('.clinical-tab').forEach(t => t.classList.toggle('active', t.dataset.clintype === type));
+    _renderClinicalForm();
+}
+
+function _renderClinicalForm() {
+    const body = document.getElementById('clinicalBody');
+    if (!body) return;
+    const t = _clinicalActiveType;
+    if (t === 'emotion') {
+        body.innerHTML = `
+            <label>Quelle émotion ressens-tu ?</label>
+            <div class="clinical-emotion-grid" id="clinEmotionGrid">
+                ${CLINICAL_EMOTIONS.map(e => `<div class="clinical-chip" onclick="_clinicalToggleChip(this,'emotion','${e}')">${e}</div>`).join('')}
+            </div>
+            <label>Intensité (1 = à peine, 5 = très fort)</label>
+            <div class="clinical-intensity">
+                ${[1,2,3,4,5].map(n => `<button type="button" onclick="_clinicalSetIntensity(${n})">${n}</button>`).join('')}
+            </div>
+            <label>Note libre <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="clinNote" placeholder="À quel moment ? Lié à quoi ?"></textarea>`;
+    } else if (t === 'observation') {
+        body.innerHTML = `
+            <label>Qu'as-tu observé ?</label>
+            <textarea id="clinObservation" placeholder="Décris ce que tu vois, entends, ressens dans la situation. Sois factuel, pas d'interprétation pour l'instant."></textarea>
+            <label>Sur qui / quoi ? <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <input type="text" id="clinObsTarget" placeholder="Ex : un collègue, le bénéficiaire, le matériel, l'ambiance…">`;
+    } else if (t === 'message') {
+        body.innerHTML = `
+            <label>De qui vient le message ?</label>
+            <input type="text" id="clinMsgFrom" placeholder="Hiérarchie, collègue, client, bénéficiaire…">
+            <label>Quel était le message ? <span style="font-weight:400;color:#999;">(verbal ou non-verbal)</span></label>
+            <textarea id="clinMsgContent" placeholder="Mots dits, geste, regard, silence…"></textarea>
+            <label>Comment l'as-tu interprété ?</label>
+            <textarea id="clinMsgInterp" placeholder="Ce que tu en as compris, ressenti…"></textarea>`;
+    } else if (t === 'double_contrainte') {
+        body.innerHTML = `
+            <label>Quelle est l'injonction A ?</label>
+            <input type="text" id="clinDcA" placeholder="Ex : Sois rapide.">
+            <label>Quelle est l'injonction B (qui contredit A) ?</label>
+            <input type="text" id="clinDcB" placeholder="Ex : Sois minutieux et zéro défaut.">
+            <label>Qui émet ces injonctions ? <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <input type="text" id="clinDcSource" placeholder="Ex : un même chef, deux services différents, le client + l'institution…">
+            <label>Note <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="clinDcNote" placeholder="Comment tu vis ce paradoxe ? Que fais-tu pour t'en sortir ?"></textarea>`;
+    } else if (t === 'ressenti_corporel') {
+        body.innerHTML = `
+            <label>Où dans le corps ?</label>
+            <div class="clinical-body-grid">
+                ${CLINICAL_BODY_ZONES.map(z => `<div class="clinical-chip" onclick="_clinicalToggleChip(this,'body_zone','${z}')">${z}</div>`).join('')}
+            </div>
+            <label>Type de sensation</label>
+            <select id="clinBodyType">
+                <option value="">— choisir —</option>
+                <option>Tension / contracture</option>
+                <option>Chaleur</option>
+                <option>Froid</option>
+                <option>Fatigue / lourdeur</option>
+                <option>Picotement / fourmillement</option>
+                <option>Douleur</option>
+                <option>Vide / engourdissement</option>
+                <option>Légèreté / détente</option>
+                <option>Autre</option>
+            </select>
+            <label>Intensité</label>
+            <div class="clinical-intensity">
+                ${[1,2,3,4,5].map(n => `<button type="button" onclick="_clinicalSetIntensity(${n})">${n}</button>`).join('')}
+            </div>
+            <label>Note <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="clinBodyNote" placeholder="Quand est-ce arrivé ? Ce que tu en penses ?"></textarea>`;
+    }
+}
+
+function _clinicalToggleChip(el, key, value) {
+    if (!el) return;
+    const grid = el.parentElement;
+    if (grid) grid.querySelectorAll('.clinical-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    _clinicalDraft[key] = value;
+}
+function _clinicalSetIntensity(n) {
+    _clinicalDraft.intensity = n;
+    const wrap = document.querySelector('.clinical-intensity');
+    if (wrap) {
+        wrap.querySelectorAll('button').forEach((b, i) => b.classList.toggle('selected', i + 1 === n));
+    }
+}
+
+function submitClinicalInput() {
+    const t = _clinicalActiveType;
+    const ctx = currentPrestationContext || {};
+    const author = (typeof currentUserSession !== 'undefined' && currentUserSession) ? currentUserSession.name : 'Anonyme';
+    const entry = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        type: t,
+        author: author,
+        prestationId: ctx.prestationId || null,
+        prestationLabel: _getActivePrestationLabel(),
+        beneficiaireId: ctx.beneficiaireId || null,
+        data: {}
+    };
+    if (t === 'emotion') {
+        if (!_clinicalDraft.emotion) { toast('Sélectionne une émotion', 'warning'); return; }
+        entry.data = { emotion: _clinicalDraft.emotion, intensity: _clinicalDraft.intensity || null, note: document.getElementById('clinNote')?.value.trim() || '' };
+    } else if (t === 'observation') {
+        const obs = document.getElementById('clinObservation')?.value.trim();
+        if (!obs) { toast('Décris ton observation', 'warning'); return; }
+        entry.data = { observation: obs, target: document.getElementById('clinObsTarget')?.value.trim() || '' };
+    } else if (t === 'message') {
+        const content = document.getElementById('clinMsgContent')?.value.trim();
+        if (!content) { toast('Décris le message', 'warning'); return; }
+        entry.data = {
+            from: document.getElementById('clinMsgFrom')?.value.trim() || '',
+            content: content,
+            interpretation: document.getElementById('clinMsgInterp')?.value.trim() || ''
+        };
+    } else if (t === 'double_contrainte') {
+        const a = document.getElementById('clinDcA')?.value.trim();
+        const b = document.getElementById('clinDcB')?.value.trim();
+        if (!a || !b) { toast('Renseigne les deux injonctions A et B', 'warning'); return; }
+        entry.data = { injonctionA: a, injonctionB: b, source: document.getElementById('clinDcSource')?.value.trim() || '', note: document.getElementById('clinDcNote')?.value.trim() || '' };
+    } else if (t === 'ressenti_corporel') {
+        if (!_clinicalDraft.body_zone) { toast('Indique la zone du corps', 'warning'); return; }
+        entry.data = {
+            zone: _clinicalDraft.body_zone,
+            sensationType: document.getElementById('clinBodyType')?.value || '',
+            intensity: _clinicalDraft.intensity || null,
+            note: document.getElementById('clinBodyNote')?.value.trim() || ''
+        };
+    }
+    clinicalInputs.push(entry);
+    saveClinicalInputs();
+    if (typeof toast === 'function') toast('🎭 Saisie clinique enregistrée', 'success');
+    closeClinicalModal();
+}
+
+// Hook : Activer/désactiver le contexte selon l'onglet visité
+(function() {
+    const origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
+    if (!origSwitchTab) return;
+    window.switchTab = function(tabName) {
+        const ret = origSwitchTab.apply(this, arguments);
+        try {
+            if (tabName === 'calculateur') {
+                setPrestationContext({ isCalculator: true, prestationId: null, label: null });
+            }
+        } catch(e) {}
+        return ret;
+    };
+})();
+
+// Charge les données + active le FAB si on est déjà dans un contexte
+document.addEventListener('DOMContentLoaded', () => {
+    try { loadClinicalInputs(); } catch(e) {}
+});
 </script>
+
+<!-- ── v2.17 — Outils cliniques flottants ─────────────────────────── -->
+<button id="clinicalFab" type="button" onclick="openClinicalModal()" aria-label="Outils cliniques" title="Outils cliniques (clinique du travail)">
+    🎭
+    <span id="clinicalFabLabel">Outils cliniques</span>
+</button>
+<div id="clinicalModal" role="dialog" aria-modal="true" aria-labelledby="clinicalModalTitle" onclick="if(event.target===this)closeClinicalModal()">
+    <div id="clinicalModalBox">
+        <div id="clinicalModalHeader">
+            <div>
+                <h3 id="clinicalModalTitle">🎭 Outils cliniques du travail</h3>
+                <div id="clinicalModalContext">—</div>
+            </div>
+            <button class="clinical-btn-secondary" onclick="closeClinicalModal()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+        </div>
+        <div id="clinicalTabs">
+            <button class="clinical-tab active" data-clintype="emotion" onclick="switchClinicalTab('emotion')">😊 Émotion</button>
+            <button class="clinical-tab" data-clintype="observation" onclick="switchClinicalTab('observation')">👁️ Observation</button>
+            <button class="clinical-tab" data-clintype="message" onclick="switchClinicalTab('message')">📨 Message reçu</button>
+            <button class="clinical-tab" data-clintype="double_contrainte" onclick="switchClinicalTab('double_contrainte')">🌀 Double contrainte</button>
+            <button class="clinical-tab" data-clintype="ressenti_corporel" onclick="switchClinicalTab('ressenti_corporel')">🤝 Ressenti corporel</button>
+        </div>
+        <div id="clinicalBody"></div>
+        <div id="clinicalActions">
+            <button class="clinical-btn-secondary" onclick="closeClinicalModal()">Annuler</button>
+            <button class="clinical-btn-primary" onclick="submitClinicalInput()">💾 Enregistrer</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
