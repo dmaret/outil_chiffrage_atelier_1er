@@ -13,6 +13,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -21,10 +22,10 @@
     <meta name="apple-mobile-web-app-title" content="Atelier LP">
     <meta name="theme-color" content="#6b8fa3">
     <link rel="manifest" href="manifest.json">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -6382,6 +6383,44 @@
                 <h2>🔔 Relances devis — Suivi commercial</h2>
                 <div id="dashRelancesDevis"></div>
               </div>
+
+              <div id="dashSectionHeatmap" class="section" style="margin-top:20px;">
+                <h2>🌡️ Heatmap CA — 52 dernières semaines</h2>
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+                  <div style="font-size:0.85em;color:#7a9db1;">Chaque case = un jour. Plus c'est foncé, plus le CA est élevé. <strong>Cliquez</strong> pour filtrer.</div>
+                  <div id="dashHeatmapStats" style="font-size:0.85em;color:#6b8fa3;"></div>
+                </div>
+                <div id="dashHeatmapGrid" style="overflow-x:auto;"></div>
+              </div>
+
+              <div id="dashSectionKanban" class="section" style="margin-top:20px;">
+                <h2>🗂️ Kanban approbation — Glissez pour faire avancer</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Glissez une carte d'une colonne à l'autre pour changer son état d'approbation.</div>
+                <div id="dashKanbanBoard"></div>
+              </div>
+
+              <div id="dashSectionGraph" class="section" style="margin-top:20px;">
+                <h2>🕸️ Graphe relationnel — Clients · Prestations · Bénéficiaires</h2>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowBeneficiaires" checked onchange="renderRelationGraph()"> Bénéficiaires</label>
+                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowClients" checked onchange="renderRelationGraph()"> Clients</label>
+                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowPrestations" checked onchange="renderRelationGraph()"> Prestations</label>
+                  <button class="btn btn-small btn-secondary" onclick="resetRelationGraph()" style="margin-left:auto;">↻ Réorganiser</button>
+                </div>
+                <div id="dashGraphContainer" style="position:relative;width:100%;height:480px;background:#f8fafc;border:1px solid #e8f0f5;border-radius:10px;overflow:hidden;"></div>
+              </div>
+
+              <div id="dashSectionVille" class="section" style="margin-top:20px;">
+                <h2>🏙️ Vue Ville — Navigation spatiale</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Cliquez sur un bâtiment pour ouvrir le module correspondant. Les badges signalent les éléments à traiter.</div>
+                <div id="dashVilleMap" style="width:100%;background:linear-gradient(180deg,#cfe6f5 0%,#e8f4fa 50%,#f5f1e8 100%);border-radius:12px;border:1px solid #bcd5e6;"></div>
+              </div>
+
+              <div id="dashSectionRiver" class="section" style="margin-top:20px;">
+                <h2>🌊 Rivière de trésorerie — Flux 12 mois</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">La largeur du courant représente le flux mensuel net. Les bateaux flottent au rythme du temps.</div>
+                <div id="dashRiverFlow" style="width:100%;height:280px;background:linear-gradient(180deg,#e3f1fa 0%,#cfe6f5 100%);border-radius:12px;border:1px solid #bcd5e6;overflow:hidden;position:relative;"></div>
+              </div>
             </div>
 
         </div>
@@ -6737,6 +6776,11 @@
             { id: 'dashFormationModule',  label: '🏭 Module Formation Logistique',           display: 'block' },
             { id: 'dashSectionEstime',    label: '⏱️ Précision des estimations — Estimé vs Réel', display: 'block' },
             { id: 'dashSectionRelances',  label: '🔔 Relances devis — Suivi commercial',    display: 'block' },
+            { id: 'dashSectionHeatmap',   label: '🌡️ Heatmap CA — 52 semaines',             display: 'block' },
+            { id: 'dashSectionKanban',    label: '🗂️ Kanban approbation drag & drop',        display: 'block' },
+            { id: 'dashSectionGraph',     label: '🕸️ Graphe relationnel',                    display: 'block' },
+            { id: 'dashSectionVille',     label: '🏙️ Vue Ville — Navigation spatiale',       display: 'block' },
+            { id: 'dashSectionRiver',     label: '🌊 Rivière de trésorerie',                 display: 'block' },
         ];
         const _ALL_DASH_WIDGET_IDS = DASHBOARD_WIDGETS.map(w => w.id);
 
@@ -11808,7 +11852,7 @@
                 const isVideo = att.type.startsWith('video/');
                 let preview = '';
                 if (isImage) {
-                    preview = `<img src="${att.data}" alt="${att.name}" loading="lazy">`;
+                    preview = `<img src="${att.data}" alt="${att.name}" loading="lazy" decoding="async">`;
                 } else if (isVideo) {
                     preview = `<video src="${att.data}"></video>`;
                 } else {
@@ -21733,6 +21777,419 @@
             try { renderDashboardCharts(); } catch (e) { console.warn('renderDashboardCharts failed:', e); }
             try { renderPendingApprovals(); } catch (e) { console.warn('renderPendingApprovals failed:', e); }
             try { renderApprovalStats(); } catch (e) { console.warn('renderApprovalStats failed:', e); }
+            try { renderCAHeatmap(); } catch (e) { console.warn('renderCAHeatmap failed:', e); }
+            try { renderApprovalKanban(); } catch (e) { console.warn('renderApprovalKanban failed:', e); }
+            try { renderRelationGraph(); } catch (e) { console.warn('renderRelationGraph failed:', e); }
+            try { renderVilleMap(); } catch (e) { console.warn('renderVilleMap failed:', e); }
+            try { renderTresorerieRiver(); } catch (e) { console.warn('renderTresorerieRiver failed:', e); }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  v2.14 — Flux visuels interactifs
+        // ═══════════════════════════════════════════════════════════
+
+        // ── 1. Heatmap CA style GitHub contributions ──
+        function renderCAHeatmap() {
+            const grid = document.getElementById('dashHeatmapGrid');
+            const stats = document.getElementById('dashHeatmapStats');
+            if (!grid) return;
+            const today = new Date(); today.setHours(0,0,0,0);
+            const start = new Date(today); start.setDate(start.getDate() - (52 * 7) + 1);
+            // Aligner sur lundi
+            const dow = (start.getDay() + 6) % 7;
+            start.setDate(start.getDate() - dow);
+
+            const dailyCA = {};
+            (prestationsSauvegardees || []).forEach(p => {
+                if (!['valide','facture','paye','encaisse'].includes(p.statut || 'devis')) return;
+                const d = new Date(p.date); d.setHours(0,0,0,0);
+                if (d < start || d > today) return;
+                const k = d.toISOString().slice(0,10);
+                dailyCA[k] = (dailyCA[k] || 0) + (p.prixVente || 0);
+            });
+            const maxCA = Math.max(1, ...Object.values(dailyCA));
+            const totalCA = Object.values(dailyCA).reduce((s,v) => s+v, 0);
+            const activeDays = Object.keys(dailyCA).length;
+            if (stats) stats.innerHTML = `<strong>${activeDays}</strong> jours actifs · CA total <strong>${totalCA.toFixed(0)} CHF</strong> · max jour <strong>${maxCA.toFixed(0)} CHF</strong>`;
+
+            const colorFor = (v) => {
+                if (!v) return '#ebedf0';
+                const r = Math.log(1 + v) / Math.log(1 + maxCA);
+                if (r < 0.25) return '#c6e48b';
+                if (r < 0.5)  return '#7bc96f';
+                if (r < 0.75) return '#239a3b';
+                return '#196127';
+            };
+            const moisLabels = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+            const dowLabels = ['Lun','','Mer','','Ven','',''];
+            const cells = [];
+            const monthHeaders = [];
+            let cur = new Date(start);
+            let lastMonth = -1;
+            for (let w = 0; w < 53; w++) {
+                let monthLabel = '';
+                const wkStart = new Date(cur);
+                if (wkStart.getMonth() !== lastMonth && wkStart.getDate() <= 7) {
+                    monthLabel = moisLabels[wkStart.getMonth()];
+                    lastMonth = wkStart.getMonth();
+                }
+                monthHeaders.push(`<div style="width:14px;font-size:9px;color:#7a9db1;text-align:left;">${monthLabel}</div>`);
+                const col = [];
+                for (let d = 0; d < 7; d++) {
+                    if (cur > today) { col.push('<div style="width:12px;height:12px;"></div>'); continue; }
+                    const k = cur.toISOString().slice(0,10);
+                    const v = dailyCA[k] || 0;
+                    const dateStr = cur.toLocaleDateString('fr-CH');
+                    const tip = v > 0 ? `${dateStr} — ${v.toFixed(0)} CHF` : `${dateStr} — aucun CA`;
+                    col.push(`<div title="${tip}" data-date="${k}" onclick="filterPrestationsByDate('${k}')" style="width:12px;height:12px;border-radius:2px;background:${colorFor(v)};cursor:pointer;transition:transform .1s;" onmouseover="this.style.transform='scale(1.4)'" onmouseout="this.style.transform='scale(1)'"></div>`);
+                    cur.setDate(cur.getDate() + 1);
+                }
+                cells.push(`<div style="display:flex;flex-direction:column;gap:2px;">${col.join('')}</div>`);
+            }
+            grid.innerHTML = `
+                <div style="display:flex;gap:6px;">
+                    <div style="display:flex;flex-direction:column;gap:2px;padding-top:14px;font-size:9px;color:#7a9db1;">
+                        ${dowLabels.map(l => `<div style="height:12px;line-height:12px;">${l}</div>`).join('')}
+                    </div>
+                    <div style="flex:1;">
+                        <div style="display:flex;gap:2px;height:12px;margin-bottom:2px;">${monthHeaders.join('')}</div>
+                        <div style="display:flex;gap:2px;">${cells.join('')}</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.78em;color:#7a9db1;">
+                    <span>Moins</span>
+                    ${['#ebedf0','#c6e48b','#7bc96f','#239a3b','#196127'].map(c => `<div style="width:11px;height:11px;border-radius:2px;background:${c};"></div>`).join('')}
+                    <span>Plus</span>
+                </div>`;
+        }
+        function filterPrestationsByDate(dateStr) {
+            try {
+                switchTab('prestations');
+                const inp = document.getElementById('searchPrestations');
+                if (inp) {
+                    inp.value = new Date(dateStr).toLocaleDateString('fr-CH');
+                    inp.dispatchEvent(new Event('input'));
+                }
+                if (typeof toast === 'function') toast(`Filtré sur ${new Date(dateStr).toLocaleDateString('fr-CH')}`, 'info');
+            } catch(e) { console.warn(e); }
+        }
+
+        // ── 2. Kanban approbation drag & drop ──
+        const KANBAN_COLUMNS = [
+            { id: 'draft',          label: '✏️ Brouillon',     color: '#94a3b8', bg: '#f1f5f9' },
+            { id: 'pending_review', label: '⏳ Soumis',         color: '#f59e0b', bg: '#fef3c7' },
+            { id: 'approved',       label: '✅ Approuvé',       color: '#10b981', bg: '#d1fae5' },
+            { id: 'rejected',       label: '❌ Rejeté',         color: '#ef4444', bg: '#fee2e2' },
+            { id: 'archived',       label: '📦 Facturé',         color: '#6366f1', bg: '#e0e7ff' },
+        ];
+        function _kanbanStateOf(p) {
+            const st = (p.statut || 'devis').toLowerCase();
+            if (['facture','paye','encaisse'].includes(st)) return 'archived';
+            return p.approvalState || 'draft';
+        }
+        function renderApprovalKanban() {
+            const board = document.getElementById('dashKanbanBoard');
+            if (!board) return;
+            const grouped = {};
+            KANBAN_COLUMNS.forEach(c => grouped[c.id] = []);
+            (prestationsSauvegardees || []).forEach(p => {
+                const s = _kanbanStateOf(p);
+                if (grouped[s]) grouped[s].push(p);
+            });
+            board.innerHTML = `<div style="display:grid;grid-template-columns:repeat(${KANBAN_COLUMNS.length},minmax(160px,1fr));gap:10px;overflow-x:auto;">
+                ${KANBAN_COLUMNS.map(col => `
+                    <div class="kanban-col" data-state="${col.id}" ondragover="event.preventDefault();this.style.outline='2px dashed ${col.color}'" ondragleave="this.style.outline='none'" ondrop="onKanbanDrop(event,'${col.id}')" style="background:${col.bg};border-radius:10px;padding:10px;min-height:200px;outline:none;">
+                        <div style="font-weight:bold;color:${col.color};margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                            <span>${col.label}</span>
+                            <span style="background:white;color:${col.color};border-radius:10px;padding:1px 8px;font-size:0.78em;">${grouped[col.id].length}</span>
+                        </div>
+                        ${grouped[col.id].slice(0, 20).map(p => `
+                            <div draggable="true" ondragstart="onKanbanDragStart(event,${JSON.stringify(p.id)})" style="background:white;border-radius:6px;padding:8px;margin-bottom:6px;border-left:3px solid ${col.color};cursor:grab;font-size:0.84em;box-shadow:0 1px 2px rgba(0,0,0,0.06);">
+                                <div style="font-weight:bold;color:#2d3e50;">${escapeHtml(p.prestation || '—')}</div>
+                                <div style="color:#7a9db1;font-size:0.9em;">${escapeHtml(p.client || '')}</div>
+                                <div style="margin-top:4px;color:${col.color};font-weight:bold;">${(p.prixVente||0).toFixed(0)} CHF</div>
+                            </div>
+                        `).join('') || '<div style="color:#9ab0be;font-style:italic;font-size:0.82em;">Aucun</div>'}
+                        ${grouped[col.id].length > 20 ? `<div style="text-align:center;font-size:0.78em;color:#7a9db1;">+${grouped[col.id].length - 20} autres</div>` : ''}
+                    </div>`).join('')}
+            </div>`;
+        }
+        let _kanbanDraggedId = null;
+        function onKanbanDragStart(ev, id) {
+            _kanbanDraggedId = id;
+            try { ev.dataTransfer.setData('text/plain', String(id)); } catch(e) {}
+        }
+        function onKanbanDrop(ev, targetState) {
+            ev.preventDefault();
+            const col = ev.currentTarget; if (col) col.style.outline = 'none';
+            const id = _kanbanDraggedId;
+            _kanbanDraggedId = null;
+            if (id === null) return;
+            const p = (prestationsSauvegardees || []).find(x => String(x.id) === String(id));
+            if (!p) return;
+            const cur = _kanbanStateOf(p);
+            if (cur === targetState) return;
+            try {
+                if (targetState === 'pending_review') {
+                    if (typeof requestPrestationApproval === 'function') requestPrestationApproval(p.id);
+                    else { p.approvalState = 'pending_review'; saveToStorage(); }
+                } else if (targetState === 'approved') {
+                    if (typeof approvePrestation === 'function') approvePrestation(p.id);
+                    else { p.approvalState = 'approved'; saveToStorage(); }
+                } else if (targetState === 'rejected') {
+                    if (typeof rejectPrestation === 'function') rejectPrestation(p.id);
+                    else { p.approvalState = 'rejected'; saveToStorage(); }
+                } else if (targetState === 'draft') {
+                    p.approvalState = 'draft'; saveToStorage();
+                } else if (targetState === 'archived') {
+                    p.statut = 'facture'; saveToStorage();
+                }
+                if (typeof toast === 'function') toast('Carte déplacée', 'success');
+                renderDashboard();
+            } catch(e) { console.warn(e); }
+        }
+
+        // ── 3. Graphe relationnel SVG (clients · prestations · bénéficiaires) ──
+        let _graphState = { nodes: [], links: [], dragging: null };
+        function renderRelationGraph() {
+            const cont = document.getElementById('dashGraphContainer');
+            if (!cont) return;
+            const showB = document.getElementById('graphShowBeneficiaires')?.checked !== false;
+            const showC = document.getElementById('graphShowClients')?.checked !== false;
+            const showP = document.getElementById('graphShowPrestations')?.checked !== false;
+            const W = cont.clientWidth || 800, H = 480;
+            const nodes = [], links = [];
+            const idx = {};
+            const addNode = (id, type, label, value) => {
+                if (idx[id] !== undefined) return idx[id];
+                idx[id] = nodes.length;
+                nodes.push({ id, type, label, value: value || 1, x: W/2 + (Math.random()-0.5)*200, y: H/2 + (Math.random()-0.5)*200, vx: 0, vy: 0 });
+                return idx[id];
+            };
+            const palette = { client: '#3498db', prestation: '#9b59b6', beneficiaire: '#27ae60' };
+            (prestationsSauvegardees || []).slice(0, 80).forEach(p => {
+                const pid = 'p:' + p.id;
+                if (showP) addNode(pid, 'prestation', p.prestation || '—', (p.prixVente||0)/1000 + 1);
+                if (showC && p.client) {
+                    const cid = 'c:' + p.client;
+                    addNode(cid, 'client', p.client, 2);
+                    if (showP) links.push({ s: idx[pid], t: idx[cid] });
+                }
+                if (showB && Array.isArray(p.beneficiaires)) {
+                    p.beneficiaires.forEach(b => {
+                        const bid = 'b:' + (b.id || b.nom || b);
+                        const lbl = (b.prenom ? b.prenom + ' ' : '') + (b.nom || b);
+                        addNode(bid, 'beneficiaire', lbl, 1.5);
+                        if (showP) links.push({ s: idx[pid], t: idx[bid] });
+                    });
+                }
+            });
+            _graphState.nodes = nodes;
+            _graphState.links = links;
+            // Petite simulation force (5 itérations)
+            for (let it = 0; it < 60; it++) {
+                for (let i = 0; i < nodes.length; i++) {
+                    let fx = 0, fy = 0;
+                    for (let j = 0; j < nodes.length; j++) {
+                        if (i === j) continue;
+                        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+                        const d2 = dx*dx + dy*dy + 0.01;
+                        const f = 800 / d2;
+                        fx += dx * f; fy += dy * f;
+                    }
+                    fx += (W/2 - nodes[i].x) * 0.01;
+                    fy += (H/2 - nodes[i].y) * 0.01;
+                    nodes[i].vx = (nodes[i].vx + fx) * 0.5;
+                    nodes[i].vy = (nodes[i].vy + fy) * 0.5;
+                }
+                links.forEach(l => {
+                    const a = nodes[l.s], b = nodes[l.t];
+                    if (!a || !b) return;
+                    const dx = b.x - a.x, dy = b.y - a.y;
+                    const d = Math.sqrt(dx*dx + dy*dy) + 0.01;
+                    const target = 80;
+                    const f = (d - target) * 0.05;
+                    a.vx += dx/d * f; a.vy += dy/d * f;
+                    b.vx -= dx/d * f; b.vy -= dy/d * f;
+                });
+                nodes.forEach(n => {
+                    n.x += n.vx; n.y += n.vy;
+                    n.x = Math.max(20, Math.min(W-20, n.x));
+                    n.y = Math.max(20, Math.min(H-20, n.y));
+                });
+            }
+            const svg = `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;cursor:grab;" onmousedown="onGraphMouseDown(event)" onmousemove="onGraphMouseMove(event)" onmouseup="_graphState.dragging=null" onmouseleave="_graphState.dragging=null">
+                ${links.map(l => {
+                    const a = nodes[l.s], b = nodes[l.t]; if (!a||!b) return '';
+                    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#bcd0dc" stroke-width="1.2"/>`;
+                }).join('')}
+                ${nodes.map((n,i) => {
+                    const r = Math.min(22, 6 + n.value * 3);
+                    return `<g data-idx="${i}" style="cursor:grab;">
+                        <circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${palette[n.type]}" stroke="white" stroke-width="2" opacity="0.92"/>
+                        <text x="${n.x}" y="${n.y + r + 11}" text-anchor="middle" font-size="10" fill="#2d3e50" pointer-events="none">${escapeHtml(String(n.label).slice(0,18))}</text>
+                    </g>`;
+                }).join('')}
+            </svg>
+            <div style="position:absolute;top:8px;right:8px;background:white;border:1px solid #e8f0f5;border-radius:6px;padding:6px 10px;font-size:0.78em;display:flex;gap:10px;">
+                <span style="color:${palette.client};">● Clients</span>
+                <span style="color:${palette.prestation};">● Prestations</span>
+                <span style="color:${palette.beneficiaire};">● Bénéficiaires</span>
+            </div>`;
+            cont.innerHTML = svg;
+        }
+        function onGraphMouseDown(ev) {
+            const g = ev.target.closest('g[data-idx]'); if (!g) return;
+            _graphState.dragging = parseInt(g.getAttribute('data-idx'));
+        }
+        function onGraphMouseMove(ev) {
+            if (_graphState.dragging === null || _graphState.dragging === undefined) return;
+            const cont = document.getElementById('dashGraphContainer'); if (!cont) return;
+            const rect = cont.getBoundingClientRect();
+            const n = _graphState.nodes[_graphState.dragging];
+            if (!n) return;
+            const sx = (ev.clientX - rect.left) * (cont.clientWidth / rect.width);
+            const sy = (ev.clientY - rect.top);
+            n.x = sx; n.y = sy;
+            const svg = cont.querySelector('svg'); if (!svg) return;
+            const circle = svg.querySelectorAll('g[data-idx] circle')[_graphState.dragging];
+            const text = svg.querySelectorAll('g[data-idx] text')[_graphState.dragging];
+            if (circle) { circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); }
+            if (text) { text.setAttribute('x', n.x); text.setAttribute('y', n.y + 18); }
+            // Update lines
+            svg.querySelectorAll('line').forEach((line, i) => {
+                const l = _graphState.links[i]; if (!l) return;
+                const a = _graphState.nodes[l.s], b = _graphState.nodes[l.t];
+                if (a) { line.setAttribute('x1', a.x); line.setAttribute('y1', a.y); }
+                if (b) { line.setAttribute('x2', b.x); line.setAttribute('y2', b.y); }
+            });
+        }
+        function resetRelationGraph() { renderRelationGraph(); }
+
+        // ── 4. Vue Ville — Plan isométrique cliquable ──
+        const VILLE_BUILDINGS = [
+            { tab: 'dashboard',           x:  60, y: 230, w: 110, h: 80, color: '#5b9bd5', icon: '📊', label: 'Hôtel de ville', badgeFn: () => 0 },
+            { tab: 'calculateur',         x: 200, y: 200, w: 120, h: 110, color: '#e8a44c', icon: '🧮', label: 'Atelier calcul', badgeFn: () => (prestationsSauvegardees||[]).filter(p => p.statut === 'devis').length },
+            { tab: 'prestations',         x: 350, y: 220, w: 140, h: 90, color: '#7cb342', icon: '📋', label: 'Bibliothèque', badgeFn: () => (prestationsSauvegardees||[]).filter(p => (p.approvalState||'') === 'pending_review').length },
+            { tab: 'clients',             x: 520, y: 240, w: 100, h: 70, color: '#ec407a', icon: '🏢', label: 'Marché', badgeFn: () => Object.keys(typeof clientsData !== 'undefined' ? clientsData : {}).length },
+            { tab: 'planification',       x: 660, y: 200, w: 110, h: 110, color: '#42a5f5', icon: '📅', label: 'Tour horloge', badgeFn: () => 0 },
+            { tab: 'stock',               x: 100, y: 100, w: 120, h: 70, color: '#8d6e63', icon: '📦', label: 'Entrepôt', badgeFn: () => {
+                let lows = 0;
+                if (typeof stockActuel !== 'undefined' && typeof stockMins !== 'undefined') {
+                    Object.entries(stockActuel).forEach(([ref, d]) => { const m = stockMins[ref]; if (m !== undefined && (d.total||0) <= m) lows++; });
+                }
+                return lows;
+            } },
+            { tab: 'consommables',        x: 250, y:  90, w: 100, h: 70, color: '#ab47bc', icon: '🧰', label: 'Quincaillerie', badgeFn: () => 0 },
+            { tab: 'accompagnement',      x: 380, y:  90, w: 130, h: 80, color: '#26a69a', icon: '🌊', label: 'Centre social', badgeFn: () => (typeof beneficiairesData !== 'undefined' ? beneficiairesData.length : 0) },
+            { tab: 'formation-logistique',x: 540, y: 100, w: 120, h: 70, color: '#ef6c00', icon: '🎓', label: 'École CEA', badgeFn: () => 0 },
+            { tab: 'guide',               x: 690, y:  90, w:  90, h: 80, color: '#5c6bc0', icon: '📖', label: 'Phare guide', badgeFn: () => 0 },
+        ];
+        function renderVilleMap() {
+            const map = document.getElementById('dashVilleMap');
+            if (!map) return;
+            const W = 820, H = 360;
+            const buildings = VILLE_BUILDINGS.map(b => {
+                let badge = 0; try { badge = b.badgeFn() || 0; } catch(e) {}
+                // Bâtiment isométrique simplifié
+                const top = `${b.x},${b.y} ${b.x + b.w},${b.y} ${b.x + b.w + 12},${b.y - 12} ${b.x + 12},${b.y - 12}`;
+                const right = `${b.x + b.w},${b.y} ${b.x + b.w + 12},${b.y - 12} ${b.x + b.w + 12},${b.y - 12 + b.h} ${b.x + b.w},${b.y + b.h}`;
+                return `<g style="cursor:pointer;" onclick="switchTab('${b.tab}')" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
+                    <polygon points="${right}" fill="${b.color}" stroke="#2d3e50" stroke-width="1.2" opacity="0.7"/>
+                    <polygon points="${top}" fill="${b.color}" stroke="#2d3e50" stroke-width="1.2" opacity="0.85"/>
+                    <rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="${b.color}" stroke="#2d3e50" stroke-width="1.4"/>
+                    <text x="${b.x + b.w/2}" y="${b.y + b.h/2 - 2}" text-anchor="middle" font-size="22">${b.icon}</text>
+                    <text x="${b.x + b.w/2}" y="${b.y + b.h/2 + 18}" text-anchor="middle" font-size="11" font-weight="bold" fill="white" style="text-shadow:0 1px 2px rgba(0,0,0,0.5);">${b.label}</text>
+                    ${badge > 0 ? `<g><circle cx="${b.x + b.w - 6}" cy="${b.y + 4}" r="11" fill="#e74c3c" stroke="white" stroke-width="2"/><text x="${b.x + b.w - 6}" y="${b.y + 8}" text-anchor="middle" font-size="11" font-weight="bold" fill="white">${badge > 99 ? '99+' : badge}</text></g>` : ''}
+                </g>`;
+            }).join('');
+            // Routes ondulées
+            const roads = `
+                <path d="M 0 320 Q ${W/4} 290 ${W/2} 320 T ${W} 320" stroke="#bdb39a" stroke-width="14" fill="none"/>
+                <path d="M 0 320 Q ${W/4} 290 ${W/2} 320 T ${W} 320" stroke="#fff" stroke-width="1.2" fill="none" stroke-dasharray="6 8"/>
+                <path d="M 0 180 Q ${W/3} 170 ${W*2/3} 185 T ${W} 175" stroke="#bdb39a" stroke-width="10" fill="none"/>
+                <path d="M 0 180 Q ${W/3} 170 ${W*2/3} 185 T ${W} 175" stroke="#fff" stroke-width="1" fill="none" stroke-dasharray="4 6"/>`;
+            // Soleil + nuages
+            const decor = `
+                <circle cx="${W - 60}" cy="40" r="22" fill="#fff48a" stroke="#f4c430" stroke-width="2"/>
+                <ellipse cx="120" cy="35" rx="24" ry="9" fill="white" opacity="0.85"/>
+                <ellipse cx="380" cy="28" rx="30" ry="10" fill="white" opacity="0.85"/>`;
+            map.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;">
+                ${decor}
+                ${roads}
+                ${buildings}
+            </svg>`;
+        }
+
+        // ── 5. Rivière de trésorerie ──
+        function renderTresorerieRiver() {
+            const cont = document.getElementById('dashRiverFlow');
+            if (!cont) return;
+            const W = 900, H = 280;
+            const now = new Date();
+            const months = [];
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push({ y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString('fr-CH',{month:'short'}), inflow: 0, outflow: 0 });
+            }
+            (prestationsSauvegardees || []).forEach(p => {
+                const d = new Date(p.date); if (isNaN(d)) return;
+                const idx = months.findIndex(mm => mm.y === d.getFullYear() && mm.m === d.getMonth());
+                if (idx < 0) return;
+                const v = p.prixVente || 0;
+                if (['valide','facture','paye','encaisse'].includes(p.statut)) months[idx].inflow += v;
+                if (['soumis','devis','brouillon'].includes(p.statut || 'devis')) months[idx].outflow += v * 0.3;
+            });
+            const maxFlow = Math.max(1, ...months.map(m => m.inflow + m.outflow));
+            const dx = W / (months.length - 1 || 1);
+            const path = (offset) => {
+                let p = '';
+                months.forEach((m, i) => {
+                    const x = i * dx;
+                    const w = ((m.inflow + m.outflow) / maxFlow) * 70 + 10;
+                    const y = H/2 + offset * w;
+                    p += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+                });
+                return p;
+            };
+            const upper = path(-1).replace('M', 'M');
+            const lower = months.map((m, i) => {
+                const x = (months.length - 1 - i) * dx;
+                const w = ((m.inflow + m.outflow) / maxFlow) * 70 + 10;
+                return `${i === 0 ? 'L' : 'L'} ${x} ${H/2 + w}`;
+            }).reverse().join(' ');
+            const riverPath = `${upper} L ${(months.length-1)*dx} ${H/2 + ((months[months.length-1].inflow + months[months.length-1].outflow)/maxFlow)*70 + 10} ${months.map((m,i) => {
+                const x = (months.length - 1 - i) * dx;
+                const w = ((m.inflow + m.outflow) / maxFlow) * 70 + 10;
+                return `L ${x} ${H/2 + w}`;
+            }).join(' ')} Z`;
+            // Bateaux = prestations actives
+            const boats = (prestationsSauvegardees || []).filter(p => ['devis','soumis','valide'].includes(p.statut || 'devis')).slice(0, 8).map((p, i) => {
+                const phase = (i / 8) * (months.length - 1);
+                const x = phase * dx;
+                const drift = (Date.now() / 50 + i * 90) % W;
+                return `<text x="${(x + drift) % W}" y="${H/2 + 4}" font-size="20" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,0.2));"><animate attributeName="x" from="-30" to="${W+30}" dur="${20 + i*3}s" repeatCount="indefinite"/>⛵</text>`;
+            }).join('');
+            const labels = months.map((m, i) => {
+                const x = i * dx;
+                return `<text x="${x}" y="${H - 8}" font-size="11" fill="#2d3e50" text-anchor="middle">${m.label}<tspan x="${x}" dy="-${H - 30}" font-size="9" fill="#7a9db1">${(m.inflow/1000).toFixed(1)}k</tspan></text>`;
+            }).join('');
+            const totalIn = months.reduce((s,m)=>s+m.inflow,0);
+            cont.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block;">
+                <defs>
+                    <linearGradient id="riverGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#42a5f5" stop-opacity="0.9"/>
+                        <stop offset="100%" stop-color="#1e88e5" stop-opacity="0.7"/>
+                    </linearGradient>
+                </defs>
+                <path d="${riverPath}" fill="url(#riverGrad)" stroke="#1976d2" stroke-width="1.5"/>
+                <path d="M 0 ${H/2} Q ${W/4} ${H/2 - 10} ${W/2} ${H/2} T ${W} ${H/2}" stroke="white" stroke-width="1" fill="none" opacity="0.5">
+                    <animate attributeName="d" values="M 0 ${H/2} Q ${W/4} ${H/2 - 10} ${W/2} ${H/2} T ${W} ${H/2};M 0 ${H/2} Q ${W/4} ${H/2 + 10} ${W/2} ${H/2} T ${W} ${H/2};M 0 ${H/2} Q ${W/4} ${H/2 - 10} ${W/2} ${H/2} T ${W} ${H/2}" dur="6s" repeatCount="indefinite"/>
+                </path>
+                ${boats}
+                ${labels}
+                <text x="10" y="20" font-size="13" font-weight="bold" fill="#1565c0">💰 ${(totalIn/1000).toFixed(1)} k CHF encaissés sur 12 mois</text>
+            </svg>`;
         }
 
         // ═══════════════════════════════════════════════════════════

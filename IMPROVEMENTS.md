@@ -2,6 +2,28 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-29 — v2.14 Cinq nouveaux flux visuels interactifs sur le Dashboard
+
+5 widgets ajoutés à la fin du Dashboard, chacun configurable individuellement via les permissions de groupe :
+
+- **🌡️ Heatmap CA — 52 dernières semaines** : grille jour-par-jour style « GitHub contributions » (52×7), couleur log-échelle (gris → vert foncé), tooltip CHF par jour, **clic → filtrage automatique** des prestations sur cette date.
+- **🗂️ Kanban approbation drag & drop** : 5 colonnes (Brouillon · Soumis · Approuvé · Rejeté · Facturé). Cartes draggables HTML5 — relâcher dans une autre colonne déclenche la transition correspondante (`requestPrestationApproval`, `approvePrestation`, `rejectPrestation`). Synchronisation immédiate avec le reste de l'app.
+- **🕸️ Graphe relationnel** : SVG dynamique avec simulation de forces (répulsion + ressort) en JS natif, pas de D3. Trois types de nœuds (Clients bleu, Prestations violet, Bénéficiaires vert). Drag possible, toggles visibilité, bouton « Réorganiser ».
+- **🏙️ Vue Ville** : 10 bâtiments isométriques cliquables, chaque bâtiment = un module de l'app. Badges rouges pour signaler les éléments à traiter (devis, approbations en attente, stock bas). Routes ondulées + soleil + nuages décoratifs.
+- **🌊 Rivière de trésorerie** : SVG animé, courant dont la largeur représente le flux mensuel net sur 12 mois, gradient bleu, ondulation animée, **bateaux ⛵ flottants** (prestations actives) qui dérivent via `<animate>`.
+
+Tous protégés par try/catch dans `renderDashboard()` — un échec d'une vue ne bloque pas le reste. Tous inscrits dans `DASHBOARD_WIDGETS` pour respecter les permissions par groupe.
+
+### Optimisations performance (reprise safe de la PR #102 abandonnée)
+
+- **`<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>`** ajouté → handshake TLS anticipé pour les 4 libs CDN (html2pdf, xlsx, three.js, Chart.js).
+- **`defer`** appliqué aux 4 scripts CDN → ne bloquent plus le parsing HTML, exécutés dans l'ordre juste avant `DOMContentLoaded`. Vérifié : aucun usage top-level de ces libs (toutes les inits passent par `DOMContentLoaded` / `load` / event handlers).
+- **`decoding="async"`** ajouté à l'`<img>` des aperçus d'attachements (en plus du `loading="lazy"` déjà présent).
+
+PR #102 (« minification + lazy loading ») fermée — sa base était figée sur `e582261` (~v2.3, 10 versions de retard), donc impossible à merger. Reset de `dev` sur main effectué pour repartir propre.
+
+---
+
 ## 2026-04-28 — v2.13 Excel partout : modèle, import & export
 
 - Sur les 5 onglets BDD (Catalogue, Consommables, Stock, Clients, Bénéficiaires), chaque panneau **Modèle / Importer / Exporter** propose désormais **CSV ET Excel** côte à côte.
