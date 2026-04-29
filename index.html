@@ -3687,6 +3687,8 @@
                             <input type="date" id="date">
                         </div>
                     </div>
+                    <!-- v2.16 — Suggestions tarifaires basées sur l'historique -->
+                    <div id="pricingSuggestions" style="display:none;margin:6px 0 12px;padding:10px 14px;background:linear-gradient(135deg,#fdf8f4,#f0ddd4);border-left:3px solid #c97866;border-radius:6px;font-size:0.85em;color:#a45a52;"></div>
                     <div class="form-row" style="background:#f0f8ff;border-radius:8px;padding:8px 12px;border:1px dashed #a8d5e2;">
                         <div class="form-group">
                             <label style="color:#5a7b8f;font-size:0.88em;">📅 Début prévu <span style="font-size:0.8em;font-weight:400;color:#a0b8cc;">(planification)</span></label>
@@ -11512,6 +11514,41 @@
                 btn.title = 'Enregistrer la prestation (⌘/Ctrl+S)';
             }
             try { updateLiveDevisPreview(); } catch (e) {}
+            try { updatePricingSuggestions(); } catch (e) {}
+        }
+
+        // v2.16 — Suggestions tarifaires basées sur l'historique
+        function updatePricingSuggestions() {
+            const panel = document.getElementById('pricingSuggestions');
+            if (!panel) return;
+            const prest = (document.getElementById('prestation')?.value || '').trim().toLowerCase();
+            const client = (document.getElementById('client')?.value || '').trim().toLowerCase();
+            if (prest.length < 3 && client.length < 3) { panel.style.display = 'none'; return; }
+            if (!Array.isArray(prestationsSauvegardees) || prestationsSauvegardees.length === 0) { panel.style.display = 'none'; return; }
+
+            const matches = prestationsSauvegardees.filter(p => {
+                if (!p.prixVente || p.prixVente <= 0) return false;
+                const pp = (p.prestation || '').toLowerCase();
+                const pc = (p.client || '').toLowerCase();
+                const matchPrest = prest.length >= 3 && pp.includes(prest);
+                const matchClient = client.length >= 3 && pc.includes(client);
+                return matchPrest || matchClient;
+            });
+            if (matches.length < 2) { panel.style.display = 'none'; return; }
+
+            const prices = matches.map(p => p.prixVente).sort((a, b) => a - b);
+            const sum = prices.reduce((s, v) => s + v, 0);
+            const mean = sum / prices.length;
+            const median = prices.length % 2 ? prices[(prices.length - 1) / 2] : (prices[prices.length / 2 - 1] + prices[prices.length / 2]) / 2;
+            const min = prices[0];
+            const max = prices[prices.length - 1];
+            const fmt = v => v.toFixed(0);
+            const matchType = (prest.length >= 3 ? `« ${prest} »` : '') + (prest.length >= 3 && client.length >= 3 ? ' ou ' : '') + (client.length >= 3 ? `client « ${client} »` : '');
+            panel.innerHTML = `<strong>💡 Suggestions tarifaires</strong> · ${matches.length} prestation${matches.length>1?'s':''} similaire${matches.length>1?'s':''} (${matchType})<br>
+                <span style="display:inline-block;margin:4px 12px 0 0;"><strong>Moyenne :</strong> ${fmt(mean)} CHF</span>
+                <span style="display:inline-block;margin:4px 12px 0 0;"><strong>Médiane :</strong> ${fmt(median)} CHF</span>
+                <span style="display:inline-block;margin:4px 12px 0 0;"><strong>Fourchette :</strong> ${fmt(min)} – ${fmt(max)} CHF</span>`;
+            panel.style.display = 'block';
         }
 
         // Panneau récap live : mise à jour temps / coût / jauge marge
@@ -22680,6 +22717,96 @@
         let _cmdPaletteActiveIdx = 0;
         let _cmdPaletteFiltered = [];
 
+        // v2.16 — Recherche dans les vraies données (clients, prestations, gestes, bénéficiaires, apprenants, docs)
+        function _buildDynamicCmdItems(query) {
+            if (!query || query.length < 2) return [];
+            const q = query.toLowerCase();
+            const items = [];
+            try {
+                if (typeof clientsData === 'object' && clientsData) {
+                    Object.keys(clientsData).forEach(nom => {
+                        if (nom.toLowerCase().includes(q)) {
+                            const c = clientsData[nom] || {};
+                            items.push({
+                                section: 'Clients', icon: '🏢',
+                                label: `${nom}${c.tel ? ' · ' + c.tel : ''}`,
+                                run: () => { switchTab('clients'); setTimeout(() => { const inp = document.getElementById('searchClient'); if (inp) { inp.value = nom; inp.dispatchEvent(new Event('input')); } }, 200); }
+                            });
+                        }
+                    });
+                }
+            } catch(e) {}
+            try {
+                if (Array.isArray(prestationsSauvegardees)) {
+                    prestationsSauvegardees.slice(0, 500).forEach(p => {
+                        const txt = `${p.prestation || ''} ${p.client || ''} ${p.reference || ''}`.toLowerCase();
+                        if (txt.includes(q)) {
+                            items.push({
+                                section: 'Prestations', icon: '📋',
+                                label: `${(p.prestation || '—').slice(0,40)} — ${p.client || '—'} (${(p.prixVente||0).toFixed(0)} CHF)`,
+                                run: () => { switchTab('prestations'); setTimeout(() => { const inp = document.getElementById('searchPrestations'); if (inp) { inp.value = p.prestation || p.client || ''; inp.dispatchEvent(new Event('input')); } }, 200); }
+                            });
+                        }
+                    });
+                }
+            } catch(e) {}
+            try {
+                if (Array.isArray(catalogueGestes)) {
+                    catalogueGestes.forEach(g => {
+                        const txt = `${g.code || ''} ${g.description || ''}`.toLowerCase();
+                        if (txt.includes(q)) {
+                            items.push({
+                                section: 'Catalogue gestes', icon: '🛠️',
+                                label: `${g.code} — ${(g.description || '').slice(0,50)}`,
+                                run: () => { switchTab('catalogue'); }
+                            });
+                        }
+                    });
+                }
+            } catch(e) {}
+            try {
+                if (Array.isArray(beneficiaires)) {
+                    beneficiaires.forEach(b => {
+                        const lbl = `${b.prenom || ''} ${b.nom || ''}`.trim();
+                        if (lbl.toLowerCase().includes(q)) {
+                            items.push({
+                                section: 'Bénéficiaires', icon: '🌊',
+                                label: `${lbl}${b.statut ? ' · ' + b.statut : ''}`,
+                                run: () => { switchTab('accompagnement'); }
+                            });
+                        }
+                    });
+                }
+            } catch(e) {}
+            try {
+                if (Array.isArray(learnersList)) {
+                    learnersList.forEach(l => {
+                        if ((l.name || '').toLowerCase().includes(q)) {
+                            items.push({
+                                section: 'Apprenants', icon: '🎓',
+                                label: `${l.name}${l.category ? ' · ' + l.category : ''}`,
+                                run: () => { switchTab('formation-logistique'); setTimeout(() => { const sel = document.getElementById('learnerFormationSelect'); if (sel) { sel.value = l.id; sel.dispatchEvent(new Event('change')); } }, 200); }
+                            });
+                        }
+                    });
+                }
+            } catch(e) {}
+            try {
+                if (Array.isArray(referenceDocuments)) {
+                    referenceDocuments.forEach(d => {
+                        if ((d.title || '').toLowerCase().includes(q)) {
+                            items.push({
+                                section: 'Documents', icon: '📄',
+                                label: `${d.title}${d.type ? ' · ' + d.type : ''}`,
+                                run: () => { if (d.url) window.open(d.url, '_blank'); else switchTab('formation-logistique'); }
+                            });
+                        }
+                    });
+                }
+            } catch(e) {}
+            return items.slice(0, 30);
+        }
+
         function openCmdPalette() {
             const el = document.getElementById('cmdPalette');
             if (!el) return;
@@ -22695,11 +22822,13 @@
         function filterCmdPalette(query) {
             const q = (query || '').trim().toLowerCase();
             const isAdmin = typeof hasPermission === 'function' ? hasPermission('admin') : true;
-            _cmdPaletteFiltered = _cmdPaletteCommands.filter(c => {
+            const staticMatches = _cmdPaletteCommands.filter(c => {
                 if (c.admin && !isAdmin) return false;
                 if (!q) return true;
                 return c.label.toLowerCase().includes(q) || (c.section || '').toLowerCase().includes(q);
             });
+            const dynamicMatches = _buildDynamicCmdItems(q);
+            _cmdPaletteFiltered = [...staticMatches, ...dynamicMatches];
             _cmdPaletteActiveIdx = 0;
             _renderCmdPaletteList();
         }
