@@ -7188,9 +7188,21 @@
               </div>
 
               <div id="dashSectionVille" class="section" style="margin-top:20px;">
-                <h2>🏙️ Vue Ville — Navigation spatiale</h2>
-                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Cliquez sur un bâtiment pour ouvrir le module correspondant. Les badges signalent les éléments à traiter.</div>
-                <div id="dashVilleMap" style="width:100%;background:linear-gradient(180deg,#cfe6f5 0%,#e8f4fa 50%,#f5f1e8 100%);border-radius:12px;border:1px solid #bcd5e6;"></div>
+                <h2>📚 Récapitulatif d'apprentissage</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Résumé de votre progression et des concepts pratiqués.</div>
+                <div id="learnerRecapContent" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;"></div>
+              </div>
+
+              <div id="dashSectionDefi" class="section" style="margin-top:20px;">
+                <h2>🎯 Défi du jour</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Un cas pratique ou scénario à résoudre pour appliquer vos connaissances.</div>
+                <div id="learnerDefiContent" style="background:#f8fafc;border:1px solid #e0e8ed;border-radius:10px;padding:16px;"></div>
+              </div>
+
+              <div id="dashSectionRessources" class="section" style="margin-top:20px;">
+                <h2>📖 Ressources pédagogiques</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Guides, vidéos et documents pour approfondir.</div>
+                <div id="learnerRessourcesContent" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;"></div>
               </div>
 
               <div id="dashSectionRiver" class="section" style="margin-top:20px;">
@@ -7562,7 +7574,9 @@
             { id: 'dashSectionHeatmap',   label: '🌡️ Heatmap CA — 52 semaines',             display: 'block' },
             { id: 'dashSectionKanban',    label: '🗂️ Kanban approbation drag & drop',        display: 'block' },
             { id: 'dashSectionGraph',     label: '🕸️ Graphe relationnel',                    display: 'block' },
-            { id: 'dashSectionVille',     label: '🏙️ Vue Ville — Navigation spatiale',       display: 'block' },
+            { id: 'dashSectionVille',     label: '📚 Récapitulatif d\'apprentissage',       display: 'block' },
+            { id: 'dashSectionDefi',      label: '🎯 Défi du jour',                         display: 'block' },
+            { id: 'dashSectionRessources',label: '📖 Ressources pédagogiques',             display: 'block' },
             { id: 'dashSectionRiver',     label: '🌊 Rivière de trésorerie',                 display: 'block' },
             { id: 'dashSectionEcarts',    label: '📐 Écarts observés — Top déviations',       display: 'block' },
         ];
@@ -10832,6 +10846,73 @@
                     </div>` : `<p style="font-size:0.85em;color:#9aacb8;font-style:italic;">Aucun jalon enregistré pour ce bénéficiaire.</p>`}
                 </div>`;
             }).join('');
+        }
+
+        // ════════════════════════════════════════════════════════
+        // Dashboard Apprenant — Récapitulatif, Défi, Ressources
+        function renderLearnerDashboard() {
+            renderLearnerRecap();
+            renderLearnerDefi();
+            renderLearnerRessources();
+        }
+
+        function renderLearnerRecap() {
+            const el = document.getElementById('learnerRecapContent');
+            if (!el) return;
+            const concepts = [
+                { emoji: '💼', titre: 'Calculateur', desc: 'Maîtrise des devis et tarifs' },
+                { emoji: '📦', titre: 'Gestion Stock', desc: 'Mouvements et valorisation' },
+                { emoji: '📊', titre: 'Prestations', desc: 'Saisie et suivi des services' },
+                { emoji: '👥', titre: 'Clients', desc: 'Gestion des informations clients' },
+                { emoji: '📈', titre: 'Comparateur', desc: 'Analyse des déviations' },
+                { emoji: '📋', titre: 'Procédures', desc: 'Documentation et protocols' }
+            ];
+            el.innerHTML = concepts.map(c => `
+                <div style="background:#f8fafc;border:1px solid #e0e8ed;border-radius:10px;padding:12px;text-align:center;">
+                    <div style="font-size:2em;margin-bottom:6px;">${c.emoji}</div>
+                    <div style="font-weight:600;font-size:0.95em;color:#2d3e50;margin-bottom:4px;">${c.titre}</div>
+                    <div style="font-size:0.8em;color:#7a9db1;">${c.desc}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderLearnerDefi() {
+            const el = document.getElementById('learnerDefiContent');
+            if (!el) return;
+            const defis = [
+                { titre: '🎯 Defi 1: Créer un devis complet', desc: 'Créez un devis avec 3 prestations différentes, validez et exportez.' },
+                { titre: '🎯 Defi 2: Analyser les écarts', desc: 'Identifiez 2 écarts dans une prestation et proposez des solutions.' },
+                { titre: '🎯 Defi 3: Gérer un mouvement de stock', desc: 'Effectuez une entrée et une sortie de stock, puis analysez l\'impact.' }
+            ];
+            const defiDuJour = defis[new Date().getDate() % defis.length];
+            el.innerHTML = `
+                <div style="padding:12px;background:#e8f4f8;border-left:4px solid #a8d5e2;border-radius:6px;">
+                    <div style="font-weight:700;color:#6b8fa3;margin-bottom:8px;">${defiDuJour.titre}</div>
+                    <div style="color:#5a7b8f;font-size:0.95em;margin-bottom:12px;">${defiDuJour.desc}</div>
+                    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.9em;" onclick="toast('Défi lancé! Vous avez 30 minutes. Bonne chance!', 'success')">▶ Commencer le défi</button>
+                </div>
+            `;
+        }
+
+        function renderLearnerRessources() {
+            const el = document.getElementById('learnerRessourcesContent');
+            if (!el) return;
+            const ressources = [
+                { emoji: '📖', titre: 'Guide complet', type: 'Documentation', desc: 'Tous les modules expliqués pas à pas' },
+                { emoji: '🎥', titre: 'Tutoriels vidéo', type: 'Vidéo', desc: 'Démonstrations pratiques des fonctionnalités' },
+                { emoji: '❓', titre: 'FAQ Apprenant', type: 'Questions', desc: 'Réponses aux questions les plus fréquentes' },
+                { emoji: '📋', titre: 'Checklist', type: 'À faire', desc: 'Liste des étapes pour maîtriser chaque module' },
+                { emoji: '🔗', titre: 'Glossaire', type: 'Termes', desc: 'Définition de tous les termes métier' },
+                { emoji: '💡', titre: 'Conseils', type: 'Astuces', desc: 'Raccourcis et bonnes pratiques' }
+            ];
+            el.innerHTML = ressources.map(r => `
+                <div style="background:#f8fafc;border:1px solid #e0e8ed;border-radius:10px;padding:12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(168,213,226,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+                    <div style="font-size:1.8em;margin-bottom:6px;">${r.emoji}</div>
+                    <div style="font-weight:600;font-size:0.95em;color:#2d3e50;margin-bottom:2px;">${r.titre}</div>
+                    <div style="font-size:0.75em;color:#a8d5e2;font-weight:500;margin-bottom:4px;">${r.type}</div>
+                    <div style="font-size:0.8em;color:#7a9db1;">${r.desc}</div>
+                </div>
+            `).join('');
         }
 
         // ════════════════════════════════════════════════════════
@@ -22628,7 +22709,7 @@
             try { renderCAHeatmap(); } catch (e) { console.warn('renderCAHeatmap failed:', e); }
             try { renderApprovalKanban(); } catch (e) { console.warn('renderApprovalKanban failed:', e); }
             try { renderRelationGraph(); } catch (e) { console.warn('renderRelationGraph failed:', e); }
-            try { renderVilleMap(); } catch (e) { console.warn('renderVilleMap failed:', e); }
+            try { renderLearnerDashboard(); } catch (e) { console.warn('renderLearnerDashboard failed:', e); }
             try { renderTresorerieRiver(); } catch (e) { console.warn('renderTresorerieRiver failed:', e); }
             try { renderEcartsWidget(); } catch (e) { console.warn('renderEcartsWidget failed:', e); }
         }
