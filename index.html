@@ -5169,6 +5169,39 @@
                 </div>
 
                 <div class="section">
+                    <h2>📦 Modèle · Import · Export — Apprenants</h2>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV / Excel</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : nom, categorie, date_debut, statut</p>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-secondary btn-small" onclick="downloadLearnersTemplate()">⬇ CSV</button>
+                                <button class="btn btn-small" onclick="downloadLearnersTemplateXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬇ Excel</button>
+                            </div>
+                        </div>
+                        <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV / Excel</h3>
+                            <div class="import-drop-zone" id="learnerDropZone" onclick="document.getElementById('learnerCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleLearnerCsvDrop(event)" style="margin:0;">
+                                <p>📄 Cliquez ou glissez un fichier CSV ou Excel ici</p>
+                                <p style="font-size:0.8em;margin-top:4px;">Format : nom,categorie,date_debut,statut</p>
+                            </div>
+                            <input type="file" id="learnerCsvInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importLearnersCSV(this)">
+                        </div>
+                        <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
+                            <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
+                            <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV / Excel</h3>
+                            <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez la liste des apprenants avec leur statut.</p>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn btn-small" onclick="exportLearnersCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ CSV</button>
+                                <button class="btn btn-small" onclick="exportLearnersXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬆ Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
                     <h2>📋 Liste des apprenants</h2>
                     <div id="learnersContainer" style="display:grid;gap:12px;"></div>
                     <p id="noLearnersMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun apprenant enregistré</p>
@@ -24906,6 +24939,107 @@
                 const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
                 const rows = lines.map(line => line.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
                 _applyBeneficiairesRows(rows);
+                clearInput();
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // Learners (Formation Admin) — Import/Export CSV/Excel
+        // ════════════════════════════════════════════════════════════
+
+        function downloadLearnersTemplate() {
+            const header = 'nom,categorie,date_debut,statut';
+            const ex1 = 'Pierre Martin,Réception,2026-01-15,en-cours';
+            const ex2 = 'Marie Dupont,Contrôle,2025-09-01,termine';
+            _downloadCSV([header, ex1, ex2].join('\n'), 'modele_apprenants.csv');
+        }
+
+        function downloadLearnersTemplateXLSX() {
+            const aoa = [
+                ['nom','categorie','date_debut','statut'],
+                ['Pierre Martin','Réception','2026-01-15','en-cours'],
+                ['Marie Dupont','Contrôle','2025-09-01','termine'],
+            ];
+            _downloadXLSX(aoa, 'Apprenants', 'modele_apprenants.xlsx');
+        }
+
+        function exportLearnersCSV() {
+            if (!learnersList.length) { toast('Aucun apprenant enregistré', 'warning'); return; }
+            const header = 'nom,categorie,date_debut,statut';
+            const rows = learnersList.map(l =>
+                [l.name || '', l.category || '', l.startDate || '', l.statut || 'en-cours']
+                    .map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')
+            );
+            _downloadCSV([header, ...rows].join('\n'), `apprenants_${new Date().toISOString().slice(0, 10)}.csv`);
+            toast('✅ Apprenants exportés', 'success');
+        }
+
+        function exportLearnersXLSX() {
+            if (!learnersList.length) { toast('Aucun apprenant enregistré', 'warning'); return; }
+            const aoa = [['nom','categorie','date_debut','statut']];
+            learnersList.forEach(l => aoa.push([
+                l.name || '', l.category || '', l.startDate || '', l.statut || 'en-cours'
+            ]));
+            _downloadXLSX(aoa, 'Apprenants', `apprenants_${new Date().toISOString().slice(0,10)}.xlsx`);
+            toast('✅ Apprenants exportés (Excel)', 'success');
+        }
+
+        function handleLearnerCsvDrop(e) {
+            e.preventDefault();
+            document.getElementById('learnerDropZone').style.background = '';
+            const file = e.dataTransfer.files[0];
+            if (file) importLearnersCSV({ files: [file] });
+        }
+
+        function _applyLearnersRows(rows) {
+            try {
+                if (rows.length < 2) { toast('Fichier vide ou sans données', 'warning'); return; }
+                const headers = rows[0].map(h => String(h ?? '').trim().toLowerCase());
+                const iNom    = headers.indexOf('nom');
+                const iCateg  = headers.indexOf('categorie');
+                const iDate   = headers.indexOf('date_debut');
+                const iStatut = headers.indexOf('statut');
+                if (iNom < 0 || iCateg < 0) { toast('Colonnes "nom" et "categorie" requises', 'danger'); return; }
+                let added = 0;
+                rows.slice(1).forEach(cols => {
+                    const nom = String(cols[iNom] ?? '').trim();
+                    if (!nom) return;
+                    const exists = learnersList.find(l => l.name === nom);
+                    if (exists) return;
+                    learnersList.push({
+                        id:        Date.now() + added,
+                        name:      nom,
+                        category:  iCateg >= 0 ? String(cols[iCateg] ?? '').trim() : '',
+                        startDate: iDate >= 0 ? String(cols[iDate] ?? '').trim() : new Date().toISOString().split('T')[0],
+                        statut:    iStatut >= 0 ? String(cols[iStatut] ?? '').trim() : 'en-cours',
+                        progress:  {},
+                        assignedDocuments: [],
+                        assignedFormations: [],
+                        quizResults: {}
+                    });
+                    added++;
+                });
+                saveFormationData();
+                updateFormationSelectors();
+                renderLearners();
+                toast(`✅ ${added} apprenant(s) importé(s)`, 'success');
+            } catch (err) { toast('Erreur lors de l\'import apprenants', 'error'); console.error(err); }
+        }
+
+        function importLearnersCSV(input) {
+            const file = input.files ? input.files[0] : input;
+            if (!file) return;
+            const clearInput = () => { if (input.value !== undefined) input.value = ''; };
+            if (_isXLSXFile(file)) {
+                _readXLSXAsAOA(file, rows => { _applyLearnersRows(rows); clearInput(); });
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+                const rows = lines.map(line => line.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+                _applyLearnersRows(rows);
                 clearInput();
             };
             reader.readAsText(file, 'utf-8');
