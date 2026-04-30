@@ -7359,6 +7359,9 @@
     </aside>
 
     <script>
+        // Global variables - declare early to avoid initialization order issues
+        let _autosaveDirty = false;
+
         // === Helpers de formatage numérique (format suisse avec apostrophe ' comme séparateur de milliers) ===
         // fmtNum(1234.5) → "1'234.50" ; fmtNum(1234.5, 0) → "1'235"
         function fmtNum(n, decimals = 2) {
@@ -24563,7 +24566,6 @@
         // ============================================================
         // AUTOSAVE
         // ============================================================
-        let _autosaveDirty = false;
         function markDirty() { _autosaveDirty = true; const dot = document.getElementById('autosaveDot'); if (dot) dot.style.background='#e67e22'; }
         function autosaveNow() {
             if (!_autosaveDirty) return;
@@ -32272,7 +32274,7 @@ function submitDebriefInput() {
     const checkedItems = [];
     document.querySelectorAll('#debriefBody input[type="checkbox"]:checked').forEach(cb => {
         const question = DEBRIEF_QUESTIONS.find(q => q.id === cb.dataset.question);
-        const textarea = document.querySelector(\`.debrief-note[data-question="\${cb.dataset.question}"]\`);
+        const textarea = document.querySelector(`.debrief-note[data-question="${cb.dataset.question}"]`);
         const note = textarea ? textarea.value.trim() : '';
 
         if (question) {
