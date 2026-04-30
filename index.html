@@ -7361,6 +7361,8 @@
     <script>
         // Global variables - declare early to avoid initialization order issues
         let _autosaveDirty = false;
+        let _tabsOrder = null;
+        let _liveCollapsed = false;
 
         // === Helpers de formatage numérique (format suisse avec apostrophe ' comme séparateur de milliers) ===
         // fmtNum(1234.5) → "1'234.50" ; fmtNum(1234.5, 0) → "1'235"
@@ -8738,7 +8740,6 @@
         }
 
         // ── Réorganisation des onglets ─────────────────────────────
-        let _tabsOrder = null;
 
         function getDefaultTabsOrder() {
             const tabsBar = document.getElementById('tabsBar');
@@ -30579,7 +30580,6 @@
             window.addEventListener('offline', () => { updateOnlineUI(); if (typeof toast === 'function') toast('⚠️ Mode hors ligne — les données sont sauvegardées localement.', 'warning'); });
             document.addEventListener('DOMContentLoaded', updateOnlineUI);
         })();
-    </script>
 
     <!-- Auth : écran de connexion -->
     <div id="authOverlay" class="auth-overlay" style="display:none;">
@@ -31008,9 +31008,6 @@
     </div>
 </div>
 
-<script>
-let _autosaveDirty = false;
-let _liveCollapsed = false;
 function toggleLiveCollapse() {
     const content = document.getElementById('liveContent');
     const marge = document.getElementById('liveMargeSection');
@@ -32827,7 +32824,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try { renderAccompClinicalBody(); } catch(e) { console.warn('Clinical body init:', e); }
     try { renderAccompTimeline(); } catch(e) { console.warn('Timeline init:', e); }
 });
-    </script>
 
 <!-- ── v2.17 — Outils cliniques flottants ─────────────────────────── -->
 <button id="clinicalFab" type="button" onclick="openClinicalModal()" aria-label="Outils cliniques" title="Outils cliniques (clinique du travail)">
@@ -32965,5 +32961,6 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 
+    </script>
 </body>
 </html>
