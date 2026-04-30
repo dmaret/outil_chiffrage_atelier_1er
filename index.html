@@ -8591,7 +8591,6 @@
             const savedTheme = localStorage.getItem('themePrefs');
             try { if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme)); } catch(e) { console.error('Error loading theme preferences:', e); }
             loadConfig();
-            applyTabGroupColors();
         }
 
         /**
@@ -12070,6 +12069,11 @@
         // Rendu initial des templates au chargement
         document.addEventListener('DOMContentLoaded', () => {
             try { renderPrestationTemplates(); } catch (e) { console.warn('renderPrestationTemplates failed:', e); }
+        });
+
+        // Apply tab group colors and separators once DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            try { applyTabGroupColors(); } catch (e) { console.warn('applyTabGroupColors failed:', e); }
         });
 
         /**
