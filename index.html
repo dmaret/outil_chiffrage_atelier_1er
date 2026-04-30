@@ -31149,14 +31149,6 @@ function _renderComparator(p) {
     `;
 
     let html = `
-        <div class="compare-col col-prescrit">
-            <div class="compare-col-title">📋 Prescrit client</div>
-            <label>Objectifs / demandes</label>
-            <textarea id="prescritObjectifs" placeholder="Qu'a demandé le client ? Ses attentes ?">${escapeHtml(prescrit.objectifs || '')}</textarea>
-            <label style="margin-top:8px;">Contraintes connues</label>
-            <textarea id="prescritContraintes" placeholder="Délais, moyens, restrictions de sécurité…">${escapeHtml(prescrit.contraintes || '')}</textarea>
-        </div>
-
         <div class="compare-col col-procedure">
             <div class="compare-col-title">⚙️ Procédure CEA</div>
             <div class="compare-template-pick">
@@ -31173,6 +31165,14 @@ function _renderComparator(p) {
                     </div>
                 `).join('')}
             </div>
+        </div>
+
+        <div class="compare-col col-prescrit">
+            <div class="compare-col-title">📋 Prescrit client</div>
+            <label>Objectifs / demandes</label>
+            <textarea id="prescritObjectifs" placeholder="Qu'a demandé le client ? Ses attentes ?">${escapeHtml(prescrit.objectifs || '')}</textarea>
+            <label style="margin-top:8px;">Contraintes connues</label>
+            <textarea id="prescritContraintes" placeholder="Délais, moyens, restrictions de sécurité…">${escapeHtml(prescrit.contraintes || '')}</textarea>
         </div>
 
         <div class="compare-col col-reel">
