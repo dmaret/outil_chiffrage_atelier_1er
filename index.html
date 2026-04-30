@@ -3508,6 +3508,88 @@
         }
         .type-debrief { border-left: 4px solid var(--terra-primary); }
         .type-debrief .timeline-event-icon { border-color: var(--terra-primary); }
+
+        /* ── v2.22 Statistiques cliniques ──────────────────────────── */
+        #clinicalStatsModal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 5000; align-items: center;
+            justify-content: center; padding: 16px;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        #clinicalStatsModal.visible {
+            display: flex; opacity: 1;
+        }
+        #clinicalStatsModalBox {
+            background: white; border-radius: 16px; padding: 0;
+            max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25); border: 2px solid var(--terra-primary);
+        }
+        body.dark-mode #clinicalStatsModalBox {
+            background: #2d2520; border-color: var(--terra-accent); color: #f0ddd4;
+        }
+        #clinicalStatsModalHeader {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: linear-gradient(135deg, var(--terra-primary), var(--terra-light));
+            border-bottom: 2px solid var(--terra-primary);
+        }
+        body.dark-mode #clinicalStatsModalHeader {
+            background: linear-gradient(135deg, #3a322a, #2d2520);
+        }
+        #clinicalStatsModalHeader h3 {
+            margin: 0; color: var(--terra-dark); font-size: 1.1em;
+        }
+        body.dark-mode #clinicalStatsModalHeader h3 { color: var(--terra-light); }
+        #clinicalStatsModalHeader button {
+            background: rgba(255,255,255,0.3); border: none; border-radius: 50%;
+            width: 32px; height: 32px; font-size: 1.2em; cursor: pointer;
+            transition: background 0.2s;
+        }
+        #clinicalStatsModalHeader button:hover { background: rgba(255,255,255,0.5); }
+        #clinicalStatsBody {
+            padding: 16px;
+        }
+        body.dark-mode #clinicalStatsBody { background: #1e1812; }
+
+        /* ── v2.23 Dashboard clinique ──────────────────────────── */
+        #clinicalDashboardModal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 5000; align-items: center;
+            justify-content: center; padding: 16px;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        #clinicalDashboardModal.visible {
+            display: flex; opacity: 1;
+        }
+        #clinicalDashboardModalBox {
+            background: white; border-radius: 16px; padding: 0;
+            max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25); border: 2px solid var(--terra-primary);
+        }
+        body.dark-mode #clinicalDashboardModalBox {
+            background: #2d2520; border-color: var(--terra-accent); color: #f0ddd4;
+        }
+        #clinicalDashboardModalHeader {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: linear-gradient(135deg, var(--terra-primary), var(--terra-light));
+            border-bottom: 2px solid var(--terra-primary);
+        }
+        body.dark-mode #clinicalDashboardModalHeader {
+            background: linear-gradient(135deg, #3a322a, #2d2520);
+        }
+        #clinicalDashboardModalHeader h3 {
+            margin: 0; color: var(--terra-dark); font-size: 1.1em;
+        }
+        body.dark-mode #clinicalDashboardModalHeader h3 { color: var(--terra-light); }
+        #clinicalDashboardModalHeader button {
+            background: rgba(255,255,255,0.3); border: none; border-radius: 50%;
+            width: 32px; height: 32px; font-size: 1.2em; cursor: pointer;
+            transition: background 0.2s;
+        }
+        #clinicalDashboardModalHeader button:hover { background: rgba(255,255,255,0.5); }
+        #clinicalDashboardBody {
+            padding: 16px;
+        }
+        body.dark-mode #clinicalDashboardBody { background: #1e1812; }
     </style>
 </head>
 <body>
@@ -31304,6 +31386,407 @@ function _initGlossaryInteractions() {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  v2.23 — Dashboard clinique (Module G) + Rapports (Module H)
+// ═══════════════════════════════════════════════════════════
+function openClinicalDashboard() {
+    const modal = document.getElementById('clinicalDashboardModal');
+    if (!modal) return;
+
+    const body = document.getElementById('clinicalDashboardBody');
+    if (!body) return;
+
+    // Récupérer tous les bénéficiaires avec données cliniques
+    const beneficiairesWithData = [];
+    const allInputs = clinicalInputs || [];
+
+    const uniqueBenefIds = [...new Set(allInputs.map(ci => ci.beneficiaireId).filter(Boolean))];
+
+    uniqueBenefIds.forEach(benefId => {
+        const stats = _computeClinicalStats(benefId);
+        if (stats.total > 0) {
+            const benef = beneficiairesSauvegardees?.find(b => b.id === benefId);
+            beneficiairesWithData.push({
+                id: benefId,
+                name: benef?.nom || '?',
+                stats: stats,
+                benef: benef
+            });
+        }
+    });
+
+    // Trier par nombre d'inputs décroissant
+    beneficiairesWithData.sort((a, b) => b.stats.total - a.stats.total);
+
+    body.innerHTML = `
+        <div style="display:grid;gap:12px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:8px;">
+                <div style="background:#f0ddd4;padding:12px;border-radius:8px;text-align:center;">
+                    <div style="font-size:1.8em;font-weight:700;color:var(--terra-dark);">${allInputs.length}</div>
+                    <div style="font-size:0.85em;color:#666;">Inputs totaux</div>
+                </div>
+                <div style="background:#e8d4f0;padding:12px;border-radius:8px;text-align:center;">
+                    <div style="font-size:1.8em;font-weight:700;color:#6b4d8f;">${uniqueBenefIds.length}</div>
+                    <div style="font-size:0.85em;color:#666;">Bénéficiaires</div>
+                </div>
+                <div style="background:#d4e8f2;padding:12px;border-radius:8px;text-align:center;">
+                    <div style="font-size:1.8em;font-weight:700;color:#6b8fa3;">${(allInputs.filter(ci => ci.type === 'emotion').length)}</div>
+                    <div style="font-size:0.85em;color:#666;">Émotions</div>
+                </div>
+            </div>
+
+            <div style="border-top:1px solid #e0e0e0;padding-top:12px;">
+                <strong style="color:var(--terra-dark);">📋 Résumé par bénéficiaire</strong>
+                <div style="display:grid;gap:8px;margin-top:8px;">
+                    ${beneficiairesWithData.map(bd => `
+                        <div style="background:white;padding:10px;border-radius:6px;border-left:4px solid var(--terra-primary);display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <strong style="color:#2d3e50;">${bd.name}</strong>
+                                <div style="font-size:0.8em;color:#888;margin-top:2px;">
+                                    ${bd.stats.total} inputs • ${bd.stats.topEmotions.length ? bd.stats.topEmotions[0].emotion : '—'}
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <button class="clinical-btn-secondary" onclick="openClinicalStats('${bd.id}')" style="padding:4px 8px;font-size:0.85em;">📊 Voir stats</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            ${allInputs.filter(ci => ci.type === 'debrief').length ? `
+                <div style="border-top:1px solid #e0e0e0;padding-top:12px;background:#f0f4f8;padding:12px;border-radius:6px;">
+                    <strong>📋 Débriefings: ${allInputs.filter(ci => ci.type === 'debrief').length}</strong>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    modal.classList.add('visible');
+}
+
+function closeClinicalDashboard() {
+    const modal = document.getElementById('clinicalDashboardModal');
+    if (modal) modal.classList.remove('visible');
+}
+
+function _findCorrelations(beneficiaireId) {
+    const inputs = _getBeneficiaryClinicalInputs(beneficiaireId);
+    const correlations = [];
+
+    // Chercher les presta avec déviations + inputs cliniques
+    const prestationsWithData = new Map();
+
+    inputs.forEach(ci => {
+        if (ci.prestationId) {
+            if (!prestationsWithData.has(ci.prestationId)) {
+                prestationsWithData.set(ci.prestationId, { pId: ci.prestationId, inputs: [], deviations: [] });
+            }
+            prestationsWithData.get(ci.prestationId).inputs.push(ci);
+        }
+    });
+
+    // Récupérer les déviations (Module B)
+    prestationsSauvegardees?.forEach(p => {
+        if (prestationsWithData.has(p.id) && p.realExecute?.deviations) {
+            const entry = prestationsWithData.get(p.id);
+            entry.deviations = p.realExecute.deviations;
+            entry.label = p.prestation;
+
+            // Créer des insights si déviations + inputs négatifs
+            const negativeEmotions = entry.inputs.filter(ci =>
+                ci.type === 'emotion' &&
+                ['Colère', 'Frustration', 'Peur', 'Anxiété', 'Tristesse'].includes(ci.data?.emotion)
+            );
+            const doubleContraintes = entry.inputs.filter(ci => ci.type === 'double_contrainte');
+
+            if (entry.deviations.length > 0 && (negativeEmotions.length > 0 || doubleContraintes.length > 0)) {
+                correlations.push({
+                    pId: p.id,
+                    label: p.prestation,
+                    deviations: entry.deviations.length,
+                    negEmotions: negativeEmotions.length,
+                    doubleContraintes: doubleContraintes.length,
+                    insight: `Écarts observés (${entry.deviations.length}) + Émotions négatives (${negativeEmotions.length}) + Doubles contraintes (${doubleContraintes.length})`
+                });
+            }
+        }
+    });
+
+    return correlations;
+}
+
+function exportClinicalReportPDF(beneficiaireId) {
+    try {
+        const stats = _computeClinicalStats(beneficiaireId);
+        const benef = beneficiairesSauvegardees?.find(b => b.id === beneficiaireId);
+        const inputs = _getBeneficiaryClinicalInputs(beneficiaireId);
+        const correlations = _findCorrelations(beneficiaireId);
+
+        let html = `
+            <html><head><meta charset="UTF-8"><title>Rapport Clinique</title>
+            <style>
+                body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+                h1, h2 { color: #a8d5e2; border-bottom: 2px solid #a8d5e2; padding-bottom: 8px; }
+                .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+                .stat-box { background: #f0f4f8; padding: 10px; border-radius: 6px; text-align: center; }
+                .stat-box strong { color: #6b8fa3; font-size: 1.4em; display: block; }
+                .stat-box span { color: #888; font-size: 0.9em; }
+                table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background: #a8d5e2; color: white; font-weight: bold; }
+                ul { margin: 5px 0; padding-left: 20px; }
+                .alert { background: #fff3cd; border-left: 4px solid #f39c12; padding: 10px; margin: 10px 0; }
+            </style>
+            </head><body>
+            <h1>📋 Rapport Clinique — ${escapeHtml(benef?.nom || '?')}</h1>
+            <p><strong>Date:</strong> ${new Date().toLocaleDateString('fr-FR')}</p>
+
+            <h2>📊 Résumé</h2>
+            <div class="stats">
+                <div class="stat-box"><strong>${stats.total}</strong><span>Inputs cliniques</span></div>
+                <div class="stat-box"><strong>${stats.debriefings}</strong><span>Débriefings</span></div>
+                <div class="stat-box"><strong>${stats.topEmotions.length}</strong><span>Émotions principales</span></div>
+                <div class="stat-box"><strong>${stats.doubleContraintes}</strong><span>Doubles contraintes</span></div>
+            </div>
+
+            ${stats.topEmotions.length ? `
+                <h2>😊 Émotions principales</h2>
+                <table>
+                    <thead><tr><th>Émotion</th><th>Fréquence</th></tr></thead>
+                    <tbody>
+                    ${stats.topEmotions.map(e => `<tr><td>${e.emotion}</td><td>${e.count}x</td></tr>`).join('')}
+                    </tbody>
+                </table>
+            ` : ''}
+
+            ${stats.topZones.length ? `
+                <h2>🤝 Zones corporelles sensibles</h2>
+                <table>
+                    <thead><tr><th>Zone</th><th>Fréquence</th></tr></thead>
+                    <tbody>
+                    ${stats.topZones.map(z => `<tr><td>${z.zone}</td><td>${z.count}x</td></tr>`).join('')}
+                    </tbody>
+                </table>
+            ` : ''}
+
+            ${stats.riskAlerts.length ? `
+                <h2>🚨 Alertes détectées</h2>
+                ${stats.riskAlerts.map(alert => `<div class="alert"><strong>${alert.emoji} ${alert.label}</strong></div>`).join('')}
+            ` : ''}
+
+            ${correlations.length ? `
+                <h2>🔗 Corrélations détectées (Module B + Inputs)</h2>
+                <p>Prestations avec écarts observés ET réactions cliniques :</p>
+                <ul>
+                ${correlations.map(c => `<li><strong>${c.label}</strong> — ${c.insight}</li>`).join('')}
+                </ul>
+            ` : ''}
+
+            <h2>📜 Historique détaillé (${inputs.length} entrées)</h2>
+            <ul>
+            ${inputs.slice(-10).reverse().map(ci => {
+                const d = new Date(ci.timestamp);
+                return `<li><strong>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</strong> — ${typeLabels[ci.type] || ci.type}</li>`;
+            }).join('')}
+            </ul>
+            </body></html>
+        `;
+
+        const element = document.createElement('div');
+        element.innerHTML = html;
+        const opt = {
+            margin: 10,
+            filename: `rapport_${benef?.nom || 'bénéficiaire'}_${new Date().toISOString().split('T')[0]}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+        };
+        html2pdf().set(opt).from(html).save();
+        toast('✅ Rapport PDF généré', 'success');
+    } catch(e) {
+        console.error('exportClinicalReportPDF:', e);
+        toast('❌ Erreur lors de la génération du rapport', 'error');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  v2.22 — Statistiques cliniques & Alertes (Modules F)
+// ═══════════════════════════════════════════════════════════
+function _computeClinicalStats(beneficiaireId) {
+    const inputs = _getBeneficiaryClinicalInputs(beneficiaireId);
+    const stats = {
+        total: inputs.length,
+        byType: {},
+        emotions: {},
+        bodyZones: {},
+        messages: 0,
+        doubleContraintes: 0,
+        debriefings: 0,
+        topEmotions: [],
+        topZones: [],
+        topPatterns: [],
+        riskAlerts: []
+    };
+
+    const now = Date.now();
+    const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
+
+    inputs.forEach(ci => {
+        const type = ci.type;
+        stats.byType[type] = (stats.byType[type] || 0) + 1;
+
+        if (type === 'emotion') {
+            const emotion = ci.data?.emotion || 'Autre';
+            stats.emotions[emotion] = (stats.emotions[emotion] || 0) + 1;
+        } else if (type === 'ressenti_corporel') {
+            const zone = ci.data?.zone || 'Autre';
+            stats.bodyZones[zone] = (stats.bodyZones[zone] || 0) + 1;
+        } else if (type === 'message') {
+            stats.messages++;
+        } else if (type === 'double_contrainte') {
+            stats.doubleContraintes++;
+        } else if (type === 'debrief') {
+            stats.debriefings++;
+        }
+    });
+
+    // Top 3 émotions
+    stats.topEmotions = Object.entries(stats.emotions)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([emotion, count]) => ({ emotion, count }));
+
+    // Top 3 zones corporelles
+    stats.topZones = Object.entries(stats.bodyZones)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([zone, count]) => ({ zone, count }));
+
+    // Détection de patterns à risque
+    inputs.forEach(ci => {
+        const timestamp = new Date(ci.timestamp).getTime();
+        const isRecent = timestamp > oneWeekAgo;
+
+        if (ci.type === 'emotion' && isRecent) {
+            const emotion = ci.data?.emotion;
+            const negativeEmotions = ['Colère', 'Frustration', 'Peur', 'Anxiété', 'Tristesse', 'Découragement'];
+            if (negativeEmotions.includes(emotion)) {
+                const sameEmotionCount = inputs.filter(inp =>
+                    inp.type === 'emotion' &&
+                    inp.data?.emotion === emotion &&
+                    new Date(inp.timestamp).getTime() > oneWeekAgo
+                ).length;
+                if (sameEmotionCount >= 3 && !stats.riskAlerts.some(a => a.type === 'negative_emotion' && a.emotion === emotion)) {
+                    stats.riskAlerts.push({
+                        type: 'negative_emotion',
+                        emoji: '⚠️',
+                        label: `Émotion négative récurrente: ${emotion} (${sameEmotionCount}x cette semaine)`,
+                        severity: sameEmotionCount >= 5 ? 'high' : 'medium',
+                        emotion
+                    });
+                }
+            }
+        }
+
+        if (ci.type === 'double_contrainte' && isRecent) {
+            const dcCount = inputs.filter(inp =>
+                inp.type === 'double_contrainte' &&
+                new Date(inp.timestamp).getTime() > oneWeekAgo
+            ).length;
+            if (dcCount >= 2 && !stats.riskAlerts.some(a => a.type === 'double_contrainte_freq')) {
+                stats.riskAlerts.push({
+                    type: 'double_contrainte_freq',
+                    emoji: '🚨',
+                    label: `Doubles contraintes fréquentes (${dcCount}x cette semaine)`,
+                    severity: 'high'
+                });
+            }
+        }
+    });
+
+    return stats;
+}
+
+function openClinicalStats(beneficiaireId) {
+    const stats = _computeClinicalStats(beneficiaireId);
+    const modal = document.getElementById('clinicalStatsModal');
+    if (!modal) return;
+
+    const body = document.getElementById('clinicalStatsBody');
+    if (!body) return;
+
+    // Stocker benefId pour les exports
+    modal.dataset.benefId = beneficiaireId;
+
+    body.innerHTML = `
+        <div style="display:grid;gap:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div style="background:#f0ddd4;padding:12px;border-radius:8px;text-align:center;border-left:4px solid var(--terra-primary);">
+                    <div style="font-size:1.8em;font-weight:700;color:var(--terra-dark);">${stats.total}</div>
+                    <div style="font-size:0.85em;color:#666;">Inputs cliniques</div>
+                </div>
+                <div style="background:#e8d4f0;padding:12px;border-radius:8px;text-align:center;border-left:4px solid #9a70b8;">
+                    <div style="font-size:1.8em;font-weight:700;color:#6b4d8f;">${stats.debriefings}</div>
+                    <div style="font-size:0.85em;color:#666;">Débriefings</div>
+                </div>
+            </div>
+
+            ${stats.topEmotions.length ? `
+                <div style="background:white;padding:12px;border-radius:8px;border:1px solid #e8e0d6;">
+                    <strong style="color:var(--terra-dark);display:block;margin-bottom:8px;">😊 Top émotions</strong>
+                    <div style="display:grid;gap:6px;">
+                        ${stats.topEmotions.map(e => `
+                            <div style="display:flex;justify-content:space-between;font-size:0.9em;padding:4px;background:#f8f4f0;border-radius:4px;">
+                                <span>${e.emotion}</span>
+                                <span style="font-weight:700;color:var(--terra-primary);">${e.count}x</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            ${stats.topZones.length ? `
+                <div style="background:white;padding:12px;border-radius:8px;border:1px solid #e8e0d6;">
+                    <strong style="color:var(--terra-dark);display:block;margin-bottom:8px;">🤝 Zones corporelles sensibles</strong>
+                    <div style="display:grid;gap:6px;">
+                        ${stats.topZones.map(z => `
+                            <div style="display:flex;justify-content:space-between;font-size:0.9em;padding:4px;background:#f8f4f0;border-radius:4px;">
+                                <span>${z.zone}</span>
+                                <span style="font-weight:700;color:#9a70b8;">${z.count}x</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            ${stats.riskAlerts.length ? `
+                <div style="background:#fff3cd;padding:12px;border-radius:8px;border-left:4px solid #f39c12;border:2px solid #f39c12;">
+                    <strong style="color:#856404;display:block;margin-bottom:8px;">🚨 Alertes détectées</strong>
+                    <div style="display:grid;gap:6px;">
+                        ${stats.riskAlerts.map(alert => `
+                            <div style="padding:8px;background:white;border-radius:4px;border-left:3px solid ${alert.severity === 'high' ? '#e74c3c' : '#f39c12'};">
+                                <span style="font-weight:500;color:#333;">${alert.emoji} ${alert.label}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            <div style="background:#f0f4f8;padding:12px;border-radius:8px;font-size:0.85em;color:#666;">
+                <strong>Résumé :</strong> ${stats.total} inputs (${(stats.byType['emotion'] || 0)} émotions, ${(stats.byType['observation'] || 0)} observations, ${stats.doubleContraintes} doubles contraintes)
+            </div>
+        </div>
+    `;
+
+    modal.classList.add('visible');
+}
+
+function closeClinicalStats() {
+    const modal = document.getElementById('clinicalStatsModal');
+    if (modal) modal.classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════════════════════
 //  v2.21 — Débriefing post-prestation (Module E)
 // ═══════════════════════════════════════════════════════════
 const DEBRIEF_QUESTIONS = [
@@ -31651,6 +32134,10 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <!-- ── v2.17 — Outils cliniques flottants ─────────────────────────── -->
+<button id="clinicalDashboardBtn" type="button" onclick="openClinicalDashboard()" aria-label="Dashboard clinique" title="Dashboard clinique (vue d'ensemble)" style="margin-bottom:12px;">
+    📊
+    <span>Dashboard</span>
+</button>
 <button id="clinicalFab" type="button" onclick="openClinicalModal()" aria-label="Outils cliniques" title="Outils cliniques (clinique du travail)">
     🎭
     <span id="clinicalFabLabel">Outils cliniques</span>
@@ -31726,6 +32213,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div id="timelineSubtitle" style="font-size:0.85em;color:#888;margin-top:3px;">—</div>
             </div>
             <button class="clinical-btn-secondary" onclick="closeClinicalTimeline()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+            <button class="clinical-btn-secondary" onclick="openClinicalStats(_currentTimelineBenefId)" style="margin-left:auto;" title="Statistiques cliniques">📊 Stats</button>
         </div>
         <div id="timelinePatterns" class="timeline-patterns"></div>
         <div id="timelineFilters" class="timeline-filters">
@@ -31752,6 +32240,32 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="debrief-btn debrief-btn-secondary" onclick="closeDebriefModal()">Annuler</button>
             <button class="debrief-btn debrief-btn-primary" onclick="submitDebriefInput()">💾 Enregistrer</button>
         </div>
+    </div>
+</div>
+
+<!-- ── v2.22 — Statistiques cliniques (Module F) ──────────────── -->
+<div id="clinicalStatsModal" role="dialog" aria-modal="true" aria-labelledby="clinicalStatsModalTitle" onclick="if(event.target===this)closeClinicalStats()">
+    <div id="clinicalStatsModalBox">
+        <div id="clinicalStatsModalHeader">
+            <h3 id="clinicalStatsModalTitle">📊 Statistiques cliniques</h3>
+            <button class="debrief-btn-secondary" onclick="closeClinicalStats()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+        </div>
+        <div id="clinicalStatsBody"></div>
+        <div style="padding:12px;border-top:1px solid #e0e0e0;display:flex;gap:8px;justify-content:flex-end;background:#f8f9fa;">
+            <button class="debrief-btn debrief-btn-secondary" onclick="closeClinicalStats()">Fermer</button>
+            <button class="debrief-btn debrief-btn-primary" onclick="exportClinicalReportPDF(document.getElementById('clinicalStatsModal').dataset.benefId)">📄 Exporter PDF</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── v2.23 — Dashboard clinique (Module G) ──────────────────── -->
+<div id="clinicalDashboardModal" role="dialog" aria-modal="true" aria-labelledby="clinicalDashboardModalTitle" onclick="if(event.target===this)closeClinicalDashboard()">
+    <div id="clinicalDashboardModalBox">
+        <div id="clinicalDashboardModalHeader">
+            <h3 id="clinicalDashboardModalTitle">📊 Dashboard clinique</h3>
+            <button class="debrief-btn-secondary" onclick="closeClinicalDashboard()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+        </div>
+        <div id="clinicalDashboardBody"></div>
     </div>
 </div>
 

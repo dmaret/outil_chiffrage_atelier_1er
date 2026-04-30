@@ -1,7 +1,53 @@
 # Améliorations
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
-> 📌 **Version affichée en pied de page** : Chaque chargement affiche la version courante (v2.21) pour traçabilité.
+> 📌 **Version affichée en pied de page** : Chaque chargement affiche la version courante (v2.25) pour traçabilité.
+
+## 2026-04-30 — v2.25 Intégrations avancées (Module I)
+
+Détection de **corrélations multi-modules** : Déviations (Module B) + Inputs cliniques (Module A) = Insights au niveau prestation.
+
+- **Fonction `_findCorrelations()`** : Identifie les prestations avec écarts + réactions cliniques
+- **Intégration rapports** : Section « Corrélations détectées » dans les PDF exports
+- **Pattern-matching** : Émotion négative + double contrainte + déviation = signal d'alerte
+- Zéro dépendances externes, try/catch complète
+
+---
+
+## 2026-04-30 — v2.24 Rapports & Exports (Module H)
+
+Génération de **rapports PDF professionnels** par bénéficiaire avec html2pdf.
+
+- **Bouton 📄 Exporter PDF** dans la modale des Statistiques cliniques
+- **Contenu complet** : Infos bénéficiaire, résumés, tableaux, alertes, historique
+- **Nommage auto** : `rapport_[nom]_[date].pdf`
+- Feedback utilisateur (toast succès/erreur)
+
+---
+
+## 2026-04-30 — v2.23 Dashboard clinique (Module G)
+
+Vue d'ensemble **globale de tous les bénéficiaires** avec activité clinique résumée.
+
+- **Nouveau FAB 📊 Dashboard** flottant, style terracotta
+- **Métriques** : Total inputs, bénéficiaires, émotions
+- **Résumés par bénéficiaire** : Nom, inputs count, émotion principale
+- **Accès rapide** : Bouton « 📊 Voir stats » pour chaque bénéficiaire
+- Dark mode complet, responsive
+
+---
+
+## 2026-04-30 — v2.22 Statistiques cliniques (Module F)
+
+**Agrégation** et **analyse des patterns** avec détection automatique de risques.
+
+- **Modale Stats** : Appelée depuis Timeline clinique (Module C)
+- **Calculs** : Top 3 émotions, top 3 zones corporelles, décomposition par type
+- **Alertes détectées** : Émotions négatives fréquentes (3+/semaine), doubles contraintes (2+/semaine)
+- **Indicateurs de sévérité** : Medium/High
+- Integrated dans rapports (Module H)
+
+---
 
 ## 2026-04-30 — v2.21 Débriefing post-prestation (Module E)
 
