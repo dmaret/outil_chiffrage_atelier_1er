@@ -8395,7 +8395,6 @@
         updateTabScrollBtns();
         loadTabProfiles();
         renderCatalogue();
-        renderBundleButtons();
         updateUniteCalcLabel();
         calculateRatio();
         updateStockAlertBadge();
@@ -12106,6 +12105,11 @@
         // Apply tab group colors and separators once DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             try { applyTabGroupColors(); } catch (e) { console.warn('applyTabGroupColors failed:', e); }
+        });
+
+        // Render bundle buttons after data is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            try { renderBundleButtons(); } catch (e) { console.warn('renderBundleButtons failed:', e); }
         });
 
         /**
