@@ -8435,6 +8435,7 @@
         loadEmailWebhooksConfig();
         const storedTabsOrder = getStoredTabsOrder();
         if (storedTabsOrder) applyTabsOrder(storedTabsOrder);
+        applyTabGroupColors();
         renderStockSelects();
         document.getElementById('date').valueAsDate = new Date();
         document.getElementById('dateMouvement').valueAsDate = new Date();
@@ -8824,6 +8825,7 @@
 
             saveTabsOrder(_tabsOrder);
             applyTabsOrder(_tabsOrder);
+            applyTabGroupColors();
             renderTabsOrderEditor();
             event.target.style.background = '#f5f8fc';
             event.target.style.borderColor = '#d0dae8';
@@ -8834,6 +8836,7 @@
             localStorage.removeItem('tabsOrder');
             _tabsOrder = getDefaultTabsOrder();
             applyTabsOrder(_tabsOrder);
+            applyTabGroupColors();
             renderTabsOrderEditor();
             toast('Ordre des onglets réinitialisé', 'success');
         }
