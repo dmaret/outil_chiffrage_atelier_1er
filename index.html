@@ -19647,19 +19647,20 @@
         }
 
         function initMatrice() {
-            const saved = localStorage.getItem('matriceApprenance');
-            if (!saved) return;
+            const tbody = document.getElementById('matriceBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
             try {
-                const rows = JSON.parse(saved);
-                const tbody = document.getElementById('matriceBody');
-                if (!tbody) return;
-                tbody.innerHTML = '';
-                rows.forEach(r => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = _matriceRowHtml(r);
-                    tbody.appendChild(tr);
-                });
-            } catch(e) { /* silent */ }
+                const saved = localStorage.getItem('matriceApprenance');
+                if (saved) {
+                    const rows = JSON.parse(saved);
+                    rows.forEach(r => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = _matriceRowHtml(r);
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch(e) { console.warn('initMatrice:', e); }
         }
 
         function filterMatrice(q) {
