@@ -31977,6 +31977,30 @@ function switchClinicalTab(type) {
     _clinicalDraft = {};
     document.querySelectorAll('.clinical-tab').forEach(t => t.classList.toggle('active', t.dataset.clintype === type));
     _renderClinicalForm();
+    _updateClinicalHelp();
+}
+
+function toggleClinicalHelp() {
+    const helpSection = document.getElementById('clinicalHelpSection');
+    if (helpSection) {
+        const isHidden = helpSection.style.display === 'none';
+        helpSection.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) _updateClinicalHelp();
+    }
+}
+
+function _updateClinicalHelp() {
+    const helpContent = document.getElementById('clinicalHelpContent');
+    if (!helpContent) return;
+    const t = _clinicalActiveType;
+    const helpTexts = {
+        emotion: `<strong>💙 Accompagnement Émotion</strong><br/>Identifie ce que tu ressens dans la situation. Les émotions sont des signaux : elles te donnent de l'information sur ce que tu veux, ce qui te dérange, ce qui compte pour toi. <br/>💡 <em>Tu peux ressentir plusieurs émotions à la fois. Note l'intensité pour mesurer l'impact.</em>`,
+        observation: `<strong>👁️ Accompagnement Observation</strong><br/>Décris factuellement ce que tu as vu, entendu, observé — sans interpréter. Sépare l'observable (faits) de l'interprétable (ce que tu en penses). Cela aide à objectiver la situation.<br/>💡 <em>"J'ai observé un silence de 3 minutes" vs "Il était fâché".</em>`,
+        message: `<strong>📨 Accompagnement Message reçu</strong><br/>Les messages arrivent sous mille formes : verbal, silence, geste, regard. Tu les interprètes selon ton contexte personnel. Note qui l'émet, le contenu, et surtout <em>ta</em> compréhension.<br/>💡 <em>Même message, interprétations différentes selon qui le reçoit.</em>`,
+        double_contrainte: `<strong>🌀 Accompagnement Double contrainte</strong><br/>Une paradoxe : deux exigences incompatibles qui te pressent à la fois. "Sois rapide ET minutieux." "Sois autonome ET demande l'avis du chef." Ces paradoxes usent progressivement.<br/>💡 <em>Les détects et les nomme, c'est déjà une première forme de libération.</em>`,
+        ressenti_corporel: `<strong>🤝 Accompagnement Ressenti corporel</strong><br/>Le corps parle : tensions, chaleurs, fatigues, légèretés. Ces sensations révèlent comment tu vis la situation au niveau physique. Elles te connectent à tes limites et tes ressources.<br/>💡 <em>Une tension mâchoire = stress ? Une légèreté = confiance ? Observe sans juger.</em>`
+    };
+    helpContent.innerHTML = helpTexts[t] || `<em>Sélectionne un onglet pour afficher l'aide.</em>`;
 }
 
 function _renderClinicalForm() {
@@ -32149,7 +32173,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 id="clinicalModalTitle">🎭 Outils cliniques du travail</h3>
                 <div id="clinicalModalContext">—</div>
             </div>
+            <button class="clinical-btn-secondary" onclick="toggleClinicalHelp()" aria-label="Aide" title="Afficher l'aide" style="padding:4px 10px;">?</button>
             <button class="clinical-btn-secondary" onclick="closeClinicalModal()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+        </div>
+        <div id="clinicalHelpSection" style="display:none;padding:12px;margin-bottom:12px;background:#f5f0e8;border-left:4px solid var(--terra-primary);border-radius:6px;font-size:0.9em;color:#2d3e50;">
+            <div id="clinicalHelpContent"></div>
         </div>
         <div id="clinicalTabs">
             <button class="clinical-tab active" data-clintype="emotion" onclick="switchClinicalTab('emotion')">😊 Émotion</button>
