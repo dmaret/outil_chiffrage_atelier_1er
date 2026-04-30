@@ -10664,8 +10664,8 @@
                         <button class="btn btn-small" onclick="procDeleteProcedure('${p.id}')" style="padding:3px 10px;color:#f88;border-color:#5a2a2a;">🗑️</button>
                     </div>`).join('')}
                 </div>`;
-            el.innerHTML = renderGroup(ceas, 'PROCÉDURES CEA — RÉFÉRENCE', '#4fc070') +
-                           renderGroup(clients, 'PROCÉDURES CLIENT — OBSERVÉES', '#4a9af0');
+            el.innerHTML = renderGroup(clients, 'PROCÉDURES CLIENT — OBSERVÉES', '#4a9af0') +
+                           renderGroup(ceas, 'PROCÉDURES CEA — RÉFÉRENCE', '#4fc070');
         }
 
         function procFillCompSelects() {
