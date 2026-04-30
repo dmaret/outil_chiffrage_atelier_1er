@@ -6478,6 +6478,49 @@
                     </div>
                 </div>
 
+                <!-- Outils cliniques — Saisie observations -->
+                <div class="section" style="background:linear-gradient(135deg,#fff0f5,#f0f8ff);border-left-color:#c070f0;">
+                    <h2 style="color:#6b3a8f;">🎭 Outils cliniques du travail — Saisie observation</h2>
+                    <p style="font-size:0.85em;color:#7a5a9a;margin-bottom:14px;">Enregistrez une observation clinique pour le bénéficiaire sélectionné. Émotion, Observation, Message reçu, Double contrainte, Ressenti corporel.</p>
+
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                        <button class="btn" data-clintype="emotion" onclick="switchAccompClinicalTab('emotion')" style="background:#e8b5c8;border-color:#d070a0;color:#6b3a8f;font-weight:600;">😊 Émotion</button>
+                        <button class="btn" data-clintype="observation" onclick="switchAccompClinicalTab('observation')" style="background:#b5d5e8;border-color:#70a0d0;color:#3a6b8f;font-weight:600;">👁️ Observation</button>
+                        <button class="btn" data-clintype="message" onclick="switchAccompClinicalTab('message')" style="background:#d5d5e8;border-color:#a0a0d0;color:#3a3a8f;font-weight:600;">💬 Message reçu</button>
+                        <button class="btn" data-clintype="double_contrainte" onclick="switchAccompClinicalTab('double_contrainte')" style="background:#e8d5b5;border-color:#d0a070;color:#8f6b3a;font-weight:600;">🌀 Double contrainte</button>
+                        <button class="btn" data-clintype="ressenti_corporel" onclick="switchAccompClinicalTab('ressenti_corporel')" style="background:#c8e8b5;border-color:#a0d070;color:#6b8f3a;font-weight:600;">🤝 Ressenti corporel</button>
+                    </div>
+
+                    <div id="accompClinicalBody" style="background:white;border:1px solid #d4aaee;border-radius:8px;padding:14px;margin-bottom:12px;">
+                        <!-- Contenu dynamique selon l'onglet sélectionné -->
+                    </div>
+
+                    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+                        <button class="btn btn-secondary" onclick="resetAccompClinical()">↺ Réinitialiser</button>
+                        <button class="btn btn-success" onclick="saveAccompClinicalInput()">💾 Enregistrer l'observation</button>
+                    </div>
+                </div>
+
+                <!-- Historique clinique — Timeline par bénéficiaire -->
+                <div class="section" style="background:#f0f8ff;border-left-color:#4a9af0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                        <h2 style="margin:0;color:#2d5b8a;">📊 Historique clinique — Timeline</h2>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="btn btn-small" onclick="filterAccompTimeline('all')" style="background:#e0f0f8;border-color:#4a9af0;color:#2d5b8a;">Tout</button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('emotion')" style="background:#fce8e8;border-color:#e84a5f;color:#6b3a3a;">😊 Émotions</button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('observation')" style="background:#e8f0fc;border-color:#4a7af0;color:#3a4a8f;">👁️ Observations</button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('message')" style="background:#f0e8fc;border-color:#a070d0;color:#5a3a8f;">💬 Messages</button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('double_contrainte')" style="background:#f8f0e8;border-color:#d0a070;color:#8f6b3a;">🌀 DC</button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('ressenti_corporel')" style="background:#e8f8e8;border-color:#70d070;color:#3a8f3a;">🤝 Ressentis</button>
+                        </div>
+                    </div>
+                    <p style="font-size:0.85em;color:#5a7b8f;margin-bottom:12px;">Historique des observations enregistrées pour le bénéficiaire sélectionné. Cliquez pour détailler.</p>
+                    <div id="accompTimelineEvents" style="display:flex;flex-direction:column;gap:8px;">
+                        <!-- Timeline rendering -->
+                    </div>
+                    <p id="accompTimelineEmpty" style="text-align:center;color:#8aacbc;font-size:0.88em;padding:20px;">Aucune observation enregistrée pour ce bénéficiaire.</p>
+                </div>
+
                 <!-- Outil analyse de situation -->
                 <div class="section" style="background:linear-gradient(135deg,#f0f8ff,#f8f0ff);border-left-color:#8e44ad;">
                     <h2 style="color:#6c3483;">🔍 Outil d'analyse de situation</h2>
@@ -32145,6 +32188,250 @@ function submitDebriefInput() {
         console.error('submitDebriefInput:', e);
         toast('❌ Erreur lors de l\'enregistrement', 'error');
     }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Accompagnement — Outils cliniques intégrés
+// ═══════════════════════════════════════════════════════════
+let _accompClinicalActiveType = 'emotion';
+let _accompClinicalDraft = {};
+let _accompClinicalObservations = [];  // Observations cliniques du bénéficiaire
+
+function switchAccompClinicalTab(type) {
+    _accompClinicalActiveType = type;
+    _accompClinicalDraft = {};
+    renderAccompClinicalBody();
+}
+
+function renderAccompClinicalBody() {
+    const body = document.getElementById('accompClinicalBody');
+    if (!body) return;
+    const t = _accompClinicalActiveType;
+
+    if (t === 'emotion') {
+        body.innerHTML = `
+            <label style="display:block;margin-bottom:10px;font-weight:600;">Quelle émotion ressens-tu ?</label>
+            <div class="clinical-emotion-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                ${CLINICAL_EMOTIONS.map(e => `<div class="clinical-chip" onclick="toggleAccompEmotion('${e}')" style="padding:8px 12px;border:2px solid #ddd;border-radius:6px;cursor:pointer;background:#fff;transition:all 0.2s;" id="chip-emotion-${e}">${e}</div>`).join('')}
+            </div>
+            <label style="display:block;margin-bottom:8px;margin-top:12px;font-weight:600;">Intensité (1 = peu, 5 = très fort)</label>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+                ${[1,2,3,4,5].map(n => `<button type="button" onclick="setAccompIntensity(${n})" style="padding:8px 14px;border:2px solid #ddd;border-radius:6px;cursor:pointer;background:#fff;font-weight:600;transition:all 0.2s;" id="intensity-${n}">${n}</button>`).join('')}
+            </div>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Note <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="accompNoteEmotion" placeholder="À quel moment ? Lié à quoi ?" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>`;
+    } else if (t === 'observation') {
+        body.innerHTML = `
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Qu'as-tu observé ?</label>
+            <textarea id="accompObservation" placeholder="Décris factuellement ce que tu as vu, entendu, observé — sans interpréter." style="width:100%;min-height:100px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>
+            <label style="display:block;margin-top:12px;margin-bottom:8px;font-weight:600;">Sur qui / quoi ? <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <input type="text" id="accompObsTarget" placeholder="Ex : un collègue, le bénéficiaire, le matériel…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">`;
+    } else if (t === 'message') {
+        body.innerHTML = `
+            <label style="display:block;margin-bottom:8px;font-weight:600;">De qui vient le message ?</label>
+            <input type="text" id="accompMsgFrom" placeholder="Hiérarchie, collègue, client, bénéficiaire…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Quel était le message ?</label>
+            <textarea id="accompMsgContent" placeholder="Mots dits, geste, regard, silence…" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;"></textarea>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Comment l'as-tu interprété ?</label>
+            <textarea id="accompMsgInterp" placeholder="Ce que tu en as compris, ressenti…" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>`;
+    } else if (t === 'double_contrainte') {
+        body.innerHTML = `
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Injonction A</label>
+            <input type="text" id="accompDcA" placeholder="Ex : Sois rapide." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Injonction B (contradictoire)</label>
+            <input type="text" id="accompDcB" placeholder="Ex : Sois minutieux et zéro défaut." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Qui émet ces injonctions ? <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <input type="text" id="accompDcSource" placeholder="Ex : le chef, deux services différents…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Note <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="accompDcNote" placeholder="Comment vis-tu ce paradoxe ?" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>`;
+    } else if (t === 'ressenti_corporel') {
+        body.innerHTML = `
+            <label style="display:block;margin-bottom:10px;font-weight:600;">Où dans le corps ?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                ${CLINICAL_BODY_ZONES.map(z => `<div class="clinical-chip" onclick="toggleAccompBodyZone('${z}')" style="padding:8px 12px;border:2px solid #ddd;border-radius:6px;cursor:pointer;background:#fff;transition:all 0.2s;" id="chip-zone-${z}">${z}</div>`).join('')}
+            </div>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Type de sensation</label>
+            <select id="accompBodyType" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">
+                <option value="">— choisir —</option>
+                <option value="tension">🔴 Tension, crispation</option>
+                <option value="chaleur">🔥 Chaleur, brûlure</option>
+                <option value="froid">❄️ Froid, frisson</option>
+                <option value="fatigue">😴 Fatigue, lourdeur</option>
+                <option value="energie">⚡ Énergie, légèreté</option>
+                <option value="douleur">😣 Douleur</option>
+                <option value="autre">🤔 Autre</option>
+            </select>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Note <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="accompBodyNote" placeholder="Intensité, contexte, duration…" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>`;
+    }
+}
+
+function toggleAccompEmotion(emotion) {
+    if (!_accompClinicalDraft.emotions) _accompClinicalDraft.emotions = [];
+    const idx = _accompClinicalDraft.emotions.indexOf(emotion);
+    if (idx > -1) {
+        _accompClinicalDraft.emotions.splice(idx, 1);
+    } else {
+        _accompClinicalDraft.emotions.push(emotion);
+    }
+    const chip = document.getElementById(`chip-emotion-${emotion}`);
+    if (chip) chip.style.background = idx > -1 ? '#fff' : '#e8b5c8';
+    if (chip) chip.style.borderColor = idx > -1 ? '#ddd' : '#d070a0';
+}
+
+function toggleAccompBodyZone(zone) {
+    if (!_accompClinicalDraft.body_zones) _accompClinicalDraft.body_zones = [];
+    const idx = _accompClinicalDraft.body_zones.indexOf(zone);
+    if (idx > -1) {
+        _accompClinicalDraft.body_zones.splice(idx, 1);
+    } else {
+        _accompClinicalDraft.body_zones.push(zone);
+    }
+    const chip = document.getElementById(`chip-zone-${zone}`);
+    if (chip) chip.style.background = idx > -1 ? '#fff' : '#c8e8b5';
+    if (chip) chip.style.borderColor = idx > -1 ? '#ddd' : '#a0d070';
+}
+
+function setAccompIntensity(n) {
+    _accompClinicalDraft.intensity = n;
+    for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`intensity-${i}`);
+        if (btn) {
+            btn.style.background = i <= n ? '#c070f0' : '#fff';
+            btn.style.color = i <= n ? '#fff' : '#000';
+            btn.style.borderColor = i <= n ? '#a040d0' : '#ddd';
+        }
+    }
+}
+
+function resetAccompClinical() {
+    _accompClinicalDraft = {};
+    _accompClinicalActiveType = 'emotion';
+    renderAccompClinicalBody();
+}
+
+function saveAccompClinicalInput() {
+    const currentBenef = getCurrentSelectedBeneficiary();
+    if (!currentBenef) {
+        alert('Sélectionne un bénéficiaire d\'abord.');
+        return;
+    }
+
+    const obs = {
+        id: 'obs_' + Date.now(),
+        type: _accompClinicalActiveType,
+        beneficiaire: currentBenef.nom,
+        beneficiaireId: currentBenef.id,
+        timestamp: new Date().toISOString(),
+        data: _accompClinicalDraft
+    };
+
+    // Ajouter la saisie en fonction du type
+    if (_accompClinicalActiveType === 'emotion') {
+        obs.emotions = _accompClinicalDraft.emotions || [];
+        obs.intensity = _accompClinicalDraft.intensity || 0;
+        obs.note = document.getElementById('accompNoteEmotion')?.value || '';
+    } else if (_accompClinicalActiveType === 'observation') {
+        obs.observation = document.getElementById('accompObservation')?.value || '';
+        obs.target = document.getElementById('accompObsTarget')?.value || '';
+    } else if (_accompClinicalActiveType === 'message') {
+        obs.from = document.getElementById('accompMsgFrom')?.value || '';
+        obs.content = document.getElementById('accompMsgContent')?.value || '';
+        obs.interpretation = document.getElementById('accompMsgInterp')?.value || '';
+    } else if (_accompClinicalActiveType === 'double_contrainte') {
+        obs.injunctionA = document.getElementById('accompDcA')?.value || '';
+        obs.injunctionB = document.getElementById('accompDcB')?.value || '';
+        obs.source = document.getElementById('accompDcSource')?.value || '';
+        obs.note = document.getElementById('accompDcNote')?.value || '';
+    } else if (_accompClinicalActiveType === 'ressenti_corporel') {
+        obs.body_zones = _accompClinicalDraft.body_zones || [];
+        obs.sensation_type = document.getElementById('accompBodyType')?.value || '';
+        obs.note = document.getElementById('accompBodyNote')?.value || '';
+    }
+
+    _accompClinicalObservations.push(obs);
+    localStorage.setItem('accompClinicalObservations', JSON.stringify(_accompClinicalObservations));
+
+    resetAccompClinical();
+    renderAccompTimeline();
+    showToast(`✅ Observation enregistrée pour ${currentBenef.nom}`);
+}
+
+function filterAccompTimeline(filterType) {
+    renderAccompTimeline(filterType);
+}
+
+function renderAccompTimeline(filterType = 'all') {
+    const currentBenef = getCurrentSelectedBeneficiary();
+    const timelineDiv = document.getElementById('accompTimelineEvents');
+    const emptyMsg = document.getElementById('accompTimelineEmpty');
+
+    if (!timelineDiv) return;
+
+    // Charger depuis localStorage
+    const stored = localStorage.getItem('accompClinicalObservations');
+    if (stored) {
+        _accompClinicalObservations = JSON.parse(stored);
+    }
+
+    // Filtrer par bénéficiaire et type
+    let filtered = _accompClinicalObservations;
+    if (currentBenef) {
+        filtered = filtered.filter(o => o.beneficiaireId === currentBenef.id);
+    }
+    if (filterType !== 'all') {
+        filtered = filtered.filter(o => o.type === filterType);
+    }
+
+    // Trier par date décroissante
+    filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    if (filtered.length === 0) {
+        timelineDiv.innerHTML = '';
+        if (emptyMsg) emptyMsg.style.display = 'block';
+        return;
+    }
+
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    const icons = {
+        emotion: '😊', observation: '👁️', message: '💬',
+        double_contrainte: '🌀', ressenti_corporel: '🤝'
+    };
+
+    timelineDiv.innerHTML = filtered.map(obs => {
+        const d = new Date(obs.timestamp);
+        const dateStr = d.toLocaleString('fr-FR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        let content = '';
+
+        if (obs.type === 'emotion') {
+            content = `<strong>${obs.emotions?.join(', ') || '—'}</strong> (intensité: ${obs.intensity}/5)<br/><em>${obs.note || ''}</em>`;
+        } else if (obs.type === 'observation') {
+            content = `<strong>${obs.target || 'Observation'}</strong><br/><em>${obs.observation || ''}</em>`;
+        } else if (obs.type === 'message') {
+            content = `<strong>De ${obs.from || '—'}</strong><br/><em>"${obs.content || ''}"</em><br/>Interprétation: ${obs.interpretation || ''}`;
+        } else if (obs.type === 'double_contrainte') {
+            content = `<strong>A:</strong> ${obs.injunctionA || '—'}<br/><strong>B:</strong> ${obs.injunctionB || '—'}<br/><em>${obs.note || ''}</em>`;
+        } else if (obs.type === 'ressenti_corporel') {
+            content = `<strong>${obs.body_zones?.join(', ') || '—'}</strong> (${obs.sensation_type || '—'})<br/><em>${obs.note || ''}</em>`;
+        }
+
+        return `<div style="background:white;border-left:4px solid #4a9af0;padding:10px;border-radius:4px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#f0f8ff'" onmouseout="this.style.background='white'">
+            <div style="font-size:0.75em;color:#888;margin-bottom:4px;">${icons[obs.type]} ${obs.type.replace('_', ' ')} — ${dateStr}</div>
+            <div style="font-size:0.9em;color:#2d5b8a;">${content}</div>
+        </div>`;
+    }).join('');
+}
+
+function getCurrentSelectedBeneficiary() {
+    // Chercher le bénéficiaire actuellement sélectionné
+    const activeBenefCard = document.querySelector('.benef-card.active');
+    if (activeBenefCard) {
+        const id = activeBenefCard.getAttribute('data-benef-id');
+        const nom = activeBenefCard.querySelector('h4')?.textContent || '—';
+        return { id, nom };
+    }
+    return null;
 }
 
 // ═══════════════════════════════════════════════════════════
