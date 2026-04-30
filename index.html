@@ -24488,7 +24488,6 @@
         // ============================================================
         // AUTOSAVE
         // ============================================================
-        let _autosaveDirty = false;
         function markDirty() { _autosaveDirty = true; const dot = document.getElementById('autosaveDot'); if (dot) dot.style.background='#e67e22'; }
         function autosaveNow() {
             if (!_autosaveDirty) return;
@@ -30828,6 +30827,7 @@
 </div>
 
 <script>
+let _autosaveDirty = false;
 let _liveCollapsed = false;
 function toggleLiveCollapse() {
     const content = document.getElementById('liveContent');
