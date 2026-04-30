@@ -12136,6 +12136,7 @@
             updateLiveSummary({ totalHeures, prixRevient, prixVente, margePourcent, seuilMin });
             updateSaveButtonState();
             try { updateLiveDevisPreview(); } catch (e) {}
+            markDirty();
         }
 
         // Validation progressive : grise le bouton Enregistrer tant que
@@ -12382,6 +12383,7 @@
             }
 
             resetCalculateur();
+            markDirty();
         }
 
         function resetCalculateur() {
@@ -18660,6 +18662,9 @@
         setInterval(autosaveNow, 15000);
         // Force save on page close / reload
         window.addEventListener('beforeunload', () => { if (_autosaveDirty) saveToStorage(); });
+        // Global listener: mark as dirty on any input change
+        document.addEventListener('change', () => { markDirty(); }, true);
+        document.addEventListener('input', () => { markDirty(); }, true);
 
         // ── Tabs scroll arrows ─────────────────────────────────────
         function scrollTabs(delta) {
