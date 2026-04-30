@@ -4317,6 +4317,30 @@
                 </div>
 
                 <div class="section">
+                    <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
+                    <div class="bundles-bar" id="bundlesBar">
+                        <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
+                        <!-- rendered by renderBundleButtons() on load -->
+                    </div>
+                    <div id="gestesContainer"></div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+                        <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd" data-kbd="g">Ctrl+G</span></button>
+                        <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
+                        <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
+                        <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
+                        <button id="btnRedo" class="btn btn-secondary btn-small" onclick="redoLastAction()" title="Rétablir (Ctrl+Shift+Z)" disabled style="opacity:0.5;">🔁 Rétablir</button>
+                    </div>
+                    <div class="chrono-bar" id="chronoBar">
+                        <span style="font-size:0.82em;color:#6b8fa3;font-weight:600;">⏱️ Chronomètre :</span>
+                        <span class="chrono-display" id="chronoDisplay">00:00</span>
+                        <button class="btn btn-small" id="chronoBtnStart" onclick="chronoToggle()">▶ Démarrer</button>
+                        <button class="btn btn-secondary btn-small" onclick="chronoReset()">↺ Reset</button>
+                        <button class="btn btn-secondary btn-small" onclick="chronoApply()" title="Copier le temps mesuré dans le dernier geste sélectionné">→ Appliquer au geste</button>
+                        <span style="font-size:0.78em;color:#8aacbc;" id="chronoStatus"></span>
+                    </div>
+                </div>
+
+                <div class="section">
                     <h2>Informations prestation</h2>
                     <div class="form-row">
                         <div class="form-group">
@@ -4434,31 +4458,6 @@
                         <div id="simulVolumesTable"></div>
                     </div>
                 </div>
-
-                <div class="section">
-                    <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
-                    <div class="bundles-bar" id="bundlesBar">
-                        <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
-                        <!-- rendered by renderBundleButtons() on load -->
-                    </div>
-                    <div id="gestesContainer"></div>
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
-                        <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd" data-kbd="g">Ctrl+G</span></button>
-                        <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
-                        <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
-                        <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
-                        <button id="btnRedo" class="btn btn-secondary btn-small" onclick="redoLastAction()" title="Rétablir (Ctrl+Shift+Z)" disabled style="opacity:0.5;">🔁 Rétablir</button>
-                    </div>
-                    <div class="chrono-bar" id="chronoBar">
-                        <span style="font-size:0.82em;color:#6b8fa3;font-weight:600;">⏱️ Chronomètre :</span>
-                        <span class="chrono-display" id="chronoDisplay">00:00</span>
-                        <button class="btn btn-small" id="chronoBtnStart" onclick="chronoToggle()">▶ Démarrer</button>
-                        <button class="btn btn-secondary btn-small" onclick="chronoReset()">↺ Reset</button>
-                        <button class="btn btn-secondary btn-small" onclick="chronoApply()" title="Copier le temps mesuré dans le dernier geste sélectionné">→ Appliquer au geste</button>
-                        <span style="font-size:0.78em;color:#8aacbc;" id="chronoStatus"></span>
-                    </div>
-                </div>
-
                 <div class="section" id="sectionConsommables">
                     <h2>Consommables</h2>
                     <div id="consommablesContainer"></div>
