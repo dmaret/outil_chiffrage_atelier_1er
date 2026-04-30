@@ -13489,7 +13489,7 @@
                 </label>`;
             }).join('');
             const docHtml = referenceDocuments.length ? referenceDocuments.map(doc => {
-                const on = l.assignedDocuments.includes(doc.id);
+                const on = (l.assignedDocuments || []).some(id => String(id) === String(doc.id));
                 const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
                 return `<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:6px;border:1px solid ${on?'#27ae60':'#dde'};background:${on?'#e8f9f0':'#fafafa'};cursor:pointer;font-size:0.85em;">
                     <input type="checkbox" ${on?'checked':''} onchange="toggleDocumentAssignment('${l.id}',${doc.id},this.checked)">
@@ -14432,20 +14432,21 @@
         }
 
         function toggleDocumentAssignment(learnerId, docId, isAssigned) {
-            const learner = learnersList.find(l => l.id === learnerId);
-            if (!learner) return;
+            const learner = learnersList.find(l => String(l.id) === String(learnerId));
+            if (!learner) { console.warn('toggleDocumentAssignment: learner introuvable', learnerId); return; }
 
             if (!learner.assignedDocuments) learner.assignedDocuments = [];
 
             if (isAssigned) {
-                if (!learner.assignedDocuments.includes(docId)) {
+                if (!learner.assignedDocuments.some(id => String(id) === String(docId))) {
                     learner.assignedDocuments.push(docId);
                 }
             } else {
-                learner.assignedDocuments = learner.assignedDocuments.filter(id => id !== docId);
+                learner.assignedDocuments = learner.assignedDocuments.filter(id => String(id) !== String(docId));
             }
 
             saveFormationData();
+            if (typeof toast === 'function') toast(isAssigned ? '📎 Document assigné' : '📎 Document retiré', 'success', 1500);
         }
 
         function toggleGestureComplete(learnerId, code, completed) {
