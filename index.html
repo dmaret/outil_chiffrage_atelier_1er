@@ -10110,15 +10110,16 @@
             // Insert a separator when the group changes between consecutive tabs
             const tabBtns = [...tabBar.querySelectorAll('.tab')];
             let prevGroup = null;
-            tabBtns.forEach(btn => {
+            tabBtns.forEach((btn, idx) => {
                 const m = btn.getAttribute('onclick')?.match(/switchTab\('([^']+)'\)/);
                 const tabName = m ? m[1] : null;
                 const grp = tabName ? tabGroupOf(tabName) : null;
                 const grpId = grp ? grp.id : null;
-                if (prevGroup !== null && grpId !== prevGroup) {
+                // Insert separator BEFORE tab if group changed
+                if (idx > 0 && prevGroup !== null && grpId !== prevGroup && grp) {
                     const sep = document.createElement('span');
                     sep.className = 'tabs-group-sep';
-                    sep.style.setProperty('--sep-color', grp ? grp.couleur : '#ccc');
+                    sep.style.setProperty('--sep-color', grp.couleur);
                     tabBar.insertBefore(sep, btn);
                 }
                 prevGroup = grpId;
