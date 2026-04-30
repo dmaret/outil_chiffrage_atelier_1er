@@ -2,6 +2,64 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-30 — v2.19 Timeline clinique (Module C)
+
+Module d'agrégation des inputs cliniques par bénéficiaire, accessible via un nouveau bouton **📊 Timeline** sur chaque fiche bénéficiaire.
+
+- **Modale Timeline** avec header bénéficiaire (avatar, nom, objectifs), filtres par type d'input (chips: Tout / 😊 Émotions / 👁️ Observations / 📨 Messages / 🌀 Doubles contraintes / 🤝 Ressentis corporels), et timeline chronologique verticale.
+- **Détection automatique de patterns** : Top 3 émotions avec intensité moyenne, top 3 zones corporelles, compteur de doubles contraintes signalées, volumes messages/observations.
+- **Agrégation intelligente** : récupère les inputs directement liés au bénéficiaire (`beneficiaireId`) ET ceux liés via les prestations associées (lien indirect). Déduplication par ID.
+- **Rendu type-aware** : icônes et couleurs dédiées par catégorie (rose / bleu / vert / jaune / lavande), affichage adapté (intensité ⭐, citations « », flèches → pour interprétations), métadonnées (date, heure, auteur, prestation).
+- 3 fonctions dédiées : `_getBeneficiaryClinicalInputs`, `_computeClinicalPatterns`, `_renderTimelineEvent`.
+- Dark mode intégré.
+
+---
+
+## 2026-04-30 — v2.18 Comparateur 3-niveaux (Module B)
+
+Module Prescrit · Procédure · Réel — outil de comparaison entre ce que le client a demandé, le modèle de procédure CEA, et ce qui s'est réellement déroulé.
+
+- **3 modèles de procédure CEA par défaut** : Conditionnement standard, Assemblage/montage standard, Formation logistique standard (8-10 étapes chacun, marquées `mandatory` ou non, étiquetées `avant`/`pendant`/`apres`).
+- **Modale Comparateur** accessible via bouton **🔀 Comparer** sur chaque prestation, avec 3 colonnes responsive (1 colonne en mobile <900px) :
+  - **Prescrit client** (gauche, bleu) : objectifs/demandes + contraintes connues
+  - **Procédure CEA** (centre, terracotta) : sélecteur de modèle, liste des étapes obligatoires/optionnelles
+  - **Réel exécuté** (droite, vert) : durée réelle, dropdown par étape (Fait / Partiel / Omis / Modifié), gestion des déviations textuelles, réflexion clinique post-atelier
+- **Stats agrégées** en haut : étapes réalisées/omises/modifiées, nombre de déviations.
+- **Éditeur de modèles de procédure** (CRUD) accessible via ⚙️ Modèles.
+- **Widget Dashboard « 📐 Écarts observés »** : top 10 des déviations textuelles cross-prestations + compteurs ❌ omises / ⚠️ partielles / 🔄 modifiées.
+- Persistance localStorage (`procedureTemplates` séparé, `prescritClient` + `realExecute` dans la prestation).
+- Try/catch sur toutes les opérations, dark mode intégré.
+- **Fix v2.18.1** : Correction d'un bug où taper dans les textareas puis interagir avec un dropdown ou ajouter une déviation effaçait les saisies en cours. Nouvelle fonction `_captureCompareFormValues()` appelée avant tout re-render.
+
+---
+
+## 2026-04-30 — v2.17 Outils cliniques flottants (Module A)
+
+Module fondateur de la suite clinique — un FAB (Floating Action Button) terracotta animé qui s'active uniquement dans les contextes pertinents (calculateur, édition d'une prestation) pour saisir 5 types d'inputs cliniques au fil de la prestation.
+
+- **5 types d'inputs cliniques** : 😊 Émotion (20 émotions chips + intensité 1-5 + note), 👁️ Observation (texte + cible), 📨 Message reçu (émetteur + contenu + interprétation), 🌀 Double contrainte (injonction A + B + source + note), 🤝 Ressenti corporel (11 zones + type sensation + intensité + note).
+- **Contexte automatique** : hooks dans `switchTab('calculateur')` et `editPrestation(id)` pour pré-renseigner `prestationId`, `beneficiaireId`, `prestationLabel`.
+- **Données structurées** : `clinicalInputs[]` persisté en localStorage avec entries `{ id, timestamp, type, author, prestationId, prestationLabel, beneficiaireId, data }`.
+- **UX guidée** : pas de page blanche, formulaires guidés par chips de sélection, validations contextuelles avec toasts.
+- Sécurisé par try/catch sur toutes les opérations.
+
+---
+
+## 2026-04-29 — v2.16 Recherche globale étendue + suggestions tarifaires
+
+- Extension du palette `Ctrl+K` pour couvrir clients, prestations, gestes, bénéficiaires, apprenants, documents.
+- Suggestions automatiques de tarifs dans le calculateur : moyenne, médiane, min/max des prestations similaires (filtrées par nom de prestation/client).
+- Hook dans `updateSaveButtonState()` pour calcul on-the-fly à chaque oninput.
+
+---
+
+## 2026-04-29 — v2.15 Sketch terracotta — restyling 5 flux visuels
+
+- Restyling complet en thème « illustré terracotta » des 5 flux visuels du Dashboard (heatmap, kanban, graphe, ville, rivière).
+- 100+ lignes de CSS `.sketch-*` avec palette terracotta (`--terra-primary`, `--terra-light`, `--terra-dark`).
+
+---
+
 ## 2026-04-29 — v2.14 Cinq nouveaux flux visuels interactifs sur le Dashboard
 
 5 widgets ajoutés à la fin du Dashboard, chacun configurable individuellement via les permissions de groupe :
