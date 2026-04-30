@@ -1,6 +1,20 @@
 # Améliorations
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
+> 📌 **Version affichée en pied de page** : Chaque chargement affiche la version courante (v2.21) pour traçabilité.
+
+## 2026-04-30 — v2.21 Débriefing post-prestation (Module E)
+
+Formulaire guidé post-prestation accessible lors de l'édition (si bénéficiaire présent). 5 questions avec checkboxes + notes optionnelles.
+
+- **Modale Débriefing** avec questions structurées (🎯 Objectifs / ✨ Points positifs / 🔄 Améliorations / 💬 Feedback / 🔍 Observations).
+- **Bouton 📋 Débriefing** dans la modale des outils cliniques (v2.17), visible uniquement si bénéficiaire associé.
+- **Enregistrement** : Items cochés + notes optionnelles sauvegardés comme input clinique spécial (`type: 'debrief'`).
+- **Timeline** : Débriefing affichage avec icône 📋 terracotta, compteur + liste détaillée.
+- Intégré au glossaire (Module D) — termes cliquables pour définitions.
+- Dark mode complet, try/catch sécurisé, localStorage persisté.
+
+---
 
 ## 2026-04-30 — v2.20 Glossaire clinique (Module D)
 

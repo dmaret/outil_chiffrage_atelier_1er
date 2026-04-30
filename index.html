@@ -3433,6 +3433,81 @@
         }
         body.dark-mode .glossary-link { color: var(--terra-light); }
         body.dark-mode .glossary-link:hover { background: rgba(217, 168, 146, 0.15); color: var(--terra-accent); }
+
+        /* ── v2.21 Débriefing post-prestation ──────────────────────── */
+        #debriefModal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 5000; align-items: center;
+            justify-content: center; padding: 16px;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        #debriefModal.visible {
+            display: flex; opacity: 1;
+        }
+        #debriefModalBox {
+            background: white; border-radius: 16px; padding: 0;
+            max-width: 500px; width: 100%; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25); border: 2px solid var(--terra-primary);
+        }
+        body.dark-mode #debriefModalBox {
+            background: #2d2520; border-color: var(--terra-accent); color: #f0ddd4;
+        }
+        #debriefModalHeader {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: linear-gradient(135deg, var(--terra-primary), var(--terra-light));
+            border-bottom: 2px solid var(--terra-primary);
+        }
+        body.dark-mode #debriefModalHeader {
+            background: linear-gradient(135deg, #3a322a, #2d2520);
+        }
+        #debriefModalHeader h3 {
+            margin: 0; color: var(--terra-dark); font-size: 1.1em;
+        }
+        body.dark-mode #debriefModalHeader h3 { color: var(--terra-light); }
+        #debriefModalHeader button {
+            background: rgba(255,255,255,0.3); border: none; border-radius: 50%;
+            width: 32px; height: 32px; font-size: 1.2em; cursor: pointer;
+            transition: background 0.2s;
+        }
+        #debriefModalHeader button:hover { background: rgba(255,255,255,0.5); }
+        #debriefBody {
+            padding: 16px;
+        }
+        #debriefActions {
+            display: flex; gap: 8px; padding: 16px; border-top: 1px solid #e0e0e0;
+            background: #f8f9fa; justify-content: flex-end;
+        }
+        body.dark-mode #debriefActions {
+            background: #1e1812; border-top-color: #3a322a;
+        }
+        .debrief-btn {
+            padding: 8px 16px; border-radius: 6px; border: none; font-weight: 500;
+            cursor: pointer; transition: all 0.2s; font-size: 0.9em;
+        }
+        .debrief-btn-secondary {
+            background: #e0e0e0; color: #333;
+        }
+        .debrief-btn-secondary:hover { background: #d0d0d0; }
+        body.dark-mode .debrief-btn-secondary { background: #3a322a; color: #f0ddd4; }
+        body.dark-mode .debrief-btn-secondary:hover { background: #4a3a32; }
+        .debrief-btn-primary {
+            background: var(--terra-primary); color: white;
+        }
+        .debrief-btn-primary:hover { background: var(--terra-dark); }
+        body.dark-mode .debrief-btn-primary {
+            background: var(--terra-dark); color: #f0ddd4;
+        }
+        body.dark-mode .debrief-btn-primary:hover {
+            background: var(--terra-primary);
+        }
+        .debrief-note {
+            background: white; color: #333;
+        }
+        body.dark-mode .debrief-note {
+            background: #1e1812; color: #d4d4d4; border-color: #3a322a !important;
+        }
+        .type-debrief { border-left: 4px solid var(--terra-primary); }
+        .type-debrief .timeline-event-icon { border-color: var(--terra-primary); }
     </style>
 </head>
 <body>
@@ -7054,7 +7129,7 @@
 
     <!-- App footer copyright -->
     <div style="text-align:center;font-size:0.72em;color:#9ab0be;padding:14px 20px 10px;border-top:1px solid #e8ecf0;background:#f8fafc;margin-top:8px;">
-        © 2025–2026 <strong>MARET Davie</strong> — <span style="cursor:pointer;text-decoration:underline;" onclick="showUsageConditions()">Conditions d'utilisation</span>
+        © 2025–2026 <strong>MARET Davie</strong> — <span style="cursor:pointer;text-decoration:underline;" onclick="showUsageConditions()">Conditions d'utilisation</span> • <span id="appVersion" style="font-family:monospace;color:#6b8fa3;font-weight:600;">v2.20</span>
     </div>
     <!-- Paiement Modal -->
     <!-- Comparateur de prestations -->
@@ -12551,6 +12626,10 @@
             try {
                 const benefId = (Array.isArray(p.beneficiaires) && p.beneficiaires[0]) ? (p.beneficiaires[0].id || null) : null;
                 setPrestationContext({ prestationId: p.id, label: `${p.prestation || '—'} · ${p.client || '—'}`, beneficiaireId: benefId, isCalculator: false });
+                // v2.21 — active le contexte de débriefing
+                currentDebriefContext = { prestationId: p.id, beneficiaireId: benefId, prestationLabel: `${p.prestation || '—'} · ${p.client || '—'}` };
+                const debriefBtn = document.getElementById('debriefBtn');
+                if (debriefBtn) debriefBtn.style.display = benefId ? 'inline-block' : 'none';
             } catch(e) {}
 
             // Mettre le bouton en mode "Mettre à jour"
@@ -31017,11 +31096,12 @@ function _renderTimelineEvent(ci) {
 
     const typeIcons = {
         'emotion': '😊', 'observation': '👁️', 'message': '📨',
-        'double_contrainte': '🌀', 'ressenti_corporel': '🤝'
+        'double_contrainte': '🌀', 'ressenti_corporel': '🤝', 'debrief': '📋'
     };
     const typeLabels = {
         'emotion': 'Émotion', 'observation': 'Observation', 'message': 'Message reçu',
-        'double_contrainte': 'Double contrainte', 'ressenti_corporel': 'Ressenti corporel'
+        'double_contrainte': 'Double contrainte', 'ressenti_corporel': 'Ressenti corporel',
+        'debrief': 'Débriefing post-prestation'
     };
     const icon = typeIcons[ci.type] || '🎭';
     const typeLabel = typeLabels[ci.type] || ci.type;
@@ -31049,6 +31129,14 @@ function _renderTimelineEvent(ci) {
         const stars = data.intensity ? '⭐'.repeat(data.intensity) : '';
         content = `<strong>${escapeHtml(data.zone || '—')}</strong> — ${escapeHtml(data.sensationType || '—')} ${stars}
                    ${data.note ? `<div style="margin-top:4px;color:#666;font-style:italic;">${escapeHtml(data.note)}</div>` : ''}`;
+    } else if (ci.type === 'debrief') {
+        const items = data.items || [];
+        content = `<div style="margin:0;padding:0;">
+                   <strong style="color:var(--terra-dark);">${data.itemCount || 0} point(s) couvert(s)</strong>
+                   ${items.length ? `<ul style="margin:6px 0 0 16px;padding:0;font-size:0.85em;color:#555;">
+                       ${items.map(item => `<li>${escapeHtml(item.label)}${item.note ? ` : « ${escapeHtml(item.note)} »` : ''}</li>`).join('')}
+                   </ul>` : ''}
+                   </div>`;
     }
 
     return `<div class="timeline-event type-${ci.type}">
@@ -31213,6 +31301,126 @@ function _initGlossaryInteractions() {
             _showGlossaryTooltip(e, e.target.dataset.term);
         }
     });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  v2.21 — Débriefing post-prestation (Module E)
+// ═══════════════════════════════════════════════════════════
+const DEBRIEF_QUESTIONS = [
+    { id: 'objectives', label: 'Objectifs de la prestation atteints?', type: 'checkbox', icon: '🎯' },
+    { id: 'positive', label: 'Points positifs observés', type: 'checkbox', icon: '✨' },
+    { id: 'improvement', label: 'Points d\'amélioration', type: 'checkbox', icon: '🔄' },
+    { id: 'feedback', label: 'Feedback du bénéficiaire', type: 'checkbox', icon: '💬' },
+    { id: 'clinical', label: 'Observations cliniques additionnelles', type: 'checkbox', icon: '🔍' },
+];
+
+let currentDebriefContext = null;  // { prestationId, beneficiaireId, prestationLabel }
+
+function openDebriefModal() {
+    const modal = document.getElementById('debriefModal');
+    if (!modal) return;
+
+    if (!currentDebriefContext || !currentDebriefContext.beneficiaireId) {
+        toast('⚠️ Débriefing : Aucun bénéficiaire associé', 'warning');
+        return;
+    }
+
+    _renderDebriefForm();
+    modal.classList.add('visible');
+}
+
+function closeDebriefModal() {
+    const modal = document.getElementById('debriefModal');
+    if (modal) modal.classList.remove('visible');
+}
+
+function _renderDebriefForm() {
+    const body = document.getElementById('debriefBody');
+    if (!body) return;
+
+    body.innerHTML = `
+        <div style="margin-bottom:16px;padding:12px;background:#f0ddd4;border-radius:8px;border-left:4px solid var(--terra-primary);">
+            <strong style="color:var(--terra-dark);">📋 Débriefing post-prestation</strong>
+            <p style="margin:6px 0 0 0;font-size:0.85em;color:#555;">Complétez ce formulaire après la prestation pour documenter les points clés.</p>
+        </div>
+        <div style="display:grid;gap:10px;">
+            ${DEBRIEF_QUESTIONS.map(q => `
+                <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border-radius:6px;border:1px solid #e0e0e0;background:white;transition:all 0.2s;">
+                    <input type="checkbox" id="debrief-${q.id}" data-question="${q.id}" style="margin-top:3px;flex-shrink:0;">
+                    <div style="flex:1;">
+                        <span style="font-weight:500;color:#2d3e50;">${q.icon} ${q.label}</span>
+                        <textarea
+                            class="debrief-note"
+                            data-question="${q.id}"
+                            placeholder="Détails (optionnel)"
+                            style="display:none;width:100%;margin-top:6px;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.85em;font-family:inherit;min-height:50px;resize:vertical;">
+                        </textarea>
+                    </div>
+                </label>
+            `).join('')}
+        </div>
+        <script>
+            document.querySelectorAll('#debriefBody input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const textarea = document.querySelector(\`.debrief-note[data-question="\${this.dataset.question}"]\`);
+                    if (textarea) textarea.style.display = this.checked ? 'block' : 'none';
+                });
+            });
+        </script>
+    `;
+}
+
+function submitDebriefInput() {
+    if (!currentDebriefContext) {
+        toast('⚠️ Contexte de débriefing perdu', 'warning');
+        closeDebriefModal();
+        return;
+    }
+
+    const checkedItems = [];
+    document.querySelectorAll('#debriefBody input[type="checkbox"]:checked').forEach(cb => {
+        const question = DEBRIEF_QUESTIONS.find(q => q.id === cb.dataset.question);
+        const textarea = document.querySelector(\`.debrief-note[data-question="\${cb.dataset.question}"]\`);
+        const note = textarea ? textarea.value.trim() : '';
+
+        if (question) {
+            checkedItems.push({
+                questionId: question.id,
+                label: question.label,
+                icon: question.icon,
+                note: note
+            });
+        }
+    });
+
+    if (checkedItems.length === 0) {
+        toast('ℹ️ Sélectionnez au moins une question', 'info');
+        return;
+    }
+
+    try {
+        const debriefEntry = {
+            id: Date.now() + Math.random(),
+            timestamp: new Date().toISOString(),
+            type: 'debrief',
+            author: (config && config.username) || 'Anonyme',
+            prestationId: currentDebriefContext.prestationId,
+            prestationLabel: currentDebriefContext.prestationLabel,
+            beneficiaireId: currentDebriefContext.beneficiaireId,
+            data: {
+                items: checkedItems,
+                itemCount: checkedItems.length
+            }
+        };
+
+        clinicalInputs.push(debriefEntry);
+        saveClinicalInputs();
+        toast('✅ Débriefing enregistré', 'success');
+        closeDebriefModal();
+    } catch(e) {
+        console.error('submitDebriefInput:', e);
+        toast('❌ Erreur lors de l\'enregistrement', 'error');
+    }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -31466,6 +31674,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="clinicalBody"></div>
         <div id="clinicalActions">
             <button class="clinical-btn-secondary" onclick="closeClinicalModal()">Annuler</button>
+            <button class="clinical-btn-secondary" id="debriefBtn" onclick="openDebriefModal()" style="display:none;margin-left:auto;" title="Débriefing post-prestation">📋 Débriefing</button>
             <button class="clinical-btn-primary" onclick="submitClinicalInput()">💾 Enregistrer</button>
         </div>
     </div>
@@ -31528,6 +31737,21 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="timeline-filter" data-filter="ressenti_corporel" onclick="_filterTimeline('ressenti_corporel')">🤝 Ressentis corporels</span>
         </div>
         <div id="timelineEvents"></div>
+    </div>
+</div>
+
+<!-- ── v2.21 — Débriefing post-prestation (Module E) ──────────── -->
+<div id="debriefModal" role="dialog" aria-modal="true" aria-labelledby="debriefModalTitle" onclick="if(event.target===this)closeDebriefModal()">
+    <div id="debriefModalBox">
+        <div id="debriefModalHeader">
+            <h3 id="debriefModalTitle">📋 Débriefing post-prestation</h3>
+            <button class="debrief-btn-secondary" onclick="closeDebriefModal()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+        </div>
+        <div id="debriefBody"></div>
+        <div id="debriefActions">
+            <button class="debrief-btn debrief-btn-secondary" onclick="closeDebriefModal()">Annuler</button>
+            <button class="debrief-btn debrief-btn-primary" onclick="submitDebriefInput()">💾 Enregistrer</button>
+        </div>
     </div>
 </div>
 
