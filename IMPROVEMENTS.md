@@ -2,6 +2,19 @@
 
 > 🧹 **Hygiène repo** : « Automatically delete head branches » activé sur GitHub — les branches sources des PR mergées sont supprimées automatiquement.
 
+## 2026-04-30 — v2.20 Glossaire clinique (Module D)
+
+Ressource d'apprentissage intégrée pour les termes cliniques. Utilisateurs cliquent sur les termes dans la Timeline (Module C) pour consulter définitions, exemples, et termes liés.
+
+- **Glossaire interactif** : 9 termes clés (Double contrainte, Ressenti corporel, Charge mentale, Émotion, Observation, Message, Intensité, Pattern, Timeline) + 5 références de types cliniques.
+- **Tooltips contextuels** : Cliquer sur un terme souligné en pointillé terracotta → tooltip avec définition, exemples, liens vers termes liés.
+- **Navigation intelligente** : Chaque tooltip contient des liens cliquables pour explorer les connexions (ex: Double contrainte → Charge mentale).
+- **Dark mode intégré** : Couleurs adaptées, contraste WCAG AA.
+- 2 fonctions dédiées : `_showGlossaryTooltip()`, `_initGlossaryInteractions()`. Constante `CLINICAL_GLOSSARY` extensible.
+- Vanilla JS, zéro dépendance externe.
+
+---
+
 ## 2026-04-30 — v2.19 Timeline clinique (Module C)
 
 Module d'agrégation des inputs cliniques par bénéficiaire, accessible via un nouveau bouton **📊 Timeline** sur chaque fiche bénéficiaire.

@@ -3348,6 +3348,91 @@
         body.dark-mode #timelineEvents { background: #1e1812; }
         body.dark-mode .timeline-event { background: #2d2520; color: #f0ddd4; border-color: #3a322a; }
         body.dark-mode .timeline-event-icon { background: #2d2520; }
+
+        /* ── v2.20 Glossaire clinique ─────────────────────────────── */
+        .glossary-term {
+            cursor: help; border-bottom: 2px dotted var(--terra-primary);
+            position: relative; color: var(--terra-dark); font-weight: 500;
+            transition: all 0.2s;
+        }
+        .glossary-term:hover { background: rgba(201, 120, 102, 0.1); border-bottom-style: solid; }
+        body.dark-mode .glossary-term { color: var(--terra-light); }
+
+        .glossary-tooltip {
+            position: fixed; z-index: 10000;
+            background: white; border: 2px solid var(--terra-primary);
+            border-radius: var(--border-radius-md);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 350px; padding: 12px; font-size: 0.9em;
+            opacity: 0; transform: translateY(-5px);
+            transition: all 0.2s ease-out; pointer-events: none;
+        }
+        .glossary-tooltip.visible {
+            opacity: 1; transform: translateY(0); pointer-events: all;
+        }
+        body.dark-mode .glossary-tooltip { background: #2d2520; border-color: var(--terra-accent); color: #f0ddd4; }
+
+        .glossary-tooltip-header {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 8px; padding-bottom: 8px;
+            border-bottom: 1px solid rgba(201, 120, 102, 0.2);
+            position: relative;
+        }
+        body.dark-mode .glossary-tooltip-header { border-bottom-color: rgba(217, 168, 146, 0.2); }
+
+        .glossary-tooltip-icon {
+            font-size: 1.2em; flex-shrink: 0;
+        }
+        .glossary-tooltip-header strong {
+            flex: 1; color: var(--terra-dark);
+        }
+        body.dark-mode .glossary-tooltip-header strong { color: var(--terra-light); }
+
+        .glossary-tooltip-close {
+            background: none; border: none; cursor: pointer;
+            font-size: 1.2em; color: #888; padding: 0 4px;
+            transition: color 0.2s;
+        }
+        .glossary-tooltip-close:hover { color: var(--terra-dark); }
+        body.dark-mode .glossary-tooltip-close:hover { color: var(--terra-light); }
+
+        .glossary-tooltip-definition {
+            margin: 8px 0; color: #3a3530; line-height: 1.4;
+        }
+        body.dark-mode .glossary-tooltip-definition { color: #d4d4d4; }
+
+        .glossary-tooltip-examples,
+        .glossary-tooltip-related {
+            margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(201, 120, 102, 0.15);
+        }
+        body.dark-mode .glossary-tooltip-examples,
+        body.dark-mode .glossary-tooltip-related { border-top-color: rgba(217, 168, 146, 0.15); }
+
+        .glossary-tooltip-examples strong,
+        .glossary-tooltip-related strong {
+            display: block; color: var(--terra-dark); margin-bottom: 4px; font-size: 0.85em;
+        }
+        body.dark-mode .glossary-tooltip-examples strong,
+        body.dark-mode .glossary-tooltip-related strong { color: var(--terra-light); }
+
+        .glossary-tooltip-examples ul {
+            margin-left: 16px; font-size: 0.85em; color: #555;
+        }
+        body.dark-mode .glossary-tooltip-examples ul { color: #bbb; }
+
+        .glossary-related-links {
+            display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.85em;
+        }
+        .glossary-link {
+            cursor: pointer; color: var(--terra-primary); text-decoration: underline;
+            padding: 2px 4px; border-radius: 3px;
+            transition: all 0.2s;
+        }
+        .glossary-link:hover {
+            background: rgba(201, 120, 102, 0.1); color: var(--terra-dark);
+        }
+        body.dark-mode .glossary-link { color: var(--terra-light); }
+        body.dark-mode .glossary-link:hover { background: rgba(217, 168, 146, 0.15); color: var(--terra-accent); }
     </style>
 </head>
 <body>
@@ -30969,11 +31054,165 @@ function _renderTimelineEvent(ci) {
     return `<div class="timeline-event type-${ci.type}">
         <div class="timeline-event-icon">${icon}</div>
         <div class="timeline-event-meta">
-            ${dateStr} · ${timeStr} · ${escapeHtml(typeLabel)} · ${escapeHtml(author)}
+            ${dateStr} · ${timeStr} · <span class="glossary-term" data-term="clinical-type-${ci.type}">${escapeHtml(typeLabel)}</span> · ${escapeHtml(author)}
             ${ci.prestationId ? `<br>📋 ${escapeHtml(prest)}` : ''}
         </div>
         <div class="timeline-event-content">${content}</div>
     </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  v2.20 — Glossaire clinique (Module D)
+// ═══════════════════════════════════════════════════════════
+const CLINICAL_GLOSSARY = {
+    'double_contrainte': {
+        term: 'Double contrainte',
+        icon: '🌀',
+        definition: 'Situation où deux demandes ou obligations contradictoires s\'adressent à une personne, sans possibilité de choix. Ex: « Sois naturel » ET « Souris en permanence ».',
+        examples: ['Injonction paradoxale', 'Bind paradoxal', 'Paradoxe pragmatique'],
+        relatedTerms: ['charge_mentale']
+    },
+    'ressenti_corporel': {
+        term: 'Ressenti corporel',
+        icon: '🤝',
+        definition: 'Sensations physiques et émotionnelles localisées dans le corps (tension, chaleur, froid, picotement, etc.). Indicateur de bien-être ou d\'inconfort.',
+        examples: ['Tension musculaire', 'Chaleur', 'Froideur', 'Picotement'],
+        relatedTerms: ['emotion', 'intensity']
+    },
+    'charge_mentale': {
+        term: 'Charge mentale',
+        icon: '🧠',
+        definition: 'Ensemble des efforts cognitifs et décisionnels requis pour accomplir une tâche. Accumulation mentale de responsabilités, mémorisation, anticipation.',
+        examples: ['Surcharge cognitive', 'Fatigue décisionnelle', 'Accumulation de tâches'],
+        relatedTerms: ['double_contrainte', 'observation']
+    },
+    'emotion': {
+        term: 'Émotion',
+        icon: '😊',
+        definition: 'État affectif momentané en réaction à un événement ou situation. Indicateur important du bien-être et de la réaction aux conditions de travail.',
+        examples: ['Joie', 'Colère', 'Peur', 'Tristesse', 'Surprise'],
+        relatedTerms: ['intensity', 'ressenti_corporel']
+    },
+    'observation': {
+        term: 'Observation',
+        icon: '👁️',
+        definition: 'Fait objectif ou comportement noté sans jugement lors de la prestation. Description factuelle d\'une situation, action ou réaction observée.',
+        examples: ['Comportement', 'Réaction observable', 'Fait noté'],
+        relatedTerms: ['charge_mentale']
+    },
+    'message': {
+        term: 'Message reçu',
+        icon: '📨',
+        definition: 'Communication directe reçue d\'une personne pendant ou avant la prestation, avec interprétation éventuelle. Peut influencer le contexte clinique.',
+        examples: ['Feedback', 'Demande exprimée', 'Conseil reçu'],
+        relatedTerms: ['observation', 'emotion']
+    },
+    'intensity': {
+        term: 'Intensité',
+        icon: '⭐',
+        definition: 'Niveau d\'amplitude d\'une émotion ou sensation de 1 (faible) à 5 (très fort). Permet de nuancer et contextualiser la réaction.',
+        examples: ['1 = à peine ressenti', '5 = très intense'],
+        relatedTerms: ['emotion', 'ressenti_corporel']
+    },
+    'pattern': {
+        term: 'Pattern (motif récurrent)',
+        icon: '🔄',
+        definition: 'Comportement, émotion ou situation qui se répète régulièrement dans les inputs cliniques. Permet d\'identifier des tendances et leviers d\'intervention.',
+        examples: ['Émotions récurrentes', 'Zones corporelles sensibles', 'Doubles contraintes fréquentes'],
+        relatedTerms: ['observation', 'timeline']
+    },
+    'timeline': {
+        term: 'Timeline clinique',
+        icon: '📊',
+        definition: 'Représentation chronologique et visuelle de tous les inputs cliniques d\'un bénéficiaire. Outil de relecture et d\'analyse des patterns et tendances.',
+        examples: ['Historique clinique', 'Frise chronologique', 'Agrégation d\'inputs'],
+        relatedTerms: ['pattern', 'emotion', 'ressenti_corporel']
+    },
+    'clinical-type-emotion': {
+        term: 'Émotion',
+        icon: '😊',
+        definition: 'État affectif momentané. Voir « Émotion » pour détails.',
+        isTypeRef: true
+    },
+    'clinical-type-observation': {
+        term: 'Observation',
+        icon: '👁️',
+        definition: 'Fait objectif noté. Voir « Observation » pour détails.',
+        isTypeRef: true
+    },
+    'clinical-type-message': {
+        term: 'Message reçu',
+        icon: '📨',
+        definition: 'Communication reçue. Voir « Message reçu » pour détails.',
+        isTypeRef: true
+    },
+    'clinical-type-double_contrainte': {
+        term: 'Double contrainte',
+        icon: '🌀',
+        definition: 'Demandes contradictoires. Voir « Double contrainte » pour détails.',
+        isTypeRef: true
+    },
+    'clinical-type-ressenti_corporel': {
+        term: 'Ressenti corporel',
+        icon: '🤝',
+        definition: 'Sensations physiques. Voir « Ressenti corporel » pour détails.',
+        isTypeRef: true
+    }
+};
+
+function _showGlossaryTooltip(event, termKey) {
+    event.preventDefault();
+    const entry = CLINICAL_GLOSSARY[termKey];
+    if (!entry) return;
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'glossary-tooltip';
+    tooltip.innerHTML = `
+        <div class="glossary-tooltip-header">
+            <span class="glossary-tooltip-icon">${entry.icon}</span>
+            <strong>${escapeHtml(entry.term)}</strong>
+            <button class="glossary-tooltip-close" onclick="this.closest('.glossary-tooltip').remove()">✕</button>
+        </div>
+        <p class="glossary-tooltip-definition">${escapeHtml(entry.definition)}</p>
+        ${entry.examples && entry.examples.length ? `
+            <div class="glossary-tooltip-examples">
+                <strong>Exemples :</strong>
+                <ul>${entry.examples.map(ex => `<li>${escapeHtml(ex)}</li>`).join('')}</ul>
+            </div>
+        ` : ''}
+        ${entry.relatedTerms && entry.relatedTerms.length && !entry.isTypeRef ? `
+            <div class="glossary-tooltip-related">
+                <strong>Termes liés :</strong>
+                <div class="glossary-related-links">
+                    ${entry.relatedTerms.map(t => `<span class="glossary-link" onclick="_showGlossaryTooltip(event, '${t}')">${CLINICAL_GLOSSARY[t]?.term || t}</span>`).join(' • ')}
+                </div>
+            </div>
+        ` : ''}
+    `;
+
+    document.body.appendChild(tooltip);
+
+    const rect = event.target.getBoundingClientRect();
+    tooltip.style.position = 'fixed';
+    tooltip.style.top = (rect.bottom + 10) + 'px';
+    tooltip.style.left = Math.max(10, rect.left) + 'px';
+
+    setTimeout(() => tooltip.classList.add('visible'), 10);
+
+    document.addEventListener('click', function closeTooltip(e) {
+        if (!tooltip.contains(e.target) && e.target !== event.target) {
+            tooltip.remove();
+            document.removeEventListener('click', closeTooltip);
+        }
+    });
+}
+
+function _initGlossaryInteractions() {
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('glossary-term')) {
+            _showGlossaryTooltip(e, e.target.dataset.term);
+        }
+    });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -31199,6 +31438,7 @@ function submitClinicalInput() {
 // Charge les données + active le FAB si on est déjà dans un contexte
 document.addEventListener('DOMContentLoaded', () => {
     try { loadClinicalInputs(); } catch(e) {}
+    try { _initGlossaryInteractions(); } catch(e) { console.warn('Glossary init:', e); }
 });
 </script>
 
