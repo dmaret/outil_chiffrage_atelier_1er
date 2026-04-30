@@ -4303,6 +4303,7 @@
                         <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
                         <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
                         <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
+                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
                     </div>
                     <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
                 </div>
@@ -4595,7 +4596,6 @@
                 </div>
 
                 <div style="margin-top: 25px; text-align: center;">
-                    <button class="btn btn-success" id="btnSavePrestation" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
                     <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
                     <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
