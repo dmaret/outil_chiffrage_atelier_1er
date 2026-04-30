@@ -31842,15 +31842,15 @@ function _renderDebriefForm() {
                 </label>
             `).join('')}
         </div>
-        <script>
-            document.querySelectorAll('#debriefBody input[type="checkbox"]').forEach(cb => {
-                cb.addEventListener('change', function() {
-                    const textarea = document.querySelector(\`.debrief-note[data-question="\${this.dataset.question}"]\`);
-                    if (textarea) textarea.style.display = this.checked ? 'block' : 'none';
-                });
-            });
-        </script>
     `;
+
+    // Ajouter les event listeners après le rendu
+    document.querySelectorAll('#debriefBody input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const textarea = document.querySelector(`.debrief-note[data-question="${this.dataset.question}"]`);
+            if (textarea) textarea.style.display = this.checked ? 'block' : 'none';
+        });
+    });
 }
 
 function submitDebriefInput() {
