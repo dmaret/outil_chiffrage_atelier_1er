@@ -248,7 +248,7 @@
         .tab[data-group-color] { border-bottom: 3px solid var(--tab-group-color, transparent); position:relative; }
         .tab[data-group-color].active { border-bottom-color: var(--tab-group-color, var(--color-primary)); color: var(--tab-group-color, var(--color-primary-dark)); }
         .tab[data-group-color]:hover { border-bottom-color: var(--tab-group-color, transparent); }
-        .tabs-group-sep { display:inline-block; width:5px; height:28px; border-radius:3px; background:var(--sep-color,#aaa); opacity:0.8; vertical-align:middle; flex-shrink:0; margin:0 3px; box-shadow:0 0 3px rgba(0,0,0,0.1); }
+        .tabs-group-sep { display:inline-block; width:5px; height:18px; border-radius:3px; background:var(--sep-color,#aaa); opacity:0.8; vertical-align:middle; flex-shrink:0; margin:0 3px; box-shadow:0 0 3px rgba(0,0,0,0.1); }
         /* Editor rows for tabGroups */
         .tg-row { background:var(--color-bg-alt); border:1px solid var(--color-border); border-radius:10px; margin-bottom:8px; overflow:hidden; }
         .tg-row-header { display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; user-select:none; }
@@ -5572,17 +5572,6 @@
                     <div id="pinStatus" style="margin-top:10px;font-size:0.9em;color:#7a9db1;"></div>
                 </div>
 
-                <!-- ── Groupes d'onglets (admin only) ── -->
-                <div class="section admin-only" style="border-left-color:#7a8fa6;">
-                    <h2>🗂️ Groupes d'onglets</h2>
-                    <div class="info-box">Organisez les onglets par groupes colorés. Chaque groupe affiche une bande de couleur sous ses onglets — comme les intercalaires d'un classeur. Modifiez les noms, couleurs et affectations.</div>
-                    <div id="tabGroupsEditor" style="margin-top:14px;"></div>
-                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                        <button class="btn btn-secondary btn-small" onclick="tabGroupsAddGroup()">➕ Nouveau groupe</button>
-                        <button class="btn btn-secondary btn-small" onclick="tabGroupsReset()">↺ Réinitialiser</button>
-                    </div>
-                </div>
-
                 <div class="section" style="border-left-color:#a8d5e2;">
                     <h2>🖥️ Modes d'affichage</h2>
                     <div class="info-box">Personnalisez l'interface selon vos préférences. Les réglages sont sauvegardés automatiquement.</div>
@@ -5604,6 +5593,17 @@
                     <div style="display:flex;gap:8px;flex-wrap:wrap;">
                         <button class="display-mode-btn" id="btn-calc-complet" onclick="setDisplayPref('modeCalculateur','complet')">🔧 Complet<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Consommables + Stockage visibles</span></button>
                         <button class="display-mode-btn" id="btn-calc-simplifie" onclick="setDisplayPref('modeCalculateur','simplifie')">✂️ Simplifié<br><span style="font-size:0.75em;font-weight:400;opacity:0.8;">Sections avancées masquées par défaut</span></button>
+                    </div>
+                </div>
+
+                <!-- ── Groupes d'onglets (admin only) ── -->
+                <div class="section admin-only" style="border-left-color:#7a8fa6;">
+                    <h2>🗂️ Groupes d'onglets</h2>
+                    <div class="info-box">Organisez les onglets par groupes colorés. Chaque groupe affiche une bande de couleur sous ses onglets — comme les intercalaires d'un classeur. Modifiez les noms, couleurs et affectations.</div>
+                    <div id="tabGroupsEditor" style="margin-top:14px;"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-small" onclick="tabGroupsAddGroup()">➕ Nouveau groupe</button>
+                        <button class="btn btn-secondary btn-small" onclick="tabGroupsReset()">↺ Réinitialiser</button>
                     </div>
                 </div>
             </div>
