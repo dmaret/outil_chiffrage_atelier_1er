@@ -5640,6 +5640,16 @@
                         <button class="btn btn-secondary btn-small" onclick="tabGroupsReset()">↺ Réinitialiser</button>
                     </div>
                 </div>
+
+                <!-- ── Réorganisation des onglets ── -->
+                <div class="section admin-only" style="border-left-color:#9370b8;">
+                    <h2>📋 Réorganisation des onglets</h2>
+                    <div class="info-box">Glissez-déposez les onglets pour les réorganiser. L'ordre sera sauvegardé automatiquement et appliqué au prochain chargement.</div>
+                    <div id="tabsOrderContainer" style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-small" onclick="resetTabsOrder()">↺ Réinitialiser à l'ordre par défaut</button>
+                    </div>
+                </div>
             </div>
 
             <!-- ONGLET STATS -->
@@ -8420,6 +8430,8 @@
         migrateLocalStorage();
         loadFromStorage();
         loadEmailWebhooksConfig();
+        const storedTabsOrder = getStoredTabsOrder();
+        if (storedTabsOrder) applyTabsOrder(storedTabsOrder);
         renderStockSelects();
         document.getElementById('date').valueAsDate = new Date();
         document.getElementById('dateMouvement').valueAsDate = new Date();
@@ -8718,6 +8730,109 @@
             document.getElementById('alertThresholdWarning').value = config.alertThresholdWarning || 70;
             document.getElementById('alertThresholdDanger').value = config.alertThresholdDanger || 90;
             updatePinStatus();
+            renderTabsOrderEditor();
+        }
+
+        // ── Réorganisation des onglets ─────────────────────────────
+        let _tabsOrder = null;
+
+        function getDefaultTabsOrder() {
+            const tabsBar = document.getElementById('tabsBar');
+            if (!tabsBar) return [];
+            const tabs = Array.from(tabsBar.querySelectorAll('.tab')).map(btn => {
+                const match = btn.getAttribute('onclick')?.match(/'([^']+)'/);
+                return match ? match[1] : null;
+            }).filter(Boolean);
+            return tabs;
+        }
+
+        function getStoredTabsOrder() {
+            try {
+                const stored = localStorage.getItem('tabsOrder');
+                return stored ? JSON.parse(stored) : null;
+            } catch(e) { return null; }
+        }
+
+        function saveTabsOrder(order) {
+            localStorage.setItem('tabsOrder', JSON.stringify(order));
+            _tabsOrder = order;
+        }
+
+        function applyTabsOrder(order) {
+            const tabsBar = document.getElementById('tabsBar');
+            if (!tabsBar || !order || !order.length) return;
+            const tabs = Array.from(tabsBar.querySelectorAll('.tab'));
+            const tabMap = new Map();
+            tabs.forEach(tab => {
+                const match = tab.getAttribute('onclick')?.match(/'([^']+)'/);
+                if (match) tabMap.set(match[1], tab);
+            });
+            const sorted = [];
+            for (const tabName of order) {
+                if (tabMap.has(tabName)) sorted.push(tabMap.get(tabName));
+            }
+            for (const tab of tabs) {
+                if (!sorted.includes(tab)) sorted.push(tab);
+            }
+            sorted.forEach(tab => tabsBar.appendChild(tab));
+        }
+
+        function renderTabsOrderEditor() {
+            const container = document.getElementById('tabsOrderContainer');
+            if (!container) return;
+            const defaultOrder = getDefaultTabsOrder();
+            const storedOrder = getStoredTabsOrder();
+            const currentOrder = storedOrder || defaultOrder;
+            _tabsOrder = currentOrder;
+
+            const tabsBar = document.getElementById('tabsBar');
+            const tabs = Array.from(tabsBar.querySelectorAll('.tab'));
+            const tabMap = new Map();
+            tabs.forEach(tab => {
+                const match = tab.getAttribute('onclick')?.match(/'([^']+)'/);
+                if (match) {
+                    const text = tab.textContent.trim();
+                    tabMap.set(match[1], text);
+                }
+            });
+
+            container.innerHTML = currentOrder.map((tabName, idx) => {
+                const label = tabMap.get(tabName) || tabName;
+                return `<div draggable="true" data-tab-name="${tabName}"
+                    style="padding:10px;background:#f5f8fc;border:1px solid #d0dae8;border-radius:8px;cursor:move;user-select:none;text-align:center;font-size:0.9em;"
+                    ondragstart="event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('tabName',this.dataset.tabName)"
+                    ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';this.style.background='#e0f0ff';this.style.borderColor='#4e9af1'"
+                    ondragleave="this.style.background='#f5f8fc';this.style.borderColor='#d0dae8'"
+                    ondrop="reorderTabs(event, '${tabName}')">${escapeHtml(label)}</div>`;
+            }).join('');
+        }
+
+        function reorderTabs(event, dropTabName) {
+            event.preventDefault();
+            const draggedTabName = event.dataTransfer.getData('tabName');
+            if (!draggedTabName || !_tabsOrder) return;
+
+            const dragIdx = _tabsOrder.indexOf(draggedTabName);
+            const dropIdx = _tabsOrder.indexOf(dropTabName);
+            if (dragIdx === -1 || dropIdx === -1 || dragIdx === dropIdx) return;
+
+            _tabsOrder.splice(dragIdx, 1);
+            _tabsOrder.splice(dropIdx, 0, draggedTabName);
+
+            saveTabsOrder(_tabsOrder);
+            applyTabsOrder(_tabsOrder);
+            renderTabsOrderEditor();
+            event.target.style.background = '#f5f8fc';
+            event.target.style.borderColor = '#d0dae8';
+        }
+
+        function resetTabsOrder() {
+            if (!confirm('Restaurer l\'ordre des onglets par défaut?')) return;
+            localStorage.removeItem('tabsOrder');
+            _tabsOrder = getDefaultTabsOrder();
+            applyTabsOrder(_tabsOrder);
+            renderTabsOrderEditor();
+            toast('Ordre des onglets réinitialisé', 'success');
         }
 
         // ── CEA Niveaux ─────────────────────────────────────────────
@@ -10884,37 +10999,54 @@
                 return;
             }
             c.innerHTML = beneficiaires.map(b => {
-                const myJ  = jalons.filter(j => j.beneficiaireId === b.id).sort((a, x) => x.date > a.date ? 1 : -1);
-                const pIds = [...new Set([...(b.prestationsIds||[]), ...myJ.map(j => j.prestationId).filter(Boolean)])];
-                const prests = pIds.map(id => prestationsSauvegardees.find(p => p.id == id)).filter(Boolean);
-                const st   = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
+                const myJ = jalons.filter(j => j.beneficiaireId === b.id).sort((a, x) => (a.date || '') > (x.date || '') ? 1 : -1);
+                const reussites = myJ.filter(j => j.type === 'reussite' || j.type === 'progression' || j.type === 'reconnaissance');
+                const freins = myJ.filter(j => j.type === 'frein' || j.type === 'difficulte');
+                const st = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
+
                 return `<div style="border:1px solid #e0e8f0;border-radius:14px;padding:18px;margin-bottom:16px;">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
                         <span style="font-size:1.6em;">${b.avatar || '👤'}</span>
                         <strong style="font-size:1.05em;">${b.prenom} ${b.nom}</strong>
                         <span style="font-size:0.78em;background:${st.color}22;color:${st.color};border:1px solid ${st.color}44;border-radius:20px;padding:2px 9px;">${st.label}</span>
-                        <span style="font-size:0.8em;color:#7a9db1;margin-left:auto;">${myJ.length} jalon${myJ.length !== 1 ? 's' : ''} · ${prests.length} prestation${prests.length !== 1 ? 's' : ''}</span>
+                        <span style="font-size:0.8em;color:#7a9db1;margin-left:auto;">✅ ${reussites.length} · 🚧 ${freins.length}</span>
                     </div>
-                    ${prests.length ? `<div style="margin-bottom:12px;">
-                        <p style="font-size:0.78em;font-weight:700;color:#6b8fa3;letter-spacing:.5px;margin-bottom:6px;">PRESTATIONS LIÉES</p>
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                            ${prests.map(p => `<span style="font-size:0.82em;background:#e8f4fb;color:#2980b9;border-radius:8px;padding:3px 10px;cursor:pointer;" onclick="switchTab('prestations')" title="Voir les prestations">${p.prestation || p.client}</span>`).join('')}
+
+                    ${reussites.length || freins.length ? `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                        <div style="min-width:600px;position:relative;padding:20px 0;">
+                            <!-- Piste Réussites -->
+                            <div style="margin-bottom:30px;">
+                                <div style="font-size:0.75em;font-weight:700;color:#27ae60;letter-spacing:.5px;margin-bottom:8px;">✅ RÉUSSITES</div>
+                                <div style="position:relative;height:60px;background:#f0f8f4;border-radius:8px;border:1px solid #d4edda;display:flex;align-items:center;padding:0 12px;">
+                                    <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;">
+                                        ${reussites.length ? reussites.map(j => {
+                                            const tp = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                                            return `<div style="position:relative;margin-right:12px;flex-shrink:0;">
+                                                <div title="${j.titre}" style="background:${tp.color};color:white;border-radius:20px;padding:6px 12px;font-size:0.8em;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">${j.titre}</div>
+                                                <div style="font-size:0.65em;color:#666;text-align:center;margin-top:2px;white-space:nowrap;">${j.date}</div>
+                                            </div>`;
+                                        }).join('') : '<span style="color:#9aacb8;font-size:0.85em;font-style:italic;">Aucune réussite</span>'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Piste Freins -->
+                            <div>
+                                <div style="font-size:0.75em;font-weight:700;color:#e74c3c;letter-spacing:.5px;margin-bottom:8px;">🚧 FREINS</div>
+                                <div style="position:relative;height:60px;background:#fef5f3;border-radius:8px;border:1px solid #fadad1;display:flex;align-items:center;padding:0 12px;">
+                                    <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;">
+                                        ${freins.length ? freins.map(j => {
+                                            const tp = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                                            return `<div style="position:relative;margin-right:12px;flex-shrink:0;">
+                                                <div title="${j.titre}" style="background:${tp.color};color:white;border-radius:20px;padding:6px 12px;font-size:0.8em;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">${j.titre}</div>
+                                                <div style="font-size:0.65em;color:#666;text-align:center;margin-top:2px;white-space:nowrap;">${j.date}</div>
+                                            </div>`;
+                                        }).join('') : '<span style="color:#9aacb8;font-size:0.85em;font-style:italic;">Aucun frein</span>'}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>` : ''}
-                    ${myJ.length ? `<div>
-                        <p style="font-size:0.78em;font-weight:700;color:#6b8fa3;letter-spacing:.5px;margin-bottom:8px;">CHRONOLOGIE DES JALONS</p>
-                        <div style="display:flex;flex-direction:column;gap:5px;">
-                            ${myJ.slice(0, 6).map(j => {
-                                const tp = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
-                                return `<div style="display:flex;gap:8px;align-items:baseline;font-size:0.83em;">
-                                    <span style="color:#9aacb8;white-space:nowrap;min-width:88px;">${j.date}</span>
-                                    <span style="background:${tp.color}22;color:${tp.color};border-radius:6px;padding:1px 7px;font-size:0.82em;white-space:nowrap;">${tp.label}</span>
-                                    <span>${j.titre}</span>
-                                </div>`;
-                            }).join('')}
-                            ${myJ.length > 6 ? `<span style="font-size:0.8em;color:#9aacb8;">+ ${myJ.length - 6} autre${myJ.length - 6 > 1 ? 's' : ''}</span>` : ''}
-                        </div>
-                    </div>` : `<p style="font-size:0.85em;color:#9aacb8;font-style:italic;">Aucun jalon enregistré pour ce bénéficiaire.</p>`}
+                    </div>` : `<p style="font-size:0.85em;color:#9aacb8;font-style:italic;">Aucune réussite ou frein enregistré.</p>`}
                 </div>`;
             }).join('');
         }
