@@ -5606,6 +5606,16 @@
                         <button class="btn btn-secondary btn-small" onclick="tabGroupsReset()">↺ Réinitialiser</button>
                     </div>
                 </div>
+
+                <!-- ── Réorganisation des onglets ── -->
+                <div class="section admin-only" style="border-left-color:#9370b8;">
+                    <h2>📋 Réorganisation des onglets</h2>
+                    <div class="info-box">Glissez-déposez les onglets pour les réorganiser. L'ordre sera sauvegardé automatiquement et appliqué au prochain chargement.</div>
+                    <div id="tabsOrderContainer" style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-small" onclick="resetTabsOrder()">↺ Réinitialiser à l'ordre par défaut</button>
+                    </div>
+                </div>
             </div>
 
             <!-- ONGLET STATS -->
@@ -8350,6 +8360,8 @@
         migrateLocalStorage();
         loadFromStorage();
         loadEmailWebhooksConfig();
+        const storedTabsOrder = getStoredTabsOrder();
+        if (storedTabsOrder) applyTabsOrder(storedTabsOrder);
         renderStockSelects();
         document.getElementById('date').valueAsDate = new Date();
         document.getElementById('dateMouvement').valueAsDate = new Date();
@@ -8649,6 +8661,109 @@
             document.getElementById('alertThresholdWarning').value = config.alertThresholdWarning || 70;
             document.getElementById('alertThresholdDanger').value = config.alertThresholdDanger || 90;
             updatePinStatus();
+            renderTabsOrderEditor();
+        }
+
+        // ── Réorganisation des onglets ─────────────────────────────
+        let _tabsOrder = null;
+
+        function getDefaultTabsOrder() {
+            const tabsBar = document.getElementById('tabsBar');
+            if (!tabsBar) return [];
+            const tabs = Array.from(tabsBar.querySelectorAll('.tab')).map(btn => {
+                const match = btn.getAttribute('onclick')?.match(/'([^']+)'/);
+                return match ? match[1] : null;
+            }).filter(Boolean);
+            return tabs;
+        }
+
+        function getStoredTabsOrder() {
+            try {
+                const stored = localStorage.getItem('tabsOrder');
+                return stored ? JSON.parse(stored) : null;
+            } catch(e) { return null; }
+        }
+
+        function saveTabsOrder(order) {
+            localStorage.setItem('tabsOrder', JSON.stringify(order));
+            _tabsOrder = order;
+        }
+
+        function applyTabsOrder(order) {
+            const tabsBar = document.getElementById('tabsBar');
+            if (!tabsBar || !order || !order.length) return;
+            const tabs = Array.from(tabsBar.querySelectorAll('.tab'));
+            const tabMap = new Map();
+            tabs.forEach(tab => {
+                const match = tab.getAttribute('onclick')?.match(/'([^']+)'/);
+                if (match) tabMap.set(match[1], tab);
+            });
+            const sorted = [];
+            for (const tabName of order) {
+                if (tabMap.has(tabName)) sorted.push(tabMap.get(tabName));
+            }
+            for (const tab of tabs) {
+                if (!sorted.includes(tab)) sorted.push(tab);
+            }
+            sorted.forEach(tab => tabsBar.appendChild(tab));
+        }
+
+        function renderTabsOrderEditor() {
+            const container = document.getElementById('tabsOrderContainer');
+            if (!container) return;
+            const defaultOrder = getDefaultTabsOrder();
+            const storedOrder = getStoredTabsOrder();
+            const currentOrder = storedOrder || defaultOrder;
+            _tabsOrder = currentOrder;
+
+            const tabsBar = document.getElementById('tabsBar');
+            const tabs = Array.from(tabsBar.querySelectorAll('.tab'));
+            const tabMap = new Map();
+            tabs.forEach(tab => {
+                const match = tab.getAttribute('onclick')?.match(/'([^']+)'/);
+                if (match) {
+                    const text = tab.textContent.trim();
+                    tabMap.set(match[1], text);
+                }
+            });
+
+            container.innerHTML = currentOrder.map((tabName, idx) => {
+                const label = tabMap.get(tabName) || tabName;
+                return `<div draggable="true" data-tab-name="${tabName}"
+                    style="padding:10px;background:#f5f8fc;border:1px solid #d0dae8;border-radius:8px;cursor:move;user-select:none;text-align:center;font-size:0.9em;"
+                    ondragstart="event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('tabName',this.dataset.tabName)"
+                    ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';this.style.background='#e0f0ff';this.style.borderColor='#4e9af1'"
+                    ondragleave="this.style.background='#f5f8fc';this.style.borderColor='#d0dae8'"
+                    ondrop="reorderTabs(event, '${tabName}')">${escapeHtml(label)}</div>`;
+            }).join('');
+        }
+
+        function reorderTabs(event, dropTabName) {
+            event.preventDefault();
+            const draggedTabName = event.dataTransfer.getData('tabName');
+            if (!draggedTabName || !_tabsOrder) return;
+
+            const dragIdx = _tabsOrder.indexOf(draggedTabName);
+            const dropIdx = _tabsOrder.indexOf(dropTabName);
+            if (dragIdx === -1 || dropIdx === -1 || dragIdx === dropIdx) return;
+
+            _tabsOrder.splice(dragIdx, 1);
+            _tabsOrder.splice(dropIdx, 0, draggedTabName);
+
+            saveTabsOrder(_tabsOrder);
+            applyTabsOrder(_tabsOrder);
+            renderTabsOrderEditor();
+            event.target.style.background = '#f5f8fc';
+            event.target.style.borderColor = '#d0dae8';
+        }
+
+        function resetTabsOrder() {
+            if (!confirm('Restaurer l\'ordre des onglets par défaut?')) return;
+            localStorage.removeItem('tabsOrder');
+            _tabsOrder = getDefaultTabsOrder();
+            applyTabsOrder(_tabsOrder);
+            renderTabsOrderEditor();
+            toast('Ordre des onglets réinitialisé', 'success');
         }
 
         // ── CEA Niveaux ─────────────────────────────────────────────
