@@ -8346,6 +8346,7 @@
             if (dv) { const d = new Date(); d.setDate(d.getDate() + 30); dv.value = d.toISOString().split('T')[0]; }
         })();
         loadTabOrder();
+        updateTabScrollBtns();
         loadTabProfiles();
         renderCatalogue();
         renderBundleButtons();
@@ -8576,7 +8577,7 @@
             const savedTheme = localStorage.getItem('themePrefs');
             try { if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme)); } catch(e) { console.error('Error loading theme preferences:', e); }
             loadConfig();
-            requestAnimationFrame(applyTabGroupColors);
+            applyTabGroupColors();
         }
 
         /**
@@ -8608,6 +8609,7 @@
             localStorage.setItem('themePrefs', JSON.stringify(themePrefs));
             localStorage.setItem('beneficiaires', JSON.stringify(beneficiaires));
             localStorage.setItem('jalons', JSON.stringify(jalons));
+            localStorage.setItem('tabGroups', JSON.stringify(tabGroups));
             lastSaveTime = Date.now();
             updateSaveIndicator();
         }
