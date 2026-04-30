@@ -32823,6 +32823,9 @@ function submitClinicalInput() {
 document.addEventListener('DOMContentLoaded', () => {
     try { loadClinicalInputs(); } catch(e) {}
     try { _initGlossaryInteractions(); } catch(e) { console.warn('Glossary init:', e); }
+    try { initMatrice(); } catch(e) { console.warn('Matrice init:', e); }
+    try { renderAccompClinicalBody(); } catch(e) { console.warn('Clinical body init:', e); }
+    try { renderAccompTimeline(); } catch(e) { console.warn('Timeline init:', e); }
 });
     </script>
 
