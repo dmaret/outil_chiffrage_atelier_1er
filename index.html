@@ -14985,6 +14985,14 @@
             });
         }
 
+        // ── Exposition au scope global pour onclick HTML ─────────────────
+        window.loadReferenceDocuments = loadReferenceDocuments;
+        window.addReferenceDocument = addReferenceDocument;
+        window.saveReferenceDocuments = saveReferenceDocuments;
+        window.renderReferenceDocuments = renderReferenceDocuments;
+        window.editReferenceDocument = editReferenceDocument;
+        window.deleteReferenceDocument = deleteReferenceDocument;
+
         function addConsommable() {
             // Check permission
             if (!checkPermission('manage_consommables')) {
