@@ -8346,6 +8346,7 @@
             if (dv) { const d = new Date(); d.setDate(d.getDate() + 30); dv.value = d.toISOString().split('T')[0]; }
         })();
         loadTabOrder();
+        updateTabScrollBtns();
         loadTabProfiles();
         renderCatalogue();
         renderBundleButtons();
