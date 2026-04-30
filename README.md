@@ -12,6 +12,13 @@
    - [Flux global des activités](#11-flux-global-des-activités)
    - [Vue par acteur](#12-vue-par-acteur)
 2. [Démarrage rapide](#2-démarrage-rapide)
+   - [Flux d'utilisation typiques](#25-flux-dutilisation-typiques)
+     - [Scénario 1 : Chiffrer une prestation](#-scénario-1--chiffrer-une-nouvelle-prestation-adminca)
+     - [Scénario 2 : Valider avec comparateur](#-scénario-2--valider-une-prestation-avec-comparateur-cea)
+     - [Scénario 3 : Suivre la clinique](#-scénario-3--suivre-la-clinique-dun-bénéficiaire-accompagnement)
+     - [Scénario 4 : Analyser les inputs](#-scénario-4--analyser-tous-les-inputs-cliniques-dashboard)
+     - [Scénario 5 : Détecter corrélations](#-scénario-5--détecter-une-corrélation-modules-b--a)
+     - [Scénario 6 : Gérer les stocks FIFO](#-scénario-6--gérer-les-stocks-fifo-stock)
 3. [Structure du projet](#3-structure-du-projet)
 4. [Modules fonctionnels](#4-modules-fonctionnels)
    - [Tableau de bord](#41-tableau-de-bord-)
@@ -222,6 +229,182 @@ Ouvrir index.html dans votre navigateur
 ### Sauvegarde initiale
 
 Dès que des données sont saisies, effectuez une sauvegarde depuis l'onglet **Configuration → Export JSON** afin de conserver un point de restauration.
+
+---
+
+## 2.5. Flux d'utilisation typiques
+
+### 📋 Scénario 1 : Chiffrer une nouvelle prestation (Admin/CEA)
+
+```
+START
+  ↓
+📚 Catalogue des gestes
+  ├─ Sélectionner "Conditionnement" (15 min)
+  └─ Sélectionner "Montage" (20 min)
+  ↓
+🛒 Consommables
+  ├─ Ajouter "Boîte carton" (0,50 CHF × 5)
+  └─ Ajouter "Ruban adhésif" (0,20 CHF × 1)
+  ↓
+💼 Calculateur
+  ├─ Client: "ABC Ltd"
+  ├─ Prestation: "Préparation colis"
+  ├─ Coût CEA: 48 CHF (2 × 24h)
+  ├─ Coût MSP: 12 CHF (1 × 12h optionnel)
+  ├─ Coût consommables: 3 CHF
+  ├─ Marge (30%): +18,90 CHF
+  └─ TOTAL VENTE: 81,90 CHF
+  ↓
+💾 Sauvegarder
+  ↓
+END (Devis créé, peut être approuvé/facturé)
+```
+
+### 📋 Scénario 2 : Valider une prestation avec comparateur (CEA)
+
+```
+START
+  ↓
+📊 Prestations
+  └─ Ouvrir devis "Colis ABC" (état: Soumis)
+  ↓
+✏️ Éditer prestation
+  ↓
+🔀 Comparateur 3-niveaux
+  ├─ Prescrit client: "10h travail + matériel"
+  ├─ Procédure CEA: "Conditionnement std (8 étapes)"
+  └─ Réel exécuté:
+      ├─ Étape 1 (Préparation): ✅ Fait
+      ├─ Étape 2 (Tri): ✅ Fait
+      ├─ Étape 3 (Emballage): ⚠️ Partiel (manque ruban)
+      ├─ Étape 4 (Étiquetage): ❌ Omis
+      └─ Écarts identifiés: 1 déviation
+  ↓
+📋 Débriefing post-prestation
+  ├─ ✅ Objectifs atteints
+  ├─ ✨ Points positifs: "Vitesse +10%"
+  ├─ 🔄 À améliorer: "Manque préparation ruban"
+  ├─ 💬 Feedback: "Bénéficiaire satisfait"
+  └─ 🔍 Observations: "Double contrainte détectée"
+  ↓
+💾 Valider
+  ↓
+END (Prestation approuvée, prêt à facturer)
+```
+
+### 📋 Scénario 3 : Suivre la clinique d'un bénéficiaire (Accompagnement)
+
+```
+START
+  ↓
+👥 Accompagnement → Bénéficiaires
+  └─ Cliquer sur "Jean D." (suivi depuis 6 mois)
+  ↓
+🎭 Outils cliniques (FAB flottant)
+  ├─ Ajouter Émotion: "Fierté" (intensité 4)
+  ├─ Ajouter Observation: "Concentration +20%"
+  ├─ Ajouter Ressenti corporel: "Épaules détendues"
+  └─ Note: "Excellente journée"
+  ↓
+📊 Timeline clinique
+  ├─ Afficher historique (15 entrées)
+  ├─ Filtrer par "Émotions"
+  ├─ Pattern détecté: "Fierté 5x/mois"
+  ├─ Zone sensible: "Épaules" (8 mentions)
+  └─ Alerte: Aucune (contexte positif)
+  ↓
+📊 Statistiques cliniques
+  ├─ Top émotions: Fierté (5x), Plaisir (4x), Joie (3x)
+  ├─ Top zones: Épaules (8x), Mains (5x)
+  ├─ Débriefings: 6 réalisés
+  └─ Alertes: Aucune ✅
+  ↓
+📄 Exporter PDF
+  └─ "Rapport clinique Jean D. - Avril 2026.pdf"
+  ↓
+END (Suivi à jour, prêt pour réunion)
+```
+
+### 📋 Scénario 4 : Analyser tous les inputs cliniques (Dashboard)
+
+```
+START
+  ↓
+📊 Dashboard Clinique (FAB 📊)
+  ├─ Total inputs: 247
+  ├─ Bénéficiaires actifs: 12
+  ├─ Émotions saisies: 156
+  └─ Débriefings: 18
+  ↓
+Résumé par bénéficiaire:
+  ├─ Jean D. (87 inputs) → 📊 Voir stats
+  ├─ Marie L. (65 inputs) → 📊 Voir stats
+  ├─ Philippe M. (52 inputs) → 📊 Voir stats
+  └─ Autres (43 inputs)
+  ↓
+Jean D. → Statistiques
+  ├─ Émotions: Fierté (5), Plaisir (4), Joie (3)
+  ├─ Zones: Épaules (8), Mains (5)
+  ├─ Alertes: Aucune ✅
+  └─ PDF: Exporter rapport
+  ↓
+END (Vue d'ensemble complète)
+```
+
+### 📋 Scénario 5 : Détecter une corrélation (Modules B + A)
+
+```
+START
+  ↓
+📊 Prestation "Conditionnement ABC"
+  ├─ Comparateur (Module B):
+  │   └─ 3 écarts identifiés (Étapes omises/modifiées)
+  └─ Timeline (Module A):
+      └─ 2 émotions négatives (Frustration, Anxiété)
+      └─ 1 double contrainte documentée
+  ↓
+🔗 Intégration avancée (Module I)
+  └─ Corrélation détectée:
+      "Écarts observés (3) + Émotions négatives (2) 
+       + Doubles contraintes (1) → À investiguer"
+  ↓
+📄 Rapport PDF
+  └─ Section "Corrélations détectées"
+      └─ Prestation "Cond. ABC": Insight généré
+  ↓
+💬 Action proposée
+  └─ "Débriefing approfondi à faire au prochain cycle"
+  ↓
+END (Risque identifié, suivi assuré)
+```
+
+### 📋 Scénario 6 : Gérer les stocks FIFO (Stock)
+
+```
+START
+  ↓
+📦 Stock → Emplacements
+  └─ Sélectionner "Étagère A1" (Boîtes carton)
+  ↓
+Consulter:
+  ├─ Quantité: 250 unités
+  ├─ Prix unitaire: 0,50 CHF
+  ├─ Valeur totale: 125 CHF
+  ├─ Entrée plus ancienne: 2026-02-15 (89 unités)
+  ├─ Entrée récente: 2026-04-20 (161 unités)
+  └─ Méthode: FIFO (consommer les 89 premières)
+  ↓
+Retirer stock:
+  ├─ Quantité: 50 unités
+  ├─ FIFO sélectionne: 50 des 89 anciennes
+  ├─ Coût sortie: 50 × 0,50 = 25 CHF
+  └─ Stock restant: 200 (39 anciennes + 161 récentes)
+  ↓
+💾 Confirmer
+  ↓
+END (Stock mis à jour, FIFO appliqué)
+```
 
 ---
 
