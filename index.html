@@ -30574,7 +30574,7 @@
             document.addEventListener('DOMContentLoaded', updateOnlineUI);
         })();
 
-    </script>
+
 
     <!-- Auth : écran de connexion -->
     <div id="authOverlay" class="auth-overlay" style="display:none;">
@@ -31003,7 +31003,6 @@
     </div>
 </div>
 
-<script>
 let _liveCollapsed = false;
 function toggleLiveCollapse() {
     const content = document.getElementById('liveContent');
@@ -32814,7 +32813,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try { loadClinicalInputs(); } catch(e) {}
     try { _initGlossaryInteractions(); } catch(e) { console.warn('Glossary init:', e); }
 });
-</script>
+    </script>
 
 <!-- ── v2.17 — Outils cliniques flottants ─────────────────────────── -->
 <button id="clinicalFab" type="button" onclick="openClinicalModal()" aria-label="Outils cliniques" title="Outils cliniques (clinique du travail)">
