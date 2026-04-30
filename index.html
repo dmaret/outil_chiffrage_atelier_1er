@@ -3111,6 +3111,243 @@
         body.dark-mode #clinicalModalBox { background: #2d2520; border-color: var(--terra-primary); }
         body.dark-mode #clinicalBody label { color: var(--terra-light); }
         body.dark-mode #clinicalBody input, body.dark-mode #clinicalBody textarea, body.dark-mode #clinicalBody select { background: #1e1812; color: #f0ddd4; border-color: var(--terra-dark); }
+
+        /* ── Comparateur 3-niveaux (v2.18 — Module B) ───────────────── */
+        #compareModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(45, 35, 30, 0.55); backdrop-filter: blur(3px);
+            z-index: 10005; align-items: flex-start; justify-content: center;
+            overflow-y: auto; padding: 20px 12px;
+        }
+        #compareModal.visible { display: flex; }
+        #compareModalBox {
+            background: white; border-radius: 14px; max-width: 1280px; width: 100%;
+            border: 2px solid var(--terra-accent);
+            box-shadow: 0 20px 50px rgba(45, 35, 30, 0.25);
+            display: flex; flex-direction: column;
+            max-height: calc(100vh - 40px);
+        }
+        #compareModalHeader {
+            padding: 14px 18px; border-bottom: 2px solid var(--terra-accent);
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+            background: linear-gradient(180deg, #fff8f3 0%, #fff 100%);
+            border-radius: 14px 14px 0 0;
+        }
+        #compareModalHeader h3 { margin: 0; color: var(--terra-dark); font-size: 1.1em; }
+        #compareModalContext { font-size: 0.82em; color: #888; margin-top: 3px; }
+        #compareGrid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px; padding: 16px; overflow-y: auto; flex: 1;
+            background: #f9f6f2;
+        }
+        @media (max-width: 900px) {
+            #compareGrid { grid-template-columns: 1fr; }
+        }
+        .compare-col {
+            background: white; border: 2px solid #e8e0d6; border-radius: 12px;
+            padding: 12px; display: flex; flex-direction: column; min-width: 0;
+        }
+        .compare-col.col-prescrit { border-color: #a8c8f0; }
+        .compare-col.col-procedure { border-color: var(--terra-accent); }
+        .compare-col.col-reel { border-color: #b8e0c0; }
+        .compare-col-title {
+            font-weight: 700; font-size: 0.95em; padding-bottom: 8px;
+            border-bottom: 2px solid currentColor; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .col-prescrit .compare-col-title { color: #2b5d8c; }
+        .col-procedure .compare-col-title { color: var(--terra-dark); }
+        .col-reel .compare-col-title { color: #2a7a4a; }
+        .compare-col textarea, .compare-col input[type="text"], .compare-col select {
+            width: 100%; padding: 7px 9px; border: 1.5px solid #d8d0c4;
+            border-radius: 7px; font-size: 0.88em; background: white;
+            color: #2d3e50; font-family: inherit; box-sizing: border-box;
+        }
+        .compare-col textarea { min-height: 60px; resize: vertical; }
+        .compare-col label { font-size: 0.78em; color: #7a7060; font-weight: 600;
+            display: block; margin: 8px 0 3px; }
+        .compare-step {
+            padding: 7px 9px; margin-bottom: 5px; border-radius: 7px;
+            border-left: 3px solid #d8d0c4; background: #fafaf6;
+            font-size: 0.85em; line-height: 1.35; color: #3a3530;
+            display: flex; align-items: flex-start; gap: 6px;
+        }
+        .compare-step.mandatory { border-left-color: var(--terra-primary); }
+        .compare-step .step-icon { flex-shrink: 0; }
+        .compare-step .step-label { flex: 1; min-width: 0; }
+        .compare-step.ecart-omis { background: #fdecec; border-left-color: #c9303c; }
+        .compare-step.ecart-partiel { background: #fef6e6; border-left-color: #d68910; }
+        .compare-step.ecart-modifie { background: #eef6fd; border-left-color: #2980b9; }
+        .compare-step.ecart-fait { background: #effaf0; border-left-color: #27ae60; }
+        .compare-step.ecart-ajoute { background: #f3eef9; border-left-color: #7a5a9a; }
+        .compare-step select {
+            font-size: 0.78em; padding: 3px 5px; border-radius: 5px;
+            border: 1px solid #d8d0c4; background: white; color: #3a3530;
+            margin-left: auto; flex-shrink: 0; cursor: pointer; max-width: 110px;
+        }
+        .compare-deviation-list { margin-top: 8px; }
+        .compare-deviation {
+            padding: 6px 8px; margin-bottom: 4px; border-radius: 6px;
+            background: #f3eef9; border-left: 3px solid #7a5a9a;
+            font-size: 0.82em; display: flex; gap: 6px; align-items: flex-start;
+        }
+        .compare-deviation .dev-rm {
+            background: none; border: none; color: #c9303c; cursor: pointer;
+            font-size: 1.05em; padding: 0; margin-left: auto; line-height: 1;
+        }
+        #compareActions {
+            padding: 12px 18px; border-top: 2px solid var(--terra-accent);
+            display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+            background: linear-gradient(0deg, #fff8f3 0%, #fff 100%);
+            border-radius: 0 0 14px 14px;
+        }
+        .compare-stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 6px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #f0e8db;
+            font-size: 0.82em;
+        }
+        .compare-stat-box {
+            text-align: center; padding: 4px;
+            background: #faf6f0; border-radius: 6px;
+        }
+        .compare-stat-box strong { display: block; font-size: 1.15em; color: var(--terra-dark); }
+        .compare-stat-box small { color: #7a7060; }
+        .compare-template-pick {
+            margin-bottom: 10px; padding: 8px; background: #faf6f0;
+            border: 1px dashed var(--terra-accent); border-radius: 8px;
+            font-size: 0.83em;
+        }
+        .compare-template-pick select { margin-top: 4px; }
+        body.dark-mode #compareModalBox { background: #2d2520; border-color: var(--terra-primary); }
+        body.dark-mode #compareGrid { background: #1e1812; }
+        body.dark-mode .compare-col { background: #2d2520; border-color: var(--terra-dark); }
+        body.dark-mode .compare-col textarea, body.dark-mode .compare-col input[type="text"], body.dark-mode .compare-col select { background: #1e1812; color: #f0ddd4; border-color: var(--terra-dark); }
+        body.dark-mode .compare-step { background: #1e1812; color: #f0ddd4; }
+        body.dark-mode #compareModalHeader, body.dark-mode #compareActions { background: #2d2520; }
+        body.dark-mode .compare-stats { background: #2d2520; border-color: #3a322a; }
+        body.dark-mode .compare-stat-box { background: #1e1812; }
+
+        /* Bouton Comparer dans la liste des prestations */
+        .btn-compare {
+            background: #fff4e6 !important; color: #b66a1f !important;
+            border: 1px solid #f0b87a !important;
+        }
+        .btn-compare:hover { background: #ffe8cc !important; }
+        body.dark-mode .btn-compare { background: #3a2a1e !important; color: #f0c898 !important; border-color: #6b4a2e !important; }
+
+        /* ── Timeline clinique (v2.19 — Module C) ──────────────────── */
+        #timelineModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(45, 35, 30, 0.55); backdrop-filter: blur(3px);
+            z-index: 10006; align-items: flex-start; justify-content: center;
+            overflow-y: auto; padding: 20px 12px;
+        }
+        #timelineModal.visible { display: flex; }
+        #timelineModalBox {
+            background: white; border-radius: 14px; max-width: 980px; width: 100%;
+            border: 2px solid var(--terra-accent);
+            box-shadow: 0 20px 50px rgba(45, 35, 30, 0.25);
+            display: flex; flex-direction: column;
+            max-height: calc(100vh - 40px);
+        }
+        #timelineModalHeader {
+            padding: 16px 18px; border-bottom: 2px solid var(--terra-accent);
+            display: flex; justify-content: space-between; align-items: flex-start;
+            background: linear-gradient(180deg, #fff8f3 0%, #fff 100%);
+            border-radius: 14px 14px 0 0; gap: 12px;
+        }
+        #timelineModalHeader h3 { margin: 0; color: var(--terra-dark); }
+        .timeline-patterns {
+            padding: 14px 18px; background: #faf6f0;
+            border-bottom: 1px solid #e8e0d6;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .timeline-pattern-card {
+            background: white; border: 2px solid #e8e0d6; border-radius: 10px;
+            padding: 8px 10px;
+        }
+        .timeline-pattern-card.emotion { border-color: #e6b4a0; }
+        .timeline-pattern-card.body { border-color: #c9b3d4; }
+        .timeline-pattern-card.dc { border-color: #f5cb73; }
+        .timeline-pattern-card.message { border-color: #a8c8f0; }
+        .timeline-pattern-title {
+            font-weight: 700; color: var(--terra-dark); font-size: 0.85em;
+            margin-bottom: 4px;
+        }
+        .timeline-pattern-list { font-size: 0.82em; color: #5a4830; }
+        .timeline-pattern-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 3px 0; gap: 8px;
+        }
+        .timeline-filters {
+            padding: 10px 18px; display: flex; gap: 6px; flex-wrap: wrap;
+            background: #fafafa; border-bottom: 1px solid #f0e8db;
+            font-size: 0.85em;
+        }
+        .timeline-filter {
+            padding: 4px 10px; border-radius: 14px; cursor: pointer;
+            background: white; border: 1.5px solid #d8d0c4;
+            color: #5a4830; font-weight: 600; transition: all 0.12s;
+        }
+        .timeline-filter:hover { transform: translateY(-1px); }
+        .timeline-filter.active { background: var(--terra-primary); color: white; border-color: var(--terra-primary); }
+        #timelineEvents {
+            padding: 16px; overflow-y: auto; flex: 1;
+            background: #fafafa; position: relative;
+        }
+        #timelineEvents::before {
+            content: ''; position: absolute;
+            left: 30px; top: 16px; bottom: 16px;
+            width: 2px; background: var(--terra-accent);
+        }
+        .timeline-event {
+            position: relative; padding: 10px 12px 10px 60px;
+            margin-bottom: 10px; background: white;
+            border-radius: 10px; border: 1.5px solid #e8e0d6;
+            font-size: 0.88em;
+        }
+        .timeline-event::before {
+            content: ''; position: absolute; left: 22px; top: 18px;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--terra-light); border: 2px solid var(--terra-primary);
+            z-index: 1;
+        }
+        .timeline-event-icon {
+            position: absolute; left: 16px; top: 14px;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: white; display: flex; align-items: center;
+            justify-content: center; font-size: 1em;
+            border: 2px solid var(--terra-primary); z-index: 2;
+        }
+        .timeline-event.type-emotion { border-left: 4px solid #e6b4a0; }
+        .timeline-event.type-emotion .timeline-event-icon { border-color: #e6b4a0; }
+        .timeline-event.type-observation { border-left: 4px solid #a8c8f0; }
+        .timeline-event.type-observation .timeline-event-icon { border-color: #a8c8f0; }
+        .timeline-event.type-message { border-left: 4px solid #b8e0c0; }
+        .timeline-event.type-message .timeline-event-icon { border-color: #b8e0c0; }
+        .timeline-event.type-double_contrainte { border-left: 4px solid #f5cb73; }
+        .timeline-event.type-double_contrainte .timeline-event-icon { border-color: #f5cb73; }
+        .timeline-event.type-ressenti_corporel { border-left: 4px solid #c9b3d4; }
+        .timeline-event.type-ressenti_corporel .timeline-event-icon { border-color: #c9b3d4; }
+        .timeline-event-meta {
+            font-size: 0.78em; color: #888; margin-bottom: 4px;
+        }
+        .timeline-event-content { color: #3a3530; line-height: 1.4; }
+        .timeline-event-content strong { color: var(--terra-dark); }
+        .timeline-empty {
+            padding: 40px 20px; text-align: center; color: #888;
+            font-size: 0.95em;
+        }
+        body.dark-mode #timelineModalBox { background: #2d2520; border-color: var(--terra-primary); }
+        body.dark-mode #timelineModalHeader { background: #2d2520; }
+        body.dark-mode .timeline-patterns { background: #1e1812; border-color: #3a322a; }
+        body.dark-mode .timeline-pattern-card { background: #2d2520; border-color: #3a322a; color: #f0ddd4; }
+        body.dark-mode .timeline-filters { background: #1e1812; }
+        body.dark-mode .timeline-filter { background: #2d2520; color: #f0ddd4; border-color: #3a322a; }
+        body.dark-mode #timelineEvents { background: #1e1812; }
+        body.dark-mode .timeline-event { background: #2d2520; color: #f0ddd4; border-color: #3a322a; }
+        body.dark-mode .timeline-event-icon { background: #2d2520; }
     </style>
 </head>
 <body>
@@ -6719,6 +6956,12 @@
                 <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">La largeur du courant représente le flux mensuel net. Les bateaux flottent au rythme du temps.</div>
                 <div id="dashRiverFlow" style="width:100%;height:280px;background:linear-gradient(180deg,#e3f1fa 0%,#cfe6f5 100%);border-radius:12px;border:1px solid #bcd5e6;overflow:hidden;position:relative;"></div>
               </div>
+
+              <div id="dashSectionEcarts" class="section" style="margin-top:20px;">
+                <h2>📐 Écarts observés — Top 10 déviations par étape</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Les écarts les plus fréquents détectés dans les comparaisons 3-niveaux. Cliquez pour explorer.</div>
+                <div id="dashEcartsContent" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;"></div>
+              </div>
             </div>
 
         </div>
@@ -7079,6 +7322,7 @@
             { id: 'dashSectionGraph',     label: '🕸️ Graphe relationnel',                    display: 'block' },
             { id: 'dashSectionVille',     label: '🏙️ Vue Ville — Navigation spatiale',       display: 'block' },
             { id: 'dashSectionRiver',     label: '🌊 Rivière de trésorerie',                 display: 'block' },
+            { id: 'dashSectionEcarts',    label: '📐 Écarts observés — Top déviations',       display: 'block' },
         ];
         const _ALL_DASH_WIDGET_IDS = DASHBOARD_WIDGETS.map(w => w.id);
 
@@ -10119,6 +10363,7 @@
                     </div>
                     <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
                         <button class="btn btn-small btn-success" onclick="openJalonModal(null,${b.id})" title="Ajouter un jalon pour ce bénéficiaire">🎯 Jalon</button>
+                        <button class="btn btn-small" style="background:#fff4e6;color:#b66a1f;border:1px solid #f0b87a;" onclick="openClinicalTimeline(${b.id})" title="Timeline clinique : émotions, observations, doubles contraintes, ressentis corporels">📊 Timeline</button>
                         <button class="btn btn-small btn-secondary" onclick="openBeneficiaireModal(${b.id})">✏️</button>
                         <button class="btn btn-small" onclick="deleteBeneficiaire(${b.id})" style="background:#e74c3c;color:#fff;border-color:#c0392b;">🗑</button>
                     </div>
@@ -14929,6 +15174,7 @@
                             </select>
                             <button class="btn btn-small" style="background:#e8f4f8;color:#5a7b8f;border:1px solid #a8d5e2;" onclick="editPrestation(${p.id})" title="Éditer">✏️ Éditer</button>
                             <button class="btn btn-small" style="background:#f0f7f0;color:#3a7a4a;border:1px solid #b8e0c0;" onclick="toggleReelSection(${p.id})" title="Saisir temps réel">⏱️ Réel</button>
+                            <button class="btn btn-small btn-compare" onclick="openComparator(${p.id})" title="Comparateur 3-niveaux: Prescrit · Procédure · Réel">🔀 Comparer</button>
                             <button class="btn btn-small" onclick="printPrestation(${p.id})" title="Exporter PDF interne">📄 PDF</button>
                             <button class="btn btn-small" style="background:#edf5ff;color:#2980b9;border:1px solid #a8c8f0;" onclick="generateDevisPDF(${p.id})" title="Devis client PDF">📨 Devis</button>
                             <button class="btn btn-secondary btn-small" onclick="duplicatePrestation(${p.id})" title="Dupliquer">📋 Dupliquer</button>
@@ -22122,6 +22368,7 @@
             try { renderRelationGraph(); } catch (e) { console.warn('renderRelationGraph failed:', e); }
             try { renderVilleMap(); } catch (e) { console.warn('renderVilleMap failed:', e); }
             try { renderTresorerieRiver(); } catch (e) { console.warn('renderTresorerieRiver failed:', e); }
+            try { renderEcartsWidget(); } catch (e) { console.warn('renderEcartsWidget failed:', e); }
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -22548,6 +22795,89 @@
                     <text x="12" y="24" font-size="13" font-weight="bold" fill="#a45a52" filter="drop-shadow(1px 1px 1px rgba(255,255,255,0.8))">💰 ${(totalIn/1000).toFixed(1)} k CHF encaissés sur 12 mois</text>
                 </svg>
             </div>`;
+        }
+
+        // ─ Écarts observés (v2.18) — agrégation des déviations
+        function renderEcartsWidget() {
+            const cont = document.getElementById('dashEcartsContent');
+            if (!cont) return;
+
+            const deviationFreq = {};
+            const stateFreq = { 'omis': 0, 'partiel': 0, 'modifie': 0 };
+            let totalRealExecutions = 0;
+
+            (prestationsSauvegardees || []).forEach(p => {
+                const realData = p.realExecute;
+                if (!realData) return;
+                totalRealExecutions++;
+
+                // Compter les état omis/partiel/modifie
+                Object.entries(realData.stepsState || {}).forEach(([stepId, state]) => {
+                    if (['omis','partiel','modifie'].includes(state)) {
+                        stateFreq[state]++;
+                    }
+                });
+
+                // Compter les déviations explicitement décrites
+                (realData.deviations || []).forEach(dev => {
+                    const key = (dev.note || 'autre').substring(0, 50);
+                    deviationFreq[key] = (deviationFreq[key] || 0) + 1;
+                });
+            });
+
+            // Top 10 des écarts
+            const topEcarts = Object.entries(deviationFreq)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            let html = '';
+            if (totalRealExecutions === 0) {
+                html = `<div style="grid-column:1/-1;padding:20px;text-align:center;color:#999;font-size:0.9em;">
+                    Aucune comparaison enregistrée pour le moment. Utilisez le bouton 🔀 Comparer sur vos prestations pour démarrer.
+                </div>`;
+            } else {
+                // Affiche les fréquences de statuts
+                if (stateFreq.omis > 0 || stateFreq.partiel > 0 || stateFreq.modifie > 0) {
+                    html += `
+                        <div class="sketch-card" style="border-color:#c9303c;cursor:pointer;" title="Cliquer pour filtrer">
+                            <div class="sketch-card-title" style="color:#c9303c;">❌ Étapes omises</div>
+                            <div class="sketch-card-value" style="color:#c9303c;font-size:1.8em;">${stateFreq.omis}</div>
+                            <div class="sketch-card-meta">Fréquence d'omission</div>
+                        </div>
+                        <div class="sketch-card" style="border-color:#d68910;cursor:pointer;" title="Cliquer pour filtrer">
+                            <div class="sketch-card-title" style="color:#d68910;">⚠️ Étapes partielles</div>
+                            <div class="sketch-card-value" style="color:#d68910;font-size:1.8em;">${stateFreq.partiel}</div>
+                            <div class="sketch-card-meta">Réalisations incomplètes</div>
+                        </div>
+                        <div class="sketch-card" style="border-color:#2980b9;cursor:pointer;" title="Cliquer pour filtrer">
+                            <div class="sketch-card-title" style="color:#2980b9;">🔄 Étapes modifiées</div>
+                            <div class="sketch-card-value" style="color:#2980b9;font-size:1.8em;">${stateFreq.modifie}</div>
+                            <div class="sketch-card-meta">Procédures adaptées</div>
+                        </div>
+                    `;
+                }
+
+                // Affiche les top déviations textuelles
+                topEcarts.forEach((entry, idx) => {
+                    const [note, count] = entry;
+                    const pct = ((count / totalRealExecutions) * 100).toFixed(0);
+                    html += `
+                        <div class="sketch-card" style="border-color:#7a5a9a;opacity:${1 - idx*0.08};">
+                            <div class="sketch-card-title" style="color:#7a5a9a;font-size:0.85em;">${escapeHtml(note)}</div>
+                            <div class="sketch-card-value" style="color:#7a5a9a;">${count}x (${pct}%)</div>
+                            <div class="sketch-card-meta">Contextes d'exécution</div>
+                        </div>
+                    `;
+                });
+
+                if (topEcarts.length === 0 && stateFreq.omis === 0) {
+                    html += `<div style="grid-column:1/-1;padding:20px;text-align:center;color:#999;font-size:0.9em;">
+                        ✨ Excellente exécution — aucun écart significatif détecté !
+                    </div>`;
+                }
+            }
+
+            cont.innerHTML = html;
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -30035,6 +30365,618 @@ function toggleLiveCollapse() {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  v2.18 — Comparateur 3-niveaux (Module B — Prescrit · Procédure · Réel)
+// ═══════════════════════════════════════════════════════════
+let procedureTemplates = [];
+let _currentComparePrestation = null;
+
+const PROCEDURE_TEMPLATES_DEFAULTS = [
+    {
+        id: 'tpl-cond-001',
+        name: 'Conditionnement standard',
+        type: 'atelier',
+        description: 'Procédure standard pour les ateliers de conditionnement',
+        steps: [
+            { id: 's1', label: 'Vérification du matériel', mandatory: true, etape: 'avant' },
+            { id: 's2', label: 'Rangement et organisation de l\'espace', mandatory: true, etape: 'avant' },
+            { id: 's3', label: 'Sécurité: briefing du groupe', mandatory: true, etape: 'avant' },
+            { id: 's4', label: 'Tri et préparation des articles', mandatory: true, etape: 'pendant' },
+            { id: 's5', label: 'Emballage selon normes CEA', mandatory: true, etape: 'pendant' },
+            { id: 's6', label: 'Contrôle qualité', mandatory: true, etape: 'pendant' },
+            { id: 's7', label: 'Étiquetage et marquage', mandatory: false, etape: 'pendant' },
+            { id: 's8', label: 'Palettisation (le cas échéant)', mandatory: false, etape: 'pendant' },
+            { id: 's9', label: 'Nettoyage et rangement post-atelier', mandatory: true, etape: 'apres' },
+            { id: 's10', label: 'Débriefing clinique du groupe', mandatory: false, etape: 'apres' }
+        ]
+    },
+    {
+        id: 'tpl-asm-001',
+        name: 'Assemblage/montage standard',
+        type: 'atelier',
+        description: 'Procédure standard pour les ateliers d\'assemblage et de montage',
+        steps: [
+            { id: 's1', label: 'Préparation des postes de travail', mandatory: true, etape: 'avant' },
+            { id: 's2', label: 'Distribution des consignes de sécurité', mandatory: true, etape: 'avant' },
+            { id: 's3', label: 'Constitution des groupes de travail', mandatory: true, etape: 'avant' },
+            { id: 's4', label: 'Tri des composants', mandatory: true, etape: 'pendant' },
+            { id: 's5', label: 'Assemblage selon plan de montage', mandatory: true, etape: 'pendant' },
+            { id: 's6', label: 'Contrôle des assemblages', mandatory: true, etape: 'pendant' },
+            { id: 's7', label: 'Rangement des pièces/outils', mandatory: true, etape: 'apres' },
+            { id: 's8', label: 'Nettoyage des postes', mandatory: true, etape: 'apres' },
+            { id: 's9', label: 'Retour d\'expérience — observations cliniques', mandatory: false, etape: 'apres' }
+        ]
+    },
+    {
+        id: 'tpl-form-001',
+        name: 'Formation logistique standard',
+        type: 'formation',
+        description: 'Procédure standard pour les sessions de formation logistique',
+        steps: [
+            { id: 's1', label: 'Mise en place pédagogique et support', mandatory: true, etape: 'avant' },
+            { id: 's2', label: 'Accueil et positionnement des stagiaires', mandatory: true, etape: 'avant' },
+            { id: 's3', label: 'Exposé théorique / présentation du module', mandatory: true, etape: 'pendant' },
+            { id: 's4', label: 'Démonstration pratique', mandatory: true, etape: 'pendant' },
+            { id: 's5', label: 'Exercices pratiques guidés', mandatory: true, etape: 'pendant' },
+            { id: 's6', label: 'Questions/évaluations formatives', mandatory: true, etape: 'pendant' },
+            { id: 's7', label: 'Mise en pratique autonome', mandatory: false, etape: 'pendant' },
+            { id: 's8', label: 'Rangement du matériel de formation', mandatory: true, etape: 'apres' },
+            { id: 's9', label: 'Feedback et recommandations', mandatory: false, etape: 'apres' }
+        ]
+    }
+];
+
+function loadProcedureTemplates() {
+    try {
+        const saved = JSON.parse(localStorage.getItem('procedureTemplates') || '[]');
+        procedureTemplates = Array.isArray(saved) ? saved : [];
+        if (procedureTemplates.length === 0) {
+            procedureTemplates = JSON.parse(JSON.stringify(PROCEDURE_TEMPLATES_DEFAULTS));
+            saveProcedureTemplates();
+        }
+    } catch(e) {
+        procedureTemplates = JSON.parse(JSON.stringify(PROCEDURE_TEMPLATES_DEFAULTS));
+    }
+}
+
+function saveProcedureTemplates() {
+    try { localStorage.setItem('procedureTemplates', JSON.stringify(procedureTemplates)); } catch(e) { console.warn('saveProcedureTemplates:', e); }
+}
+
+function openComparator(prestationId) {
+    try {
+        const p = prestationsSauvegardees.find(x => x.id === prestationId);
+        if (!p) { toast('⚠️ Prestation introuvable', 'warning'); return; }
+        _currentComparePrestation = p;
+        _renderComparator(p);
+        document.getElementById('compareModal').classList.add('visible');
+    } catch(e) { console.error('openComparator:', e); toast('❌ Erreur ouverture comparateur', 'error'); }
+}
+
+function closeComparator() {
+    document.getElementById('compareModal').classList.remove('visible');
+    _currentComparePrestation = null;
+}
+
+function _renderComparator(p) {
+    const modal = document.getElementById('compareModal');
+    const ctxEl = document.getElementById('compareModalContext');
+    const statsEl = document.getElementById('compareStats');
+    const gridEl = document.getElementById('compareGrid');
+
+    if (ctxEl) ctxEl.textContent = `📋 ${p.prestation || '—'} · ${p.client || '—'} (${new Date(p.date).toLocaleDateString('fr-FR')})`;
+
+    const prescrit = p.prescritClient || {};
+    const realData = p.realExecute || {};
+    const templateId = p.procedureTemplateId || PROCEDURE_TEMPLATES_DEFAULTS[0].id;
+    const template = procedureTemplates.find(t => t.id === templateId) || procedureTemplates[0];
+
+    // Stats: nombre d'étapes par état
+    const stateMap = realData.stepsState || {};
+    const stats = {
+        'fait': 0, 'partiel': 0, 'omis': 0, 'modifie': 0, 'ajoute': 0
+    };
+    Object.values(stateMap).forEach(s => { if(stats[s] !== undefined) stats[s]++; });
+    const total = template.steps.length;
+    const complete = stats.fait + stats.partiel;
+
+    statsEl.innerHTML = `
+        <div class="compare-stat-box"><strong>${complete}/${total}</strong><small>Étapes réalisées</small></div>
+        <div class="compare-stat-box"><strong>${stats.fait}</strong><small>Fait</small></div>
+        <div class="compare-stat-box"><strong>${stats.partiel}</strong><small>Partiel</small></div>
+        <div class="compare-stat-box"><strong>${stats.omis}</strong><small>Omis</small></div>
+        <div class="compare-stat-box"><strong>${stats.modifie}</strong><small>Modifié</small></div>
+        <div class="compare-stat-box"><strong>${(realData.deviations || []).length}</strong><small>Déviations</small></div>
+    `;
+
+    let html = `
+        <div class="compare-col col-prescrit">
+            <div class="compare-col-title">📋 Prescrit client</div>
+            <label>Objectifs / demandes</label>
+            <textarea id="prescritObjectifs" placeholder="Qu'a demandé le client ? Ses attentes ?">${escapeHtml(prescrit.objectifs || '')}</textarea>
+            <label style="margin-top:8px;">Contraintes connues</label>
+            <textarea id="prescritContraintes" placeholder="Délais, moyens, restrictions de sécurité…">${escapeHtml(prescrit.contraintes || '')}</textarea>
+        </div>
+
+        <div class="compare-col col-procedure">
+            <div class="compare-col-title">⚙️ Procédure CEA</div>
+            <div class="compare-template-pick">
+                <label>Modèle de procédure</label>
+                <select id="selectTemplate" onchange="_updateTemplateinComparator()">
+                    ${procedureTemplates.map(t => `<option value="${t.id}" ${t.id === templateId ? 'selected' : ''}>${t.name}</option>`).join('')}
+                </select>
+            </div>
+            <div style="font-size:0.82em;color:#7a7060;margin-bottom:8px;max-height:200px;overflow-y:auto;">
+                ${template.steps.map(s => `
+                    <div class="compare-step ${s.mandatory ? 'mandatory' : ''}">
+                        <span class="step-icon">${s.mandatory ? '🔴' : '⚪'}</span>
+                        <span class="step-label"><strong>${escapeHtml(s.label)}</strong><br><small style="color:#9a8070;">[${s.etape}]</small></span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="compare-col col-reel">
+            <div class="compare-col-title">✓ Réel exécuté</div>
+            <label>Durée réelle (heures)</label>
+            <input type="number" id="realDuree" min="0" step="0.25" value="${realData.dureeReelle || p.heuresReelles || ''}" placeholder="ex: 2.5">
+            <div style="font-size:0.82em;color:#7a7060;margin-top:8px;max-height:200px;overflow-y:auto;">
+                ${template.steps.map(s => {
+                    const state = stateMap[s.id] || 'non-renseigne';
+                    const stateClass = ['fait','partiel','omis','modifie','ajoute'].includes(state) ? `ecart-${state}` : '';
+                    return `
+                        <div class="compare-step ${stateClass}">
+                            <span class="step-icon">${{
+                                'fait': '✅',
+                                'partiel': '⚠️',
+                                'omis': '❌',
+                                'modifie': '🔄',
+                                'ajoute': '➕',
+                                'non-renseigne': '❓'
+                            }[state]}</span>
+                            <span class="step-label">${escapeHtml(s.label)}</span>
+                            <select onchange="_setStepState('${s.id}', this.value)">
+                                <option value="non-renseigne" ${state === 'non-renseigne' ? 'selected' : ''}>—</option>
+                                <option value="fait" ${state === 'fait' ? 'selected' : ''}>Fait</option>
+                                <option value="partiel" ${state === 'partiel' ? 'selected' : ''}>Partiel</option>
+                                <option value="omis" ${state === 'omis' ? 'selected' : ''}>Omis</option>
+                                <option value="modifie" ${state === 'modifie' ? 'selected' : ''}>Modifié</option>
+                            </select>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            <label style="margin-top:8px;">Déviations observées</label>
+            <div class="compare-deviation-list" id="deviationsList">
+                ${(realData.deviations || []).map((d, i) => `
+                    <div class="compare-deviation">
+                        <span>${escapeHtml(d.note || '?')}</span>
+                        <button type="button" class="dev-rm" onclick="_removeDeviation(${i})">×</button>
+                    </div>
+                `).join('')}
+            </div>
+            <button type="button" class="btn btn-small" style="margin-top:4px;font-size:0.8em;background:#eef6fd;border:1px solid #a8c8f0;color:#2980b9;" onclick="addDeviation()">➕ Ajouter déviation</button>
+            <label style="margin-top:8px;">Réflexion clinique</label>
+            <textarea id="realReflexion" placeholder="Observations, sentiments, apprentissages, défis…" style="min-height:80px;">${escapeHtml(realData.reflexion || '')}</textarea>
+        </div>
+    `;
+
+    gridEl.innerHTML = html;
+}
+
+// Capture les valeurs du formulaire avant un re-render pour éviter de les perdre
+function _captureCompareFormValues() {
+    const p = _currentComparePrestation;
+    if (!p) return;
+    const obj = document.getElementById('prescritObjectifs');
+    const con = document.getElementById('prescritContraintes');
+    const dur = document.getElementById('realDuree');
+    const ref = document.getElementById('realReflexion');
+    if (obj || con) {
+        if (!p.prescritClient) p.prescritClient = {};
+        if (obj) p.prescritClient.objectifs = obj.value;
+        if (con) p.prescritClient.contraintes = con.value;
+    }
+    if (dur || ref) {
+        if (!p.realExecute) p.realExecute = { stepsState: {}, deviations: [] };
+        if (dur) p.realExecute.dureeReelle = parseFloat(dur.value) || null;
+        if (ref) p.realExecute.reflexion = ref.value;
+    }
+}
+
+function _updateTemplateinComparator() {
+    if (_currentComparePrestation) {
+        _captureCompareFormValues();
+        const newTemplateId = document.getElementById('selectTemplate').value;
+        _currentComparePrestation.procedureTemplateId = newTemplateId;
+        _renderComparator(_currentComparePrestation);
+    }
+}
+
+function _setStepState(stepId, state) {
+    if (!_currentComparePrestation) return;
+    _captureCompareFormValues();
+    if (!_currentComparePrestation.realExecute) _currentComparePrestation.realExecute = { stepsState: {}, deviations: [] };
+    if (!_currentComparePrestation.realExecute.stepsState) _currentComparePrestation.realExecute.stepsState = {};
+    if (state === 'non-renseigne') {
+        delete _currentComparePrestation.realExecute.stepsState[stepId];
+    } else {
+        _currentComparePrestation.realExecute.stepsState[stepId] = state;
+    }
+    _renderComparator(_currentComparePrestation);
+}
+
+function addDeviation() {
+    const note = prompt('Description de la déviation (ex: "Étape omise pour gagner du temps")');
+    if (!note) return;
+    _captureCompareFormValues();
+    if (!_currentComparePrestation.realExecute) _currentComparePrestation.realExecute = { stepsState: {}, deviations: [] };
+    _currentComparePrestation.realExecute.deviations.push({
+        id: Date.now(),
+        note: note,
+        timestamp: new Date().toISOString()
+    });
+    _renderComparator(_currentComparePrestation);
+}
+
+function _removeDeviation(idx) {
+    if (_currentComparePrestation && _currentComparePrestation.realExecute && _currentComparePrestation.realExecute.deviations) {
+        _captureCompareFormValues();
+        _currentComparePrestation.realExecute.deviations.splice(idx, 1);
+        _renderComparator(_currentComparePrestation);
+    }
+}
+
+function saveComparator() {
+    try {
+        if (!_currentComparePrestation) return;
+        const p = _currentComparePrestation;
+
+        // Capturer les saisies du formulaire
+        if (!p.prescritClient) p.prescritClient = {};
+        p.prescritClient.objectifs = document.getElementById('prescritObjectifs')?.value.trim() || '';
+        p.prescritClient.contraintes = document.getElementById('prescritContraintes')?.value.trim() || '';
+        p.prescritClient.dateRecueil = new Date().toISOString();
+
+        if (!p.realExecute) p.realExecute = { stepsState: {}, deviations: [] };
+        p.realExecute.dureeReelle = parseFloat(document.getElementById('realDuree')?.value || 0) || null;
+        p.realExecute.reflexion = document.getElementById('realReflexion')?.value.trim() || '';
+        p.realExecute.completedAt = new Date().toISOString();
+
+        // Persister
+        const idx = prestationsSauvegardees.findIndex(x => x.id === p.id);
+        if (idx !== -1) prestationsSauvegardees[idx] = p;
+
+        saveToStorage();
+        if (typeof toast === 'function') toast('💾 Comparateur enregistré', 'success');
+        closeComparator();
+        renderPrestations();
+    } catch(e) {
+        console.error('saveComparator:', e);
+        if (typeof toast === 'function') toast('❌ Erreur save: ' + e.message, 'error');
+    }
+}
+
+function openTemplateEditor() {
+    const modal = document.getElementById('templateEditorModal');
+    if (!modal) return;
+    const body = document.getElementById('templateEditorBody');
+    if (!body) return;
+
+    body.innerHTML = procedureTemplates.map((t, idx) => `
+        <div style="padding:10px;margin-bottom:10px;background:#faf6f0;border-radius:8px;border:1px solid #e8e0d6;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;">
+                <div>
+                    <div style="font-weight:700;color:var(--terra-dark);">${escapeHtml(t.name)}</div>
+                    <div style="font-size:0.82em;color:#7a7060;">${escapeHtml(t.description)}</div>
+                </div>
+                <button type="button" class="delete-btn" onclick="_deleteTemplate('${t.id}')" style="padding:3px 8px;">🗑️</button>
+            </div>
+            <div style="font-size:0.78em;color:#999;margin-top:4px;">
+                ${t.steps.length} étapes • Type: ${t.type}
+            </div>
+        </div>
+    `).join('');
+
+    modal.style.display = 'flex';
+}
+
+function closeTemplateEditor() {
+    const modal = document.getElementById('templateEditorModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function _deleteTemplate(templateId) {
+    if (procedureTemplates.length <= 1) {
+        toast('⚠️ Au moins un modèle requis', 'warning');
+        return;
+    }
+    if (!confirm('Supprimer ce modèle ?')) return;
+    procedureTemplates = procedureTemplates.filter(t => t.id !== templateId);
+    saveProcedureTemplates();
+    openTemplateEditor();
+    toast('✓ Modèle supprimé', 'success');
+}
+
+function addProcedureTemplate() {
+    const name = prompt('Nom du modèle:');
+    if (!name) return;
+    const desc = prompt('Description:');
+    const newTpl = {
+        id: 'tpl-' + Date.now(),
+        name: name,
+        type: 'atelier',
+        description: desc || '',
+        steps: []
+    };
+    procedureTemplates.push(newTpl);
+    saveProcedureTemplates();
+    openTemplateEditor();
+    toast('✓ Modèle créé', 'success');
+}
+
+// Charge les templates au startup
+document.addEventListener('DOMContentLoaded', () => {
+    try { loadProcedureTemplates(); } catch(e) {}
+});
+
+// ═══════════════════════════════════════════════════════════
+//  v2.19 — Timeline clinique (Module C — agrégation par bénéficiaire)
+// ═══════════════════════════════════════════════════════════
+let _currentTimelineBenefId = null;
+let _currentTimelineFilter = 'all';
+
+function openClinicalTimeline(beneficiaireId) {
+    try {
+        const b = beneficiaires.find(x => x.id === beneficiaireId);
+        if (!b) { toast('⚠️ Bénéficiaire introuvable', 'warning'); return; }
+        _currentTimelineBenefId = beneficiaireId;
+        _currentTimelineFilter = 'all';
+
+        const subtitle = document.getElementById('timelineSubtitle');
+        if (subtitle) subtitle.textContent = `${b.avatar || '👤'} ${b.prenom} ${b.nom} — ${b.objectifs || 'Suivi clinique'}`;
+
+        document.querySelectorAll('.timeline-filter').forEach(f => f.classList.toggle('active', f.dataset.filter === 'all'));
+
+        _renderClinicalTimeline();
+        document.getElementById('timelineModal').classList.add('visible');
+    } catch(e) { console.error('openClinicalTimeline:', e); toast('❌ Erreur ouverture timeline', 'error'); }
+}
+
+function closeClinicalTimeline() {
+    document.getElementById('timelineModal').classList.remove('visible');
+    _currentTimelineBenefId = null;
+}
+
+function _filterTimeline(type) {
+    _currentTimelineFilter = type;
+    document.querySelectorAll('.timeline-filter').forEach(f => f.classList.toggle('active', f.dataset.filter === type));
+    _renderClinicalTimeline();
+}
+
+function _getBeneficiaryClinicalInputs(beneficiaireId) {
+    if (!Array.isArray(clinicalInputs)) return [];
+
+    // Inputs directement liés au bénéficiaire
+    const directInputs = clinicalInputs.filter(ci =>
+        String(ci.beneficiaireId) === String(beneficiaireId)
+    );
+
+    // Inputs via les prestations associées au bénéficiaire
+    const benefPrestationIds = new Set();
+    if (Array.isArray(prestationsSauvegardees)) {
+        prestationsSauvegardees.forEach(p => {
+            if (Array.isArray(p.beneficiaires)) {
+                p.beneficiaires.forEach(pb => {
+                    if (String(pb.id) === String(beneficiaireId)) {
+                        benefPrestationIds.add(String(p.id));
+                    }
+                });
+            }
+        });
+    }
+    // Aussi via beneficiaires.prestationsIds
+    const b = beneficiaires.find(x => x.id === beneficiaireId);
+    if (b && Array.isArray(b.prestationsIds)) {
+        b.prestationsIds.forEach(pid => benefPrestationIds.add(String(pid)));
+    }
+
+    const indirectInputs = clinicalInputs.filter(ci =>
+        ci.prestationId &&
+        benefPrestationIds.has(String(ci.prestationId)) &&
+        String(ci.beneficiaireId) !== String(beneficiaireId)
+    );
+
+    // Combiner et dédupliquer
+    const seen = new Set();
+    return [...directInputs, ...indirectInputs].filter(ci => {
+        if (seen.has(ci.id)) return false;
+        seen.add(ci.id);
+        return true;
+    });
+}
+
+function _computeClinicalPatterns(inputs) {
+    const patterns = {
+        emotions: {},
+        bodyZones: {},
+        bodySensations: {},
+        doublesContraintes: 0,
+        messages: 0,
+        observations: 0
+    };
+
+    inputs.forEach(ci => {
+        if (ci.type === 'emotion' && ci.data?.emotion) {
+            const key = ci.data.emotion;
+            if (!patterns.emotions[key]) patterns.emotions[key] = { count: 0, intensitySum: 0 };
+            patterns.emotions[key].count++;
+            if (ci.data.intensity) patterns.emotions[key].intensitySum += ci.data.intensity;
+        } else if (ci.type === 'ressenti_corporel') {
+            if (ci.data?.zone) patterns.bodyZones[ci.data.zone] = (patterns.bodyZones[ci.data.zone] || 0) + 1;
+            if (ci.data?.sensationType) patterns.bodySensations[ci.data.sensationType] = (patterns.bodySensations[ci.data.sensationType] || 0) + 1;
+        } else if (ci.type === 'double_contrainte') {
+            patterns.doublesContraintes++;
+        } else if (ci.type === 'message') {
+            patterns.messages++;
+        } else if (ci.type === 'observation') {
+            patterns.observations++;
+        }
+    });
+
+    return patterns;
+}
+
+function _renderClinicalTimeline() {
+    if (!_currentTimelineBenefId) return;
+
+    const inputs = _getBeneficiaryClinicalInputs(_currentTimelineBenefId);
+    const patterns = _computeClinicalPatterns(inputs);
+
+    // Patterns
+    const patternsEl = document.getElementById('timelinePatterns');
+    if (patternsEl) {
+        const topEmotions = Object.entries(patterns.emotions)
+            .sort((a, b) => b[1].count - a[1].count)
+            .slice(0, 3);
+        const topBodyZones = Object.entries(patterns.bodyZones)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3);
+
+        let html = '';
+
+        if (topEmotions.length > 0) {
+            html += `<div class="timeline-pattern-card emotion">
+                <div class="timeline-pattern-title">😊 Top émotions</div>
+                <div class="timeline-pattern-list">
+                    ${topEmotions.map(([name, data]) => {
+                        const avg = data.intensitySum > 0 ? (data.intensitySum / data.count).toFixed(1) : '—';
+                        return `<div class="timeline-pattern-item">
+                            <span>${escapeHtml(name)}</span>
+                            <span style="color:#888;font-size:0.9em;">${data.count}× · ⭐${avg}</span>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+        }
+
+        if (topBodyZones.length > 0) {
+            html += `<div class="timeline-pattern-card body">
+                <div class="timeline-pattern-title">🤝 Top zones corporelles</div>
+                <div class="timeline-pattern-list">
+                    ${topBodyZones.map(([name, count]) => `
+                        <div class="timeline-pattern-item">
+                            <span>${escapeHtml(name)}</span>
+                            <span style="color:#888;font-size:0.9em;">${count}×</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        if (patterns.doublesContraintes > 0) {
+            html += `<div class="timeline-pattern-card dc">
+                <div class="timeline-pattern-title">🌀 Doubles contraintes</div>
+                <div class="timeline-pattern-list">
+                    <div style="font-size:1.4em;color:#a47a20;font-weight:700;">${patterns.doublesContraintes}</div>
+                    <div style="color:#888;">paradoxes signalés</div>
+                </div>
+            </div>`;
+        }
+
+        if (patterns.messages > 0 || patterns.observations > 0) {
+            html += `<div class="timeline-pattern-card message">
+                <div class="timeline-pattern-title">📨 Volumes</div>
+                <div class="timeline-pattern-list">
+                    <div class="timeline-pattern-item"><span>Messages</span><span>${patterns.messages}</span></div>
+                    <div class="timeline-pattern-item"><span>Observations</span><span>${patterns.observations}</span></div>
+                </div>
+            </div>`;
+        }
+
+        if (!html) {
+            html = `<div style="grid-column:1/-1;text-align:center;color:#888;padding:8px;font-size:0.9em;">
+                Pas encore de patterns détectés. Saisissez des observations cliniques via le bouton 🎭 sur les prestations.
+            </div>`;
+        }
+
+        patternsEl.innerHTML = html;
+    }
+
+    // Events (filtered)
+    const eventsEl = document.getElementById('timelineEvents');
+    if (eventsEl) {
+        const filtered = _currentTimelineFilter === 'all'
+            ? inputs
+            : inputs.filter(ci => ci.type === _currentTimelineFilter);
+
+        const sorted = [...filtered].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        if (sorted.length === 0) {
+            eventsEl.innerHTML = `<div class="timeline-empty">
+                <div style="font-size:2em;margin-bottom:8px;">📭</div>
+                <div>Aucune saisie clinique pour le moment.</div>
+                <div style="font-size:0.85em;margin-top:6px;">Utilisez le bouton 🎭 outils cliniques sur les prestations pour démarrer.</div>
+            </div>`;
+        } else {
+            eventsEl.innerHTML = sorted.map(ci => _renderTimelineEvent(ci)).join('');
+        }
+    }
+}
+
+function _renderTimelineEvent(ci) {
+    const d = new Date(ci.timestamp);
+    const dateStr = d.toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+    const timeStr = d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    const author = ci.author || 'Anonyme';
+    const prest = ci.prestationLabel || '—';
+
+    const typeIcons = {
+        'emotion': '😊', 'observation': '👁️', 'message': '📨',
+        'double_contrainte': '🌀', 'ressenti_corporel': '🤝'
+    };
+    const typeLabels = {
+        'emotion': 'Émotion', 'observation': 'Observation', 'message': 'Message reçu',
+        'double_contrainte': 'Double contrainte', 'ressenti_corporel': 'Ressenti corporel'
+    };
+    const icon = typeIcons[ci.type] || '🎭';
+    const typeLabel = typeLabels[ci.type] || ci.type;
+
+    let content = '';
+    const data = ci.data || {};
+
+    if (ci.type === 'emotion') {
+        const stars = data.intensity ? '⭐'.repeat(data.intensity) : '';
+        content = `<strong>${escapeHtml(data.emotion || '—')}</strong> ${stars}
+                   ${data.note ? `<div style="margin-top:4px;color:#666;font-style:italic;">« ${escapeHtml(data.note)} »</div>` : ''}`;
+    } else if (ci.type === 'observation') {
+        content = `${escapeHtml(data.observation || '—')}
+                   ${data.target ? `<div style="margin-top:4px;font-size:0.85em;color:#888;">Cible : ${escapeHtml(data.target)}</div>` : ''}`;
+    } else if (ci.type === 'message') {
+        content = `<strong>De :</strong> ${escapeHtml(data.from || '—')}
+                   <div style="margin-top:3px;">« ${escapeHtml(data.content || '—')} »</div>
+                   ${data.interpretation ? `<div style="margin-top:4px;font-size:0.88em;color:#666;font-style:italic;">→ ${escapeHtml(data.interpretation)}</div>` : ''}`;
+    } else if (ci.type === 'double_contrainte') {
+        content = `<strong>A :</strong> ${escapeHtml(data.injonctionA || '—')}<br>
+                   <strong>B :</strong> ${escapeHtml(data.injonctionB || '—')}
+                   ${data.source ? `<div style="margin-top:3px;font-size:0.85em;color:#888;">Source : ${escapeHtml(data.source)}</div>` : ''}
+                   ${data.note ? `<div style="margin-top:4px;color:#666;font-style:italic;">${escapeHtml(data.note)}</div>` : ''}`;
+    } else if (ci.type === 'ressenti_corporel') {
+        const stars = data.intensity ? '⭐'.repeat(data.intensity) : '';
+        content = `<strong>${escapeHtml(data.zone || '—')}</strong> — ${escapeHtml(data.sensationType || '—')} ${stars}
+                   ${data.note ? `<div style="margin-top:4px;color:#666;font-style:italic;">${escapeHtml(data.note)}</div>` : ''}`;
+    }
+
+    return `<div class="timeline-event type-${ci.type}">
+        <div class="timeline-event-icon">${icon}</div>
+        <div class="timeline-event-meta">
+            ${dateStr} · ${timeStr} · ${escapeHtml(typeLabel)} · ${escapeHtml(author)}
+            ${ci.prestationId ? `<br>📋 ${escapeHtml(prest)}` : ''}
+        </div>
+        <div class="timeline-event-content">${content}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
 //  v2.17 — Outils cliniques flottants (clinique du travail)
 // ═══════════════════════════════════════════════════════════
 let clinicalInputs = [];
@@ -30286,6 +31228,66 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="clinical-btn-secondary" onclick="closeClinicalModal()">Annuler</button>
             <button class="clinical-btn-primary" onclick="submitClinicalInput()">💾 Enregistrer</button>
         </div>
+    </div>
+</div>
+
+<!-- ── v2.18 — Comparateur 3-niveaux (Module B) ──────────────────────── -->
+<div id="compareModal" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle" onclick="if(event.target===this)closeComparator()">
+    <div id="compareModalBox">
+        <div id="compareModalHeader">
+            <div>
+                <h3 id="compareModalTitle">🔀 Comparateur 3-niveaux — Prescrit · Procédure · Réel</h3>
+                <div id="compareModalContext">—</div>
+            </div>
+            <button class="clinical-btn-secondary" onclick="closeComparator()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+        </div>
+        <div class="compare-stats" id="compareStats"></div>
+        <div id="compareGrid"></div>
+        <div id="compareActions">
+            <button class="clinical-btn-secondary" onclick="closeComparator()">Annuler</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="clinical-btn-secondary" onclick="openTemplateEditor()" title="Gérer les modèles de procédure CEA">⚙️ Modèles</button>
+                <button class="clinical-btn-primary" onclick="saveComparator()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── v2.18 — Éditeur de templates de procédure ─────────────────────── -->
+<div id="templateEditorModal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeTemplateEditor()" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.55);backdrop-filter:blur(3px);z-index:10006;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 12px;">
+    <div style="background:white;border-radius:14px;max-width:760px;width:100%;border:2px solid var(--terra-accent);box-shadow:0 20px 50px rgba(45,35,30,0.25);display:flex;flex-direction:column;max-height:calc(100vh - 40px);">
+        <div style="padding:14px 18px;border-bottom:2px solid var(--terra-accent);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin:0;color:var(--terra-dark);">⚙️ Modèles de procédure CEA</h3>
+            <button class="clinical-btn-secondary" onclick="closeTemplateEditor()" style="padding:4px 10px;">×</button>
+        </div>
+        <div id="templateEditorBody" style="padding:16px;overflow-y:auto;flex:1;"></div>
+        <div style="padding:12px 18px;border-top:2px solid var(--terra-accent);display:flex;justify-content:space-between;gap:10px;">
+            <button class="clinical-btn-secondary" onclick="addProcedureTemplate()">➕ Nouveau modèle</button>
+            <button class="clinical-btn-primary" onclick="closeTemplateEditor()">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── v2.19 — Timeline clinique (Module C) ──────────────────────── -->
+<div id="timelineModal" role="dialog" aria-modal="true" aria-labelledby="timelineModalTitle" onclick="if(event.target===this)closeClinicalTimeline()">
+    <div id="timelineModalBox">
+        <div id="timelineModalHeader">
+            <div>
+                <h3 id="timelineModalTitle">📊 Timeline clinique</h3>
+                <div id="timelineSubtitle" style="font-size:0.85em;color:#888;margin-top:3px;">—</div>
+            </div>
+            <button class="clinical-btn-secondary" onclick="closeClinicalTimeline()" aria-label="Fermer" style="padding:4px 10px;">×</button>
+        </div>
+        <div id="timelinePatterns" class="timeline-patterns"></div>
+        <div id="timelineFilters" class="timeline-filters">
+            <span class="timeline-filter active" data-filter="all" onclick="_filterTimeline('all')">Tout</span>
+            <span class="timeline-filter" data-filter="emotion" onclick="_filterTimeline('emotion')">😊 Émotions</span>
+            <span class="timeline-filter" data-filter="observation" onclick="_filterTimeline('observation')">👁️ Observations</span>
+            <span class="timeline-filter" data-filter="message" onclick="_filterTimeline('message')">📨 Messages</span>
+            <span class="timeline-filter" data-filter="double_contrainte" onclick="_filterTimeline('double_contrainte')">🌀 Doubles contraintes</span>
+            <span class="timeline-filter" data-filter="ressenti_corporel" onclick="_filterTimeline('ressenti_corporel')">🤝 Ressentis corporels</span>
+        </div>
+        <div id="timelineEvents"></div>
     </div>
 </div>
 
