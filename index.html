@@ -9902,6 +9902,8 @@
             { id: 'bilan',          label: '📋 Bilan',           color: '#4e9af1' },
             { id: 'transition',     label: '🔄 Transition',     color: '#9a70b8' },
             { id: 'reconnaissance', label: '⭐ Reconnaissance',  color: '#f39c12' },
+            { id: 'reussite',       label: '✅ Réussite',       color: '#27ae60' },
+            { id: 'frein',          label: '🚧 Frein',          color: '#e74c3c' },
         ];
         const BENEF_STATUTS = [
             { id: 'en-cours',  label: 'En cours',  color: '#27ae60' },
@@ -10812,37 +10814,54 @@
                 return;
             }
             c.innerHTML = beneficiaires.map(b => {
-                const myJ  = jalons.filter(j => j.beneficiaireId === b.id).sort((a, x) => x.date > a.date ? 1 : -1);
-                const pIds = [...new Set([...(b.prestationsIds||[]), ...myJ.map(j => j.prestationId).filter(Boolean)])];
-                const prests = pIds.map(id => prestationsSauvegardees.find(p => p.id == id)).filter(Boolean);
-                const st   = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
+                const myJ = jalons.filter(j => j.beneficiaireId === b.id).sort((a, x) => (a.date || '') > (x.date || '') ? 1 : -1);
+                const reussites = myJ.filter(j => j.type === 'reussite' || j.type === 'progression' || j.type === 'reconnaissance');
+                const freins = myJ.filter(j => j.type === 'frein' || j.type === 'difficulte');
+                const st = BENEF_STATUTS.find(s => s.id === b.statut) || BENEF_STATUTS[0];
+
                 return `<div style="border:1px solid #e0e8f0;border-radius:14px;padding:18px;margin-bottom:16px;">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
                         <span style="font-size:1.6em;">${b.avatar || '👤'}</span>
                         <strong style="font-size:1.05em;">${b.prenom} ${b.nom}</strong>
                         <span style="font-size:0.78em;background:${st.color}22;color:${st.color};border:1px solid ${st.color}44;border-radius:20px;padding:2px 9px;">${st.label}</span>
-                        <span style="font-size:0.8em;color:#7a9db1;margin-left:auto;">${myJ.length} jalon${myJ.length !== 1 ? 's' : ''} · ${prests.length} prestation${prests.length !== 1 ? 's' : ''}</span>
+                        <span style="font-size:0.8em;color:#7a9db1;margin-left:auto;">✅ ${reussites.length} · 🚧 ${freins.length}</span>
                     </div>
-                    ${prests.length ? `<div style="margin-bottom:12px;">
-                        <p style="font-size:0.78em;font-weight:700;color:#6b8fa3;letter-spacing:.5px;margin-bottom:6px;">PRESTATIONS LIÉES</p>
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                            ${prests.map(p => `<span style="font-size:0.82em;background:#e8f4fb;color:#2980b9;border-radius:8px;padding:3px 10px;cursor:pointer;" onclick="switchTab('prestations')" title="Voir les prestations">${p.prestation || p.client}</span>`).join('')}
+
+                    ${reussites.length || freins.length ? `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                        <div style="min-width:600px;position:relative;padding:20px 0;">
+                            <!-- Piste Réussites -->
+                            <div style="margin-bottom:30px;">
+                                <div style="font-size:0.75em;font-weight:700;color:#27ae60;letter-spacing:.5px;margin-bottom:8px;">✅ RÉUSSITES</div>
+                                <div style="position:relative;height:60px;background:#f0f8f4;border-radius:8px;border:1px solid #d4edda;display:flex;align-items:center;padding:0 12px;">
+                                    <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;">
+                                        ${reussites.length ? reussites.map(j => {
+                                            const tp = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                                            return `<div style="position:relative;margin-right:12px;flex-shrink:0;">
+                                                <div title="${j.titre}" style="background:${tp.color};color:white;border-radius:20px;padding:6px 12px;font-size:0.8em;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">${j.titre}</div>
+                                                <div style="font-size:0.65em;color:#666;text-align:center;margin-top:2px;white-space:nowrap;">${j.date}</div>
+                                            </div>`;
+                                        }).join('') : '<span style="color:#9aacb8;font-size:0.85em;font-style:italic;">Aucune réussite</span>'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Piste Freins -->
+                            <div>
+                                <div style="font-size:0.75em;font-weight:700;color:#e74c3c;letter-spacing:.5px;margin-bottom:8px;">🚧 FREINS</div>
+                                <div style="position:relative;height:60px;background:#fef5f3;border-radius:8px;border:1px solid #fadad1;display:flex;align-items:center;padding:0 12px;">
+                                    <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;">
+                                        ${freins.length ? freins.map(j => {
+                                            const tp = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                                            return `<div style="position:relative;margin-right:12px;flex-shrink:0;">
+                                                <div title="${j.titre}" style="background:${tp.color};color:white;border-radius:20px;padding:6px 12px;font-size:0.8em;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">${j.titre}</div>
+                                                <div style="font-size:0.65em;color:#666;text-align:center;margin-top:2px;white-space:nowrap;">${j.date}</div>
+                                            </div>`;
+                                        }).join('') : '<span style="color:#9aacb8;font-size:0.85em;font-style:italic;">Aucun frein</span>'}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>` : ''}
-                    ${myJ.length ? `<div>
-                        <p style="font-size:0.78em;font-weight:700;color:#6b8fa3;letter-spacing:.5px;margin-bottom:8px;">CHRONOLOGIE DES JALONS</p>
-                        <div style="display:flex;flex-direction:column;gap:5px;">
-                            ${myJ.slice(0, 6).map(j => {
-                                const tp = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
-                                return `<div style="display:flex;gap:8px;align-items:baseline;font-size:0.83em;">
-                                    <span style="color:#9aacb8;white-space:nowrap;min-width:88px;">${j.date}</span>
-                                    <span style="background:${tp.color}22;color:${tp.color};border-radius:6px;padding:1px 7px;font-size:0.82em;white-space:nowrap;">${tp.label}</span>
-                                    <span>${j.titre}</span>
-                                </div>`;
-                            }).join('')}
-                            ${myJ.length > 6 ? `<span style="font-size:0.8em;color:#9aacb8;">+ ${myJ.length - 6} autre${myJ.length - 6 > 1 ? 's' : ''}</span>` : ''}
-                        </div>
-                    </div>` : `<p style="font-size:0.85em;color:#9aacb8;font-style:italic;">Aucun jalon enregistré pour ce bénéficiaire.</p>`}
+                    </div>` : `<p style="font-size:0.85em;color:#9aacb8;font-style:italic;">Aucune réussite ou frein enregistré.</p>`}
                 </div>`;
             }).join('');
         }
