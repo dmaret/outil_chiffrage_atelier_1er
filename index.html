@@ -30563,8 +30563,29 @@ function _renderComparator(p) {
     gridEl.innerHTML = html;
 }
 
+// Capture les valeurs du formulaire avant un re-render pour éviter de les perdre
+function _captureCompareFormValues() {
+    const p = _currentComparePrestation;
+    if (!p) return;
+    const obj = document.getElementById('prescritObjectifs');
+    const con = document.getElementById('prescritContraintes');
+    const dur = document.getElementById('realDuree');
+    const ref = document.getElementById('realReflexion');
+    if (obj || con) {
+        if (!p.prescritClient) p.prescritClient = {};
+        if (obj) p.prescritClient.objectifs = obj.value;
+        if (con) p.prescritClient.contraintes = con.value;
+    }
+    if (dur || ref) {
+        if (!p.realExecute) p.realExecute = { stepsState: {}, deviations: [] };
+        if (dur) p.realExecute.dureeReelle = parseFloat(dur.value) || null;
+        if (ref) p.realExecute.reflexion = ref.value;
+    }
+}
+
 function _updateTemplateinComparator() {
     if (_currentComparePrestation) {
+        _captureCompareFormValues();
         const newTemplateId = document.getElementById('selectTemplate').value;
         _currentComparePrestation.procedureTemplateId = newTemplateId;
         _renderComparator(_currentComparePrestation);
@@ -30573,6 +30594,7 @@ function _updateTemplateinComparator() {
 
 function _setStepState(stepId, state) {
     if (!_currentComparePrestation) return;
+    _captureCompareFormValues();
     if (!_currentComparePrestation.realExecute) _currentComparePrestation.realExecute = { stepsState: {}, deviations: [] };
     if (!_currentComparePrestation.realExecute.stepsState) _currentComparePrestation.realExecute.stepsState = {};
     if (state === 'non-renseigne') {
@@ -30586,6 +30608,7 @@ function _setStepState(stepId, state) {
 function addDeviation() {
     const note = prompt('Description de la déviation (ex: "Étape omise pour gagner du temps")');
     if (!note) return;
+    _captureCompareFormValues();
     if (!_currentComparePrestation.realExecute) _currentComparePrestation.realExecute = { stepsState: {}, deviations: [] };
     _currentComparePrestation.realExecute.deviations.push({
         id: Date.now(),
@@ -30597,6 +30620,7 @@ function addDeviation() {
 
 function _removeDeviation(idx) {
     if (_currentComparePrestation && _currentComparePrestation.realExecute && _currentComparePrestation.realExecute.deviations) {
+        _captureCompareFormValues();
         _currentComparePrestation.realExecute.deviations.splice(idx, 1);
         _renderComparator(_currentComparePrestation);
     }
