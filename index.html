@@ -9914,6 +9914,7 @@
         function saveBeneficiairesData() {
             localStorage.setItem('beneficiaires', JSON.stringify(beneficiaires));
             localStorage.setItem('jalons',        JSON.stringify(jalons));
+            saveToStorage();
         }
 
         function switchAccompSub(sub) {
