@@ -34079,6 +34079,7 @@ function submitDebriefInput() {
 let _accompClinicalActiveType = 'emotion';
 let _accompClinicalDraft = {};
 let _accompClinicalObservations = [];  // Observations cliniques du bénéficiaire
+let _accompClinicalSelectedBenefId = null;
 
 function switchAccompClinicalTab(type) {
     _accompClinicalActiveType = type;
@@ -34094,8 +34095,21 @@ function renderAccompClinicalBody() {
     const emotions = ['Joie', 'Fierté', 'Plaisir', 'Surprise', 'Colère', 'Frustration', 'Agacement', 'Indignation', 'Peur', 'Inquiétude', 'Anxiété', 'Honte', 'Tristesse', 'Découragement', 'Lassitude', 'Solitude', 'Confusion', 'Dégoût', 'Soulagement', 'Indifférence'];
     const bodyZones = ['Tête', 'Cou/Gorge', 'Épaules', 'Poitrine', 'Ventre', 'Dos', 'Bras', 'Mains', 'Jambes', 'Pieds'];
 
+    // Beneficiary selector section
+    const beneficiaireSelector = `
+        <div style="margin-bottom:16px;padding:12px;background:#e8f4f8;border:2px solid #a0c8e0;border-radius:8px;">
+            <label style="display:block;margin-bottom:8px;font-weight:600;color:#2d5b8a;">👤 Sélectionnez le bénéficiaire</label>
+            <select id="accompClinicalBenefSelect" onchange="setAccompClinicalBeneficiary(this.value)" style="width:100%;padding:8px;border:1px solid #a0c8e0;border-radius:6px;font-size:0.95em;">
+                <option value="">— Choisir un bénéficiaire —</option>
+                ${(window.beneficiaires || []).map(b => `<option value="${b.id}" ${_accompClinicalSelectedBenefId == b.id ? 'selected' : ''}>${escapeHtml(b.prenom || '')} ${escapeHtml(b.nom || '')}</option>`).join('')}
+            </select>
+            ${_accompClinicalSelectedBenefId ? `<p style="margin:8px 0 0 0;font-size:0.85em;color:#4a5f75;">✓ Bénéficiaire sélectionné</p>` : `<p style="margin:8px 0 0 0;font-size:0.85em;color:#d70000;font-weight:600;">⚠️ Vous devez sélectionner un bénéficiaire</p>`}
+        </div>
+    `;
+
     if (t === 'emotion') {
         body.innerHTML = `
+            ${beneficiaireSelector}
             <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre une <span class="glossary-term" data-term="emotion" style="border-bottom:2px dotted #c97866;cursor:pointer;">émotion</span> ressentie et son <span class="glossary-term" data-term="intensity" style="border-bottom:2px dotted #c97866;cursor:pointer;">intensité</span>.</p>
             <label style="display:block;margin-bottom:10px;font-weight:600;">Quelle émotion ressens-tu ?</label>
             <div class="clinical-emotion-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
@@ -34109,6 +34123,7 @@ function renderAccompClinicalBody() {
             <textarea id="accompNoteEmotion" placeholder="À quel moment ? Lié à quoi ?" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>`;
     } else if (t === 'observation') {
         body.innerHTML = `
+            ${beneficiaireSelector}
             <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre une <span class="glossary-term" data-term="observation" style="border-bottom:2px dotted #c97866;cursor:pointer;">observation</span> : faits objectifs, sans interprétation.</p>
             <label style="display:block;margin-bottom:8px;font-weight:600;">Qu'as-tu observé ?</label>
             <textarea id="accompObservation" placeholder="Décris factuellement ce que tu as vu, entendu, observé — sans interpréter." style="width:100%;min-height:100px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>
@@ -34116,6 +34131,7 @@ function renderAccompClinicalBody() {
             <input type="text" id="accompObsTarget" placeholder="Ex : un collègue, le bénéficiaire, le matériel…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">`;
     } else if (t === 'message') {
         body.innerHTML = `
+            ${beneficiaireSelector}
             <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre un <span class="glossary-term" data-term="message" style="border-bottom:2px dotted #c97866;cursor:pointer;">message reçu</span> et ton interprétation.</p>
             <label style="display:block;margin-bottom:8px;font-weight:600;">De qui vient le message ?</label>
             <input type="text" id="accompMsgFrom" placeholder="Hiérarchie, collègue, client, bénéficiaire…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">
@@ -34125,6 +34141,7 @@ function renderAccompClinicalBody() {
             <textarea id="accompMsgInterp" placeholder="Ce que tu en as compris, ressenti…" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>`;
     } else if (t === 'double_contrainte') {
         body.innerHTML = `
+            ${beneficiaireSelector}
             <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre une <span class="glossary-term" data-term="double_contrainte" style="border-bottom:2px dotted #c97866;cursor:pointer;">double contrainte</span> : deux demandes contradictoires.</p>
             <label style="display:block;margin-bottom:8px;font-weight:600;">Injonction A</label>
             <input type="text" id="accompDcA" placeholder="Ex : Sois rapide." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">
@@ -34136,6 +34153,7 @@ function renderAccompClinicalBody() {
             <textarea id="accompDcNote" placeholder="Comment vis-tu ce paradoxe ?" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;"></textarea>`;
     } else if (t === 'ressenti_corporel') {
         body.innerHTML = `
+            ${beneficiaireSelector}
             <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre ton <span class="glossary-term" data-term="ressenti_corporel" style="border-bottom:2px dotted #c97866;cursor:pointer;">ressenti corporel</span> : sensations physiques localisées.</p>
             <label style="display:block;margin-bottom:10px;font-weight:600;">Où dans le corps ?</label>
             <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
@@ -34183,6 +34201,11 @@ function toggleAccompBodyZone(zone) {
     if (chip) chip.style.borderColor = idx > -1 ? '#ddd' : '#a0d070';
 }
 
+function setAccompClinicalBeneficiary(benefId) {
+    _accompClinicalSelectedBenefId = benefId ? Number(benefId) : null;
+    renderAccompClinicalBody();
+}
+
 function setAccompIntensity(n) {
     _accompClinicalDraft.intensity = n;
     for (let i = 1; i <= 5; i++) {
@@ -34202,17 +34225,22 @@ function resetAccompClinical() {
 }
 
 function saveAccompClinicalInput() {
-    const currentBenef = getCurrentSelectedBeneficiary();
-    if (!currentBenef) {
-        alert('Sélectionne un bénéficiaire d\'abord.');
+    if (!_accompClinicalSelectedBenefId) {
+        showToast('⚠️ Sélectionnez un bénéficiaire d\'abord.');
+        return;
+    }
+
+    const beneficiary = (window.beneficiaires || []).find(b => b.id == _accompClinicalSelectedBenefId);
+    if (!beneficiary) {
+        showToast('❌ Bénéficiaire introuvable.');
         return;
     }
 
     const obs = {
         id: 'obs_' + Date.now(),
         type: _accompClinicalActiveType,
-        beneficiaire: currentBenef.nom,
-        beneficiaireId: currentBenef.id,
+        beneficiaire: `${beneficiary.prenom || ''} ${beneficiary.nom || ''}`.trim(),
+        beneficiaireId: beneficiary.id,
         timestamp: new Date().toISOString(),
         data: _accompClinicalDraft
     };
@@ -34245,7 +34273,7 @@ function saveAccompClinicalInput() {
 
     resetAccompClinical();
     renderAccompTimeline();
-    showToast(`✅ Observation enregistrée pour ${currentBenef.nom}`);
+    showToast(`✅ Observation enregistrée pour ${beneficiary.prenom} ${beneficiary.nom}`);
 }
 
 function filterAccompTimeline(filterType) {
@@ -34315,7 +34343,15 @@ function renderAccompTimeline(filterType = 'all') {
 }
 
 function getCurrentSelectedBeneficiary() {
-    // Chercher le bénéficiaire actuellement sélectionné
+    // First check if a beneficiary is selected in the clinical tools context
+    if (_accompClinicalSelectedBenefId) {
+        const benef = (window.beneficiaires || []).find(b => b.id == _accompClinicalSelectedBenefId);
+        if (benef) {
+            return { id: benef.id, nom: `${benef.prenom || ''} ${benef.nom || ''}`.trim() };
+        }
+    }
+
+    // Otherwise look for active beneficiary card in the UI
     const activeBenefCard = document.querySelector('.benef-card.active');
     if (activeBenefCard) {
         const id = activeBenefCard.getAttribute('data-benef-id');
