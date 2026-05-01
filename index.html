@@ -7535,6 +7535,33 @@
             }
         }
 
+        // Data Validation & Sanitization
+        function validateJsonStructure(data, schema) {
+            if (!schema) return true; // No schema = accept
+            if (typeof data !== typeof schema) return false;
+            if (typeof schema === 'object' && schema !== null) {
+                for (const key in schema) {
+                    if (!(key in data)) return false;
+                    if (!validateJsonStructure(data[key], schema[key])) return false;
+                }
+            }
+            return true;
+        }
+
+        function sanitizeLocalStorageValue(key, value) {
+            // Prevent JSON serialization errors
+            if (typeof value === 'object') {
+                try {
+                    JSON.stringify(value); // Test serialization
+                    return true;
+                } catch(e) {
+                    console.warn('Value not JSON serializable:', key, e);
+                    return false;
+                }
+            }
+            return true;
+        }
+
         /**
          * Ferme une modale en masquant son élément racine.
          * Centralise le pattern `getElementById(id).style.display = 'none'`
