@@ -3745,7 +3745,76 @@
                         <strong>Note:</strong> Première connexion = définit le mot de passe<br>
                         <small>Sécurité v2.26 • Hachage SHA-256 • Brute force protection 5 tentatives</small>
                     </p>
+                    <div style="margin-top:20px;padding-top:20px;border-top:1px solid #dde5eb;">
+                        <p style="font-size:0.8em;color:#7a9db1;margin:10px 0;">
+                            ☁️ <strong>Mode Cloud</strong> — Sync données depuis n'importe quel ordinateur
+                        </p>
+                        <button type="button" onclick="toggleCloudLogin()" style="background:#4a90c2;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:0.85em;">
+                            🔗 Se connecter au cloud
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloud Login Modal -->
+    <div id="cloudLoginModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:10000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;padding:32px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+            <h2 style="margin:0 0 20px 0;color:#2d3a47;">☁️ Connexion Cloud</h2>
+            <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Synchronisez vos données sur tous vos appareils</p>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Email</label>
+                <input type="email" id="cloudEmail" placeholder="votre@email.com" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Mot de passe</label>
+                <input type="password" id="cloudPassword" placeholder="••••••••" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div id="cloudLoginError" style="color:#c85a54;margin-bottom:16px;display:none;padding:8px;background:#fce8e6;border-radius:4px;font-size:0.85em;"></div>
+
+            <div style="display:flex;gap:10px;">
+                <button onclick="handleCloudLogin()" style="flex:1;background:#4a90c2;color:white;border:none;padding:10px;border-radius:6px;cursor:pointer;font-weight:bold;">Connexion</button>
+                <button onclick="toggleCloudLogin()" style="flex:1;background:#e8eef5;color:#4a5f75;border:none;padding:10px;border-radius:6px;cursor:pointer;">Annuler</button>
+            </div>
+
+            <div style="margin-top:16px;text-align:center;">
+                <p style="font-size:0.8em;color:#7a9db1;margin:0;">Pas encore de compte?
+                    <button onclick="toggleCloudRegister()" style="background:none;border:none;color:#4a90c2;cursor:pointer;text-decoration:underline;">Créer un compte</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloud Register Modal -->
+    <div id="cloudRegisterModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:10000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;padding:32px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+            <h2 style="margin:0 0 20px 0;color:#2d3a47;">✨ Créer un compte cloud</h2>
+            <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Commencez à synchroniser vos données</p>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Nom</label>
+                <input type="text" id="cloudName" placeholder="Votre nom" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Email</label>
+                <input type="email" id="cloudRegisterEmail" placeholder="votre@email.com" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Mot de passe</label>
+                <input type="password" id="cloudRegisterPassword" placeholder="••••••••" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div id="cloudRegisterError" style="color:#c85a54;margin-bottom:16px;display:none;padding:8px;background:#fce8e6;border-radius:4px;font-size:0.85em;"></div>
+
+            <div style="display:flex;gap:10px;">
+                <button onclick="handleCloudRegister()" style="flex:1;background:#4a90c2;color:white;border:none;padding:10px;border-radius:6px;cursor:pointer;font-weight:bold;">Créer</button>
+                <button onclick="toggleCloudRegister()" style="flex:1;background:#e8eef5;color:#4a5f75;border:none;padding:10px;border-radius:6px;cursor:pointer;">Annuler</button>
             </div>
         </div>
     </div>
@@ -7581,6 +7650,54 @@
     </aside>
 
     <script>
+        // ☁️ CLOUD API CLIENT - Synchronisation avec serveur distant
+        class APIClient {
+            constructor(baseURL = 'http://localhost:5000/api') {
+                this.baseURL = baseURL;
+                this.token = localStorage.getItem('authToken');
+            }
+
+            setToken(token) {
+                this.token = token;
+                localStorage.setItem('authToken', token);
+            }
+
+            clearToken() {
+                this.token = null;
+                localStorage.removeItem('authToken');
+            }
+
+            async request(method, endpoint, data = null) {
+                const options = { method, headers: { 'Content-Type': 'application/json' } };
+                if (this.token) options.headers['Authorization'] = `Bearer ${this.token}`;
+                if (data) options.body = JSON.stringify(data);
+                try {
+                    const response = await fetch(`${this.baseURL}${endpoint}`, options);
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+                    return result;
+                } catch (error) {
+                    console.error(`API Error [${method} ${endpoint}]:`, error.message);
+                    throw error;
+                }
+            }
+
+            register(email, password, name) { return this.request('POST', '/auth/register', { email, password, name }); }
+            login(email, password) { return this.request('POST', '/auth/login', { email, password }); }
+            getPrestations() { return this.request('GET', '/data/prestations'); }
+            createPrestation(prestation, client, montant) { return this.request('POST', '/data/prestations', { prestation, client, montant }); }
+            updatePrestation(id, prestation, client, montant) { return this.request('PUT', `/data/prestations/${id}`, { prestation, client, montant }); }
+            deletePrestation(id) { return this.request('DELETE', `/data/prestations/${id}`); }
+            getClinicalRecords() { return this.request('GET', '/data/clinical'); }
+            saveClinicalRecord(clientId, data) { return this.request('POST', '/data/clinical', { client_id: clientId, data }); }
+            getDocuments() { return this.request('GET', '/data/documents'); }
+            uploadDocument(filename, data) { return this.request('POST', '/data/documents', { filename, data }); }
+            deleteDocument(id) { return this.request('DELETE', `/data/documents/${id}`); }
+        }
+
+        const cloudAPI = new APIClient('http://localhost:5000/api');
+        let cloudMode = !!localStorage.getItem('authToken'); // Active si token présent
+
         // Global variables - declare early to avoid initialization order issues
         let _autosaveDirty = false;
         let _tabsOrder = null;
@@ -8234,6 +8351,84 @@
             const loginScreen = document.getElementById('loginScreen');
             loginScreen.classList.add('hidden');
             localStorage.setItem('_currentGroupId', groupId);
+        }
+
+        // ☁️ CLOUD LOGIN FUNCTIONS
+        function toggleCloudLogin() {
+            const modal = document.getElementById('cloudLoginModal');
+            if (modal.style.display === 'none') {
+                modal.style.display = 'flex';
+                document.getElementById('cloudEmail').focus();
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        function toggleCloudRegister() {
+            document.getElementById('cloudLoginModal').style.display = 'none';
+            const regModal = document.getElementById('cloudRegisterModal');
+            if (regModal.style.display === 'none') {
+                regModal.style.display = 'flex';
+                document.getElementById('cloudName').focus();
+            } else {
+                regModal.style.display = 'none';
+            }
+        }
+
+        async function handleCloudLogin() {
+            const email = document.getElementById('cloudEmail').value.trim();
+            const password = document.getElementById('cloudPassword').value;
+            const errorDiv = document.getElementById('cloudLoginError');
+
+            if (!email || !password) {
+                errorDiv.textContent = '❌ Email et mot de passe requis';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const result = await cloudAPI.login(email, password);
+                cloudAPI.setToken(result.token);
+                cloudMode = true;
+                await loadPrestationsFromCloud();
+                hideLoginScreen('cloud');
+                toggleCloudLogin();
+                console.log('✅ Cloud login successful:', result.user.name);
+            } catch (err) {
+                errorDiv.textContent = '❌ ' + (err.message || 'Connexion échouée');
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function handleCloudRegister() {
+            const name = document.getElementById('cloudName').value.trim();
+            const email = document.getElementById('cloudRegisterEmail').value.trim();
+            const password = document.getElementById('cloudRegisterPassword').value;
+            const errorDiv = document.getElementById('cloudRegisterError');
+
+            if (!name || !email || !password) {
+                errorDiv.textContent = '❌ Tous les champs sont requis';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = '❌ Le mot de passe doit avoir au moins 6 caractères';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const result = await cloudAPI.register(email, password, name);
+                cloudAPI.setToken(result.token);
+                cloudMode = true;
+                hideLoginScreen('cloud');
+                toggleCloudRegister();
+                console.log('✅ Cloud registration successful:', result.user.name);
+            } catch (err) {
+                errorDiv.textContent = '❌ ' + (err.message || 'Inscription échouée');
+                errorDiv.style.display = 'block';
+            }
         }
 
         function showLoginScreen() {
@@ -9201,6 +9396,47 @@
             localStorage.setItem('tabGroups', JSON.stringify(tabGroups));
             lastSaveTime = Date.now();
             updateSaveIndicator();
+            // Sync to cloud in background (non-blocking)
+            if (cloudMode) syncPrestationsToCloud().catch(e => console.warn('Cloud sync skipped:', e.message));
+        }
+
+        // ☁️ CLOUD SYNCHRONIZATION
+        async function syncPrestationsToCloud() {
+            if (!cloudMode || !cloudAPI.token) return;
+            try {
+                for (const p of prestationsSauvegardees) {
+                    if (p.id && typeof p.id === 'number') {
+                        // Update existing
+                        if (p._cloudId) {
+                            await cloudAPI.updatePrestation(p._cloudId, p.prestation || '', p.client || '', p.montant || 0);
+                        } else {
+                            // Create new
+                            const result = await cloudAPI.createPrestation(p.prestation || '', p.client || '', p.montant || 0);
+                            if (result.id) p._cloudId = result.id;
+                        }
+                    }
+                }
+                console.log('✅ Prestations synced to cloud');
+            } catch (err) {
+                console.error('Cloud sync error:', err);
+            }
+        }
+
+        async function loadPrestationsFromCloud() {
+            if (!cloudMode || !cloudAPI.token) return;
+            try {
+                const cloudPrestations = await cloudAPI.getPrestations();
+                if (Array.isArray(cloudPrestations)) {
+                    prestationsSauvegardees = cloudPrestations.map(p => ({
+                        ...p,
+                        _cloudId: p.id,
+                        id: p.id // Use cloud ID locally
+                    }));
+                    console.log('✅ Loaded ' + prestationsSauvegardees.length + ' prestations from cloud');
+                }
+            } catch (err) {
+                console.error('Failed to load prestations from cloud:', err);
+            }
         }
 
         function loadConfig() {
