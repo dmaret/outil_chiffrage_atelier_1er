@@ -7630,6 +7630,18 @@
             {key:'gantt',          label:'📅 Planification'},
         ];
 
+        // Initialize Kanban columns early (used in renderDashboard)
+        const KANBAN_COLUMNS = [
+            { id: 'draft',          label: '✏️ Brouillon',     color: '#c97866', bg: '#fdf8f4', terracotta: true },
+            { id: 'pending_review', label: '⏳ Soumis',         color: '#d9a892', bg: '#fdf8f4', terracotta: true },
+            { id: 'approved',       label: '✅ Approuvé',       color: '#a45a52', bg: '#fdf8f4', terracotta: true },
+            { id: 'rejected',       label: '❌ Rejeté',         color: '#e8c4ba', bg: '#fdf8f4', terracotta: true },
+            { id: 'archived',       label: '📦 Facturé',         color: '#c97866', bg: '#fdf8f4', terracotta: true },
+        ];
+
+        // Initialize graph state early (used in renderDashboard)
+        let _graphState = { nodes: [], links: [], dragging: null };
+
         // Utility function to escape HTML special characters (prevent XSS)
         function escapeHtml(text) {
             if (!text) return '';
@@ -23622,13 +23634,6 @@
         }
 
         // ── 2. Kanban approbation drag & drop ──
-        const KANBAN_COLUMNS = [
-            { id: 'draft',          label: '✏️ Brouillon',     color: '#c97866', bg: '#fdf8f4', terracotta: true },
-            { id: 'pending_review', label: '⏳ Soumis',         color: '#d9a892', bg: '#fdf8f4', terracotta: true },
-            { id: 'approved',       label: '✅ Approuvé',       color: '#a45a52', bg: '#fdf8f4', terracotta: true },
-            { id: 'rejected',       label: '❌ Rejeté',         color: '#e8c4ba', bg: '#fdf8f4', terracotta: true },
-            { id: 'archived',       label: '📦 Facturé',         color: '#c97866', bg: '#fdf8f4', terracotta: true },
-        ];
         function _kanbanStateOf(p) {
             const st = (p.statut || 'devis').toLowerCase();
             if (['facture','paye','encaisse'].includes(st)) return 'archived';
@@ -23702,7 +23707,6 @@
         }
 
         // ── 3. Graphe relationnel SVG (clients · prestations · bénéficiaires) ──
-        let _graphState = { nodes: [], links: [], dragging: null };
         function renderRelationGraph() {
             const cont = document.getElementById('dashGraphContainer');
             if (!cont) return;
