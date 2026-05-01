@@ -316,3 +316,166 @@ frame-ancestors 'none'
 **Document Status**: ✅ ACTIVE & MAINTAINED  
 **Audience**: Developers, DevOps, Security Team  
 **Distribution**: Internal Only
+
+---
+
+## v2.26 SECURITY ENHANCEMENTS (2026-05-01)
+
+### ✅ IMPLEMENTED FEATURES
+
+#### 1. Brute Force Protection
+- **Max Attempts**: 5 login failures
+- **Lockout Duration**: 15 minutes
+- **Tracking**: Per-group in localStorage
+- **Reset**: Automatic after lockout expires
+
+#### 2. Advanced Encryption
+- **Algorithm**: AES-GCM (256-bit)
+- **Key Derivation**: PBKDF2 with 100,000 iterations
+- **Use Case**: Export protection, sensitive data
+- **Implementation**: Native Web Crypto API
+
+#### 3. Webhook Signature Verification
+- **Algorithm**: HMAC-SHA256
+- **Headers**: X-Webhook-Signature, X-Webhook-Timestamp
+- **Format**: `sha256=<base64_signature>`
+- **Purpose**: Prevent webhook spoofing
+
+#### 4. API Key Rotation
+- **Generation**: Cryptographically secure (crypto.getRandomValues)
+- **Format**: `sk_[40-char hex]`
+- **History**: Last 10 rotations tracked
+- **Revocation**: Immediate with reason logging
+
+#### 5. Group Password Hashing
+- **Algorithm**: SHA-256 via Web Crypto API
+- **Storage**: Hashed in authGroups
+- **First Login**: Set password on first access
+- **Async**: Full async/await support
+
+### FUNCTIONS ADDED
+
+```javascript
+// Authentication
+isGroupLockedOut(groupId) - Check brute force lockout
+recordLoginAttempt(groupId, success) - Track attempts
+doLogin() - Async login with security
+
+// Encryption
+encryptExport(data, password) - AES-GCM export encryption
+decryptExport(encrypted, password) - Import decryption
+deriveEncryptionKey(password, salt) - PBKDF2 key derivation
+
+// Webhooks
+generateWebhookSignature(payload, secret) - HMAC-SHA256
+triggerWebhookEmail(eventType, data) - Signed webhooks
+
+// API Key Management
+generateNewApiKey() - Secure key generation
+rotateApiKey() - Key rotation with archiving
+revokeApiKey(reason) - Immediate revocation
+getApiKeyRotationHistory() - Audit trail
+
+// Group Authentication
+hashPassword(password) - Async SHA-256 hashing
+hashPasswordSync(password) - Legacy support
+```
+
+### SECURITY METRICS
+
+| Feature | Before | After |
+|---------|--------|-------|
+| **API Key Storage** | XOR | AES-GCM |
+| **Password Hashing** | Weak bitwise | SHA-256 |
+| **Brute Force Protection** | None | 5 attempts + 15min lockout |
+| **Webhook Verification** | None | HMAC-SHA256 |
+| **Export Encryption** | Plaintext | AES-GCM |
+| **Key Rotation** | Manual | Automated tracking |
+| **CSP** | None | Implemented |
+| **SRI** | None | All CDN scripts |
+
+### COMPLIANCE UPDATES
+
+#### OWASP Top 10 Coverage
+- ✅ A02:2021 - Cryptographic Failures (AES-GCM)
+- ✅ A03:2021 - Injection (CSP, escapeHtml)
+- ✅ A05:2021 - Broken Access Control (Brute force, RBAC)
+- ✅ A07:2021 - CSRF (Timestamp in webhooks)
+
+#### NIST Recommendations
+- ✅ SP 800-132: PBKDF2 implementation
+- ✅ SP 800-38D: AES-GCM mode
+- ✅ SP 800-63B: Password guidance
+
+---
+
+## DEPLOYMENT CHECKLIST
+
+### Pre-Production Testing
+- [ ] Test brute force lockout mechanism
+- [ ] Verify AES-GCM export/import cycle
+- [ ] Validate webhook signatures
+- [ ] Test API key rotation workflow
+- [ ] Verify group password hashing
+- [ ] Check CSP doesn't break functionality
+- [ ] Load test localStorage limits
+
+### Post-Deployment Monitoring
+- [ ] Monitor login attempt spikes (brute force detection)
+- [ ] Track webhook signature failures
+- [ ] Monitor key rotation frequency
+- [ ] Check for decryption failures
+- [ ] Alert on security events
+
+### Operations
+- [ ] Document key rotation procedures
+- [ ] Create incident response playbook
+- [ ] Setup security event logging
+- [ ] Train team on new features
+- [ ] Document password policies
+
+---
+
+## KNOWN LIMITATIONS
+
+### Browser Compatibility
+- ✅ Chrome 37+
+- ✅ Firefox 34+
+- ✅ Safari 11+
+- ✅ Edge 79+
+- ❌ IE (not supported)
+
+### Storage Limits
+- ~5-10 MB localStorage limit
+- Rotation history: Last 10 entries
+- Brute force tracking: Per-group
+
+### Offline Constraints
+- No server-side validation
+- Local time used for timestamps
+- No real-time key revocation
+
+---
+
+## TRANSITION GUIDE (v2.25 → v2.26)
+
+### For Users
+1. First login may prompt for new group password
+2. Exports now support optional password encryption
+3. API keys automatically upgraded to new format
+4. Old keys remain valid during transition (30 days)
+
+### For Administrators
+1. Review `SECURITY.md` for new features
+2. Plan API key rotation schedule
+3. Configure webhook signature validation
+4. Update incident response procedures
+5. Train support team
+
+### For Developers
+1. Use `async/await` for login functions
+2. Handle `encryptExport()` promises
+3. Implement webhook signature verification
+4. Monitor brute force logs
+5. Test with invalid credentials
+
