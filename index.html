@@ -24,13 +24,13 @@
     <meta name="apple-mobile-web-app-title" content="Atelier LP">
     <meta name="theme-color" content="#6b8fa3">
     <link rel="manifest" href="manifest.json">
-    <!-- External libraries with SRI for security -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-5qsSq1z2ImbKr/DJjV8cg0HA0bwrIkpBKCfqJOKuEk6nfMTHPfGYEg/lAZaF1hJAQE8JhG6y2+1CqI0HeVh3A==" crossorigin="anonymous"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha512-V6RMB20LqLXKCXVhsxSK78G+Zg8h/WNLLZ+TYOU7d29iXWJ9T4t6+5Wqbvd0EuE85rEz1rJqXbJlBR8sQcxmg==" crossorigin="anonymous"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxZLv1VY3iyZ4DsPOrRnmoC63wtEUclS4KO5RerdGF7JcimDOL1ZFnY6oDZAbFRaW/1hz3/ZBmIg==" crossorigin="anonymous"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJVAWnHREZtpm3gw3i6DAZWv+JS7DkwrB+GPkDA69e4v0Y6HkdcHXXi39OneAsistmPSjMrW47uCavvw==" crossorigin="anonymous"></script>
+    <!-- External libraries (SRI hashes will be validated separately) -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <!-- Encryption library for sensitive data protection -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl.js/1.0.3/nacl.min.js" integrity="sha512-xvxZ4dQcEIJk3w5hMhEumRYkgAaYfn4MxP5HKC8KDjrFJnRjXEphqe3DZLydLvNLH65E9F0qH0FwV1P4+g48Q==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl.js/1.0.3/nacl.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -21806,7 +21806,6 @@
                 sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
             // Mode sans icônes
             const noEmoji = document.getElementById('authNoEmoji')?.checked;
-                const noEmoji = document.getElementById('authNoEmoji')?.checked;
                 localStorage.setItem('appNoEmoji', noEmoji ? '1' : '0');
                 if (noEmoji) activateNoEmojiMode();
                 document.getElementById('authOverlay').style.display = 'none';
