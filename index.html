@@ -8968,6 +8968,7 @@
                 try { renderConsommablesTable(); } catch(e) { console.warn('renderConsommablesTable defer:', e); }
                 try { updateStats(); } catch(e) { console.warn('updateStats defer:', e); }
                 try { loadFormationData(); } catch(e) { console.warn('loadFormationData defer:', e); }
+                try { cleanupOldStorage(); } catch(e) { console.warn('cleanupOldStorage defer:', e); }
                 try { loadReferenceDocuments(); } catch(e) { console.warn('loadReferenceDocuments defer:', e); }
                 try { loadAuditLog(); } catch(e) { console.warn('loadAuditLog defer:', e); }
             };
@@ -15537,6 +15538,16 @@
         }
 
         // ── Reference Documents Management ─────────────────────
+        function cleanupOldStorage() {
+            // Clear old localStorage documents to free space
+            try {
+                localStorage.removeItem('referenceDocuments');
+                console.log('Cleaned up old localStorage documents');
+            } catch(e) {
+                console.warn('Could not clean localStorage:', e);
+            }
+        }
+
         function loadReferenceDocuments() {
             // Try IndexedDB first, fallback to localStorage
             try {
@@ -15693,14 +15704,9 @@
                 const dbRequest = indexedDB.open('AtelierDB', 1);
 
                 dbRequest.onerror = () => {
-                    console.warn('IndexedDB failed, falling back to localStorage');
-                    // Fallback: store only metadata (no files) in localStorage
-                    const metadataOnly = referenceDocuments.map(d => {
-                        const copy = { ...d };
-                        if (copy.fileData) delete copy.fileData;
-                        return copy;
-                    });
-                    localStorage.setItem('referenceDocuments', JSON.stringify(metadataOnly));
+                    console.warn('IndexedDB failed - documents kept in memory only');
+                    toast('⚠️ Documents kept in memory (IndexedDB unavailable)', 'warning');
+                    // Don't attempt localStorage - it's likely full
                 };
 
                 dbRequest.onsuccess = (e) => {
@@ -15743,13 +15749,9 @@
                     }
                 };
             } catch(err) {
-                console.warn('IndexedDB error, falling back to localStorage:', err);
-                const metadataOnly = referenceDocuments.map(d => {
-                    const copy = { ...d };
-                    if (copy.fileData) delete copy.fileData;
-                    return copy;
-                });
-                localStorage.setItem('referenceDocuments', JSON.stringify(metadataOnly));
+                console.warn('IndexedDB error:', err);
+                toast('⚠️ Documents kept in memory (storage unavailable)', 'warning');
+                // Don't attempt localStorage - it's likely full
             }
         }
 
