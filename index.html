@@ -7924,6 +7924,70 @@
             }
         };
 
+        // ═══════════════════════════════════════════════════════════
+        //  API KEY ROTATION SYSTEM - Track & manage key lifecycle
+        // ═══════════════════════════════════════════════════════════
+
+        function getApiKeyRotationHistory() {
+            return JSON.parse(localStorage.getItem('_apiKeyRotationHistory') || '[]');
+        }
+
+        function saveApiKeyRotationHistory(history) {
+            localStorage.setItem('_apiKeyRotationHistory', JSON.stringify(history));
+        }
+
+        function generateNewApiKey() {
+            const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+            const key = 'sk_' + Array.from(randomBytes)
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('')
+                .substring(0, 40);
+            return key;
+        }
+
+        function rotateApiKey() {
+            const oldKey = emailWebhooksConfig.apiKey;
+            const newKey = generateNewApiKey();
+
+            // Archive old key
+            const history = getApiKeyRotationHistory();
+            history.push({
+                oldKey: encryptApiKey(oldKey),
+                newKey: encryptApiKey(newKey),
+                timestamp: new Date().toISOString(),
+                status: 'rotated',
+                reason: 'manual_rotation'
+            });
+
+            // Keep last 10 rotations
+            if (history.length > 10) history.shift();
+            saveApiKeyRotationHistory(history);
+
+            // Update config
+            emailWebhooksConfig.apiKey = newKey;
+            saveEmailWebhooksConfig();
+
+            logAction('Rotation clé API webhook email', 'SECURITY');
+            return newKey;
+        }
+
+        function revokeApiKey(reason = 'compromised') {
+            const history = getApiKeyRotationHistory();
+            if (history.length > 0) {
+                history[history.length - 1].status = 'revoked';
+                history[history.length - 1].revokeReason = reason;
+                history[history.length - 1].revokeTime = new Date().toISOString();
+            }
+            saveApiKeyRotationHistory(history);
+
+            const newKey = generateNewApiKey();
+            emailWebhooksConfig.apiKey = newKey;
+            saveEmailWebhooksConfig();
+
+            logAction(`Révocation clé API - raison: ${reason}`, 'SECURITY');
+            return newKey;
+        }
+
         function loadEmailWebhooksConfig() {
             try {
                 const saved = localStorage.getItem('emailWebhooksConfig');
