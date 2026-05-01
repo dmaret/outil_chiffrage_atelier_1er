@@ -8082,13 +8082,16 @@
 
         async function handleGroupLogin(event) {
             event.preventDefault();
+            console.log('🔐 handleGroupLogin called');
             const groupId = document.getElementById('groupSelect').value;
             const password = document.getElementById('groupPassword').value;
             const errorDiv = document.getElementById('loginError');
 
+            console.log('groupId:', groupId, 'password:', password ? '***' : 'empty');
+
             if (!groupId || !password) {
-                errorDiv.textContent = '❌ Veuillez remplir tous les champs';
-                errorDiv.classList.add('show');
+                if (errorDiv) errorDiv.textContent = '❌ Veuillez remplir tous les champs';
+                if (errorDiv) errorDiv.classList.add('show');
                 return;
             }
 
@@ -8100,8 +8103,10 @@
             // Check brute force lockout
             if (isGroupLockedOut(groupId)) {
                 const remaining = getGroupLockoutRemaining(groupId);
-                errorDiv.textContent = `⏳ Compte verrouillé. Réessayez dans ${remaining} minutes`;
-                errorDiv.classList.add('show');
+                if (errorDiv) {
+                    errorDiv.textContent = `⏳ Compte verrouillé. Réessayez dans ${remaining} minutes`;
+                    errorDiv.classList.add('show');
+                }
                 return;
             }
 
@@ -8109,8 +8114,10 @@
                 // Get or initialize group
                 let group = authGroups.find(g => g.id === groupId);
                 if (!group) {
-                    errorDiv.textContent = '❌ Groupe introuvable';
-                    errorDiv.classList.add('show');
+                    if (errorDiv) {
+                        errorDiv.textContent = '❌ Groupe introuvable';
+                        errorDiv.classList.add('show');
+                    }
                     return;
                 }
 
@@ -8131,14 +8138,18 @@
                     hideLoginScreen(groupId);
                 } else {
                     recordLoginAttempt(groupId, false);
-                    errorDiv.textContent = '❌ Mot de passe incorrect';
-                    errorDiv.classList.add('show');
+                    if (errorDiv) {
+                        errorDiv.textContent = '❌ Mot de passe incorrect';
+                        errorDiv.classList.add('show');
+                    }
                     document.getElementById('groupPassword').value = '';
                 }
             } catch (err) {
                 console.error('Login error:', err);
-                errorDiv.textContent = '❌ Erreur lors de la connexion';
-                errorDiv.classList.add('show');
+                if (errorDiv) {
+                    errorDiv.textContent = '❌ Erreur lors de la connexion: ' + err.message;
+                    errorDiv.classList.add('show');
+                }
             }
         }
 
