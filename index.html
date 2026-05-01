@@ -8092,6 +8092,11 @@
                 return;
             }
 
+            // Ensure auth groups are loaded
+            if (!authGroups || authGroups.length === 0) {
+                initAuthGroups();
+            }
+
             // Check brute force lockout
             if (isGroupLockedOut(groupId)) {
                 const remaining = getGroupLockoutRemaining(groupId);
