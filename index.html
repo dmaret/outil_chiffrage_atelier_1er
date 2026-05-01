@@ -5388,6 +5388,17 @@
                     </div>
                 </div>
 
+                <div class="section admin-section" style="display:none; border-left: 4px solid #e8a87c;">
+                    <h2>🔀 Réorganiser les onglets <span style="background:#e8a87c;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                    <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Glissez-déposez les onglets pour changer leur ordre. Cet ordre sera sauvegardé pour tous les utilisateurs.</p>
+                    <div id="tabsOrderContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+                        <!-- Rendu par renderTabsOrderEditor() -->
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-small" onclick="resetTabsOrder()">🔄 Ordre par défaut</button>
+                    </div>
+                </div>
+
                 <div class="section admin-section" style="display:none; border-left: 4px solid #c9b3d4;">
                     <h2>🔧 Types de mouvement <span style="background:#c9b3d4;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
                     <div id="adminListTypes"></div>
