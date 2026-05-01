@@ -3595,9 +3595,161 @@
             padding: 16px;
         }
         body.dark-mode #clinicalDashboardBody { background: #1e1812; }
+
+        /* ── LOGIN SCREEN STYLES (v2.26) ─────────────────────────────── */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--color-bg-from) 0%, var(--color-bg-to) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-family: var(--font-family);
+        }
+        #loginScreen.hidden {
+            display: none;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+        .login-box {
+            background: var(--color-surface);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(150,150,180,0.25);
+            animation: slideUp 0.4s ease-out;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h1 {
+            color: var(--color-text);
+            font-size: 1.8em;
+            margin: 0;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .login-subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.9em;
+            margin: 0;
+            font-weight: 500;
+        }
+        #loginForm {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        #loginForm .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        #loginForm label {
+            color: var(--color-text);
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        #loginForm input,
+        #loginForm select {
+            padding: 12px;
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: var(--font-family);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: white;
+            color: var(--color-text);
+        }
+        #loginForm input:focus,
+        #loginForm select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(168,213,226,0.1);
+        }
+        .login-error {
+            color: var(--color-danger);
+            background: rgba(231,76,60,0.1);
+            border: 1px solid rgba(231,76,60,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            line-height: 1.4;
+            display: none;
+        }
+        .login-error.show {
+            display: block;
+        }
+        .login-btn {
+            padding: 14px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .login-footer {
+            margin-top: 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+    <!-- Login Screen: Group Authentication (v2.26) -->
+    <div id="loginScreen" role="main" aria-label="Écran d'authentification">
+        <div class="login-container">
+            <div class="login-box">
+                <div class="login-header">
+                    <div style="font-size:3em;margin-bottom:16px;">🔐</div>
+                    <h1>Outil Chiffrage Atelier</h1>
+                    <p class="login-subtitle">Authentification sécurisée v2.26</p>
+                </div>
+
+                <form id="loginForm" onsubmit="handleGroupLogin(event)">
+                    <div class="form-group">
+                        <label for="groupSelect">Groupe d'accès</label>
+                        <select id="groupSelect" required aria-label="Sélectionnez votre groupe">
+                            <option value="">-- Sélectionnez un groupe --</option>
+                            <option value="cea">👥 CEA</option>
+                            <option value="asp">👥 ASP</option>
+                            <option value="msp">👥 MSP</option>
+                            <option value="admin">🔧 ADMIN</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="groupPassword">Mot de passe</label>
+                        <input type="password" id="groupPassword" placeholder="Entrez le mot de passe"
+                               aria-label="Mot de passe du groupe" autocomplete="current-password">
+                    </div>
+
+                    <div id="loginError" class="login-error" role="alert"></div>
+
+                    <button type="submit" class="btn btn-success login-btn">
+                        🔓 Accéder à l'application
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <p style="font-size:0.85em;color:#6b8fa3;margin-top:20px;text-align:center;">
+                        <strong>Note:</strong> Première connexion = définit le mot de passe<br>
+                        <small>Sécurité v2.26 • Hachage SHA-256 • Brute force protection 5 tentatives</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- PIN Modal: Protection d'accès simple à l'application -->
     <div id="pinModal" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
         <div id="pinModalBox">
@@ -7925,6 +8077,86 @@
         };
 
         // ═══════════════════════════════════════════════════════════
+        //  GROUP AUTHENTICATION - v2.26 Secure Login System
+        // ═══════════════════════════════════════════════════════════
+
+        async function handleGroupLogin(event) {
+            event.preventDefault();
+            const groupId = document.getElementById('groupSelect').value;
+            const password = document.getElementById('groupPassword').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (!groupId || !password) {
+                errorDiv.textContent = '❌ Veuillez remplir tous les champs';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Check brute force lockout
+            if (isGroupLockedOut(groupId)) {
+                const remaining = getGroupLockoutRemaining(groupId);
+                errorDiv.textContent = `⏳ Compte verrouillé. Réessayez dans ${remaining} minutes`;
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            try {
+                // Get or initialize group
+                let group = authGroups.find(g => g.id === groupId);
+                if (!group) {
+                    errorDiv.textContent = '❌ Groupe introuvable';
+                    errorDiv.classList.add('show');
+                    return;
+                }
+
+                // First login: set password
+                if (!group.passwordHash) {
+                    const hash = await hashPassword(password);
+                    group.passwordHash = hash;
+                    saveAuthGroups();
+                    recordLoginAttempt(groupId, true);
+                    hideLoginScreen(groupId);
+                    return;
+                }
+
+                // Verify password
+                const isValid = await verifyPassword(password, group.passwordHash);
+                if (isValid) {
+                    recordLoginAttempt(groupId, true);
+                    hideLoginScreen(groupId);
+                } else {
+                    recordLoginAttempt(groupId, false);
+                    errorDiv.textContent = '❌ Mot de passe incorrect';
+                    errorDiv.classList.add('show');
+                    document.getElementById('groupPassword').value = '';
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                errorDiv.textContent = '❌ Erreur lors de la connexion';
+                errorDiv.classList.add('show');
+            }
+        }
+
+        function hideLoginScreen(groupId) {
+            const loginScreen = document.getElementById('loginScreen');
+            loginScreen.classList.add('hidden');
+            localStorage.setItem('_currentGroupId', groupId);
+        }
+
+        function showLoginScreen() {
+            const loginScreen = document.getElementById('loginScreen');
+            loginScreen.classList.remove('hidden');
+            document.getElementById('groupSelect').value = '';
+            document.getElementById('groupPassword').value = '';
+            document.getElementById('loginError').classList.remove('show');
+        }
+
+        function logout() {
+            localStorage.removeItem('_currentGroupId');
+            showLoginScreen();
+        }
+
+        // ═══════════════════════════════════════════════════════════
         //  API KEY ROTATION SYSTEM - Track & manage key lifecycle
         // ═══════════════════════════════════════════════════════════
 
@@ -8661,6 +8893,7 @@
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
         window.addEventListener('load', () => {
             initAuthGroups();
+            initAuthScreen();
             checkAuthSession();
             syncEmailWebhooksUI();
             initTabDragAndDropMode();
@@ -21070,6 +21303,20 @@
             localStorage.setItem('authGroups', JSON.stringify(authGroups));
         }
 
+        function initAuthScreen() {
+            // Check if user is already logged in
+            const currentGroupId = localStorage.getItem('_currentGroupId');
+            const loginScreen = document.getElementById('loginScreen');
+
+            if (currentGroupId && authGroups.find(g => g.id === currentGroupId)) {
+                // Already logged in, hide login screen
+                if (loginScreen) loginScreen.classList.add('hidden');
+            } else {
+                // Not logged in, show login screen
+                if (loginScreen) loginScreen.classList.remove('hidden');
+            }
+        }
+
         function checkAuthSession() {
             try {
                 const s = sessionStorage.getItem('authSession');
@@ -21305,6 +21552,11 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
+        async function verifyPassword(password, hash) {
+            const newHash = await hashPassword(password);
+            return newHash === hash;
+        }
+
         // Wrapper for sync usage (backwards compatibility)
         function hashPasswordSync(password) {
             let hash = 0;
@@ -21483,6 +21735,17 @@
                 _loginAttempts[groupId].lastAttempt = Date.now();
             }
             localStorage.setItem('_loginAttempts', JSON.stringify(_loginAttempts));
+        }
+
+        function getGroupLockoutRemaining(groupId) {
+            const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
+            const attempts = _loginAttempts[groupId];
+            if (attempts && attempts.count >= 5) {
+                const lockoutExpiry = attempts.lastAttempt + LOCKOUT_DURATION_MS;
+                const remaining = Math.ceil((lockoutExpiry - Date.now()) / 1000 / 60);
+                return Math.max(1, remaining);
+            }
+            return 0;
         }
 
         async function doLogin() {
