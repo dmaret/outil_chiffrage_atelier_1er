@@ -3745,7 +3745,76 @@
                         <strong>Note:</strong> Première connexion = définit le mot de passe<br>
                         <small>Sécurité v2.26 • Hachage SHA-256 • Brute force protection 5 tentatives</small>
                     </p>
+                    <div style="margin-top:20px;padding-top:20px;border-top:1px solid #dde5eb;">
+                        <p style="font-size:0.8em;color:#7a9db1;margin:10px 0;">
+                            ☁️ <strong>Mode Cloud</strong> — Sync données depuis n'importe quel ordinateur
+                        </p>
+                        <button type="button" onclick="toggleCloudLogin()" style="background:#4a90c2;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:0.85em;">
+                            🔗 Se connecter au cloud
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloud Login Modal -->
+    <div id="cloudLoginModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:10000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;padding:32px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+            <h2 style="margin:0 0 20px 0;color:#2d3a47;">☁️ Connexion Cloud</h2>
+            <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Synchronisez vos données sur tous vos appareils</p>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Email</label>
+                <input type="email" id="cloudEmail" placeholder="votre@email.com" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Mot de passe</label>
+                <input type="password" id="cloudPassword" placeholder="••••••••" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div id="cloudLoginError" style="color:#c85a54;margin-bottom:16px;display:none;padding:8px;background:#fce8e6;border-radius:4px;font-size:0.85em;"></div>
+
+            <div style="display:flex;gap:10px;">
+                <button onclick="handleCloudLogin()" style="flex:1;background:#4a90c2;color:white;border:none;padding:10px;border-radius:6px;cursor:pointer;font-weight:bold;">Connexion</button>
+                <button onclick="toggleCloudLogin()" style="flex:1;background:#e8eef5;color:#4a5f75;border:none;padding:10px;border-radius:6px;cursor:pointer;">Annuler</button>
+            </div>
+
+            <div style="margin-top:16px;text-align:center;">
+                <p style="font-size:0.8em;color:#7a9db1;margin:0;">Pas encore de compte?
+                    <button onclick="toggleCloudRegister()" style="background:none;border:none;color:#4a90c2;cursor:pointer;text-decoration:underline;">Créer un compte</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloud Register Modal -->
+    <div id="cloudRegisterModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:10000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;padding:32px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+            <h2 style="margin:0 0 20px 0;color:#2d3a47;">✨ Créer un compte cloud</h2>
+            <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Commencez à synchroniser vos données</p>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Nom</label>
+                <input type="text" id="cloudName" placeholder="Votre nom" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Email</label>
+                <input type="email" id="cloudRegisterEmail" placeholder="votre@email.com" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;font-size:0.9em;color:#4a5f75;">Mot de passe</label>
+                <input type="password" id="cloudRegisterPassword" placeholder="••••••••" style="width:100%;padding:10px;border:1px solid #dde5eb;border-radius:6px;box-sizing:border-box;font-size:0.95em;">
+            </div>
+
+            <div id="cloudRegisterError" style="color:#c85a54;margin-bottom:16px;display:none;padding:8px;background:#fce8e6;border-radius:4px;font-size:0.85em;"></div>
+
+            <div style="display:flex;gap:10px;">
+                <button onclick="handleCloudRegister()" style="flex:1;background:#4a90c2;color:white;border:none;padding:10px;border-radius:6px;cursor:pointer;font-weight:bold;">Créer</button>
+                <button onclick="toggleCloudRegister()" style="flex:1;background:#e8eef5;color:#4a5f75;border:none;padding:10px;border-radius:6px;cursor:pointer;">Annuler</button>
             </div>
         </div>
     </div>
@@ -3758,6 +3827,214 @@
             <input type="password" id="pinInput" placeholder="PIN" maxlength="8" aria-label="Code PIN" onkeydown="if(event.key==='Enter') checkPin()">
             <div id="pinError"></div>
             <button class="btn btn-success" onclick="checkPin()" style="width:100%;margin-top:4px;">✓ Confirmer</button>
+        </div>
+    </div>
+
+    <!-- 📊 Observation Clinique Modal (Post-Prestation) -->
+    <div id="clinicalObservationModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:10005;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
+        <div style="background:white;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);max-width:700px;width:100%;padding:28px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid #e8f4f8;padding-bottom:16px;">
+                <h2 style="margin:0;color:#2d3a47;font-size:1.4em;">📊 Observation Clinique</h2>
+                <button onclick="closeObservationModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#a0c8e0;">×</button>
+            </div>
+
+            <!-- Info prestation -->
+            <div style="background:#f0f7fb;padding:14px;border-radius:8px;margin-bottom:20px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.9em;">
+                    <div><strong>CEA:</strong> <span id="obs-cea-name">—</span></div>
+                    <div><strong>Prestation:</strong> <span id="obs-prestation-name">—</span></div>
+                </div>
+            </div>
+
+            <!-- Scroll container for long form -->
+            <div style="max-height:calc(100vh - 300px);overflow-y:auto;padding-right:10px;">
+
+            <!-- 1. Émotions/Affect -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">😊 Émotions/Affect observées</h4>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="satisfaction" style="cursor:pointer;">
+                        <span style="background:#ffc9d0;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😊 Satisfaction</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="frustration" style="cursor:pointer;">
+                        <span style="background:#ffb3ba;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😤 Frustration</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="anxiety" style="cursor:pointer;">
+                        <span style="background:#ffe5b4;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😟 Anxiété</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="calm" style="cursor:pointer;">
+                        <span style="background:#c9f0dd;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😌 Calme</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="disengagement" style="cursor:pointer;">
+                        <span style="background:#d0d0d0;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😒 Désengagement</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 2. Autonomie -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">⚙️ Autonomie observée</h4>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="range" id="obs-autonomy" min="1" max="5" value="3" style="flex:1;cursor:pointer;">
+                    <div style="text-align:center;min-width:100px;background:#e8f4f8;padding:8px;border-radius:6px;font-weight:bold;color:#2d5b8a;">
+                        <span id="autonomy-label">3</span>/5
+                    </div>
+                </div>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">1=Dépendant | 5=Expert</small>
+            </div>
+
+            <!-- 3. Confiance -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">💪 Confiance / Estime de soi</h4>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="range" id="obs-confidence" min="1" max="5" value="3" style="flex:1;cursor:pointer;">
+                    <div style="text-align:center;min-width:100px;background:#e8f4f8;padding:8px;border-radius:6px;font-weight:bold;color:#2d5b8a;">
+                        <span id="confidence-label">3</span>/5
+                    </div>
+                </div>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">1=Insécure | 5=Haute confiance</small>
+            </div>
+
+            <!-- 4. Engagement -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">🎯 Engagement/Motivation</h4>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="range" id="obs-engagement" min="1" max="5" value="3" style="flex:1;cursor:pointer;">
+                    <div style="text-align:center;min-width:100px;background:#e8f4f8;padding:8px;border-radius:6px;font-weight:bold;color:#2d5b8a;">
+                        <span id="engagement-label">3</span>/5
+                    </div>
+                </div>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">1=Refus | 5=Enthousiaste</small>
+            </div>
+
+            <!-- 5. Frustration/Résilience -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">🧗 Résilience face aux défis</h4>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="range" id="obs-resilience" min="1" max="5" value="3" style="flex:1;cursor:pointer;">
+                    <div style="text-align:center;min-width:100px;background:#e8f4f8;padding:8px;border-radius:6px;font-weight:bold;color:#2d5b8a;">
+                        <span id="resilience-label">3</span>/5
+                    </div>
+                </div>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">1=Abandon rapide | 5=Persévérance</small>
+            </div>
+
+            <!-- 6. Capacités cognitives -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">🧠 Capacités cognitives observées</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="concentration" style="cursor:pointer;">
+                        <span>Concentration maintenue</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="comprehension" style="cursor:pointer;">
+                        <span>Compréhension consignes</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="learning" style="cursor:pointer;">
+                        <span>Apprentissage rapide</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="memory" style="cursor:pointer;">
+                        <span>Mémorisation</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="problem-solving" style="cursor:pointer;">
+                        <span>Résolution problèmes</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="planning" style="cursor:pointer;">
+                        <span>Planification/anticipation</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 7. Comportement/Relation -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">👥 Comportement/Relation</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="rules" style="cursor:pointer;">
+                        <span>Respecte consignes</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="collaboration" style="cursor:pointer;">
+                        <span>Collabore avec pairs</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="helps-others" style="cursor:pointer;">
+                        <span>Aide d'autres CEA</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="feedback" style="cursor:pointer;">
+                        <span>Accepte feedbacks</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="emotion-regulation" style="cursor:pointer;">
+                        <span>Régule émotions</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="communication" style="cursor:pointer;">
+                        <span>Communication claire</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 8. Besoins de soutien -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">🤝 Besoins de soutien identifiés</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="emotional" style="cursor:pointer;">
+                        <span>Étayage émotionnel</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="cognitive" style="cursor:pointer;">
+                        <span>Aide cognitive</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="physical" style="cursor:pointer;">
+                        <span>Aide physique</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="supervision" style="cursor:pointer;">
+                        <span>Encadrement</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="positive-reinforcement" style="cursor:pointer;">
+                        <span>Renforcement positif</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="break" style="cursor:pointer;">
+                        <span>Pause/décompression</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="peer-tutoring" style="cursor:pointer;">
+                        <span>Pair-tutoring</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 9. Notes cliniques -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">📝 Notes cliniques libres</h4>
+                <textarea id="obs-notes" placeholder="Observations contextuelles, remarques cliniques pertinentes..." style="width:100%;height:100px;padding:10px;border:1px solid #dde5eb;border-radius:6px;font-family:inherit;font-size:0.9em;box-sizing:border-box;"></textarea>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">Ex: "David a réussi du 1er coup, confiance en hausse. Valoriser son travail."</small>
+            </div>
+
+            </div>
+
+            <!-- Buttons -->
+            <div style="display:flex;gap:10px;margin-top:20px;border-top:1px solid #dde5eb;padding-top:16px;">
+                <button onclick="saveObservation()" style="flex:1;background:#4a90c2;color:white;border:none;padding:12px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:1em;">💾 Enregistrer observation</button>
+                <button onclick="closeObservationModal()" style="flex:1;background:#e8eef5;color:#4a5f75;border:none;padding:12px;border-radius:6px;cursor:pointer;">Annuler</button>
+            </div>
         </div>
     </div>
 
@@ -6685,6 +6962,80 @@
                     </div>
                 </div>
 
+                <!-- 📊 NEW: Accompagnement Clinique (Observation-based) -->
+                <div class="section" style="background:linear-gradient(135deg,#f0f8ff,#e8f4f8);border-left:5px solid #2d5b8a;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                        <h2 style="margin:0;color:#2d3a47;">📊 Accompagnement Clinique — Suivi du Vécu</h2>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <select id="accompCeaFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByCea(this.value)">
+                                <option value="">-- Tous les CEA --</option>
+                            </select>
+                            <select id="accompPrestationFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByPrestation(this.value)">
+                                <option value="">-- Toutes prestations --</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="exportAccompReport()" style="font-size:0.9em;">📥 Rapport</button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">
+                        <!-- CEA Cards rendered here -->
+                        <div id="accompCeaContainer" style="grid-column:1/-1;padding:20px;background:white;border-radius:8px;text-align:center;color:#8aacbc;">
+                            📭 Aucune observation pour l'instant
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CEA Observation Detail Modal -->
+                <div id="ceaDetailModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
+                    <div style="background:white;border-radius:12px;max-width:900px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);padding:28px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                            <h2 id="ceaDetailTitle" style="margin:0;color:#2d3a47;"></h2>
+                            <button onclick="closeCeaDetail()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#a0c8e0;">×</button>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;padding:16px;background:#f0f7fb;border-radius:8px;">
+                            <div>
+                                <strong style="color:#4a5f75;">Observations:</strong>
+                                <p id="ceaDetailCount" style="margin:4px 0;font-size:1.3em;color:#2d5b8a;font-weight:bold;">—</p>
+                            </div>
+                            <div>
+                                <strong style="color:#4a5f75;">Dernière observation:</strong>
+                                <p id="ceaDetailLastDate" style="margin:4px 0;font-size:0.95em;color:#7a9db1;">—</p>
+                            </div>
+                        </div>
+
+                        <h3 style="color:#2d3a47;margin-top:20px;margin-bottom:12px;">📈 Évolution des indicateurs</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">
+                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #2d5b8a;">
+                                <small style="color:#7a9db1;">Autonomie</small>
+                                <p id="ceaDetailAutonomy" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#2d5b8a;">—</p>
+                            </div>
+                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #4a90c2;">
+                                <small style="color:#7a9db1;">Confiance</small>
+                                <p id="ceaDetailConfidence" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#4a90c2;">—</p>
+                            </div>
+                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #7ab9d0;">
+                                <small style="color:#7a9db1;">Engagement</small>
+                                <p id="ceaDetailEngagement" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#7ab9d0;">—</p>
+                            </div>
+                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #a0d08c;">
+                                <small style="color:#7a9db1;">Résilience</small>
+                                <p id="ceaDetailResilience" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#a0d08c;">—</p>
+                            </div>
+                        </div>
+
+                        <h3 style="color:#2d3a47;margin-bottom:12px;">📋 Historique des observations</h3>
+                        <div id="ceaDetailHistory" style="max-height:400px;overflow-y:auto;border:1px solid #dde5eb;border-radius:8px;padding:12px;">
+                            <!-- Observations listed here -->
+                        </div>
+
+                        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+                            <button onclick="closeCeaDetail()" class="btn btn-secondary">Fermer</button>
+                            <button onclick="editCeaObservation()" class="btn btn-primary">✏️ Modifier</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Matrice apprenance -->
                 <div class="section">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
@@ -7581,6 +7932,54 @@
     </aside>
 
     <script>
+        // ☁️ CLOUD API CLIENT - Synchronisation avec serveur distant
+        class APIClient {
+            constructor(baseURL = 'http://localhost:5000/api') {
+                this.baseURL = baseURL;
+                this.token = localStorage.getItem('authToken');
+            }
+
+            setToken(token) {
+                this.token = token;
+                localStorage.setItem('authToken', token);
+            }
+
+            clearToken() {
+                this.token = null;
+                localStorage.removeItem('authToken');
+            }
+
+            async request(method, endpoint, data = null) {
+                const options = { method, headers: { 'Content-Type': 'application/json' } };
+                if (this.token) options.headers['Authorization'] = `Bearer ${this.token}`;
+                if (data) options.body = JSON.stringify(data);
+                try {
+                    const response = await fetch(`${this.baseURL}${endpoint}`, options);
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+                    return result;
+                } catch (error) {
+                    console.error(`API Error [${method} ${endpoint}]:`, error.message);
+                    throw error;
+                }
+            }
+
+            register(email, password, name) { return this.request('POST', '/auth/register', { email, password, name }); }
+            login(email, password) { return this.request('POST', '/auth/login', { email, password }); }
+            getPrestations() { return this.request('GET', '/data/prestations'); }
+            createPrestation(prestation, client, montant) { return this.request('POST', '/data/prestations', { prestation, client, montant }); }
+            updatePrestation(id, prestation, client, montant) { return this.request('PUT', `/data/prestations/${id}`, { prestation, client, montant }); }
+            deletePrestation(id) { return this.request('DELETE', `/data/prestations/${id}`); }
+            getClinicalRecords() { return this.request('GET', '/data/clinical'); }
+            saveClinicalRecord(clientId, data) { return this.request('POST', '/data/clinical', { client_id: clientId, data }); }
+            getDocuments() { return this.request('GET', '/data/documents'); }
+            uploadDocument(filename, data) { return this.request('POST', '/data/documents', { filename, data }); }
+            deleteDocument(id) { return this.request('DELETE', `/data/documents/${id}`); }
+        }
+
+        const cloudAPI = new APIClient('http://localhost:5000/api');
+        let cloudMode = !!localStorage.getItem('authToken'); // Active si token présent
+
         // Global variables - declare early to avoid initialization order issues
         let _autosaveDirty = false;
         let _tabsOrder = null;
@@ -8235,6 +8634,383 @@
             loginScreen.classList.add('hidden');
             localStorage.setItem('_currentGroupId', groupId);
         }
+
+        // ☁️ CLOUD LOGIN FUNCTIONS
+        function toggleCloudLogin() {
+            const modal = document.getElementById('cloudLoginModal');
+            if (modal.style.display === 'none') {
+                modal.style.display = 'flex';
+                document.getElementById('cloudEmail').focus();
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        function toggleCloudRegister() {
+            document.getElementById('cloudLoginModal').style.display = 'none';
+            const regModal = document.getElementById('cloudRegisterModal');
+            if (regModal.style.display === 'none') {
+                regModal.style.display = 'flex';
+                document.getElementById('cloudName').focus();
+            } else {
+                regModal.style.display = 'none';
+            }
+        }
+
+        async function handleCloudLogin() {
+            const email = document.getElementById('cloudEmail').value.trim();
+            const password = document.getElementById('cloudPassword').value;
+            const errorDiv = document.getElementById('cloudLoginError');
+
+            if (!email || !password) {
+                errorDiv.textContent = '❌ Email et mot de passe requis';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const result = await cloudAPI.login(email, password);
+                cloudAPI.setToken(result.token);
+                cloudMode = true;
+                await loadPrestationsFromCloud();
+                hideLoginScreen('cloud');
+                toggleCloudLogin();
+                console.log('✅ Cloud login successful:', result.user.name);
+            } catch (err) {
+                errorDiv.textContent = '❌ ' + (err.message || 'Connexion échouée');
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function handleCloudRegister() {
+            const name = document.getElementById('cloudName').value.trim();
+            const email = document.getElementById('cloudRegisterEmail').value.trim();
+            const password = document.getElementById('cloudRegisterPassword').value;
+            const errorDiv = document.getElementById('cloudRegisterError');
+
+            if (!name || !email || !password) {
+                errorDiv.textContent = '❌ Tous les champs sont requis';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = '❌ Le mot de passe doit avoir au moins 6 caractères';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const result = await cloudAPI.register(email, password, name);
+                cloudAPI.setToken(result.token);
+                cloudMode = true;
+                hideLoginScreen('cloud');
+                toggleCloudRegister();
+                console.log('✅ Cloud registration successful:', result.user.name);
+            } catch (err) {
+                errorDiv.textContent = '❌ ' + (err.message || 'Inscription échouée');
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  📊 OBSERVATION CLINIQUE - Suivi accompagnement EPI
+        // ═══════════════════════════════════════════════════════════
+
+        let _currentObservationData = null;
+
+        // Update slider display values
+        document.addEventListener('DOMContentLoaded', () => {
+            ['autonomy', 'confidence', 'engagement', 'resilience'].forEach(id => {
+                const slider = document.getElementById('obs-' + id);
+                if (slider) {
+                    slider.addEventListener('input', (e) => {
+                        document.getElementById(id + '-label').textContent = e.target.value;
+                    });
+                }
+            });
+        });
+
+        function openObservationModal(prestationId, prestationName, ceaId, ceaName) {
+            const modal = document.getElementById('clinicalObservationModal');
+            document.getElementById('obs-cea-name').textContent = ceaName || '—';
+            document.getElementById('obs-prestation-name').textContent = prestationName || '—';
+
+            _currentObservationData = {
+                prestationId, prestationName, ceaId, ceaName,
+                timestamp: new Date().toISOString()
+            };
+
+            // Reset form
+            document.querySelectorAll('#clinicalObservationModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#clinicalObservationModal input[type="range"]').forEach(r => {
+                r.value = 3;
+                const id = r.id.replace('obs-', '');
+                document.getElementById(id + '-label').textContent = '3';
+            });
+            document.getElementById('obs-notes').value = '';
+
+            modal.style.display = 'flex';
+        }
+
+        function closeObservationModal() {
+            document.getElementById('clinicalObservationModal').style.display = 'none';
+            _currentObservationData = null;
+        }
+
+        async function saveObservation() {
+            if (!_currentObservationData) return;
+
+            const observation = {
+                id: '_' + Date.now(),
+                ..._currentObservationData,
+                emotions: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="emotion"]:checked')).map(e => e.value),
+                autonomy: parseInt(document.getElementById('obs-autonomy').value),
+                confidence: parseInt(document.getElementById('obs-confidence').value),
+                engagement: parseInt(document.getElementById('obs-engagement').value),
+                resilience: parseInt(document.getElementById('obs-resilience').value),
+                cognitive: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="cognitive"]:checked')).map(e => e.value),
+                behavior: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="behavior"]:checked')).map(e => e.value),
+                support: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="support"]:checked')).map(e => e.value),
+                notes: document.getElementById('obs-notes').value,
+                observer: document.getElementById('groupSelect')?.value || 'system',
+                date: new Date().toISOString()
+            };
+
+            try {
+                // Save to IndexedDB
+                await saveToIndexedDB('observations', observation);
+                // Sync to cloud if available
+                if (cloudMode && cloudAPI.token) {
+                    await cloudAPI.saveClinicalRecord(observation.ceaId, observation);
+                }
+                closeObservationModal();
+                showNotification('✅ Observation enregistrée', 'success');
+            } catch (err) {
+                console.error('Error saving observation:', err);
+                showNotification('❌ Erreur: ' + err.message, 'error');
+            }
+        }
+
+        // IndexedDB helpers
+        function saveToIndexedDB(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('atelier_db', 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const tx = db.transaction([storeName], 'readwrite');
+                    tx.objectStore(storeName).put(data);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                };
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        function getFromIndexedDB(storeName, key) {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('atelier_db', 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const tx = db.transaction([storeName], 'readonly');
+                    const req = key ? tx.objectStore(storeName).get(key) : tx.objectStore(storeName).getAll();
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                };
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  📊 ACCOMPAGNEMENT CLINIQUE - Display & Filtering
+        // ═══════════════════════════════════════════════════════════
+
+        async function loadAccompObservations() {
+            try {
+                const observations = await getFromIndexedDB('observations') || [];
+                const grouped = {};
+
+                // Group by CEA
+                observations.forEach(obs => {
+                    if (!grouped[obs.ceaId]) {
+                        grouped[obs.ceaId] = {
+                            id: obs.ceaId,
+                            name: obs.ceaName,
+                            observations: []
+                        };
+                    }
+                    grouped[obs.ceaId].observations.push(obs);
+                });
+
+                // Populate CEA filter dropdown
+                const filter = document.getElementById('accompCeaFilter');
+                const ceaIds = Object.keys(grouped);
+                ceaIds.forEach(id => {
+                    if (!filter.querySelector(`option[value="${id}"]`)) {
+                        const opt = document.createElement('option');
+                        opt.value = id;
+                        opt.textContent = grouped[id].name;
+                        filter.appendChild(opt);
+                    }
+                });
+
+                renderAccompCards(grouped);
+            } catch (err) {
+                console.error('Error loading observations:', err);
+            }
+        }
+
+        function renderAccompCards(grouped) {
+            const container = document.getElementById('accompCeaContainer');
+            const ceaFilter = document.getElementById('accompCeaFilter').value;
+            const prestationFilter = document.getElementById('accompPrestationFilter').value;
+
+            if (Object.keys(grouped).length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1;padding:20px;background:white;border-radius:8px;text-align:center;color:#8aacbc;">📭 Aucune observation pour l\'instant</div>';
+                return;
+            }
+
+            let filtered = Object.values(grouped);
+            if (ceaFilter) filtered = filtered.filter(g => g.id === ceaFilter);
+
+            container.innerHTML = filtered.map(cea => {
+                const obs = cea.observations;
+                const avgAutonomy = (obs.reduce((s, o) => s + (o.autonomy || 0), 0) / obs.length).toFixed(1);
+                const avgConfidence = (obs.reduce((s, o) => s + (o.confidence || 0), 0) / obs.length).toFixed(1);
+                const emotions = obs.flatMap(o => o.emotions || []);
+                const lastObs = obs.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+                return `
+                <div onclick="showCeaDetail('${cea.id}')" style="background:white;border:2px solid #e8f4f8;border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;hover:border-color:#4a90c2;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <h3 style="margin:0;color:#2d3a47;font-size:1.1em;">${escapeHtml(cea.name)}</h3>
+                        <span style="background:#2d5b8a;color:white;padding:4px 10px;border-radius:12px;font-size:0.85em;font-weight:bold;">${obs.length} obs</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                        <div style="background:#f0f7fb;padding:8px;border-radius:6px;border-left:3px solid #2d5b8a;">
+                            <small style="color:#7a9db1;">Autonomie moy</small>
+                            <p style="margin:4px 0;font-size:1.1em;font-weight:bold;color:#2d5b8a;">${avgAutonomy}/5</p>
+                        </div>
+                        <div style="background:#f0f7fb;padding:8px;border-radius:6px;border-left:3px solid #4a90c2;">
+                            <small style="color:#7a9db1;">Confiance moy</small>
+                            <p style="margin:4px 0;font-size:1.1em;font-weight:bold;color:#4a90c2;">${avgConfidence}/5</p>
+                        </div>
+                    </div>
+                    <div style="font-size:0.85em;color:#7a9db1;">
+                        <strong>Dernière obs:</strong> ${lastObs ? formatDate(lastObs.date) : '—'}
+                    </div>
+                    <div style="font-size:0.8em;color:#a0c8e0;margin-top:8px;">
+                        Cliquez pour détails →
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function filterAccompByCea(ceaId) {
+            loadAccompObservations();
+        }
+
+        function filterAccompByPrestation(prestationId) {
+            loadAccompObservations();
+        }
+
+        async function showCeaDetail(ceaId) {
+            const observations = await getFromIndexedDB('observations') || [];
+            const ceaObs = observations.filter(o => o.ceaId === ceaId).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (ceaObs.length === 0) return;
+
+            const cea = ceaObs[0];
+            document.getElementById('ceaDetailTitle').textContent = `📊 ${escapeHtml(cea.ceaName)} — Historique du vécu`;
+            document.getElementById('ceaDetailCount').textContent = ceaObs.length;
+            document.getElementById('ceaDetailLastDate').textContent = formatDate(cea.date);
+
+            const avgAutonomy = (ceaObs.reduce((s, o) => s + (o.autonomy || 0), 0) / ceaObs.length).toFixed(1);
+            const avgConfidence = (ceaObs.reduce((s, o) => s + (o.confidence || 0), 0) / ceaObs.length).toFixed(1);
+            const avgEngagement = (ceaObs.reduce((s, o) => s + (o.engagement || 0), 0) / ceaObs.length).toFixed(1);
+            const avgResilience = (ceaObs.reduce((s, o) => s + (o.resilience || 0), 0) / ceaObs.length).toFixed(1);
+
+            document.getElementById('ceaDetailAutonomy').textContent = `${avgAutonomy}/5`;
+            document.getElementById('ceaDetailConfidence').textContent = `${avgConfidence}/5`;
+            document.getElementById('ceaDetailEngagement').textContent = `${avgEngagement}/5`;
+            document.getElementById('ceaDetailResilience').textContent = `${avgResilience}/5`;
+
+            const historyHtml = ceaObs.map(obs => `
+                <div style="padding:12px;border-bottom:1px solid #e8eef5;display:flex;justify-content:space-between;align-items:start;">
+                    <div style="flex:1;">
+                        <strong style="color:#2d3a47;">${escapeHtml(obs.prestationName)}</strong><br>
+                        <small style="color:#7a9db1;">${formatDate(obs.date)}</small><br>
+                        <div style="margin-top:6px;">
+                            ${obs.emotions.length > 0 ? `<span style="font-size:0.9em;">😊 ${obs.emotions.map(e => e.charAt(0).toUpperCase() + e.slice(1)).join(', ')}</span><br>` : ''}
+                            <small style="color:#a0c8e0;">Auto: ${obs.autonomy}/5 • Conf: ${obs.confidence}/5</small>
+                        </div>
+                        ${obs.notes ? `<p style="margin:6px 0;padding:8px;background:#f0f7fb;border-radius:4px;font-size:0.85em;color:#4a5f75;border-left:3px solid #e8f4f8;">"${escapeHtml(obs.notes)}"</p>` : ''}
+                    </div>
+                    <button onclick="editCeaObservation('${obs.id}')" style="background:none;border:none;color:#4a90c2;cursor:pointer;font-size:0.9em;">✏️</button>
+                </div>
+            `).join('');
+
+            document.getElementById('ceaDetailHistory').innerHTML = historyHtml;
+            document.getElementById('ceaDetailModal').style.display = 'flex';
+        }
+
+        function closeCeaDetail() {
+            document.getElementById('ceaDetailModal').style.display = 'none';
+        }
+
+        function editCeaObservation(obsId) {
+            alert('Édition à venir - version complète dans rapport');
+        }
+
+        async function exportAccompReport() {
+            const observations = await getFromIndexedDB('observations') || [];
+            if (observations.length === 0) {
+                alert('Aucune observation à exporter');
+                return;
+            }
+
+            const grouped = {};
+            observations.forEach(obs => {
+                if (!grouped[obs.ceaName]) grouped[obs.ceaName] = [];
+                grouped[obs.ceaName].push(obs);
+            });
+
+            let csv = 'CEA,Prestation,Date,Autonomie,Confiance,Engagement,Résilience,Émotions,Besoins,Notes\n';
+            Object.entries(grouped).forEach(([cea, obs]) => {
+                obs.forEach(o => {
+                    csv += `"${cea}","${o.prestationName}","${formatDate(o.date)}",${o.autonomy},${o.confidence},${o.engagement},${o.resilience},"${o.emotions.join(', ')}","${o.support.join(', ')}","${(o.notes || '').replace(/"/g, '""')}"\n`;
+                });
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `accompagnement_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('fr-CH') + ' ' + d.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Load observations when switching to tab
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (document.getElementById('accompCeaContainer')) {
+                    loadAccompObservations();
+                }
+            }, 500);
+        });
 
         function showLoginScreen() {
             const loginScreen = document.getElementById('loginScreen');
@@ -9201,6 +9977,47 @@
             localStorage.setItem('tabGroups', JSON.stringify(tabGroups));
             lastSaveTime = Date.now();
             updateSaveIndicator();
+            // Sync to cloud in background (non-blocking)
+            if (cloudMode) syncPrestationsToCloud().catch(e => console.warn('Cloud sync skipped:', e.message));
+        }
+
+        // ☁️ CLOUD SYNCHRONIZATION
+        async function syncPrestationsToCloud() {
+            if (!cloudMode || !cloudAPI.token) return;
+            try {
+                for (const p of prestationsSauvegardees) {
+                    if (p.id && typeof p.id === 'number') {
+                        // Update existing
+                        if (p._cloudId) {
+                            await cloudAPI.updatePrestation(p._cloudId, p.prestation || '', p.client || '', p.montant || 0);
+                        } else {
+                            // Create new
+                            const result = await cloudAPI.createPrestation(p.prestation || '', p.client || '', p.montant || 0);
+                            if (result.id) p._cloudId = result.id;
+                        }
+                    }
+                }
+                console.log('✅ Prestations synced to cloud');
+            } catch (err) {
+                console.error('Cloud sync error:', err);
+            }
+        }
+
+        async function loadPrestationsFromCloud() {
+            if (!cloudMode || !cloudAPI.token) return;
+            try {
+                const cloudPrestations = await cloudAPI.getPrestations();
+                if (Array.isArray(cloudPrestations)) {
+                    prestationsSauvegardees = cloudPrestations.map(p => ({
+                        ...p,
+                        _cloudId: p.id,
+                        id: p.id // Use cloud ID locally
+                    }));
+                    console.log('✅ Loaded ' + prestationsSauvegardees.length + ' prestations from cloud');
+                }
+            } catch (err) {
+                console.error('Failed to load prestations from cloud:', err);
+            }
         }
 
         function loadConfig() {
