@@ -33751,7 +33751,7 @@ function exportClinicalReportPDF(beneficiaireId) {
             <ul>
             ${inputs.slice(-10).reverse().map(ci => {
                 const d = new Date(ci.timestamp);
-                return `<li><strong>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</strong> — ${typeLabels[ci.type] || ci.type}</li>`;
+                return `<li><strong>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</strong> — ${typeLabels[ci.type] || ci.type}</li>`;
             }).join('')}
             </ul>
             </body></html>
