@@ -1024,6 +1024,8 @@
         /* Tabs drag-to-reorder (admin mode) */
         body.admin-mode .tab { cursor: grab; }
         body.admin-mode .tab:active { cursor: grabbing; }
+        /* Brighten other tabs during drag instead of dimming dragged tab */
+        body.admin-mode.tab-dragging { background: transparent; }
         .tab.tab-drag-over { opacity: 0.4; }
         .tab.tab-drop-before { box-shadow: -3px 0 0 0 #4e9af1; }
         .tab.tab-drop-after  { box-shadow:  3px 0 0 0 #4e9af1; }
@@ -10456,13 +10458,15 @@
                 const tab = e.target.closest('.tab');
                 if (!tab || !isSuperUser) { e.preventDefault(); return; }
                 _tabDragSrc = tab;
-                tab.style.opacity = '0.4';
+                tab.style.opacity = '0.6';
+                document.body.classList.add('tab-dragging');
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', '');
             });
 
             bar.addEventListener('dragend', () => {
                 if (_tabDragSrc) _tabDragSrc.style.opacity = '';
+                document.body.classList.remove('tab-dragging');
                 bar.querySelectorAll('.tab').forEach(t => {
                     t.classList.remove('tab-drag-over','tab-drop-before','tab-drop-after');
                 });
