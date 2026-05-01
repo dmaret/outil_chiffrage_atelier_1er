@@ -3830,6 +3830,214 @@
         </div>
     </div>
 
+    <!-- 📊 Observation Clinique Modal (Post-Prestation) -->
+    <div id="clinicalObservationModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:10005;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
+        <div style="background:white;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);max-width:700px;width:100%;padding:28px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid #e8f4f8;padding-bottom:16px;">
+                <h2 style="margin:0;color:#2d3a47;font-size:1.4em;">📊 Observation Clinique</h2>
+                <button onclick="closeObservationModal()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#a0c8e0;">×</button>
+            </div>
+
+            <!-- Info prestation -->
+            <div style="background:#f0f7fb;padding:14px;border-radius:8px;margin-bottom:20px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.9em;">
+                    <div><strong>CEA:</strong> <span id="obs-cea-name">—</span></div>
+                    <div><strong>Prestation:</strong> <span id="obs-prestation-name">—</span></div>
+                </div>
+            </div>
+
+            <!-- Scroll container for long form -->
+            <div style="max-height:calc(100vh - 300px);overflow-y:auto;padding-right:10px;">
+
+            <!-- 1. Émotions/Affect -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">😊 Émotions/Affect observées</h4>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="satisfaction" style="cursor:pointer;">
+                        <span style="background:#ffc9d0;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😊 Satisfaction</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="frustration" style="cursor:pointer;">
+                        <span style="background:#ffb3ba;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😤 Frustration</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="anxiety" style="cursor:pointer;">
+                        <span style="background:#ffe5b4;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😟 Anxiété</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="calm" style="cursor:pointer;">
+                        <span style="background:#c9f0dd;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😌 Calme</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="emotion" value="disengagement" style="cursor:pointer;">
+                        <span style="background:#d0d0d0;padding:6px 12px;border-radius:20px;font-size:0.85em;cursor:pointer;">😒 Désengagement</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 2. Autonomie -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">⚙️ Autonomie observée</h4>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="range" id="obs-autonomy" min="1" max="5" value="3" style="flex:1;cursor:pointer;">
+                    <div style="text-align:center;min-width:100px;background:#e8f4f8;padding:8px;border-radius:6px;font-weight:bold;color:#2d5b8a;">
+                        <span id="autonomy-label">3</span>/5
+                    </div>
+                </div>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">1=Dépendant | 5=Expert</small>
+            </div>
+
+            <!-- 3. Confiance -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">💪 Confiance / Estime de soi</h4>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="range" id="obs-confidence" min="1" max="5" value="3" style="flex:1;cursor:pointer;">
+                    <div style="text-align:center;min-width:100px;background:#e8f4f8;padding:8px;border-radius:6px;font-weight:bold;color:#2d5b8a;">
+                        <span id="confidence-label">3</span>/5
+                    </div>
+                </div>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">1=Insécure | 5=Haute confiance</small>
+            </div>
+
+            <!-- 4. Engagement -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">🎯 Engagement/Motivation</h4>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="range" id="obs-engagement" min="1" max="5" value="3" style="flex:1;cursor:pointer;">
+                    <div style="text-align:center;min-width:100px;background:#e8f4f8;padding:8px;border-radius:6px;font-weight:bold;color:#2d5b8a;">
+                        <span id="engagement-label">3</span>/5
+                    </div>
+                </div>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">1=Refus | 5=Enthousiaste</small>
+            </div>
+
+            <!-- 5. Frustration/Résilience -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">🧗 Résilience face aux défis</h4>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="range" id="obs-resilience" min="1" max="5" value="3" style="flex:1;cursor:pointer;">
+                    <div style="text-align:center;min-width:100px;background:#e8f4f8;padding:8px;border-radius:6px;font-weight:bold;color:#2d5b8a;">
+                        <span id="resilience-label">3</span>/5
+                    </div>
+                </div>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">1=Abandon rapide | 5=Persévérance</small>
+            </div>
+
+            <!-- 6. Capacités cognitives -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">🧠 Capacités cognitives observées</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="concentration" style="cursor:pointer;">
+                        <span>Concentration maintenue</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="comprehension" style="cursor:pointer;">
+                        <span>Compréhension consignes</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="learning" style="cursor:pointer;">
+                        <span>Apprentissage rapide</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="memory" style="cursor:pointer;">
+                        <span>Mémorisation</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="problem-solving" style="cursor:pointer;">
+                        <span>Résolution problèmes</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="cognitive" value="planning" style="cursor:pointer;">
+                        <span>Planification/anticipation</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 7. Comportement/Relation -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">👥 Comportement/Relation</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="rules" style="cursor:pointer;">
+                        <span>Respecte consignes</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="collaboration" style="cursor:pointer;">
+                        <span>Collabore avec pairs</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="helps-others" style="cursor:pointer;">
+                        <span>Aide d'autres CEA</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="feedback" style="cursor:pointer;">
+                        <span>Accepte feedbacks</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="emotion-regulation" style="cursor:pointer;">
+                        <span>Régule émotions</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="behavior" value="communication" style="cursor:pointer;">
+                        <span>Communication claire</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 8. Besoins de soutien -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">🤝 Besoins de soutien identifiés</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="emotional" style="cursor:pointer;">
+                        <span>Étayage émotionnel</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="cognitive" style="cursor:pointer;">
+                        <span>Aide cognitive</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="physical" style="cursor:pointer;">
+                        <span>Aide physique</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="supervision" style="cursor:pointer;">
+                        <span>Encadrement</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="positive-reinforcement" style="cursor:pointer;">
+                        <span>Renforcement positif</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="break" style="cursor:pointer;">
+                        <span>Pause/décompression</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" name="support" value="peer-tutoring" style="cursor:pointer;">
+                        <span>Pair-tutoring</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 9. Notes cliniques -->
+            <div style="margin-bottom:20px;">
+                <h4 style="margin:0 0 10px 0;color:#2d3a47;">📝 Notes cliniques libres</h4>
+                <textarea id="obs-notes" placeholder="Observations contextuelles, remarques cliniques pertinentes..." style="width:100%;height:100px;padding:10px;border:1px solid #dde5eb;border-radius:6px;font-family:inherit;font-size:0.9em;box-sizing:border-box;"></textarea>
+                <small style="color:#7a9db1;display:block;margin-top:6px;">Ex: "David a réussi du 1er coup, confiance en hausse. Valoriser son travail."</small>
+            </div>
+
+            </div>
+
+            <!-- Buttons -->
+            <div style="display:flex;gap:10px;margin-top:20px;border-top:1px solid #dde5eb;padding-top:16px;">
+                <button onclick="saveObservation()" style="flex:1;background:#4a90c2;color:white;border:none;padding:12px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:1em;">💾 Enregistrer observation</button>
+                <button onclick="closeObservationModal()" style="flex:1;background:#e8eef5;color:#4a5f75;border:none;padding:12px;border-radius:6px;cursor:pointer;">Annuler</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Zone d'impression PDF -->
     <div id="printZone" style="display:none;"></div>
 
@@ -8429,6 +8637,120 @@
                 errorDiv.textContent = '❌ ' + (err.message || 'Inscription échouée');
                 errorDiv.style.display = 'block';
             }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  📊 OBSERVATION CLINIQUE - Suivi accompagnement EPI
+        // ═══════════════════════════════════════════════════════════
+
+        let _currentObservationData = null;
+
+        // Update slider display values
+        document.addEventListener('DOMContentLoaded', () => {
+            ['autonomy', 'confidence', 'engagement', 'resilience'].forEach(id => {
+                const slider = document.getElementById('obs-' + id);
+                if (slider) {
+                    slider.addEventListener('input', (e) => {
+                        document.getElementById(id + '-label').textContent = e.target.value;
+                    });
+                }
+            });
+        });
+
+        function openObservationModal(prestationId, prestationName, ceaId, ceaName) {
+            const modal = document.getElementById('clinicalObservationModal');
+            document.getElementById('obs-cea-name').textContent = ceaName || '—';
+            document.getElementById('obs-prestation-name').textContent = prestationName || '—';
+
+            _currentObservationData = {
+                prestationId, prestationName, ceaId, ceaName,
+                timestamp: new Date().toISOString()
+            };
+
+            // Reset form
+            document.querySelectorAll('#clinicalObservationModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#clinicalObservationModal input[type="range"]').forEach(r => {
+                r.value = 3;
+                const id = r.id.replace('obs-', '');
+                document.getElementById(id + '-label').textContent = '3';
+            });
+            document.getElementById('obs-notes').value = '';
+
+            modal.style.display = 'flex';
+        }
+
+        function closeObservationModal() {
+            document.getElementById('clinicalObservationModal').style.display = 'none';
+            _currentObservationData = null;
+        }
+
+        async function saveObservation() {
+            if (!_currentObservationData) return;
+
+            const observation = {
+                id: '_' + Date.now(),
+                ..._currentObservationData,
+                emotions: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="emotion"]:checked')).map(e => e.value),
+                autonomy: parseInt(document.getElementById('obs-autonomy').value),
+                confidence: parseInt(document.getElementById('obs-confidence').value),
+                engagement: parseInt(document.getElementById('obs-engagement').value),
+                resilience: parseInt(document.getElementById('obs-resilience').value),
+                cognitive: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="cognitive"]:checked')).map(e => e.value),
+                behavior: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="behavior"]:checked')).map(e => e.value),
+                support: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="support"]:checked')).map(e => e.value),
+                notes: document.getElementById('obs-notes').value,
+                observer: document.getElementById('groupSelect')?.value || 'system',
+                date: new Date().toISOString()
+            };
+
+            try {
+                // Save to IndexedDB
+                await saveToIndexedDB('observations', observation);
+                // Sync to cloud if available
+                if (cloudMode && cloudAPI.token) {
+                    await cloudAPI.saveClinicalRecord(observation.ceaId, observation);
+                }
+                closeObservationModal();
+                showNotification('✅ Observation enregistrée', 'success');
+            } catch (err) {
+                console.error('Error saving observation:', err);
+                showNotification('❌ Erreur: ' + err.message, 'error');
+            }
+        }
+
+        // IndexedDB helpers
+        function saveToIndexedDB(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('atelier_db', 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const tx = db.transaction([storeName], 'readwrite');
+                    tx.objectStore(storeName).put(data);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                };
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        function getFromIndexedDB(storeName, key) {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('atelier_db', 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const tx = db.transaction([storeName], 'readonly');
+                    const req = key ? tx.objectStore(storeName).get(key) : tx.objectStore(storeName).getAll();
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                };
+            });
         }
 
         function showLoginScreen() {
