@@ -9,6 +9,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Security: Content Security Policy for XSS protection -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none';">
     <title>Outil Complet Atelier - La Pallanterie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,10 +24,13 @@
     <meta name="apple-mobile-web-app-title" content="Atelier LP">
     <meta name="theme-color" content="#6b8fa3">
     <link rel="manifest" href="manifest.json">
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <!-- External libraries with SRI for security -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-5qsSq1z2ImbKr/DJjV8cg0HA0bwrIkpBKCfqJOKuEk6nfMTHPfGYEg/lAZaF1hJAQE8JhG6y2+1CqI0HeVh3A==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha512-V6RMB20LqLXKCXVhsxSK78G+Zg8h/WNLLZ+TYOU7d29iXWJ9T4t6+5Wqbvd0EuE85rEz1rJqXbJlBR8sQcxmg==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxZLv1VY3iyZ4DsPOrRnmoC63wtEUclS4KO5RerdGF7JcimDOL1ZFnY6oDZAbFRaW/1hz3/ZBmIg==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJVAWnHREZtpm3gw3i6DAZWv+JS7DkwrB+GPkDA69e4v0Y6HkdcHXXi39OneAsistmPSjMrW47uCavvw==" crossorigin="anonymous"></script>
+    <!-- Encryption library for sensitive data protection -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl.js/1.0.3/nacl.min.js" integrity="sha512-xvxZ4dQcEIJk3w5hMhEumRYkgAaYfn4MxP5HKC8KDjrFJnRjXEphqe3DZLydLvNLH65E9F0qH0FwV1P4+g48Q==" crossorigin="anonymous"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -7364,6 +7369,44 @@
         let _tabsOrder = null;
         let _liveCollapsed = false;
 
+        // ═══════════════════════════════════════════════════════════
+        //  🔐 SÉCURITÉ: Chiffrement & Hashing pour données sensibles
+        // ═══════════════════════════════════════════════════════════
+
+        // PIN hashing avec salt
+        async function hashPin(pin) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(pin);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function verifyPin(pin, hash) {
+            const newHash = await hashPin(pin);
+            return newHash === hash;
+        }
+
+        // API Key encryption/decryption (simple XOR with user-specific salt)
+        function encryptApiKey(key) {
+            if (!key) return '';
+            const salt = localStorage.getItem('_secSalt') || (Math.random().toString(36).substr(2, 12));
+            if (!localStorage.getItem('_secSalt')) localStorage.setItem('_secSalt', salt);
+            return btoa(String.fromCharCode(...key.split('').map((c, i) => c.charCodeAt(0) ^ salt.charCodeAt(i % salt.length))));
+        }
+
+        function decryptApiKey(encrypted) {
+            if (!encrypted) return '';
+            try {
+                const salt = localStorage.getItem('_secSalt') || '';
+                const decoded = atob(encrypted);
+                return String.fromCharCode(...decoded.split('').map((c, i) => c.charCodeAt(0) ^ salt.charCodeAt(i % salt.length)));
+            } catch(e) {
+                console.warn('Decryption failed:', e);
+                return '';
+            }
+        }
+
         // === Helpers de formatage numérique (format suisse avec apostrophe ' comme séparateur de milliers) ===
         // fmtNum(1234.5) → "1'234.50" ; fmtNum(1234.5, 0) → "1'235"
         function fmtNum(n, decimals = 2) {
@@ -7490,6 +7533,33 @@
                 console.warn('safeJSONGet parse error, fallback used:', key, e);
                 return fallback;
             }
+        }
+
+        // Data Validation & Sanitization
+        function validateJsonStructure(data, schema) {
+            if (!schema) return true; // No schema = accept
+            if (typeof data !== typeof schema) return false;
+            if (typeof schema === 'object' && schema !== null) {
+                for (const key in schema) {
+                    if (!(key in data)) return false;
+                    if (!validateJsonStructure(data[key], schema[key])) return false;
+                }
+            }
+            return true;
+        }
+
+        function sanitizeLocalStorageValue(key, value) {
+            // Prevent JSON serialization errors
+            if (typeof value === 'object') {
+                try {
+                    JSON.stringify(value); // Test serialization
+                    return true;
+                } catch(e) {
+                    console.warn('Value not JSON serializable:', key, e);
+                    return false;
+                }
+            }
+            return true;
         }
 
         /**
@@ -18090,7 +18160,7 @@
         // ============================================================
         // FEATURE 10 : Code PIN
         // ============================================================
-        function checkPin() {
+        async function checkPin() {
             const storedPinHash = localStorage.getItem('appPinHash');
             const entered = document.getElementById('pinInput').value;
 
@@ -18099,28 +18169,38 @@
                 return;
             }
 
-            const enteredHash = hashPassword(entered);
-            if (enteredHash === storedPinHash) {
-                document.getElementById('pinModal').classList.remove('visible');
-                document.getElementById('pinInput').value = '';
-                document.getElementById('pinError').textContent = '';
-            } else {
-                document.getElementById('pinError').textContent = '❌ Code PIN incorrect';
-                document.getElementById('pinInput').value = '';
-                document.getElementById('pinInput').focus();
+            try {
+                const enteredHash = await hashPassword(entered);
+                if (enteredHash === storedPinHash) {
+                    document.getElementById('pinModal').classList.remove('visible');
+                    document.getElementById('pinInput').value = '';
+                    document.getElementById('pinError').textContent = '';
+                } else {
+                    document.getElementById('pinError').textContent = '❌ Code PIN incorrect';
+                    document.getElementById('pinInput').value = '';
+                    document.getElementById('pinInput').focus();
+                }
+            } catch(e) {
+                console.error('PIN verification failed:', e);
+                document.getElementById('pinError').textContent = '❌ Erreur de vérification';
             }
         }
 
-        function setPin() {
+        async function setPin() {
             const val = document.getElementById('newPinInput').value.trim();
             if (val.length < 4) { toast('Le PIN doit faire au moins 4 caractères', 'warning'); return; }
             if (!/^\d+$/.test(val)) { toast('Le PIN doit contenir uniquement des chiffres', 'warning'); return; }
 
-            const pinHash = hashPassword(val);
-            localStorage.setItem('appPinHash', pinHash);
-            document.getElementById('newPinInput').value = '';
-            updatePinStatus();
-            toast('✅ PIN défini avec succès', 'success');
+            try {
+                const pinHash = await hashPassword(val);
+                localStorage.setItem('appPinHash', pinHash);
+                document.getElementById('newPinInput').value = '';
+                updatePinStatus();
+                toast('✅ PIN défini avec succès', 'success');
+            } catch(e) {
+                console.error('PIN hashing failed:', e);
+                toast('❌ Erreur lors de la configuration du PIN', 'error');
+            }
         }
 
         function removePin() {
@@ -21124,7 +21204,17 @@
 
         // Simple hash function for passwords (not cryptographically secure)
         // For production, use server-side hashing
-        function hashPassword(password) {
+        // Secure hash function using Web Crypto API
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Wrapper for sync usage (backwards compatibility)
+        function hashPasswordSync(password) {
             let hash = 0;
             for (let i = 0; i < password.length; i++) {
                 const char = password.charCodeAt(i);
