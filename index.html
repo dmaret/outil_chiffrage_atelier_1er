@@ -9582,14 +9582,45 @@
 
             const sections = tabContent.querySelectorAll(':scope > .section');
 
-            sections.forEach(section => {
-                // Add hint if not exists
-                if (!section.querySelector('.section-drag-hint')) {
-                    const hint = document.createElement('div');
-                    hint.className = 'section-drag-hint';
-                    hint.textContent = '[DÉPLACER]';
+            sections.forEach((section, index) => {
+                // Add reorder buttons if not exists
+                if (!section.querySelector('.section-reorder-btns')) {
+                    const btnContainer = document.createElement('div');
+                    btnContainer.className = 'section-reorder-btns';
+                    btnContainer.style.cssText = 'position:absolute;top:12px;right:12px;display:flex;gap:4px;z-index:10;';
+
+                    const btnUp = document.createElement('button');
+                    btnUp.innerHTML = '↑';
+                    btnUp.className = 'btn btn-small';
+                    btnUp.style.cssText = 'padding:4px 8px;font-size:0.9em;cursor:pointer;background:#e8f4f8;border:1px solid #a0c8e0;color:#2d5b8a;';
+                    btnUp.title = 'Remonter cette section';
+                    btnUp.onclick = (e) => {
+                        e.stopPropagation();
+                        if (index > 0) {
+                            const prev = section.previousElementSibling;
+                            if (prev) section.parentNode.insertBefore(section, prev);
+                            initSectionDragAndDrop(); // Refresh
+                        }
+                    };
+
+                    const btnDown = document.createElement('button');
+                    btnDown.innerHTML = '↓';
+                    btnDown.className = 'btn btn-small';
+                    btnDown.style.cssText = 'padding:4px 8px;font-size:0.9em;cursor:pointer;background:#e8f4f8;border:1px solid #a0c8e0;color:#2d5b8a;';
+                    btnDown.title = 'Descendre cette section';
+                    btnDown.onclick = (e) => {
+                        e.stopPropagation();
+                        if (index < sections.length - 1) {
+                            const next = section.nextElementSibling;
+                            if (next) section.parentNode.insertBefore(next, section);
+                            initSectionDragAndDrop(); // Refresh
+                        }
+                    };
+
+                    btnContainer.appendChild(btnUp);
+                    btnContainer.appendChild(btnDown);
                     section.style.position = 'relative';
-                    section.appendChild(hint);
+                    section.appendChild(btnContainer);
                 }
 
                 // Only enable drag on the section itself
