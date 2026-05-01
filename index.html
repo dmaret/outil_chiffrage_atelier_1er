@@ -6266,6 +6266,7 @@
                         <button class="btn guide-pill" data-sec="suivi"     onclick="switchGuideSection('suivi')">💶 Suivi & paiement</button>
                         <button class="btn guide-pill" data-sec="securite"  onclick="switchGuideSection('securite')">🛡️ Sauvegarde & sécurité</button>
                         <button class="btn guide-pill" data-sec="raccourcis" onclick="switchGuideSection('raccourcis')">⌨️ Raccourcis</button>
+                        <button class="btn guide-pill" data-sec="glossaire" onclick="switchGuideSection('glossaire')">📚 Glossaire clinique</button>
                         <button class="btn guide-pill" data-sec="nouveautes" onclick="switchGuideSection('nouveautes')">✨ Nouveautés</button>
                     </div>
 
@@ -6490,6 +6491,66 @@
                         </div>
                     </div>
 
+                    <!-- Section : Glossaire clinique -->
+                    <div class="guide-section" id="guide-sec-glossaire" style="display:none;">
+                        <div class="guide-block">
+                            <h3 class="guide-block-title">📚 Module D — Glossaire clinique du travail</h3>
+                            <p class="guide-block-sub">Définitions des termes et concepts clés utilisés dans les observations cliniques et le suivi des bénéficiaires.</p>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px;">
+                                <!-- Termes cliniques -->
+                                <div style="background:linear-gradient(135deg,#fff0f5,#f0f8ff);border:1px solid #d4aaee;border-radius:8px;padding:14px;">
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                        <span style="font-size:1.4em;">😊</span>
+                                        <strong style="color:#6b3a8f;">Émotion</strong>
+                                    </div>
+                                    <p style="font-size:0.85em;color:#555;margin:0;line-height:1.4;">État affectif momentané en réaction à un événement ou situation. Indicateur important du bien-être et de la réaction aux conditions de travail.</p>
+                                    <p style="font-size:0.75em;color:#888;margin:8px 0 0;"><strong>Ex :</strong> Joie, Colère, Peur, Tristesse</p>
+                                </div>
+                                <div style="background:linear-gradient(135deg,#f0f8ff,#f0f0ff);border:1px solid #a0a0d0;border-radius:8px;padding:14px;">
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                        <span style="font-size:1.4em;">👁️</span>
+                                        <strong style="color:#3a6b8f;">Observation</strong>
+                                    </div>
+                                    <p style="font-size:0.85em;color:#555;margin:0;line-height:1.4;">Fait objectif ou comportement noté sans jugement lors de la prestation. Description factuelle d'une situation, action ou réaction observée.</p>
+                                    <p style="font-size:0.75em;color:#888;margin:8px 0 0;"><strong>Ex :</strong> Comportement, Réaction observable</p>
+                                </div>
+                                <div style="background:linear-gradient(135deg,#fff5f0,#f0fff5);border:1px solid #a070d0;border-radius:8px;padding:14px;">
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                        <span style="font-size:1.4em;">📨</span>
+                                        <strong style="color:#5a3a8f;">Message reçu</strong>
+                                    </div>
+                                    <p style="font-size:0.85em;color:#555;margin:0;line-height:1.4;">Communication directe reçue d'une personne pendant ou avant la prestation. Peut influencer le contexte clinique.</p>
+                                    <p style="font-size:0.75em;color:#888;margin:8px 0 0;"><strong>Ex :</strong> Feedback, Demande exprimée</p>
+                                </div>
+                                <div style="background:linear-gradient(135deg,#fff8f0,#f8f0ff);border:1px solid #d0a070;border-radius:8px;padding:14px;">
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                        <span style="font-size:1.4em;">🌀</span>
+                                        <strong style="color:#8f6b3a;">Double contrainte</strong>
+                                    </div>
+                                    <p style="font-size:0.85em;color:#555;margin:0;line-height:1.4;">Situation où deux demandes ou obligations contradictoires s'adressent à une personne, sans possibilité de choix.</p>
+                                    <p style="font-size:0.75em;color:#888;margin:8px 0 0;"><strong>Ex :</strong> « Sois naturel » ET « Souris en permanence »</p>
+                                </div>
+                                <div style="background:linear-gradient(135deg,#f0fff8,#f0fff0);border:1px solid #70d070;border-radius:8px;padding:14px;">
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                        <span style="font-size:1.4em;">🤝</span>
+                                        <strong style="color:#3a8f3a;">Ressenti corporel</strong>
+                                    </div>
+                                    <p style="font-size:0.85em;color:#555;margin:0;line-height:1.4;">Sensations physiques et émotionnelles localisées dans le corps. Indicateur de bien-être ou d'inconfort.</p>
+                                    <p style="font-size:0.75em;color:#888;margin:8px 0 0;"><strong>Ex :</strong> Tension musculaire, Chaleur, Picotement</p>
+                                </div>
+                                <div style="background:linear-gradient(135deg,#f5f0ff,#f0f5ff);border:1px solid #a070b8;border-radius:8px;padding:14px;">
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                        <span style="font-size:1.4em;">🧠</span>
+                                        <strong style="color:#6b4d8f;">Charge mentale</strong>
+                                    </div>
+                                    <p style="font-size:0.85em;color:#555;margin:0;line-height:1.4;">Ensemble des efforts cognitifs et décisionnels requis pour accomplir une tâche. Accumulation de responsabilités et anticipation.</p>
+                                    <p style="font-size:0.75em;color:#888;margin:8px 0 0;"><strong>Ex :</strong> Surcharge cognitive, Fatigue décisionnelle</p>
+                                </div>
+                            </div>
+                            <div class="guide-tip" style="margin-top:20px;">💡 Cliquez sur les termes colorés dans les outils cliniques (marqués d'un <span style="color:#c97666;cursor:help;">?</span>) pour voir leurs définitions complètes avec des exemples. Ces observations aident à mieux documenter et analyser le parcours de chaque bénéficiaire.</div>
+                        </div>
+                    </div>
+
                     <!-- Section : Nouveautés -->
                     <div class="guide-section" id="guide-sec-nouveautes" style="display:none;">
                         <div class="guide-block">
@@ -6647,15 +6708,18 @@
 
                 <!-- Outils cliniques — Saisie observations -->
                 <div class="section" style="background:linear-gradient(135deg,#fff0f5,#f0f8ff);border-left-color:#c070f0;">
-                    <h2 style="color:#6b3a8f;">🎭 Outils cliniques du travail — Saisie observation</h2>
-                    <p style="font-size:0.85em;color:#7a5a9a;margin-bottom:14px;">Enregistrez une observation clinique pour le bénéficiaire sélectionné. Émotion, Observation, Message reçu, Double contrainte, Ressenti corporel.</p>
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+                        <h2 style="color:#6b3a8f;margin:0;cursor:pointer;flex:1;" onclick="switchTab('guide');switchGuideSection('glossaire');" title="Cliquez pour voir le glossaire complet">🎭 Outils cliniques du travail — Saisie observation</h2>
+                        <button class="btn btn-small" onclick="switchTab('guide');switchGuideSection('glossaire');" style="background:#c070f0;color:#fff;border-color:#a050d0;font-weight:600;">📚 Glossaire</button>
+                    </div>
+                    <p style="font-size:0.85em;color:#7a5a9a;margin-bottom:14px;">Enregistrez une observation clinique pour le bénéficiaire sélectionné. <span class="glossary-term" data-term="emotion" style="cursor:help;">Émotion <span style="color:#c97666;font-weight:700;">?</span></span>, <span class="glossary-term" data-term="observation" style="cursor:help;">Observation <span style="color:#c97666;font-weight:700;">?</span></span>, <span class="glossary-term" data-term="message" style="cursor:help;">Message reçu <span style="color:#c97666;font-weight:700;">?</span></span>, <span class="glossary-term" data-term="double_contrainte" style="cursor:help;">Double contrainte <span style="color:#c97666;font-weight:700;">?</span></span>, <span class="glossary-term" data-term="ressenti_corporel" style="cursor:help;">Ressenti corporel <span style="color:#c97666;font-weight:700;">?</span></span>.</p>
 
                     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                        <button class="btn" data-clintype="emotion" onclick="switchAccompClinicalTab('emotion')" style="background:#e8b5c8;border-color:#d070a0;color:#6b3a8f;font-weight:600;">😊 Émotion</button>
-                        <button class="btn" data-clintype="observation" onclick="switchAccompClinicalTab('observation')" style="background:#b5d5e8;border-color:#70a0d0;color:#3a6b8f;font-weight:600;">👁️ Observation</button>
-                        <button class="btn" data-clintype="message" onclick="switchAccompClinicalTab('message')" style="background:#d5d5e8;border-color:#a0a0d0;color:#3a3a8f;font-weight:600;">💬 Message reçu</button>
-                        <button class="btn" data-clintype="double_contrainte" onclick="switchAccompClinicalTab('double_contrainte')" style="background:#e8d5b5;border-color:#d0a070;color:#8f6b3a;font-weight:600;">🌀 Double contrainte</button>
-                        <button class="btn" data-clintype="ressenti_corporel" onclick="switchAccompClinicalTab('ressenti_corporel')" style="background:#c8e8b5;border-color:#a0d070;color:#6b8f3a;font-weight:600;">🤝 Ressenti corporel</button>
+                        <button class="btn" data-clintype="emotion" onclick="switchAccompClinicalTab('emotion')" style="background:#e8b5c8;border-color:#d070a0;color:#6b3a8f;font-weight:600;"><span class="glossary-term" data-term="emotion" style="cursor:help;border:none;background:none;">😊 Émotion <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                        <button class="btn" data-clintype="observation" onclick="switchAccompClinicalTab('observation')" style="background:#b5d5e8;border-color:#70a0d0;color:#3a6b8f;font-weight:600;"><span class="glossary-term" data-term="observation" style="cursor:help;border:none;background:none;">👁️ Observation <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                        <button class="btn" data-clintype="message" onclick="switchAccompClinicalTab('message')" style="background:#d5d5e8;border-color:#a0a0d0;color:#3a3a8f;font-weight:600;"><span class="glossary-term" data-term="message" style="cursor:help;border:none;background:none;">💬 Message reçu <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                        <button class="btn" data-clintype="double_contrainte" onclick="switchAccompClinicalTab('double_contrainte')" style="background:#e8d5b5;border-color:#d0a070;color:#8f6b3a;font-weight:600;"><span class="glossary-term" data-term="double_contrainte" style="cursor:help;border:none;background:none;">🌀 Double contrainte <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                        <button class="btn" data-clintype="ressenti_corporel" onclick="switchAccompClinicalTab('ressenti_corporel')" style="background:#c8e8b5;border-color:#a0d070;color:#6b8f3a;font-weight:600;"><span class="glossary-term" data-term="ressenti_corporel" style="cursor:help;border:none;background:none;">🤝 Ressenti corporel <span style="color:#c97666;font-weight:700;">?</span></span></button>
                     </div>
 
                     <div id="accompClinicalBody" style="background:white;border:1px solid #d4aaee;border-radius:8px;padding:14px;margin-bottom:12px;">
@@ -6671,14 +6735,15 @@
                 <!-- Historique clinique — Timeline par bénéficiaire -->
                 <div class="section" style="background:#f0f8ff;border-left-color:#4a9af0;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                        <h2 style="margin:0;color:#2d5b8a;">📊 Historique clinique — Timeline</h2>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <h2 style="margin:0;color:#2d5b8a;cursor:pointer;flex:1;" onclick="switchTab('guide');switchGuideSection('glossaire');" title="Cliquez pour voir le glossaire complet">📊 Historique clinique — Timeline</h2>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                             <button class="btn btn-small" onclick="filterAccompTimeline('all')" style="background:#e0f0f8;border-color:#4a9af0;color:#2d5b8a;">Tout</button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('emotion')" style="background:#fce8e8;border-color:#e84a5f;color:#6b3a3a;">😊 Émotions</button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('observation')" style="background:#e8f0fc;border-color:#4a7af0;color:#3a4a8f;">👁️ Observations</button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('message')" style="background:#f0e8fc;border-color:#a070d0;color:#5a3a8f;">💬 Messages</button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('double_contrainte')" style="background:#f8f0e8;border-color:#d0a070;color:#8f6b3a;">🌀 DC</button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('ressenti_corporel')" style="background:#e8f8e8;border-color:#70d070;color:#3a8f3a;">🤝 Ressentis</button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('emotion')" style="background:#fce8e8;border-color:#e84a5f;color:#6b3a3a;"><span class="glossary-term" data-term="emotion" style="cursor:help;border:none;background:none;">😊 Émotions <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('observation')" style="background:#e8f0fc;border-color:#4a7af0;color:#3a4a8f;"><span class="glossary-term" data-term="observation" style="cursor:help;border:none;background:none;">👁️ Observations <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('message')" style="background:#f0e8fc;border-color:#a070d0;color:#5a3a8f;"><span class="glossary-term" data-term="message" style="cursor:help;border:none;background:none;">💬 Messages <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('double_contrainte')" style="background:#f8f0e8;border-color:#d0a070;color:#8f6b3a;"><span class="glossary-term" data-term="double_contrainte" style="cursor:help;border:none;background:none;">🌀 DC <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('ressenti_corporel')" style="background:#e8f8e8;border-color:#70d070;color:#3a8f3a;"><span class="glossary-term" data-term="ressenti_corporel" style="cursor:help;border:none;background:none;">🤝 Ressentis <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                            <button class="btn btn-small" onclick="switchTab('guide');switchGuideSection('glossaire');" style="background:#4a9af0;color:#fff;border-color:#3878b0;font-weight:600;">📚 Glossaire</button>
                         </div>
                     </div>
                     <p style="font-size:0.85em;color:#5a7b8f;margin-bottom:12px;">Historique des observations enregistrées pour le bénéficiaire sélectionné. Cliquez pour détailler.</p>
@@ -33432,9 +33497,10 @@ document.addEventListener('DOMContentLoaded', () => {
     <div id="clinicalModalBox">
         <div id="clinicalModalHeader">
             <div>
-                <h3 id="clinicalModalTitle">🎭 Outils cliniques du travail</h3>
+                <h3 id="clinicalModalTitle" style="cursor:pointer;" onclick="switchTab('guide');switchGuideSection('glossaire');" title="Cliquez pour voir le glossaire complet">🎭 Outils cliniques du travail</h3>
                 <div id="clinicalModalContext">—</div>
             </div>
+            <button class="clinical-btn-secondary" onclick="switchTab('guide');switchGuideSection('glossaire');" title="Voir le glossaire clinique" style="padding:4px 10px;background:#c070f0;color:#fff;">📚</button>
             <button class="clinical-btn-secondary" onclick="toggleClinicalHelp()" aria-label="Aide" title="Afficher l'aide" style="padding:4px 10px;">?</button>
             <button class="clinical-btn-secondary" onclick="closeClinicalModal()" aria-label="Fermer" style="padding:4px 10px;">×</button>
         </div>
@@ -33442,11 +33508,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <div id="clinicalHelpContent"></div>
         </div>
         <div id="clinicalTabs">
-            <button class="clinical-tab active" data-clintype="emotion" onclick="switchClinicalTab('emotion')">😊 Émotion</button>
-            <button class="clinical-tab" data-clintype="observation" onclick="switchClinicalTab('observation')">👁️ Observation</button>
-            <button class="clinical-tab" data-clintype="message" onclick="switchClinicalTab('message')">📨 Message reçu</button>
-            <button class="clinical-tab" data-clintype="double_contrainte" onclick="switchClinicalTab('double_contrainte')">🌀 Double contrainte</button>
-            <button class="clinical-tab" data-clintype="ressenti_corporel" onclick="switchClinicalTab('ressenti_corporel')">🤝 Ressenti corporel</button>
+            <button class="clinical-tab active" data-clintype="emotion" onclick="switchClinicalTab('emotion')"><span class="glossary-term" data-term="emotion" style="cursor:help;border:none;background:none;">😊 Émotion <span style="color:#c97666;font-weight:700;">?</span></span></button>
+            <button class="clinical-tab" data-clintype="observation" onclick="switchClinicalTab('observation')"><span class="glossary-term" data-term="observation" style="cursor:help;border:none;background:none;">👁️ Observation <span style="color:#c97666;font-weight:700;">?</span></span></button>
+            <button class="clinical-tab" data-clintype="message" onclick="switchClinicalTab('message')"><span class="glossary-term" data-term="message" style="cursor:help;border:none;background:none;">📨 Message reçu <span style="color:#c97666;font-weight:700;">?</span></span></button>
+            <button class="clinical-tab" data-clintype="double_contrainte" onclick="switchClinicalTab('double_contrainte')"><span class="glossary-term" data-term="double_contrainte" style="cursor:help;border:none;background:none;">🌀 Double contrainte <span style="color:#c97666;font-weight:700;">?</span></span></button>
+            <button class="clinical-tab" data-clintype="ressenti_corporel" onclick="switchClinicalTab('ressenti_corporel')"><span class="glossary-term" data-term="ressenti_corporel" style="cursor:help;border:none;background:none;">🤝 Ressenti corporel <span style="color:#c97666;font-weight:700;">?</span></span></button>
         </div>
         <div id="clinicalBody"></div>
         <div id="clinicalActions">
