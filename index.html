@@ -1024,6 +1024,8 @@
         /* Tabs drag-to-reorder (admin mode) */
         body.admin-mode .tab { cursor: grab; }
         body.admin-mode .tab:active { cursor: grabbing; }
+        /* Brighten other tabs during drag instead of dimming dragged tab */
+        body.admin-mode.tab-dragging { background: transparent; }
         .tab.tab-drag-over { opacity: 0.4; }
         .tab.tab-drop-before { box-shadow: -3px 0 0 0 #4e9af1; }
         .tab.tab-drop-after  { box-shadow:  3px 0 0 0 #4e9af1; }
@@ -6962,6 +6964,79 @@
                     </div>
                 </div>
 
+                <!-- 📊 NEW: Accompagnement Clinique (Observation-based) -->
+                <div class="section" style="background:linear-gradient(135deg,#f0f8ff,#e8f4f8);border-left:5px solid #2d5b8a;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                        <h2 style="margin:0;color:#2d3a47;">📊 Accompagnement Clinique — Suivi du Vécu</h2>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <select id="accompCeaFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByCea(this.value)">
+                                <option value="">-- Tous les CEA --</option>
+                            </select>
+                            <select id="accompPrestationFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByPrestation(this.value)">
+                                <option value="">-- Toutes prestations --</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="exportAccompReport()" style="font-size:0.9em;">📥 Rapport</button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">
+                        <!-- CEA Cards rendered here -->
+                        <div id="accompCeaContainer" style="grid-column:1/-1;padding:20px;background:white;border-radius:8px;text-align:center;color:#8aacbc;">
+                            📭 Aucune observation pour l'instant
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CEA Observation Detail Modal -->
+                <div id="ceaDetailModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
+                    <div style="background:white;border-radius:12px;max-width:900px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);padding:28px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                            <h2 id="ceaDetailTitle" style="margin:0;color:#2d3a47;"></h2>
+                            <button onclick="closeCeaDetail()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#a0c8e0;">×</button>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;padding:16px;background:#f0f7fb;border-radius:8px;">
+                            <div>
+                                <strong style="color:#4a5f75;">Observations:</strong>
+                                <p id="ceaDetailCount" style="margin:4px 0;font-size:1.3em;color:#2d5b8a;font-weight:bold;">—</p>
+                            </div>
+                            <div>
+                                <strong style="color:#4a5f75;">Dernière observation:</strong>
+                                <p id="ceaDetailLastDate" style="margin:4px 0;font-size:0.95em;color:#7a9db1;">—</p>
+                            </div>
+                        </div>
+
+                        <h3 style="color:#2d3a47;margin-top:20px;margin-bottom:12px;">📈 Évolution des indicateurs</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">
+                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #2d5b8a;">
+                                <small style="color:#7a9db1;">Autonomie</small>
+                                <p id="ceaDetailAutonomy" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#2d5b8a;">—</p>
+                            </div>
+                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #4a90c2;">
+                                <small style="color:#7a9db1;">Confiance</small>
+                                <p id="ceaDetailConfidence" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#4a90c2;">—</p>
+                            </div>
+                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #7ab9d0;">
+                                <small style="color:#7a9db1;">Engagement</small>
+                                <p id="ceaDetailEngagement" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#7ab9d0;">—</p>
+                            </div>
+                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #a0d08c;">
+                                <small style="color:#7a9db1;">Résilience</small>
+                                <p id="ceaDetailResilience" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#a0d08c;">—</p>
+                            </div>
+                        </div>
+
+                        <h3 style="color:#2d3a47;margin-bottom:12px;">📋 Historique des observations</h3>
+                        <div id="ceaDetailHistory" style="max-height:400px;overflow-y:auto;border:1px solid #dde5eb;border-radius:8px;padding:12px;">
+                            <!-- Observations listed here -->
+                        </div>
+
+                        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+                            <button onclick="closeCeaDetail()" class="btn btn-secondary">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Matrice apprenance -->
                 <div class="section">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
@@ -8324,7 +8399,8 @@
                 export_data: true,
                 manage_users: true,
                 request_approval: true,
-                approve_prestation: true
+                approve_prestation: true,
+                edit_observation: true
             },
             'cea': {
                 create_prestation: false,
@@ -8340,7 +8416,8 @@
                 view_audit: false,
                 export_data: false,
                 manage_users: false,
-                create_cea_procedure: true
+                create_cea_procedure: true,
+                edit_observation: false
             },
             'msp': {
                 create_prestation: false,
@@ -8357,7 +8434,8 @@
                 export_data: true,
                 manage_users: false,
                 request_approval: true,
-                approve_prestation: false
+                approve_prestation: false,
+                edit_observation: true
             },
             'asp': {
                 create_prestation: false,
@@ -8373,7 +8451,8 @@
                 view_audit: false,
                 export_data: false,
                 manage_users: false,
-                create_cea_procedure: true
+                create_cea_procedure: true,
+                edit_observation: true
             }
         };
 
@@ -8404,7 +8483,8 @@
                     'manage_config': 'accéder à la configuration',
                     'view_audit': 'voir l\'historique',
                     'export_data': 'exporter les données',
-                    'manage_users': 'gérer les utilisateurs'
+                    'manage_users': 'gérer les utilisateurs',
+                    'edit_observation': 'modifier une observation clinique'
                 };
                 const label = actionLabels[action] || action;
                 toast(`❌ Vous n'avez pas la permission de ${label}`, 'error');
@@ -8687,8 +8767,9 @@
         async function saveObservation() {
             if (!_currentObservationData) return;
 
+            const isEditing = _currentObservationData.id && _currentObservationData.id.startsWith('_');
             const observation = {
-                id: '_' + Date.now(),
+                id: isEditing ? _currentObservationData.id : '_' + Date.now(),
                 ..._currentObservationData,
                 emotions: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="emotion"]:checked')).map(e => e.value),
                 autonomy: parseInt(document.getElementById('obs-autonomy').value),
@@ -8700,8 +8781,12 @@
                 support: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="support"]:checked')).map(e => e.value),
                 notes: document.getElementById('obs-notes').value,
                 observer: document.getElementById('groupSelect')?.value || 'system',
-                date: new Date().toISOString()
+                date: isEditing ? _currentObservationData.date : new Date().toISOString(),
+                updatedAt: isEditing ? new Date().toISOString() : undefined
             };
+
+            // Remove undefined updatedAt for new observations
+            if (!isEditing) delete observation.updatedAt;
 
             try {
                 // Save to IndexedDB
@@ -8711,7 +8796,14 @@
                     await cloudAPI.saveClinicalRecord(observation.ceaId, observation);
                 }
                 closeObservationModal();
-                showNotification('✅ Observation enregistrée', 'success');
+                const msg = isEditing ? '✅ Observation mise à jour' : '✅ Observation enregistrée';
+                showNotification(msg, 'success');
+
+                // Reload the accompanied detail view if it's open
+                if (document.getElementById('ceaDetailModal').style.display === 'flex') {
+                    const ceaId = _currentObservationData.ceaId;
+                    setTimeout(() => showCeaDetail(ceaId), 300);
+                }
             } catch (err) {
                 console.error('Error saving observation:', err);
                 showNotification('❌ Erreur: ' + err.message, 'error');
@@ -8752,6 +8844,286 @@
                 };
             });
         }
+
+        // ═══════════════════════════════════════════════════════════
+        //  📊 ACCOMPAGNEMENT CLINIQUE - Display & Filtering
+        // ═══════════════════════════════════════════════════════════
+
+        async function loadAccompObservations() {
+            try {
+                const observations = await getFromIndexedDB('observations') || [];
+                const grouped = {};
+
+                // Group by CEA
+                observations.forEach(obs => {
+                    if (!grouped[obs.ceaId]) {
+                        grouped[obs.ceaId] = {
+                            id: obs.ceaId,
+                            name: obs.ceaName,
+                            observations: []
+                        };
+                    }
+                    grouped[obs.ceaId].observations.push(obs);
+                });
+
+                // Populate CEA filter dropdown
+                const filter = document.getElementById('accompCeaFilter');
+                const ceaIds = Object.keys(grouped);
+                ceaIds.forEach(id => {
+                    if (!filter.querySelector(`option[value="${id}"]`)) {
+                        const opt = document.createElement('option');
+                        opt.value = id;
+                        opt.textContent = grouped[id].name;
+                        filter.appendChild(opt);
+                    }
+                });
+
+                renderAccompCards(grouped);
+            } catch (err) {
+                console.error('Error loading observations:', err);
+            }
+        }
+
+        function renderAccompCards(grouped) {
+            const container = document.getElementById('accompCeaContainer');
+            const ceaFilter = document.getElementById('accompCeaFilter').value;
+            const prestationFilter = document.getElementById('accompPrestationFilter').value;
+
+            if (Object.keys(grouped).length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1;padding:20px;background:white;border-radius:8px;text-align:center;color:#8aacbc;">📭 Aucune observation pour l\'instant</div>';
+                return;
+            }
+
+            let filtered = Object.values(grouped);
+            if (ceaFilter) filtered = filtered.filter(g => g.id === ceaFilter);
+
+            container.innerHTML = filtered.map(cea => {
+                const obs = cea.observations;
+                const avgAutonomy = (obs.reduce((s, o) => s + (o.autonomy || 0), 0) / obs.length).toFixed(1);
+                const avgConfidence = (obs.reduce((s, o) => s + (o.confidence || 0), 0) / obs.length).toFixed(1);
+                const emotions = obs.flatMap(o => o.emotions || []);
+                const lastObs = obs.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+                return `
+                <div onclick="showCeaDetail('${cea.id}')" style="background:white;border:2px solid #e8f4f8;border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;hover:border-color:#4a90c2;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <h3 style="margin:0;color:#2d3a47;font-size:1.1em;">${escapeHtml(cea.name)}</h3>
+                        <span style="background:#2d5b8a;color:white;padding:4px 10px;border-radius:12px;font-size:0.85em;font-weight:bold;">${obs.length} obs</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                        <div style="background:#f0f7fb;padding:8px;border-radius:6px;border-left:3px solid #2d5b8a;">
+                            <small style="color:#7a9db1;">Autonomie moy</small>
+                            <p style="margin:4px 0;font-size:1.1em;font-weight:bold;color:#2d5b8a;">${avgAutonomy}/5</p>
+                        </div>
+                        <div style="background:#f0f7fb;padding:8px;border-radius:6px;border-left:3px solid #4a90c2;">
+                            <small style="color:#7a9db1;">Confiance moy</small>
+                            <p style="margin:4px 0;font-size:1.1em;font-weight:bold;color:#4a90c2;">${avgConfidence}/5</p>
+                        </div>
+                    </div>
+                    <div style="font-size:0.85em;color:#7a9db1;">
+                        <strong>Dernière obs:</strong> ${lastObs ? formatDate(lastObs.date) : '—'}
+                    </div>
+                    <div style="font-size:0.8em;color:#a0c8e0;margin-top:8px;">
+                        Cliquez pour détails →
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function filterAccompByCea(ceaId) {
+            loadAccompObservations();
+        }
+
+        function filterAccompByPrestation(prestationId) {
+            loadAccompObservations();
+        }
+
+        async function showCeaDetail(ceaId) {
+            const observations = await getFromIndexedDB('observations') || [];
+            const ceaObs = observations.filter(o => o.ceaId === ceaId).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (ceaObs.length === 0) return;
+
+            const cea = ceaObs[0];
+            document.getElementById('ceaDetailTitle').textContent = `📊 ${escapeHtml(cea.ceaName)} — Historique du vécu`;
+            document.getElementById('ceaDetailCount').textContent = ceaObs.length;
+            document.getElementById('ceaDetailLastDate').textContent = formatDate(cea.date);
+
+            const avgAutonomy = (ceaObs.reduce((s, o) => s + (o.autonomy || 0), 0) / ceaObs.length).toFixed(1);
+            const avgConfidence = (ceaObs.reduce((s, o) => s + (o.confidence || 0), 0) / ceaObs.length).toFixed(1);
+            const avgEngagement = (ceaObs.reduce((s, o) => s + (o.engagement || 0), 0) / ceaObs.length).toFixed(1);
+            const avgResilience = (ceaObs.reduce((s, o) => s + (o.resilience || 0), 0) / ceaObs.length).toFixed(1);
+
+            document.getElementById('ceaDetailAutonomy').textContent = `${avgAutonomy}/5`;
+            document.getElementById('ceaDetailConfidence').textContent = `${avgConfidence}/5`;
+            document.getElementById('ceaDetailEngagement').textContent = `${avgEngagement}/5`;
+            document.getElementById('ceaDetailResilience').textContent = `${avgResilience}/5`;
+
+            const canEdit = hasPermission('edit_observation');
+
+            const historyHtml = ceaObs.map(obs => `
+                <div style="padding:12px;border-bottom:1px solid #e8eef5;display:flex;justify-content:space-between;align-items:start;">
+                    <div style="flex:1;">
+                        <strong style="color:#2d3a47;">${escapeHtml(obs.prestationName)}</strong><br>
+                        <small style="color:#7a9db1;">${formatDate(obs.date)} • Observateur: ${escapeHtml(obs.observer || 'système')}</small><br>
+                        <div style="margin-top:6px;">
+                            ${obs.emotions.length > 0 ? `<span style="font-size:0.9em;">😊 ${obs.emotions.map(e => e.charAt(0).toUpperCase() + e.slice(1)).join(', ')}</span><br>` : ''}
+                            <small style="color:#a0c8e0;">Auto: ${obs.autonomy}/5 • Conf: ${obs.confidence}/5</small>
+                        </div>
+                        ${obs.notes ? `<p style="margin:6px 0;padding:8px;background:#f0f7fb;border-radius:4px;font-size:0.85em;color:#4a5f75;border-left:3px solid #e8f4f8;">"${escapeHtml(obs.notes)}"</p>` : ''}
+                    </div>
+                    ${canEdit ? `<button onclick="editCeaObservation('${obs.id}')" style="background:none;border:none;color:#4a90c2;cursor:pointer;font-size:0.9em;margin-left:10px;">✏️</button>` : ''}
+                </div>
+            `).join('');
+
+            document.getElementById('ceaDetailHistory').innerHTML = historyHtml;
+            document.getElementById('ceaDetailModal').style.display = 'flex';
+        }
+
+        function closeCeaDetail() {
+            document.getElementById('ceaDetailModal').style.display = 'none';
+        }
+
+        async function editCeaObservation(obsId) {
+            if (!checkPermission('edit_observation')) {
+                return;
+            }
+
+            if (!obsId) {
+                toast('❌ Observation non trouvée', 'error');
+                return;
+            }
+
+            try {
+                const observations = await getFromIndexedDB('observations') || [];
+                const obs = observations.find(o => o.id === obsId);
+
+                if (!obs) {
+                    toast('❌ Observation non trouvée', 'error');
+                    return;
+                }
+
+                // Check if user is the observer (or is admin)
+                const currentGroupId = document.getElementById('groupSelect')?.value || 'system';
+                const isAdmin = currentGroupId === 'admin';
+                const isObserver = obs.observer === currentGroupId;
+
+                if (!isAdmin && !isObserver) {
+                    toast('⚠️ Vous pouvez seulement modifier vos propres observations', 'warning');
+                    return;
+                }
+
+                // Populate observation form with existing data
+                _currentObservationData = { ...obs };
+
+                // Set form values
+                document.getElementById('obs-cea-name').textContent = obs.ceaName || '—';
+                document.getElementById('obs-prestation-name').textContent = obs.prestationName || '—';
+
+                // Reset and set checkboxes
+                document.querySelectorAll('#clinicalObservationModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+                // Set emotions
+                if (Array.isArray(obs.emotions)) {
+                    obs.emotions.forEach(emotion => {
+                        const checkbox = document.querySelector(`#clinicalObservationModal input[name="emotion"][value="${emotion}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Set cognitive
+                if (Array.isArray(obs.cognitive)) {
+                    obs.cognitive.forEach(cog => {
+                        const checkbox = document.querySelector(`#clinicalObservationModal input[name="cognitive"][value="${cog}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Set behavior
+                if (Array.isArray(obs.behavior)) {
+                    obs.behavior.forEach(beh => {
+                        const checkbox = document.querySelector(`#clinicalObservationModal input[name="behavior"][value="${beh}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Set support needs
+                if (Array.isArray(obs.support)) {
+                    obs.support.forEach(sup => {
+                        const checkbox = document.querySelector(`#clinicalObservationModal input[name="support"][value="${sup}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Set sliders
+                document.getElementById('obs-autonomy').value = obs.autonomy || 3;
+                document.getElementById('autonomy-label').textContent = obs.autonomy || 3;
+
+                document.getElementById('obs-confidence').value = obs.confidence || 3;
+                document.getElementById('confidence-label').textContent = obs.confidence || 3;
+
+                document.getElementById('obs-engagement').value = obs.engagement || 3;
+                document.getElementById('engagement-label').textContent = obs.engagement || 3;
+
+                document.getElementById('obs-resilience').value = obs.resilience || 3;
+                document.getElementById('resilience-label').textContent = obs.resilience || 3;
+
+                // Set notes
+                document.getElementById('obs-notes').value = obs.notes || '';
+
+                // Show modal
+                document.getElementById('clinicalObservationModal').style.display = 'flex';
+
+                toast('✏️ Édition de l\'observation', 'info');
+            } catch(err) {
+                console.error('Error editing observation:', err);
+                toast('❌ Erreur lors du chargement de l\'observation', 'error');
+            }
+        }
+
+        async function exportAccompReport() {
+            const observations = await getFromIndexedDB('observations') || [];
+            if (observations.length === 0) {
+                alert('Aucune observation à exporter');
+                return;
+            }
+
+            const grouped = {};
+            observations.forEach(obs => {
+                if (!grouped[obs.ceaName]) grouped[obs.ceaName] = [];
+                grouped[obs.ceaName].push(obs);
+            });
+
+            let csv = 'CEA,Prestation,Date,Autonomie,Confiance,Engagement,Résilience,Émotions,Besoins,Notes\n';
+            Object.entries(grouped).forEach(([cea, obs]) => {
+                obs.forEach(o => {
+                    csv += `"${cea}","${o.prestationName}","${formatDate(o.date)}",${o.autonomy},${o.confidence},${o.engagement},${o.resilience},"${o.emotions.join(', ')}","${o.support.join(', ')}","${(o.notes || '').replace(/"/g, '""')}"\n`;
+                });
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `accompagnement_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('fr-CH') + ' ' + d.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Load observations when switching to tab
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (document.getElementById('accompCeaContainer')) {
+                    loadAccompObservations();
+                }
+            }, 500);
+        });
 
         function showLoginScreen() {
             const loginScreen = document.getElementById('loginScreen');
@@ -10086,13 +10458,15 @@
                 const tab = e.target.closest('.tab');
                 if (!tab || !isSuperUser) { e.preventDefault(); return; }
                 _tabDragSrc = tab;
-                tab.style.opacity = '0.4';
+                tab.style.opacity = '0.6';
+                document.body.classList.add('tab-dragging');
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', '');
             });
 
             bar.addEventListener('dragend', () => {
                 if (_tabDragSrc) _tabDragSrc.style.opacity = '';
+                document.body.classList.remove('tab-dragging');
                 bar.querySelectorAll('.tab').forEach(t => {
                     t.classList.remove('tab-drag-over','tab-drop-before','tab-drop-after');
                 });
@@ -13762,6 +14136,16 @@
                 saveToStorage();
                 triggerWebhookEmail('prestation_created', prest);
                 toast(`✅ Prestation enregistrée <span onclick="flashPrestation(${prest.id})" style="margin-left:10px;padding:2px 8px;background:rgba(255,255,255,0.25);border-radius:4px;cursor:pointer;text-decoration:underline;">Voir →</span>`, 'success', 5000);
+
+                // 🏥 Automatically open observation modal for clinical follow-up
+                setTimeout(() => {
+                    const ceaData = Array.isArray(prest.beneficiaires) && prest.beneficiaires.length > 0
+                        ? prest.beneficiaires[0]
+                        : null;
+                    const ceaId = ceaData?.id || prest.client;
+                    const ceaName = ceaData ? `${ceaData.prenom || ''} ${ceaData.nom || ''}`.trim() : prest.client;
+                    openObservationModal(prest.id, prest.prestation, ceaId, ceaName);
+                }, 300);
             }
 
             resetCalculateur();
@@ -33296,6 +33680,7 @@ function _findCorrelations(beneficiaireId) {
     return correlations;
 }
 
+/*
 function exportClinicalReportPDF(beneficiaireId) {
     try {
         const stats = _computeClinicalStats(beneficiaireId);
@@ -33367,7 +33752,7 @@ function exportClinicalReportPDF(beneficiaireId) {
             <ul>
             ${inputs.slice(-10).reverse().map(ci => {
                 const d = new Date(ci.timestamp);
-                return `<li><strong>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</strong> — ${typeLabels[ci.type] || ci.type}</li>`;
+                return `<li><strong>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</strong> — ${typeLabels[ci.type] || ci.type}</li>`;
             }).join('')}
             </ul>
             </body></html>
@@ -33389,6 +33774,7 @@ function exportClinicalReportPDF(beneficiaireId) {
         toast('❌ Erreur lors de la génération du rapport', 'error');
     }
 }
+*/
 
 // ═══════════════════════════════════════════════════════════
 //  v2.22 — Statistiques cliniques & Alertes (Modules F)
@@ -34191,8 +34577,9 @@ document.addEventListener('DOMContentLoaded', () => {
     try { renderAccompClinicalBody(); } catch(e) { console.warn('Clinical body init:', e); }
     try { renderAccompTimeline(); } catch(e) { console.warn('Timeline init:', e); }
 });
+    </script>
 
-<!-- ── v2.17 — Outils cliniques flottants ─────────────────────────── -->
+    <!-- ── v2.17 — Outils cliniques flottants ─────────────────────────── -->
 <button id="clinicalFab" type="button" onclick="openClinicalModal()" aria-label="Outils cliniques" title="Outils cliniques (clinique du travail)">
     🎭
     <span id="clinicalFabLabel">Outils cliniques</span>
@@ -34329,6 +34716,5 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 
-    </script>
 </body>
 </html>
