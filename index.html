@@ -21294,10 +21294,16 @@
                 if (g && def) { g.tabs = def.tabs; if (!g.dashWidgets) g.dashWidgets = def.dashWidgets; }
             });
             saveAuthGroups();
-            // Populate login select
-            const sel = document.getElementById('authGroupSelect');
+            // Populate login select (v2.26)
+            const sel = document.getElementById('groupSelect');
             if (sel) {
-                sel.innerHTML = '<option value="">— Sélectionnez votre groupe —</option>' +
+                sel.innerHTML = '<option value="">-- Sélectionnez un groupe --</option>' +
+                    authGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+            }
+            // Also populate old select if it exists (backwards compatibility)
+            const selOld = document.getElementById('authGroupSelect');
+            if (selOld) {
+                selOld.innerHTML = '<option value="">— Sélectionnez votre groupe —</option>' +
                     authGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
             }
         }
