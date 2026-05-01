@@ -7031,7 +7031,7 @@
 
                         <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
                             <button onclick="closeCeaDetail()" class="btn btn-secondary">Fermer</button>
-                            <button onclick="editCeaObservation()" class="btn btn-primary">✏️ Modifier</button>
+                            <button id="ceaDetailEditBtn" onclick="editCeaObservation()" class="btn btn-primary" style="display:none;">✏️ Modifier</button>
                         </div>
                     </div>
                 </div>
@@ -8398,7 +8398,8 @@
                 export_data: true,
                 manage_users: true,
                 request_approval: true,
-                approve_prestation: true
+                approve_prestation: true,
+                edit_observation: true
             },
             'cea': {
                 create_prestation: false,
@@ -8414,7 +8415,8 @@
                 view_audit: false,
                 export_data: false,
                 manage_users: false,
-                create_cea_procedure: true
+                create_cea_procedure: true,
+                edit_observation: false
             },
             'msp': {
                 create_prestation: false,
@@ -8431,7 +8433,8 @@
                 export_data: true,
                 manage_users: false,
                 request_approval: true,
-                approve_prestation: false
+                approve_prestation: false,
+                edit_observation: true
             },
             'asp': {
                 create_prestation: false,
@@ -8447,7 +8450,8 @@
                 view_audit: false,
                 export_data: false,
                 manage_users: false,
-                create_cea_procedure: true
+                create_cea_procedure: true,
+                edit_observation: true
             }
         };
 
@@ -8478,7 +8482,8 @@
                     'manage_config': 'accéder à la configuration',
                     'view_audit': 'voir l\'historique',
                     'export_data': 'exporter les données',
-                    'manage_users': 'gérer les utilisateurs'
+                    'manage_users': 'gérer les utilisateurs',
+                    'edit_observation': 'modifier une observation clinique'
                 };
                 const label = actionLabels[action] || action;
                 toast(`❌ Vous n'avez pas la permission de ${label}`, 'error');
@@ -8761,8 +8766,9 @@
         async function saveObservation() {
             if (!_currentObservationData) return;
 
+            const isEditing = _currentObservationData.id && _currentObservationData.id.startsWith('_');
             const observation = {
-                id: '_' + Date.now(),
+                id: isEditing ? _currentObservationData.id : '_' + Date.now(),
                 ..._currentObservationData,
                 emotions: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="emotion"]:checked')).map(e => e.value),
                 autonomy: parseInt(document.getElementById('obs-autonomy').value),
@@ -8774,8 +8780,12 @@
                 support: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="support"]:checked')).map(e => e.value),
                 notes: document.getElementById('obs-notes').value,
                 observer: document.getElementById('groupSelect')?.value || 'system',
-                date: new Date().toISOString()
+                date: isEditing ? _currentObservationData.date : new Date().toISOString(),
+                updatedAt: isEditing ? new Date().toISOString() : undefined
             };
+
+            // Remove undefined updatedAt for new observations
+            if (!isEditing) delete observation.updatedAt;
 
             try {
                 // Save to IndexedDB
@@ -8785,7 +8795,14 @@
                     await cloudAPI.saveClinicalRecord(observation.ceaId, observation);
                 }
                 closeObservationModal();
-                showNotification('✅ Observation enregistrée', 'success');
+                const msg = isEditing ? '✅ Observation mise à jour' : '✅ Observation enregistrée';
+                showNotification(msg, 'success');
+
+                // Reload the accompanied detail view if it's open
+                if (document.getElementById('ceaDetailModal').style.display === 'flex') {
+                    const ceaId = _currentObservationData.ceaId;
+                    setTimeout(() => showCeaDetail(ceaId), 300);
+                }
             } catch (err) {
                 console.error('Error saving observation:', err);
                 showNotification('❌ Erreur: ' + err.message, 'error');
@@ -8942,22 +8959,25 @@
             document.getElementById('ceaDetailEngagement').textContent = `${avgEngagement}/5`;
             document.getElementById('ceaDetailResilience').textContent = `${avgResilience}/5`;
 
+            const canEdit = hasPermission('edit_observation');
+
             const historyHtml = ceaObs.map(obs => `
                 <div style="padding:12px;border-bottom:1px solid #e8eef5;display:flex;justify-content:space-between;align-items:start;">
                     <div style="flex:1;">
                         <strong style="color:#2d3a47;">${escapeHtml(obs.prestationName)}</strong><br>
-                        <small style="color:#7a9db1;">${formatDate(obs.date)}</small><br>
+                        <small style="color:#7a9db1;">${formatDate(obs.date)} • Observateur: ${escapeHtml(obs.observer || 'système')}</small><br>
                         <div style="margin-top:6px;">
                             ${obs.emotions.length > 0 ? `<span style="font-size:0.9em;">😊 ${obs.emotions.map(e => e.charAt(0).toUpperCase() + e.slice(1)).join(', ')}</span><br>` : ''}
                             <small style="color:#a0c8e0;">Auto: ${obs.autonomy}/5 • Conf: ${obs.confidence}/5</small>
                         </div>
                         ${obs.notes ? `<p style="margin:6px 0;padding:8px;background:#f0f7fb;border-radius:4px;font-size:0.85em;color:#4a5f75;border-left:3px solid #e8f4f8;">"${escapeHtml(obs.notes)}"</p>` : ''}
                     </div>
-                    <button onclick="editCeaObservation('${obs.id}')" style="background:none;border:none;color:#4a90c2;cursor:pointer;font-size:0.9em;">✏️</button>
+                    ${canEdit ? `<button onclick="editCeaObservation('${obs.id}')" style="background:none;border:none;color:#4a90c2;cursor:pointer;font-size:0.9em;margin-left:10px;">✏️</button>` : ''}
                 </div>
             `).join('');
 
             document.getElementById('ceaDetailHistory').innerHTML = historyHtml;
+            document.getElementById('ceaDetailEditBtn').style.display = canEdit ? 'inline-block' : 'none';
             document.getElementById('ceaDetailModal').style.display = 'flex';
         }
 
@@ -8965,8 +8985,101 @@
             document.getElementById('ceaDetailModal').style.display = 'none';
         }
 
-        function editCeaObservation(obsId) {
-            alert('Édition à venir - version complète dans rapport');
+        async function editCeaObservation(obsId) {
+            if (!checkPermission('edit_observation')) {
+                return;
+            }
+
+            if (!obsId) {
+                toast('❌ Observation non trouvée', 'error');
+                return;
+            }
+
+            try {
+                const observations = await getFromIndexedDB('observations') || [];
+                const obs = observations.find(o => o.id === obsId);
+
+                if (!obs) {
+                    toast('❌ Observation non trouvée', 'error');
+                    return;
+                }
+
+                // Check if user is the observer (or is admin)
+                const currentGroupId = document.getElementById('groupSelect')?.value || 'system';
+                const isAdmin = currentGroupId === 'admin';
+                const isObserver = obs.observer === currentGroupId;
+
+                if (!isAdmin && !isObserver) {
+                    toast('⚠️ Vous pouvez seulement modifier vos propres observations', 'warning');
+                    return;
+                }
+
+                // Populate observation form with existing data
+                _currentObservationData = { ...obs };
+
+                // Set form values
+                document.getElementById('obs-cea-name').textContent = obs.ceaName || '—';
+                document.getElementById('obs-prestation-name').textContent = obs.prestationName || '—';
+
+                // Reset and set checkboxes
+                document.querySelectorAll('#clinicalObservationModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+                // Set emotions
+                if (Array.isArray(obs.emotions)) {
+                    obs.emotions.forEach(emotion => {
+                        const checkbox = document.querySelector(`#clinicalObservationModal input[name="emotion"][value="${emotion}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Set cognitive
+                if (Array.isArray(obs.cognitive)) {
+                    obs.cognitive.forEach(cog => {
+                        const checkbox = document.querySelector(`#clinicalObservationModal input[name="cognitive"][value="${cog}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Set behavior
+                if (Array.isArray(obs.behavior)) {
+                    obs.behavior.forEach(beh => {
+                        const checkbox = document.querySelector(`#clinicalObservationModal input[name="behavior"][value="${beh}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Set support needs
+                if (Array.isArray(obs.support)) {
+                    obs.support.forEach(sup => {
+                        const checkbox = document.querySelector(`#clinicalObservationModal input[name="support"][value="${sup}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Set sliders
+                document.getElementById('obs-autonomy').value = obs.autonomy || 3;
+                document.getElementById('autonomy-label').textContent = obs.autonomy || 3;
+
+                document.getElementById('obs-confidence').value = obs.confidence || 3;
+                document.getElementById('confidence-label').textContent = obs.confidence || 3;
+
+                document.getElementById('obs-engagement').value = obs.engagement || 3;
+                document.getElementById('engagement-label').textContent = obs.engagement || 3;
+
+                document.getElementById('obs-resilience').value = obs.resilience || 3;
+                document.getElementById('resilience-label').textContent = obs.resilience || 3;
+
+                // Set notes
+                document.getElementById('obs-notes').value = obs.notes || '';
+
+                // Show modal
+                document.getElementById('clinicalObservationModal').style.display = 'flex';
+
+                toast('✏️ Édition de l\'observation', 'info');
+            } catch(err) {
+                console.error('Error editing observation:', err);
+                toast('❌ Erreur lors du chargement de l\'observation', 'error');
+            }
         }
 
         async function exportAccompReport() {
@@ -14021,6 +14134,16 @@
                 saveToStorage();
                 triggerWebhookEmail('prestation_created', prest);
                 toast(`✅ Prestation enregistrée <span onclick="flashPrestation(${prest.id})" style="margin-left:10px;padding:2px 8px;background:rgba(255,255,255,0.25);border-radius:4px;cursor:pointer;text-decoration:underline;">Voir →</span>`, 'success', 5000);
+
+                // 🏥 Automatically open observation modal for clinical follow-up
+                setTimeout(() => {
+                    const ceaData = Array.isArray(prest.beneficiaires) && prest.beneficiaires.length > 0
+                        ? prest.beneficiaires[0]
+                        : null;
+                    const ceaId = ceaData?.id || prest.client;
+                    const ceaName = ceaData ? `${ceaData.prenom || ''} ${ceaData.nom || ''}`.trim() : prest.client;
+                    openObservationModal(prest.id, prest.prestation, ceaId, ceaName);
+                }, 300);
             }
 
             resetCalculateur();
