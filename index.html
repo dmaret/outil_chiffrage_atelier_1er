@@ -7950,7 +7950,30 @@
             logAction('Mise à jour configuration webhooks email', 'UPDATE');
         }
 
-        function triggerWebhookEmail(eventType, data) {
+        // HMAC signature for webhook verification
+        async function generateWebhookSignature(payload, secret) {
+            try {
+                const encoder = new TextEncoder();
+                const key = await crypto.subtle.importKey(
+                    'raw',
+                    encoder.encode(secret),
+                    { name: 'HMAC', hash: 'SHA-256' },
+                    false,
+                    ['sign']
+                );
+                const signature = await crypto.subtle.sign(
+                    'HMAC',
+                    key,
+                    encoder.encode(payload)
+                );
+                return btoa(String.fromCharCode(...new Uint8Array(signature)));
+            } catch(e) {
+                console.error('HMAC generation error:', e);
+                return null;
+            }
+        }
+
+        async function triggerWebhookEmail(eventType, data) {
             if (!emailWebhooksConfig.enabled || !emailWebhooksConfig.webhookUrl) return;
 
             const template = emailWebhooksConfig.templates[eventType];
@@ -7966,19 +7989,24 @@
                 recipients: template.recipients.split(',').map(r => r.trim())
             };
 
+            const payloadString = JSON.stringify(payload);
+            const signature = await generateWebhookSignature(payloadString, emailWebhooksConfig.apiKey);
+
             // Send webhook with retry logic
             fetchWithRetry(emailWebhooksConfig.webhookUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${emailWebhooksConfig.apiKey}`,
-                    'X-Webhook-Event': eventType
+                    'X-Webhook-Event': eventType,
+                    'X-Webhook-Signature': `sha256=${signature}`,
+                    'X-Webhook-Timestamp': payload.timestamp
                 },
-                body: JSON.stringify(payload),
+                body: payloadString,
                 timeout: 8000,
                 retryDelay: 2000
             }, 2).then(resp => resp.json()).then(() => {
-                logAction(`Webhook email déclenché: ${eventType}`, 'INFO');
+                logAction(`Webhook email déclenché: ${eventType} (signé)`, 'INFO');
             }).catch(err => {
                 console.error('Webhook email error:', err);
                 logAction(`Erreur webhook email: ${eventType} - ${err.message}`, 'ERROR');
@@ -21256,6 +21284,80 @@
             }
         }
 
+        // ═══════════════════════════════════════════════════════════
+        //  AES-GCM ENCRYPTION for export/sensitive data protection
+        // ═══════════════════════════════════════════════════════════
+
+        // Derive encryption key from password using PBKDF2
+        async function deriveEncryptionKey(password, salt = null) {
+            if (!salt) salt = crypto.getRandomValues(new Uint8Array(16));
+            const encoder = new TextEncoder();
+            const baseKey = await crypto.subtle.importKey(
+                'raw',
+                encoder.encode(password),
+                'PBKDF2',
+                false,
+                ['deriveKey']
+            );
+            const key = await crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+                baseKey,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+            return { key, salt };
+        }
+
+        // Encrypt data with AES-GCM (for exports)
+        async function encryptExport(data, password) {
+            try {
+                const { key, salt } = await deriveEncryptionKey(password);
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const encoder = new TextEncoder();
+                const encoded = encoder.encode(JSON.stringify(data));
+
+                const encrypted = await crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    encoded
+                );
+
+                const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+                combined.set(salt, 0);
+                combined.set(iv, salt.length);
+                combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+
+                return btoa(String.fromCharCode(...combined));
+            } catch(e) {
+                console.error('Export encryption error:', e);
+                return null;
+            }
+        }
+
+        // Decrypt data with AES-GCM (for imports)
+        async function decryptExport(encrypted, password) {
+            try {
+                const combined = Uint8Array.from(atob(encrypted), c => c.charCodeAt(0));
+                const salt = combined.slice(0, 16);
+                const iv = combined.slice(16, 28);
+                const data = combined.slice(28);
+
+                const { key } = await deriveEncryptionKey(password, salt);
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    data
+                );
+
+                const decoder = new TextDecoder();
+                return JSON.parse(decoder.decode(decrypted));
+            } catch(e) {
+                console.error('Export decryption error:', e);
+                return null;
+            }
+        }
+
         function togglePasswordVisibility() {
             const input = document.getElementById('authPasswordInput');
             const btn = document.getElementById('authPasswordToggle');
@@ -21285,54 +21387,106 @@
             toast('🚀 Mode logistique - Accès rapide', 'success');
         }
 
-        function doLogin() {
+        // Brute force protection: track login attempts
+        let _loginAttempts = JSON.parse(localStorage.getItem('_loginAttempts') || '{}');
+        const MAX_LOGIN_ATTEMPTS = 5;
+        const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
+        function isGroupLockedOut(groupId) {
+            const attempts = _loginAttempts[groupId];
+            if (!attempts) return false;
+            if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
+                const lockoutExpiry = attempts.lastAttempt + LOCKOUT_DURATION_MS;
+                if (Date.now() < lockoutExpiry) {
+                    return true; // Still locked out
+                } else {
+                    delete _loginAttempts[groupId]; // Lockout expired
+                    localStorage.setItem('_loginAttempts', JSON.stringify(_loginAttempts));
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        function recordLoginAttempt(groupId, success) {
+            if (success) {
+                delete _loginAttempts[groupId];
+            } else {
+                if (!_loginAttempts[groupId]) {
+                    _loginAttempts[groupId] = { count: 0, lastAttempt: Date.now() };
+                }
+                _loginAttempts[groupId].count++;
+                _loginAttempts[groupId].lastAttempt = Date.now();
+            }
+            localStorage.setItem('_loginAttempts', JSON.stringify(_loginAttempts));
+        }
+
+        async function doLogin() {
             const groupId = document.getElementById('authGroupSelect')?.value;
             const password = document.getElementById('authPasswordInput')?.value;
             const errEl = document.getElementById('authError');
             if (!groupId) { if(errEl) errEl.textContent = 'Veuillez sélectionner un groupe.'; return; }
             if (!password) { if(errEl) errEl.textContent = 'Veuillez entrer un mot de passe.'; return; }
 
+            // Check brute force lockout
+            if (isGroupLockedOut(groupId)) {
+                if(errEl) errEl.textContent = `❌ Trop de tentatives. Réessayez dans 15 minutes.`;
+                logAction(`Login attempt blocked - group ${groupId} locked out`, 'SECURITY');
+                return;
+            }
+
             const group = authGroups.find(g => g.id === groupId);
             if (!group) {
                 if(errEl) errEl.textContent = '❌ Groupe non trouvé.';
+                recordLoginAttempt(groupId, false);
                 return;
             }
 
-            // Check if password hash is set - if not, SET IT on first login
-            if (!group.passwordHash) {
-                group.passwordHash = hashPassword(password);
-                // Save to localStorage
-                localStorage.setItem('authGroups', JSON.stringify(authGroups));
-                // Proceed with login
+            try {
+                // Check if password hash is set - if not, SET IT on first login
+                if (!group.passwordHash) {
+                    group.passwordHash = await hashPassword(password);
+                    // Save to localStorage
+                    localStorage.setItem('authGroups', JSON.stringify(authGroups));
+                    // Proceed with login
+                    sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
+                    const noEmoji1 = document.getElementById('authNoEmoji')?.checked;
+                    localStorage.setItem('appNoEmoji', noEmoji1 ? '1' : '0');
+                    if (noEmoji1) activateNoEmojiMode();
+                    document.getElementById('authOverlay').style.display = 'none';
+                    applyAuthGroup(group);
+                    recordLoginAttempt(groupId, true);
+                    toast(`✅ Mot de passe configuré! Bienvenue, groupe ${group.name} !`, 'success');
+                    logAction(`Connexion groupe ${group.name} - première configuration`);
+                    return;
+                }
+
+                // Compare password hashes (async)
+                const inputHash = await hashPassword(password);
+                if (inputHash !== group.passwordHash) {
+                    if(errEl) errEl.textContent = '❌ Mot de passe incorrect.';
+                    document.getElementById('authPasswordInput')?.select();
+                    recordLoginAttempt(groupId, false);
+                    return;
+                }
+
+                // Auth OK
                 sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
-                const noEmoji1 = document.getElementById('authNoEmoji')?.checked;
-                localStorage.setItem('appNoEmoji', noEmoji1 ? '1' : '0');
-                if (noEmoji1) activateNoEmojiMode();
-                document.getElementById('authOverlay').style.display = 'none';
-                applyAuthGroup(group);
-                toast(`✅ Mot de passe configuré! Bienvenue, groupe ${group.name} !`, 'success');
-                logAction(`Connexion groupe ${group.name}`);
-                return;
-            }
-
-            // Compare password hashes
-            const inputHash = hashPassword(password);
-            if (inputHash !== group.passwordHash) {
-                if(errEl) errEl.textContent = '❌ Mot de passe incorrect.';
-                document.getElementById('authPasswordInput')?.select();
-                return;
-            }
-
-            // Auth OK
-            sessionStorage.setItem('authSession', JSON.stringify({ id: group.id, name: group.name }));
             // Mode sans icônes
             const noEmoji = document.getElementById('authNoEmoji')?.checked;
-            localStorage.setItem('appNoEmoji', noEmoji ? '1' : '0');
-            if (noEmoji) activateNoEmojiMode();
-            document.getElementById('authOverlay').style.display = 'none';
-            applyAuthGroup(group);
-            toast(`Bienvenue, groupe ${group.name} !`, 'success');
-            logAction(`Connexion groupe ${group.name}`);
+                const noEmoji = document.getElementById('authNoEmoji')?.checked;
+                localStorage.setItem('appNoEmoji', noEmoji ? '1' : '0');
+                if (noEmoji) activateNoEmojiMode();
+                document.getElementById('authOverlay').style.display = 'none';
+                applyAuthGroup(group);
+                recordLoginAttempt(groupId, true);
+                toast(`✅ Bienvenue, groupe ${group.name} !`, 'success');
+                logAction(`Connexion groupe ${group.name}`);
+            } catch(e) {
+                console.error('Login error:', e);
+                if(errEl) errEl.textContent = '❌ Erreur lors de la connexion. Réessayez.';
+                recordLoginAttempt(groupId, false);
+            }
         }
 
         function doLogout() {
