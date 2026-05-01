@@ -3706,7 +3706,7 @@
 </head>
 <body>
     <!-- Login Screen: Group Authentication (v2.26) -->
-    <div id="loginScreen" role="main" aria-label="Écran d'authentification">
+    <div id="loginScreen" class="hidden" role="main" aria-label="Écran d'authentification">
         <div class="login-container">
             <div class="login-box">
                 <div class="login-header">
@@ -6736,14 +6736,14 @@
                 <div class="section" style="background:#f0f8ff;border-left-color:#4a9af0;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
                         <h2 style="margin:0;color:#2d5b8a;cursor:pointer;flex:1;" onclick="switchTab('guide');switchGuideSection('glossaire');" title="Cliquez pour voir le glossaire complet">📊 Historique clinique — Timeline</h2>
-                        <button class="btn btn-small" onclick="switchTab('guide');switchGuideSection('glossaire');" style="background:#4a9af0;color:#fff;border-color:#3878b0;font-weight:600;">📚 Glossaire</button>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                             <button class="btn btn-small" onclick="filterAccompTimeline('all')" style="background:#e0f0f8;border-color:#4a9af0;color:#2d5b8a;">Tout</button>
                             <button class="btn btn-small" onclick="filterAccompTimeline('emotion')" style="background:#fce8e8;border-color:#e84a5f;color:#6b3a3a;"><span class="glossary-term" data-term="emotion" style="cursor:help;border:none;background:none;">😊 Émotions <span style="color:#c97666;font-weight:700;">?</span></span></button>
                             <button class="btn btn-small" onclick="filterAccompTimeline('observation')" style="background:#e8f0fc;border-color:#4a7af0;color:#3a4a8f;"><span class="glossary-term" data-term="observation" style="cursor:help;border:none;background:none;">👁️ Observations <span style="color:#c97666;font-weight:700;">?</span></span></button>
                             <button class="btn btn-small" onclick="filterAccompTimeline('message')" style="background:#f0e8fc;border-color:#a070d0;color:#5a3a8f;"><span class="glossary-term" data-term="message" style="cursor:help;border:none;background:none;">💬 Messages <span style="color:#c97666;font-weight:700;">?</span></span></button>
                             <button class="btn btn-small" onclick="filterAccompTimeline('double_contrainte')" style="background:#f8f0e8;border-color:#d0a070;color:#8f6b3a;"><span class="glossary-term" data-term="double_contrainte" style="cursor:help;border:none;background:none;">🌀 DC <span style="color:#c97666;font-weight:700;">?</span></span></button>
                             <button class="btn btn-small" onclick="filterAccompTimeline('ressenti_corporel')" style="background:#e8f8e8;border-color:#70d070;color:#3a8f3a;"><span class="glossary-term" data-term="ressenti_corporel" style="cursor:help;border:none;background:none;">🤝 Ressentis <span style="color:#c97666;font-weight:700;">?</span></span></button>
+                            <button class="btn btn-small" onclick="switchTab('guide');switchGuideSection('glossaire');" style="background:#4a9af0;color:#fff;border-color:#3878b0;font-weight:600;">📚 Glossaire</button>
                         </div>
                     </div>
                     <p style="font-size:0.85em;color:#5a7b8f;margin-bottom:12px;">Historique des observations enregistrées pour le bénéficiaire sélectionné. Cliquez pour détailler.</p>
@@ -8968,6 +8968,7 @@
                 try { renderConsommablesTable(); } catch(e) { console.warn('renderConsommablesTable defer:', e); }
                 try { updateStats(); } catch(e) { console.warn('updateStats defer:', e); }
                 try { loadFormationData(); } catch(e) { console.warn('loadFormationData defer:', e); }
+                try { cleanupOldStorage(); } catch(e) { console.warn('cleanupOldStorage defer:', e); }
                 try { loadReferenceDocuments(); } catch(e) { console.warn('loadReferenceDocuments defer:', e); }
                 try { loadAuditLog(); } catch(e) { console.warn('loadAuditLog defer:', e); }
             };
@@ -9581,14 +9582,45 @@
 
             const sections = tabContent.querySelectorAll(':scope > .section');
 
-            sections.forEach(section => {
-                // Add hint if not exists
-                if (!section.querySelector('.section-drag-hint')) {
-                    const hint = document.createElement('div');
-                    hint.className = 'section-drag-hint';
-                    hint.textContent = '[DÉPLACER]';
+            sections.forEach((section, index) => {
+                // Add reorder buttons if not exists
+                if (!section.querySelector('.section-reorder-btns')) {
+                    const btnContainer = document.createElement('div');
+                    btnContainer.className = 'section-reorder-btns';
+                    btnContainer.style.cssText = 'position:absolute;top:12px;right:12px;display:flex;gap:4px;z-index:10;';
+
+                    const btnUp = document.createElement('button');
+                    btnUp.innerHTML = '↑';
+                    btnUp.className = 'btn btn-small';
+                    btnUp.style.cssText = 'padding:4px 8px;font-size:0.9em;cursor:pointer;background:#e8f4f8;border:1px solid #a0c8e0;color:#2d5b8a;';
+                    btnUp.title = 'Remonter cette section';
+                    btnUp.onclick = (e) => {
+                        e.stopPropagation();
+                        if (index > 0) {
+                            const prev = section.previousElementSibling;
+                            if (prev) section.parentNode.insertBefore(section, prev);
+                            initSectionDragAndDrop(); // Refresh
+                        }
+                    };
+
+                    const btnDown = document.createElement('button');
+                    btnDown.innerHTML = '↓';
+                    btnDown.className = 'btn btn-small';
+                    btnDown.style.cssText = 'padding:4px 8px;font-size:0.9em;cursor:pointer;background:#e8f4f8;border:1px solid #a0c8e0;color:#2d5b8a;';
+                    btnDown.title = 'Descendre cette section';
+                    btnDown.onclick = (e) => {
+                        e.stopPropagation();
+                        if (index < sections.length - 1) {
+                            const next = section.nextElementSibling;
+                            if (next) section.parentNode.insertBefore(next, section);
+                            initSectionDragAndDrop(); // Refresh
+                        }
+                    };
+
+                    btnContainer.appendChild(btnUp);
+                    btnContainer.appendChild(btnDown);
                     section.style.position = 'relative';
-                    section.appendChild(hint);
+                    section.appendChild(btnContainer);
                 }
 
                 // Only enable drag on the section itself
@@ -15537,10 +15569,64 @@
         }
 
         // ── Reference Documents Management ─────────────────────
+        function cleanupOldStorage() {
+            // Clear old localStorage documents to free space
+            try {
+                localStorage.removeItem('referenceDocuments');
+                console.log('Cleaned up old localStorage documents');
+            } catch(e) {
+                console.warn('Could not clean localStorage:', e);
+            }
+        }
+
         function loadReferenceDocuments() {
-            const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
-            referenceDocuments = saved;
-            renderReferenceDocuments();
+            // Try IndexedDB first, fallback to localStorage
+            try {
+                const dbRequest = indexedDB.open('AtelierDB', 1);
+
+                dbRequest.onerror = () => {
+                    console.warn('IndexedDB load failed, using localStorage');
+                    const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                    referenceDocuments = saved;
+                    renderReferenceDocuments();
+                };
+
+                dbRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.close();
+                        // No IndexedDB data, try localStorage
+                        const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                        referenceDocuments = saved;
+                        renderReferenceDocuments();
+                        return;
+                    }
+
+                    const transaction = db.transaction(['documents'], 'readonly');
+                    const store = transaction.objectStore('documents');
+                    const getAllRequest = store.getAll();
+
+                    getAllRequest.onsuccess = () => {
+                        referenceDocuments = getAllRequest.result || [];
+                        renderReferenceDocuments();
+                        db.close();
+                    };
+
+                    getAllRequest.onerror = () => {
+                        console.warn('IndexedDB read failed, using localStorage');
+                        const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                        referenceDocuments = saved;
+                        renderReferenceDocuments();
+                        db.close();
+                    };
+                };
+            } catch(err) {
+                console.warn('IndexedDB load error:', err);
+                const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                referenceDocuments = saved;
+                renderReferenceDocuments();
+            }
         }
 
         function addReferenceDocument() {
@@ -15560,6 +15646,13 @@
             }
 
             if (file) {
+                // Check file size (limit to 50 MB for IndexedDB)
+                const maxSize = 50 * 1024 * 1024; // 50 MB
+                if (file.size > maxSize) {
+                    toast(`❌ Fichier trop volumineux: ${(file.size / 1024 / 1024).toFixed(2)} MB (max: 50 MB)`, 'error');
+                    return;
+                }
+
                 // Handle file upload
                 showLoading(`Chargement du document "${title}"...`);
                 const reader = new FileReader();
@@ -15637,7 +15730,60 @@
         }
 
         function saveReferenceDocuments() {
-            localStorage.setItem('referenceDocuments', JSON.stringify(referenceDocuments));
+            // Use IndexedDB for large file storage instead of localStorage
+            try {
+                const dbRequest = indexedDB.open('AtelierDB', 1);
+
+                dbRequest.onerror = () => {
+                    console.warn('IndexedDB failed - documents kept in memory only');
+                    toast('⚠️ Documents kept in memory (IndexedDB unavailable)', 'warning');
+                    // Don't attempt localStorage - it's likely full
+                };
+
+                dbRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+
+                    // Create object store if it doesn't exist
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.close();
+                        const upgradeRequest = indexedDB.open('AtelierDB', 2);
+                        upgradeRequest.onupgradeneeded = (ev) => {
+                            const upgradeDb = ev.target.result;
+                            upgradeDb.createObjectStore('documents', { keyPath: 'id' });
+                        };
+                        upgradeRequest.onsuccess = () => {
+                            saveReferenceDocuments(); // Retry
+                        };
+                        return;
+                    }
+
+                    const transaction = db.transaction(['documents'], 'readwrite');
+                    const store = transaction.objectStore('documents');
+
+                    // Clear and save all documents
+                    store.clear();
+                    referenceDocuments.forEach(doc => {
+                        store.add(doc);
+                    });
+
+                    transaction.oncomplete = () => db.close();
+                    transaction.onerror = () => {
+                        console.error('Transaction failed:', transaction.error);
+                        db.close();
+                    };
+                };
+
+                dbRequest.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.createObjectStore('documents', { keyPath: 'id' });
+                    }
+                };
+            } catch(err) {
+                console.warn('IndexedDB error:', err);
+                toast('⚠️ Documents kept in memory (storage unavailable)', 'warning');
+                // Don't attempt localStorage - it's likely full
+            }
         }
 
         function renderReferenceDocuments() {
