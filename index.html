@@ -15538,9 +15538,53 @@
 
         // ── Reference Documents Management ─────────────────────
         function loadReferenceDocuments() {
-            const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
-            referenceDocuments = saved;
-            renderReferenceDocuments();
+            // Try IndexedDB first, fallback to localStorage
+            try {
+                const dbRequest = indexedDB.open('AtelierDB', 1);
+
+                dbRequest.onerror = () => {
+                    console.warn('IndexedDB load failed, using localStorage');
+                    const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                    referenceDocuments = saved;
+                    renderReferenceDocuments();
+                };
+
+                dbRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.close();
+                        // No IndexedDB data, try localStorage
+                        const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                        referenceDocuments = saved;
+                        renderReferenceDocuments();
+                        return;
+                    }
+
+                    const transaction = db.transaction(['documents'], 'readonly');
+                    const store = transaction.objectStore('documents');
+                    const getAllRequest = store.getAll();
+
+                    getAllRequest.onsuccess = () => {
+                        referenceDocuments = getAllRequest.result || [];
+                        renderReferenceDocuments();
+                        db.close();
+                    };
+
+                    getAllRequest.onerror = () => {
+                        console.warn('IndexedDB read failed, using localStorage');
+                        const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                        referenceDocuments = saved;
+                        renderReferenceDocuments();
+                        db.close();
+                    };
+                };
+            } catch(err) {
+                console.warn('IndexedDB load error:', err);
+                const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                referenceDocuments = saved;
+                renderReferenceDocuments();
+            }
         }
 
         function addReferenceDocument() {
@@ -15560,6 +15604,13 @@
             }
 
             if (file) {
+                // Check file size (limit to 50 MB for IndexedDB)
+                const maxSize = 50 * 1024 * 1024; // 50 MB
+                if (file.size > maxSize) {
+                    toast(`❌ Fichier trop volumineux: ${(file.size / 1024 / 1024).toFixed(2)} MB (max: 50 MB)`, 'error');
+                    return;
+                }
+
                 // Handle file upload
                 showLoading(`Chargement du document "${title}"...`);
                 const reader = new FileReader();
@@ -15637,7 +15688,69 @@
         }
 
         function saveReferenceDocuments() {
-            localStorage.setItem('referenceDocuments', JSON.stringify(referenceDocuments));
+            // Use IndexedDB for large file storage instead of localStorage
+            try {
+                const dbRequest = indexedDB.open('AtelierDB', 1);
+
+                dbRequest.onerror = () => {
+                    console.warn('IndexedDB failed, falling back to localStorage');
+                    // Fallback: store only metadata (no files) in localStorage
+                    const metadataOnly = referenceDocuments.map(d => {
+                        const copy = { ...d };
+                        if (copy.fileData) delete copy.fileData;
+                        return copy;
+                    });
+                    localStorage.setItem('referenceDocuments', JSON.stringify(metadataOnly));
+                };
+
+                dbRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+
+                    // Create object store if it doesn't exist
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.close();
+                        const upgradeRequest = indexedDB.open('AtelierDB', 2);
+                        upgradeRequest.onupgradeneeded = (ev) => {
+                            const upgradeDb = ev.target.result;
+                            upgradeDb.createObjectStore('documents', { keyPath: 'id' });
+                        };
+                        upgradeRequest.onsuccess = () => {
+                            saveReferenceDocuments(); // Retry
+                        };
+                        return;
+                    }
+
+                    const transaction = db.transaction(['documents'], 'readwrite');
+                    const store = transaction.objectStore('documents');
+
+                    // Clear and save all documents
+                    store.clear();
+                    referenceDocuments.forEach(doc => {
+                        store.add(doc);
+                    });
+
+                    transaction.oncomplete = () => db.close();
+                    transaction.onerror = () => {
+                        console.error('Transaction failed:', transaction.error);
+                        db.close();
+                    };
+                };
+
+                dbRequest.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.createObjectStore('documents', { keyPath: 'id' });
+                    }
+                };
+            } catch(err) {
+                console.warn('IndexedDB error, falling back to localStorage:', err);
+                const metadataOnly = referenceDocuments.map(d => {
+                    const copy = { ...d };
+                    if (copy.fileData) delete copy.fileData;
+                    return copy;
+                });
+                localStorage.setItem('referenceDocuments', JSON.stringify(metadataOnly));
+            }
         }
 
         function renderReferenceDocuments() {
