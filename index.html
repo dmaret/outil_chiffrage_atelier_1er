@@ -7031,7 +7031,6 @@
 
                         <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
                             <button onclick="closeCeaDetail()" class="btn btn-secondary">Fermer</button>
-                            <button id="ceaDetailEditBtn" onclick="editCeaObservation()" class="btn btn-primary" style="display:none;">✏️ Modifier</button>
                         </div>
                     </div>
                 </div>
@@ -8977,7 +8976,6 @@
             `).join('');
 
             document.getElementById('ceaDetailHistory').innerHTML = historyHtml;
-            document.getElementById('ceaDetailEditBtn').style.display = canEdit ? 'inline-block' : 'none';
             document.getElementById('ceaDetailModal').style.display = 'flex';
         }
 
