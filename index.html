@@ -34112,7 +34112,7 @@ function renderAccompClinicalBody() {
             <label style="display:block;margin-bottom:8px;font-weight:600;color:#2d5b8a;">👤 Sélectionnez le bénéficiaire</label>
             <select id="accompClinicalBenefSelect" onchange="setAccompClinicalBeneficiary(this.value)" style="width:100%;padding:8px;border:1px solid #a0c8e0;border-radius:6px;font-size:0.95em;">
                 <option value="">— Choisir un bénéficiaire —</option>
-                ${(window.beneficiaires || []).map(b => `<option value="${b.id}" ${_accompClinicalSelectedBenefId == b.id ? 'selected' : ''}>${escapeHtml(b.prenom || '')} ${escapeHtml(b.nom || '')}</option>`).join('')}
+                ${(beneficiaires || []).map(b => `<option value="${b.id}" ${_accompClinicalSelectedBenefId == b.id ? 'selected' : ''}>${escapeHtml(b.prenom || '')} ${escapeHtml(b.nom || '')}</option>`).join('')}
             </select>
             ${_accompClinicalSelectedBenefId ? `<p style="margin:8px 0 0 0;font-size:0.85em;color:#4a5f75;">✓ Bénéficiaire sélectionné</p>` : `<p style="margin:8px 0 0 0;font-size:0.85em;color:#d70000;font-weight:600;">⚠️ Vous devez sélectionner un bénéficiaire</p>`}
         </div>
@@ -34241,7 +34241,7 @@ function saveAccompClinicalInput() {
         return;
     }
 
-    const beneficiary = (window.beneficiaires || []).find(b => b.id == _accompClinicalSelectedBenefId);
+    const beneficiary = (beneficiaires || []).find(b => b.id == _accompClinicalSelectedBenefId);
     if (!beneficiary) {
         showToast('❌ Bénéficiaire introuvable.');
         return;
@@ -34356,7 +34356,7 @@ function renderAccompTimeline(filterType = 'all') {
 function getCurrentSelectedBeneficiary() {
     // First check if a beneficiary is selected in the clinical tools context
     if (_accompClinicalSelectedBenefId) {
-        const benef = (window.beneficiaires || []).find(b => b.id == _accompClinicalSelectedBenefId);
+        const benef = (beneficiaires || []).find(b => b.id == _accompClinicalSelectedBenefId);
         if (benef) {
             return { id: benef.id, nom: `${benef.prenom || ''} ${benef.nom || ''}`.trim() };
         }
