@@ -16741,8 +16741,8 @@
 
         function saveDocumentsToLocalStorage() {
             try {
-                // Save only metadata, not file data (to avoid quota exceeded)
-                const metadata = referenceDocuments.map(doc => ({
+                // Save complete documents except base64 fileData which is too large
+                const toSave = referenceDocuments.map(doc => ({
                     id: doc.id,
                     title: doc.title,
                     fileName: doc.fileName,
@@ -16751,24 +16751,14 @@
                     isFile: doc.isFile,
                     // Don't save base64 fileData - it's too large
                 }));
-                localStorage.setItem('referenceDocuments', JSON.stringify(metadata));
-                console.log('Documents metadata saved to localStorage');
+                localStorage.setItem('referenceDocuments', JSON.stringify(toSave));
+                console.log('Documents saved to localStorage');
             } catch(e) {
                 if (e.name === 'QuotaExceededError') {
-                    console.error('localStorage full - clearing old data');
-                    // Try clearing old data to make space
-                    try {
-                        localStorage.removeItem('referenceDocuments_backup');
-                        localStorage.setItem('referenceDocuments', JSON.stringify(referenceDocuments.map(doc => ({
-                            id: doc.id, title: doc.title, type: doc.type, url: doc.url
-                        }))));
-                    } catch(e2) {
-                        console.error('localStorage still full:', e2);
-                        toast('⚠️ Stockage plein - videz le cache du navigateur', 'warning');
-                    }
+                    console.error('localStorage full');
+                    toast('⚠️ Stockage plein - videz le cache du navigateur', 'warning');
                 } else {
                     console.error('localStorage error:', e);
-                    toast('⚠️ Erreur stockage', 'warning');
                 }
             }
         }
