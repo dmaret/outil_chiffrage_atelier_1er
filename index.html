@@ -16675,9 +16675,8 @@
                 const dbRequest = indexedDB.open('AtelierDB', 1);
 
                 dbRequest.onerror = () => {
-                    console.warn('IndexedDB failed - documents kept in memory only');
-                    toast('⚠️ Documents kept in memory (IndexedDB unavailable)', 'warning');
-                    // Don't attempt localStorage - it's likely full
+                    console.warn('IndexedDB failed - falling back to localStorage');
+                    saveDocumentsToLocalStorage();
                 };
 
                 dbRequest.onsuccess = (e) => {
@@ -16706,9 +16705,14 @@
                         store.add(doc);
                     });
 
-                    transaction.oncomplete = () => db.close();
+                    transaction.oncomplete = () => {
+                        console.log('Documents saved to IndexedDB');
+                        saveDocumentsToLocalStorage();
+                        db.close();
+                    };
                     transaction.onerror = () => {
                         console.error('Transaction failed:', transaction.error);
+                        saveDocumentsToLocalStorage();
                         db.close();
                     };
                 };
@@ -16721,8 +16725,7 @@
                 };
             } catch(err) {
                 console.warn('IndexedDB error:', err);
-                toast('⚠️ Documents kept in memory (storage unavailable)', 'warning');
-                // Don't attempt localStorage - it's likely full
+                saveDocumentsToLocalStorage();
             }
         }
 
