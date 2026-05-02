@@ -15130,8 +15130,6 @@
         function loadFormationData() {
             const saved = JSON.parse(localStorage.getItem('learnersList') || '[]');
             learnersList = saved;
-            const savedDocs = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
-            referenceDocuments = savedDocs;
             renderLearners();
         }
 
