@@ -9719,7 +9719,15 @@
         let selectedLearnerId = null;
         let formationProgress = {};
         let auditLog = [];
-        let referenceDocuments = [];
+        let referenceDocuments = (() => {
+            try {
+                const stored = localStorage.getItem('referenceDocuments');
+                if (stored) return JSON.parse(stored);
+                const backup = localStorage.getItem('referenceDocuments_backup');
+                if (backup) return JSON.parse(backup);
+            } catch(e) { console.warn('Error loading documents from storage:', e); }
+            return [];
+        })();
         let trainingRequests = []; // Demandes de formation en attente
         let _presentationMode = false;
         let _presentationConfig = (() => {
@@ -16677,9 +16685,8 @@
                 const dbRequest = indexedDB.open('AtelierDB', 1);
 
                 dbRequest.onerror = () => {
-                    console.warn('IndexedDB failed - documents kept in memory only');
-                    toast('⚠️ Documents kept in memory (IndexedDB unavailable)', 'warning');
-                    // Don't attempt localStorage - it's likely full
+                    console.warn('IndexedDB failed - falling back to localStorage');
+                    saveDocumentsToLocalStorage();
                 };
 
                 dbRequest.onsuccess = (e) => {
@@ -16708,10 +16715,17 @@
                         store.add(doc);
                     });
 
-                    transaction.oncomplete = () => db.close();
+                    transaction.oncomplete = () => {
+                        db.close();
+                        // Also save to localStorage as backup
+                        try {
+                            localStorage.setItem('referenceDocuments_backup', JSON.stringify(referenceDocuments));
+                        } catch(e) { console.warn('localStorage backup failed'); }
+                    };
                     transaction.onerror = () => {
                         console.error('Transaction failed:', transaction.error);
                         db.close();
+                        saveDocumentsToLocalStorage();
                     };
                 };
 
@@ -16723,8 +16737,38 @@
                 };
             } catch(err) {
                 console.warn('IndexedDB error:', err);
-                toast('⚠️ Documents kept in memory (storage unavailable)', 'warning');
-                // Don't attempt localStorage - it's likely full
+                saveDocumentsToLocalStorage();
+            }
+        }
+
+        function saveDocumentsToLocalStorage() {
+            try {
+                localStorage.setItem('referenceDocuments', JSON.stringify(referenceDocuments));
+                toast('✅ Documents sauvegardés', 'success');
+            } catch(e) {
+                console.error('localStorage full or unavailable:', e);
+                toast('⚠️ Stockage plein - documents en mémoire uniquement', 'warning');
+            }
+        }
+
+        function loadReferenceDocumentsFromStorage() {
+            try {
+                // Try localStorage first
+                const stored = localStorage.getItem('referenceDocuments');
+                if (stored) {
+                    referenceDocuments = JSON.parse(stored);
+                    console.log('Documents chargés depuis localStorage');
+                    return;
+                }
+                // Try backup
+                const backup = localStorage.getItem('referenceDocuments_backup');
+                if (backup) {
+                    referenceDocuments = JSON.parse(backup);
+                    console.log('Documents chargés depuis backup localStorage');
+                    return;
+                }
+            } catch(e) {
+                console.warn('Erreur chargement localStorage:', e);
             }
         }
 
