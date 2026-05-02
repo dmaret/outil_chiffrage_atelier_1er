@@ -1024,9 +1024,7 @@
         /* Tabs drag-to-reorder (admin mode) */
         body.admin-mode .tab { cursor: grab; }
         body.admin-mode .tab:active { cursor: grabbing; }
-        /* Brighten other tabs during drag instead of dimming dragged tab */
-        body.admin-mode.tab-dragging { background: transparent; }
-        .tab.tab-drag-over { opacity: 0.75; background-color: #e8f4f8 !important; }
+        .tab.tab-drag-over { opacity: 0.85; background: #d8eeff !important; }
         .tab.tab-drop-before { box-shadow: -3px 0 0 0 #4e9af1; }
         .tab.tab-drop-after  { box-shadow:  3px 0 0 0 #4e9af1; }
         .tabs-drag-hint { display:none; font-size:0.7em; color:#8aacbc; padding:0 8px; line-height:1; white-space:nowrap; }
@@ -5385,17 +5383,6 @@
                     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
                         <button class="btn btn-success btn-small" onclick="openTabProfileModal()">➕ Nouveau profil</button>
                         <button class="btn btn-secondary btn-small" onclick="resetTabProfile()">🔄 Afficher tous les onglets</button>
-                    </div>
-                </div>
-
-                <div class="section admin-section" style="display:none; border-left: 4px solid #e8a87c;">
-                    <h2>🔀 Réorganiser les onglets <span style="background:#e8a87c;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
-                    <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Glissez-déposez les onglets pour changer leur ordre. Cet ordre sera sauvegardé pour tous les utilisateurs.</p>
-                    <div id="tabsOrderContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
-                        <!-- Rendu par renderTabsOrderEditor() -->
-                    </div>
-                    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
-                        <button class="btn btn-secondary btn-small" onclick="resetTabsOrder()">🔄 Ordre par défaut</button>
                     </div>
                 </div>
 
@@ -10184,7 +10171,9 @@
         function getStoredTabsOrder() {
             try {
                 const stored = localStorage.getItem('tabsOrder');
-                return stored ? JSON.parse(stored) : null;
+                const parsed = stored ? JSON.parse(stored) : null;
+                // Return null if empty or invalid so we fall back to defaultOrder
+                return (Array.isArray(parsed) && parsed.length > 0) ? parsed : null;
             } catch(e) { return null; }
         }
 
@@ -22629,8 +22618,8 @@
                     <h2>Formation CEA</h2>
                     <h3 style="font-size:1.1em;color:#27ae60;margin-bottom:12px;">Module logistique &amp; gestes</h3>
                     <p class="training-subtitle">Parcours d'apprentissage : flux opérationnels, quiz, validation des compétences clés.</p>
-                    <button class="btn-training" style="background:linear-gradient(135deg,#27ae60,#1a7a40);" onclick="document.getElementById('authOverlay') && (document.getElementById('authOverlay').style.display='none'); switchTab('formation-logistique'); setTimeout(()=>document.getElementById('learnerFormationSelect')?.focus(), 400);">🚀 Accéder à la formation</button>
-                    <p class="training-footer">Réservé aux apprenants — accès direct sans connexion admin requise</p>
+                    <button class="btn-training" style="background:linear-gradient(135deg,#27ae60,#1a7a40);" onclick="openFormationLogin()">🚀 Accéder à la formation</button>
+                    <p class="training-footer">Connexion requise — utilisez votre groupe et mot de passe</p>
                 </div>`;
             }
 
@@ -23012,6 +23001,60 @@
                 recordLoginAttempt(groupId, false);
             }
         }
+
+        // ── Formation Login ────────────────────────────────────────
+        function openFormationLogin() {
+            const modal = document.getElementById('formationLoginModal');
+            if (!modal) return;
+            // Populate group selector
+            const sel = document.getElementById('formationLoginGroup');
+            sel.innerHTML = '<option value="">— Sélectionnez votre groupe —</option>' +
+                authGroups.map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join('');
+            document.getElementById('formationLoginPassword').value = '';
+            document.getElementById('formationLoginError').textContent = '';
+            modal.style.display = 'flex';
+            setTimeout(() => sel.focus(), 100);
+        }
+
+        function closeFormationLogin() {
+            const modal = document.getElementById('formationLoginModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function toggleFormationPwd() {
+            const inp = document.getElementById('formationLoginPassword');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        }
+
+        async function submitFormationLogin() {
+            const groupId = document.getElementById('formationLoginGroup').value;
+            const password = document.getElementById('formationLoginPassword').value;
+            const errEl = document.getElementById('formationLoginError');
+
+            if (!groupId) { errEl.textContent = 'Choisissez un groupe.'; return; }
+            if (!password) { errEl.textContent = 'Entrez votre mot de passe.'; return; }
+
+            const group = authGroups.find(g => g.id === groupId);
+            if (!group) { errEl.textContent = 'Groupe introuvable.'; return; }
+
+            if (!group.passwordHash) {
+                // Premier accès : définit le mot de passe
+                const hash = await hashPassword(password);
+                group.passwordHash = hash;
+                localStorage.setItem('authGroups', JSON.stringify(authGroups));
+            }
+
+            const valid = await verifyPassword(password, group.passwordHash);
+            if (!valid) { errEl.textContent = 'Mot de passe incorrect.'; return; }
+
+            closeFormationLogin();
+            if (document.getElementById('authOverlay')) {
+                document.getElementById('authOverlay').style.display = 'none';
+            }
+            switchTab('formation-logistique');
+            setTimeout(() => document.getElementById('learnerFormationSelect')?.focus(), 400);
+        }
+        // ──────────────────────────────────────────────────────────
 
         function doLogout() {
             sessionStorage.removeItem('authSession');
@@ -32341,6 +32384,27 @@
             document.addEventListener('DOMContentLoaded', updateOnlineUI);
         })();
     </script>
+
+    <!-- Modal login Formation -->
+    <div id="formationLoginModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;align-items:center;justify-content:center;" onclick="if(event.target===this)closeFormationLogin()">
+        <div style="background:#fff;border-radius:16px;padding:32px;max-width:380px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,0.2);text-align:center;">
+            <div style="font-size:3em;margin-bottom:8px;">🎓</div>
+            <h2 style="margin:0 0 4px;color:#1a5c35;font-size:1.4em;">Formation CEA</h2>
+            <p style="color:#7a9db1;font-size:0.9em;margin-bottom:20px;">Identifiez-vous pour accéder au module</p>
+            <select id="formationLoginGroup" style="width:100%;padding:10px;border:1.5px solid #c0d8c0;border-radius:8px;font-size:0.95em;margin-bottom:12px;background:#f8fff8;">
+                <option value="">— Sélectionnez votre groupe —</option>
+            </select>
+            <div style="position:relative;margin-bottom:16px;">
+                <input type="password" id="formationLoginPassword" placeholder="Mot de passe du groupe"
+                    style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid #c0d8c0;border-radius:8px;font-size:0.95em;box-sizing:border-box;"
+                    onkeydown="if(event.key==='Enter')submitFormationLogin()">
+                <button onclick="toggleFormationPwd()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1em;" title="Voir le mot de passe">👁️</button>
+            </div>
+            <p id="formationLoginError" style="color:#c0392b;font-size:0.85em;margin-bottom:12px;min-height:18px;"></p>
+            <button onclick="submitFormationLogin()" style="width:100%;padding:12px;background:linear-gradient(135deg,#27ae60,#1a7a40);color:#fff;border:none;border-radius:8px;font-size:1em;font-weight:700;cursor:pointer;margin-bottom:10px;">Accéder à la formation</button>
+            <button onclick="closeFormationLogin()" style="width:100%;padding:10px;background:#f0f4f8;color:#7a9db1;border:none;border-radius:8px;font-size:0.9em;cursor:pointer;">Annuler</button>
+        </div>
+    </div>
 
     <!-- Auth : écran de connexion -->
     <div id="authOverlay" class="auth-overlay" style="display:none;">
