@@ -23107,6 +23107,14 @@
             sessionStorage.removeItem('authSession');
             // Reset tab visibility
             document.querySelectorAll('#tabsBar .tab').forEach(btn => btn.style.display = '');
+            // Clean up Formation restricted mode if active
+            if (_formationRestrictedMode) {
+                _formationRestrictedMode = false;
+                const formationExitBtn = document.getElementById('formationExitBtn');
+                if (formationExitBtn) formationExitBtn.remove();
+                // Show any hidden breadcrumbs
+                document.querySelectorAll('.tab-content-breadcrumb').forEach(b => b.style.display = '');
+            }
             // Remove admin mode
             document.body.classList.remove('admin-mode');
             hideAdminSections();
