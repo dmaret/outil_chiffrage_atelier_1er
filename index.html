@@ -23076,12 +23076,12 @@
             const subTabs = document.querySelector('.tab-content.active .tab-content-breadcrumb');
             if (subTabs) subTabs.style.display = 'none';
 
-            // Ajouter bouton "Quitter la Formation" en bas à gauche
+            // Ajouter bouton "Quitter la Formation" sous les icônes du header
             if (!document.getElementById('formationExitBtn')) {
                 const btn = document.createElement('button');
                 btn.id = 'formationExitBtn';
-                btn.innerHTML = '🚪 Quitter la Formation';
-                btn.style.cssText = 'position:fixed;bottom:20px;left:20px;padding:10px 16px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;z-index:1000;';
+                btn.innerHTML = '🚪 Quitter';
+                btn.style.cssText = 'position:fixed;top:50px;right:20px;padding:8px 12px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.85em;cursor:pointer;z-index:1000;';
                 btn.onclick = exitFormationRestrictedMode;
                 document.body.appendChild(btn);
             }
