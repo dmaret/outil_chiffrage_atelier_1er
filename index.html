@@ -23003,6 +23003,8 @@
         }
 
         // ── Formation Login ────────────────────────────────────────
+        let _formationRestrictedMode = false;  // Flag pour mode Formation seul
+
         function openFormationLogin() {
             const modal = document.getElementById('formationLoginModal');
             if (!modal) return;
@@ -23048,11 +23050,56 @@
             if (!valid) { errEl.textContent = 'Mot de passe incorrect.'; return; }
 
             closeFormationLogin();
+            _formationRestrictedMode = true;  // Active le mode restreint
+            enableFormationRestrictedMode();   // Cache les autres onglets
+
             if (document.getElementById('authOverlay')) {
                 document.getElementById('authOverlay').style.display = 'none';
             }
             switchTab('formation-logistique');
             setTimeout(() => document.getElementById('learnerFormationSelect')?.focus(), 400);
+        }
+
+        function enableFormationRestrictedMode() {
+            // Masquer tous les onglets sauf formation-logistique
+            document.querySelectorAll('.tab').forEach(tab => {
+                const onclick = tab.getAttribute('onclick') || '';
+                if (!onclick.includes('formation-logistique')) {
+                    tab.style.display = 'none';
+                }
+            });
+            // Masquer la barre de sous-onglets (Accueil, Formation logistique)
+            const subTabs = document.querySelector('.tab-content.active .tab-content-breadcrumb');
+            if (subTabs) subTabs.style.display = 'none';
+
+            // Ajouter bouton "Quitter la Formation" en haut
+            const header = document.querySelector('.header');
+            if (header && !document.getElementById('formationExitBtn')) {
+                const btn = document.createElement('button');
+                btn.id = 'formationExitBtn';
+                btn.innerHTML = '🚪 Quitter la Formation';
+                btn.style.cssText = 'position:fixed;top:20px;right:20px;padding:10px 16px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;z-index:1000;';
+                btn.onclick = exitFormationRestrictedMode;
+                document.body.appendChild(btn);
+            }
+        }
+
+        function exitFormationRestrictedMode() {
+            _formationRestrictedMode = false;
+            // Réafficher tous les onglets
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.style.display = '';
+            });
+            // Réafficher les sous-onglets
+            const subTabs = document.querySelectorAll('.tab-content .tab-content-breadcrumb');
+            subTabs.forEach(s => s.style.display = '');
+
+            // Supprimer le bouton de sortie
+            const btn = document.getElementById('formationExitBtn');
+            if (btn) btn.remove();
+
+            // Retour à l'accueil (ecran login)
+            document.getElementById('authOverlay').style.display = 'flex';
         }
         // ──────────────────────────────────────────────────────────
 
