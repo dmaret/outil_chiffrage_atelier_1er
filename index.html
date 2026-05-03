@@ -5675,7 +5675,10 @@
                     <div class="form-row" style="gap:12px;">
                         <div class="form-group" style="flex:1;">
                             <label>URL du document</label>
-                            <input type="text" id="docUrl" placeholder="https://drive.google.com/... ou https://exemple.com/document.pdf">
+                            <div style="display:flex;gap:8px;align-items:flex-end;">
+                                <input type="text" id="docUrl" placeholder="https://drive.google.com/... ou https://exemple.com/document.pdf" style="flex:1;">
+                                <button type="button" class="btn btn-secondary btn-small" onclick="openDocumentFilePicker()" title="Ouvrir le navigateur de fichiers">📁 Parcourir</button>
+                            </div>
                         </div>
                     </div>
                     <div style="text-align:right;">
@@ -16710,6 +16713,51 @@
                 };
             } catch(err) {
                 console.warn('IndexedDB load error:', err);
+            }
+        }
+
+        async function openDocumentFilePicker() {
+            try {
+                // Essayer d'abord avec l'API File System Access (moderne)
+                if (window.showOpenFilePicker) {
+                    const handles = await window.showOpenFilePicker({
+                        types: [
+                            { description: 'Documents', extensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'] }
+                        ],
+                        multiple: false
+                    });
+
+                    if (handles && handles[0]) {
+                        const file = await handles[0].getFile();
+                        document.getElementById('docUrl').value = file.name;
+                        toast(`📁 Fichier sélectionné: ${file.name}`, 'info');
+                    }
+                } else if (window.showDirectoryPicker) {
+                    // Fallback: parcourir un dossier
+                    const dirHandle = await window.showDirectoryPicker();
+                    document.getElementById('docUrl').value = dirHandle.name;
+                    toast(`📁 Dossier sélectionné: ${dirHandle.name}`, 'info');
+                } else {
+                    // Fallback ultime: input file standard
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.multiple = false;
+                    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
+                    input.onchange = (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                            document.getElementById('docUrl').value = file.name;
+                            toast(`📁 Fichier sélectionné: ${file.name}`, 'info');
+                        }
+                    };
+                    input.click();
+                }
+            } catch(err) {
+                // Annulation ou erreur
+                if (err.name !== 'AbortError') {
+                    console.error('File picker error:', err);
+                    toast('⚠️ Impossible d\'ouvrir le navigateur de fichiers', 'warning');
+                }
             }
         }
 
