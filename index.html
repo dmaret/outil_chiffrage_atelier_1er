@@ -15566,11 +15566,16 @@
                     ${docs.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">
                         ${docs.map(doc => {
                             const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
-                            const href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
                             const isPdf = doc.type === 'pdf' && doc.isFile;
+                            let href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
+                            let onclick = '';
+                            if (isPdf && !doc.fileData) {
+                                onclick = `onclick="openDocumentFromIDB(${doc.id},'${escapeHtml(doc.fileName||doc.title)}');return false;"`;
+                                href = '#';
+                            }
                             const downloadAttr = doc.isFile && doc.fileName && !isPdf ? `download="${escapeHtml(doc.fileName)}"` : '';
                             const targetAttr = !doc.isFile || isPdf ? 'target="_blank"' : '';
-                            return `<a href="${href}" ${targetAttr} ${downloadAttr} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;">${ico} ${escapeHtml(doc.title)}${doc.isFile && !isPdf ? ' ⬇' : ''}</a>`;
+                            return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${doc.isFile && !isPdf ? ' ⬇' : ''}</a>`;
                         }).join('')}
                     </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
                 </div>`;
@@ -15604,11 +15609,16 @@
                 ${docs.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">
                     ${docs.map(doc => {
                         const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
-                        const href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
                         const isPdf = doc.type === 'pdf' && doc.isFile;
+                        let href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
+                        let onclick = '';
+                        if (isPdf && !doc.fileData) {
+                            onclick = `onclick="openDocumentFromIDB(${doc.id},'${escapeHtml(doc.fileName||doc.title)}');return false;"`;
+                            href = '#';
+                        }
                         const downloadAttr = doc.isFile && doc.fileName && !isPdf ? `download="${escapeHtml(doc.fileName)}"` : '';
                         const targetAttr = !doc.isFile || isPdf ? 'target="_blank"' : '';
-                        return `<a href="${href}" ${targetAttr} ${downloadAttr} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;">${ico} ${escapeHtml(doc.title)}${doc.isFile && !isPdf ? ' ⬇' : ''}</a>`;
+                        return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${doc.isFile && !isPdf ? ' ⬇' : ''}</a>`;
                     }).join('')}
                 </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
             </div>`;
@@ -16589,9 +16599,68 @@
             } catch(e) { console.warn('localStorage parse error:', e); }
         }
 
+        // Load single document from IndexedDB by ID (for PDFs that need fileData)
+        function getDocumentFromIndexedDB(docId) {
+            return new Promise((resolve, reject) => {
+                const dbRequest = indexedDB.open('AtelierDB', ATELIER_DB_VERSION);
+                dbRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.close();
+                        resolve(null);
+                        return;
+                    }
+                    const tx = db.transaction(['documents'], 'readonly');
+                    const getReq = tx.objectStore('documents').get(docId);
+                    getReq.onsuccess = () => {
+                        db.close();
+                        resolve(getReq.result || null);
+                    };
+                    getReq.onerror = () => {
+                        db.close();
+                        reject(getReq.error);
+                    };
+                };
+                dbRequest.onerror = () => reject(dbRequest.error);
+            });
+        }
+
+        // Open PDF from IndexedDB when fileData is not in localStorage
+        async function openDocumentFromIDB(docId, fileName) {
+            try {
+                console.log('[PDF] Chargement depuis IndexedDB:', docId);
+                const doc = await getDocumentFromIndexedDB(docId);
+                if (!doc || !doc.fileData) {
+                    toast('❌ Document non trouvé dans IndexedDB', 'error');
+                    return;
+                }
+                const blob = _dataURLtoBlob(doc.fileData);
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                console.log('[PDF] Ouvert:', fileName);
+            } catch(err) {
+                console.error('[PDF] Erreur:', err);
+                toast('❌ Erreur lors du chargement du PDF', 'error');
+            }
+        }
+
+        // Convert data URL (base64) to Blob
+        function _dataURLtoBlob(dataUrl) {
+            const arr = dataUrl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            const n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            for (let i = 0; i < n; i++) {
+                u8arr[i] = bstr.charCodeAt(i);
+            }
+            return new Blob([u8arr], { type: mime });
+        }
+
         function loadReferenceDocuments() {
             // Charge d'abord depuis localStorage (rapide, immédiat)
             _loadFromLocalStorageFallback();
+            console.log('[ReferenceDocuments] Après localStorage:', referenceDocuments.length, 'doc(s)');
             renderReferenceDocuments();
 
             // Puis essaie IndexedDB pour avoir les données complètes (avec fileData)
@@ -16612,6 +16681,7 @@
                 dbRequest.onsuccess = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains('documents')) {
+                        console.log('[ReferenceDocuments] IndexedDB existe pas le store "documents"');
                         db.close();
                         return;
                     }
@@ -16620,9 +16690,11 @@
                     const getAllRequest = store.getAll();
                     getAllRequest.onsuccess = () => {
                         const idbDocs = getAllRequest.result || [];
+                        console.log('[ReferenceDocuments] IndexedDB trouvé:', idbDocs.length, 'doc(s)');
                         // Si IndexedDB a des données, l'utiliser (plus complet avec fileData)
                         if (idbDocs.length > 0) {
                             referenceDocuments = idbDocs;
+                            console.log('[ReferenceDocuments] Utilisé IndexedDB, total:', referenceDocuments.length);
                             renderReferenceDocuments();
                         }
                         db.close();
