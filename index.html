@@ -5664,19 +5664,20 @@
                         </div>
                         <div class="form-group">
                             <label>Type</label>
-                            <select id="docType">
+                            <select id="docType" onchange="updateDocInputLabel()">
                                 <option value="pdf">📄 PDF</option>
                                 <option value="link">🔗 Lien web</option>
                                 <option value="video">🎥 Vidéo</option>
+                                <option value="folder">📁 Dossier local</option>
                                 <option value="other">📦 Autre</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-row" style="gap:12px;">
                         <div class="form-group" style="flex:1;">
-                            <label>URL du document</label>
+                            <label id="docInputLabel">URL du document</label>
                             <input type="text" id="docUrl" placeholder="https://drive.google.com/... ou https://exemple.com/document.pdf">
-                            <p style="font-size:0.8em;color:#7a9db1;margin-top:4px;">💡 Pour un dossier local, utilise le <strong>générateur de raccourcis</strong> ci-dessous</p>
+                            <p id="docUrlHint" style="font-size:0.8em;color:#7a9db1;margin-top:4px;">💡 Pour un dossier local, utilise le <strong>générateur de raccourcis</strong> ci-dessous</p>
                         </div>
                     </div>
                     <div style="text-align:right;">
@@ -12642,7 +12643,7 @@
 
             if (tabName === 'dashboard') renderDashboard();
             else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
-            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); }
+            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); updateDocInputLabel(); }
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
             else if (tabName === 'clients') renderClients();
@@ -16838,6 +16839,23 @@
             }
         }
 
+        function updateDocInputLabel() {
+            const type = document.getElementById('docType').value;
+            const label = document.getElementById('docInputLabel');
+            const hint = document.getElementById('docUrlHint');
+            const input = document.getElementById('docUrl');
+
+            if (type === 'folder') {
+                label.textContent = 'Chemin du dossier';
+                input.placeholder = 'Ex: /Users/davie/Documents/formation ou C:\\Users\\davie\\Documents\\formation';
+                hint.innerHTML = '💡 Copie le chemin depuis le Finder/Explorateur (cmd+C ou shift+cmd+C sur Mac)';
+            } else {
+                label.textContent = 'URL du document';
+                input.placeholder = 'https://drive.google.com/... ou https://exemple.com/document.pdf';
+                hint.innerHTML = '💡 Pour un dossier local, utilise le <strong>générateur de raccourcis</strong> ci-dessous';
+            }
+        }
+
         function addReferenceDocument() {
             const title = document.getElementById('docTitle')?.value.trim();
             const url = document.getElementById('docUrl')?.value.trim();
@@ -16848,11 +16866,37 @@
                 return;
             }
             if (!url) {
-                toast('⚠️ Veuillez entrer une URL valide', 'warning');
+                toast('⚠️ Veuillez entrer une URL ou un chemin de dossier', 'warning');
                 return;
             }
 
-            // Normalize URL - require valid web URL
+            // Handle folder type differently
+            if (type === 'folder') {
+                // For folders, just store the path as-is
+                const doc = {
+                    id: Date.now(),
+                    title: title,
+                    url: url,
+                    type: type,
+                    isFile: false,
+                    createdAt: new Date().toISOString().split('T')[0]
+                };
+
+                referenceDocuments.push(doc);
+                saveReferenceDocuments();
+                renderReferenceDocuments();
+
+                document.getElementById('docTitle').value = '';
+                document.getElementById('docUrl').value = '';
+                document.getElementById('docType').value = 'pdf';
+                updateDocInputLabel();
+
+                toast(`✅ Document dossier "${title}" ajouté avec succès!`, 'success');
+                logAction(`Ajout document dossier: ${title}`, 'CREATE');
+                return;
+            }
+
+            // Normalize URL for web types
             let normalizedUrl = url;
             const hasProtocol = url.match(/^https?:\/\//i);
 
@@ -16868,11 +16912,11 @@
                     throw new Error('Invalid hostname');
                 }
             } catch(e) {
-                toast('❌ Veuillez entrer une URL web valide (ex: https://drive.google.com/...). Pour un dossier local, utilisez le générateur de raccourcis.', 'error');
+                toast('❌ Veuillez entrer une URL web valide (ex: https://drive.google.com/...)', 'error');
                 return;
             }
 
-            // Create document with URL only
+            // Create document with URL
             const doc = {
                 id: Date.now(),
                 title: title,
@@ -16889,9 +16933,36 @@
             document.getElementById('docTitle').value = '';
             document.getElementById('docUrl').value = '';
             document.getElementById('docType').value = 'pdf';
+            updateDocInputLabel();
 
             toast(`✅ Document "${title}" ajouté avec succès!`, 'success');
             logAction(`Ajout document référence: ${title}`, 'CREATE');
+        }
+
+        function showFolderPath(folderPath, title) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:20000;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+            const cleanPath = folderPath.replace(/\\'/g, "'");
+            const isWindows = cleanPath.includes(':\\');
+            const displayPath = isWindows ? cleanPath.replace(/\\/g, '\\') : cleanPath;
+
+            modal.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:24px;max-width:600px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                    <h3 style="margin:0 0 20px;color:#333;">📁 ${title}</h3>
+                    <p style="color:#666;margin-bottom:16px;font-size:0.95em;">Chemin du dossier:</p>
+                    <div style="background:#f5f9fc;border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:16px;word-break:break-all;font-family:monospace;font-size:0.9em;color:#333;">${displayPath}</div>
+                    <p style="color:#7a9db1;font-size:0.9em;margin-bottom:16px;">
+                        ${isWindows
+                            ? '💡 Copie ce chemin dans <strong>Explorateur</strong> (Windows) pour ouvrir le dossier'
+                            : '💡 Copie ce chemin dans <strong>Finder</strong> (Mac) ou utilise <strong>Terminal</strong> pour naviguer'}</p>
+                    <div style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button onclick="navigator.clipboard.writeText('${displayPath.replace(/'/g, "\\'")}'); toast('✅ Chemin copié!', 'success'); this.closest('div').parentElement.parentElement.style.display='none';" style="padding:10px 20px;background:#27ae60;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">📋 Copier le chemin</button>
+                        <button onclick="this.closest('div').parentElement.parentElement.style.display='none';" style="padding:10px 20px;background:#ddd;color:#333;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Fermer</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         function saveReferenceDocuments() {
@@ -17001,7 +17072,7 @@
             }
 
             noMsg.style.display = 'none';
-            const icons = { pdf: '📄', link: '🔗', video: '🎥', other: '📦' };
+            const icons = { pdf: '📄', link: '🔗', video: '🎥', folder: '📁', other: '📦' };
 
             container.innerHTML = `<table style="width:100%;">
                 <thead><tr>
@@ -17022,6 +17093,8 @@
                     let actionBtn = '';
                     if (doc.isFile) {
                         actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
+                    } else if (doc.type === 'folder') {
+                        actionBtn = `<button class="btn btn-small btn-secondary" onclick="showFolderPath('${doc.url.replace(/'/g, "\\'")}', '${doc.title.replace(/'/g, "\\'")}')" style="margin-right:8px;">📁 Afficher le chemin</button>`;
                     } else if (doc.url && !doc.url.includes('([A-Z]')) {
                         // Only show link if URL is valid (doesn't contain regex patterns)
                         actionBtn = `<a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>`;
@@ -17065,6 +17138,15 @@
                 document.body.appendChild(modal);
             }
 
+            const isFolder = doc.type === 'folder';
+            const inputLabel = isFolder ? 'Chemin du dossier' : 'URL ou lien (optionnel)';
+            const inputPlaceholder = isFolder
+                ? 'Ex: /Users/davie/Documents/formation ou C:\\Users\\davie\\Documents\\formation'
+                : 'www.exemple.com ou https://...';
+            const inputHint = isFolder
+                ? '💡 Copie le chemin depuis le Finder/Explorateur'
+                : '💡 Vous pouvez entrer juste www.exemple.com, https:// sera ajouté automatiquement';
+
             modal.innerHTML = `
                 <div style="background:white;border-radius:12px;padding:24px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
                     <h3 style="margin:0 0 20px;color:#333;">✏️ Éditer le document</h3>
@@ -17076,9 +17158,9 @@
 
                     ${!doc.isFile ? `
                     <div style="margin-bottom:16px;">
-                        <label style="display:block;font-weight:600;margin-bottom:8px;color:#555;">URL ou lien (optionnel)</label>
-                        <input type="text" id="editDocUrl" value="${doc.url}" placeholder="www.exemple.com ou https://..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
-                        <p style="font-size:0.85em;color:#7a9db1;margin:6px 0 0;">💡 Vous pouvez entrer juste www.exemple.com, https:// sera ajouté automatiquement</p>
+                        <label style="display:block;font-weight:600;margin-bottom:8px;color:#555;">${inputLabel}</label>
+                        <input type="text" id="editDocUrl" value="${doc.url}" placeholder="${inputPlaceholder}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
+                        <p style="font-size:0.85em;color:#7a9db1;margin:6px 0 0;">${inputHint}</p>
                     </div>
                     ` : ''}
 
@@ -17106,12 +17188,17 @@
             doc.title = newTitle;
 
             if (!doc.isFile && newUrl) {
-                // Normalize URL
-                let normalizedUrl = newUrl;
-                if (!newUrl.match(/^https?:\/\//i)) {
-                    normalizedUrl = 'https://' + newUrl;
+                if (doc.type === 'folder') {
+                    // For folders, just store the path as-is
+                    doc.url = newUrl;
+                } else {
+                    // For web documents, normalize URL
+                    let normalizedUrl = newUrl;
+                    if (!newUrl.match(/^https?:\/\//i)) {
+                        normalizedUrl = 'https://' + newUrl;
+                    }
+                    doc.url = normalizedUrl;
                 }
-                doc.url = normalizedUrl;
             }
 
             saveReferenceDocuments();
