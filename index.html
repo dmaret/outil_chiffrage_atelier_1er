@@ -8799,8 +8799,21 @@
                 const observations = await getFromIndexedDB('observations') || [];
                 const grouped = {};
 
-                // Group by CEA
+                // Get CEAs for current beneficiary
+                const ceaIdsForBenef = new Set();
+                if (_accompCurrentBenefId && jalons && Array.isArray(jalons)) {
+                    jalons.filter(j => j.beneficiaire_id === _accompCurrentBenefId).forEach(j => {
+                        if (j.cea_id) ceaIdsForBenef.add(j.cea_id);
+                    });
+                }
+
+                // Group observations by CEA, filtering for current beneficiary
                 observations.forEach(obs => {
+                    // If beneficiary is selected, only include their CEAs
+                    if (_accompCurrentBenefId && ceaIdsForBenef.size > 0 && !ceaIdsForBenef.has(obs.ceaId)) {
+                        return; // Skip observations not for this beneficiary
+                    }
+
                     if (!grouped[obs.ceaId]) {
                         grouped[obs.ceaId] = {
                             id: obs.ceaId,
@@ -8811,36 +8824,18 @@
                     grouped[obs.ceaId].observations.push(obs);
                 });
 
-                // Populate CEA filter dropdown from observations AND prestations
-                const filter = document.getElementById('accompCeaFilter');
-                const ceaIds = Object.keys(grouped);
-
-                // Also add CEA from prestations if not already present
-                if (prestationsSauvegardees && Array.isArray(prestationsSauvegardees)) {
-                    prestationsSauvegardees.forEach(prest => {
-                        if (prest.beneficiaires && Array.isArray(prest.beneficiaires) && prest.beneficiaires.length > 0) {
-                            prest.beneficiaires.forEach(cea => {
-                                if (cea.id && !grouped[cea.id]) {
-                                    grouped[cea.id] = {
-                                        id: cea.id,
-                                        name: `${cea.prenom || ''} ${cea.nom || ''}`.trim() || cea.id,
-                                        observations: []
-                                    };
-                                }
-                            });
+                // Also add CEAs from jalons even if no observations yet
+                if (_accompCurrentBenefId) {
+                    ceaIdsForBenef.forEach(ceaId => {
+                        if (!grouped[ceaId]) {
+                            grouped[ceaId] = {
+                                id: ceaId,
+                                name: ceaId,
+                                observations: []
+                            };
                         }
                     });
                 }
-
-                // Add all CEA to dropdown
-                Object.keys(grouped).forEach(id => {
-                    if (!filter.querySelector(`option[value="${id}"]`)) {
-                        const opt = document.createElement('option');
-                        opt.value = id;
-                        opt.textContent = grouped[id].name;
-                        filter.appendChild(opt);
-                    }
-                });
 
                 renderAccompCards(grouped);
             } catch (err) {
@@ -11712,6 +11707,32 @@
         }
 
         let _accompCurrentBenefId = null;
+
+        function renderAccompClinicalCards() {
+            const benefId = _accompCurrentBenefId;
+            const filter = document.getElementById('accompCeaFilter');
+
+            if (!filter) return;
+
+            // Reset and populate filter with CEAs for current beneficiary
+            filter.innerHTML = '<option value="">-- Tous CEA --</option>';
+
+            // Get beneficiary's jalons/CEAs
+            if (benefId && jalons && Array.isArray(jalons)) {
+                const benefJalons = jalons.filter(j => j.beneficiaire_id === benefId);
+                const ceaIds = new Set(benefJalons.map(j => j.cea_id).filter(Boolean));
+
+                ceaIds.forEach(ceaId => {
+                    const opt = document.createElement('option');
+                    opt.value = ceaId;
+                    opt.textContent = escapeHtml(ceaId);
+                    filter.appendChild(opt);
+                });
+            }
+
+            // Load and display observations
+            loadAccompObservations();
+        }
 
         function switchAccompSub(sub) {
             document.querySelectorAll('.accomp-pill').forEach(b => {
