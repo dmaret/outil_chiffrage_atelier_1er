@@ -23069,9 +23069,18 @@
                     tab.style.display = 'none';
                 }
             });
-            // Masquer la barre de sous-onglets (Accueil, Formation logistique)
-            const subTabs = document.querySelector('.tab-content.active .tab-content-breadcrumb');
-            if (subTabs) subTabs.style.display = 'none';
+            // Désactiver le lien "Accueil" dans le breadcrumb
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            if (breadcrumbs) {
+                const links = breadcrumbs.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.pointerEvents = 'none';
+                    link.style.color = '#999';
+                    link.style.cursor = 'not-allowed';
+                    link.style.opacity = '0.6';
+                    link.onclick = (e) => e.preventDefault();
+                });
+            }
 
             // Ajouter bouton "Quitter la Formation" en haut
             const header = document.querySelector('.header');
@@ -23079,7 +23088,7 @@
                 const btn = document.createElement('button');
                 btn.id = 'formationExitBtn';
                 btn.innerHTML = '🚪 Quitter la Formation';
-                btn.style.cssText = 'position:fixed;top:20px;right:20px;padding:10px 16px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;z-index:1000;';
+                btn.style.cssText = 'position:fixed;top:78px;right:180px;padding:10px 16px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;z-index:1000;';
                 btn.onclick = exitFormationRestrictedMode;
                 document.body.appendChild(btn);
             }
@@ -23091,9 +23100,18 @@
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.style.display = '';
             });
-            // Réafficher les sous-onglets
-            const subTabs = document.querySelectorAll('.tab-content .tab-content-breadcrumb');
-            subTabs.forEach(s => s.style.display = '');
+            // Réactiver le lien "Accueil" dans le breadcrumb
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            if (breadcrumbs) {
+                const links = breadcrumbs.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.pointerEvents = '';
+                    link.style.color = '';
+                    link.style.cursor = '';
+                    link.style.opacity = '';
+                    link.onclick = function(e) { switchTab('dashboard'); };
+                });
+            }
 
             // Supprimer le bouton de sortie
             const btn = document.getElementById('formationExitBtn');
@@ -23113,8 +23131,17 @@
                 _formationRestrictedMode = false;
                 const formationExitBtn = document.getElementById('formationExitBtn');
                 if (formationExitBtn) formationExitBtn.remove();
-                // Show any hidden breadcrumbs
-                document.querySelectorAll('.tab-content-breadcrumb').forEach(b => b.style.display = '');
+                // Réactiver les liens du breadcrumb
+                const breadcrumbs = document.getElementById('breadcrumbs');
+                if (breadcrumbs) {
+                    const links = breadcrumbs.querySelectorAll('a');
+                    links.forEach(link => {
+                        link.style.pointerEvents = '';
+                        link.style.color = '';
+                        link.style.cursor = '';
+                        link.style.opacity = '';
+                    });
+                }
             }
             // Remove admin mode
             document.body.classList.remove('admin-mode');
