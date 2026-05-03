@@ -16137,7 +16137,7 @@
             html += `</div>`;
 
             // Display selected learner's card
-            const selectedLearner = learnersList.find(l => l.id === selectedLearnerId);
+            const selectedLearner = learnersList.find(l => String(l.id) === String(selectedLearnerId));
             if (selectedLearner) {
                 const gestesInCategory = catalogueGestes.filter(g => g.categorie === selectedLearner.category);
                 const completed = Object.values(selectedLearner.progress).filter(v => v).length;
@@ -16266,7 +16266,7 @@
 
         function deleteLearner(learnerId) {
             toastConfirm('Supprimer cet apprenant?', () => {
-                const l = learnersList.find(x => x.id === learnerId);
+                const l = learnersList.find(x => String(x.id) === String(learnerId));
                 pushUndoSnapshot(`Suppression apprenant : ${l?.name || learnerId}`);
                 learnersList = learnersList.filter(l => l.id !== learnerId);
                 delete formationProgress[learnerId];
@@ -16277,7 +16277,7 @@
         }
 
         function openLearnerProgress(learnerId) {
-            const learner = learnersList.find(l => l.id === learnerId);
+            const learner = learnersList.find(l => String(l.id) === String(learnerId));
             if (!learner) return;
 
             const gestesInCategory = catalogueGestes.filter(g => g.categorie === learner.category);
@@ -16335,7 +16335,7 @@
         }
 
         function openEditLearner(learnerId) {
-            const learner = learnersList.find(l => l.id === learnerId);
+            const learner = learnersList.find(l => String(l.id) === String(learnerId));
             if (!learner) return;
 
             // Ensure assignedDocuments exists (for backward compatibility)
@@ -16451,7 +16451,7 @@
         }
 
         function saveLearnerEdits(learnerId) {
-            const learner = learnersList.find(l => l.id === learnerId);
+            const learner = learnersList.find(l => String(l.id) === String(learnerId));
             if (!learner) return;
 
             const name = document.getElementById('edit-learner-name').value.trim();
@@ -16475,24 +16475,30 @@
         }
 
         function toggleDocumentAssignment(learnerId, docId, isAssigned) {
-            const learner = learnersList.find(l => l.id === learnerId);
-            if (!learner) return;
+            // Comparaison robuste : learnerId vient en string depuis le DOM, l.id est un number
+            const learner = learnersList.find(l => String(l.id) === String(learnerId));
+            if (!learner) {
+                console.warn('Learner non trouvé pour assignation document:', learnerId);
+                return;
+            }
 
             if (!learner.assignedDocuments) learner.assignedDocuments = [];
 
+            // Normaliser docId pour la comparaison
+            const docIdNum = Number(docId);
             if (isAssigned) {
-                if (!learner.assignedDocuments.includes(docId)) {
-                    learner.assignedDocuments.push(docId);
+                if (!learner.assignedDocuments.some(id => Number(id) === docIdNum)) {
+                    learner.assignedDocuments.push(docIdNum);
                 }
             } else {
-                learner.assignedDocuments = learner.assignedDocuments.filter(id => id !== docId);
+                learner.assignedDocuments = learner.assignedDocuments.filter(id => Number(id) !== docIdNum);
             }
 
             saveFormationData();
         }
 
         function toggleGestureComplete(learnerId, code, completed) {
-            const learner = learnersList.find(l => l.id === learnerId);
+            const learner = learnersList.find(l => String(l.id) === String(learnerId));
             if (!learner) return;
 
             learner.progress[code] = completed;
