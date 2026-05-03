@@ -8145,6 +8145,21 @@
         let configUnites = ['Palette', 'Carton', 'Pièce'];
         let configTypesStock = ['entree', 'sortie', 'transfert', 'inventaire'];
         let isSuperUser = false;
+
+        // Get existing emplacements with stock
+        function getExistingEmplacements() {
+            const existing = new Set();
+            if (stockActuel) {
+                Object.values(stockActuel).forEach(item => {
+                    if (item.emplacements) {
+                        Object.keys(item.emplacements).forEach(loc => existing.add(loc));
+                    }
+                });
+            }
+            // Combine with configured defaults
+            const all = new Set([...configEmplacements, ...existing]);
+            return Array.from(all).sort();
+        }
         let authGroups = [];
         let currentUserSession = null;
         let loginConfig = { widgets: [], messageTitle: 'Bienvenue', messageText: '', messageBg: '#f0f7ff' };
@@ -20270,19 +20285,21 @@
                 if (currentUnite) selUnite.value = currentUnite;
             }
 
-            // Emplacement source
+            // Emplacement source (with existing locations)
             const selEmpl = document.getElementById('emplacementStock');
             if (selEmpl) {
                 const currentEmpl = selEmpl.value;
-                selEmpl.innerHTML = configEmplacements.map(e => `<option value="${e}">${e}</option>`).join('');
+                const emplacements = getExistingEmplacements();
+                selEmpl.innerHTML = emplacements.map(e => `<option value="${e}">${e}</option>`).join('');
                 if (currentEmpl) selEmpl.value = currentEmpl;
             }
             // Emplacement destination (transfert)
             const selDest = document.getElementById('destEmplacementStock');
             if (selDest) {
                 const currentDest = selDest.value;
+                const emplacements = getExistingEmplacements();
                 selDest.innerHTML = '<option value="">-- Choisir destination --</option>' +
-                    configEmplacements.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+                    emplacements.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
                 if (currentDest) selDest.value = currentDest;
             }
             adaptMouvementForm();
