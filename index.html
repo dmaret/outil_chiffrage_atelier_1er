@@ -15576,7 +15576,7 @@
                             if (isFile) {
                                 label = canOpenInBrowser ? '' : ' ⬇';
                                 action = canOpenInBrowser
-                                    ? `onclick="openDocument('${doc.fileData.replace(/'/g, "\\'")}', '${escapeHtml(doc.fileName)}');return false;"`
+                                    ? `onclick="openDocument(${doc.id});return false;"`
                                     : `href="${doc.fileData}" download="${escapeHtml(doc.fileName)}"`;
                             } else {
                                 label = '';
@@ -15622,7 +15622,7 @@
                         if (isFile) {
                             label = canOpenInBrowser ? '📄' : '📥';
                             action = canOpenInBrowser
-                                ? `onclick="openDocument('${doc.fileData.replace(/'/g, "\\'")}', '${escapeHtml(doc.fileName)}');return false;"`
+                                ? `onclick="openDocument(${doc.id});return false;"`
                                 : `href="${doc.fileData}" download="${escapeHtml(doc.fileName)}"`;
                         } else {
                             label = doc.type==='video'?'🎥':'🔗';
@@ -16636,6 +16636,16 @@
         }
 
         // Open PDF from IndexedDB when fileData is not in localStorage
+        function openDocument(docId) {
+            const doc = referenceDocuments.find(d => d.id === docId);
+            if (!doc || !doc.fileData) {
+                toast('❌ Document introuvable', 'error');
+                return;
+            }
+            const win = window.open();
+            win.document.write(`<iframe style="width:100%;height:100%;border:none;" src="${doc.fileData}"></iframe>`);
+        }
+
         async function openDocumentFromIDB(docId, fileName) {
             try {
                 console.log('[PDF] Chargement depuis IndexedDB:', docId);
@@ -17004,7 +17014,7 @@
                         const fileType = doc.fileType || '';
                         const canOpen = fileType.includes('pdf') || fileType.includes('image') || fileType.startsWith('text');
                         if (canOpen) {
-                            actionBtn = `<button onclick="openDocument('${doc.fileData.replace(/'/g, "\\'")}', '${doc.fileName.replace(/'/g, "\\'")}');" class="btn btn-small btn-secondary" style="margin-right:8px;">📄 Ouvrir</button>`;
+                            actionBtn = `<button onclick="openDocument(${doc.id});" class="btn btn-small btn-secondary" style="margin-right:8px;">📄 Ouvrir</button>`;
                         } else {
                             actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
                         }
