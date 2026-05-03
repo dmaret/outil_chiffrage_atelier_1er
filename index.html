@@ -16746,43 +16746,17 @@
             }
         }
 
-        async function openDocumentFilePicker() {
-            try {
-                // Utiliser File System Access API pour garder l'accès en mémoire
-                if (window.showDirectoryPicker) {
-                    const dirHandle = await window.showDirectoryPicker();
-
-                    // Demander l'accès persistant
-                    if (dirHandle.requestPermission) {
-                        const permission = await dirHandle.requestPermission({ mode: 'read' });
-                        if (permission !== 'granted') {
-                            toast('⚠️ Accès au dossier refusé', 'warning');
-                            return;
-                        }
-                    }
-
-                    // Sauvegarder le handle avec un ID unique
-                    const handleId = 'handle_' + Date.now();
-                    localStorage.setItem(handleId, JSON.stringify({ name: dirHandle.name }));
-
-                    // Créer un identifiant spécial pour ce raccourci
-                    const shortcutUrl = 'shortcut://' + handleId;
-                    document.getElementById('docUrl').value = shortcutUrl;
-
-                    // Stocker le handle en mémoire (global)
-                    window.fileSystemHandles = window.fileSystemHandles || {};
-                    window.fileSystemHandles[handleId] = dirHandle;
-
-                    toast(`✅ Raccourci mémorisé: ${dirHandle.name}`, 'success');
-                } else {
-                    toast('⚠️ File System Access non supporté sur ce navigateur', 'warning');
+        function openDocumentFilePicker() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                    document.getElementById('docUrl').value = file.name;
+                    toast(`✅ Fichier sélectionné: ${file.name}`, 'success');
                 }
-            } catch(err) {
-                if (err.name !== 'AbortError') {
-                    console.error('File picker error:', err);
-                    toast('⚠️ Erreur lors de la sélection', 'warning');
-                }
-            }
+            };
+            input.click();
         }
 
         function downloadShortcutWindows() {
