@@ -8684,8 +8684,8 @@
             if (!isEditing) delete observation.updatedAt;
 
             try {
-                // Save to IndexedDB
-                await saveToIndexedDB('observations', observation);
+                // Save to IndexedDB (use atelier_db, not quizzes_db)
+                await saveToIndexedDB('observations', observation, 'atelier_db');
                 // Sync to cloud if available
                 if (cloudMode && cloudAPI.token) {
                     await cloudAPI.saveClinicalRecord(observation.ceaId, observation);
