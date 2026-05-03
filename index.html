@@ -5641,6 +5641,15 @@
                     </div>
                 </div>
 
+                <div class="section" style="background:#fff9e6;border-left:4px solid #e67e22;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <h2 style="margin:0;">🎓 Gérer les Quiz</h2>
+                        <button class="btn btn-success" onclick="openQuizAdminModal()">➕ Créer un quiz</button>
+                    </div>
+                    <p style="color:#8a7a5a;margin-bottom:12px;">Créez, modifiez et organisez les quiz personnalisés pour vos apprenants</p>
+                    <div id="adminQuizzesContainer" style="margin-top:16px;"></div>
+                </div>
+
                 <div class="section">
                     <h2>👨‍🎓 Gestion des apprenants</h2>
                     <div class="form-row">
@@ -12675,7 +12684,7 @@
 
             if (tabName === 'dashboard') renderDashboard();
             else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
-            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); updateDocInputLabel(); }
+            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); }
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
             else if (tabName === 'clients') renderClients();
@@ -15723,6 +15732,33 @@
         function loadQuizzes() {
             const learnerTab = document.querySelector('[data-tab="learner"]');
             if (learnerTab) learnerTab.click();
+        }
+
+        async function renderAdminQuizzes() {
+            const container = document.getElementById('adminQuizzesContainer');
+            if (!container) return;
+
+            const quizzes = await loadCustomQuizzes();
+            if (!quizzes || quizzes.length === 0) {
+                container.innerHTML = '<p style="color:#aaa;font-style:italic;">Aucun quiz personnalisé créé. Cliquez sur "➕ Créer un quiz" pour en ajouter.</p>';
+                return;
+            }
+
+            const quizHtml = quizzes.map(quiz => `
+                <div style="background:white;border-radius:10px;padding:14px;border:2px solid #e67e22;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:#2d3e50;font-size:0.95em;">${escapeHtml(quiz.title)}</div>
+                        <div style="font-size:0.8em;color:#888;margin-top:3px;">${escapeHtml(quiz.category)} — ${quiz.questions.length} question(s)</div>
+                        ${quiz.description ? `<div style="font-size:0.8em;color:#666;margin-top:3px;font-style:italic;">${escapeHtml(quiz.description)}</div>` : ''}
+                    </div>
+                    <div style="display:flex;gap:6px;flex-shrink:0;">
+                        <button onclick="openQuizAdminModal('${quiz.id}')" style="padding:6px 10px;border-radius:6px;border:1px solid #ddd;background:white;color:#666;cursor:pointer;font-size:0.8em;font-weight:600;">✏️ Modifier</button>
+                        <button onclick="if(confirm('Supprimer ce quiz?')) deleteCustomQuiz('${quiz.id}').then(() => renderAdminQuizzes())" style="padding:6px 10px;border-radius:6px;border:1px solid #e74c3c;background:white;color:#e74c3c;cursor:pointer;font-size:0.8em;font-weight:600;">🗑️ Supprimer</button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;">${quizHtml}</div>`;
         }
         }
 
