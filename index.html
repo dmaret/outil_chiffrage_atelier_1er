@@ -8847,6 +8847,10 @@
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     const db = request.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        resolve(key ? undefined : []);
+                        return;
+                    }
                     const tx = db.transaction([storeName], 'readonly');
                     const req = key ? tx.objectStore(storeName).get(key) : tx.objectStore(storeName).getAll();
                     req.onsuccess = () => resolve(req.result);
@@ -16356,7 +16360,7 @@
                 docsHtml = `
                     <div style="max-height:400px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;padding:12px;background:#f9f9f9;">
                         ${referenceDocuments.map(doc => {
-                            const isAssigned = learner.assignedDocuments.includes(doc.id);
+                            const isAssigned = (learner.assignedDocuments || []).includes(doc.id);
                             return `
                                 <label style="display:flex;gap:10px;align-items:start;padding:10px;border:1px solid #e8e8e8;border-radius:6px;margin-bottom:8px;cursor:pointer;background:#fff;transition:background 0.2s;">
                                     <input type="checkbox"
