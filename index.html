@@ -5041,6 +5041,7 @@
                 <div style="margin-top: 25px; text-align: center;">
                     <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
                     <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
+                    <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
                     <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis… <span class="kbd" data-kbd="p">Ctrl+P</span></button>
                 </div>
@@ -15568,16 +15569,20 @@
                     ${docs.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">
                         ${docs.map(doc => {
                             const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
-                            const isPdf = doc.type === 'pdf' && doc.isFile;
-                            let href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
-                            let onclick = '';
-                            if (isPdf && !doc.fileData) {
-                                onclick = `onclick="openDocumentFromIDB(${doc.id},'${escapeHtml(doc.fileName||doc.title)}');return false;"`;
-                                href = '#';
+                            const isFile = doc.isFile && doc.fileData;
+                            const fileType = doc.fileType || '';
+                            const canOpenInBrowser = fileType.includes('pdf') || fileType.includes('image') || fileType.startsWith('text');
+                            let href, attrs, label;
+                            if (isFile) {
+                                href = doc.fileData;
+                                attrs = canOpenInBrowser ? 'target="_blank"' : `download="${escapeHtml(doc.fileName)}"`;
+                                label = canOpenInBrowser ? '' : ' ⬇';
+                            } else {
+                                href = doc.url || '#';
+                                attrs = 'target="_blank"';
+                                label = '';
                             }
-                            const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
-                            const targetAttr = !doc.isFile && !isPdf ? 'target="_blank"' : '';
-                            return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
+                            return `<a href="${href}" ${attrs} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${label}</a>`;
                         }).join('')}
                     </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
                 </div>`;
@@ -15610,17 +15615,22 @@
                 <h4 style="margin:0 0 10px;color:#5a7b8f;">📎 Mes documents (${docs.length})</h4>
                 ${docs.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">
                     ${docs.map(doc => {
-                        const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
-                        const isPdf = doc.type === 'pdf' && doc.isFile;
-                        let href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
-                        let onclick = '';
-                        if (isPdf && !doc.fileData) {
-                            onclick = `onclick="openDocumentFromIDB(${doc.id},'${escapeHtml(doc.fileName||doc.title)}');return false;"`;
-                            href = '#';
+                        const isFile = doc.isFile && doc.fileData;
+                        const fileType = doc.fileType || '';
+                        const canOpenInBrowser = fileType.includes('pdf') || fileType.includes('image') || fileType.startsWith('text');
+                        let ico, label, attrs, href;
+                        if (isFile) {
+                            href = doc.fileData;
+                            ico = canOpenInBrowser ? '📄' : '📥';
+                            label = canOpenInBrowser ? '' : ' ⬇';
+                            attrs = canOpenInBrowser ? 'target="_blank"' : `download="${escapeHtml(doc.fileName)}"`;
+                        } else {
+                            href = doc.url || '#';
+                            ico = doc.type==='video'?'🎥':'🔗';
+                            label = '';
+                            attrs = 'target="_blank"';
                         }
-                        const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
-                        const targetAttr = !doc.isFile && !isPdf ? 'target="_blank"' : '';
-                        return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
+                        return `<a href="${href}" ${attrs} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${label}</a>`;
                     }).join('')}
                 </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
             </div>`;
@@ -16993,7 +17003,13 @@
 
                     let actionBtn = '';
                     if (doc.isFile) {
-                        actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
+                        const fileType = doc.fileType || '';
+                        const canOpen = fileType.includes('pdf') || fileType.includes('image') || fileType.startsWith('text');
+                        if (canOpen) {
+                            actionBtn = `<a href="${doc.fileData}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">📄 Ouvrir</a>`;
+                        } else {
+                            actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
+                        }
                     } else {
                         actionBtn = `<a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>`;
                     }
