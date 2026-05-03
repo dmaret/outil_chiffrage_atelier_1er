@@ -5656,28 +5656,29 @@
 
                 <div class="section">
                     <h2>📚 Documents de référence</h2>
-                    <p style="color:#7a9db1;margin-bottom:12px;">Ajoutez des liens vers vos documents (PDFs, liens web, vidéos, etc.)</p>
+                    <p style="color:#7a9db1;margin-bottom:12px;">Téléchargez vos documents ou ajoutez des liens web</p>
                     <div class="form-row">
-                        <div class="form-group">
+                        <div class="form-group" style="flex:2;">
                             <label>Titre du document</label>
                             <input type="text" id="docTitle" placeholder="Ex: Manuel de sécurité">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="flex:1;">
                             <label>Type</label>
                             <select id="docType" onchange="updateDocInputLabel()">
-                                <option value="pdf">📄 PDF</option>
+                                <option value="file">📥 Télécharger un fichier</option>
                                 <option value="link">🔗 Lien web</option>
-                                <option value="video">🎥 Vidéo</option>
-                                <option value="folder">📁 Dossier local</option>
-                                <option value="other">📦 Autre</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-row" style="gap:12px;">
                         <div class="form-group" style="flex:1;">
-                            <label id="docInputLabel">URL du document</label>
-                            <input type="text" id="docUrl" placeholder="https://drive.google.com/... ou https://exemple.com/document.pdf">
-                            <p id="docUrlHint" style="font-size:0.8em;color:#7a9db1;margin-top:4px;">💡 Pour un dossier local, utilise le <strong>générateur de raccourcis</strong> ci-dessous</p>
+                            <label id="docInputLabel">Sélectionner un fichier</label>
+                            <input type="file" id="docFile" style="display:none;">
+                            <div id="docFileDisplay" style="display:flex;gap:8px;align-items:center;">
+                                <button class="btn btn-small" onclick="document.getElementById('docFile').click()">📁 Choisir un fichier</button>
+                                <span id="docFileName" style="color:#7a9db1;font-size:0.9em;">Aucun fichier sélectionné</span>
+                            </div>
+                            <p id="docUrlHint" style="font-size:0.8em;color:#7a9db1;margin-top:4px;display:none;">Collez une URL web</p>
                         </div>
                     </div>
                     <div style="text-align:right;">
@@ -16719,41 +16720,110 @@
             const type = document.getElementById('docType').value;
             const label = document.getElementById('docInputLabel');
             const hint = document.getElementById('docUrlHint');
-            const input = document.getElementById('docUrl');
+            const fileDisplay = document.getElementById('docFileDisplay');
+            const fileInput = document.getElementById('docFile');
 
-            if (type === 'folder') {
-                label.textContent = 'Chemin du dossier';
-                input.placeholder = 'Ex: /Users/davie/Documents/formation ou C:\\Users\\davie\\Documents\\formation';
-                hint.innerHTML = '💡 Copie le chemin depuis le Finder/Explorateur (cmd+C ou shift+cmd+C sur Mac)';
+            if (type === 'file') {
+                label.textContent = 'Sélectionner un fichier';
+                fileDisplay.style.display = 'flex';
+                hint.style.display = 'none';
             } else {
                 label.textContent = 'URL du document';
-                input.placeholder = 'https://drive.google.com/... ou https://exemple.com/document.pdf';
-                hint.innerHTML = '💡 Pour un dossier local, utilise le <strong>générateur de raccourcis</strong> ci-dessous';
+                fileDisplay.style.display = 'none';
+                hint.style.display = 'block';
+                hint.innerHTML = '💡 Entrez une URL web valide';
             }
         }
 
+        // Handle file selection
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('docFile');
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files?.[0];
+                    const fileName = document.getElementById('docFileName');
+                    if (file) {
+                        fileName.textContent = `✅ ${file.name}`;
+                    }
+                });
+            }
+        });
+
         function addReferenceDocument() {
             const title = document.getElementById('docTitle')?.value.trim();
-            const url = document.getElementById('docUrl')?.value.trim();
-            const type = document.getElementById('docType')?.value || 'other';
+            const type = document.getElementById('docType')?.value || 'link';
 
             if (!title) {
                 toast('⚠️ Merci de remplir le titre du document', 'warning');
                 return;
             }
-            if (!url) {
-                toast('⚠️ Veuillez entrer une URL ou un chemin de dossier', 'warning');
-                return;
-            }
 
-            // Handle folder type differently
-            if (type === 'folder') {
-                // For folders, just store the path as-is
+            if (type === 'file') {
+                const fileInput = document.getElementById('docFile');
+                const file = fileInput?.files?.[0];
+                if (!file) {
+                    toast('⚠️ Veuillez sélectionner un fichier', 'warning');
+                    return;
+                }
+
+                showLoading();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const fileData = e.target.result;
+                    const doc = {
+                        id: Date.now(),
+                        title: title,
+                        fileName: file.name,
+                        fileType: file.type,
+                        fileData: fileData,
+                        type: 'file',
+                        isFile: true,
+                        createdAt: new Date().toISOString().split('T')[0]
+                    };
+
+                    referenceDocuments.push(doc);
+                    saveReferenceDocuments();
+                    renderReferenceDocuments();
+
+                    document.getElementById('docTitle').value = '';
+                    document.getElementById('docFile').value = '';
+                    document.getElementById('docFileName').textContent = 'Aucun fichier sélectionné';
+                    document.getElementById('docType').value = 'file';
+
+                    hideLoading();
+                    toast(`✅ Document "${title}" uploadé avec succès!`, 'success');
+                    logAction(`Upload document: ${title}`, 'CREATE');
+                };
+                reader.onerror = () => {
+                    hideLoading();
+                    toast(`❌ Erreur lors de la lecture du fichier`, 'error');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Handle web link
+                const url = document.getElementById('docUrl')?.value.trim();
+                if (!url) {
+                    toast('⚠️ Veuillez entrer une URL', 'warning');
+                    return;
+                }
+
+                let normalizedUrl = url;
+                if (!url.match(/^https?:\/\//i)) {
+                    normalizedUrl = 'https://' + url;
+                }
+
+                try {
+                    new URL(normalizedUrl);
+                } catch(e) {
+                    toast('❌ URL invalide', 'error');
+                    return;
+                }
+
                 const doc = {
                     id: Date.now(),
                     title: title,
-                    url: url,
-                    type: type,
+                    url: normalizedUrl,
+                    type: 'link',
                     isFile: false,
                     createdAt: new Date().toISOString().split('T')[0]
                 };
@@ -16764,55 +16834,12 @@
 
                 document.getElementById('docTitle').value = '';
                 document.getElementById('docUrl').value = '';
-                document.getElementById('docType').value = 'pdf';
+                document.getElementById('docType').value = 'file';
                 updateDocInputLabel();
 
-                toast(`✅ Document dossier "${title}" ajouté avec succès!`, 'success');
-                logAction(`Ajout document dossier: ${title}`, 'CREATE');
-                return;
+                toast(`✅ Lien "${title}" ajouté avec succès!`, 'success');
+                logAction(`Ajout lien document: ${title}`, 'CREATE');
             }
-
-            // Normalize URL for web types
-            let normalizedUrl = url;
-            const hasProtocol = url.match(/^https?:\/\//i);
-
-            if (!hasProtocol) {
-                // Add https:// for web URLs
-                normalizedUrl = 'https://' + url;
-            }
-
-            // Validate it's a real URL
-            try {
-                const parsed = new URL(normalizedUrl);
-                if (!parsed.hostname.includes('.')) {
-                    throw new Error('Invalid hostname');
-                }
-            } catch(e) {
-                toast('❌ Veuillez entrer une URL web valide (ex: https://drive.google.com/...)', 'error');
-                return;
-            }
-
-            // Create document with URL
-            const doc = {
-                id: Date.now(),
-                title: title,
-                url: normalizedUrl,
-                type: type,
-                isFile: false,
-                createdAt: new Date().toISOString().split('T')[0]
-            };
-
-            referenceDocuments.push(doc);
-            saveReferenceDocuments();
-            renderReferenceDocuments();
-
-            document.getElementById('docTitle').value = '';
-            document.getElementById('docUrl').value = '';
-            document.getElementById('docType').value = 'pdf';
-            updateDocInputLabel();
-
-            toast(`✅ Document "${title}" ajouté avec succès!`, 'success');
-            logAction(`Ajout document référence: ${title}`, 'CREATE');
         }
 
         function showFolderPath(folderPath, title) {
@@ -16948,7 +16975,7 @@
             }
 
             noMsg.style.display = 'none';
-            const icons = { pdf: '📄', link: '🔗', video: '🎥', folder: '📁', other: '📦' };
+            const icons = { file: '📥', link: '🔗' };
 
             container.innerHTML = `<table style="width:100%;">
                 <thead><tr>
@@ -16960,7 +16987,6 @@
                 </tr></thead>
                 <tbody>
                 ${referenceDocuments.map(doc => {
-                    // Find learners that have this document assigned
                     const assignedLearners = learnersList.filter(l => {
                         if (!l.assignedDocuments) return false;
                         return l.assignedDocuments.includes(doc.id);
@@ -16969,23 +16995,20 @@
                     let actionBtn = '';
                     if (doc.isFile) {
                         actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
-                    } else if (doc.type === 'folder') {
-                        actionBtn = `<button class="btn btn-small btn-secondary" onclick="showFolderPath('${doc.url.replace(/'/g, "\\'")}', '${doc.title.replace(/'/g, "\\'")}')" style="margin-right:8px;">📁 Afficher le chemin</button>`;
-                    } else if (doc.url && !doc.url.includes('([A-Z]')) {
-                        // Only show link if URL is valid (doesn't contain regex patterns)
-                        actionBtn = `<a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>`;
                     } else {
-                        // URL is invalid or contains patterns
-                        actionBtn = `<span class="btn btn-small" style="background:#ddd;color:#999;cursor:not-allowed;margin-right:8px;">⚠️ URL invalide</span>`;
+                        actionBtn = `<a href="${doc.url}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">🔗 Ouvrir</a>`;
                     }
 
                     const assignedDisplay = assignedLearners.length > 0
                         ? `<span style="background:#e3f2fd;padding:4px 8px;border-radius:4px;font-size:0.85em;">${assignedLearners.join(', ')}</span>`
                         : `<span style="color:#999;font-style:italic;font-size:0.85em;">Non assigné</span>`;
 
+                    const typeDisplay = doc.isFile ? 'FILE' : 'LINK';
+                    const typeIcon = doc.isFile ? '📥' : '🔗';
+
                     return `
                     <tr style="border-bottom:1px solid #eee;">
-                        <td style="padding:12px;"><strong>${icons[doc.type] || '📦'} ${doc.type.toUpperCase()}</strong></td>
+                        <td style="padding:12px;"><strong>${typeIcon} ${typeDisplay}</strong></td>
                         <td style="padding:12px;">${doc.title}${doc.isFile ? ` <span style="color:#7a9db1;font-size:0.85em;">(${doc.fileName})</span>` : ''}</td>
                         <td style="padding:12px;">${assignedDisplay}</td>
                         <td style="padding:12px;color:#7a9db1;font-size:0.9em;">${doc.createdAt}</td>
@@ -17014,15 +17037,6 @@
                 document.body.appendChild(modal);
             }
 
-            const isFolder = doc.type === 'folder';
-            const inputLabel = isFolder ? 'Chemin du dossier' : 'URL ou lien (optionnel)';
-            const inputPlaceholder = isFolder
-                ? 'Ex: /Users/davie/Documents/formation ou C:\\Users\\davie\\Documents\\formation'
-                : 'www.exemple.com ou https://...';
-            const inputHint = isFolder
-                ? '💡 Copie le chemin depuis le Finder/Explorateur'
-                : '💡 Vous pouvez entrer juste www.exemple.com, https:// sera ajouté automatiquement';
-
             modal.innerHTML = `
                 <div style="background:white;border-radius:12px;padding:24px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
                     <h3 style="margin:0 0 20px;color:#333;">✏️ Éditer le document</h3>
@@ -17034,9 +17048,8 @@
 
                     ${!doc.isFile ? `
                     <div style="margin-bottom:16px;">
-                        <label style="display:block;font-weight:600;margin-bottom:8px;color:#555;">${inputLabel}</label>
-                        <input type="text" id="editDocUrl" value="${doc.url}" placeholder="${inputPlaceholder}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
-                        <p style="font-size:0.85em;color:#7a9db1;margin:6px 0 0;">${inputHint}</p>
+                        <label style="display:block;font-weight:600;margin-bottom:8px;color:#555;">URL</label>
+                        <input type="text" id="editDocUrl" value="${doc.url}" placeholder="https://..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
                     </div>
                     ` : ''}
 
@@ -17064,17 +17077,11 @@
             doc.title = newTitle;
 
             if (!doc.isFile && newUrl) {
-                if (doc.type === 'folder') {
-                    // For folders, just store the path as-is
-                    doc.url = newUrl;
-                } else {
-                    // For web documents, normalize URL
-                    let normalizedUrl = newUrl;
-                    if (!newUrl.match(/^https?:\/\//i)) {
-                        normalizedUrl = 'https://' + newUrl;
-                    }
-                    doc.url = normalizedUrl;
+                let normalizedUrl = newUrl;
+                if (!newUrl.match(/^https?:\/\//i)) {
+                    normalizedUrl = 'https://' + newUrl;
                 }
+                doc.url = normalizedUrl;
             }
 
             saveReferenceDocuments();
