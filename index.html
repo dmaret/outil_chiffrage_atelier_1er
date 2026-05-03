@@ -16642,8 +16642,7 @@
                 toast('❌ Document introuvable', 'error');
                 return;
             }
-            const win = window.open();
-            win.document.write(`<iframe style="width:100%;height:100%;border:none;" src="${doc.fileData}"></iframe>`);
+            window.open(doc.fileData, '_blank');
         }
 
         async function openDocumentFromIDB(docId, fileName) {
