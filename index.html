@@ -10632,6 +10632,57 @@
             });
         }
 
+        function saveSectionOrder() {
+            const tabContent = document.querySelector('.tab-content.active');
+            if (!tabContent) return;
+
+            const sections = Array.from(tabContent.querySelectorAll(':scope > .section'));
+            const order = sections.map(sec => {
+                const heading = sec.querySelector('h2, h3');
+                return heading ? heading.textContent.trim() : 'section_' + Date.now();
+            });
+
+            const activeTab = document.querySelector('.tab.active');
+            const tabName = activeTab ? activeTab.textContent.trim() : 'unknown';
+
+            const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
+            sectionOrders[tabName] = order;
+            localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
+            console.log('📋 Ordre des sections sauvegardé pour', tabName, ':', order);
+        }
+
+        function applySectionOrder() {
+            const tabContent = document.querySelector('.tab-content.active');
+            if (!tabContent) return;
+
+            const activeTab = document.querySelector('.tab.active');
+            const tabName = activeTab ? activeTab.textContent.trim() : 'unknown';
+
+            const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
+            const savedOrder = sectionOrders[tabName];
+
+            if (!savedOrder) return;
+
+            const sections = Array.from(tabContent.querySelectorAll(':scope > .section'));
+            const sectionMap = new Map();
+
+            sections.forEach(sec => {
+                const heading = sec.querySelector('h2, h3');
+                const title = heading ? heading.textContent.trim() : null;
+                if (title) sectionMap.set(title, sec);
+            });
+
+            // Réorganiser selon l'ordre sauvegardé
+            savedOrder.forEach(title => {
+                const section = sectionMap.get(title);
+                if (section && section.parentNode) {
+                    section.parentNode.appendChild(section);
+                }
+            });
+
+            console.log('📋 Ordre des sections restauré pour', tabName);
+        }
+
         function initSectionDragAndDrop() {
             if (!document.body.classList.contains('admin-mode')) return;
 
@@ -10657,6 +10708,7 @@
                         if (index > 0) {
                             const prev = section.previousElementSibling;
                             if (prev) section.parentNode.insertBefore(section, prev);
+                            saveSectionOrder();
                             initSectionDragAndDrop(); // Refresh
                         }
                     };
@@ -10671,6 +10723,7 @@
                         if (index < sections.length - 1) {
                             const next = section.nextElementSibling;
                             if (next) section.parentNode.insertBefore(next, section);
+                            saveSectionOrder();
                             initSectionDragAndDrop(); // Refresh
                         }
                     };
@@ -10694,6 +10747,7 @@
                 section.addEventListener('dragend', (e) => {
                     section.classList.remove('dragging');
                     sections.forEach(s => s.classList.remove('section-drag-over'));
+                    saveSectionOrder();
                     draggedSection = null;
                 }, { once: false });
 
@@ -12754,8 +12808,11 @@
             const _pbPop = document.getElementById('pb-recap-popup');
             if (_pbPop) _pbPop.style.display = tabName === 'pedalboard' ? 'block' : 'none';
 
-            // Initialize drag-and-drop for sections in admin mode
-            setTimeout(() => initSectionDragAndDrop(), 100);
+            // Restore section order and initialize drag-and-drop for sections in admin mode
+            setTimeout(() => {
+                applySectionOrder();
+                initSectionDragAndDrop();
+            }, 100);
 
             // Récap live : visible uniquement sur l'onglet calculateur
             const live = document.getElementById('liveSummary');
