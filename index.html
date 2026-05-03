@@ -7861,14 +7861,17 @@
               </div>
 
               <div id="dashSectionGraph" class="section" style="margin-top:20px;">
-                <h2>🕸️ Graphe relationnel — Clients · Prestations · Bénéficiaires</h2>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
-                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowBeneficiaires" checked onchange="renderRelationGraph()"> Bénéficiaires</label>
-                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowClients" checked onchange="renderRelationGraph()"> Clients</label>
-                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowPrestations" checked onchange="renderRelationGraph()"> Prestations</label>
-                  <button class="btn btn-small btn-secondary" onclick="resetRelationGraph()" style="margin-left:auto;">↻ Réorganiser</button>
+                <h2>🕸️ Relations — Clients · Prestations · Bénéficiaires</h2>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+                  <input type="text" id="relationSearchFilter" placeholder="🔍 Rechercher (client, prestation, bénéficiaire...)" style="flex:1;min-width:200px;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;" onkeyup="filterRelationTable()">
+                  <select id="relationTypeFilter" onchange="filterRelationTable()" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">
+                    <option value="">— Tous les types —</option>
+                    <option value="client">👥 Clients</option>
+                    <option value="prestation">💼 Prestations</option>
+                    <option value="beneficiaire">👤 Bénéficiaires</option>
+                  </select>
                 </div>
-                <div id="dashGraphContainer" style="position:relative;width:100%;height:480px;background:#f8fafc;border:1px solid #e8f0f5;border-radius:10px;overflow:hidden;"></div>
+                <div id="relationTableContainer" style="width:100%;border:1px solid #e0e8ed;border-radius:10px;overflow-x:auto;"></div>
               </div>
 
               <div id="dashSectionVille" class="section" style="margin-top:20px;">
@@ -25287,123 +25290,122 @@
         }
 
         // ── 3. Graphe relationnel SVG (clients · prestations · bénéficiaires) ──
-        function renderRelationGraph() {
-            const cont = document.getElementById('dashGraphContainer');
+        function renderRelationTable() {
+            const cont = document.getElementById('relationTableContainer');
             if (!cont) return;
-            const showB = document.getElementById('graphShowBeneficiaires')?.checked !== false;
-            const showC = document.getElementById('graphShowClients')?.checked !== false;
-            const showP = document.getElementById('graphShowPrestations')?.checked !== false;
-            const W = cont.clientWidth || 800, H = 480;
-            const nodes = [], links = [];
-            const idx = {};
-            const addNode = (id, type, label, value) => {
-                if (idx[id] !== undefined) return idx[id];
-                idx[id] = nodes.length;
-                nodes.push({ id, type, label, value: value || 1, x: W/2 + (Math.random()-0.5)*200, y: H/2 + (Math.random()-0.5)*200, vx: 0, vy: 0 });
-                return idx[id];
-            };
-            const palette = { client: '#c97866', prestation: '#d9a892', beneficiaire: '#a45a52' };
-            (prestationsSauvegardees || []).slice(0, 80).forEach(p => {
-                const pid = 'p:' + p.id;
-                if (showP) addNode(pid, 'prestation', p.prestation || '—', (p.prixVente||0)/1000 + 1);
-                if (showC && p.client) {
-                    const cid = 'c:' + p.client;
-                    addNode(cid, 'client', p.client, 2);
-                    if (showP) links.push({ s: idx[pid], t: idx[cid] });
-                }
-                if (showB && Array.isArray(p.beneficiaires)) {
-                    p.beneficiaires.forEach(b => {
-                        const bid = 'b:' + (b.id || b.nom || b);
-                        const lbl = (b.prenom ? b.prenom + ' ' : '') + (b.nom || b);
-                        addNode(bid, 'beneficiaire', lbl, 1.5);
-                        if (showP) links.push({ s: idx[pid], t: idx[bid] });
+
+            const rows = [];
+
+            // Clients
+            (prestationsSauvegardees || []).forEach(p => {
+                if (p.client) {
+                    rows.push({
+                        type: 'client',
+                        client: p.client,
+                        prestation: p.prestation || '—',
+                        montant: p.prixVente || 0,
+                        date: p.date || '—',
+                        display: `👥 ${p.client}`
                     });
                 }
             });
-            _graphState.nodes = nodes;
-            _graphState.links = links;
-            // Petite simulation force (5 itérations)
-            for (let it = 0; it < 60; it++) {
-                for (let i = 0; i < nodes.length; i++) {
-                    let fx = 0, fy = 0;
-                    for (let j = 0; j < nodes.length; j++) {
-                        if (i === j) continue;
-                        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
-                        const d2 = dx*dx + dy*dy + 0.01;
-                        const f = 800 / d2;
-                        fx += dx * f; fy += dy * f;
-                    }
-                    fx += (W/2 - nodes[i].x) * 0.01;
-                    fy += (H/2 - nodes[i].y) * 0.01;
-                    nodes[i].vx = (nodes[i].vx + fx) * 0.5;
-                    nodes[i].vy = (nodes[i].vy + fy) * 0.5;
+
+            // Prestations avec bénéficiaires
+            (prestationsSauvegardees || []).forEach(p => {
+                if (Array.isArray(p.beneficiaires) && p.beneficiaires.length > 0) {
+                    p.beneficiaires.forEach(b => {
+                        const nom = (b.prenom ? b.prenom + ' ' : '') + (b.nom || '—');
+                        rows.push({
+                            type: 'beneficiaire',
+                            client: p.client || '—',
+                            prestation: p.prestation || '—',
+                            montant: p.prixVente || 0,
+                            beneficiaire: nom,
+                            date: p.date || '—',
+                            display: `👤 ${nom}`
+                        });
+                    });
                 }
-                links.forEach(l => {
-                    const a = nodes[l.s], b = nodes[l.t];
-                    if (!a || !b) return;
-                    const dx = b.x - a.x, dy = b.y - a.y;
-                    const d = Math.sqrt(dx*dx + dy*dy) + 0.01;
-                    const target = 80;
-                    const f = (d - target) * 0.05;
-                    a.vx += dx/d * f; a.vy += dy/d * f;
-                    b.vx -= dx/d * f; b.vy -= dy/d * f;
-                });
-                nodes.forEach(n => {
-                    n.x += n.vx; n.y += n.vy;
-                    n.x = Math.max(20, Math.min(W-20, n.x));
-                    n.y = Math.max(20, Math.min(H-20, n.y));
-                });
-            }
-            const svg = `<div class="sketch-container" style="position:relative;width:100%;height:${H}px;padding:0;">
-                <div class="sketch-header" style="position:absolute;top:0;left:0;right:0;margin:0;padding:8px 12px;border-radius:0;background:rgba(255,255,255,0.95);z-index:10;">🕸️ Réseau relationnel</div>
-                <svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;cursor:grab;position:absolute;top:0;left:0;margin-top:30px;" class="sketch-svg" onmousedown="onGraphMouseDown(event)" onmousemove="onGraphMouseMove(event)" onmouseup="_graphState.dragging=null" onmouseleave="_graphState.dragging=null">
-                    ${links.map(l => {
-                        const a = nodes[l.s], b = nodes[l.t]; if (!a||!b) return '';
-                        return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#e8c4ba" stroke-width="1.8" opacity="0.6"/>`;
-                    }).join('')}
-                    ${nodes.map((n,i) => {
-                        const r = Math.min(22, 6 + n.value * 3);
-                        return `<g data-idx="${i}" style="cursor:grab;">
-                            <circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${palette[n.type]}" stroke="white" stroke-width="2.5" opacity="0.9"/>
-                            <text x="${n.x}" y="${n.y + r + 11}" text-anchor="middle" font-size="10" font-weight="bold" fill="#2d3e50" pointer-events="none">${escapeHtml(String(n.label).slice(0,14))}</text>
-                        </g>`;
-                    }).join('')}
-                </svg>
-                <div style="position:absolute;bottom:8px;right:8px;background:rgba(255,255,255,0.95);border:2px solid var(--terra-primary);border-radius:6px;padding:8px 12px;font-size:0.78em;display:flex;gap:12px;">
-                    <span style="color:${palette.client};font-weight:bold;">● Clients</span>
-                    <span style="color:${palette.prestation};font-weight:bold;">● Prestations</span>
-                    <span style="color:${palette.beneficiaire};font-weight:bold;">● Bénéficiaires</span>
-                </div>
-            </div>`;
-            cont.innerHTML = svg;
-        }
-        function onGraphMouseDown(ev) {
-            const g = ev.target.closest('g[data-idx]'); if (!g) return;
-            _graphState.dragging = parseInt(g.getAttribute('data-idx'));
-        }
-        function onGraphMouseMove(ev) {
-            if (_graphState.dragging === null || _graphState.dragging === undefined) return;
-            const cont = document.getElementById('dashGraphContainer'); if (!cont) return;
-            const rect = cont.getBoundingClientRect();
-            const n = _graphState.nodes[_graphState.dragging];
-            if (!n) return;
-            const sx = (ev.clientX - rect.left) * (cont.clientWidth / rect.width);
-            const sy = (ev.clientY - rect.top);
-            n.x = sx; n.y = sy;
-            const svg = cont.querySelector('svg'); if (!svg) return;
-            const circle = svg.querySelectorAll('g[data-idx] circle')[_graphState.dragging];
-            const text = svg.querySelectorAll('g[data-idx] text')[_graphState.dragging];
-            if (circle) { circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); }
-            if (text) { text.setAttribute('x', n.x); text.setAttribute('y', n.y + 18); }
-            // Update lines
-            svg.querySelectorAll('line').forEach((line, i) => {
-                const l = _graphState.links[i]; if (!l) return;
-                const a = _graphState.nodes[l.s], b = _graphState.nodes[l.t];
-                if (a) { line.setAttribute('x1', a.x); line.setAttribute('y1', a.y); }
-                if (b) { line.setAttribute('x2', b.x); line.setAttribute('y2', b.y); }
             });
+
+            // Prestations
+            (prestationsSauvegardees || []).forEach(p => {
+                rows.push({
+                    type: 'prestation',
+                    client: p.client || '—',
+                    prestation: p.prestation || '—',
+                    montant: p.prixVente || 0,
+                    date: p.date || '—',
+                    statut: p.statut || 'devis',
+                    display: `💼 ${p.prestation}`
+                });
+            });
+
+            window.relationTableData = rows;
+            filterRelationTable();
         }
-        function resetRelationGraph() { renderRelationGraph(); }
+
+        function filterRelationTable() {
+            const cont = document.getElementById('relationTableContainer');
+            if (!cont || !window.relationTableData) return;
+
+            const searchVal = document.getElementById('relationSearchFilter')?.value.toLowerCase() || '';
+            const typeVal = document.getElementById('relationTypeFilter')?.value || '';
+
+            let filtered = window.relationTableData.filter(row => {
+                const matchType = !typeVal || row.type === typeVal;
+                const matchSearch = !searchVal ||
+                    row.client.toLowerCase().includes(searchVal) ||
+                    row.prestation.toLowerCase().includes(searchVal) ||
+                    row.display.toLowerCase().includes(searchVal) ||
+                    (row.beneficiaire || '').toLowerCase().includes(searchVal);
+                return matchType && matchSearch;
+            });
+
+            const html = `
+                <table style="width:100%;border-collapse:collapse;background:white;">
+                    <thead>
+                        <tr style="background:#a8d5e2;border-bottom:2px solid #6b8fa3;">
+                            <th style="padding:12px;text-align:left;font-weight:600;color:#2d3e50;">Type</th>
+                            <th style="padding:12px;text-align:left;font-weight:600;color:#2d3e50;">Détail</th>
+                            <th style="padding:12px;text-align:left;font-weight:600;color:#2d3e50;">Client</th>
+                            <th style="padding:12px;text-align:left;font-weight:600;color:#2d3e50;">Prestation</th>
+                            <th style="padding:12px;text-align:right;font-weight:600;color:#2d3e50;">Montant (CHF)</th>
+                            <th style="padding:12px;text-align:left;font-weight:600;color:#2d3e50;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.length === 0 ? `
+                            <tr>
+                                <td colspan="6" style="padding:20px;text-align:center;color:#7a9db1;font-style:italic;">
+                                    Aucun résultat trouvé
+                                </td>
+                            </tr>
+                        ` : filtered.map(row => `
+                            <tr style="border-bottom:1px solid #e8f0f6;">
+                                <td style="padding:10px 12px;color:#6b8fa3;font-size:0.9em;">${row.type === 'client' ? '👥' : row.type === 'beneficiaire' ? '👤' : '💼'} ${row.type.toUpperCase()}</td>
+                                <td style="padding:10px 12px;color:#2d3e50;font-weight:500;">${row.beneficiaire || row.display}</td>
+                                <td style="padding:10px 12px;color:#555;">${row.client}</td>
+                                <td style="padding:10px 12px;color:#555;">${row.prestation}</td>
+                                <td style="padding:10px 12px;text-align:right;color:#27ae60;font-weight:600;">${(row.montant || 0).toFixed(2)}</td>
+                                <td style="padding:10px 12px;color:#7a9db1;font-size:0.85em;">${row.date}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            cont.innerHTML = html;
+        }
+
+        function renderRelationGraph() {
+            renderRelationTable();
+        }
+
+        function resetRelationGraph() {
+            document.getElementById('relationSearchFilter').value = '';
+            document.getElementById('relationTypeFilter').value = '';
+            renderRelationTable();
+        }
 
         // ── 4. Vue Ville — Plan isométrique cliquable ──
         const VILLE_BUILDINGS = [
