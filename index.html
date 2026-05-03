@@ -10771,47 +10771,48 @@
             const sections = tabContent.querySelectorAll(':scope > .section');
 
             sections.forEach((section, index) => {
-                // Add reorder buttons if not exists
-                if (!section.querySelector('.section-reorder-btns')) {
-                    const btnContainer = document.createElement('div');
-                    btnContainer.className = 'section-reorder-btns';
-                    btnContainer.style.cssText = 'position:absolute;top:12px;right:12px;display:flex;gap:4px;z-index:10;';
+                // Remove old reorder buttons to regenerate with correct index
+                const oldBtnContainer = section.querySelector('.section-reorder-btns');
+                if (oldBtnContainer) oldBtnContainer.remove();
 
-                    const btnUp = document.createElement('button');
-                    btnUp.innerHTML = '↑';
-                    btnUp.className = 'btn btn-small';
-                    btnUp.style.cssText = 'padding:4px 8px;font-size:0.9em;cursor:pointer;background:#e8f4f8;border:1px solid #a0c8e0;color:#2d5b8a;';
-                    btnUp.title = 'Remonter cette section';
-                    btnUp.onclick = (e) => {
-                        e.stopPropagation();
-                        if (index > 0) {
-                            const prev = section.previousElementSibling;
-                            if (prev) section.parentNode.insertBefore(section, prev);
-                            saveSectionOrder();
-                            initSectionDragAndDrop(); // Refresh
-                        }
-                    };
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'section-reorder-btns';
+                btnContainer.style.cssText = 'position:absolute;top:12px;right:12px;display:flex;gap:4px;z-index:10;';
 
-                    const btnDown = document.createElement('button');
-                    btnDown.innerHTML = '↓';
-                    btnDown.className = 'btn btn-small';
-                    btnDown.style.cssText = 'padding:4px 8px;font-size:0.9em;cursor:pointer;background:#e8f4f8;border:1px solid #a0c8e0;color:#2d5b8a;';
-                    btnDown.title = 'Descendre cette section';
-                    btnDown.onclick = (e) => {
-                        e.stopPropagation();
-                        if (index < sections.length - 1) {
-                            const next = section.nextElementSibling;
-                            if (next) section.parentNode.insertBefore(next, section);
-                            saveSectionOrder();
-                            initSectionDragAndDrop(); // Refresh
-                        }
-                    };
+                const btnUp = document.createElement('button');
+                btnUp.innerHTML = '↑';
+                btnUp.className = 'btn btn-small';
+                const upDisabled = index === 0;
+                btnUp.style.cssText = `padding:4px 8px;font-size:0.9em;cursor:${upDisabled ? 'not-allowed' : 'pointer'};background:${upDisabled ? '#e0e8f0' : '#e8f4f8'};border:1px solid ${upDisabled ? '#b8c8d8' : '#a0c8e0'};color:${upDisabled ? '#9aacbc' : '#2d5b8a'};opacity:${upDisabled ? '0.5' : '1'};`;
+                btnUp.title = upDisabled ? 'Première section' : 'Remonter cette section';
+                btnUp.disabled = upDisabled;
+                btnUp.onclick = (e) => {
+                    e.stopPropagation();
+                    const prev = section.previousElementSibling;
+                    if (prev) section.parentNode.insertBefore(section, prev);
+                    saveSectionOrder();
+                    initSectionDragAndDrop();
+                };
 
-                    btnContainer.appendChild(btnUp);
-                    btnContainer.appendChild(btnDown);
-                    section.style.position = 'relative';
-                    section.appendChild(btnContainer);
-                }
+                const btnDown = document.createElement('button');
+                btnDown.innerHTML = '↓';
+                btnDown.className = 'btn btn-small';
+                const downDisabled = index === sections.length - 1;
+                btnDown.style.cssText = `padding:4px 8px;font-size:0.9em;cursor:${downDisabled ? 'not-allowed' : 'pointer'};background:${downDisabled ? '#e0e8f0' : '#e8f4f8'};border:1px solid ${downDisabled ? '#b8c8d8' : '#a0c8e0'};color:${downDisabled ? '#9aacbc' : '#2d5b8a'};opacity:${downDisabled ? '0.5' : '1'};`;
+                btnDown.title = downDisabled ? 'Dernière section' : 'Descendre cette section';
+                btnDown.disabled = downDisabled;
+                btnDown.onclick = (e) => {
+                    e.stopPropagation();
+                    const next = section.nextElementSibling;
+                    if (next) section.parentNode.insertBefore(next, section);
+                    saveSectionOrder();
+                    initSectionDragAndDrop();
+                };
+
+                btnContainer.appendChild(btnUp);
+                btnContainer.appendChild(btnDown);
+                section.style.position = 'relative';
+                section.appendChild(btnContainer);
 
                 // Only enable drag on the section itself
                 section.draggable = true;
