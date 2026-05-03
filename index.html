@@ -8661,6 +8661,7 @@
             const observation = {
                 id: isEditing ? _currentObservationData.id : '_' + Date.now(),
                 ..._currentObservationData,
+                beneficiaryId: _accompCurrentBenefId,
                 emotions: Array.from(document.querySelectorAll('#clinicalObservationModal input[name="emotion"]:checked')).map(e => e.value),
                 autonomy: parseInt(document.getElementById('obs-autonomy').value),
                 confidence: parseInt(document.getElementById('obs-confidence').value),
@@ -8794,18 +8795,10 @@
                 const observations = await getFromIndexedDB('observations') || [];
                 const grouped = {};
 
-                // Get CEAs for current beneficiary
-                const ceaIdsForBenef = new Set();
-                if (_accompCurrentBenefId && jalons && Array.isArray(jalons)) {
-                    jalons.filter(j => j.beneficiaireId === _accompCurrentBenefId).forEach(j => {
-                        if (j.ceaId) ceaIdsForBenef.add(j.ceaId);
-                    });
-                }
-
                 // Group observations by CEA, filtering for current beneficiary
                 observations.forEach(obs => {
-                    // If beneficiary is selected, only include their CEAs
-                    if (_accompCurrentBenefId && ceaIdsForBenef.size > 0 && !ceaIdsForBenef.has(obs.ceaId)) {
+                    // If beneficiary is selected, only include observations for that beneficiary
+                    if (_accompCurrentBenefId && obs.beneficiaryId && obs.beneficiaryId !== _accompCurrentBenefId) {
                         return; // Skip observations not for this beneficiary
                     }
 
@@ -8818,19 +8811,6 @@
                     }
                     grouped[obs.ceaId].observations.push(obs);
                 });
-
-                // Also add CEAs from jalons even if no observations yet
-                if (_accompCurrentBenefId) {
-                    ceaIdsForBenef.forEach(ceaId => {
-                        if (!grouped[ceaId]) {
-                            grouped[ceaId] = {
-                                id: ceaId,
-                                name: ceaId,
-                                observations: []
-                            };
-                        }
-                    });
-                }
 
                 renderAccompCards(grouped);
             } catch (err) {
@@ -11704,28 +11684,7 @@
         let _accompCurrentBenefId = null;
 
         function renderAccompClinicalCards() {
-            const benefId = _accompCurrentBenefId;
-            const filter = document.getElementById('accompCeaFilter');
-
-            if (!filter) return;
-
-            // Reset and populate filter with CEAs for current beneficiary
-            filter.innerHTML = '<option value="">-- Tous CEA --</option>';
-
-            // Get beneficiary's jalons/CEAs
-            if (benefId && jalons && Array.isArray(jalons)) {
-                const benefJalons = jalons.filter(j => j.beneficiaireId === benefId);
-                const ceaIds = new Set(benefJalons.map(j => j.ceaId).filter(Boolean));
-
-                ceaIds.forEach(ceaId => {
-                    const opt = document.createElement('option');
-                    opt.value = ceaId;
-                    opt.textContent = escapeHtml(ceaId);
-                    filter.appendChild(opt);
-                });
-            }
-
-            // Load and display observations
+            // Load and display observations (which will populate CEA filter)
             loadAccompObservations();
         }
 
