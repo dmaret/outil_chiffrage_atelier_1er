@@ -8887,51 +8887,27 @@
             }
         }
 
-        // IndexedDB helpers
-        function saveToIndexedDB(storeName, data, retryCount = 0) {
-            const MAX_RETRIES = 2;
+        // IndexedDB helpers - Custom Quizzes in separate database
+        function saveToIndexedDB(storeName, data, dbName = 'quizzes_db') {
             return new Promise((resolve, reject) => {
                 const timeout = setTimeout(() => {
                     reject(new Error('IndexedDB timeout: opération prend trop de temps'));
-                }, 10000);
+                }, 5000);
 
-                const request = indexedDB.open('atelier_db', 5);
+                const request = indexedDB.open(dbName, 1);
                 request.onerror = () => {
                     clearTimeout(timeout);
                     reject(request.error);
                 };
                 request.onsuccess = () => {
                     const db = request.result;
-                    if (!db.objectStoreNames.contains(storeName)) {
-                        db.close();
-                        if (retryCount >= MAX_RETRIES) {
-                            clearTimeout(timeout);
-                            reject(new Error(`Store "${storeName}" not found après ${MAX_RETRIES} tentatives`));
-                            return;
-                        }
-                        console.log(`⚠️ Store manquante, suppression DB (tentative ${retryCount + 1}/${MAX_RETRIES})...`);
-                        const deleteReq = indexedDB.deleteDatabase('atelier_db');
-                        deleteReq.onsuccess = () => {
-                            console.log('🗑️ BD supprimée, réouverture...');
-                            clearTimeout(timeout);
-                            saveToIndexedDB(storeName, data, retryCount + 1).then(resolve).catch(reject);
-                        };
-                        deleteReq.onerror = () => {
-                            clearTimeout(timeout);
-                            console.error('❌ Erreur suppression BD:', deleteReq.error);
-                            reject(deleteReq.error);
-                        };
-                        deleteReq.onblocked = () => {
-                            console.warn('⚠️ Suppression BD bloquée - connections ouvertes');
-                        };
-                        return;
-                    }
                     try {
                         const tx = db.transaction([storeName], 'readwrite');
                         tx.objectStore(storeName).put(data);
                         tx.oncomplete = () => {
                             clearTimeout(timeout);
-                            console.log('✅ Quiz sauvegardé dans IndexedDB');
+                            console.log('✅ Sauvegardé dans', dbName, '/', storeName);
+                            db.close();
                             resolve();
                         };
                         tx.onerror = () => {
@@ -8954,23 +8930,33 @@
             });
         }
 
-        function getFromIndexedDB(storeName, key) {
+        function getFromIndexedDB(storeName, key, dbName = 'atelier_db') {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('atelier_db', 5);
+                const request = indexedDB.open(dbName, 1);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     const db = request.result;
                     if (!db.objectStoreNames.contains(storeName)) {
+                        db.close();
                         resolve(key ? undefined : []);
                         return;
                     }
-                    const tx = db.transaction([storeName], 'readonly');
-                    const req = key ? tx.objectStore(storeName).get(key) : tx.objectStore(storeName).getAll();
-                    req.onsuccess = () => {
-                        console.log('getFromIndexedDB result for', storeName + ':', req.result);
-                        resolve(req.result);
-                    };
-                    req.onerror = () => reject(req.error);
+                    try {
+                        const tx = db.transaction([storeName], 'readonly');
+                        const req = key ? tx.objectStore(storeName).get(key) : tx.objectStore(storeName).getAll();
+                        req.onsuccess = () => {
+                            console.log('getFromIndexedDB result for', storeName + ':', req.result);
+                            db.close();
+                            resolve(req.result);
+                        };
+                        req.onerror = () => {
+                            db.close();
+                            reject(req.error);
+                        };
+                    } catch (err) {
+                        db.close();
+                        reject(err);
+                    }
                 };
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
@@ -30491,7 +30477,7 @@
 
         async function loadCustomQuizzes() {
             try {
-                const quizzes = await getFromIndexedDB('customQuizzes');
+                const quizzes = await getFromIndexedDB('customQuizzes', null, 'quizzes_db');
                 console.log('Quizzes chargés:', quizzes);
                 if (Array.isArray(quizzes)) return quizzes;
                 if (quizzes === undefined || quizzes === null) return [];
@@ -30514,7 +30500,7 @@
             const quizzes = await loadCustomQuizzes();
             const filtered = quizzes.filter(q => q.id !== quizId);
             const db = await new Promise((resolve, reject) => {
-                const request = indexedDB.open('atelier_db', 5);
+                const request = indexedDB.open('quizzes_db', 1);
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
                 request.onupgradeneeded = (e) => {
@@ -30528,8 +30514,14 @@
             tx.objectStore('customQuizzes').clear();
             filtered.forEach(q => tx.objectStore('customQuizzes').put(q));
             return new Promise((resolve, reject) => {
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => reject(tx.error);
+                tx.oncomplete = () => {
+                    db.close();
+                    resolve();
+                };
+                tx.onerror = () => {
+                    db.close();
+                    reject(tx.error);
+                };
             });
         }
 
