@@ -8797,8 +8797,8 @@
                 // Get CEAs for current beneficiary
                 const ceaIdsForBenef = new Set();
                 if (_accompCurrentBenefId && jalons && Array.isArray(jalons)) {
-                    jalons.filter(j => j.beneficiaire_id === _accompCurrentBenefId).forEach(j => {
-                        if (j.cea_id) ceaIdsForBenef.add(j.cea_id);
+                    jalons.filter(j => j.beneficiaireId === _accompCurrentBenefId).forEach(j => {
+                        if (j.ceaId) ceaIdsForBenef.add(j.ceaId);
                     });
                 }
 
@@ -11714,8 +11714,8 @@
 
             // Get beneficiary's jalons/CEAs
             if (benefId && jalons && Array.isArray(jalons)) {
-                const benefJalons = jalons.filter(j => j.beneficiaire_id === benefId);
-                const ceaIds = new Set(benefJalons.map(j => j.cea_id).filter(Boolean));
+                const benefJalons = jalons.filter(j => j.beneficiaireId === benefId);
+                const ceaIds = new Set(benefJalons.map(j => j.ceaId).filter(Boolean));
 
                 ceaIds.forEach(ceaId => {
                     const opt = document.createElement('option');
@@ -22035,6 +22035,12 @@
                 <p style="font-size:0.78em;color:#9a7ab0;margin-top:12px;margin-bottom:0;">⚠️ Cette analyse est indicative. Elle ne remplace pas l'évaluation clinique d'un professionnel qualifié.</p>`;
             container.style.display = 'block';
             container.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+            // Auto-navigate to aides after 2 seconds
+            setTimeout(() => {
+                switchAccompSub('aides');
+                toast('✓ Analyse terminée — Navigation vers les aides', 'success');
+            }, 2000);
 
             // Sauver dans l'historique
             saveAnalyseHistorique({
