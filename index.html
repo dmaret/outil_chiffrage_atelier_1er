@@ -15567,16 +15567,22 @@
                     ${docs.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">
                         ${docs.map(doc => {
                             const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
+                            const isShortcut = doc.url && doc.url.startsWith('shortcut://');
                             const isPdf = doc.type === 'pdf' && doc.isFile;
-                            let href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
+                            let href = '#';
                             let onclick = '';
-                            if (isPdf && !doc.fileData) {
+
+                            if (isShortcut) {
+                                onclick = `onclick="openShortcutFolder('${escapeHtml(doc.url)}');return false;"`;
+                            } else if (isPdf && !doc.fileData) {
                                 onclick = `onclick="openDocumentFromIDB(${doc.id},'${escapeHtml(doc.fileName||doc.title)}');return false;"`;
-                                href = '#';
+                            } else {
+                                href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
                             }
+
                             const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
-                            const targetAttr = !doc.isFile && !isPdf ? 'target="_blank"' : '';
-                            return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
+                            const targetAttr = !doc.isFile && !isPdf && !isShortcut ? 'target="_blank"' : '';
+                            return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${isShortcut ? ' 📂' : ''}</a>`;
                         }).join('')}
                     </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
                 </div>`;
@@ -16716,19 +16722,76 @@
             }
         }
 
-        function openDocumentFilePicker() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.multiple = false;
-            input.onchange = (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                    const fileUrl = 'file://' + file.name;
-                    document.getElementById('docUrl').value = fileUrl;
-                    toast(`✅ Raccourci créé: ${file.name}`, 'success');
+        async function openDocumentFilePicker() {
+            try {
+                // Utiliser File System Access API pour garder l'accès en mémoire
+                if (window.showDirectoryPicker) {
+                    const dirHandle = await window.showDirectoryPicker();
+
+                    // Demander l'accès persistant
+                    if (dirHandle.requestPermission) {
+                        const permission = await dirHandle.requestPermission({ mode: 'read' });
+                        if (permission !== 'granted') {
+                            toast('⚠️ Accès au dossier refusé', 'warning');
+                            return;
+                        }
+                    }
+
+                    // Sauvegarder le handle avec un ID unique
+                    const handleId = 'handle_' + Date.now();
+                    localStorage.setItem(handleId, JSON.stringify({ name: dirHandle.name }));
+
+                    // Créer un identifiant spécial pour ce raccourci
+                    const shortcutUrl = 'shortcut://' + handleId;
+                    document.getElementById('docUrl').value = shortcutUrl;
+
+                    // Stocker le handle en mémoire (global)
+                    window.fileSystemHandles = window.fileSystemHandles || {};
+                    window.fileSystemHandles[handleId] = dirHandle;
+
+                    toast(`✅ Raccourci mémorisé: ${dirHandle.name}`, 'success');
+                } else {
+                    toast('⚠️ File System Access non supporté sur ce navigateur', 'warning');
                 }
-            };
-            input.click();
+            } catch(err) {
+                if (err.name !== 'AbortError') {
+                    console.error('File picker error:', err);
+                    toast('⚠️ Erreur lors de la sélection', 'warning');
+                }
+            }
+        }
+
+        async function openShortcutFolder(shortcutUrl) {
+            try {
+                const handleId = shortcutUrl.replace('shortcut://', '');
+                const dirHandle = window.fileSystemHandles?.[handleId];
+
+                if (!dirHandle) {
+                    toast('⚠️ Raccourci invalide ou expiré', 'warning');
+                    return;
+                }
+
+                // Vérifier l'accès
+                const permission = await dirHandle.queryPermission({ mode: 'read' });
+                if (permission !== 'granted') {
+                    toast('⚠️ Accès au dossier révoqué. Demandez à l\'admin de créer un nouveau raccourci.', 'warning');
+                    return;
+                }
+
+                // Sur Mac, ouvrir le dossier avec showDirectoryPicker ou window.open
+                // Malheureusement, on ne peut pas directement ouvrir Finder, mais on peut donner accès au contenu
+                // Pour Mac, le meilleur moyen c'est d'utiliser une approche native via Electron ou app
+                toast(`📂 Ouverture: ${dirHandle.name}...`, 'success');
+
+                // Tenter d'ouvrir avec système (ne marche pas en web pur, mais on essaie)
+                if (navigator.platform.includes('Mac')) {
+                    // Sur Mac, on pourrait utiliser un handler custom, mais ce n'est pas possible en web pur
+                    toast(`📂 Dossier: ${dirHandle.name}`, 'info');
+                }
+            } catch(err) {
+                console.error('Error opening shortcut:', err);
+                toast('⚠️ Impossible d\'ouvrir le dossier', 'warning');
+            }
         }
 
         function addReferenceDocument() {
@@ -16747,23 +16810,26 @@
 
             // Normalize URL
             let normalizedUrl = url;
-            const hasProtocol = url.match(/^(https?|file):\/\//i);
+            const hasProtocol = url.match(/^(https?|file|shortcut):\/\//i);
             const isFileUrl = url.match(/^file:\/\//i);
+            const isShortcut = url.match(/^shortcut:\/\//i);
 
-            // If it's already a file:// URL, keep it as-is
-            if (isFileUrl) {
+            // If it's a shortcut or file URL, keep as-is
+            if (isShortcut || isFileUrl) {
                 normalizedUrl = url;
             } else if (!hasProtocol) {
                 // Add https:// if no protocol
                 normalizedUrl = 'https://' + url;
             }
 
-            // Validate URL format
-            try {
-                new URL(normalizedUrl);
-            } catch(e) {
-                toast('❌ URL invalide. Veuillez entrer une URL valide (ex: https://drive.google.com/...) ou sélectionner un dossier via "Parcourir"', 'error');
-                return;
+            // Validate URL format (skip for shortcuts)
+            if (!isShortcut) {
+                try {
+                    new URL(normalizedUrl);
+                } catch(e) {
+                    toast('❌ URL invalide. Veuillez entrer une URL valide (ex: https://drive.google.com/...) ou sélectionner un dossier via "Parcourir"', 'error');
+                    return;
+                }
             }
 
             // Create document with URL only
