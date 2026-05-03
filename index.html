@@ -1042,6 +1042,15 @@
             opacity: 0.5;
             cursor: grabbing;
         }
+        /* Eviter que le contenu chevauche les flèches ↑↓ de réorganisation */
+        body.admin-mode .section > div:first-child[style*="justify-content:space-between"],
+        body.admin-mode .section > div:first-child[style*="justify-content: space-between"] {
+            padding-right: 80px;
+        }
+        body.admin-mode .section > h2:first-child,
+        body.admin-mode .section > h3:first-child {
+            padding-right: 80px;
+        }
         .section.section-drag-over {
             border-top: 3px solid #6b8fa3;
         }
@@ -5670,7 +5679,8 @@
                             <input type="file" id="docFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style="padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9em;">
                         </div>
                     </div>
-                    <div style="text-align:right;">
+                    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+                        <button class="btn btn-success" onclick="saveAllDocumentsAndAssignments()" title="Forcer la sauvegarde de tous les documents et leurs assignations aux apprenants">💾 Sauvegarder</button>
                         <button class="btn" onclick="addReferenceDocument()">➕ Ajouter document</button>
                     </div>
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
@@ -16726,6 +16736,57 @@
             } catch(err) {
                 console.warn('IndexedDB error:', err);
                 saveDocumentsToLocalStorage();
+            }
+        }
+
+        function saveDocumentsToLocalStorage() {
+            // Sauvegarde uniquement les métadonnées (sans base64 fileData volumineux)
+            try {
+                const toSave = referenceDocuments.map(doc => ({
+                    id: doc.id,
+                    title: doc.title,
+                    fileName: doc.fileName,
+                    type: doc.type,
+                    url: doc.url,
+                    isFile: doc.isFile,
+                    createdAt: doc.createdAt,
+                    // fileData volontairement exclu (trop gros pour localStorage)
+                }));
+                localStorage.setItem('referenceDocuments', JSON.stringify(toSave));
+                // Backup secondaire
+                try {
+                    localStorage.setItem('referenceDocuments_backup', JSON.stringify(toSave));
+                } catch(e2) { /* ignore backup failure */ }
+            } catch(e) {
+                if (e.name === 'QuotaExceededError') {
+                    console.error('localStorage plein');
+                    if (typeof toast === 'function') toast('⚠️ Stockage plein - videz le cache du navigateur', 'warning');
+                } else {
+                    console.error('localStorage error:', e);
+                }
+            }
+        }
+
+        function saveAllDocumentsAndAssignments() {
+            // Force la sauvegarde de tout : documents + assignations apprenants
+            try {
+                // 1. Sauvegarder les documents (IndexedDB + localStorage backup)
+                saveReferenceDocuments();
+                saveDocumentsToLocalStorage();
+
+                // 2. Sauvegarder la liste des apprenants (avec leurs assignations)
+                saveFormationData();
+
+                // 3. Confirmation visuelle
+                const docCount = referenceDocuments.length;
+                const learnerCount = learnersList.length;
+                const assignedCount = learnersList.reduce((sum, l) => sum + (l.assignedDocuments?.length || 0), 0);
+
+                toast(`✅ Sauvegardé : ${docCount} document(s), ${learnerCount} apprenant(s), ${assignedCount} assignation(s)`, 'success');
+                logAction(`Sauvegarde manuelle: ${docCount} docs, ${assignedCount} assignations`, 'UPDATE');
+            } catch(err) {
+                console.error('Erreur sauvegarde:', err);
+                toast('❌ Erreur lors de la sauvegarde : ' + err.message, 'error');
             }
         }
 
