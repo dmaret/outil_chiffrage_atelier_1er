@@ -5675,10 +5675,8 @@
                     <div class="form-row" style="gap:12px;">
                         <div class="form-group" style="flex:1;">
                             <label>URL du document</label>
-                            <div style="display:flex;gap:8px;align-items:flex-end;">
-                                <input type="text" id="docUrl" placeholder="https://drive.google.com/... ou https://exemple.com/document.pdf" style="flex:1;">
-                                <button type="button" class="btn btn-secondary btn-small" onclick="openDocumentFilePicker()" title="Ouvrir le navigateur de fichiers">📁 Parcourir</button>
-                            </div>
+                            <input type="text" id="docUrl" placeholder="https://drive.google.com/... ou https://exemple.com/document.pdf">
+                            <p style="font-size:0.8em;color:#7a9db1;margin-top:4px;">💡 Pour un dossier local, utilise le <strong>générateur de raccourcis</strong> ci-dessous</p>
                         </div>
                     </div>
                     <div style="text-align:right;">
@@ -16854,27 +16852,24 @@
                 return;
             }
 
-            // Normalize URL - accept filenames, paths, URLs
+            // Normalize URL - require valid web URL
             let normalizedUrl = url;
-            const hasProtocol = url.match(/^(https?|file|shortcut):\/\//i);
-            const isFilename = /\.[a-z0-9]{2,5}$/i.test(url);
-            const isPath = url.startsWith('/') || /^[a-z]:\\/i.test(url);
+            const hasProtocol = url.match(/^https?:\/\//i);
 
-            // If it's already a URL with protocol, keep it
-            if (hasProtocol) {
-                normalizedUrl = url;
-            } else if (isFilename || isPath) {
-                // Filename or path - keep as-is
-                normalizedUrl = url;
-            } else {
+            if (!hasProtocol) {
                 // Add https:// for web URLs
                 normalizedUrl = 'https://' + url;
-                try {
-                    new URL(normalizedUrl);
-                } catch(e) {
-                    toast('❌ URL invalide. Veuillez entrer une URL valide ou sélectionner un fichier via "Parcourir"', 'error');
-                    return;
+            }
+
+            // Validate it's a real URL
+            try {
+                const parsed = new URL(normalizedUrl);
+                if (!parsed.hostname.includes('.')) {
+                    throw new Error('Invalid hostname');
                 }
+            } catch(e) {
+                toast('❌ Veuillez entrer une URL web valide (ex: https://drive.google.com/...). Pour un dossier local, utilisez le générateur de raccourcis.', 'error');
+                return;
             }
 
             // Create document with URL only
