@@ -16522,62 +16522,75 @@
 
         // ── Reference Documents Management ─────────────────────
         function cleanupOldStorage() {
-            // Clear old localStorage documents to free space
+            // NE PAS supprimer 'referenceDocuments' - c'est notre fallback de sauvegarde !
+            // Cette fonction est conservée pour la compatibilité mais ne fait plus rien.
+            // (Auparavant : localStorage.removeItem('referenceDocuments') causait la perte
+            // des liens après un hard refresh quand IndexedDB échouait.)
+        }
+
+        // Version unifiée d'IndexedDB pour éviter les VersionError
+        const ATELIER_DB_VERSION = 2;
+
+        function _loadFromLocalStorageFallback() {
             try {
-                localStorage.removeItem('referenceDocuments');
-                console.log('Cleaned up old localStorage documents');
-            } catch(e) {
-                console.warn('Could not clean localStorage:', e);
-            }
+                const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
+                if (saved.length > 0) {
+                    referenceDocuments = saved;
+                    return;
+                }
+                // Try backup if main is empty
+                const backup = JSON.parse(localStorage.getItem('referenceDocuments_backup') || '[]');
+                if (backup.length > 0) {
+                    referenceDocuments = backup;
+                }
+            } catch(e) { console.warn('localStorage parse error:', e); }
         }
 
         function loadReferenceDocuments() {
-            // Try IndexedDB first, fallback to localStorage
+            // Charge d'abord depuis localStorage (rapide, immédiat)
+            _loadFromLocalStorageFallback();
+            renderReferenceDocuments();
+
+            // Puis essaie IndexedDB pour avoir les données complètes (avec fileData)
             try {
-                const dbRequest = indexedDB.open('AtelierDB', 1);
+                const dbRequest = indexedDB.open('AtelierDB', ATELIER_DB_VERSION);
+
+                dbRequest.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.createObjectStore('documents', { keyPath: 'id' });
+                    }
+                };
 
                 dbRequest.onerror = () => {
-                    console.warn('IndexedDB load failed, using localStorage');
-                    const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
-                    referenceDocuments = saved;
-                    renderReferenceDocuments();
+                    console.warn('IndexedDB load failed, keeping localStorage data');
                 };
 
                 dbRequest.onsuccess = (e) => {
                     const db = e.target.result;
-
                     if (!db.objectStoreNames.contains('documents')) {
                         db.close();
-                        // No IndexedDB data, try localStorage
-                        const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
-                        referenceDocuments = saved;
-                        renderReferenceDocuments();
                         return;
                     }
-
                     const transaction = db.transaction(['documents'], 'readonly');
                     const store = transaction.objectStore('documents');
                     const getAllRequest = store.getAll();
-
                     getAllRequest.onsuccess = () => {
-                        referenceDocuments = getAllRequest.result || [];
-                        renderReferenceDocuments();
+                        const idbDocs = getAllRequest.result || [];
+                        // Si IndexedDB a des données, l'utiliser (plus complet avec fileData)
+                        if (idbDocs.length > 0) {
+                            referenceDocuments = idbDocs;
+                            renderReferenceDocuments();
+                        }
                         db.close();
                     };
-
                     getAllRequest.onerror = () => {
-                        console.warn('IndexedDB read failed, using localStorage');
-                        const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
-                        referenceDocuments = saved;
-                        renderReferenceDocuments();
+                        console.warn('IndexedDB read failed, keeping localStorage data');
                         db.close();
                     };
                 };
             } catch(err) {
                 console.warn('IndexedDB load error:', err);
-                const saved = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
-                referenceDocuments = saved;
-                renderReferenceDocuments();
             }
         }
 
@@ -16682,52 +16695,12 @@
         }
 
         function saveReferenceDocuments() {
-            // Use IndexedDB for large file storage instead of localStorage
+            // PRIORITÉ : sauvegarder IMMÉDIATEMENT dans localStorage (synchrone, garanti)
+            saveDocumentsToLocalStorage();
+
+            // Puis sauvegarder dans IndexedDB pour les fichiers volumineux (asynchrone)
             try {
-                const dbRequest = indexedDB.open('AtelierDB', 1);
-
-                dbRequest.onerror = () => {
-                    console.warn('IndexedDB failed - falling back to localStorage');
-                    saveDocumentsToLocalStorage();
-                };
-
-                dbRequest.onsuccess = (e) => {
-                    const db = e.target.result;
-
-                    // Create object store if it doesn't exist
-                    if (!db.objectStoreNames.contains('documents')) {
-                        db.close();
-                        const upgradeRequest = indexedDB.open('AtelierDB', 2);
-                        upgradeRequest.onupgradeneeded = (ev) => {
-                            const upgradeDb = ev.target.result;
-                            upgradeDb.createObjectStore('documents', { keyPath: 'id' });
-                        };
-                        upgradeRequest.onsuccess = () => {
-                            saveReferenceDocuments(); // Retry
-                        };
-                        return;
-                    }
-
-                    const transaction = db.transaction(['documents'], 'readwrite');
-                    const store = transaction.objectStore('documents');
-
-                    // Clear and save all documents
-                    store.clear();
-                    referenceDocuments.forEach(doc => {
-                        store.add(doc);
-                    });
-
-                    transaction.oncomplete = () => {
-                        console.log('Documents saved to IndexedDB');
-                        saveDocumentsToLocalStorage();
-                        db.close();
-                    };
-                    transaction.onerror = () => {
-                        console.error('Transaction failed:', transaction.error);
-                        saveDocumentsToLocalStorage();
-                        db.close();
-                    };
-                };
+                const dbRequest = indexedDB.open('AtelierDB', ATELIER_DB_VERSION);
 
                 dbRequest.onupgradeneeded = (e) => {
                     const db = e.target.result;
@@ -16735,9 +16708,34 @@
                         db.createObjectStore('documents', { keyPath: 'id' });
                     }
                 };
+
+                dbRequest.onerror = () => {
+                    console.warn('IndexedDB failed - localStorage already saved');
+                };
+
+                dbRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('documents')) {
+                        db.close();
+                        return;
+                    }
+                    const transaction = db.transaction(['documents'], 'readwrite');
+                    const store = transaction.objectStore('documents');
+                    store.clear();
+                    referenceDocuments.forEach(doc => {
+                        store.add(doc);
+                    });
+                    transaction.oncomplete = () => {
+                        console.log('Documents saved to IndexedDB + localStorage');
+                        db.close();
+                    };
+                    transaction.onerror = () => {
+                        console.error('Transaction failed:', transaction.error);
+                        db.close();
+                    };
+                };
             } catch(err) {
                 console.warn('IndexedDB error:', err);
-                saveDocumentsToLocalStorage();
             }
         }
 
