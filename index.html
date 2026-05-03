@@ -11555,6 +11555,117 @@
             },
         ];
 
+        function renderAnalysisQuestionnaire() {
+            const c = document.getElementById('analyseQuestionnaire');
+            if (!c) return;
+            c.innerHTML = `
+                <div style="display:flex;flex-direction:column;gap:20px;">
+                    <!-- Q1: Comportement observé -->
+                    <div style="border:1px solid #d0a0ee;border-radius:8px;padding:14px;background:#f8f0ff;">
+                        <h3 style="color:#6c3483;margin-top:0;margin-bottom:10px;">1️⃣ Quel comportement avez-vous observé ?</h3>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q1" value="cadence" style="width:16px;height:16px;cursor:pointer;"> Rythme de travail trop rapide ou saccadé
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q1" value="conflit" style="width:16px;height:16px;cursor:pointer;"> Conflit ou tension relationnelle
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q1" value="dependance" style="width:16px;height:16px;cursor:pointer;"> Dépendance vis-à-vis du médiateur
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q1" value="retrait" style="width:16px;height:16px;cursor:pointer;"> Retrait, passivité, désinvestissement
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q1" value="agitation" style="width:16px;height:16px;cursor:pointer;"> Agitation, hyperactivité, dispersion
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q2: Type de tâche -->
+                    <div style="border:1px solid #d0a0ee;border-radius:8px;padding:14px;background:#f8f0ff;">
+                        <h3 style="color:#6c3483;margin-top:0;margin-bottom:10px;">2️⃣ Quel était le type de tâche ?</h3>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q2" value="nouvelle" style="width:16px;height:16px;cursor:pointer;"> Nouvelle, jamais faite ou peu connue
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q2" value="habituelle" style="width:16px;height:16px;cursor:pointer;"> Habituelle, bien maîtrisée
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q2" value="complexe" style="width:16px;height:16px;cursor:pointer;"> Complexe, impliquant plusieurs variables
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q3: Déclencheur -->
+                    <div style="border:1px solid #d0a0ee;border-radius:8px;padding:14px;background:#f8f0ff;">
+                        <h3 style="color:#6c3483;margin-top:0;margin-bottom:10px;">3️⃣ Qu'a déclenché cette situation ?</h3>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q3" value="consigne" style="width:16px;height:16px;cursor:pointer;"> Une consigne ou instruction ambiguë
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q3" value="equipe" style="width:16px;height:16px;cursor:pointer;"> Une dynamique ou tension d'équipe
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q3" value="pression" style="width:16px;height:16px;cursor:pointer;"> Une pression externe (délais, performance)
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q3" value="perso" style="width:16px;height:16px;cursor:pointer;"> Un facteur personnel (fatigue, stress hors travail)
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q3" value="rien" style="width:16px;height:16px;cursor:pointer;"> Pas de déclencheur évident
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q4: Interaction MSP -->
+                    <div style="border:1px solid #d0a0ee;border-radius:8px;padding:14px;background:#f8f0ff;">
+                        <h3 style="color:#6c3483;margin-top:0;margin-bottom:10px;">4️⃣ Comment la personne a-t-elle réagi au MSP ?</h3>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q4" value="evite" style="width:16px;height:16px;cursor:pointer;"> Elle a évité, ignoré ou minimisé
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q4" value="cherche" style="width:16px;height:16px;cursor:pointer;"> Elle a cherché l'interaction, s'est confiée
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q4" value="neutre" style="width:16px;height:16px;cursor:pointer;"> Réaction neutre, pragmatique
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.95em;">
+                                <input type="radio" name="q4" value="opposition" style="width:16px;height:16px;cursor:pointer;"> Opposition, remise en question ou conflit
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div style="border:1px solid #d0a0ee;border-radius:8px;padding:14px;background:#f8f0ff;">
+                        <div style="font-size:0.9em;color:#7a5a9a;margin-bottom:8px;">
+                            <span id="analyseProgressLabel">0 / 4 questions répondues</span>
+                        </div>
+                        <div style="height:8px;background:#e8d5f5;border-radius:4px;overflow:hidden;">
+                            <div id="analyseProgressFill" style="height:100%;background:#8e44ad;width:0%;transition:width 0.3s;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Action button -->
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button id="btnAnalyser" class="btn btn-success" onclick="analyserSituation()" disabled style="opacity:0.5;cursor:not-allowed;">📊 Analyser la situation</button>
+                    </div>
+
+                    <!-- Results container -->
+                    <div id="analyseResultat" style="display:none;"></div>
+                </div>
+            `;
+
+            // Attach change listeners to all radio buttons
+            document.querySelectorAll('#analyseQuestionnaire input[type=radio]').forEach(r => {
+                r.addEventListener('change', updateAnalyseProgress);
+            });
+            updateAnalyseProgress();
+        }
+
         function renderFichesRapides() {
             const c = document.getElementById('fichesRapides');
             if (!c) return;
