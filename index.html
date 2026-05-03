@@ -7048,6 +7048,7 @@
                             <select id="accompPrestationFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByPrestation(this.value)">
                                 <option value="">-- Toutes prestations --</option>
                             </select>
+                            <button class="btn btn-success" onclick="openQuickObservationModal()" style="font-size:0.9em;">➕ Nouvelle observation</button>
                             <button class="btn btn-primary" onclick="exportAccompReport()" style="font-size:0.9em;">📥 Rapport</button>
                         </div>
                     </div>
@@ -8829,6 +8830,28 @@
             });
         });
 
+        function openQuickObservationModal() {
+            const ceaFilter = document.getElementById('accompCeaFilter').value;
+            if (!ceaFilter) {
+                toast('⚠️ Sélectionnez d\'abord une CEA dans le filtre', 'warning');
+                return;
+            }
+
+            const ceaOption = document.querySelector(`#accompCeaFilter option[value="${ceaFilter}"]`);
+            const ceaName = ceaOption?.textContent || ceaFilter;
+
+            // Use prestation filter if available, otherwise use empty string
+            const prestationFilter = document.getElementById('accompPrestationFilter').value || '';
+            const prestationOption = document.querySelector(`#accompPrestationFilter option[value="${prestationFilter}"]`);
+            const prestationName = prestationFilter ? (prestationOption?.textContent || prestationFilter) : 'Observation générale';
+
+            openObservationModal(prestationFilter || '', prestationName, ceaFilter, ceaName);
+        }
+
+        function openCeaObservationModal(ceaId, ceaName) {
+            openObservationModal('', 'Observation générale', ceaId, ceaName);
+        }
+
         function openObservationModal(prestationId, prestationName, ceaId, ceaName) {
             const modal = document.getElementById('clinicalObservationModal');
             document.getElementById('obs-cea-name').textContent = ceaName || '—';
@@ -8895,6 +8918,11 @@
                 if (document.getElementById('ceaDetailModal').style.display === 'flex') {
                     const ceaId = _currentObservationData.ceaId;
                     setTimeout(() => showCeaDetail(ceaId), 300);
+                }
+
+                // Reload observations in the main Accompagnement section
+                if (document.getElementById('accompCeaContainer')) {
+                    setTimeout(() => loadAccompObservations(), 300);
                 }
             } catch (err) {
                 console.error('Error saving observation:', err);
@@ -9003,10 +9031,33 @@
                     grouped[obs.ceaId].observations.push(obs);
                 });
 
-                // Populate CEA filter dropdown
+                // Populate CEA filter dropdown from observations AND prestations
                 const filter = document.getElementById('accompCeaFilter');
                 const ceaIds = Object.keys(grouped);
-                ceaIds.forEach(id => {
+
+                // Also add CEA from prestations if not already present
+                if (prestationsSauvegardees && Array.isArray(prestationsSauvegardees)) {
+                    const prestCeaIds = new Set();
+                    prestationsSauvegardees.forEach(prest => {
+                        if (prest.beneficiaires && Array.isArray(prest.beneficiaires) && prest.beneficiaires.length > 0) {
+                            prest.beneficiaires.forEach(cea => {
+                                if (cea.id && !ceaIds.includes(cea.id)) {
+                                    prestCeaIds.add(cea.id);
+                                    if (!grouped[cea.id]) {
+                                        grouped[cea.id] = {
+                                            id: cea.id,
+                                            name: `${cea.prenom || ''} ${cea.nom || ''}`.trim() || cea.id,
+                                            observations: []
+                                        };
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Add all CEA to dropdown
+                Object.keys(grouped).forEach(id => {
                     if (!filter.querySelector(`option[value="${id}"]`)) {
                         const opt = document.createElement('option');
                         opt.value = id;
@@ -9035,10 +9086,26 @@
             if (ceaFilter) filtered = filtered.filter(g => g.id === ceaFilter);
 
             container.innerHTML = filtered.map(cea => {
-                const obs = cea.observations;
+                const obs = cea.observations || [];
+
+                // If no observations for this CEA, show a "no data" card with button to add
+                if (obs.length === 0) {
+                    return `
+                    <div style="background:white;border:2px dashed #a0c8e0;border-radius:10px;padding:16px;transition:all 0.2s;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                            <h3 style="margin:0;color:#7a9db1;font-size:1.1em;">${escapeHtml(cea.name)}</h3>
+                            <span style="background:#a0c8e0;color:white;padding:4px 10px;border-radius:12px;font-size:0.85em;font-weight:bold;">0 obs</span>
+                        </div>
+                        <div style="text-align:center;padding:16px 0;color:#7a9db1;">
+                            <p style="margin:0 0 12px 0;font-size:0.95em;">Aucune observation enregistrée</p>
+                            <button class="btn btn-small btn-success" onclick="openCeaObservationModal('${cea.id}', '${escapeHtml(cea.name).replace(/'/g, "\\'")}')">➕ Ajouter une observation</button>
+                        </div>
+                    </div>
+                    `;
+                }
+
                 const avgAutonomy = (obs.reduce((s, o) => s + (o.autonomy || 0), 0) / obs.length).toFixed(1);
                 const avgConfidence = (obs.reduce((s, o) => s + (o.confidence || 0), 0) / obs.length).toFixed(1);
-                const emotions = obs.flatMap(o => o.emotions || []);
                 const lastObs = obs.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
                 return `
