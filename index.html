@@ -9037,19 +9037,15 @@
 
                 // Also add CEA from prestations if not already present
                 if (prestationsSauvegardees && Array.isArray(prestationsSauvegardees)) {
-                    const prestCeaIds = new Set();
                     prestationsSauvegardees.forEach(prest => {
                         if (prest.beneficiaires && Array.isArray(prest.beneficiaires) && prest.beneficiaires.length > 0) {
                             prest.beneficiaires.forEach(cea => {
-                                if (cea.id && !ceaIds.includes(cea.id)) {
-                                    prestCeaIds.add(cea.id);
-                                    if (!grouped[cea.id]) {
-                                        grouped[cea.id] = {
-                                            id: cea.id,
-                                            name: `${cea.prenom || ''} ${cea.nom || ''}`.trim() || cea.id,
-                                            observations: []
-                                        };
-                                    }
+                                if (cea.id && !grouped[cea.id]) {
+                                    grouped[cea.id] = {
+                                        id: cea.id,
+                                        name: `${cea.prenom || ''} ${cea.nom || ''}`.trim() || cea.id,
+                                        observations: []
+                                    };
                                 }
                             });
                         }
