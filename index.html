@@ -1513,10 +1513,10 @@
         /* ── Flux d'apprentissage ─────────────────────────────────────── */
         .flux-card { background:white; border-radius:16px; padding:20px 22px 16px; box-shadow:0 3px 14px rgba(0,0,0,0.09); border-top:5px solid #4e9af1; }
         .flux-card-desc { font-size:0.82em; color:#888; margin:2px 0 14px; }
-        .flux-steps-row { display:flex; align-items:flex-start; gap:0; flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; }
-        .flux-step-node { display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; }
-        .flux-step-btn { width:52px; height:52px; border-radius:50%; border:3px solid #ddd; display:flex; align-items:center; justify-content:center; font-size:1.35em; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; background:#fafafa; }
-        .flux-step-btn:not([disabled]):hover { transform:scale(1.1); box-shadow:0 4px 14px rgba(0,0,0,0.18); }
+        .flux-steps-row { display:flex; align-items:flex-start; gap:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:visible; padding:10px 6px 8px; }
+        .flux-step-node { display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; padding:2px; }
+        .flux-step-btn { width:52px; height:52px; border-radius:50%; border:3px solid #ddd; display:flex; align-items:center; justify-content:center; font-size:1.35em; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; background:#fafafa; flex-shrink:0; }
+        .flux-step-btn:not([disabled]):hover { transform:scale(1.08); box-shadow:0 4px 14px rgba(0,0,0,0.18); z-index:2; position:relative; }
         .flux-step-btn[disabled] { filter:grayscale(1) opacity(0.45); cursor:not-allowed; }
         .flux-step-btn.fs-available { border-color:#2980b9; background:#e8f4ff; animation:fpulse 2.2s ease-in-out infinite; }
         .flux-step-btn.fs-done { background:#edfaf3; border-color:#27ae60; }
