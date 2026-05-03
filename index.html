@@ -16718,9 +16718,6 @@
 
         async function openDocumentFilePicker() {
             try {
-                let selectedFileName = '';
-
-                // Essayer d'abord avec l'API File System Access (moderne)
                 if (window.showOpenFilePicker) {
                     const handles = await window.showOpenFilePicker({
                         types: [
@@ -16731,14 +16728,9 @@
 
                     if (handles && handles[0]) {
                         const file = await handles[0].getFile();
-                        selectedFileName = file.name;
+                        document.getElementById('docUrl').value = file.name;
                     }
-                } else if (window.showDirectoryPicker) {
-                    // Fallback: parcourir un dossier
-                    const dirHandle = await window.showDirectoryPicker();
-                    selectedFileName = dirHandle.name;
                 } else {
-                    // Fallback ultime: input file standard
                     const input = document.createElement('input');
                     input.type = 'file';
                     input.multiple = false;
@@ -16746,52 +16738,16 @@
                     input.onchange = (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                            selectedFileName = file.name;
-                            showFilePickerHelper(file.name);
+                            document.getElementById('docUrl').value = file.name;
                         }
                     };
                     input.click();
-                    return;
-                }
-
-                if (selectedFileName) {
-                    showFilePickerHelper(selectedFileName);
                 }
             } catch(err) {
-                // Annulation ou erreur
                 if (err.name !== 'AbortError') {
                     console.error('File picker error:', err);
-                    toast('⚠️ Impossible d\'ouvrir le navigateur de fichiers', 'warning');
                 }
             }
-        }
-
-        function showFilePickerHelper(fileName) {
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
-            modal.innerHTML = `
-                <div style="background:white;border-radius:12px;padding:25px;max-width:500px;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
-                    <h2 style="color:#6b8fa3;margin:0 0 16px;font-size:1.2em;">📁 Fichier sélectionné</h2>
-                    <p style="color:#666;margin:0 0 12px;font-size:0.95em;"><strong>${fileName}</strong></p>
-                    <div style="background:#fdf8f4;border-left:3px solid #c97866;padding:12px;border-radius:6px;margin-bottom:16px;font-size:0.85em;color:#666;line-height:1.6;">
-                        <strong style="color:#a45a52;">Prochaine étape :</strong><br>
-                        Pour utiliser ce fichier, tu dois récupérer son URL de partage:
-                        <ul style="margin:8px 0;padding-left:20px;">
-                            <li><strong>OneDrive/SharePoint:</strong> Clique droit → Partager → Copie le lien</li>
-                            <li><strong>Google Drive:</strong> Clique droit → Partager → Copie le lien</li>
-                            <li><strong>Autre cloud:</strong> Cherche option "Partager" ou "Get link"</li>
-                        </ul>
-                        Colle ensuite cette URL dans le champ ci-dessus.
-                    </div>
-                    <div style="display:flex;gap:8px;justify-content:flex-end;">
-                        <button onclick="this.closest('div').parentElement.remove()" style="background:#e0e0e0;color:#333;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-weight:600;">Compris</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            modal.onclick = (e) => {
-                if (e.target === modal) modal.remove();
-            };
         }
 
         function addReferenceDocument() {
