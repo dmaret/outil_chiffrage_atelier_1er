@@ -7047,17 +7047,6 @@
                     </div>
 
                     <!-- Historique clinique -->
-                    <div class="section" style="background:#f0f8ff;border-left-color:#4a9af0;">
-                        <h2 style="margin:0;color:#2d5b8a;">📊 Historique des ressentis</h2>
-                        <p style="font-size:0.85em;color:#5a7b8f;margin-bottom:12px;">Tous les ressentis enregistrés pour ce bénéficiaire.</p>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                            <button class="btn btn-small" onclick="filterAccompTimeline('all')" style="background:#e0f0f8;border-color:#4a9af0;color:#2d5b8a;">Tous</button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('emotion')" style="background:#fce8e8;border-color:#e84a5f;color:#6b3a3a;">😊 Émotions</button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('observation')" style="background:#e8f0fc;border-color:#4a7af0;color:#3a4a8f;">👁️ Observations</button>
-                        </div>
-                        <div id="accompTimelineEvents" style="display:flex;flex-direction:column;gap:8px;"></div>
-                        <p id="accompTimelineEmpty" style="text-align:center;color:#8aacbc;font-size:0.88em;padding:20px;">Aucun ressenti enregistré.</p>
-                    </div>
                 </div>
 
                 <!-- ══════════════════════════════════════════════════════ -->
@@ -11754,7 +11743,7 @@
             // Render content based on step
             if (sub === 'benef')    renderBeneficiaires();
             if (sub === 'projets')  { _populateJalonBenefFilter(); renderJalons(); }
-            if (sub === 'ressentis') { renderAccompRessentisBody(); renderAccompTimeline(); }
+            if (sub === 'ressentis') { renderAccompRessentisBody(); }
             if (sub === 'analyse')  renderAnalysisQuestionnaire();
             if (sub === 'aides')    renderFichesRapides();
             if (sub === 'observations') { renderAccompClinicalCards(); }
