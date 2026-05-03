@@ -1766,6 +1766,59 @@
             text-align: right; font-weight: 700; color: var(--color-primary-dark);
         }
 
+        /* Quiz Admin Modal */
+        #quizAdminModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.55); z-index: 10000;
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        #quizAdminModal.visible { display: flex; }
+        #quizAdminModalBox {
+            background: white; border-radius: 14px; max-width: 800px; width: 100%;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            border: 2px solid var(--color-primary);
+            display: flex; flex-direction: column;
+        }
+        #quizAdminModalHeader {
+            padding: 16px 20px; border-bottom: 2px solid var(--color-primary);
+            display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            color: white; font-weight: 600; border-radius: 14px 14px 0 0;
+        }
+        #quizAdminModalHeader button {
+            background: rgba(255, 255, 255, 0.3); border: none; width: 36px; height: 36px;
+            border-radius: 50%; cursor: pointer; font-size: 1.2em;
+        }
+        #quizAdminModalBody {
+            padding: 20px; flex: 1; overflow-y: auto;
+        }
+        #quizAdminModalFooter {
+            padding: 16px 20px; border-top: 2px solid var(--color-border);
+            display: flex; justify-content: space-between; gap: 10px;
+            background: var(--color-section-bg);
+        }
+        .quiz-form-group {
+            margin-bottom: 16px;
+        }
+        .quiz-form-group label {
+            display: block; font-weight: 600; color: var(--color-primary-dark);
+            margin-bottom: 6px; font-size: 0.95em;
+        }
+        .quiz-form-group input[type="text"],
+        .quiz-form-group textarea,
+        .quiz-form-group select {
+            width: 100%; padding: 10px; border: 2px solid var(--color-border);
+            border-radius: 6px; font-size: 0.95em; font-family: inherit;
+        }
+        .quiz-form-group textarea { min-height: 80px; }
+        .quiz-form-group input:focus,
+        .quiz-form-group textarea:focus,
+        .quiz-form-group select:focus {
+            outline: none; border-color: var(--color-primary); box-shadow: 0 0 8px rgba(168, 213, 226, 0.3);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -15634,11 +15687,43 @@
             </div>`;
 
             const quizSection = `<div style="margin-top:26px;">
-                    <h3 style="color:#5a7b8f;font-size:0.95em;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:6px;">❓ Mes Quiz de domaine</h3>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">${cards}</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <h3 style="color:#5a7b8f;font-size:0.95em;font-weight:700;margin:0;display:flex;align-items:center;gap:6px;">❓ Mes Quiz de domaine</h3>
+                        <button onclick="openQuizAdminModal()" style="background:#e67e22;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:0.85em;font-weight:600;">➕ Créer un quiz</button>
+                    </div>
+                    <div id="quizCardsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">${cards}</div>
                 </div>`;
 
             container.innerHTML = `${flowsHtml}${quizSection}${docsHtml}`;
+
+            // Charger et afficher les quiz personnalisés
+            loadCustomQuizzes().then(customQuizzes => {
+                if (customQuizzes && customQuizzes.length > 0) {
+                    const customCards = customQuizzes.map(quiz => {
+                        return `<div style="background:white;border-radius:12px;padding:18px;border:2px solid #c9b3d4;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;flex-direction:column;gap:10px;">
+                            <div style="font-size:2.2em;">🎓</div>
+                            <div>
+                                <div style="font-weight:700;color:#2d3e50;font-size:1em;">${escapeHtml(quiz.title)}</div>
+                                <div style="font-size:0.8em;color:#888;margin-top:4px;">${escapeHtml(quiz.category)} — ${quiz.questions.length} question(s)</div>
+                            </div>
+                            <button onclick="startCustomQuiz('${quiz.id}')" style="width:100%;padding:9px;border-radius:8px;border:none;background:#c9b3d4;color:white;cursor:pointer;font-weight:700;font-size:0.88em;">
+                                🎯 Démarrer
+                            </button>
+                            <div style="display:flex;gap:6px;">
+                                <button onclick="openQuizAdminModal('${quiz.id}')" style="flex:1;padding:6px;border-radius:6px;border:1px solid #ddd;background:white;color:#666;cursor:pointer;font-size:0.8em;">✏️ Modifier</button>
+                                <button onclick="if(confirm('Supprimer ce quiz?')) deleteCustomQuiz('${quiz.id}').then(() => loadQuizzes())" style="flex:1;padding:6px;border-radius:6px;border:1px solid #e74c3c;background:white;color:#e74c3c;cursor:pointer;font-size:0.8em;">🗑️ Supprimer</button>
+                            </div>
+                        </div>`;
+                    }).join('');
+                    document.getElementById('quizCardsContainer').insertAdjacentHTML('beforeend', customCards);
+                }
+            });
+        }
+
+        function loadQuizzes() {
+            const learnerTab = document.querySelector('[data-tab="learner"]');
+            if (learnerTab) learnerTab.click();
+        }
         }
 
         // ── Liens cartes formation ────────────────────────────────────────────
@@ -30218,6 +30303,426 @@
             document.body.appendChild(modal);
         }
 
+        // ═══════════════════════════════════════════════════════════
+        //  🎓 GESTION DES QUIZ PERSONNALISÉS
+        // ═══════════════════════════════════════════════════════════
+
+        async function loadCustomQuizzes() {
+            return await getFromIndexedDB('customQuizzes') || [];
+        }
+
+        async function saveCustomQuiz(quiz) {
+            quiz.id = quiz.id || 'quiz_' + Date.now();
+            quiz.createdAt = quiz.createdAt || new Date().toISOString();
+            quiz.updatedAt = new Date().toISOString();
+            await saveToIndexedDB('customQuizzes', quiz);
+            return quiz;
+        }
+
+        async function deleteCustomQuiz(quizId) {
+            const quizzes = await loadCustomQuizzes();
+            const filtered = quizzes.filter(q => q.id !== quizId);
+            const db = await new Promise((resolve, reject) => {
+                const request = indexedDB.open('atelier_db', 1);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+            const tx = db.transaction(['customQuizzes'], 'readwrite');
+            tx.objectStore('customQuizzes').clear();
+            filtered.forEach(q => tx.objectStore('customQuizzes').put(q));
+            return new Promise((resolve, reject) => {
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        function openQuizAdminModal(quizId = null) {
+            const modal = document.getElementById('quizAdminModal');
+            modal.classList.add('visible');
+
+            if (quizId) {
+                loadCustomQuizzes().then(quizzes => {
+                    const quiz = quizzes.find(q => q.id === quizId);
+                    if (quiz) populateQuizForm(quiz);
+                });
+            } else {
+                document.getElementById('quizAdminForm').reset();
+                document.getElementById('quizQuestions').innerHTML = '';
+                document.getElementById('quizAdminForm').dataset.quizId = '';
+            }
+        }
+
+        function closeQuizAdminModal() {
+            document.getElementById('quizAdminModal').classList.remove('visible');
+        }
+
+        function addQuestionField() {
+            const container = document.getElementById('quizQuestions');
+            const questionId = 'q_' + Date.now();
+            const html = `
+                <div class="quiz-question-block" data-question-id="${questionId}">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <label style="font-weight:600;color:var(--terra-dark);">Question</label>
+                        <button type="button" onclick="this.closest('.quiz-question-block').remove();" style="background:#e74c3c;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">🗑️ Supprimer</button>
+                    </div>
+                    <textarea class="quiz-question-text" placeholder="Entrez la question..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;min-height:60px;margin-bottom:10px;"></textarea>
+
+                    <label style="font-weight:600;color:var(--terra-dark);margin-bottom:8px;display:block;">Type de question</label>
+                    <select class="quiz-question-type" onchange="updateQuestionType(this, '${questionId}')" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;margin-bottom:10px;">
+                        <option value="qcm">QCM (Choix multiples)</option>
+                        <option value="text">Texte libre</option>
+                    </select>
+
+                    <div class="quiz-question-options">
+                        <label style="font-weight:600;color:var(--terra-dark);margin-bottom:8px;display:block;">Options</label>
+                        <div class="quiz-options-list"></div>
+                        <button type="button" class="quiz-add-option" onclick="addOptionField(this, '${questionId}')" style="background:#27ae60;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;margin-top:8px;">➕ Ajouter une option</button>
+                    </div>
+
+                    <div class="quiz-question-text-answer" style="display:none;margin-top:10px;">
+                        <label style="font-weight:600;color:var(--terra-dark);margin-bottom:8px;display:block;">Réponse attendue (optionnelle)</label>
+                        <textarea class="quiz-text-answer" placeholder="Entrez la réponse attendue..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;min-height:60px;"></textarea>
+                    </div>
+
+                    <hr style="margin:15px 0;border:none;border-top:1px solid #ddd;">
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            // Ajouter une première option pour QCM
+            addOptionField(container.querySelector(`[data-question-id="${questionId}"] .quiz-add-option`), questionId);
+        }
+
+        function updateQuestionType(select, questionId) {
+            const block = select.closest('.quiz-question-block');
+            const optionsDiv = block.querySelector('.quiz-question-options');
+            const textAnswerDiv = block.querySelector('.quiz-question-text-answer');
+
+            if (select.value === 'qcm') {
+                optionsDiv.style.display = 'block';
+                textAnswerDiv.style.display = 'none';
+            } else {
+                optionsDiv.style.display = 'none';
+                textAnswerDiv.style.display = 'block';
+            }
+        }
+
+        function addOptionField(button, questionId) {
+            const block = document.querySelector(`[data-question-id="${questionId}"] .quiz-options-list`);
+            const optionId = 'opt_' + Date.now();
+            const html = `
+                <div class="quiz-option-field" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+                    <input type="text" class="quiz-option-text" placeholder="Option..." style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                    <label style="display:flex;align-items:center;gap:6px;font-weight:600;color:var(--terra-dark);">
+                        <input type="radio" class="quiz-option-correct" name="correct_${questionId}" value="true">
+                        Correcte
+                    </label>
+                    <button type="button" onclick="this.closest('.quiz-option-field').remove();" style="background:#e74c3c;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">✕</button>
+                </div>
+            `;
+            block.insertAdjacentHTML('beforeend', html);
+        }
+
+        function populateQuizForm(quiz) {
+            document.getElementById('quizTitle').value = quiz.title || '';
+            document.getElementById('quizCategory').value = quiz.category || '';
+            document.getElementById('quizDescription').value = quiz.description || '';
+            document.getElementById('quizAdminForm').dataset.quizId = quiz.id;
+
+            const questionsDiv = document.getElementById('quizQuestions');
+            questionsDiv.innerHTML = '';
+
+            (quiz.questions || []).forEach(q => {
+                const questionId = 'q_' + Date.now() + Math.random();
+                const html = `
+                    <div class="quiz-question-block" data-question-id="${questionId}">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                            <label style="font-weight:600;color:var(--terra-dark);">Question</label>
+                            <button type="button" onclick="this.closest('.quiz-question-block').remove();" style="background:#e74c3c;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">🗑️ Supprimer</button>
+                        </div>
+                        <textarea class="quiz-question-text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;min-height:60px;margin-bottom:10px;">${q.question}</textarea>
+
+                        <label style="font-weight:600;color:var(--terra-dark);margin-bottom:8px;display:block;">Type de question</label>
+                        <select class="quiz-question-type" onchange="updateQuestionType(this, '${questionId}')" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;margin-bottom:10px;">
+                            <option value="qcm" ${q.type === 'qcm' ? 'selected' : ''}>QCM (Choix multiples)</option>
+                            <option value="text" ${q.type === 'text' ? 'selected' : ''}>Texte libre</option>
+                        </select>
+
+                        <div class="quiz-question-options" style="display:${q.type === 'qcm' ? 'block' : 'none'};">
+                            <label style="font-weight:600;color:var(--terra-dark);margin-bottom:8px;display:block;">Options</label>
+                            <div class="quiz-options-list">
+                                ${(q.options || []).map((opt, idx) => `
+                                    <div class="quiz-option-field" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+                                        <input type="text" class="quiz-option-text" value="${opt.text}" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                        <label style="display:flex;align-items:center;gap:6px;font-weight:600;color:var(--terra-dark);">
+                                            <input type="radio" class="quiz-option-correct" name="correct_${questionId}" value="true" ${opt.correct ? 'checked' : ''}>
+                                            Correcte
+                                        </label>
+                                        <button type="button" onclick="this.closest('.quiz-option-field').remove();" style="background:#e74c3c;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">✕</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button type="button" class="quiz-add-option" onclick="addOptionField(this, '${questionId}')" style="background:#27ae60;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;margin-top:8px;">➕ Ajouter une option</button>
+                        </div>
+
+                        <div class="quiz-question-text-answer" style="display:${q.type === 'text' ? 'block' : 'none'};margin-top:10px;">
+                            <label style="font-weight:600;color:var(--terra-dark);margin-bottom:8px;display:block;">Réponse attendue (optionnelle)</label>
+                            <textarea class="quiz-text-answer" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-family:inherit;min-height:60px;">${q.expectedAnswer || ''}</textarea>
+                        </div>
+
+                        <hr style="margin:15px 0;border:none;border-top:1px solid #ddd;">
+                    </div>
+                `;
+                questionsDiv.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        async function saveQuizAdmin() {
+            const title = document.getElementById('quizTitle').value;
+            const category = document.getElementById('quizCategory').value;
+            const description = document.getElementById('quizDescription').value;
+            const quizId = document.getElementById('quizAdminForm').dataset.quizId;
+
+            if (!title || !category) {
+                toast('❌ Titre et catégorie sont obligatoires', 'danger');
+                return;
+            }
+
+            const questions = [];
+            document.querySelectorAll('.quiz-question-block').forEach(block => {
+                const questionText = block.querySelector('.quiz-question-text').value;
+                const questionType = block.querySelector('.quiz-question-type').value;
+
+                if (!questionText) return;
+
+                if (questionType === 'qcm') {
+                    const options = [];
+                    block.querySelectorAll('.quiz-option-field').forEach(optField => {
+                        const text = optField.querySelector('.quiz-option-text').value;
+                        const correct = optField.querySelector('.quiz-option-correct').checked;
+                        if (text) options.push({ text, correct });
+                    });
+
+                    const hasCorrectAnswer = options.some(o => o.correct);
+                    if (!hasCorrectAnswer || options.length < 2) {
+                        toast('❌ Chaque question QCM doit avoir au moins 2 options et une bonne réponse', 'danger');
+                        return;
+                    }
+
+                    questions.push({ question: questionText, type: 'qcm', options });
+                } else {
+                    const expectedAnswer = block.querySelector('.quiz-text-answer').value;
+                    questions.push({ question: questionText, type: 'text', expectedAnswer });
+                }
+            });
+
+            if (questions.length === 0) {
+                toast('❌ Ajoutez au moins une question', 'danger');
+                return;
+            }
+
+            const quiz = {
+                id: quizId || 'quiz_' + Date.now(),
+                title,
+                category,
+                description,
+                questions,
+                createdAt: quizId ? (await loadCustomQuizzes()).find(q => q.id === quizId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            await saveCustomQuiz(quiz);
+            toast('✅ Quiz sauvegardé!', 'success');
+            closeQuizAdminModal();
+            loadQuizzes(); // Rafraîchir l'affichage
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  🎮 JOUEUR DE QUIZ PERSONNALISÉ
+        // ═══════════════════════════════════════════════════════════
+
+        let customQuizState = {
+            quizId: null,
+            currentQuestion: 0,
+            score: 0,
+            answered: [],
+            finished: false,
+            quiz: null
+        };
+
+        async function startCustomQuiz(quizId) {
+            const quizzes = await loadCustomQuizzes();
+            const quiz = quizzes.find(q => q.id === quizId);
+            if (!quiz) {
+                toast('❌ Quiz non trouvé', 'error');
+                return;
+            }
+
+            customQuizState = {
+                quizId,
+                currentQuestion: 0,
+                score: 0,
+                answered: [],
+                finished: false,
+                quiz
+            };
+            showCustomQuestion();
+        }
+
+        function showCustomQuestion() {
+            if (customQuizState.currentQuestion >= customQuizState.quiz.questions.length) {
+                showCustomQuizResults();
+                return;
+            }
+
+            const q = customQuizState.quiz.questions[customQuizState.currentQuestion];
+            const modal = document.createElement('div');
+            modal.className = 'game-menu-overlay';
+            window.closeQuizPlayer = () => modal.remove();
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeQuizPlayer();
+            });
+
+            const progressPercent = ((customQuizState.currentQuestion + 1) / customQuizState.quiz.questions.length) * 100;
+            let html = `
+                <div class="game-menu-container" style="max-width:650px;position:relative;">
+                    <button onclick="closeQuizPlayer()" style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.5em;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;">×</button>
+                    <div class="game-menu-header">
+                        <h2>🎓 ${escapeHtml(customQuizState.quiz.title)}</h2>
+                        <div class="game-menu-subtitle">Question ${customQuizState.currentQuestion + 1} / ${customQuizState.quiz.questions.length}</div>
+                    </div>
+                    <div class="game-menu-content">
+                        <div class="quiz-progress-bar">
+                            <div class="quiz-progress-fill" style="width:${progressPercent}%;"></div>
+                        </div>
+                        <div class="quiz-question">${escapeHtml(q.question)}</div>
+            `;
+
+            if (q.type === 'qcm') {
+                html += `<div class="quiz-options">`;
+                q.options.forEach((opt, idx) => {
+                    html += `
+                        <button class="quiz-option" onclick="answerCustomQCM(${idx}, this)" style="text-align:left;">
+                            ${escapeHtml(opt.text)}
+                        </button>
+                    `;
+                });
+                html += `</div>`;
+            } else {
+                html += `
+                    <div style="margin:20px 0;">
+                        <textarea id="textAnswer" placeholder="Votre réponse..." style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;min-height:100px;"></textarea>
+                        <button onclick="answerCustomText()" style="width:100%;padding:10px;margin-top:10px;background:#27ae60;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Valider ma réponse</button>
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                    <div class="game-menu-footer">
+                        <button class="btn btn-secondary" onclick="customQuizState.currentQuestion++;showCustomQuestion();">Suivant →</button>
+                    </div>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+        function answerCustomQCM(optionIdx, btn) {
+            const q = customQuizState.quiz.questions[customQuizState.currentQuestion];
+            const isCorrect = q.options[optionIdx].correct;
+
+            btn.style.borderColor = isCorrect ? '#27ae60' : '#e74c3c';
+            btn.style.background = isCorrect ? '#d5f4e6' : '#fadbd8';
+            btn.style.color = isCorrect ? '#27ae60' : '#e74c3c';
+            btn.disabled = true;
+
+            const explDiv = document.createElement('div');
+            explDiv.style.cssText = 'background:#f0f4f8;padding:15px;border-radius:8px;margin-top:15px;border-left:4px solid ' + (isCorrect ? '#27ae60' : '#e74c3c') + ';';
+            explDiv.innerHTML = `<strong>${isCorrect ? '✅ Correct!' : '❌ Incorrect'}</strong>`;
+            if (q.explanation) {
+                explDiv.innerHTML += `<br><div style="margin-top:8px;color:#666;font-size:0.95em;">${escapeHtml(q.explanation)}</div>`;
+            }
+            btn.parentElement.appendChild(explDiv);
+
+            if (isCorrect) {
+                customQuizState.score += 20;
+                addXP(20);
+                toast('✅ Correct!', 'success');
+            } else {
+                addXP(5);
+                toast('❌ Incorrect...', 'danger');
+            }
+
+            customQuizState.answered.push({ question: q.question, correct: isCorrect });
+        }
+
+        function answerCustomText() {
+            const answer = document.getElementById('textAnswer').value;
+            if (!answer.trim()) {
+                toast('⚠️ Entrez une réponse', 'warning');
+                return;
+            }
+
+            const q = customQuizState.quiz.questions[customQuizState.currentQuestion];
+            const textarea = document.getElementById('textAnswer');
+            textarea.disabled = true;
+
+            const explDiv = document.createElement('div');
+            explDiv.style.cssText = 'background:#f0f4f8;padding:15px;border-radius:8px;margin-top:15px;border-left:4px solid #3498db;';
+            explDiv.innerHTML = `<strong>📝 Votre réponse enregistrée</strong>`;
+            if (q.expectedAnswer) {
+                explDiv.innerHTML += `<br><div style="margin-top:8px;color:#666;font-size:0.95em;"><strong>Réponse attendue:</strong> ${escapeHtml(q.expectedAnswer)}</div>`;
+            }
+            textarea.parentElement.appendChild(explDiv);
+
+            customQuizState.score += 15;
+            addXP(15);
+            customQuizState.answered.push({ question: q.question, answer });
+
+            setTimeout(() => {
+                customQuizState.currentQuestion++;
+                showCustomQuestion();
+            }, 2000);
+        }
+
+        function showCustomQuizResults() {
+            const total = customQuizState.quiz.questions.length;
+            const percentage = (customQuizState.score / (total * 20)) * 100;
+            let resultEmoji = '📚', resultMessage = 'Quiz terminé!';
+
+            if (percentage === 100) {
+                resultEmoji = '🏆';
+                resultMessage = 'PARFAIT! Expert confirmé!';
+            } else if (percentage >= 80) {
+                resultEmoji = '⭐';
+                resultMessage = 'Excellent travail!';
+            } else if (percentage >= 60) {
+                resultEmoji = '👍';
+                resultMessage = 'Bien! Continuez à pratiquer!';
+            }
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+
+            let html = `
+                <div style="background:white;padding:40px;border-radius:16px;max-width:500px;width:90%;text-align:center;">
+                    <div style="font-size:3em;margin-bottom:20px;">${resultEmoji}</div>
+                    <h2 style="color:#6b8fa3;margin-bottom:10px;">${escapeHtml(customQuizState.quiz.title)}</h2>
+                    <p style="color:#666;margin-bottom:20px;font-size:0.95em;">${resultMessage}</p>
+                    <div style="background:linear-gradient(135deg,#c9b3d4,#a8d5e2);padding:25px;border-radius:12px;margin-bottom:20px;">
+                        <div style="font-size:2.5em;font-weight:bold;color:white;margin-bottom:10px;">${customQuizState.score}/${total * 20}</div>
+                        <div style="font-size:1.5em;font-weight:bold;color:white;">${percentage.toFixed(1)}%</div>
+                    </div>
+                    <button onclick="this.closest('div').closest('div').remove();loadQuizzes();" style="width:100%;padding:12px;background:#6b8fa3;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.95em;">Fermer</button>
+                </div>
+            `;
+
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
         function startSpeedTimer() {
             let timeLeft = 60;
             const timerEl = document.createElement('div');
@@ -35195,6 +35700,54 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="debrief-btn-secondary" onclick="closeClinicalDashboard()" aria-label="Fermer" style="padding:4px 10px;">×</button>
         </div>
         <div id="clinicalDashboardBody"></div>
+    </div>
+</div>
+
+<!-- ── Quiz Admin Modal ────────────────────────────────────── -->
+<div id="quizAdminModal" role="dialog" aria-modal="true">
+    <div id="quizAdminModalBox">
+        <div id="quizAdminModalHeader">
+            <h3 style="margin: 0;">🎓 Créer / Modifier un Quiz</h3>
+            <button onclick="closeQuizAdminModal()" aria-label="Fermer">×</button>
+        </div>
+        <div id="quizAdminModalBody">
+            <form id="quizAdminForm">
+                <div class="quiz-form-group">
+                    <label for="quizTitle">Titre du Quiz *</label>
+                    <input type="text" id="quizTitle" placeholder="Ex: Quiz KPI" required>
+                </div>
+
+                <div class="quiz-form-group">
+                    <label for="quizCategory">Catégorie *</label>
+                    <select id="quizCategory" required>
+                        <option value="">-- Sélectionner une catégorie --</option>
+                        <option value="Méthodes">Méthodes</option>
+                        <option value="KPI">KPI</option>
+                        <option value="Retailers">Retailers</option>
+                        <option value="Systèmes">Systèmes</option>
+                        <option value="Opérations">Opérations</option>
+                        <option value="Autres">Autres</option>
+                    </select>
+                </div>
+
+                <div class="quiz-form-group">
+                    <label for="quizDescription">Description (optionnelle)</label>
+                    <textarea id="quizDescription" placeholder="Description du quiz..."></textarea>
+                </div>
+
+                <div style="border-top: 2px solid var(--color-border); padding-top: 16px; margin-top: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h4 style="margin: 0; color: var(--color-primary-dark);">Questions</h4>
+                        <button type="button" onclick="addQuestionField()" style="background: var(--color-success); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">➕ Ajouter une question</button>
+                    </div>
+                    <div id="quizQuestions"></div>
+                </div>
+            </form>
+        </div>
+        <div id="quizAdminModalFooter">
+            <button onclick="closeQuizAdminModal()" style="background: var(--color-border); color: var(--color-text); border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">Annuler</button>
+            <button onclick="saveQuizAdmin()" style="background: var(--color-success); color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">💾 Enregistrer le Quiz</button>
+        </div>
     </div>
 </div>
 
