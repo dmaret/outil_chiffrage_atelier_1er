@@ -8890,7 +8890,7 @@
         // IndexedDB helpers
         function saveToIndexedDB(storeName, data) {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('atelier_db', 2);
+                const request = indexedDB.open('atelier_db', 3);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     const db = request.result;
@@ -8919,7 +8919,7 @@
 
         function getFromIndexedDB(storeName, key) {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('atelier_db', 2);
+                const request = indexedDB.open('atelier_db', 3);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     const db = request.result;
@@ -21356,7 +21356,7 @@
                 if (!('indexedDB' in window)) return Promise.reject(new Error('IndexedDB indisponible'));
                 if (this._dbPromise) return this._dbPromise;
                 return this._dbPromise = new Promise((resolve, reject) => {
-                    const req = indexedDB.open('atelier_db', 2);
+                    const req = indexedDB.open('atelier_db', 3);
                     req.onupgradeneeded = (e) => {
                         const db = e.target.result;
                         if (!db.objectStoreNames.contains('audit')) {
@@ -30477,7 +30477,7 @@
             const quizzes = await loadCustomQuizzes();
             const filtered = quizzes.filter(q => q.id !== quizId);
             const db = await new Promise((resolve, reject) => {
-                const request = indexedDB.open('atelier_db', 2);
+                const request = indexedDB.open('atelier_db', 3);
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
                 request.onupgradeneeded = (e) => {
