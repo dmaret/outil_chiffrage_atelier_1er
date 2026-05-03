@@ -12502,6 +12502,52 @@
             switchAccompSub('ressentis');
         }
 
+        function renderSynthese() {
+            const benefId = _accompCurrentBenefId;
+            const jalonId = _accompSelectedJalonId;
+
+            // Load work done from jalons
+            const travailContainer = document.getElementById('syntheseTravail');
+            const veduContainer = document.getElementById('syntheseVecu');
+
+            if (!benefId) {
+                travailContainer.innerHTML = '⚠️ Aucun bénéficiaire sélectionné';
+                veduContainer.innerHTML = '⚠️ Aucun bénéficiaire sélectionné';
+                return;
+            }
+
+            // Get work done (jalons for current beneficiary)
+            const benefJalons = jalons.filter(j => j.beneficiaireId === benefId);
+            if (benefJalons.length > 0) {
+                const jalonsList = benefJalons.map(j => {
+                    const type = JALON_TYPES.find(t => t.id === j.type) || JALON_TYPES[0];
+                    return `<li style="margin-bottom:6px;"><strong>${j.titre}</strong> <span style="font-size:0.85em;color:#999;">(${type.label} • ${j.date})</span></li>`;
+                }).join('');
+                travailContainer.innerHTML = `<ul style="margin:0;padding-left:20px;">${jalonsList}</ul>`;
+            } else {
+                travailContainer.innerHTML = '— Aucun jalon enregistré';
+            }
+
+            // Get CEA experience from ressentis data
+            try {
+                const ressentisData = JSON.parse(localStorage.getItem('accompRessentisData_' + benefId) || '{}');
+                if (Object.keys(ressentisData).length > 0) {
+                    const veduList = Object.entries(ressentisData).map(([key, value]) => {
+                        if (value && typeof value === 'object') {
+                            const label = key.charAt(0).toUpperCase() + key.slice(1);
+                            return `<li style="margin-bottom:6px;"><strong>${label}</strong>: ${JSON.stringify(value).substring(0, 100)}...</li>`;
+                        }
+                        return '';
+                    }).filter(Boolean).join('');
+                    veduContainer.innerHTML = veduList ? `<ul style="margin:0;padding-left:20px;">${veduList}</ul>` : '— Pas de données de ressenti enregistrées';
+                } else {
+                    veduContainer.innerHTML = '— Pas de données de ressenti enregistrées';
+                }
+            } catch (e) {
+                veduContainer.innerHTML = '— Pas de données de ressenti enregistrées';
+            }
+        }
+
         function renderJalons() {
             const c = document.getElementById('jalonsList');
             if (!c) return;
