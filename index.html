@@ -15572,17 +15572,17 @@
                             const isFile = doc.isFile && doc.fileData;
                             const fileType = doc.fileType || '';
                             const canOpenInBrowser = fileType.includes('pdf') || fileType.includes('image') || fileType.startsWith('text');
-                            let href, attrs, label;
+                            let action, label;
                             if (isFile) {
-                                href = doc.fileData;
-                                attrs = canOpenInBrowser ? 'target="_blank"' : `download="${escapeHtml(doc.fileName)}"`;
                                 label = canOpenInBrowser ? '' : ' ⬇';
+                                action = canOpenInBrowser
+                                    ? `onclick="openDocument('${doc.fileData.replace(/'/g, "\\'")}', '${escapeHtml(doc.fileName)}');return false;"`
+                                    : `href="${doc.fileData}" download="${escapeHtml(doc.fileName)}"`;
                             } else {
-                                href = doc.url || '#';
-                                attrs = 'target="_blank"';
                                 label = '';
+                                action = `href="${doc.url || '#'}" target="_blank"`;
                             }
-                            return `<a href="${href}" ${attrs} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${label}</a>`;
+                            return `<a ${action} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${label}</a>`;
                         }).join('')}
                     </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
                 </div>`;
@@ -15618,19 +15618,17 @@
                         const isFile = doc.isFile && doc.fileData;
                         const fileType = doc.fileType || '';
                         const canOpenInBrowser = fileType.includes('pdf') || fileType.includes('image') || fileType.startsWith('text');
-                        let ico, label, attrs, href;
+                        let label, action;
                         if (isFile) {
-                            href = doc.fileData;
-                            ico = canOpenInBrowser ? '📄' : '📥';
-                            label = canOpenInBrowser ? '' : ' ⬇';
-                            attrs = canOpenInBrowser ? 'target="_blank"' : `download="${escapeHtml(doc.fileName)}"`;
+                            label = canOpenInBrowser ? '📄' : '📥';
+                            action = canOpenInBrowser
+                                ? `onclick="openDocument('${doc.fileData.replace(/'/g, "\\'")}', '${escapeHtml(doc.fileName)}');return false;"`
+                                : `href="${doc.fileData}" download="${escapeHtml(doc.fileName)}"`;
                         } else {
-                            href = doc.url || '#';
-                            ico = doc.type==='video'?'🎥':'🔗';
-                            label = '';
-                            attrs = 'target="_blank"';
+                            label = doc.type==='video'?'🎥':'🔗';
+                            action = `href="${doc.url}" target="_blank"`;
                         }
-                        return `<a href="${href}" ${attrs} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${label}</a>`;
+                        return `<a ${action} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${label} ${escapeHtml(doc.title)}</a>`;
                     }).join('')}
                 </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
             </div>`;
@@ -17006,7 +17004,7 @@
                         const fileType = doc.fileType || '';
                         const canOpen = fileType.includes('pdf') || fileType.includes('image') || fileType.startsWith('text');
                         if (canOpen) {
-                            actionBtn = `<a href="${doc.fileData}" target="_blank" class="btn btn-small btn-secondary" style="margin-right:8px;">📄 Ouvrir</a>`;
+                            actionBtn = `<button onclick="openDocument('${doc.fileData.replace(/'/g, "\\'")}', '${doc.fileName.replace(/'/g, "\\'")}');" class="btn btn-small btn-secondary" style="margin-right:8px;">📄 Ouvrir</button>`;
                         } else {
                             actionBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-small btn-secondary" style="margin-right:8px;">⬇️ Télécharger</a>`;
                         }
