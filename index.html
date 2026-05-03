@@ -13681,7 +13681,7 @@
                 </div>
                 <div class="form-group">
                     <label>Quantité</label>
-                    <input type="number" id="qte-stock-${lineId}" min="0" step="1" value="1" onchange="validateStockQuantity(this, ${lineId}); calculateTotal()">
+                    <input type="number" id="qte-stock-${lineId}" min="0" step="1" value="0" onchange="validateStockQuantity(this, ${lineId}); calculateTotal()">
                 </div>
                 <div class="form-group">
                     <label>Durée (j)</label>
@@ -19355,9 +19355,13 @@
             const container = document.getElementById('stockMinTable');
             if (!container) return;
 
-            const refs = Object.keys(stockActuel);
-            if (refs.length === 0) {
-                container.innerHTML = '<div class="empty-state">Aucun stock enregistré</div>';
+            // Get refs from both stockActuel AND stockMins
+            const refsFromStock = Object.keys(stockActuel || {});
+            const refsFromMins = Object.keys(stockMins || {});
+            const allRefs = [...new Set([...refsFromStock, ...refsFromMins])].sort();
+
+            if (allRefs.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding:20px;text-align:center;color:#999;">Aucun stock enregistré</div>';
                 return;
             }
 
@@ -19365,13 +19369,13 @@
                 <th>Référence</th><th>Stock actuel</th><th>Stock min</th><th>Statut</th><th>Action</th>
             </tr></thead><tbody>`;
 
-            refs.forEach(ref => {
-                const current = stockActuel[ref].total;
+            allRefs.forEach(ref => {
+                const current = stockActuel?.[ref]?.total || 0;
                 const min = stockMins[ref] || 0;
                 const alerte = min > 0 && current < min;
                 const statutHtml = alerte
                     ? `<span class="badge badge-danger">⚠️ Stock bas</span>`
-                    : `<span class="badge badge-success">OK</span>`;
+                    : (min > 0 ? `<span class="badge badge-success">OK</span>` : '<span style="color:#999;">—</span>');
                 html += `<tr ${alerte ? 'style="background:#fff5f5;"' : ''}>
                     <td><strong ${alerte ? 'class="stock-alerte"' : ''}>${ref}${alerte ? ' <span class="stock-alerte-badge">!</span>' : ''}</strong></td>
                     <td>${current.toFixed(0)}</td>
