@@ -7006,31 +7006,37 @@
                 </div>
 
                 <!-- ══════════════════════════════════════════════════════ -->
-                <!-- ÉTAPE 3 : RESSENTIS DU CEA -->
+                <!-- ÉTAPE 3 : RESSENTIS DU CEA — Questionnaire progressif -->
                 <!-- ══════════════════════════════════════════════════════ -->
                 <div class="accomp-sub-panel" id="accomp-ressentis" style="display:none;">
-                    <div class="info-box" style="border-left-color:#c070f0;background:#fff0f5;">Enregistrez les <strong>émotions, sensations et messages reçus</strong> du CEA.</div>
+                    <div class="info-box" style="border-left-color:#c070f0;background:#fff0f5;">Enregistrez les <strong>émotions, sensations et messages reçus</strong> du CEA — répondez un type à la fois.</div>
 
-                    <!-- Outils cliniques — Saisie observations -->
+                    <!-- Questionnaire progressif -->
                     <div class="section" style="background:linear-gradient(135deg,#fff0f5,#f0f8ff);border-left-color:#c070f0;">
-                        <h2 style="color:#6b3a8f;margin:0 0 14px;">😊 Quels ressentis du CEA ?</h2>
-                        <p style="font-size:0.85em;color:#7a5a9a;margin-bottom:14px;">Enregistrez : émotion, observation, message reçu, double contrainte, ressenti corporel.</p>
+                        <h2 style="color:#6b3a8f;margin:0 0 14px;">😊 Questionnaire des ressentis</h2>
+                        <p style="font-size:0.85em;color:#7a5a9a;margin-bottom:14px;">Répondez à chaque type de ressenti. Vous pouvez valider et passer au suivant, ou sauter les champs facultatifs.</p>
 
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                            <button class="btn" data-clintype="emotion" onclick="switchAccompClinicalTab('emotion')" style="background:#e8b5c8;border-color:#d070a0;color:#6b3a8f;font-weight:600;">😊 Émotion</button>
-                            <button class="btn" data-clintype="observation" onclick="switchAccompClinicalTab('observation')" style="background:#b5d5e8;border-color:#70a0d0;color:#3a6b8f;font-weight:600;">👁️ Observation</button>
-                            <button class="btn" data-clintype="message" onclick="switchAccompClinicalTab('message')" style="background:#d5d5e8;border-color:#a0a0d0;color:#3a3a8f;font-weight:600;">💬 Message reçu</button>
-                            <button class="btn" data-clintype="double_contrainte" onclick="switchAccompClinicalTab('double_contrainte')" style="background:#e8d5b5;border-color:#d0a070;color:#8f6b3a;font-weight:600;">🌀 Double contrainte</button>
-                            <button class="btn" data-clintype="ressenti_corporel" onclick="switchAccompClinicalTab('ressenti_corporel')" style="background:#c8e8b5;border-color:#a0d070;color:#6b8f3a;font-weight:600;">🤝 Ressenti corporel</button>
+                        <!-- Progress indicator -->
+                        <div id="ressentisProgressContainer" style="margin-bottom:16px;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">
+                            <button class="btn btn-small" data-ressentitype="emotion" onclick="switchAccompRessentisStep('emotion')" style="background:#e8b5c8;border-color:#d070a0;color:#6b3a8f;font-weight:600;min-width:80px;">😊 Émotion</button>
+                            <button class="btn btn-small" data-ressentitype="observation" onclick="switchAccompRessentisStep('observation')" style="background:#b5d5e8;border-color:#70a0d0;color:#3a6b8f;font-weight:600;min-width:100px;">👁️ Observation</button>
+                            <button class="btn btn-small" data-ressentitype="message" onclick="switchAccompRessentisStep('message')" style="background:#d5d5e8;border-color:#a0a0d0;color:#3a3a8f;font-weight:600;min-width:90px;">💬 Message</button>
+                            <button class="btn btn-small" data-ressentitype="double_contrainte" onclick="switchAccompRessentisStep('double_contrainte')" style="background:#e8d5b5;border-color:#d0a070;color:#8f6b3a;font-weight:600;min-width:110px;">🌀 Double contrainte</button>
+                            <button class="btn btn-small" data-ressentitype="ressenti_corporel" onclick="switchAccompRessentisStep('ressenti_corporel')" style="background:#c8e8b5;border-color:#a0d070;color:#6b8f3a;font-weight:600;min-width:100px;">🤝 Corporel</button>
                         </div>
 
-                        <div id="accompClinicalBody" style="background:white;border:1px solid #d4aaee;border-radius:8px;padding:14px;margin-bottom:12px;">
-                            <!-- Contenu dynamique selon l'onglet sélectionné -->
+                        <!-- Current step content -->
+                        <div id="accompRessentisBody" style="background:white;border:1px solid #d4aaee;border-radius:8px;padding:14px;margin-bottom:12px;min-height:200px;">
+                            <!-- Contenu dynamique selon l'étape sélectionnée -->
                         </div>
 
-                        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
-                            <button class="btn btn-secondary" onclick="resetAccompClinical()">↺ Réinitialiser</button>
-                            <button class="btn btn-success" onclick="saveAccompClinicalInput()">💾 Enregistrer</button>
+                        <!-- Navigation buttons -->
+                        <div style="display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;">
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-secondary" id="ressentisSkipBtn" onclick="skipAccompRessentisStep()" style="display:none;">⊘ Passer</button>
+                                <button class="btn btn-secondary" onclick="resetAccompRessentis()">↺ Recommencer</button>
+                            </div>
+                            <button class="btn btn-success" id="ressentisValidateBtn" onclick="validateAccompRessentisStep()">✓ Valider & Continuer</button>
                         </div>
                     </div>
 
@@ -11594,6 +11600,8 @@
             saveToStorage();
         }
 
+        let _accompCurrentBenefId = null;
+
         function switchAccompSub(sub) {
             document.querySelectorAll('.accomp-pill').forEach(b => {
                 const on = b.dataset.sub === sub;
@@ -11604,11 +11612,23 @@
             document.querySelectorAll('.accomp-sub-panel').forEach(p => p.style.display = 'none');
             const panel = document.getElementById('accomp-' + sub);
             if (panel) panel.style.display = '';
-            if (sub === 'suivi')    renderBeneficiaires();
-            if (sub === 'jalons')   { _populateJalonBenefFilter(); renderJalons(); }
-            if (sub === 'parcours') { _populateParcoursBenefFilter(); renderAccompagnementFlux(); }
-            if (sub === 'croise')   renderVueCroisee();
-            if (sub === 'outils')   { renderFichesRapides(); renderAccompClinicalBody(); renderAccompTimeline(); }
+
+            // Render content based on step
+            if (sub === 'benef')    renderBeneficiaires();
+            if (sub === 'projets')  { _populateJalonBenefFilter(); renderJalons(); }
+            if (sub === 'ressentis') { renderAccompRessentisBody(); renderAccompTimeline(); }
+            if (sub === 'analyse')  renderAnalysisQuestionnaire();
+            if (sub === 'aides')    renderFichesRapides();
+            if (sub === 'observations') { renderAccompClinicalCards(); }
+            if (sub === 'synthese') renderSynthese();
+        }
+
+        function setBeneficiaire(benefId) {
+            _accompCurrentBenefId = benefId ? Number(benefId) : null;
+            // Auto-load Projets when beneficiary is selected
+            if (_accompCurrentBenefId) {
+                switchAccompSub('projets');
+            }
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -12262,9 +12282,12 @@
         function _populateJalonBenefFilter() {
             const sel = document.getElementById('jalonFilterBenef');
             if (!sel) return;
-            const prev = sel.value;
+            const prev = sel.value || _accompCurrentBenefId;
             sel.innerHTML = '<option value="">— Tous les bénéficiaires —</option>' +
-                beneficiaires.map(b => `<option value="${b.id}" ${String(b.id) === prev ? 'selected' : ''}>${b.prenom} ${b.nom}</option>`).join('');
+                beneficiaires.map(b => `<option value="${b.id}" ${String(b.id) === String(prev) ? 'selected' : ''}>${b.prenom} ${b.nom}</option>`).join('');
+            if (_accompCurrentBenefId) {
+                sel.value = _accompCurrentBenefId;
+            }
         }
 
         // ── Bénéficiaires ─────────────────────────────────────
@@ -12299,8 +12322,8 @@
                         ${b.competences?.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;">${b.competences.map(c => `<span style="font-size:0.75em;background:#e8f0f8;color:#3a6fa3;border-radius:10px;padding:2px 8px;">${c}</span>`).join('')}</div>` : ''}
                     </div>
                     <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
-                        <button class="btn btn-small btn-success" onclick="openJalonModal(null,${b.id})" title="Ajouter un jalon pour ce bénéficiaire">🎯 Jalon</button>
-                        <button class="btn btn-small" style="background:#fff4e6;color:#b66a1f;border:1px solid #f0b87a;" onclick="openClinicalTimeline(${b.id})" title="Timeline clinique : émotions, observations, doubles contraintes, ressentis corporels">📊 Timeline</button>
+                        <button class="btn btn-small btn-success" onclick="setBeneficiaire(${b.id})" title="Sélectionner ce bénéficiaire et continuer">✓ Sélectionner</button>
+                        <button class="btn btn-small" onclick="openJalonModal(null,${b.id})" title="Ajouter un jalon pour ce bénéficiaire">🎯 Jalon</button>
                         <button class="btn btn-small btn-secondary" onclick="openBeneficiaireModal(${b.id})">✏️</button>
                         <button class="btn btn-small" onclick="deleteBeneficiaire(${b.id})" style="background:#e74c3c;color:#fff;border-color:#c0392b;">🗑</button>
                     </div>
@@ -35573,6 +35596,259 @@ function getCurrentSelectedBeneficiary() {
         return { id, nom };
     }
     return null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Questionnaire progressif des ressentis (Accompagnement v2.9)
+// ═══════════════════════════════════════════════════════════
+let _ressentisCurrentStep = 'emotion';
+let _ressentisSteps = ['emotion', 'observation', 'message', 'double_contrainte', 'ressenti_corporel'];
+let _ressentisData = {};
+let _ressentisCompleted = new Set();
+
+function switchAccompRessentisStep(stepType) {
+    _ressentisCurrentStep = stepType;
+    renderAccompRessentisBody();
+    updateRessentisProgressUI();
+}
+
+function renderAccompRessentisBody() {
+    const body = document.getElementById('accompRessentisBody');
+    if (!body) return;
+
+    const t = _ressentisCurrentStep;
+    const emotions = ['Joie', 'Fierté', 'Plaisir', 'Surprise', 'Colère', 'Frustration', 'Agacement', 'Indignation', 'Peur', 'Inquiétude', 'Anxiété', 'Honte', 'Tristesse', 'Découragement', 'Lassitude', 'Solitude', 'Confusion', 'Dégoût', 'Soulagement', 'Indifférence'];
+    const bodyZones = ['Tête', 'Cou/Gorge', 'Épaules', 'Poitrine', 'Ventre', 'Dos', 'Bras', 'Mains', 'Jambes', 'Pieds'];
+
+    if (t === 'emotion') {
+        body.innerHTML = `
+            <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre une émotion ressentie et son intensité.</p>
+            <label style="display:block;margin-bottom:10px;font-weight:600;">Quelle émotion ressens-tu ?</label>
+            <div class="clinical-emotion-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                ${emotions.map(e => {
+                    const isSelected = _ressentisData.emotions && _ressentisData.emotions.includes(e);
+                    return `<div class="ressenti-chip" onclick="toggleRessentisEmotion('${e}')" style="padding:8px 12px;border:2px solid ${isSelected ? '#d070a0' : '#ddd'};border-radius:6px;cursor:pointer;background:${isSelected ? '#e8b5c8' : '#fff'};transition:all 0.2s;font-weight:${isSelected ? '600' : 'normal'};" id="ressenti-emotion-${e}">${e}</div>`;
+                }).join('')}
+            </div>
+            <label style="display:block;margin-bottom:8px;margin-top:12px;font-weight:600;">Intensité (1 = peu, 5 = très fort)</label>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+                ${[1,2,3,4,5].map(n => {
+                    const isSelected = _ressentisData.emotion_intensity === n;
+                    return `<button type="button" onclick="setRessentisIntensity(${n})" style="padding:8px 14px;border:2px solid ${isSelected ? '#a040d0' : '#ddd'};border-radius:6px;cursor:pointer;background:${isSelected ? '#c070f0' : '#fff'};color:${isSelected ? '#fff' : '#000'};font-weight:600;transition:all 0.2s;flex:1;" id="ressenti-intensity-${n}">${n}</button>`;
+                }).join('')}
+            </div>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Note <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="ressentisNoteEmotion" placeholder="À quel moment ? Lié à quoi ?" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">${_ressentisData.emotion_note || ''}</textarea>`;
+    } else if (t === 'observation') {
+        body.innerHTML = `
+            <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre une observation : faits objectifs, sans interprétation.</p>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Qu'as-tu observé ?</label>
+            <textarea id="ressentisObservation" placeholder="Décris factuellement ce que tu as vu, entendu, observé — sans interpréter." style="width:100%;min-height:100px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">${_ressentisData.observation || ''}</textarea>
+            <label style="display:block;margin-top:12px;margin-bottom:8px;font-weight:600;">Sur qui / quoi ? <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <input type="text" id="ressentisObsTarget" placeholder="Ex : un collègue, le bénéficiaire, le matériel…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;" value="${_ressentisData.obs_target || ''}">`;
+    } else if (t === 'message') {
+        body.innerHTML = `
+            <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre un message reçu et ton interprétation.</p>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">De qui vient le message ?</label>
+            <input type="text" id="ressentisMessageFrom" placeholder="Hiérarchie, collègue, client, bénéficiaire…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;" value="${_ressentisData.message_from || ''}">
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Quel était le message ?</label>
+            <textarea id="ressentisMessageContent" placeholder="Mots dits, geste, regard, silence…" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">${_ressentisData.message_content || ''}</textarea>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Comment l'as-tu interprété ?</label>
+            <textarea id="ressentisMessageInterp" placeholder="Ce que tu en as compris, ressenti…" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">${_ressentisData.message_interp || ''}</textarea>`;
+    } else if (t === 'double_contrainte') {
+        body.innerHTML = `
+            <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre une double contrainte : deux demandes contradictoires. <span style="color:#999;">(optionnel — tu peux passer cette étape)</span></p>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Injonction A</label>
+            <input type="text" id="ressentis_dcA" placeholder="Ex : Sois rapide." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;" value="${_ressentisData.dc_a || ''}">
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Injonction B (contradictoire)</label>
+            <input type="text" id="ressentis_dcB" placeholder="Ex : Sois minutieux et zéro défaut." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;" value="${_ressentisData.dc_b || ''}">
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Qui émet ces injonctions ? <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <input type="text" id="ressentis_dcSource" placeholder="Ex : le chef, deux services différents…" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;" value="${_ressentisData.dc_source || ''}">
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Note <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="ressentis_dcNote" placeholder="Comment vis-tu ce paradoxe ?" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">${_ressentisData.dc_note || ''}</textarea>`;
+    } else if (t === 'ressenti_corporel') {
+        body.innerHTML = `
+            <p style="font-size:0.85em;color:#666;margin-bottom:12px;">Enregistre ton ressenti corporel : sensations physiques localisées.</p>
+            <label style="display:block;margin-bottom:10px;font-weight:600;">Où dans le corps ?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                ${bodyZones.map(z => {
+                    const isSelected = _ressentisData.body_zones && _ressentisData.body_zones.includes(z);
+                    return `<div class="ressenti-chip" onclick="toggleRessentisBodyZone('${z}')" style="padding:8px 12px;border:2px solid ${isSelected ? '#a0d070' : '#ddd'};border-radius:6px;cursor:pointer;background:${isSelected ? '#c8e8b5' : '#fff'};transition:all 0.2s;font-weight:${isSelected ? '600' : 'normal'};" id="ressenti-zone-${z}">${z}</div>`;
+                }).join('')}
+            </div>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Type de sensation</label>
+            <select id="ressentisBodyType" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;margin-bottom:12px;">
+                <option value="">— choisir —</option>
+                <option value="tension" ${_ressentisData.body_type === 'tension' ? 'selected' : ''}>🔴 Tension, crispation</option>
+                <option value="chaleur" ${_ressentisData.body_type === 'chaleur' ? 'selected' : ''}>🔥 Chaleur, brûlure</option>
+                <option value="froid" ${_ressentisData.body_type === 'froid' ? 'selected' : ''}>❄️ Froid, frisson</option>
+                <option value="fatigue" ${_ressentisData.body_type === 'fatigue' ? 'selected' : ''}>😴 Fatigue, lourdeur</option>
+                <option value="energie" ${_ressentisData.body_type === 'energie' ? 'selected' : ''}>⚡ Énergie, légèreté</option>
+                <option value="douleur" ${_ressentisData.body_type === 'douleur' ? 'selected' : ''}>😣 Douleur</option>
+                <option value="autre" ${_ressentisData.body_type === 'autre' ? 'selected' : ''}>🤔 Autre</option>
+            </select>
+            <label style="display:block;margin-bottom:8px;font-weight:600;">Note <span style="font-weight:400;color:#999;">(optionnel)</span></label>
+            <textarea id="ressentisBodyNote" placeholder="Intensité, contexte, durée…" style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;">${_ressentisData.body_note || ''}</textarea>`;
+    }
+
+    updateRessentisProgressUI();
+}
+
+function toggleRessentisEmotion(emotion) {
+    if (!_ressentisData.emotions) _ressentisData.emotions = [];
+    const idx = _ressentisData.emotions.indexOf(emotion);
+    if (idx > -1) {
+        _ressentisData.emotions.splice(idx, 1);
+    } else {
+        _ressentisData.emotions.push(emotion);
+    }
+    const chip = document.getElementById(`ressenti-emotion-${emotion}`);
+    if (chip) {
+        chip.style.background = idx > -1 ? '#fff' : '#e8b5c8';
+        chip.style.borderColor = idx > -1 ? '#ddd' : '#d070a0';
+        chip.style.fontWeight = idx > -1 ? 'normal' : '600';
+    }
+}
+
+function toggleRessentisBodyZone(zone) {
+    if (!_ressentisData.body_zones) _ressentisData.body_zones = [];
+    const idx = _ressentisData.body_zones.indexOf(zone);
+    if (idx > -1) {
+        _ressentisData.body_zones.splice(idx, 1);
+    } else {
+        _ressentisData.body_zones.push(zone);
+    }
+    const chip = document.getElementById(`ressenti-zone-${zone}`);
+    if (chip) {
+        chip.style.background = idx > -1 ? '#fff' : '#c8e8b5';
+        chip.style.borderColor = idx > -1 ? '#ddd' : '#a0d070';
+        chip.style.fontWeight = idx > -1 ? 'normal' : '600';
+    }
+}
+
+function setRessentisIntensity(n) {
+    _ressentisData.emotion_intensity = n;
+    for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`ressenti-intensity-${i}`);
+        if (btn) {
+            btn.style.background = i <= n ? '#c070f0' : '#fff';
+            btn.style.color = i <= n ? '#fff' : '#000';
+            btn.style.borderColor = i <= n ? '#a040d0' : '#ddd';
+        }
+    }
+}
+
+function updateRessentisProgressUI() {
+    const currentIdx = _ressentisSteps.indexOf(_ressentisCurrentStep);
+    document.querySelectorAll('[data-ressentitype]').forEach((btn, idx) => {
+        const type = btn.getAttribute('data-ressentitype');
+        const isActive = type === _ressentisCurrentStep;
+        const isCompleted = _ressentisCompleted.has(type);
+        btn.style.opacity = isActive ? '1' : (isCompleted ? '0.8' : '0.6');
+        btn.style.borderWidth = isActive ? '3px' : '1px';
+        if (isCompleted) btn.textContent = btn.textContent.split(' ')[0] + ' ✓ ' + btn.textContent.split(' ').slice(1).join(' ');
+    });
+
+    const skipBtn = document.getElementById('ressentisSkipBtn');
+    if (skipBtn) {
+        skipBtn.style.display = _ressentisCurrentStep === 'double_contrainte' ? 'inline-block' : 'none';
+    }
+}
+
+function validateAccompRessentisStep() {
+    const t = _ressentisCurrentStep;
+
+    // Save current step data
+    if (t === 'emotion') {
+        _ressentisData.emotion_note = document.getElementById('ressentisNoteEmotion')?.value || '';
+        if (!_ressentisData.emotions || _ressentisData.emotions.length === 0) {
+            toast('⚠️ Veuillez sélectionner au moins une émotion', 'warning');
+            return;
+        }
+    } else if (t === 'observation') {
+        _ressentisData.observation = document.getElementById('ressentisObservation')?.value || '';
+        _ressentisData.obs_target = document.getElementById('ressentisObsTarget')?.value || '';
+        if (!_ressentisData.observation.trim()) {
+            toast('⚠️ Veuillez décrire votre observation', 'warning');
+            return;
+        }
+    } else if (t === 'message') {
+        _ressentisData.message_from = document.getElementById('ressentisMessageFrom')?.value || '';
+        _ressentisData.message_content = document.getElementById('ressentisMessageContent')?.value || '';
+        _ressentisData.message_interp = document.getElementById('ressentisMessageInterp')?.value || '';
+        if (!_ressentisData.message_content.trim()) {
+            toast('⚠️ Veuillez décrire le message reçu', 'warning');
+            return;
+        }
+    } else if (t === 'double_contrainte') {
+        _ressentisData.dc_a = document.getElementById('ressentis_dcA')?.value || '';
+        _ressentisData.dc_b = document.getElementById('ressentis_dcB')?.value || '';
+        _ressentisData.dc_source = document.getElementById('ressentis_dcSource')?.value || '';
+        _ressentisData.dc_note = document.getElementById('ressentis_dcNote')?.value || '';
+    } else if (t === 'ressenti_corporel') {
+        _ressentisData.body_type = document.getElementById('ressentisBodyType')?.value || '';
+        _ressentisData.body_note = document.getElementById('ressentisBodyNote')?.value || '';
+    }
+
+    _ressentisCompleted.add(t);
+
+    // Move to next step
+    const currentIdx = _ressentisSteps.indexOf(t);
+    if (currentIdx < _ressentisSteps.length - 1) {
+        switchAccompRessentisStep(_ressentisSteps[currentIdx + 1]);
+        toast('✓ Étape validée', 'success');
+    } else {
+        // All steps completed
+        saveAccompRessentisData();
+    }
+}
+
+function skipAccompRessentisStep() {
+    const t = _ressentisCurrentStep;
+    if (t !== 'double_contrainte') {
+        toast('⚠️ Vous ne pouvez passer que la double contrainte', 'warning');
+        return;
+    }
+    _ressentisCompleted.add(t);
+    switchAccompRessentisStep('ressenti_corporel');
+    toast('✓ Étape ignorée', 'info');
+}
+
+function saveAccompRessentisData() {
+    if (!_accompCurrentBenefId) {
+        toast('⚠️ Aucun bénéficiaire sélectionné', 'warning');
+        return;
+    }
+
+    const benef = beneficiaires.find(b => b.id === _accompCurrentBenefId);
+    if (!benef) {
+        toast('❌ Bénéficiaire introuvable', 'error');
+        return;
+    }
+
+    const obs = {
+        id: 'ressentis_' + Date.now(),
+        type: 'ressentis_complet',
+        beneficiaire: `${benef.prenom || ''} ${benef.nom || ''}`.trim(),
+        beneficiaireId: benef.id,
+        timestamp: new Date().toISOString(),
+        data: _ressentisData,
+        completed_steps: Array.from(_ressentisCompleted)
+    };
+
+    _accompClinicalObservations.push(obs);
+    localStorage.setItem('accompClinicalObservations', JSON.stringify(_accompClinicalObservations));
+
+    toast(`✅ Questionnaire enregistré pour ${benef.prenom} ${benef.nom}`, 'success');
+    resetAccompRessentis();
+    renderAccompTimeline();
+}
+
+function resetAccompRessentis() {
+    _ressentisCurrentStep = 'emotion';
+    _ressentisData = {};
+    _ressentisCompleted.clear();
+    renderAccompRessentisBody();
 }
 
 // ═══════════════════════════════════════════════════════════
