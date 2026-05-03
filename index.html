@@ -5688,6 +5688,27 @@
                     <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
                 </div>
 
+                <!-- GÉNÉRATEUR DE RACCOURCIS -->
+                <div class="section" style="background:#f5f9fc;border-left-color:#27ae60;">
+                    <h2>🔗 Générer des raccourcis vers des dossiers</h2>
+                    <p style="color:#7a9db1;margin-bottom:12px;font-size:0.95em;">Crée un raccourci téléchargeable que les apprenants peuvent exécuter pour ouvrir un dossier (Mac ou Windows)</p>
+                    <div class="form-row">
+                        <div class="form-group" style="flex:2;">
+                            <label>Chemin du dossier</label>
+                            <input type="text" id="shortcutPath" placeholder="Ex: /Users/davie/Documents/formation ou C:\Users\davie\Documents\formation" style="font-family:monospace;font-size:0.9em;">
+                            <p style="font-size:0.8em;color:#7a9db1;margin-top:4px;">💡 Copie le chemin depuis le Finder/Explorateur (cmd+C ou shift+cmd+C sur Mac)</p>
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>Nom du raccourci</label>
+                            <input type="text" id="shortcutName" placeholder="Ex: Formation Documents">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn btn-success" onclick="downloadShortcutWindows()">💿 Télécharger (Windows)</button>
+                        <button class="btn btn-success" onclick="downloadShortcutMac()">🍎 Télécharger (Mac)</button>
+                    </div>
+                </div>
+
                 <!-- ÉDITEUR DE LIENS FORMATION -->
                 <div class="section admin-section" style="display:none;border-left:4px solid #27ae60;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
@@ -16759,6 +16780,54 @@
                     toast('⚠️ Erreur lors de la sélection', 'warning');
                 }
             }
+        }
+
+        function downloadShortcutWindows() {
+            const path = document.getElementById('shortcutPath')?.value.trim();
+            const name = document.getElementById('shortcutName')?.value.trim() || 'Ouvrir Dossier';
+
+            if (!path) {
+                toast('⚠️ Veuillez entrer le chemin du dossier', 'warning');
+                return;
+            }
+
+            // Créer le contenu du fichier .bat pour Windows
+            const batContent = `@echo off\nREM Raccourci pour ouvrir: ${name}\nstart "" "${path}"\npause`;
+
+            // Télécharger le fichier
+            const blob = new Blob([batContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Ouvrir_${name.replace(/\s+/g, '_')}.bat`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            toast(`✅ Raccourci Windows créé! Double-clique le fichier pour ouvrir le dossier.`, 'success');
+        }
+
+        function downloadShortcutMac() {
+            const path = document.getElementById('shortcutPath')?.value.trim();
+            const name = document.getElementById('shortcutName')?.value.trim() || 'Ouvrir Dossier';
+
+            if (!path) {
+                toast('⚠️ Veuillez entrer le chemin du dossier', 'warning');
+                return;
+            }
+
+            // Créer le contenu du script AppleScript pour Mac
+            const scriptContent = `#!/bin/bash\n# Raccourci pour ouvrir: ${name}\nopen -a Finder "${path}"\n`;
+
+            // Télécharger le fichier
+            const blob = new Blob([scriptContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Ouvrir_${name.replace(/\s+/g, '_')}.sh`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            toast(`✅ Raccourci Mac créé! Terminal: chmod +x puis double-clique pour ouvrir.`, 'success');
         }
 
         async function openShortcutFolder(shortcutUrl) {
