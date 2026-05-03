@@ -12755,15 +12755,15 @@
             const el = document.getElementById('learnerRessourcesContent');
             if (!el) return;
             const ressources = [
-                { emoji: '📖', titre: 'Guide complet', type: 'Documentation', desc: 'Tous les modules expliqués pas à pas' },
-                { emoji: '🎥', titre: 'Tutoriels vidéo', type: 'Vidéo', desc: 'Démonstrations pratiques des fonctionnalités' },
-                { emoji: '❓', titre: 'FAQ Apprenant', type: 'Questions', desc: 'Réponses aux questions les plus fréquentes' },
-                { emoji: '📋', titre: 'Checklist', type: 'À faire', desc: 'Liste des étapes pour maîtriser chaque module' },
-                { emoji: '🔗', titre: 'Glossaire', type: 'Termes', desc: 'Définition de tous les termes métier' },
-                { emoji: '💡', titre: 'Conseils', type: 'Astuces', desc: 'Raccourcis et bonnes pratiques' }
+                { emoji: '📖', titre: 'Guide complet', type: 'Documentation', desc: 'Tous les modules expliqués pas à pas', action: "switchTab('guide');switchGuideSection('intro')" },
+                { emoji: '🎥', titre: 'Tutoriels vidéo', type: 'Vidéo', desc: 'Démonstrations pratiques des fonctionnalités', action: "switchTab('guide');switchGuideSection('intro')" },
+                { emoji: '❓', titre: 'FAQ Apprenant', type: 'Questions', desc: 'Réponses aux questions les plus fréquentes', action: "switchTab('guide');switchGuideSection('faq')" },
+                { emoji: '📋', titre: 'Checklist', type: 'À faire', desc: 'Liste des étapes pour maîtriser chaque module', action: "switchTab('guide');switchGuideSection('glossaire')" },
+                { emoji: '🔗', titre: 'Glossaire', type: 'Termes', desc: 'Définition de tous les termes métier', action: "switchTab('guide');switchGuideSection('glossaire')" },
+                { emoji: '💡', titre: 'Conseils', type: 'Astuces', desc: 'Raccourcis et bonnes pratiques', action: "switchTab('guide');switchGuideSection('conseils')" }
             ];
             el.innerHTML = ressources.map(r => `
-                <div style="background:#f8fafc;border:1px solid #e0e8ed;border-radius:10px;padding:12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(168,213,226,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+                <div style="background:#f8fafc;border:1px solid #e0e8ed;border-radius:10px;padding:12px;cursor:pointer;transition:all 0.2s;" onclick="${r.action}" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(168,213,226,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
                     <div style="font-size:1.8em;margin-bottom:6px;">${r.emoji}</div>
                     <div style="font-weight:600;font-size:0.95em;color:#2d3e50;margin-bottom:2px;">${r.titre}</div>
                     <div style="font-size:0.75em;color:#a8d5e2;font-weight:500;margin-bottom:4px;">${r.type}</div>
