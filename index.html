@@ -16718,27 +16718,36 @@
 
         async function openDocumentFilePicker() {
             try {
-                // Utiliser File System Access API pour accéder au vrai filesystem
-                if (window.showDirectoryPicker) {
-                    const dirHandle = await window.showDirectoryPicker();
-                    const path = await getPathFromHandle(dirHandle);
-                    // Créer un lien file:// vers cet emplacement
-                    const fileUrl = 'file://' + path;
-                    document.getElementById('docUrl').value = fileUrl;
-                    toast(`✅ Raccourci créé vers: ${path}`, 'success');
-                } else if (window.showOpenFilePicker) {
+                // Essayer showOpenFilePicker d'abord (fichiers et dossiers)
+                if (window.showOpenFilePicker) {
                     const handles = await window.showOpenFilePicker({
                         multiple: false
                     });
 
                     if (handles && handles[0]) {
-                        const path = await getPathFromHandle(handles[0]);
-                        const fileUrl = 'file://' + path;
+                        const handle = handles[0];
+                        const file = await handle.getFile?.();
+                        const name = file?.name || handle.name;
+
+                        // Créer un lien file:// avec le nom du fichier/dossier
+                        const fileUrl = 'file://' + name;
                         document.getElementById('docUrl').value = fileUrl;
-                        toast(`✅ Raccourci créé vers: ${path}`, 'success');
+                        toast(`✅ Raccourci créé: ${name}`, 'success');
                     }
                 } else {
-                    toast('⚠️ File System Access API non disponible', 'warning');
+                    // Fallback: input file standard
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.multiple = false;
+                    input.onchange = (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                            const fileUrl = 'file://' + file.name;
+                            document.getElementById('docUrl').value = fileUrl;
+                            toast(`✅ Raccourci créé: ${file.name}`, 'success');
+                        }
+                    };
+                    input.click();
                 }
             } catch(err) {
                 if (err.name !== 'AbortError') {
@@ -16746,11 +16755,6 @@
                     toast('⚠️ Erreur lors de la sélection', 'warning');
                 }
             }
-        }
-
-        async function getPathFromHandle(handle) {
-            const path = await handle.getFullPath?.() || handle.name;
-            return path;
         }
 
         function addReferenceDocument() {
