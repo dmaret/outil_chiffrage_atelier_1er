@@ -9736,6 +9736,8 @@
         let formationProgress = {};
         let auditLog = [];
         let referenceDocuments = [];
+        // Charge les documents immédiatement (pas de délai)
+        _loadFromLocalStorageFallback();
         let trainingRequests = []; // Demandes de formation en attente
         let _presentationMode = false;
         let _presentationConfig = (() => {
