@@ -16716,45 +16716,19 @@
             }
         }
 
-        async function openDocumentFilePicker() {
-            try {
-                // Essayer showOpenFilePicker d'abord (fichiers et dossiers)
-                if (window.showOpenFilePicker) {
-                    const handles = await window.showOpenFilePicker({
-                        multiple: false
-                    });
-
-                    if (handles && handles[0]) {
-                        const handle = handles[0];
-                        const file = await handle.getFile?.();
-                        const name = file?.name || handle.name;
-
-                        // Créer un lien file:// avec le nom du fichier/dossier
-                        const fileUrl = 'file://' + name;
-                        document.getElementById('docUrl').value = fileUrl;
-                        toast(`✅ Raccourci créé: ${name}`, 'success');
-                    }
-                } else {
-                    // Fallback: input file standard
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.multiple = false;
-                    input.onchange = (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                            const fileUrl = 'file://' + file.name;
-                            document.getElementById('docUrl').value = fileUrl;
-                            toast(`✅ Raccourci créé: ${file.name}`, 'success');
-                        }
-                    };
-                    input.click();
+        function openDocumentFilePicker() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = false;
+            input.onchange = (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                    const fileUrl = 'file://' + file.name;
+                    document.getElementById('docUrl').value = fileUrl;
+                    toast(`✅ Raccourci créé: ${file.name}`, 'success');
                 }
-            } catch(err) {
-                if (err.name !== 'AbortError') {
-                    console.error('File picker error:', err);
-                    toast('⚠️ Erreur lors de la sélection', 'warning');
-                }
-            }
+            };
+            input.click();
         }
 
         function addReferenceDocument() {
