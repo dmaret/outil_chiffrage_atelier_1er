@@ -5743,6 +5743,15 @@
                     <p id="noDocsMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun document de référence ajouté</p>
                 </div>
 
+                <div class="section">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <h2 style="margin:0;">🎓 Gérer les Quiz</h2>
+                        <button class="btn btn-success btn-small" onclick="openQuizAdminModal()">➕ Créer un quiz</button>
+                    </div>
+                    <div id="adminQuizzesContainer" style="display:grid;gap:12px;"></div>
+                    <p id="noQuizzesMsg" style="color:#7a9db1;text-align:center;padding:20px;">Aucun quiz créé</p>
+                </div>
+
                 <!-- ÉDITEUR DE LIENS FORMATION -->
                 <div class="section admin-section" style="display:none;border-left:4px solid #27ae60;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
@@ -12675,7 +12684,7 @@
 
             if (tabName === 'dashboard') renderDashboard();
             else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
-            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); updateDocInputLabel(); }
+            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); }
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
             else if (tabName === 'clients') renderClients();
@@ -17162,6 +17171,34 @@
                 }).join('')}
                 </tbody>
             </table>`;
+        }
+
+        function renderAdminQuizzes() {
+            const container = document.getElementById('adminQuizzesContainer');
+            const noMsg = document.getElementById('noQuizzesMsg');
+
+            loadCustomQuizzes().then(quizzes => {
+                if (!quizzes || quizzes.length === 0) {
+                    container.innerHTML = '';
+                    noMsg.style.display = 'block';
+                    return;
+                }
+
+                noMsg.style.display = 'none';
+                const quizzesHtml = quizzes.map(quiz => {
+                    return `<div style="background:white;border-radius:8px;padding:14px;border:1px solid #ddd;box-shadow:0 2px 4px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div style="font-weight:700;color:#2d3e50;font-size:0.95em;">${escapeHtml(quiz.title)}</div>
+                            <div style="font-size:0.8em;color:#888;margin-top:4px;">${escapeHtml(quiz.category)} — ${quiz.questions.length} question(s)</div>
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="openQuizAdminModal('${quiz.id}')" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;background:white;color:#666;cursor:pointer;font-size:0.85em;">✏️ Modifier</button>
+                            <button onclick="if(confirm('Supprimer ce quiz ?')) deleteCustomQuiz('${quiz.id}').then(() => renderAdminQuizzes())" style="padding:6px 12px;border-radius:6px;border:1px solid #e74c3c;background:white;color:#e74c3c;cursor:pointer;font-size:0.85em;">🗑️ Supprimer</button>
+                        </div>
+                    </div>`;
+                }).join('');
+                container.innerHTML = quizzesHtml;
+            });
         }
 
         function editReferenceDocument(docId) {
@@ -30537,7 +30574,12 @@
             await saveCustomQuiz(quiz);
             toast('✅ Quiz sauvegardé!', 'success');
             closeQuizAdminModal();
-            loadQuizzes(); // Rafraîchir l'affichage
+            // Rafraîchir l'affichage (admin ou learner selon le contexte)
+            if (document.querySelector('[data-tab="formation"]')?.classList.contains('active')) {
+                renderAdminQuizzes();
+            } else if (document.querySelector('[data-tab="learner"]')?.classList.contains('active')) {
+                loadQuizzes();
+            }
         }
 
         // ═══════════════════════════════════════════════════════════
