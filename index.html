@@ -15575,9 +15575,9 @@
                                 onclick = `onclick="openDocumentFromIDB(${doc.id},'${escapeHtml(doc.fileName||doc.title)}');return false;"`;
                                 href = '#';
                             }
-                            const downloadAttr = !isPdf && doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
-                            const targetAttr = !doc.isFile || isPdf ? 'target="_blank"' : '';
-                            return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${!isPdf && doc.isFile ? ' ⬇' : ''}</a>`;
+                            const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
+                            const targetAttr = !doc.isFile && !isPdf ? 'target="_blank"' : '';
+                            return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
                         }).join('')}
                     </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
                 </div>`;
@@ -15618,9 +15618,9 @@
                             onclick = `onclick="openDocumentFromIDB(${doc.id},'${escapeHtml(doc.fileName||doc.title)}');return false;"`;
                             href = '#';
                         }
-                        const downloadAttr = !isPdf && doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
-                        const targetAttr = !doc.isFile || isPdf ? 'target="_blank"' : '';
-                        return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${!isPdf && doc.isFile ? ' ⬇' : ''}</a>`;
+                        const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
+                        const targetAttr = !doc.isFile && !isPdf ? 'target="_blank"' : '';
+                        return `<a href="${href}" ${targetAttr} ${downloadAttr} ${onclick} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;cursor:pointer;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
                     }).join('')}
                 </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
             </div>`;
