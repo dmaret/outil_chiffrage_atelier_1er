@@ -8886,19 +8886,28 @@
         // IndexedDB helpers
         function saveToIndexedDB(storeName, data) {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('atelier_db', 1);
+                const request = indexedDB.open('atelier_db', 2);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     const db = request.result;
-                    const tx = db.transaction([storeName], 'readwrite');
-                    tx.objectStore(storeName).put(data);
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = () => reject(tx.error);
+                    try {
+                        const tx = db.transaction([storeName], 'readwrite');
+                        tx.objectStore(storeName).put(data);
+                        tx.oncomplete = () => {
+                            console.log('saveToIndexedDB complete for', storeName);
+                            resolve();
+                        };
+                        tx.onerror = () => reject(tx.error);
+                    } catch (err) {
+                        console.error('Error in saveToIndexedDB transaction:', err);
+                        reject(err);
+                    }
                 };
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains(storeName)) {
                         db.createObjectStore(storeName, { keyPath: 'id' });
+                        console.log('Created object store:', storeName);
                     }
                 };
             });
@@ -8906,7 +8915,7 @@
 
         function getFromIndexedDB(storeName, key) {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('atelier_db', 1);
+                const request = indexedDB.open('atelier_db', 2);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     const db = request.result;
@@ -8916,8 +8925,17 @@
                     }
                     const tx = db.transaction([storeName], 'readonly');
                     const req = key ? tx.objectStore(storeName).get(key) : tx.objectStore(storeName).getAll();
-                    req.onsuccess = () => resolve(req.result);
+                    req.onsuccess = () => {
+                        console.log('getFromIndexedDB result for', storeName + ':', req.result);
+                        resolve(req.result);
+                    };
                     req.onerror = () => reject(req.error);
+                };
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { keyPath: 'id' });
+                    }
                 };
             });
         }
@@ -30358,7 +30376,16 @@
         // ═══════════════════════════════════════════════════════════
 
         async function loadCustomQuizzes() {
-            return await getFromIndexedDB('customQuizzes') || [];
+            try {
+                const quizzes = await getFromIndexedDB('customQuizzes');
+                console.log('Quizzes chargés:', quizzes);
+                if (Array.isArray(quizzes)) return quizzes;
+                if (quizzes === undefined || quizzes === null) return [];
+                return [quizzes];
+            } catch (err) {
+                console.error('Erreur loadCustomQuizzes:', err);
+                return [];
+            }
         }
 
         async function saveCustomQuiz(quiz) {
@@ -30373,9 +30400,15 @@
             const quizzes = await loadCustomQuizzes();
             const filtered = quizzes.filter(q => q.id !== quizId);
             const db = await new Promise((resolve, reject) => {
-                const request = indexedDB.open('atelier_db', 1);
+                const request = indexedDB.open('atelier_db', 2);
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('customQuizzes')) {
+                        db.createObjectStore('customQuizzes', { keyPath: 'id' });
+                    }
+                };
             });
             const tx = db.transaction(['customQuizzes'], 'readwrite');
             tx.objectStore('customQuizzes').clear();
