@@ -8888,23 +8888,41 @@
         }
 
         // IndexedDB helpers
-        function saveToIndexedDB(storeName, data) {
+        function saveToIndexedDB(storeName, data, retryCount = 0) {
+            const MAX_RETRIES = 2;
             return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error('IndexedDB timeout: opération prend trop de temps'));
+                }, 10000);
+
                 const request = indexedDB.open('atelier_db', 5);
-                request.onerror = () => reject(request.error);
+                request.onerror = () => {
+                    clearTimeout(timeout);
+                    reject(request.error);
+                };
                 request.onsuccess = () => {
                     const db = request.result;
                     if (!db.objectStoreNames.contains(storeName)) {
                         db.close();
-                        console.log('Store missing, deleting corrupted database...');
+                        if (retryCount >= MAX_RETRIES) {
+                            clearTimeout(timeout);
+                            reject(new Error(`Store "${storeName}" not found après ${MAX_RETRIES} tentatives`));
+                            return;
+                        }
+                        console.log(`⚠️ Store manquante, suppression DB (tentative ${retryCount + 1}/${MAX_RETRIES})...`);
                         const deleteReq = indexedDB.deleteDatabase('atelier_db');
                         deleteReq.onsuccess = () => {
-                            console.log('Database deleted, retrying...');
-                            saveToIndexedDB(storeName, data).then(resolve).catch(reject);
+                            console.log('🗑️ BD supprimée, réouverture...');
+                            clearTimeout(timeout);
+                            saveToIndexedDB(storeName, data, retryCount + 1).then(resolve).catch(reject);
                         };
                         deleteReq.onerror = () => {
-                            console.error('Failed to delete database:', deleteReq.error);
+                            clearTimeout(timeout);
+                            console.error('❌ Erreur suppression BD:', deleteReq.error);
                             reject(deleteReq.error);
+                        };
+                        deleteReq.onblocked = () => {
+                            console.warn('⚠️ Suppression BD bloquée - connections ouvertes');
                         };
                         return;
                     }
@@ -8912,12 +8930,17 @@
                         const tx = db.transaction([storeName], 'readwrite');
                         tx.objectStore(storeName).put(data);
                         tx.oncomplete = () => {
-                            console.log('✅ saveToIndexedDB complete for', storeName);
+                            clearTimeout(timeout);
+                            console.log('✅ Quiz sauvegardé dans IndexedDB');
                             resolve();
                         };
-                        tx.onerror = () => reject(tx.error);
+                        tx.onerror = () => {
+                            clearTimeout(timeout);
+                            reject(tx.error);
+                        };
                     } catch (err) {
-                        console.error('Error in saveToIndexedDB transaction:', err);
+                        clearTimeout(timeout);
+                        console.error('❌ Erreur transaction:', err);
                         reject(err);
                     }
                 };
@@ -8925,7 +8948,7 @@
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains(storeName)) {
                         db.createObjectStore(storeName, { keyPath: 'id' });
-                        console.log('📦 Created object store:', storeName);
+                        console.log('📦 Store créée:', storeName);
                     }
                 };
             });
