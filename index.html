@@ -16643,15 +16643,35 @@
                 return;
             }
 
+            function openWithBlob(fileData) {
+                try {
+                    const arr = fileData.split(',');
+                    const mime = arr[0].match(/:(.*?);/)[1];
+                    const bstr = atob(arr[1]);
+                    const n = bstr.length;
+                    const u8arr = new Uint8Array(n);
+                    for (let i = 0; i < n; i++) {
+                        u8arr[i] = bstr.charCodeAt(i);
+                    }
+                    const blob = new Blob([u8arr], { type: mime });
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                } catch(err) {
+                    console.error('Error opening document:', err);
+                    toast('❌ Erreur lors de l\'ouverture du document', 'error');
+                }
+            }
+
             if (doc.fileData) {
-                window.open(doc.fileData, '_blank');
+                openWithBlob(doc.fileData);
             } else {
                 getDocumentFromIndexedDB(docId).then(fullDoc => {
                     if (!fullDoc || !fullDoc.fileData) {
                         toast('❌ Données du document non disponibles', 'error');
                         return;
                     }
-                    window.open(fullDoc.fileData, '_blank');
+                    openWithBlob(fullDoc.fileData);
                 }).catch(err => {
                     console.error('IndexedDB error:', err);
                     toast('❌ Erreur lors du chargement du document', 'error');
@@ -17142,6 +17162,7 @@
         window.renderReferenceDocuments = renderReferenceDocuments;
         window.editReferenceDocument = editReferenceDocument;
         window.deleteReferenceDocument = deleteReferenceDocument;
+        window.openDocument = openDocument;
 
         function addConsommable() {
             // Check permission
