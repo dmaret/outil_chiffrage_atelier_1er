@@ -8896,16 +8896,23 @@
                     const db = request.result;
                     if (!db.objectStoreNames.contains(storeName)) {
                         db.close();
-                        indexedDB.deleteDatabase('atelier_db');
-                        console.log('Database corrupted, deleting and retrying...');
-                        setTimeout(() => saveToIndexedDB(storeName, data).then(resolve).catch(reject), 100);
+                        console.log('Store missing, deleting corrupted database...');
+                        const deleteReq = indexedDB.deleteDatabase('atelier_db');
+                        deleteReq.onsuccess = () => {
+                            console.log('Database deleted, retrying...');
+                            saveToIndexedDB(storeName, data).then(resolve).catch(reject);
+                        };
+                        deleteReq.onerror = () => {
+                            console.error('Failed to delete database:', deleteReq.error);
+                            reject(deleteReq.error);
+                        };
                         return;
                     }
                     try {
                         const tx = db.transaction([storeName], 'readwrite');
                         tx.objectStore(storeName).put(data);
                         tx.oncomplete = () => {
-                            console.log('saveToIndexedDB complete for', storeName);
+                            console.log('✅ saveToIndexedDB complete for', storeName);
                             resolve();
                         };
                         tx.onerror = () => reject(tx.error);
@@ -8918,7 +8925,7 @@
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains(storeName)) {
                         db.createObjectStore(storeName, { keyPath: 'id' });
-                        console.log('Created object store:', storeName);
+                        console.log('📦 Created object store:', storeName);
                     }
                 };
             });
