@@ -12536,6 +12536,13 @@
         }
 
         // ── Jalons ────────────────────────────────────────────
+        let _accompSelectedJalonId = null;
+
+        function selectJalonAndContinue(jalonId) {
+            _accompSelectedJalonId = jalonId;
+            switchAccompSub('ressentis');
+        }
+
         function renderJalons() {
             const c = document.getElementById('jalonsList');
             if (!c) return;
@@ -12568,6 +12575,7 @@
                         </div>
                     </div>
                     <div style="display:flex;gap:6px;align-items:flex-start;flex-shrink:0;">
+                        <button class="btn btn-small btn-success" onclick="selectJalonAndContinue(${j.id})">✓ Sélectionner</button>
                         <button class="btn btn-small btn-secondary" onclick="openJalonModal(${j.id})">✏️</button>
                         <button class="btn btn-small" onclick="deleteJalon(${j.id})" style="background:#e74c3c;color:#fff;border-color:#c0392b;">🗑</button>
                     </div>
