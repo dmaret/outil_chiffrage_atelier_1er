@@ -16718,36 +16718,39 @@
 
         async function openDocumentFilePicker() {
             try {
-                if (window.showOpenFilePicker) {
+                // Utiliser File System Access API pour accéder au vrai filesystem
+                if (window.showDirectoryPicker) {
+                    const dirHandle = await window.showDirectoryPicker();
+                    const path = await getPathFromHandle(dirHandle);
+                    // Créer un lien file:// vers cet emplacement
+                    const fileUrl = 'file://' + path;
+                    document.getElementById('docUrl').value = fileUrl;
+                    toast(`✅ Raccourci créé vers: ${path}`, 'success');
+                } else if (window.showOpenFilePicker) {
                     const handles = await window.showOpenFilePicker({
-                        types: [
-                            { description: 'Documents', extensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'] }
-                        ],
                         multiple: false
                     });
 
                     if (handles && handles[0]) {
-                        const file = await handles[0].getFile();
-                        document.getElementById('docUrl').value = file.name;
+                        const path = await getPathFromHandle(handles[0]);
+                        const fileUrl = 'file://' + path;
+                        document.getElementById('docUrl').value = fileUrl;
+                        toast(`✅ Raccourci créé vers: ${path}`, 'success');
                     }
                 } else {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.multiple = false;
-                    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
-                    input.onchange = (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                            document.getElementById('docUrl').value = file.name;
-                        }
-                    };
-                    input.click();
+                    toast('⚠️ File System Access API non disponible', 'warning');
                 }
             } catch(err) {
                 if (err.name !== 'AbortError') {
                     console.error('File picker error:', err);
+                    toast('⚠️ Erreur lors de la sélection', 'warning');
                 }
             }
+        }
+
+        async function getPathFromHandle(handle) {
+            const path = await handle.getFullPath?.() || handle.name;
+            return path;
         }
 
         function addReferenceDocument() {
@@ -16764,25 +16767,25 @@
                 return;
             }
 
-            // Normalize URL - add https:// if no protocol
+            // Normalize URL
             let normalizedUrl = url;
-            const hasProtocol = url.match(/^https?:\/\//i);
+            const hasProtocol = url.match(/^(https?|file):\/\//i);
+            const isFileUrl = url.match(/^file:\/\//i);
 
-            // If it looks like just a filename (selected from file picker), keep as-is
-            const isFilename = /\.[a-z0-9]{2,4}$/i.test(url) && !hasProtocol;
-
-            if (!hasProtocol && !isFilename) {
+            // If it's already a file:// URL, keep it as-is
+            if (isFileUrl) {
+                normalizedUrl = url;
+            } else if (!hasProtocol) {
+                // Add https:// if no protocol
                 normalizedUrl = 'https://' + url;
             }
 
-            // Validate URL format only if it's not a simple filename
-            if (!isFilename) {
-                try {
-                    new URL(normalizedUrl);
-                } catch(e) {
-                    toast('❌ URL invalide. Veuillez entrer une URL valide (ex: https://drive.google.com/...)', 'error');
-                    return;
-                }
+            // Validate URL format
+            try {
+                new URL(normalizedUrl);
+            } catch(e) {
+                toast('❌ URL invalide. Veuillez entrer une URL valide (ex: https://drive.google.com/...) ou sélectionner un dossier via "Parcourir"', 'error');
+                return;
             }
 
             // Create document with URL only
