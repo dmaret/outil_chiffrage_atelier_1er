@@ -5363,7 +5363,7 @@
                 <!-- SECTIONS ADMIN -->
                 <div class="section admin-section" style="display:none; border-left: 4px solid #f39c12;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
-                        <h2 style="margin:0;">🔐 Accès par rôle <span style="background:#f39c12;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                        <h2 style="margin:0;flex:1;min-width:0;">🔐 Accès par rôle <span style="background:#f39c12;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
                         <button class="btn btn-small btn-success" onclick="openAddGroupModal()" style="white-space:nowrap;">➕ Nouveau groupe</button>
                     </div>
                     <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Cochez les onglets accessibles pour chaque groupe. Les modifications sont sauvegardées instantanément. Cliquez sur 🔑 pour (re)définir le mot de passe d'un groupe.</p>
@@ -5750,7 +5750,7 @@
 
                 <div class="section">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                        <h2 style="margin:0;">Liste consommables</h2>
+                        <h2 style="margin:0;flex:1;min-width:0;">Liste consommables</h2>
                         <div id="consomBulkBar" style="display:none;align-items:center;gap:8px;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:6px 14px;font-size:0.88em;">
                             <span id="consomSelCount" style="font-weight:700;color:#856404;"></span>
                             <button onclick="_consomDeleteSelected()" style="background:#e74c3c;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85em;">🗑 Supprimer</button>
@@ -5881,7 +5881,7 @@
                 </div>
                 <div class="section" id="clientDetailSection" style="display:none;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <h2 id="clientDetailNom" style="margin:0;"></h2>
+                        <h2 id="clientDetailNom" style="margin:0;flex:1;min-width:0;"></h2>
                         <div style="display:flex;gap:8px;align-items:center;">
                             <span id="clientDetailPdfBtn"></span>
                             <button class="btn btn-secondary btn-small" onclick="closeClientDetail()">✖ Fermer le détail</button>
@@ -6090,7 +6090,7 @@
             <div id="stats" class="tab-content">
                 <div class="section">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
-                        <h2 style="margin:0;">Vue d'ensemble</h2>
+                        <h2 style="margin:0;flex:1;min-width:0;">Vue d'ensemble</h2>
                         <div style="display:flex;gap:8px;">
                             <button class="btn btn-small" onclick="exportStatsCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;" title="Exporter les statistiques en CSV">📥 Export CSV</button>
                             <button class="btn btn-small" onclick="exportStatsXLSX()" style="background:#edf5ff;border-color:#a8c8f0;color:#2980b9;" title="Exporter les statistiques en Excel">📊 Export Excel</button>
@@ -6864,7 +6864,7 @@
                 <div class="accomp-sub-panel" id="accomp-suivi">
                     <div class="section">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;">👤 Bénéficiaires en suivi</h2>
+                            <h2 style="margin:0;flex:1;min-width:0;">👤 Bénéficiaires en suivi</h2>
                             <button class="btn btn-success btn-small" onclick="openBeneficiaireModal()">➕ Nouveau bénéficiaire</button>
                         </div>
                         <div id="beneficiairesList"></div>
@@ -6908,7 +6908,7 @@
                 <div class="accomp-sub-panel" id="accomp-jalons" style="display:none;">
                     <div class="section">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;">🎯 Jalons d'accompagnement</h2>
+                            <h2 style="margin:0;flex:1;min-width:0;">🎯 Jalons d'accompagnement</h2>
                             <button class="btn btn-success btn-small" onclick="openJalonModal()">➕ Nouveau jalon</button>
                         </div>
                         <select id="jalonFilterBenef" onchange="renderJalons()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;margin-bottom:14px;">
@@ -6922,7 +6922,7 @@
                 <div class="accomp-sub-panel" id="accomp-parcours" style="display:none;">
                     <div class="section">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;">🌊 Parcours d'accompagnement</h2>
+                            <h2 style="margin:0;flex:1;min-width:0;">🌊 Parcours d'accompagnement</h2>
                             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                                 <select id="parcoursBenefFilter" onchange="renderAccompagnementFlux()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;">
                                     <option value="">— Tous les bénéficiaires —</option>
@@ -6965,7 +6965,7 @@
                 <!-- 📊 NEW: Accompagnement Clinique (Observation-based) -->
                 <div class="section" style="background:linear-gradient(135deg,#f0f8ff,#e8f4f8);border-left:5px solid #2d5b8a;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-                        <h2 style="margin:0;color:#2d3a47;">📊 Accompagnement Clinique — Suivi du Vécu</h2>
+                        <h2 style="margin:0;color:#2d3a47;flex:1;min-width:0;">📊 Accompagnement Clinique — Suivi du Vécu</h2>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
                             <select id="accompCeaFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByCea(this.value)">
                                 <option value="">-- Tous les CEA --</option>
@@ -7038,7 +7038,7 @@
                 <!-- Matrice apprenance -->
                 <div class="section">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                        <h2 style="margin:0;">Matrice d'Apprenance & Autonomie</h2>
+                        <h2 style="margin:0;flex:1;min-width:0;">Matrice d'Apprenance & Autonomie</h2>
                         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                             <span id="matriceSaveStatus" style="font-size:0.78em;color:#8aacbc;"></span>
                             <button class="btn btn-small" onclick="ajouterLigneMatrice()">+ Ajouter</button>
@@ -7162,7 +7162,7 @@
                     <!-- Historique des analyses -->
                     <div id="analyseHistoriqueWrap" style="margin-top:22px;display:none;">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-                            <h3 style="margin:0;color:#6c3483;font-size:1em;">📔 Historique des analyses</h3>
+                            <h3 style="margin:0;color:#6c3483;font-size:1em;flex:1;min-width:0;">📔 Historique des analyses</h3>
                             <div style="display:flex;gap:8px;">
                                 <button class="btn btn-secondary btn-small" onclick="exportAnalyseHistoriqueCSV()">📤 Export CSV</button>
                                 <button class="btn btn-secondary btn-small" onclick="clearAnalyseHistorique()">🗑️ Effacer</button>
@@ -7192,7 +7192,7 @@
                 <!-- Référentiel théorique enrichi -->
                 <div class="section" id="referentielTheorique" style="background:#fef9e6;border-left-color:#c9b84a;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-                        <h2 style="color:#7a6208;margin:0;">📚 Référentiel Théorique</h2>
+                        <h2 style="color:#7a6208;margin:0;flex:1;min-width:0;">📚 Référentiel Théorique</h2>
                         <div style="display:flex;gap:8px;">
                             <button class="btn btn-secondary btn-small" onclick="toggleAllTheorie(true)">⬇️ Tout déplier</button>
                             <button class="btn btn-secondary btn-small" onclick="toggleAllTheorie(false)">⬆️ Tout replier</button>
@@ -31399,7 +31399,7 @@
 
             inner.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-                    <h3 style="margin:0;color:#e67e22;">🧠 Quiz Formation</h3>
+                    <h3 style="margin:0;color:#e67e22;flex:1;min-width:0;">🧠 Quiz Formation</h3>
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                         ${modeBadge}${domBadge}
                         <span title="Difficulté" style="font-size:0.82em;color:#999;letter-spacing:1px;">${diffDots}</span>
