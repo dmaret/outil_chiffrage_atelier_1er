@@ -30650,24 +30650,39 @@
             });
         }
 
+        let quizSaving = false;
+
         async function saveQuizAdmin() {
-            console.log('🔍 saveQuizAdmin appelée');
-
-            const title = document.getElementById('quizTitle').value;
-            const category = document.getElementById('quizCategory').value;
-            const description = document.getElementById('quizDescription').value;
-            const quizId = document.getElementById('quizAdminForm').dataset.quizId;
-
-            console.log('📝 Titre:', title, 'Catégorie:', category);
-
-            if (!title || !category) {
-                toast('❌ Titre et catégorie sont obligatoires', 'danger');
+            if (quizSaving) {
+                console.warn('⚠️ Sauvegarde déjà en cours, requête ignorée');
                 return;
             }
 
+            const saveBtn = document.querySelector('#quizAdminModalFooter button[onclick*="saveQuizAdmin"]');
+            const title = document.getElementById('quizTitle').value.trim();
+            const category = document.getElementById('quizCategory').value;
+            const description = document.getElementById('quizDescription').value.trim();
+
+            // Validation du titre
+            if (!title) {
+                toast('❌ Le titre est obligatoire', 'danger');
+                return;
+            }
+
+            // Validation de la catégorie
+            if (!category) {
+                toast('❌ La catégorie est obligatoire', 'danger');
+                return;
+            }
+
+            // Collecter et valider les questions
             const questions = [];
+            const validationErrors = [];
+            let questionIndex = 0;
+
             document.querySelectorAll('.quiz-question-block').forEach(block => {
-                const questionText = block.querySelector('.quiz-question-text').value;
+                questionIndex++;
+                const questionText = block.querySelector('.quiz-question-text').value.trim();
                 const questionType = block.querySelector('.quiz-question-type').value;
 
                 if (!questionText) return;
@@ -30675,58 +30690,84 @@
                 if (questionType === 'qcm') {
                     const options = [];
                     block.querySelectorAll('.quiz-option-field').forEach(optField => {
-                        const text = optField.querySelector('.quiz-option-text').value;
+                        const text = optField.querySelector('.quiz-option-text').value.trim();
                         const correct = optField.querySelector('.quiz-option-correct').checked;
                         if (text) options.push({ text, correct });
                     });
 
+                    if (options.length < 2) {
+                        validationErrors.push(`Question ${questionIndex}: au moins 2 options requises`);
+                        return;
+                    }
+
                     const hasCorrectAnswer = options.some(o => o.correct);
-                    if (!hasCorrectAnswer || options.length < 2) {
-                        toast('❌ Chaque question QCM doit avoir au moins 2 options et une bonne réponse', 'danger');
+                    if (!hasCorrectAnswer) {
+                        validationErrors.push(`Question ${questionIndex}: une bonne réponse requise`);
                         return;
                     }
 
                     questions.push({ question: questionText, type: 'qcm', options });
                 } else {
-                    const expectedAnswer = block.querySelector('.quiz-text-answer').value;
+                    const expectedAnswer = block.querySelector('.quiz-text-answer').value.trim();
+                    if (!expectedAnswer) {
+                        validationErrors.push(`Question ${questionIndex}: réponse attendue requise`);
+                        return;
+                    }
                     questions.push({ question: questionText, type: 'text', expectedAnswer });
                 }
             });
 
-            console.log('❓ Questions trouvées:', questions.length);
+            if (validationErrors.length > 0) {
+                toast('❌ ' + validationErrors[0], 'danger');
+                return;
+            }
 
             if (questions.length === 0) {
                 toast('❌ Ajoutez au moins une question', 'danger');
                 return;
             }
 
-            const quiz = {
-                id: quizId || 'quiz_' + Date.now(),
-                title,
-                category,
-                description,
-                questions,
-                createdAt: quizId ? (await loadCustomQuizzes()).find(q => q.id === quizId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-
-            console.log('💾 Sauvegarde du quiz:', quiz.id, quiz.title);
+            quizSaving = true;
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.style.opacity = '0.6';
+                saveBtn.style.cursor = 'not-allowed';
+                saveBtn.textContent = '⏳ Enregistrement...';
+            }
 
             try {
-                await saveCustomQuiz(quiz);
-                console.log('✅ Quiz sauvegardé avec succès');
-                toast('✅ Quiz sauvegardé!', 'success');
-                closeQuizAdminModal();
+                const quizId = document.getElementById('quizAdminForm').dataset.quizId;
+                const quiz = {
+                    id: quizId || 'quiz_' + Date.now(),
+                    title,
+                    category,
+                    description,
+                    questions,
+                    createdAt: quizId ? (await loadCustomQuizzes()).find(q => q.id === quizId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
 
-                // Rafraîchir l'affichage
+                await saveCustomQuiz(quiz);
+                console.log('✅ Quiz sauvegardé avec succès:', quiz.id);
+                toast('✅ Quiz sauvegardé!', 'success');
+
+                // Fermer la modale et rafraîchir
+                closeQuizAdminModal();
                 const formationBtn = document.querySelector('button.tab[onclick*="\'formation\'"]');
                 if (formationBtn && formationBtn.classList.contains('active')) {
-                    console.log('🔄 Rafraîchissement de renderAdminQuizzes');
                     renderAdminQuizzes();
                 }
             } catch (err) {
                 console.error('❌ Erreur saveQuizAdmin:', err);
                 toast('❌ Erreur: ' + err.message, 'danger');
+            } finally {
+                quizSaving = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.style.opacity = '1';
+                    saveBtn.style.cursor = 'pointer';
+                    saveBtn.textContent = '💾 Enregistrer le Quiz';
+                }
             }
         }
 
