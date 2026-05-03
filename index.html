@@ -24890,7 +24890,12 @@
                 if (alertes.length === 0) {
                     alertesEl.innerHTML = '<div style="padding:16px;color:#5a9a6a;font-size:0.9em;">✅ Aucune alerte</div>';
                 } else {
-                    alertesEl.innerHTML = alertes.map(a => `<div style="padding:8px 12px;margin-bottom:6px;border-radius:6px;background:${a.type==='danger'?'#fde8e8':'#fff3cd'};border-left:3px solid ${a.type==='danger'?'#e74c3c':'#f39c12'};font-size:0.85em;">${a.msg}</div>`).join('');
+                    alertesEl.innerHTML = alertes.map(a => {
+                        const isExportAlert = a.msg.includes('sauvegarde') && a.msg.includes('exporter');
+                        const style = `padding:8px 12px;margin-bottom:6px;border-radius:6px;background:${a.type==='danger'?'#fde8e8':'#fff3cd'};border-left:3px solid ${a.type==='danger'?'#e74c3c':'#f39c12'};font-size:0.85em;${isExportAlert ? 'cursor:pointer;' : ''}`;
+                        const onclick = isExportAlert ? 'onclick="switchTab(\'config\')"' : '';
+                        return `<div style="${style}" ${onclick}>${a.msg}</div>`;
+                    }).join('');
                 }
             }
 
