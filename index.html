@@ -5582,6 +5582,9 @@
                         <option value="">-- Sélectionner un apprenant --</option>
                     </select>
                     <div id="adminFormationAssignContainer"></div>
+                    <div style="margin-top:12px;text-align:right;">
+                        <button class="btn btn-success btn-small" onclick="saveAllDocumentsAndAssignments()" title="Forcer la sauvegarde de toutes les assignations">💾 Sauvegarder</button>
+                    </div>
                 </div>
 
                 <div class="section">
@@ -5679,8 +5682,7 @@
                             <input type="file" id="docFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style="padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9em;">
                         </div>
                     </div>
-                    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
-                        <button class="btn btn-success" onclick="saveAllDocumentsAndAssignments()" title="Forcer la sauvegarde de tous les documents et leurs assignations aux apprenants">💾 Sauvegarder</button>
+                    <div style="text-align:right;">
                         <button class="btn" onclick="addReferenceDocument()">➕ Ajouter document</button>
                     </div>
                     <div id="referenceDocumentsContainer" style="display:grid;gap:12px;margin-top:16px;"></div>
