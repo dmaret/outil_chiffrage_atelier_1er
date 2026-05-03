@@ -7904,14 +7904,18 @@
               </div>
 
               <div id="dashSectionGraph" class="section" style="margin-top:20px;">
-                <h2>🕸️ Graphe relationnel — Clients · Prestations · Bénéficiaires</h2>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
-                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowBeneficiaires" checked onchange="renderRelationGraph()"> Bénéficiaires</label>
-                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowClients" checked onchange="renderRelationGraph()"> Clients</label>
-                  <label style="font-size:0.85em;color:#6b8fa3;"><input type="checkbox" id="graphShowPrestations" checked onchange="renderRelationGraph()"> Prestations</label>
-                  <button class="btn btn-small btn-secondary" onclick="resetRelationGraph()" style="margin-left:auto;">↻ Réorganiser</button>
+                <h2>📊 Répartition des bénéfices — Par client et catégorie</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Visualisez la marge brute (revenu - coût) par client et par domaine d'activité.</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                  <div style="background:#f8fafc;border:1px solid #e8f0f5;border-radius:10px;padding:16px;">
+                    <h3 style="margin:0 0 12px;font-size:0.95em;color:#2d5b8a;">Par Client (Top 8)</h3>
+                    <div id="dashBenefitsClient" style="display:grid;gap:8px;"></div>
+                  </div>
+                  <div style="background:#f8fafc;border:1px solid #e8f0f5;border-radius:10px;padding:16px;">
+                    <h3 style="margin:0 0 12px;font-size:0.95em;color:#2d5b8a;">Par Catégorie</h3>
+                    <div id="dashBenefitsCategory" style="display:grid;gap:8px;"></div>
+                  </div>
                 </div>
-                <div id="dashGraphContainer" style="position:relative;width:100%;height:480px;background:#f8fafc;border:1px solid #e8f0f5;border-radius:10px;overflow:hidden;"></div>
               </div>
 
               <div id="dashSectionVille" class="section" style="margin-top:20px;">
@@ -7933,9 +7937,9 @@
               </div>
 
               <div id="dashSectionRiver" class="section" style="margin-top:20px;">
-                <h2>🌊 Rivière de trésorerie — Flux 12 mois</h2>
-                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">La largeur du courant représente le flux mensuel net. Les bateaux flottent au rythme du temps.</div>
-                <div id="dashRiverFlow" style="width:100%;height:280px;background:linear-gradient(180deg,#e3f1fa 0%,#cfe6f5 100%);border-radius:12px;border:1px solid #bcd5e6;overflow:hidden;position:relative;"></div>
+                <h2>📊 Pipeline de conversion — Prospects → Facturé</h2>
+                <div style="font-size:0.85em;color:#7a9db1;margin-bottom:10px;">Suivi du tunnel de conversion : combien en chaque étape et combien de CA réalisé à la fin.</div>
+                <div id="dashConversionPipeline" style="width:100%;background:#f8fafc;border:1px solid #e8f0f5;border-radius:12px;padding:20px;"></div>
               </div>
 
               <div id="dashSectionEcarts" class="section" style="margin-top:20px;">
@@ -8430,11 +8434,11 @@
             { id: 'dashSectionRelances',  label: '🔔 Relances devis — Suivi commercial',    display: 'block' },
             { id: 'dashSectionHeatmap',   label: '🌡️ Heatmap CA — 52 semaines',             display: 'block' },
             { id: 'dashSectionKanban',    label: '🗂️ Kanban approbation drag & drop',        display: 'block' },
-            { id: 'dashSectionGraph',     label: '🕸️ Graphe relationnel',                    display: 'block' },
+            { id: 'dashSectionGraph',     label: '📊 Répartition des bénéfices',             display: 'block' },
             { id: 'dashSectionVille',     label: '📚 Récapitulatif d\'apprentissage',       display: 'block' },
             { id: 'dashSectionDefi',      label: '🎯 Défi du jour',                         display: 'block' },
             { id: 'dashSectionRessources',label: '📖 Ressources pédagogiques',             display: 'block' },
-            { id: 'dashSectionRiver',     label: '🌊 Rivière de trésorerie',                 display: 'block' },
+            { id: 'dashSectionRiver',     label: '📊 Pipeline de conversion',                display: 'block' },
             { id: 'dashSectionEcarts',    label: '📐 Écarts observés — Top déviations',       display: 'block' },
         ];
         const _ALL_DASH_WIDGET_IDS = DASHBOARD_WIDGETS.map(w => w.id);
@@ -25264,9 +25268,9 @@
             try { renderApprovalStats(); } catch (e) { console.warn('renderApprovalStats failed:', e); }
             try { renderCAHeatmap(); } catch (e) { console.warn('renderCAHeatmap failed:', e); }
             try { renderApprovalKanban(); } catch (e) { console.warn('renderApprovalKanban failed:', e); }
-            try { renderRelationGraph(); } catch (e) { console.warn('renderRelationGraph failed:', e); }
+            try { renderBenefitsChart(); } catch (e) { console.warn('renderBenefitsChart failed:', e); }
             try { renderLearnerDashboard(); } catch (e) { console.warn('renderLearnerDashboard failed:', e); }
-            try { renderTresorerieRiver(); } catch (e) { console.warn('renderTresorerieRiver failed:', e); }
+            try { renderConversionPipeline(); } catch (e) { console.warn('renderConversionPipeline failed:', e); }
             try { renderEcartsWidget(); } catch (e) { console.warn('renderEcartsWidget failed:', e); }
         }
 
@@ -25614,78 +25618,148 @@
             </div>`;
         }
 
-        // ── 5. Rivière de trésorerie ──
-        function renderTresorerieRiver() {
-            const cont = document.getElementById('dashRiverFlow');
+        // ── 5. Pipeline de conversion ──
+        function renderConversionPipeline() {
+            const cont = document.getElementById('dashConversionPipeline');
             if (!cont) return;
-            const W = 900, H = 280;
-            const now = new Date();
-            const months = [];
-            for (let i = 11; i >= 0; i--) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                months.push({ y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString('fr-CH',{month:'short'}), inflow: 0, outflow: 0 });
-            }
-            (prestationsSauvegardees || []).forEach(p => {
-                const d = new Date(p.date); if (isNaN(d)) return;
-                const idx = months.findIndex(mm => mm.y === d.getFullYear() && mm.m === d.getMonth());
-                if (idx < 0) return;
-                const v = p.prixVente || 0;
-                if (['valide','facture','paye','encaisse'].includes(p.statut)) months[idx].inflow += v;
-                if (['soumis','devis','brouillon'].includes(p.statut || 'devis')) months[idx].outflow += v * 0.3;
-            });
-            const maxFlow = Math.max(1, ...months.map(m => m.inflow + m.outflow));
-            const dx = W / (months.length - 1 || 1);
-            const path = (offset) => {
-                let p = '';
-                months.forEach((m, i) => {
-                    const x = i * dx;
-                    const w = ((m.inflow + m.outflow) / maxFlow) * 70 + 10;
-                    const y = H/2 + offset * w;
-                    p += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
-                });
-                return p;
-            };
-            const upper = path(-1).replace('M', 'M');
-            const lower = months.map((m, i) => {
-                const x = (months.length - 1 - i) * dx;
-                const w = ((m.inflow + m.outflow) / maxFlow) * 70 + 10;
-                return `${i === 0 ? 'L' : 'L'} ${x} ${H/2 + w}`;
-            }).reverse().join(' ');
-            const riverPath = `${upper} L ${(months.length-1)*dx} ${H/2 + ((months[months.length-1].inflow + months[months.length-1].outflow)/maxFlow)*70 + 10} ${months.map((m,i) => {
-                const x = (months.length - 1 - i) * dx;
-                const w = ((m.inflow + m.outflow) / maxFlow) * 70 + 10;
-                return `L ${x} ${H/2 + w}`;
-            }).join(' ')} Z`;
-            // Bateaux = prestations actives
-            const boats = (prestationsSauvegardees || []).filter(p => ['devis','soumis','valide'].includes(p.statut || 'devis')).slice(0, 8).map((p, i) => {
-                const phase = (i / 8) * (months.length - 1);
-                const x = phase * dx;
-                const drift = (Date.now() / 50 + i * 90) % W;
-                return `<text x="${(x + drift) % W}" y="${H/2 + 4}" font-size="20" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,0.2));"><animate attributeName="x" from="-30" to="${W+30}" dur="${20 + i*3}s" repeatCount="indefinite"/>⛵</text>`;
+
+            const stages = [
+                { label: 'Prospects', color: '#95a5a6', icon: '👤' },
+                { label: 'Devis', color: '#f39c12', icon: '📋' },
+                { label: 'Accepté', color: '#3498db', icon: '✅' },
+                { label: 'Facturé', color: '#27ae60', icon: '💰' }
+            ];
+
+            let prospects = prestationsSauvegardees.length;
+            let devis = prestationsSauvegardees.filter(p => ['devis','soumis','brouillon'].includes(p.statut || 'devis')).length;
+            let accepte = prestationsSauvegardees.filter(p => ['accepte','en-cours','valide'].includes(p.statut)).length;
+            let facture = prestationsSauvegardees.filter(p => ['facture'].includes(p.statut)).length;
+
+            const devisCA = prestationsSauvegardees.filter(p => ['devis','soumis','brouillon'].includes(p.statut || 'devis')).reduce((s,p) => s + (p.prixVente || 0), 0);
+            const accepteCA = prestationsSauvegardees.filter(p => ['accepte','en-cours','valide'].includes(p.statut)).reduce((s,p) => s + (p.prixVente || 0), 0);
+            const factureCA = prestationsSauvegardees.filter(p => ['facture'].includes(p.statut)).reduce((s,p) => s + (p.prixVente || 0), 0);
+
+            const data = [
+                { count: prospects, ca: 0 },
+                { count: devis, ca: devisCA },
+                { count: accepte, ca: accepteCA },
+                { count: facture, ca: factureCA }
+            ];
+
+            const maxCount = Math.max(1, ...data.map(d => d.count));
+            const pipelineHtml = stages.map((stage, idx) => {
+                const d = data[idx];
+                const barHeight = (d.count / maxCount) * 100;
+                const conversionRate = idx === 0 ? '-' : `${((data[idx].count / data[idx-1].count) * 100).toFixed(0)}%`;
+                return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+                    <div style="width:100%;background:#f8fafc;border:1px solid #e0e8ed;border-radius:8px;padding:12px;text-align:center;margin-bottom:8px;">
+                        <div style="font-size:0.85em;font-weight:600;color:#2d5b8a;margin-bottom:6px;">${stage.icon} ${stage.label}</div>
+                        <div style="font-size:1.4em;font-weight:700;color:${stage.color};">${d.count}</div>
+                        <div style="font-size:0.75em;color:#7a9db1;margin-top:4px;">${(d.ca/1000).toFixed(1)}k CHF</div>
+                        ${idx > 0 ? `<div style="font-size:0.75em;color:#666;margin-top:4px;padding-top:4px;border-top:1px solid #e0e8ed;">↓ ${conversionRate}</div>` : ''}
+                    </div>
+                    ${idx < stages.length - 1 ? `<div style="font-size:1.5em;color:#bdc3c7;">→</div>` : ''}
+                </div>`;
             }).join('');
-            const labels = months.map((m, i) => {
-                const x = i * dx;
-                return `<text x="${x}" y="${H - 8}" font-size="11" fill="#2d3e50" text-anchor="middle">${m.label}<tspan x="${x}" dy="-${H - 30}" font-size="9" fill="#7a9db1">${(m.inflow/1000).toFixed(1)}k</tspan></text>`;
-            }).join('');
-            const totalIn = months.reduce((s,m)=>s+m.inflow,0);
-            cont.innerHTML = `<div class="sketch-container" style="padding:0;">
-                <div class="sketch-header" style="padding:12px 16px;margin-bottom:0;">🌊 Rivière de trésorerie</div>
-                <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block;background:linear-gradient(180deg,#e3f1fa 0%,#cfe6f5 100%);border-radius:0 0 12px 12px;" class="sketch-svg">
-                    <defs>
-                        <linearGradient id="riverGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#d9a892" stop-opacity="0.85"/>
-                            <stop offset="100%" stop-color="#c97866" stop-opacity="0.75"/>
-                        </linearGradient>
-                    </defs>
-                    <path d="${riverPath}" fill="url(#riverGrad)" stroke="#a45a52" stroke-width="2.2" filter="drop-shadow(1px 2px 2px rgba(0,0,0,0.15))"/>
-                    <path d="M 0 ${H/2} Q ${W/4} ${H/2 - 10} ${W/2} ${H/2} T ${W} ${H/2}" stroke="white" stroke-width="1.5" fill="none" opacity="0.6">
-                        <animate attributeName="d" values="M 0 ${H/2} Q ${W/4} ${H/2 - 10} ${W/2} ${H/2} T ${W} ${H/2};M 0 ${H/2} Q ${W/4} ${H/2 + 10} ${W/2} ${H/2} T ${W} ${H/2};M 0 ${H/2} Q ${W/4} ${H/2 - 10} ${W/2} ${H/2} T ${W} ${H/2}" dur="6s" repeatCount="indefinite"/>
-                    </path>
-                    ${boats}
-                    ${labels.replace(/#7a9db1/g, '#666').replace(/#2d3e50/g, '#2d3e50')}
-                    <text x="12" y="24" font-size="13" font-weight="bold" fill="#a45a52" filter="drop-shadow(1px 1px 1px rgba(255,255,255,0.8))">💰 ${(totalIn/1000).toFixed(1)} k CHF encaissés sur 12 mois</text>
-                </svg>
+
+            const totalCA = data.reduce((s,d) => s + d.ca, 0);
+            const totalProspectsCount = data[0].count;
+            const finalConversion = totalProspectsCount > 0 ? ((data[3].count / totalProspectsCount) * 100).toFixed(1) : 0;
+
+            cont.innerHTML = `<div style="padding:12px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;margin-bottom:20px;">
+                    ${pipelineHtml}
+                </div>
+                <div style="background:#f8fafc;border:1px solid #e0e8ed;border-radius:8px;padding:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+                    <div style="text-align:center;padding:8px;">
+                        <div style="font-size:0.85em;color:#7a9db1;margin-bottom:4px;">CA Total Facturé</div>
+                        <div style="font-size:1.6em;font-weight:700;color:#27ae60;">${(factureCA/1000).toFixed(1)}k CHF</div>
+                    </div>
+                    <div style="text-align:center;padding:8px;">
+                        <div style="font-size:0.85em;color:#7a9db1;margin-bottom:4px;">Taux de Conversion</div>
+                        <div style="font-size:1.6em;font-weight:700;color:#3498db;">${finalConversion}%</div>
+                    </div>
+                    <div style="text-align:center;padding:8px;">
+                        <div style="font-size:0.85em;color:#7a9db1;margin-bottom:4px;">CA en Attente</div>
+                        <div style="font-size:1.6em;font-weight:700;color:#f39c12;">${((devisCA + accepteCA)/1000).toFixed(1)}k CHF</div>
+                    </div>
+                </div>
             </div>`;
+        }
+
+        // ─ Répartition des bénéfices par client et catégorie
+        function renderBenefitsChart() {
+            const clientCont = document.getElementById('dashBenefitsClient');
+            const categoryCont = document.getElementById('dashBenefitsCategory');
+            if (!clientCont || !categoryCont) return;
+
+            const clientData = {};
+            const categoryData = {};
+
+            (prestationsSauvegardees || []).forEach(p => {
+                const ca = p.prixVente || 0;
+                const cost = p.prixRevient || 0;
+                const marge = ca - cost;
+
+                if (p.client) {
+                    if (!clientData[p.client]) clientData[p.client] = { ca: 0, cost: 0, marge: 0, count: 0 };
+                    clientData[p.client].ca += ca;
+                    clientData[p.client].cost += cost;
+                    clientData[p.client].marge += marge;
+                    clientData[p.client].count += 1;
+                }
+
+                if (p.prestation) {
+                    const cat = p.prestation.split(' ')[0] || 'Autres';
+                    if (!categoryData[cat]) categoryData[cat] = { ca: 0, cost: 0, marge: 0, count: 0 };
+                    categoryData[cat].ca += ca;
+                    categoryData[cat].cost += cost;
+                    categoryData[cat].marge += marge;
+                    categoryData[cat].count += 1;
+                }
+            });
+
+            const topClients = Object.entries(clientData)
+                .sort((a,b) => b[1].marge - a[1].marge)
+                .slice(0, 8);
+
+            const topCategories = Object.entries(categoryData)
+                .sort((a,b) => b[1].marge - a[1].marge)
+                .slice(0, 8);
+
+            const maxMargeClient = Math.max(1, ...topClients.map(([_,d]) => d.marge));
+            const maxMargeCategory = Math.max(1, ...topCategories.map(([_,d]) => d.marge));
+
+            const clientHtml = topClients.map(([name, data]) => {
+                const percentage = (data.marge / maxMargeClient) * 100;
+                const margePct = data.ca > 0 ? ((data.marge / data.ca) * 100).toFixed(0) : 0;
+                return `<div style="margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="font-size:0.85em;font-weight:600;color:#2d5b8a;">${escapeHtml(name)}</span>
+                        <span style="font-size:0.85em;color:#27ae60;font-weight:700;">${(data.marge/1000).toFixed(1)}k CHF</span>
+                    </div>
+                    <div style="background:#e8f5e9;border-radius:4px;overflow:hidden;height:24px;">
+                        <div style="background:linear-gradient(90deg,#27ae60 0%,#229954 100%);width:${percentage}%;height:100%;display:flex;align-items:center;justify-content:flex-end;padding:0 6px;font-size:0.7em;color:white;font-weight:700;">${percentage > 20 ? margePct+'%' : ''}</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const categoryHtml = topCategories.map(([name, data]) => {
+                const percentage = (data.marge / maxMargeCategory) * 100;
+                const margePct = data.ca > 0 ? ((data.marge / data.ca) * 100).toFixed(0) : 0;
+                return `<div style="margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="font-size:0.85em;font-weight:600;color:#2d5b8a;">${escapeHtml(name)} (${data.count})</span>
+                        <span style="font-size:0.85em;color:#3498db;font-weight:700;">${(data.marge/1000).toFixed(1)}k CHF</span>
+                    </div>
+                    <div style="background:#e3f2fd;border-radius:4px;overflow:hidden;height:24px;">
+                        <div style="background:linear-gradient(90deg,#3498db 0%,#2980b9 100%);width:${percentage}%;height:100%;display:flex;align-items:center;justify-content:flex-end;padding:0 6px;font-size:0.7em;color:white;font-weight:700;">${percentage > 20 ? margePct+'%' : ''}</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            clientCont.innerHTML = clientHtml || '<p style="color:#999;font-style:italic;font-size:0.85em;">Aucune donnée</p>';
+            categoryCont.innerHTML = categoryHtml || '<p style="color:#999;font-style:italic;font-size:0.85em;">Aucune donnée</p>';
         }
 
         // ─ Écarts observés (v2.18) — agrégation des déviations
