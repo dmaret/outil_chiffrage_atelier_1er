@@ -17563,12 +17563,21 @@
                 const cls = jours >= 14 ? 'relance-warning' : 'relance-normal';
                 const icon = jours >= 30 ? '🔴' : jours >= 14 ? '🟠' : '🟡';
                 const badge = getStatutBadgeHtml(p.statut || 'devis');
-                return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid #f5ddb8;flex-wrap:wrap;">
+                return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5ddb8;flex-wrap:wrap;">
                     <span>${icon}</span>
                     <span style="font-weight:600;flex:1;min-width:120px;">${escapeHtml(p.client)}</span>
                     <span style="flex:2;min-width:140px;color:#5a7b8f;">${escapeHtml(p.prestation)}</span>
                     ${badge}
                     <span class="${cls}">${jours} j</span>
+                    <select onchange="setStatutDirect(${p.id}, this.value)" style="font-size:0.78em;padding:3px 6px;border-radius:4px;border:1px solid #d5e3ed;background:#f7fbfd;cursor:pointer;">
+                      <option value="brouillon" ${(p.statut||'devis')==='brouillon'?'selected':''}>⬜ Brouillon</option>
+                      <option value="devis" ${(p.statut||'devis')==='devis'?'selected':''}>🟡 Devis</option>
+                      <option value="soumis" ${(p.statut||'devis')==='soumis'?'selected':''}>🟠 Soumis</option>
+                      <option value="accepte" ${(p.statut||'devis')==='accepte'?'selected':''}>🔵 Accepté</option>
+                      <option value="en-cours" ${(p.statut||'devis')==='en-cours'?'selected':''}>🟣 En cours</option>
+                      <option value="termine" ${(p.statut||'devis')==='termine'?'selected':''}>🟢 Terminé</option>
+                      <option value="facture" ${(p.statut||'devis')==='facture'?'selected':''}>💙 Facturé</option>
+                    </select>
                     <button class="btn btn-small btn-secondary" onclick="editPrestation(${p.id})" style="padding:3px 8px;font-size:0.78em;">Éditer</button>
                 </div>`;
             }).join('');
