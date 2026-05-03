@@ -5678,7 +5678,8 @@
                                 <button class="btn btn-small" onclick="document.getElementById('docFile').click()">📁 Choisir un fichier</button>
                                 <span id="docFileName" style="color:#7a9db1;font-size:0.9em;">Aucun fichier sélectionné</span>
                             </div>
-                            <p id="docUrlHint" style="font-size:0.8em;color:#7a9db1;margin-top:4px;display:none;">Collez une URL web</p>
+                            <input type="text" id="docUrl" placeholder="https://..." style="display:none;width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
+                            <p id="docUrlHint" style="font-size:0.8em;color:#7a9db1;margin-top:4px;display:none;">Entrez une URL web valide</p>
                         </div>
                     </div>
                     <div style="text-align:right;">
@@ -16718,20 +16719,18 @@
 
         function updateDocInputLabel() {
             const type = document.getElementById('docType').value;
-            const label = document.getElementById('docInputLabel');
-            const hint = document.getElementById('docUrlHint');
             const fileDisplay = document.getElementById('docFileDisplay');
-            const fileInput = document.getElementById('docFile');
+            const urlInput = document.getElementById('docUrl');
+            const hint = document.getElementById('docUrlHint');
 
             if (type === 'file') {
-                label.textContent = 'Sélectionner un fichier';
                 fileDisplay.style.display = 'flex';
+                urlInput.style.display = 'none';
                 hint.style.display = 'none';
             } else {
-                label.textContent = 'URL du document';
                 fileDisplay.style.display = 'none';
+                urlInput.style.display = 'block';
                 hint.style.display = 'block';
-                hint.innerHTML = '💡 Entrez une URL web valide';
             }
         }
 
