@@ -15548,11 +15548,25 @@
 
             const flowsHtml = renderLearnerFlowsHtml(l);
 
+            // Si pas de quiz assigné, afficher quand même les documents si disponibles
             if (l.assignedFormations.length === 0) {
-                container.innerHTML = `${flowsHtml}<div style="text-align:center;padding:20px 30px;color:#aaa;margin-top:10px;">
+                const noQuizMsg = `<div style="text-align:center;padding:20px 30px;color:#aaa;margin-top:10px;">
                     <div style="font-size:2em;margin-bottom:6px;">📋</div>
                     <p style="font-size:0.9em;">Aucun quiz de domaine assigné.<br>Commencez par les parcours ci-dessus !</p>
                 </div>`;
+                const earlyDocsHtml = `<div style="margin-top:20px;padding:14px;background:#f5f9fc;border-radius:10px;border-left:3px solid #a8d5e2;">
+                    <h4 style="margin:0 0 10px;color:#5a7b8f;">📎 Mes documents (${docs.length})</h4>
+                    ${docs.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">
+                        ${docs.map(doc => {
+                            const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
+                            const href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
+                            const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
+                            const targetAttr = doc.isFile ? '' : 'target="_blank"';
+                            return `<a href="${href}" ${targetAttr} ${downloadAttr} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
+                        }).join('')}
+                    </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
+                </div>`;
+                container.innerHTML = `${flowsHtml}${noQuizMsg}${earlyDocsHtml}`;
                 return;
             }
 
@@ -15577,15 +15591,20 @@
                 </div>`;
             }).join('');
 
-            const docsHtml = docs.length ? `<div style="margin-top:20px;padding:14px;background:#f5f9fc;border-radius:10px;border-left:3px solid #a8d5e2;">
-                <h4 style="margin:0 0 10px;color:#5a7b8f;">📎 Mes documents</h4>
-                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            const docsHtml = `<div style="margin-top:20px;padding:14px;background:#f5f9fc;border-radius:10px;border-left:3px solid #a8d5e2;">
+                <h4 style="margin:0 0 10px;color:#5a7b8f;">📎 Mes documents (${docs.length})</h4>
+                ${docs.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">
                     ${docs.map(doc => {
                         const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
-                        return `<a href="${doc.url||'#'}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.85em;">${ico} ${escapeHtml(doc.title)}</a>`;
+                        // Pour les fichiers locaux : utiliser fileData (base64) avec download
+                        // Pour les liens : utiliser l'URL avec target=_blank
+                        const href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
+                        const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
+                        const targetAttr = doc.isFile ? '' : 'target="_blank"';
+                        return `<a href="${href}" ${targetAttr} ${downloadAttr} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
                     }).join('')}
-                </div>
-            </div>` : '';
+                </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
+            </div>`;
 
             const quizSection = `<div style="margin-top:26px;">
                     <h3 style="color:#5a7b8f;font-size:0.95em;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:6px;">❓ Mes Quiz de domaine</h3>
