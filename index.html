@@ -35424,13 +35424,77 @@ function submitDebriefInput() {
 // ═══════════════════════════════════════════════════════════
 let _accompClinicalActiveType = 'emotion';
 let _accompClinicalDraft = {};
+let _accompClinicalDrafts = {}; // Store drafts for each tab in accomp module
 let _accompClinicalObservations = [];  // Observations cliniques du bénéficiaire
 let _accompClinicalSelectedBenefId = null;
 
 function switchAccompClinicalTab(type) {
+    // Save current draft before switching
+    if (_accompClinicalActiveType) {
+        _accompClinicalDrafts[_accompClinicalActiveType] = { ..._accompClinicalDraft };
+    }
+
+    // Load draft for new tab (or create empty one)
     _accompClinicalActiveType = type;
-    _accompClinicalDraft = {};
+    _accompClinicalDraft = _accompClinicalDrafts[type] ? { ..._accompClinicalDrafts[type] } : {};
+
     renderAccompClinicalBody();
+    _restoreAccompClinicalFormState();
+}
+
+function _restoreAccompClinicalFormState() {
+    const t = _accompClinicalActiveType;
+    const draft = _accompClinicalDraft;
+
+    // Restore emotion tab
+    if (t === 'emotion') {
+        if (draft.emotions && Array.isArray(draft.emotions)) {
+            draft.emotions.forEach(emotion => {
+                const chip = document.querySelector(`[onclick*="toggleAccompEmotion('${emotion}')"]`);
+                if (chip) chip.classList.add('selected');
+            });
+        }
+        if (draft.intensity) {
+            const btns = document.querySelectorAll('#accompEmotionIntensity button');
+            btns.forEach((b, i) => b.classList.toggle('selected', i + 1 === draft.intensity));
+        }
+    }
+    // Restore ressenti corporel tab
+    else if (t === 'ressenti_corporel') {
+        if (draft.body_zones && Array.isArray(draft.body_zones)) {
+            draft.body_zones.forEach(zone => {
+                const chip = document.getElementById(`chip-zone-${zone}`);
+                if (chip) chip.classList.add('selected');
+            });
+        }
+        const typeEl = document.getElementById('accompBodyType');
+        if (typeEl && draft.body_type) typeEl.value = draft.body_type;
+        if (draft.intensity) {
+            const btns = document.querySelectorAll('#accompBodyIntensity button');
+            btns.forEach((b, i) => b.classList.toggle('selected', i + 1 === draft.intensity));
+        }
+    }
+    // Restore text fields
+    const obsEl = document.getElementById('accompObservation');
+    if (obsEl && draft.observation) obsEl.value = draft.observation;
+    const targetEl = document.getElementById('accompObsTarget');
+    if (targetEl && draft.obs_target) targetEl.value = draft.obs_target;
+
+    const fromEl = document.getElementById('accompMsgFrom');
+    if (fromEl && draft.msg_from) fromEl.value = draft.msg_from;
+    const contentEl = document.getElementById('accompMsgContent');
+    if (contentEl && draft.msg_content) contentEl.value = draft.msg_content;
+    const interpEl = document.getElementById('accompMsgInterp');
+    if (interpEl && draft.msg_interp) interpEl.value = draft.msg_interp;
+
+    const aEl = document.getElementById('accompDcA');
+    if (aEl && draft.dc_a) aEl.value = draft.dc_a;
+    const bEl = document.getElementById('accompDcB');
+    if (bEl && draft.dc_b) bEl.value = draft.dc_b;
+    const srcEl = document.getElementById('accompDcSource');
+    if (srcEl && draft.dc_source) srcEl.value = draft.dc_source;
+    const noteEl = document.getElementById('accompDcNote');
+    if (noteEl && draft.note) noteEl.value = draft.note;
 }
 
 function renderAccompClinicalBody() {
@@ -35570,7 +35634,40 @@ function resetAccompClinical() {
     renderAccompClinicalBody();
 }
 
+function _saveAccompClinicalFormState() {
+    const t = _accompClinicalActiveType;
+    const noteEl = document.getElementById('accompNoteEmotion');
+    if (noteEl) _accompClinicalDraft.note = noteEl.value;
+
+    const obsEl = document.getElementById('accompObservation');
+    if (obsEl) _accompClinicalDraft.observation = obsEl.value;
+    const targetEl = document.getElementById('accompObsTarget');
+    if (targetEl) _accompClinicalDraft.obs_target = targetEl.value;
+
+    const fromEl = document.getElementById('accompMsgFrom');
+    if (fromEl) _accompClinicalDraft.msg_from = fromEl.value;
+    const contentEl = document.getElementById('accompMsgContent');
+    if (contentEl) _accompClinicalDraft.msg_content = contentEl.value;
+    const interpEl = document.getElementById('accompMsgInterp');
+    if (interpEl) _accompClinicalDraft.msg_interp = interpEl.value;
+
+    const aEl = document.getElementById('accompDcA');
+    if (aEl) _accompClinicalDraft.dc_a = aEl.value;
+    const bEl = document.getElementById('accompDcB');
+    if (bEl) _accompClinicalDraft.dc_b = bEl.value;
+    const srcEl = document.getElementById('accompDcSource');
+    if (srcEl) _accompClinicalDraft.dc_source = srcEl.value;
+    const dcNoteEl = document.getElementById('accompDcNote');
+    if (dcNoteEl) _accompClinicalDraft.note = dcNoteEl.value;
+
+    const typeEl = document.getElementById('accompBodyType');
+    if (typeEl) _accompClinicalDraft.body_type = typeEl.value;
+}
+
 function saveAccompClinicalInput() {
+    // Save form state first
+    _saveAccompClinicalFormState();
+
     if (!_accompClinicalSelectedBenefId) {
         showToast('⚠️ Sélectionnez un bénéficiaire d\'abord.');
         return;
@@ -35714,6 +35811,7 @@ let clinicalInputs = [];
 let currentPrestationContext = null;  // { prestationId, label, beneficiaireId, isCalculator }
 let _clinicalActiveType = 'emotion';
 let _clinicalDraft = {};
+let _clinicalDrafts = {}; // Store drafts for each tab: { emotion: {...}, observation: {...}, etc }
 
 const CLINICAL_EMOTIONS = [
     'Joie', 'Fierté', 'Plaisir', 'Surprise',
@@ -35774,10 +35872,19 @@ function closeClinicalModal() {
     _clinicalDraft = {};
 }
 function switchClinicalTab(type) {
+    // Save current form state before switching
+    _saveClinicalFormState();
+    if (_clinicalActiveType) {
+        _clinicalDrafts[_clinicalActiveType] = { ..._clinicalDraft };
+    }
+
+    // Load draft for new tab (or create empty one)
     _clinicalActiveType = type;
-    _clinicalDraft = {};
+    _clinicalDraft = _clinicalDrafts[type] ? { ..._clinicalDrafts[type] } : {};
+
     document.querySelectorAll('.clinical-tab').forEach(t => t.classList.toggle('active', t.dataset.clintype === type));
     _renderClinicalForm();
+    _restoreClinicalFormState();
     _updateClinicalHelp();
 }
 
@@ -35802,6 +35909,67 @@ function _updateClinicalHelp() {
         ressenti_corporel: `<strong>🤝 Accompagnement Ressenti corporel</strong><br/>Le corps parle : tensions, chaleurs, fatigues, légèretés. Ces sensations révèlent comment tu vis la situation au niveau physique. Elles te connectent à tes limites et tes ressources.<br/>💡 <em>Une tension mâchoire = stress ? Une légèreté = confiance ? Observe sans juger.</em>`
     };
     helpContent.innerHTML = helpTexts[t] || `<em>Sélectionne un onglet pour afficher l'aide.</em>`;
+}
+
+function _restoreClinicalFormState() {
+    const t = _clinicalActiveType;
+    const draft = _clinicalDraft;
+
+    // Restore emotion tab
+    if (t === 'emotion') {
+        if (draft.emotion) {
+            const chip = document.querySelector(`[onclick*="${draft.emotion}"]`);
+            if (chip) chip.classList.add('selected');
+        }
+        if (draft.intensity) {
+            const wrap = document.querySelector('.clinical-intensity');
+            if (wrap) wrap.querySelectorAll('button').forEach((b, i) => b.classList.toggle('selected', i + 1 === draft.intensity));
+        }
+        const noteEl = document.getElementById('clinNote');
+        if (noteEl && draft.note) noteEl.value = draft.note;
+    }
+    // Restore observation tab
+    else if (t === 'observation') {
+        const obsEl = document.getElementById('clinObservation');
+        if (obsEl && draft.observation) obsEl.value = draft.observation;
+        const targetEl = document.getElementById('clinObsTarget');
+        if (targetEl && draft.obs_target) targetEl.value = draft.obs_target;
+    }
+    // Restore message tab
+    else if (t === 'message') {
+        const fromEl = document.getElementById('clinMsgFrom');
+        if (fromEl && draft.msg_from) fromEl.value = draft.msg_from;
+        const contentEl = document.getElementById('clinMsgContent');
+        if (contentEl && draft.msg_content) contentEl.value = draft.msg_content;
+        const interpEl = document.getElementById('clinMsgInterp');
+        if (interpEl && draft.msg_interp) interpEl.value = draft.msg_interp;
+    }
+    // Restore double contrainte tab
+    else if (t === 'double_contrainte') {
+        const aEl = document.getElementById('clinDcA');
+        if (aEl && draft.dc_a) aEl.value = draft.dc_a;
+        const bEl = document.getElementById('clinDcB');
+        if (bEl && draft.dc_b) bEl.value = draft.dc_b;
+        const srcEl = document.getElementById('clinDcSource');
+        if (srcEl && draft.dc_source) srcEl.value = draft.dc_source;
+        const noteEl = document.getElementById('clinDcNote');
+        if (noteEl && draft.note) noteEl.value = draft.note;
+    }
+    // Restore ressenti corporel tab
+    else if (t === 'ressenti_corporel') {
+        if (draft.body_zone) {
+            const chip = document.querySelector(`[onclick*="${draft.body_zone}"]`);
+            if (chip) chip.classList.add('selected');
+        }
+        const typeEl = document.getElementById('clinBodyType');
+        if (typeEl && draft.body_type) typeEl.value = draft.body_type;
+        if (draft.intensity) {
+            const wrap = document.querySelector('.clinical-intensity');
+            if (wrap) wrap.querySelectorAll('button').forEach((b, i) => b.classList.toggle('selected', i + 1 === draft.intensity));
+        }
+        const noteEl = document.getElementById('clinBodyNote');
+        if (noteEl && draft.note) noteEl.value = draft.note;
+    }
 }
 
 function _renderClinicalForm() {
@@ -35887,7 +36055,44 @@ function _clinicalSetIntensity(n) {
     }
 }
 
+function _saveClinicalFormState() {
+    const t = _clinicalActiveType;
+    if (t === 'emotion') {
+        const noteEl = document.getElementById('clinNote');
+        if (noteEl) _clinicalDraft.note = noteEl.value;
+    } else if (t === 'observation') {
+        const obsEl = document.getElementById('clinObservation');
+        if (obsEl) _clinicalDraft.observation = obsEl.value;
+        const targetEl = document.getElementById('clinObsTarget');
+        if (targetEl) _clinicalDraft.obs_target = targetEl.value;
+    } else if (t === 'message') {
+        const fromEl = document.getElementById('clinMsgFrom');
+        if (fromEl) _clinicalDraft.msg_from = fromEl.value;
+        const contentEl = document.getElementById('clinMsgContent');
+        if (contentEl) _clinicalDraft.msg_content = contentEl.value;
+        const interpEl = document.getElementById('clinMsgInterp');
+        if (interpEl) _clinicalDraft.msg_interp = interpEl.value;
+    } else if (t === 'double_contrainte') {
+        const aEl = document.getElementById('clinDcA');
+        if (aEl) _clinicalDraft.dc_a = aEl.value;
+        const bEl = document.getElementById('clinDcB');
+        if (bEl) _clinicalDraft.dc_b = bEl.value;
+        const srcEl = document.getElementById('clinDcSource');
+        if (srcEl) _clinicalDraft.dc_source = srcEl.value;
+        const noteEl = document.getElementById('clinDcNote');
+        if (noteEl) _clinicalDraft.note = noteEl.value;
+    } else if (t === 'ressenti_corporel') {
+        const typeEl = document.getElementById('clinBodyType');
+        if (typeEl) _clinicalDraft.body_type = typeEl.value;
+        const noteEl = document.getElementById('clinBodyNote');
+        if (noteEl) _clinicalDraft.note = noteEl.value;
+    }
+}
+
 function submitClinicalInput() {
+    // Save form state first
+    _saveClinicalFormState();
+
     const t = _clinicalActiveType;
     const ctx = currentPrestationContext || {};
     const author = (typeof currentUserSession !== 'undefined' && currentUserSession) ? currentUserSession.name : 'Anonyme';
