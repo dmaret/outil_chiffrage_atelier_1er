@@ -15142,6 +15142,9 @@
         function loadFormationData() {
             const saved = JSON.parse(localStorage.getItem('learnersList') || '[]');
             learnersList = saved;
+            // Log pour débugger : combien d'assignations sont chargées ?
+            const totalAssignments = learnersList.reduce((sum, l) => sum + (l.assignedDocuments?.length || 0), 0);
+            console.log(`[Formation] Chargé ${learnersList.length} apprenant(s), ${totalAssignments} assignation(s) document(s)`);
             renderLearners();
         }
 
@@ -16478,7 +16481,8 @@
             // Comparaison robuste : learnerId vient en string depuis le DOM, l.id est un number
             const learner = learnersList.find(l => String(l.id) === String(learnerId));
             if (!learner) {
-                console.warn('Learner non trouvé pour assignation document:', learnerId);
+                console.warn('[Assignation] Apprenant non trouvé:', learnerId);
+                toast('⚠️ Erreur: apprenant non trouvé', 'warning');
                 return;
             }
 
@@ -16489,12 +16493,22 @@
             if (isAssigned) {
                 if (!learner.assignedDocuments.some(id => Number(id) === docIdNum)) {
                     learner.assignedDocuments.push(docIdNum);
+                    console.log(`[Assignation] +1 doc à ${learner.name}:`, docIdNum, '→ total:', learner.assignedDocuments);
                 }
             } else {
                 learner.assignedDocuments = learner.assignedDocuments.filter(id => Number(id) !== docIdNum);
+                console.log(`[Assignation] -1 doc de ${learner.name}:`, docIdNum, '→ total:', learner.assignedDocuments);
             }
 
+            // Sauvegarde immédiate dans localStorage
             saveFormationData();
+
+            // Vérification que la sauvegarde est OK
+            const verif = JSON.parse(localStorage.getItem('learnersList') || '[]');
+            const verifLearner = verif.find(l => String(l.id) === String(learnerId));
+            if (verifLearner && verifLearner.assignedDocuments) {
+                console.log(`[Vérif localStorage] ${learner.name} a ${verifLearner.assignedDocuments.length} doc(s) assigné(s)`);
+            }
         }
 
         function toggleGestureComplete(learnerId, code, completed) {
