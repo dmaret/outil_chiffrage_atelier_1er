@@ -1054,6 +1054,25 @@
         .section.section-drag-over {
             border-top: 3px solid #6b8fa3;
         }
+        #accompClinicalBody {
+            background: white !important;
+            color: #333 !important;
+        }
+        #accompClinicalBody * {
+            background-color: inherit;
+            color: inherit;
+        }
+        #accompClinicalBody input,
+        #accompClinicalBody select,
+        #accompClinicalBody textarea {
+            background: white !important;
+            color: #333 !important;
+            border-color: #ddd !important;
+        }
+        #accompClinicalBody label,
+        #accompClinicalBody p {
+            color: #666 !important;
+        }
         .section-drag-hint {
             display: none;
             position: absolute;
@@ -6927,458 +6946,212 @@
 
             <div id="accompagnement" class="tab-content">
 
-                <!-- ── Navigation sous-onglets ── -->
-                <div style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;border-bottom:2px solid #c8e6d0;padding-bottom:10px;">
-                    <button class="btn accomp-pill" data-sub="suivi"    onclick="switchAccompSub('suivi')"  style="background:#27ae60;color:#fff;border-color:#1e8449;">👤 Bénéficiaires</button>
-                    <button class="btn accomp-pill" data-sub="jalons"   onclick="switchAccompSub('jalons')">🎯 Jalons</button>
-                    <button class="btn accomp-pill" data-sub="parcours" onclick="switchAccompSub('parcours')">🌊 Parcours</button>
-                    <button class="btn accomp-pill" data-sub="croise"   onclick="switchAccompSub('croise')">🗺️ Vue croisée</button>
-                    <button class="btn accomp-pill" data-sub="outils"   onclick="switchAccompSub('outils')">🔬 Outils cliniques</button>
+                <!-- ── Flux d'accompagnement linéaire ── -->
+                <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;border-bottom:3px solid #27ae60;padding-bottom:12px;overflow-x:auto;">
+                    <button class="btn accomp-pill" data-sub="benef" onclick="switchAccompSub('benef')" style="background:#27ae60;color:#fff;border-color:#1e8449;">1️⃣ Bénéficiaire</button>
+                    <button class="btn accomp-pill" data-sub="projets" onclick="switchAccompSub('projets')">2️⃣ Projets</button>
+                    <button class="btn accomp-pill" data-sub="ressentis" onclick="switchAccompSub('ressentis')">3️⃣ Ressentis</button>
+                    <button class="btn accomp-pill" data-sub="analyse" onclick="switchAccompSub('analyse')">4️⃣ Analyse</button>
+                    <button class="btn accomp-pill" data-sub="aides" onclick="switchAccompSub('aides')">5️⃣ Aides</button>
+                    <button class="btn accomp-pill" data-sub="observations" onclick="switchAccompSub('observations')">6️⃣ Observations</button>
+                    <button class="btn accomp-pill" data-sub="synthese" onclick="switchAccompSub('synthese')">7️⃣ Synthèse</button>
                 </div>
 
-                <!-- ── Panneau : Suivi bénéficiaires ── -->
-                <div class="accomp-sub-panel" id="accomp-suivi">
+                <!-- ══════════════════════════════════════════════════════ -->
+                <!-- ÉTAPE 1 : BÉNÉFICIAIRE -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <div class="accomp-sub-panel" id="accomp-benef">
                     <div class="section">
-                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;flex:1;min-width:0;">👤 Bénéficiaires en suivi</h2>
-                            <button class="btn btn-success btn-small" onclick="openBeneficiaireModal()">➕ Nouveau bénéficiaire</button>
-                        </div>
+                        <h2>👤 Bénéficiaires en suivi</h2>
+                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Sélectionnez ou créez un bénéficiaire pour débuter l'accompagnement.</p>
+                        <button class="btn btn-success btn-small" onclick="openBeneficiaireModal()" style="margin-bottom:14px;">➕ Nouveau bénéficiaire</button>
                         <div id="beneficiairesList"></div>
                     </div>
-
                     <div class="section">
-                        <h2>📦 Modèle · Import · Export — Bénéficiaires</h2>
+                        <h2>📋 Import / Export bénéficiaires</h2>
                         <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
                             <div style="flex:1;min-width:180px;border:1.5px solid #c8e6fa;border-radius:10px;padding:16px;text-align:center;background:#f0f8ff;">
-                                <div style="font-size:1.6em;margin-bottom:6px;">📋</div>
-                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Modèle CSV / Excel</h3>
-                                <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Colonnes : prenom, nom, date_entree, statut, objectifs, notes</p>
-                                <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
-                                    <button class="btn btn-secondary btn-small" onclick="downloadBeneficiairesTemplate()">⬇ CSV</button>
-                                    <button class="btn btn-small" onclick="downloadBeneficiairesTemplateXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬇ Excel</button>
-                                </div>
+                                <div style="font-size:1.2em;margin-bottom:6px;">⬇️</div>
+                                <p style="font-size:0.85em;color:#6a8aaa;margin-bottom:12px;">Télécharger modèle</p>
+                                <button class="btn btn-secondary btn-small" onclick="downloadBeneficiairesTemplate()">📥 CSV</button>
+                                <button class="btn btn-small" onclick="downloadBeneficiairesTemplateXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">📥 Excel</button>
                             </div>
                             <div style="flex:1;min-width:180px;border:1.5px solid #d5e3ed;border-radius:10px;padding:16px;text-align:center;background:#f8fafc;">
-                                <div style="font-size:1.6em;margin-bottom:6px;">📥</div>
-                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Importer CSV / Excel</h3>
-                                <div class="import-drop-zone" id="benefDropZone" onclick="document.getElementById('benefCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleBenefCsvDrop(event)" style="margin:0;">
-                                    <p>📄 Cliquez ou glissez un fichier CSV ou Excel ici</p>
-                                    <p style="font-size:0.8em;margin-top:4px;">Format : prenom,nom,date_entree,statut,objectifs,notes</p>
+                                <div style="font-size:1.2em;margin-bottom:6px;">📤</div>
+                                <p style="font-size:0.85em;color:#6a8aaa;margin-bottom:12px;">Importer fichier</p>
+                                <div class="import-drop-zone" id="benefDropZone" onclick="document.getElementById('benefCsvInput').click()" ondragover="event.preventDefault();this.style.background='#e0f0f8'" ondragleave="this.style.background=''" ondrop="handleBenefCsvDrop(event)" style="margin:0;padding:14px;border:2px dashed #a0c8e0;border-radius:6px;">
+                                    <p style="font-size:0.9em;margin:0;">📄 CSV / Excel</p>
                                 </div>
                                 <input type="file" id="benefCsvInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importBeneficiairesCSV(this)">
                             </div>
-                            <div style="flex:1;min-width:180px;border:1.5px solid #c8e8c8;border-radius:10px;padding:16px;text-align:center;background:#f0fff0;">
-                                <div style="font-size:1.6em;margin-bottom:6px;">📤</div>
-                                <h3 style="margin:0 0 6px;font-size:0.95em;color:#2d5b8a;">Exporter CSV / Excel</h3>
-                                <p style="font-size:0.78em;color:#6a8aaa;margin-bottom:12px;">Exportez la liste des bénéficiaires avec leur profil.</p>
-                                <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
-                                    <button class="btn btn-small" onclick="exportBeneficiairesCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">⬆ CSV</button>
-                                    <button class="btn btn-small" onclick="exportBeneficiairesXLSX()" style="background:#1d6f42;color:#fff;border-color:#155a35;">⬆ Excel</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ── Panneau : Jalons ── -->
-                <div class="accomp-sub-panel" id="accomp-jalons" style="display:none;">
+                <!-- ══════════════════════════════════════════════════════ -->
+                <!-- ÉTAPE 2 : PROJETS & JALONS -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <div class="accomp-sub-panel" id="accomp-projets" style="display:none;">
                     <div class="section">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;flex:1;min-width:0;">🎯 Jalons d'accompagnement</h2>
+                            <h2 style="margin:0;flex:1;min-width:0;">🎯 Jalons et projets</h2>
                             <button class="btn btn-success btn-small" onclick="openJalonModal()">➕ Nouveau jalon</button>
                         </div>
-                        <select id="jalonFilterBenef" onchange="renderJalons()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;margin-bottom:14px;">
+                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Listez les jalons d'accompagnement et les prestations liées au bénéficiaire sélectionné.</p>
+                        <select id="jalonFilterBenef" onchange="renderJalons()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;margin-bottom:14px;max-width:300px;">
                             <option value="">— Tous les bénéficiaires —</option>
                         </select>
                         <div id="jalonsList"></div>
                     </div>
                 </div>
 
-                <!-- ── Panneau : Parcours visuels (v2.8) ── -->
-                <div class="accomp-sub-panel" id="accomp-parcours" style="display:none;">
-                    <div class="section">
-                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;flex:1;min-width:0;">🌊 Parcours d'accompagnement</h2>
-                            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                                <select id="parcoursBenefFilter" onchange="renderAccompagnementFlux()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;">
-                                    <option value="">— Tous les bénéficiaires —</option>
-                                </select>
-                                <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;color:#7a9db1;cursor:pointer;">
-                                    <input type="checkbox" id="parcoursShowPrestations" checked onchange="renderAccompagnementFlux()" style="accent-color:#27ae60;">
-                                    Inclure prestations
-                                </label>
-                            </div>
+                <!-- ══════════════════════════════════════════════════════ -->
+                <!-- ÉTAPE 3 : RESSENTIS DU CEA -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <div class="accomp-sub-panel" id="accomp-ressentis" style="display:none;">
+                    <div class="info-box" style="border-left-color:#c070f0;background:#fff0f5;">Enregistrez les <strong>émotions, sensations et messages reçus</strong> du CEA.</div>
+
+                    <!-- Outils cliniques — Saisie observations -->
+                    <div class="section" style="background:linear-gradient(135deg,#fff0f5,#f0f8ff);border-left-color:#c070f0;">
+                        <h2 style="color:#6b3a8f;margin:0 0 14px;">😊 Quels ressentis du CEA ?</h2>
+                        <p style="font-size:0.85em;color:#7a5a9a;margin-bottom:14px;">Enregistrez : émotion, observation, message reçu, double contrainte, ressenti corporel.</p>
+
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                            <button class="btn" data-clintype="emotion" onclick="switchAccompClinicalTab('emotion')" style="background:#e8b5c8;border-color:#d070a0;color:#6b3a8f;font-weight:600;">😊 Émotion</button>
+                            <button class="btn" data-clintype="observation" onclick="switchAccompClinicalTab('observation')" style="background:#b5d5e8;border-color:#70a0d0;color:#3a6b8f;font-weight:600;">👁️ Observation</button>
+                            <button class="btn" data-clintype="message" onclick="switchAccompClinicalTab('message')" style="background:#d5d5e8;border-color:#a0a0d0;color:#3a3a8f;font-weight:600;">💬 Message reçu</button>
+                            <button class="btn" data-clintype="double_contrainte" onclick="switchAccompClinicalTab('double_contrainte')" style="background:#e8d5b5;border-color:#d0a070;color:#8f6b3a;font-weight:600;">🌀 Double contrainte</button>
+                            <button class="btn" data-clintype="ressenti_corporel" onclick="switchAccompClinicalTab('ressenti_corporel')" style="background:#c8e8b5;border-color:#a0d070;color:#6b8f3a;font-weight:600;">🤝 Ressenti corporel</button>
                         </div>
-                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:16px;">Vue chronologique du parcours de chaque bénéficiaire — jalons et prestations enchaînés visuellement, comme un flux.</p>
-                        <div id="parcoursContent"></div>
+
+                        <div id="accompClinicalBody" style="background:white;border:1px solid #d4aaee;border-radius:8px;padding:14px;margin-bottom:12px;">
+                            <!-- Contenu dynamique selon l'onglet sélectionné -->
+                        </div>
+
+                        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+                            <button class="btn btn-secondary" onclick="resetAccompClinical()">↺ Réinitialiser</button>
+                            <button class="btn btn-success" onclick="saveAccompClinicalInput()">💾 Enregistrer</button>
+                        </div>
+                    </div>
+
+                    <!-- Historique clinique -->
+                    <div class="section" style="background:#f0f8ff;border-left-color:#4a9af0;">
+                        <h2 style="margin:0;color:#2d5b8a;">📊 Historique des ressentis</h2>
+                        <p style="font-size:0.85em;color:#5a7b8f;margin-bottom:12px;">Tous les ressentis enregistrés pour ce bénéficiaire.</p>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                            <button class="btn btn-small" onclick="filterAccompTimeline('all')" style="background:#e0f0f8;border-color:#4a9af0;color:#2d5b8a;">Tous</button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('emotion')" style="background:#fce8e8;border-color:#e84a5f;color:#6b3a3a;">😊 Émotions</button>
+                            <button class="btn btn-small" onclick="filterAccompTimeline('observation')" style="background:#e8f0fc;border-color:#4a7af0;color:#3a4a8f;">👁️ Observations</button>
+                        </div>
+                        <div id="accompTimelineEvents" style="display:flex;flex-direction:column;gap:8px;"></div>
+                        <p id="accompTimelineEmpty" style="text-align:center;color:#8aacbc;font-size:0.88em;padding:20px;">Aucun ressenti enregistré.</p>
                     </div>
                 </div>
 
-                <!-- ── Panneau : Vue croisée ── -->
-                <div class="accomp-sub-panel" id="accomp-croise" style="display:none;">
+                <!-- ══════════════════════════════════════════════════════ -->
+                <!-- ÉTAPE 4 : ANALYSE -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <div class="accomp-sub-panel" id="accomp-analyse" style="display:none;">
+                    <div class="info-box" style="border-left-color:#8e44ad;background:#f8f0ff;">Analysez la situation observée : <strong>cadre théorique, double contrainte, interprétation</strong>.</div>
+
                     <div class="section">
-                        <h2>🗺️ Vue croisée bénéficiaires ↔ projets</h2>
-                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:16px;">Prestations et jalons de chaque bénéficiaire en un coup d'œil.</p>
-                        <div id="vueCroiseeContent"></div>
+                        <h2 style="color:#6c3483;">🔍 Analyse de situation</h2>
+                        <p style="font-size:0.88em;color:#7a5a9a;margin-bottom:10px;">Répondez aux questions ci-dessous pour identifier le cadre théorique pertinent.</p>
+                        <div id="analyseQuestionnaire">
+                            <!-- Rendu dynamique par JavaScript -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- ── Panneau : Outils cliniques (contenu existant) ── -->
-                <div class="accomp-sub-panel" id="accomp-outils" style="display:none;">
-                <div class="info-box" style="border-left-color:#8bc98b; background:#eef8f3;">
-                    <strong>Espace d'analyse socio-éducative.</strong> Croisement des exigences de production et du projet d'accompagnement individuel. Réservé aux MSP / Administrateurs.
-                </div>
+                <!-- ══════════════════════════════════════════════════════ -->
+                <!-- ÉTAPE 5 : AIDES À LA COMPRÉHENSION -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <div class="accomp-sub-panel" id="accomp-aides" style="display:none;">
+                    <div class="info-box" style="border-left-color:#27ae60;background:#eef8f3;">Ressources et <strong>postures d'intervention</strong> basées sur l'analyse.</div>
 
-                <!-- Fiches d'intervention rapide -->
-                <div class="section">
-                    <h2>⚡ Fiches d'intervention rapide</h2>
-                    <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">En face de chaque situation observée, une posture et des actions concrètes. Cliquez pour développer.</p>
-                    <div id="fichesRapides">
-                        <!-- rendered by renderFichesRapides() -->
+                    <div class="section">
+                        <h2>⚡ Fiches d'intervention rapide</h2>
+                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Actions concrètes pour accompagner au quotidien.</p>
+                        <div id="fichesRapides">
+                            <!-- Rendu dynamique -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- 📊 NEW: Accompagnement Clinique (Observation-based) -->
-                <div class="section" style="background:linear-gradient(135deg,#f0f8ff,#e8f4f8);border-left:5px solid #2d5b8a;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-                        <h2 style="margin:0;color:#2d3a47;flex:1;min-width:0;">📊 Accompagnement Clinique — Suivi du Vécu</h2>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <!-- ══════════════════════════════════════════════════════ -->
+                <!-- ÉTAPE 6 : OBSERVATIONS & HISTORIQUE -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <div class="accomp-sub-panel" id="accomp-observations" style="display:none;">
+                    <div class="section">
+                        <h2>📊 Suivi du vécu clinique</h2>
+                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Vue d'ensemble des observations et évolution du CEA.</p>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
                             <select id="accompCeaFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByCea(this.value)">
-                                <option value="">-- Tous les CEA --</option>
+                                <option value="">-- Tous CEA --</option>
                             </select>
-                            <select id="accompPrestationFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByPrestation(this.value)">
-                                <option value="">-- Toutes prestations --</option>
-                            </select>
-                            <button class="btn btn-success" onclick="openQuickObservationModal()" style="font-size:0.9em;">➕ Nouvelle observation</button>
-                            <button class="btn btn-primary" onclick="exportAccompReport()" style="font-size:0.9em;">📥 Rapport</button>
+                            <button class="btn btn-success" onclick="openQuickObservationModal()">➕ Observation rapide</button>
+                        </div>
+                        <div id="accompCeaContainer" style="padding:20px;background:white;border-radius:8px;text-align:center;color:#8aacbc;">
+                            📭 Aucune observation
                         </div>
                     </div>
 
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">
-                        <!-- CEA Cards rendered here -->
-                        <div id="accompCeaContainer" style="grid-column:1/-1;padding:20px;background:white;border-radius:8px;text-align:center;color:#8aacbc;">
-                            📭 Aucune observation pour l'instant
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CEA Observation Detail Modal -->
-                <div id="ceaDetailModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;background:rgba(45,35,30,0.7);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
-                    <div style="background:white;border-radius:12px;max-width:900px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);padding:28px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                            <h2 id="ceaDetailTitle" style="margin:0;color:#2d3a47;"></h2>
-                            <button onclick="closeCeaDetail()" style="background:none;border:none;font-size:1.5em;cursor:pointer;color:#a0c8e0;">×</button>
-                        </div>
-
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;padding:16px;background:#f0f7fb;border-radius:8px;">
-                            <div>
-                                <strong style="color:#4a5f75;">Observations:</strong>
-                                <p id="ceaDetailCount" style="margin:4px 0;font-size:1.3em;color:#2d5b8a;font-weight:bold;">—</p>
-                            </div>
-                            <div>
-                                <strong style="color:#4a5f75;">Dernière observation:</strong>
-                                <p id="ceaDetailLastDate" style="margin:4px 0;font-size:0.95em;color:#7a9db1;">—</p>
-                            </div>
-                        </div>
-
-                        <h3 style="color:#2d3a47;margin-top:20px;margin-bottom:12px;">📈 Évolution des indicateurs</h3>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">
-                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #2d5b8a;">
-                                <small style="color:#7a9db1;">Autonomie</small>
-                                <p id="ceaDetailAutonomy" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#2d5b8a;">—</p>
-                            </div>
-                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #4a90c2;">
-                                <small style="color:#7a9db1;">Confiance</small>
-                                <p id="ceaDetailConfidence" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#4a90c2;">—</p>
-                            </div>
-                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #7ab9d0;">
-                                <small style="color:#7a9db1;">Engagement</small>
-                                <p id="ceaDetailEngagement" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#7ab9d0;">—</p>
-                            </div>
-                            <div style="background:#e8f4f8;padding:12px;border-radius:8px;border-left:4px solid #a0d08c;">
-                                <small style="color:#7a9db1;">Résilience</small>
-                                <p id="ceaDetailResilience" style="margin:6px 0;font-size:1.2em;font-weight:bold;color:#a0d08c;">—</p>
-                            </div>
-                        </div>
-
-                        <h3 style="color:#2d3a47;margin-bottom:12px;">📋 Historique des observations</h3>
-                        <div id="ceaDetailHistory" style="max-height:400px;overflow-y:auto;border:1px solid #dde5eb;border-radius:8px;padding:12px;">
-                            <!-- Observations listed here -->
-                        </div>
-
-                        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
-                            <button onclick="closeCeaDetail()" class="btn btn-secondary">Fermer</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Matrice apprenance -->
-                <div class="section">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                        <h2 style="margin:0;flex:1;min-width:0;">Matrice d'Apprenance & Autonomie</h2>
-                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                            <span id="matriceSaveStatus" style="font-size:0.78em;color:#8aacbc;"></span>
+                    <!-- Matrice apprenance -->
+                    <div class="section">
+                        <h2>📚 Matrice d'Apprenance & Autonomie</h2>
+                        <p style="font-size:0.82em;color:#7a9db1;margin-bottom:8px;">Suivi du stade d'apprenance (Carré / Piaget).</p>
+                        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
                             <button class="btn btn-small" onclick="ajouterLigneMatrice()">+ Ajouter</button>
-                            <button class="btn btn-secondary btn-small" onclick="sauverMatrice()" title="Enregistrer maintenant (l'auto-save est actif)">💾 Sauver</button>
-                            <button class="btn btn-secondary btn-small" onclick="exportMatriceCSV()">📤 Export CSV</button>
+                            <button class="btn btn-secondary btn-small" onclick="sauverMatrice()">💾 Sauver</button>
+                            <button class="btn btn-secondary btn-small" onclick="exportMatriceCSV()">📤 Export</button>
                         </div>
-                    </div>
-                    <p style="font-size:0.82em;color:#7a9db1;margin-bottom:8px;">D'après P. Carré (apprenance) & J. Piaget (assimilation/accommodation). Sauvegarde automatique (localStorage).</p>
-                    <input type="text" class="matrice-filter" id="matriceFilter" placeholder="🔍 Filtrer (nom, tâche, stade, observation)…" oninput="filterMatrice(this.value)" style="width:100%;max-width:420px;">
-                    <div style="overflow-x:auto;">
-                    <table id="matriceApprenanceTable" style="font-size:0.85em;">
-                        <thead><tr><th>Collaborateur (CEA)</th><th>Tâche assignée</th><th>Stade d'assimilation</th><th>Dynamique d'apprenance</th><th>Observation</th><th style="width:90px;">Maj</th><th style="width:40px;"></th></tr></thead>
-                        <tbody id="matriceBody"></tbody>
-                    </table>
-                    </div>
-                </div>
-
-                <!-- Outils cliniques — Saisie observations -->
-                <div class="section" style="background:linear-gradient(135deg,#fff0f5,#f0f8ff);border-left-color:#c070f0;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-                        <h2 style="color:#6b3a8f;margin:0;cursor:pointer;flex:1;" onclick="switchTab('guide');switchGuideSection('glossaire');" title="Cliquez pour voir le glossaire complet">🎭 Outils cliniques du travail — Saisie observation</h2>
-                        <button class="btn btn-small" onclick="switchTab('guide');switchGuideSection('glossaire');" style="background:#c070f0;color:#fff;border-color:#a050d0;font-weight:600;">📚 Glossaire</button>
-                    </div>
-                    <p style="font-size:0.85em;color:#7a5a9a;margin-bottom:14px;">Enregistrez une observation clinique pour le bénéficiaire sélectionné. <span class="glossary-term" data-term="emotion" style="cursor:help;">Émotion <span style="color:#c97666;font-weight:700;">?</span></span>, <span class="glossary-term" data-term="observation" style="cursor:help;">Observation <span style="color:#c97666;font-weight:700;">?</span></span>, <span class="glossary-term" data-term="message" style="cursor:help;">Message reçu <span style="color:#c97666;font-weight:700;">?</span></span>, <span class="glossary-term" data-term="double_contrainte" style="cursor:help;">Double contrainte <span style="color:#c97666;font-weight:700;">?</span></span>, <span class="glossary-term" data-term="ressenti_corporel" style="cursor:help;">Ressenti corporel <span style="color:#c97666;font-weight:700;">?</span></span>.</p>
-
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                        <button class="btn" data-clintype="emotion" onclick="switchAccompClinicalTab('emotion')" style="background:#e8b5c8;border-color:#d070a0;color:#6b3a8f;font-weight:600;"><span class="glossary-term" data-term="emotion" style="cursor:help;border:none;background:none;">😊 Émotion <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                        <button class="btn" data-clintype="observation" onclick="switchAccompClinicalTab('observation')" style="background:#b5d5e8;border-color:#70a0d0;color:#3a6b8f;font-weight:600;"><span class="glossary-term" data-term="observation" style="cursor:help;border:none;background:none;">👁️ Observation <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                        <button class="btn" data-clintype="message" onclick="switchAccompClinicalTab('message')" style="background:#d5d5e8;border-color:#a0a0d0;color:#3a3a8f;font-weight:600;"><span class="glossary-term" data-term="message" style="cursor:help;border:none;background:none;">💬 Message reçu <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                        <button class="btn" data-clintype="double_contrainte" onclick="switchAccompClinicalTab('double_contrainte')" style="background:#e8d5b5;border-color:#d0a070;color:#8f6b3a;font-weight:600;"><span class="glossary-term" data-term="double_contrainte" style="cursor:help;border:none;background:none;">🌀 Double contrainte <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                        <button class="btn" data-clintype="ressenti_corporel" onclick="switchAccompClinicalTab('ressenti_corporel')" style="background:#c8e8b5;border-color:#a0d070;color:#6b8f3a;font-weight:600;"><span class="glossary-term" data-term="ressenti_corporel" style="cursor:help;border:none;background:none;">🤝 Ressenti corporel <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                    </div>
-
-                    <div id="accompClinicalBody" style="background:white;border:1px solid #d4aaee;border-radius:8px;padding:14px;margin-bottom:12px;">
-                        <!-- Contenu dynamique selon l'onglet sélectionné -->
-                    </div>
-
-                    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
-                        <button class="btn btn-secondary" onclick="resetAccompClinical()">↺ Réinitialiser</button>
-                        <button class="btn btn-success" onclick="saveAccompClinicalInput()">💾 Enregistrer l'observation</button>
-                    </div>
-                </div>
-
-                <!-- Historique clinique — Timeline par bénéficiaire -->
-                <div class="section" style="background:#f0f8ff;border-left-color:#4a9af0;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                        <h2 style="margin:0;color:#2d5b8a;cursor:pointer;flex:1;" onclick="switchTab('guide');switchGuideSection('glossaire');" title="Cliquez pour voir le glossaire complet">📊 Historique clinique — Timeline</h2>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                            <button class="btn btn-small" onclick="filterAccompTimeline('all')" style="background:#e0f0f8;border-color:#4a9af0;color:#2d5b8a;">Tout</button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('emotion')" style="background:#fce8e8;border-color:#e84a5f;color:#6b3a3a;"><span class="glossary-term" data-term="emotion" style="cursor:help;border:none;background:none;">😊 Émotions <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('observation')" style="background:#e8f0fc;border-color:#4a7af0;color:#3a4a8f;"><span class="glossary-term" data-term="observation" style="cursor:help;border:none;background:none;">👁️ Observations <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('message')" style="background:#f0e8fc;border-color:#a070d0;color:#5a3a8f;"><span class="glossary-term" data-term="message" style="cursor:help;border:none;background:none;">💬 Messages <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('double_contrainte')" style="background:#f8f0e8;border-color:#d0a070;color:#8f6b3a;"><span class="glossary-term" data-term="double_contrainte" style="cursor:help;border:none;background:none;">🌀 DC <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                            <button class="btn btn-small" onclick="filterAccompTimeline('ressenti_corporel')" style="background:#e8f8e8;border-color:#70d070;color:#3a8f3a;"><span class="glossary-term" data-term="ressenti_corporel" style="cursor:help;border:none;background:none;">🤝 Ressentis <span style="color:#c97666;font-weight:700;">?</span></span></button>
-                            <button class="btn btn-small" onclick="switchTab('guide');switchGuideSection('glossaire');" style="background:#4a9af0;color:#fff;border-color:#3878b0;font-weight:600;">📚 Glossaire</button>
-                        </div>
-                    </div>
-                    <p style="font-size:0.85em;color:#5a7b8f;margin-bottom:12px;">Historique des observations enregistrées pour le bénéficiaire sélectionné. Cliquez pour détailler.</p>
-                    <div id="accompTimelineEvents" style="display:flex;flex-direction:column;gap:8px;">
-                        <!-- Timeline rendering -->
-                    </div>
-                    <p id="accompTimelineEmpty" style="text-align:center;color:#8aacbc;font-size:0.88em;padding:20px;">Aucune observation enregistrée pour ce bénéficiaire.</p>
-                </div>
-
-                <!-- Outil analyse de situation -->
-                <div class="section" style="background:linear-gradient(135deg,#f0f8ff,#f8f0ff);border-left-color:#8e44ad;">
-                    <h2 style="color:#6c3483;">🔍 Outil d'analyse de situation</h2>
-                    <p style="font-size:0.88em;color:#7a5a9a;margin-bottom:10px;">Répondez aux questions ci-dessous pour identifier le cadre théorique le plus pertinent et obtenir des pistes d'intervention.</p>
-                    <div class="analyse-progress">
-                        <span id="analyseProgressLabel">0 / 4 questions répondues</span>
-                        <div class="analyse-progress-bar"><div id="analyseProgressFill" style="width:0%;"></div></div>
-                    </div>
-                    <div id="analyseQuestionnaire">
-                        <div class="analyse-step" id="step-1">
-                            <p class="analyse-question">1. Quel comportement observez-vous principalement ?</p>
-                            <div class="analyse-choices">
-                                <label><input type="radio" name="q1" value="cadence"> Baisse de cadence, ralentissement, erreurs répétées</label>
-                                <label><input type="radio" name="q1" value="conflit"> Tension, conflit avec un pair ou le MSP</label>
-                                <label><input type="radio" name="q1" value="dependance"> Dépendance excessive, sollicitations fréquentes</label>
-                                <label><input type="radio" name="q1" value="retrait"> Retrait, mutisme, absentéisme ou plaintes somatiques</label>
-                                <label><input type="radio" name="q1" value="agitation"> Agitation, dispersion, difficultés de concentration</label>
-                            </div>
-                        </div>
-                        <div class="analyse-step" id="step-2">
-                            <p class="analyse-question">2. La tâche concernée est-elle nouvelle ou habituelle ?</p>
-                            <div class="analyse-choices">
-                                <label><input type="radio" name="q2" value="nouvelle"> Nouvelle ou récemment modifiée</label>
-                                <label><input type="radio" name="q2" value="habituelle"> Habituelle, maîtrisée depuis longtemps</label>
-                                <label><input type="radio" name="q2" value="complexe"> Habituelle mais complexifiée (volume, pression)</label>
-                            </div>
-                        </div>
-                        <div class="analyse-step" id="step-3">
-                            <p class="analyse-question">3. Y a-t-il eu un événement déclencheur récent ?</p>
-                            <div class="analyse-choices">
-                                <label><input type="radio" name="q3" value="consigne"> Changement de consigne ou double message contradictoire</label>
-                                <label><input type="radio" name="q3" value="equipe"> Changement dans l'équipe (nouveau collègue, départ)</label>
-                                <label><input type="radio" name="q3" value="pression"> Pression de productivité ou deadline</label>
-                                <label><input type="radio" name="q3" value="perso"> Contexte personnel visible (stress, fatigue)</label>
-                                <label><input type="radio" name="q3" value="rien"> Rien de particulier identifié</label>
-                            </div>
-                        </div>
-                        <div class="analyse-step" id="step-4">
-                            <p class="analyse-question">4. Comment la personne interagit-elle avec le MSP ?</p>
-                            <div class="analyse-choices">
-                                <label><input type="radio" name="q4" value="evite"> L'évite ou ne communique plus</label>
-                                <label><input type="radio" name="q4" value="cherche"> La cherche constamment pour validation</label>
-                                <label><input type="radio" name="q4" value="neutre"> Relation neutre, fonctionnelle</label>
-                                <label><input type="radio" name="q4" value="opposition"> Opposition, résistance aux consignes</label>
-                            </div>
-                        </div>
-                        <div style="margin-top:10px;">
-                            <label style="font-size:0.83em;color:#7a5a9a;display:block;margin-bottom:4px;">Contexte (optionnel) : CEA, tâche, situation…</label>
-                            <input type="text" id="analyseContexte" placeholder="Ex : Marc — étiquetage orienté, poste 3" style="width:100%;max-width:500px;border:1px solid #d4aaee;border-radius:6px;padding:7px 10px;font-size:0.9em;">
-                        </div>
-                        <div style="margin-top:14px;">
-                            <button class="btn" id="btnAnalyser" onclick="analyserSituation()" disabled style="opacity:0.5;cursor:not-allowed;">🔍 Analyser la situation</button>
-                            <button class="btn btn-secondary" onclick="resetAnalyse()" style="margin-left:8px;">↺ Réinitialiser</button>
-                        </div>
-                    </div>
-                    <div id="analyseResultat" style="display:none;margin-top:20px;"></div>
-                    <!-- Historique des analyses -->
-                    <div id="analyseHistoriqueWrap" style="margin-top:22px;display:none;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-                            <h3 style="margin:0;color:#6c3483;font-size:1em;flex:1;min-width:0;">📔 Historique des analyses</h3>
-                            <div style="display:flex;gap:8px;">
-                                <button class="btn btn-secondary btn-small" onclick="exportAnalyseHistoriqueCSV()">📤 Export CSV</button>
-                                <button class="btn btn-secondary btn-small" onclick="clearAnalyseHistorique()">🗑️ Effacer</button>
-                            </div>
-                        </div>
-                        <div id="analyseHistorique"></div>
-                    </div>
-                </div>
-
-                <!-- Situations cliniques -->
-                <div class="section">
-                    <h2>Situations cliniques en atelier</h2>
-                    <p style="font-size:0.9em;color:#5a7b8f;margin-bottom:12px;">Documentation des anomalies de production comme symptômes d'une dynamique interactionnelle.</p>
-                    <div style="overflow-x:auto;">
-                        <table style="font-size:0.85em;">
-                            <thead><tr style="background:#eef8f3;"><th>Tâche / Contexte</th><th>Symptôme observé</th><th>Hypothèse Systémique</th><th>Piste de régulation (Posture MSP)</th></tr></thead>
-                            <tbody>
-                                <tr><td>Conditionnement sachets zip</td><td>Baisse de cadence, soupirs, erreurs de comptage</td><td><strong>Surcharge cognitive (Piaget)</strong> : étapes dépassent la zone proximale</td><td><strong>Faire avec :</strong> Séquencer la tâche. Isoler le comptage du remplissage.</td></tr>
-                                <tr><td>Palettisation croisée</td><td>Conflit avec le voisin sur l'espace de stockage</td><td><strong>Frontières poreuses (Minuchin)</strong> : territoire spatial et de rôle mal défini</td><td>Redéfinir physiquement les zones (marquage au sol) et clarifier les tâches</td></tr>
-                                <tr><td>Pliage de cartons</td><td>Plaintes somatiques (mal au dos) récurrentes à ce poste</td><td><strong>Symptôme comme message (Palo Alto)</strong> : refus non verbalisé du poste</td><td>Entretien d'explicitation. Rotation de poste toutes les 2h.</td></tr>
-                                <tr><td>Étiquetage orienté</td><td>Sollicite le MSP toutes les 2 min pour valider son geste</td><td><strong>Double contrainte (Bateson)</strong> : "Sois autonome" vs "Aucune erreur tolérée"</td><td>Restaurer le droit à l'erreur. Validation par échantillonnage (1/10).</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Référentiel théorique enrichi -->
-                <div class="section" id="referentielTheorique" style="background:#fef9e6;border-left-color:#c9b84a;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-                        <h2 style="color:#7a6208;margin:0;flex:1;min-width:0;">📚 Référentiel Théorique</h2>
-                        <div style="display:flex;gap:8px;">
-                            <button class="btn btn-secondary btn-small" onclick="toggleAllTheorie(true)">⬇️ Tout déplier</button>
-                            <button class="btn btn-secondary btn-small" onclick="toggleAllTheorie(false)">⬆️ Tout replier</button>
-                        </div>
-                    </div>
-                    <p style="font-size:0.82em;color:#9a8220;margin-bottom:10px;">Cliquez sur un thème pour développer les ressources et liens de référence.</p>
-                    <input type="text" id="theorieSearch" placeholder="🔍 Chercher (concept, auteur…)" oninput="filterTheorie(this.value)" style="width:100%;max-width:420px;padding:7px 10px;border:1px solid #c9b84a;border-radius:6px;font-size:0.88em;margin-bottom:14px;background:#fffdf0;color:#4a3c00;">
-
-                    <div class="theorie-card" onclick="toggleTheorie('piaget')">
-                        <div class="theorie-header">
-                            <span>🧠 Piaget — Développement cognitif & Zone proximale</span><span class="theorie-chevron" id="chev-piaget">▶</span>
-                        </div>
-                        <div class="theorie-body" id="body-piaget" style="display:none;">
-                            <p><strong>Concepts clés :</strong> Assimilation, Accommodation, Déséquilibre cognitif, Zone proximale de développement (ZPD), Stades opératoires.</p>
-                            <p><strong>En atelier :</strong> Une personne en déséquilibre cognitif montre des erreurs répétées ou un ralentissement face à une tâche dépassant sa ZPD. La posture MSP = séquencer, faire avec, puis laisser faire.</p>
-                            <div class="theorie-links">
-                                <a href="https://fr.wikipedia.org/wiki/Jean_Piaget" target="_blank">📖 Wikipedia — Piaget</a>
-                                <a href="https://scholar.google.com/scholar?q=piaget+zone+proximale+developpement" target="_blank">🔍 Google Scholar</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="theorie-card" onclick="toggleTheorie('vygotski')">
-                        <div class="theorie-header">
-                            <span>🤝 Vygotski — Zone proximale & Étayage</span><span class="theorie-chevron" id="chev-vygotski">▶</span>
-                        </div>
-                        <div class="theorie-body" id="body-vygotski" style="display:none;">
-                            <p><strong>Concepts clés :</strong> Zone proximale de développement (ZPD), Étayage (scaffolding), Apprentissage médiatisé, Langage intérieur.</p>
-                            <p><strong>En atelier :</strong> L'étayage MSP = soutien progressivement retiré au fur et à mesure que la personne intègre. "Ce que l'enfant fait avec aide aujourd'hui, il le fera seul demain."</p>
-                            <div class="theorie-links">
-                                <a href="https://fr.wikipedia.org/wiki/Lev_Vygotski" target="_blank">📖 Wikipedia — Vygotski</a>
-                                <a href="https://scholar.google.com/scholar?q=vygotski+zone+proximale+etayage" target="_blank">🔍 Google Scholar</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="theorie-card" onclick="toggleTheorie('carre')">
-                        <div class="theorie-header">
-                            <span>📘 Carré — Apprenance & Rapport au savoir</span><span class="theorie-chevron" id="chev-carre">▶</span>
-                        </div>
-                        <div class="theorie-body" id="body-carre" style="display:none;">
-                            <p><strong>Concepts clés :</strong> Apprenance (disposition à apprendre), Motivations intrinsèques/extrinsèques, Autodirection dans l'apprentissage, Rapport au savoir.</p>
-                            <p><strong>En atelier :</strong> Identifier si la personne est dans une dynamique d'apprenance ouverte (curiosité, initiative) ou fermée (résistance, fatalisme). La posture MSP = valoriser les progrès, relier la tâche à un sens personnel.</p>
-                            <div class="theorie-links">
-                                <a href="https://fr.wikipedia.org/wiki/Apprenance" target="_blank">📖 Wikipedia — Apprenance</a>
-                                <a href="https://scholar.google.com/scholar?q=carré+apprenance+adultes" target="_blank">🔍 Google Scholar</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="theorie-card" onclick="toggleTheorie('paloalto')">
-                        <div class="theorie-header">
-                            <span>🔄 École de Palo Alto — Communication & Systémique</span><span class="theorie-chevron" id="chev-paloalto">▶</span>
-                        </div>
-                        <div class="theorie-body" id="body-paloalto" style="display:none;">
-                            <p><strong>Concepts clés :</strong> Tout comportement est communication, Symptôme comme message, Homéostasie du système, Recadrage, Injonction paradoxale.</p>
-                            <p><strong>En atelier :</strong> Un comportement "problème" (absentéisme, lenteur) est la solution trouvée par la personne à une situation insupportable. La posture MSP = comprendre la fonction du symptôme avant d'agir sur lui.</p>
-                            <div class="theorie-links">
-                                <a href="https://fr.wikipedia.org/wiki/%C3%89cole_de_Palo_Alto" target="_blank">📖 Wikipedia — École de Palo Alto</a>
-                                <a href="https://scholar.google.com/scholar?q=palo+alto+communication+systémique+Watzlawick" target="_blank">🔍 Google Scholar</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="theorie-card" onclick="toggleTheorie('bateson')">
-                        <div class="theorie-header">
-                            <span>⚡ Bateson — Double contrainte</span><span class="theorie-chevron" id="chev-bateson">▶</span>
-                        </div>
-                        <div class="theorie-body" id="body-bateson" style="display:none;">
-                            <p><strong>Concepts clés :</strong> Double bind (double contrainte), Injonctions contradictoires non verbalisables, Contexte d'apprentissage pathogène, Deutero-apprentissage.</p>
-                            <p><strong>En atelier :</strong> "Sois autonome" + "chaque erreur est sanctionnée" = double contrainte. La personne est paralysée. Posture MSP = nommer explicitement la contradiction et lever l'injonction impossible.</p>
-                            <div class="theorie-links">
-                                <a href="https://fr.wikipedia.org/wiki/Double_contrainte" target="_blank">📖 Wikipedia — Double contrainte</a>
-                                <a href="https://scholar.google.com/scholar?q=bateson+double+bind+schizophrenia+1956" target="_blank">🔍 Google Scholar — Bateson 1956</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="theorie-card" onclick="toggleTheorie('minuchin')">
-                        <div class="theorie-header">
-                            <span>🏛️ Minuchin — Thérapie structurale & Frontières</span><span class="theorie-chevron" id="chev-minuchin">▶</span>
-                        </div>
-                        <div class="theorie-body" id="body-minuchin" style="display:none;">
-                            <p><strong>Concepts clés :</strong> Frontières (rigides / diffuses / claires), Sous-systèmes, Hiérarchie fonctionnelle, Triangulation, Enmeshment.</p>
-                            <p><strong>En atelier :</strong> Conflits territoriaux, immixtion du MSP dans la relation entre pairs, coalitions = indicateurs de frontières mal définies. Posture MSP = clarifier les rôles, les espaces et les responsabilités.</p>
-                            <div class="theorie-links">
-                                <a href="https://fr.wikipedia.org/wiki/Salvador_Minuchin" target="_blank">📖 Wikipedia — Minuchin</a>
-                                <a href="https://scholar.google.com/scholar?q=minuchin+frontières+thérapie+familiale" target="_blank">🔍 Google Scholar</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="theorie-card" onclick="toggleTheorie('paul')">
-                        <div class="theorie-header">
-                            <span>🌱 Paul — Posture d'accompagnement</span><span class="theorie-chevron" id="chev-paul">▶</span>
-                        </div>
-                        <div class="theorie-body" id="body-paul" style="display:none;">
-                            <p><strong>Concepts clés :</strong> Accompagnement comme posture (pas une technique), "Se-mettre-à-côté-de", Cheminer avec, Différence accompagnement / aide / conseil, Éthos relationnel.</p>
-                            <p><strong>En atelier :</strong> Le MSP n'est pas un expert qui sait pour l'autre, mais un compagnon de route qui crée les conditions du mouvement. La question centrale : "Que cherche cette personne ?"</p>
-                            <div class="theorie-links">
-                                <a href="https://scholar.google.com/scholar?q=Maela+Paul+accompagnement+posture" target="_blank">🔍 Google Scholar</a>
-                            </div>
+                        <div style="overflow-x:auto;">
+                            <table id="matriceApprenanceTable" style="font-size:0.85em;">
+                                <thead><tr><th>CEA</th><th>Tâche</th><th>Stade</th><th>Dynamique</th><th>Observation</th><th style="width:90px;">Maj</th></tr></thead>
+                                <tbody id="matriceBody"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                </div><!-- /accomp-outils -->
-            </div><!-- /accompagnement -->
 
-            <!-- ONGLET HISTORIQUE (admin) -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <!-- ÉTAPE 7 : SYNTHÈSE & BILAN -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <div class="accomp-sub-panel" id="accomp-synthese" style="display:none;">
+                    <div class="info-box" style="border-left-color:#f39c12;background:#fffbf0;">Synthèse de compréhension : <strong>écart entre le travail effectué et le vécu du CEA</strong>.</div>
+
+                    <div class="section" style="background:#fffbf0;border-left-color:#f39c12;">
+                        <h2 style="color:#8f6b3a;">✨ Synthèse de compréhension</h2>
+                        <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Bilan : rapprochez les données objectives du travail effectué avec le vécu subjectif du CEA.</p>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+                            <div style="background:white;border:1px solid #d0a070;border-radius:8px;padding:14px;">
+                                <h3 style="color:#8f6b3a;margin-top:0;">📋 Travail effectué</h3>
+                                <div id="syntheseTravail" style="font-size:0.9em;color:#5a6f75;line-height:1.6;">
+                                    — Chargement des données...
+                                </div>
+                            </div>
+                            <div style="background:white;border:1px solid #c070a0;border-radius:8px;padding:14px;">
+                                <h3 style="color:#6b3a8f;margin-top:0;">💭 Vécu du CEA</h3>
+                                <div id="syntheseVecu" style="font-size:0.9em;color:#5a6f75;line-height:1.6;">
+                                    — Chargement des données...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background:#f5e8f8;border:1px solid #d4aaee;border-radius:8px;padding:14px;margin-bottom:14px;">
+                            <h3 style="color:#6b3a8f;margin-top:0;">🎯 Interprétation & recommandations</h3>
+                            <textarea id="syntheseInterpretation" placeholder="Écrivez votre analyse de l'écart travail/vécu et vos recommandations..." style="width:100%;min-height:120px;padding:10px;border:1px solid #d4aaee;border-radius:6px;font-size:0.9em;font-family:inherit;"></textarea>
+                        </div>
+
+                        <div style="display:flex;gap:8px;justify-content:flex-end;">
+                            <button class="btn btn-secondary" onclick="document.getElementById('syntheseInterpretation').value=''">🔄 Réinitialiser</button>
+                            <button class="btn btn-success" onclick="saveSynthese()">💾 Enregistrer synthèse</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
             <div id="historique" class="tab-content">
                 <div class="section">
                     <h2>🔄 Historique des versions de prestations</h2>
