@@ -16636,17 +16636,16 @@
                     toast('❌ Document non trouvé dans IndexedDB', 'error');
                     return;
                 }
-                // Download instead of opening to avoid browser blocking
-                const blob = _dataURLtoBlob(doc.fileData);
-                const url = URL.createObjectURL(blob);
+                // Download directly from data URL
                 const a = document.createElement('a');
-                a.href = url;
+                a.href = doc.fileData; // Use data URL directly
                 a.download = fileName || 'document.pdf';
+                a.style.display = 'none';
                 document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                setTimeout(() => document.body.removeChild(a), 100);
                 console.log('[PDF] Téléchargé:', fileName);
+                toast(`✅ ${fileName} téléchargé`, 'success');
             } catch(err) {
                 console.error('[PDF] Erreur:', err);
                 toast('❌ Erreur lors du téléchargement du PDF', 'error');
