@@ -15567,9 +15567,10 @@
                         ${docs.map(doc => {
                             const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
                             const href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
-                            const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
-                            const targetAttr = doc.isFile ? '' : 'target="_blank"';
-                            return `<a href="${href}" ${targetAttr} ${downloadAttr} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
+                            const isPdf = doc.type === 'pdf' && doc.isFile;
+                            const downloadAttr = doc.isFile && doc.fileName && !isPdf ? `download="${escapeHtml(doc.fileName)}"` : '';
+                            const targetAttr = !doc.isFile || isPdf ? 'target="_blank"' : '';
+                            return `<a href="${href}" ${targetAttr} ${downloadAttr} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;">${ico} ${escapeHtml(doc.title)}${doc.isFile && !isPdf ? ' ⬇' : ''}</a>`;
                         }).join('')}
                     </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
                 </div>`;
@@ -15603,12 +15604,11 @@
                 ${docs.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">
                     ${docs.map(doc => {
                         const ico = doc.type==='pdf'?'📄':doc.type==='link'?'🔗':doc.type==='video'?'🎥':'📦';
-                        // Pour les fichiers locaux : utiliser fileData (base64) avec download
-                        // Pour les liens : utiliser l'URL avec target=_blank
                         const href = doc.isFile && doc.fileData ? doc.fileData : (doc.url || '#');
-                        const downloadAttr = doc.isFile && doc.fileName ? `download="${escapeHtml(doc.fileName)}"` : '';
-                        const targetAttr = doc.isFile ? '' : 'target="_blank"';
-                        return `<a href="${href}" ${targetAttr} ${downloadAttr} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;">${ico} ${escapeHtml(doc.title)}${doc.isFile ? ' ⬇' : ''}</a>`;
+                        const isPdf = doc.type === 'pdf' && doc.isFile;
+                        const downloadAttr = doc.isFile && doc.fileName && !isPdf ? `download="${escapeHtml(doc.fileName)}"` : '';
+                        const targetAttr = !doc.isFile || isPdf ? 'target="_blank"' : '';
+                        return `<a href="${href}" ${targetAttr} ${downloadAttr} style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:1px solid #a8d5e2;border-radius:6px;color:#2980b9;text-decoration:none;font-size:0.9em;font-weight:500;">${ico} ${escapeHtml(doc.title)}${doc.isFile && !isPdf ? ' ⬇' : ''}</a>`;
                     }).join('')}
                 </div>` : '<p style="color:#999;font-style:italic;font-size:0.85em;margin:0;">Aucun document assigné. Demandez à l\'admin de vous assigner des documents.</p>'}
             </div>`;
