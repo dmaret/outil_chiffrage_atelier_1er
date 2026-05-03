@@ -35835,8 +35835,9 @@ function validateAccompRessentisStep() {
         switchAccompRessentisStep(_ressentisSteps[currentIdx + 1]);
         toast('✓ Étape validée', 'success');
     } else {
-        // All steps completed
+        // All steps completed - save and move to analysis
         saveAccompRessentisData();
+        setTimeout(() => switchAccompSub('analyse'), 300);
     }
 }
 
