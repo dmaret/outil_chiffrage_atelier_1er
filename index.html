@@ -16761,44 +16761,6 @@
 
             toast(`✅ Document "${title}" ajouté avec succès!`, 'success');
             logAction(`Ajout document référence: ${title}`, 'CREATE');
-                reader.onerror = () => {
-                    toast(`❌ Erreur lors de la lecture du fichier : ${file.name}`, 'error');
-                    console.error('FileReader error for document:', file.name);
-                    hideLoading();
-                };
-                reader.onabort = () => {
-                    toast(`⚠️ Lecture du document annulée : ${file.name}`, 'warning');
-                    hideLoading();
-                };
-                reader.readAsDataURL(file);
-            } else {
-                // Handle URL - normalize it
-                let normalizedUrl = url;
-                // Add https:// if no protocol is specified
-                if (!url.match(/^https?:\/\//i)) {
-                    normalizedUrl = 'https://' + url;
-                }
-
-                const doc = {
-                    id: Date.now(),
-                    title: title,
-                    url: normalizedUrl,
-                    type: type,
-                    isFile: false,
-                    createdAt: new Date().toISOString().split('T')[0]
-                };
-
-                referenceDocuments.push(doc);
-                saveReferenceDocuments();
-                renderReferenceDocuments();
-
-                document.getElementById('docTitle').value = '';
-                document.getElementById('docUrl').value = '';
-                document.getElementById('docType').value = 'pdf';
-
-                toast(`✅ Document "${title}" ajouté avec succès!`, 'success');
-                logAction(`Ajout document référence: ${title} (URL)`, 'CREATE');
-            }
         }
 
         function saveReferenceDocuments() {
