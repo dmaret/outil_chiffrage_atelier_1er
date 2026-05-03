@@ -5363,7 +5363,7 @@
                 <!-- SECTIONS ADMIN -->
                 <div class="section admin-section" style="display:none; border-left: 4px solid #f39c12;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
-                        <h2 style="margin:0;">🔐 Accès par rôle <span style="background:#f39c12;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
+                        <h2 style="margin:0;flex:1;min-width:0;">🔐 Accès par rôle <span style="background:#f39c12;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
                         <button class="btn btn-small btn-success" onclick="openAddGroupModal()" style="white-space:nowrap;">➕ Nouveau groupe</button>
                     </div>
                     <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Cochez les onglets accessibles pour chaque groupe. Les modifications sont sauvegardées instantanément. Cliquez sur 🔑 pour (re)définir le mot de passe d'un groupe.</p>
@@ -5679,7 +5679,7 @@
 
                 <!-- ÉDITEUR DE LIENS FORMATION -->
                 <div class="section admin-section" style="display:none;border-left:4px solid #27ae60;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;min-width:0;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
                         <h2 style="margin:0;flex:1;min-width:0;">🔗 Liens des cartes de formation <span style="background:#27ae60;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
                         <button class="btn btn-small btn-secondary" onclick="_flinkResetAll()" title="Remettre tous les liens par défaut" style="flex-shrink:0;">↺ Réinitialiser</button>
                     </div>
@@ -5750,7 +5750,7 @@
 
                 <div class="section">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                        <h2 style="margin:0;">Liste consommables</h2>
+                        <h2 style="margin:0;flex:1;min-width:0;">Liste consommables</h2>
                         <div id="consomBulkBar" style="display:none;align-items:center;gap:8px;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:6px 14px;font-size:0.88em;">
                             <span id="consomSelCount" style="font-weight:700;color:#856404;"></span>
                             <button onclick="_consomDeleteSelected()" style="background:#e74c3c;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85em;">🗑 Supprimer</button>
@@ -5881,7 +5881,7 @@
                 </div>
                 <div class="section" id="clientDetailSection" style="display:none;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <h2 id="clientDetailNom" style="margin:0;"></h2>
+                        <h2 id="clientDetailNom" style="margin:0;flex:1;min-width:0;"></h2>
                         <div style="display:flex;gap:8px;align-items:center;">
                             <span id="clientDetailPdfBtn"></span>
                             <button class="btn btn-secondary btn-small" onclick="closeClientDetail()">✖ Fermer le détail</button>
@@ -6090,7 +6090,7 @@
             <div id="stats" class="tab-content">
                 <div class="section">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
-                        <h2 style="margin:0;">Vue d'ensemble</h2>
+                        <h2 style="margin:0;flex:1;min-width:0;">Vue d'ensemble</h2>
                         <div style="display:flex;gap:8px;">
                             <button class="btn btn-small" onclick="exportStatsCSV()" style="background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;" title="Exporter les statistiques en CSV">📥 Export CSV</button>
                             <button class="btn btn-small" onclick="exportStatsXLSX()" style="background:#edf5ff;border-color:#a8c8f0;color:#2980b9;" title="Exporter les statistiques en Excel">📊 Export Excel</button>
@@ -6833,14 +6833,16 @@
                         <div class="guide-block">
                             <h3 class="guide-block-title">✨ Quoi de neuf récemment</h3>
                             <ul style="line-height:1.7;font-size:0.95em;padding-left:20px;">
-                                <li><strong>v2.25</strong> · 📊 Version Complète &amp; Stable (tous les modules intégrés)</li>
-                                <li><strong>v2.24</strong> · 📑 Rapports &amp; Exports (Module H) · PDF générés dynamiquement</li>
-                                <li><strong>v2.23</strong> · 🏥 Dashboard clinique (Module G) · Suivi observations multidimensionnel</li>
-                                <li><strong>v2.22</strong> · 📈 Statistiques cliniques (Module F) · Analyse données avec Charts.js</li>
-                                <li><strong>v2.21</strong> · 💬 Débriefing post-prestation (Module E) · Questionnaires dynamiques</li>
-                                <li><strong>v2.20</strong> · 🧬 Glossaire clinique (Module D) · Terminologie standardisée</li>
+                                <li><strong>v2.8</strong> · 🌊 Vue Parcours dans Accompagnement (cartes flux)</li>
+                                <li><strong>v2.7</strong> · 📈 Stats d'approbation sur le dashboard (taux, délai, top approbateurs)</li>
+                                <li><strong>v2.6</strong> · 📦 Bulk actions sur prestations sélectionnées</li>
+                                <li><strong>v2.5</strong> · ⏳ Widget Dashboard « Approbations en attente » + filtre liste · 🎓 Carte Formation CEA &amp; stats configurables sur l'écran de connexion</li>
+                                <li><strong>v2.4</strong> · 🔐 Backup chiffré + 💾 Auto-backup + 🔔 Notifications + ✅ Workflow d'approbation</li>
+                                <li><strong>v2.3</strong> · 📊 Charts Chart.js sur dashboard · 🎨 Comparateur diff coloré · 👁️ Aperçu devis live · ⚡ Templates sectoriels</li>
+                                <li><strong>v2.2</strong> · ♿ ARIA + validation HTML5 + JSDoc + variables CSS</li>
+                                <li><strong>v2.1</strong> · 📅 Exclusion weekends Gantt · Devis PDF compact</li>
                             </ul>
-                            <p style="font-size:0.85em;color:var(--color-text-muted);margin-top:12px;">Détails complets dans les fichiers <code>releases/RELEASE_v2.x.md</code> du dépôt.</p>
+                            <p style="font-size:0.85em;color:var(--color-text-muted);margin-top:12px;">Détails complets dans les fichiers <code>RELEASE_v2.x.md</code> du dépôt.</p>
                         </div>
                     </div>
                 </div>
@@ -6862,7 +6864,7 @@
                 <div class="accomp-sub-panel" id="accomp-suivi">
                     <div class="section">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;">👤 Bénéficiaires en suivi</h2>
+                            <h2 style="margin:0;flex:1;min-width:0;">👤 Bénéficiaires en suivi</h2>
                             <button class="btn btn-success btn-small" onclick="openBeneficiaireModal()">➕ Nouveau bénéficiaire</button>
                         </div>
                         <div id="beneficiairesList"></div>
@@ -6906,7 +6908,7 @@
                 <div class="accomp-sub-panel" id="accomp-jalons" style="display:none;">
                     <div class="section">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;">🎯 Jalons d'accompagnement</h2>
+                            <h2 style="margin:0;flex:1;min-width:0;">🎯 Jalons d'accompagnement</h2>
                             <button class="btn btn-success btn-small" onclick="openJalonModal()">➕ Nouveau jalon</button>
                         </div>
                         <select id="jalonFilterBenef" onchange="renderJalons()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;margin-bottom:14px;">
@@ -6920,7 +6922,7 @@
                 <div class="accomp-sub-panel" id="accomp-parcours" style="display:none;">
                     <div class="section">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-                            <h2 style="margin:0;">🌊 Parcours d'accompagnement</h2>
+                            <h2 style="margin:0;flex:1;min-width:0;">🌊 Parcours d'accompagnement</h2>
                             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                                 <select id="parcoursBenefFilter" onchange="renderAccompagnementFlux()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;">
                                     <option value="">— Tous les bénéficiaires —</option>
@@ -6963,7 +6965,7 @@
                 <!-- 📊 NEW: Accompagnement Clinique (Observation-based) -->
                 <div class="section" style="background:linear-gradient(135deg,#f0f8ff,#e8f4f8);border-left:5px solid #2d5b8a;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-                        <h2 style="margin:0;color:#2d3a47;">📊 Accompagnement Clinique — Suivi du Vécu</h2>
+                        <h2 style="margin:0;color:#2d3a47;flex:1;min-width:0;">📊 Accompagnement Clinique — Suivi du Vécu</h2>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
                             <select id="accompCeaFilter" style="padding:8px 12px;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;font-size:0.9em;" onchange="filterAccompByCea(this.value)">
                                 <option value="">-- Tous les CEA --</option>
@@ -7036,7 +7038,7 @@
                 <!-- Matrice apprenance -->
                 <div class="section">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                        <h2 style="margin:0;">Matrice d'Apprenance & Autonomie</h2>
+                        <h2 style="margin:0;flex:1;min-width:0;">Matrice d'Apprenance & Autonomie</h2>
                         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                             <span id="matriceSaveStatus" style="font-size:0.78em;color:#8aacbc;"></span>
                             <button class="btn btn-small" onclick="ajouterLigneMatrice()">+ Ajouter</button>
@@ -7160,7 +7162,7 @@
                     <!-- Historique des analyses -->
                     <div id="analyseHistoriqueWrap" style="margin-top:22px;display:none;">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-                            <h3 style="margin:0;color:#6c3483;font-size:1em;">📔 Historique des analyses</h3>
+                            <h3 style="margin:0;color:#6c3483;font-size:1em;flex:1;min-width:0;">📔 Historique des analyses</h3>
                             <div style="display:flex;gap:8px;">
                                 <button class="btn btn-secondary btn-small" onclick="exportAnalyseHistoriqueCSV()">📤 Export CSV</button>
                                 <button class="btn btn-secondary btn-small" onclick="clearAnalyseHistorique()">🗑️ Effacer</button>
@@ -7190,7 +7192,7 @@
                 <!-- Référentiel théorique enrichi -->
                 <div class="section" id="referentielTheorique" style="background:#fef9e6;border-left-color:#c9b84a;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-                        <h2 style="color:#7a6208;margin:0;">📚 Référentiel Théorique</h2>
+                        <h2 style="color:#7a6208;margin:0;flex:1;min-width:0;">📚 Référentiel Théorique</h2>
                         <div style="display:flex;gap:8px;">
                             <button class="btn btn-secondary btn-small" onclick="toggleAllTheorie(true)">⬇️ Tout déplier</button>
                             <button class="btn btn-secondary btn-small" onclick="toggleAllTheorie(false)">⬆️ Tout replier</button>
@@ -9717,15 +9719,7 @@
         let selectedLearnerId = null;
         let formationProgress = {};
         let auditLog = [];
-        let referenceDocuments = (() => {
-            try {
-                const stored = localStorage.getItem('referenceDocuments');
-                if (stored) return JSON.parse(stored);
-                const backup = localStorage.getItem('referenceDocuments_backup');
-                if (backup) return JSON.parse(backup);
-            } catch(e) { console.warn('Error loading documents from storage:', e); }
-            return [];
-        })();
+        let referenceDocuments = [];
         let trainingRequests = []; // Demandes de formation en attente
         let _presentationMode = false;
         let _presentationConfig = (() => {
@@ -15136,8 +15130,6 @@
         function loadFormationData() {
             const saved = JSON.parse(localStorage.getItem('learnersList') || '[]');
             learnersList = saved;
-            const savedDocs = JSON.parse(localStorage.getItem('referenceDocuments') || '[]');
-            referenceDocuments = savedDocs;
             renderLearners();
         }
 
@@ -16714,16 +16706,14 @@
                     });
 
                     transaction.oncomplete = () => {
+                        console.log('Documents saved to IndexedDB');
+                        saveDocumentsToLocalStorage();
                         db.close();
-                        // Also save to localStorage as backup
-                        try {
-                            localStorage.setItem('referenceDocuments_backup', JSON.stringify(referenceDocuments));
-                        } catch(e) { console.warn('localStorage backup failed'); }
                     };
                     transaction.onerror = () => {
                         console.error('Transaction failed:', transaction.error);
-                        db.close();
                         saveDocumentsToLocalStorage();
+                        db.close();
                     };
                 };
 
@@ -16736,51 +16726,6 @@
             } catch(err) {
                 console.warn('IndexedDB error:', err);
                 saveDocumentsToLocalStorage();
-            }
-        }
-
-        function saveDocumentsToLocalStorage() {
-            try {
-                // Save complete documents except base64 fileData which is too large
-                const toSave = referenceDocuments.map(doc => ({
-                    id: doc.id,
-                    title: doc.title,
-                    fileName: doc.fileName,
-                    type: doc.type,
-                    url: doc.url,
-                    isFile: doc.isFile,
-                    // Don't save base64 fileData - it's too large
-                }));
-                localStorage.setItem('referenceDocuments', JSON.stringify(toSave));
-                console.log('Documents saved to localStorage');
-            } catch(e) {
-                if (e.name === 'QuotaExceededError') {
-                    console.error('localStorage full');
-                    toast('⚠️ Stockage plein - videz le cache du navigateur', 'warning');
-                } else {
-                    console.error('localStorage error:', e);
-                }
-            }
-        }
-
-        function loadReferenceDocumentsFromStorage() {
-            try {
-                // Try localStorage first
-                const stored = localStorage.getItem('referenceDocuments');
-                if (stored) {
-                    referenceDocuments = JSON.parse(stored);
-                    console.log('Documents chargés depuis localStorage');
-                    return;
-                }
-                // Try backup
-                const backup = localStorage.getItem('referenceDocuments_backup');
-                if (backup) {
-                    referenceDocuments = JSON.parse(backup);
-                    console.log('Documents chargés depuis backup localStorage');
-                    return;
-                }
-            } catch(e) {
-                console.warn('Erreur chargement localStorage:', e);
             }
         }
 
@@ -23124,20 +23069,26 @@
                     tab.style.display = 'none';
                 }
             });
-            // Masquer les séparateurs de groupes d'onglets (traits colorés)
-            document.querySelectorAll('.tabs-group-sep').forEach(sep => {
-                sep.style.display = 'none';
-            });
-            // Masquer la barre de sous-onglets (Accueil, Formation logistique)
-            const subTabs = document.querySelector('.tab-content.active .tab-content-breadcrumb');
-            if (subTabs) subTabs.style.display = 'none';
+            // Désactiver le lien "Accueil" dans le breadcrumb
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            if (breadcrumbs) {
+                const links = breadcrumbs.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.pointerEvents = 'none';
+                    link.style.color = '#999';
+                    link.style.cursor = 'not-allowed';
+                    link.style.opacity = '0.6';
+                    link.onclick = (e) => e.preventDefault();
+                });
+            }
 
-            // Ajouter bouton "Quitter la Formation" sous les icônes du header
-            if (!document.getElementById('formationExitBtn')) {
+            // Ajouter bouton "Quitter la Formation" en haut
+            const header = document.querySelector('.header');
+            if (header && !document.getElementById('formationExitBtn')) {
                 const btn = document.createElement('button');
                 btn.id = 'formationExitBtn';
-                btn.innerHTML = '🚪 Quitter';
-                btn.style.cssText = 'position:fixed;top:78px;right:180px;padding:8px 12px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.85em;cursor:pointer;z-index:1000;';
+                btn.innerHTML = '🚪 Quitter la Formation';
+                btn.style.cssText = 'position:fixed;top:78px;right:180px;padding:10px 16px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;z-index:1000;';
                 btn.onclick = exitFormationRestrictedMode;
                 document.body.appendChild(btn);
             }
@@ -23149,13 +23100,18 @@
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.style.display = '';
             });
-            // Réafficher les séparateurs de groupes
-            document.querySelectorAll('.tabs-group-sep').forEach(sep => {
-                sep.style.display = '';
-            });
-            // Réafficher les sous-onglets
-            const subTabs = document.querySelectorAll('.tab-content .tab-content-breadcrumb');
-            subTabs.forEach(s => s.style.display = '');
+            // Réactiver le lien "Accueil" dans le breadcrumb
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            if (breadcrumbs) {
+                const links = breadcrumbs.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.pointerEvents = '';
+                    link.style.color = '';
+                    link.style.cursor = '';
+                    link.style.opacity = '';
+                    link.onclick = function(e) { switchTab('dashboard'); };
+                });
+            }
 
             // Supprimer le bouton de sortie
             const btn = document.getElementById('formationExitBtn');
@@ -23175,8 +23131,17 @@
                 _formationRestrictedMode = false;
                 const formationExitBtn = document.getElementById('formationExitBtn');
                 if (formationExitBtn) formationExitBtn.remove();
-                // Show any hidden breadcrumbs
-                document.querySelectorAll('.tab-content-breadcrumb').forEach(b => b.style.display = '');
+                // Réactiver les liens du breadcrumb
+                const breadcrumbs = document.getElementById('breadcrumbs');
+                if (breadcrumbs) {
+                    const links = breadcrumbs.querySelectorAll('a');
+                    links.forEach(link => {
+                        link.style.pointerEvents = '';
+                        link.style.color = '';
+                        link.style.cursor = '';
+                        link.style.opacity = '';
+                    });
+                }
             }
             // Remove admin mode
             document.body.classList.remove('admin-mode');
@@ -31434,7 +31399,7 @@
 
             inner.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-                    <h3 style="margin:0;color:#e67e22;">🧠 Quiz Formation</h3>
+                    <h3 style="margin:0;color:#e67e22;flex:1;min-width:0;">🧠 Quiz Formation</h3>
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                         ${modeBadge}${domBadge}
                         <span title="Difficulté" style="font-size:0.82em;color:#999;letter-spacing:1px;">${diffDots}</span>
