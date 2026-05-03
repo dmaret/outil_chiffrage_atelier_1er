@@ -6995,7 +6995,7 @@
                     <div class="section">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
                             <h2 style="margin:0;flex:1;min-width:0;">🎯 Jalons et projets</h2>
-                            <button class="btn btn-success btn-small" onclick="openJalonModal()">➕ Nouveau jalon</button>
+                            <button class="btn btn-success btn-small" onclick="openJalonModal(null, _accompCurrentBenefId)">➕ Nouveau jalon</button>
                         </div>
                         <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Listez les jalons d'accompagnement et les prestations liées au bénéficiaire sélectionné.</p>
                         <select id="jalonFilterBenef" onchange="renderJalons()" style="padding:7px 12px;border-radius:8px;border:1px solid #dde3ea;font-size:0.9em;margin-bottom:14px;max-width:300px;">
