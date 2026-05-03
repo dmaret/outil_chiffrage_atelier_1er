@@ -16854,26 +16854,25 @@
                 return;
             }
 
-            // Normalize URL
+            // Normalize URL - accept filenames, paths, URLs
             let normalizedUrl = url;
             const hasProtocol = url.match(/^(https?|file|shortcut):\/\//i);
-            const isFileUrl = url.match(/^file:\/\//i);
-            const isShortcut = url.match(/^shortcut:\/\//i);
+            const isFilename = /\.[a-z0-9]{2,5}$/i.test(url);
+            const isPath = url.startsWith('/') || /^[a-z]:\\/i.test(url);
 
-            // If it's a shortcut or file URL, keep as-is
-            if (isShortcut || isFileUrl) {
+            // If it's already a URL with protocol, keep it
+            if (hasProtocol) {
                 normalizedUrl = url;
-            } else if (!hasProtocol) {
-                // Add https:// if no protocol
+            } else if (isFilename || isPath) {
+                // Filename or path - keep as-is
+                normalizedUrl = url;
+            } else {
+                // Add https:// for web URLs
                 normalizedUrl = 'https://' + url;
-            }
-
-            // Validate URL format (skip for shortcuts)
-            if (!isShortcut) {
                 try {
                     new URL(normalizedUrl);
                 } catch(e) {
-                    toast('❌ URL invalide. Veuillez entrer une URL valide (ex: https://drive.google.com/...) ou sélectionner un dossier via "Parcourir"', 'error');
+                    toast('❌ URL invalide. Veuillez entrer une URL valide ou sélectionner un fichier via "Parcourir"', 'error');
                     return;
                 }
             }
