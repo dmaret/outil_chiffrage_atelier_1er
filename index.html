@@ -16638,11 +16638,25 @@
         // Open PDF from IndexedDB when fileData is not in localStorage
         function openDocument(docId) {
             const doc = referenceDocuments.find(d => d.id === docId);
-            if (!doc || !doc.fileData) {
+            if (!doc) {
                 toast('❌ Document introuvable', 'error');
                 return;
             }
-            window.open(doc.fileData, '_blank');
+
+            if (doc.fileData) {
+                window.open(doc.fileData, '_blank');
+            } else {
+                getDocumentFromIndexedDB(docId).then(fullDoc => {
+                    if (!fullDoc || !fullDoc.fileData) {
+                        toast('❌ Données du document non disponibles', 'error');
+                        return;
+                    }
+                    window.open(fullDoc.fileData, '_blank');
+                }).catch(err => {
+                    console.error('IndexedDB error:', err);
+                    toast('❌ Erreur lors du chargement du document', 'error');
+                });
+            }
         }
 
         async function openDocumentFromIDB(docId, fileName) {
