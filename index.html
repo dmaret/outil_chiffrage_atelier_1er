@@ -7002,6 +7002,12 @@
                             <option value="">— Tous les bénéficiaires —</option>
                         </select>
                         <div id="jalonsList"></div>
+
+                        <!-- Action buttons -->
+                        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid #e8eef5;">
+                            <button class="btn btn-secondary" onclick="switchAccompSub('benef')">← Retour au bénéficiaire</button>
+                            <button class="btn btn-success" onclick="if(_accompCurrentBenefId) switchAccompSub('ressentis'); else toast('Sélectionnez un bénéficiaire', 'warning');">Continuer vers les ressentis →</button>
+                        </div>
                     </div>
                 </div>
 
