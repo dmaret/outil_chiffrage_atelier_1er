@@ -21356,12 +21356,15 @@
                 if (!('indexedDB' in window)) return Promise.reject(new Error('IndexedDB indisponible'));
                 if (this._dbPromise) return this._dbPromise;
                 return this._dbPromise = new Promise((resolve, reject) => {
-                    const req = indexedDB.open('atelier_db', 1);
+                    const req = indexedDB.open('atelier_db', 2);
                     req.onupgradeneeded = (e) => {
                         const db = e.target.result;
                         if (!db.objectStoreNames.contains('audit')) {
                             const st = db.createObjectStore('audit', { keyPath: 'id', autoIncrement: true });
                             st.createIndex('timestamp', 'timestamp');
+                        }
+                        if (!db.objectStoreNames.contains('customQuizzes')) {
+                            db.createObjectStore('customQuizzes', { keyPath: 'id' });
                         }
                     };
                     req.onsuccess = () => resolve(req.result);
