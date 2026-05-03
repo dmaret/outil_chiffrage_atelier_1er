@@ -5656,7 +5656,7 @@
 
                 <div class="section">
                     <h2>📚 Documents de référence</h2>
-                    <p style="color:#7a9db1;margin-bottom:12px;">Ajoutez des PDFs, liens ou autres documents pour la formation</p>
+                    <p style="color:#7a9db1;margin-bottom:12px;">Ajoutez des liens vers vos documents (PDFs, liens web, vidéos, etc.)</p>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Titre du document</label>
@@ -5674,12 +5674,8 @@
                     </div>
                     <div class="form-row" style="gap:12px;">
                         <div class="form-group" style="flex:1;">
-                            <label>URL ou lien (optionnel)</label>
-                            <input type="text" id="docUrl" placeholder="https://exemple.com/document.pdf">
-                        </div>
-                        <div class="form-group" style="flex:1;">
-                            <label>Ou charger un fichier local</label>
-                            <input type="file" id="docFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style="padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9em;">
+                            <label>URL du document</label>
+                            <input type="text" id="docUrl" placeholder="https://drive.google.com/... ou https://exemple.com/document.pdf">
                         </div>
                     </div>
                     <div style="text-align:right;">
@@ -16720,63 +16716,51 @@
         function addReferenceDocument() {
             const title = document.getElementById('docTitle')?.value.trim();
             const url = document.getElementById('docUrl')?.value.trim();
-            const fileInput = document.getElementById('docFile');
-            const file = fileInput?.files?.[0];
             const type = document.getElementById('docType')?.value || 'other';
 
             if (!title) {
                 toast('⚠️ Merci de remplir le titre du document', 'warning');
                 return;
             }
-            if (!url && !file) {
-                toast('⚠️ Veuillez entrer une URL ou charger un fichier', 'warning');
+            if (!url) {
+                toast('⚠️ Veuillez entrer une URL valide', 'warning');
                 return;
             }
 
-            if (file) {
-                // Check file size (limit to 50 MB for IndexedDB)
-                const maxSize = 50 * 1024 * 1024; // 50 MB
-                if (file.size > maxSize) {
-                    toast(`❌ Fichier trop volumineux: ${(file.size / 1024 / 1024).toFixed(2)} MB (max: 50 MB)`, 'error');
-                    return;
-                }
+            // Normalize URL - add https:// if no protocol
+            let normalizedUrl = url;
+            if (!url.match(/^https?:\/\//i)) {
+                normalizedUrl = 'https://' + url;
+            }
 
-                // Handle file upload
-                showLoading(`Chargement du document "${title}"...`);
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const fileData = e.target.result;
-                        const fileName = file.name;
+            // Validate URL format
+            try {
+                new URL(normalizedUrl);
+            } catch(e) {
+                toast('❌ URL invalide. Veuillez entrer une URL valide (ex: https://drive.google.com/...)', 'error');
+                return;
+            }
 
-                        const doc = {
-                            id: Date.now(),
-                            title: title,
-                            fileData: fileData,
-                            fileName: fileName,
-                            type: type,
-                            isFile: true,
-                            createdAt: new Date().toISOString().split('T')[0]
-                        };
+            // Create document with URL only
+            const doc = {
+                id: Date.now(),
+                title: title,
+                url: normalizedUrl,
+                type: type,
+                isFile: false,
+                createdAt: new Date().toISOString().split('T')[0]
+            };
 
-                        referenceDocuments.push(doc);
-                        saveReferenceDocuments();
-                        renderReferenceDocuments();
+            referenceDocuments.push(doc);
+            saveReferenceDocuments();
+            renderReferenceDocuments();
 
-                        document.getElementById('docTitle').value = '';
-                        document.getElementById('docUrl').value = '';
-                        document.getElementById('docType').value = 'pdf';
-                        fileInput.value = '';
+            document.getElementById('docTitle').value = '';
+            document.getElementById('docUrl').value = '';
+            document.getElementById('docType').value = 'pdf';
 
-                        toast(`✅ Document "${title}" (${fileName}) ajouté avec succès!`, 'success');
-                        logAction(`Ajout document référence: ${title} (fichier: ${fileName})`, 'CREATE');
-                    } catch(err) {
-                        toast(`Erreur lors du traitement du document: ${err.message}`, 'error');
-                        console.error('Error processing document:', err);
-                    } finally {
-                        hideLoading();
-                    }
-                };
+            toast(`✅ Document "${title}" ajouté avec succès!`, 'success');
+            logAction(`Ajout document référence: ${title}`, 'CREATE');
                 reader.onerror = () => {
                     toast(`❌ Erreur lors de la lecture du fichier : ${file.name}`, 'error');
                     console.error('FileReader error for document:', file.name);
