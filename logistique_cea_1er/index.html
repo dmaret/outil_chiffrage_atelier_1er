@@ -699,9 +699,75 @@
         if (currentGestureIndex < gestes.length - 1) {
             currentGestureIndex++;
             renderGestureList(order);
-        } else {
-            closeOrderModal();
+        } else if (currentGestureIndex === gestes.length - 1) {
+            showFinishConfirmation(order.id);
         }
+    }
+
+    function showFinishConfirmation(prestationId) {
+        let confirmModal = document.getElementById('finishConfirmModal');
+        if (!confirmModal) {
+            confirmModal = document.createElement('div');
+            confirmModal.id = 'finishConfirmModal';
+            confirmModal.className = 'modal';
+            document.body.appendChild(confirmModal);
+        }
+
+        confirmModal.innerHTML = `
+            <div class="modal-content" style="max-width: 400px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
+                <div class="modal-title" style="font-size: 24px; margin-bottom: 15px;">Avez-vous fini cette commande?</div>
+                <div style="color: #666; margin-bottom: 30px; font-size: 16px;">Tous les gestes ont été complétés. Confirme-tu?</div>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="finishOrder(${prestationId})"
+                        style="flex: 1; padding: 16px; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer;">
+                        ✅ Oui, c'est fini
+                    </button>
+                    <button onclick="cancelFinish()"
+                        style="flex: 1; padding: 16px; background: #f0f0f0; color: #333; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer;">
+                        ❌ Annuler
+                    </button>
+                </div>
+            </div>
+        `;
+
+        confirmModal.classList.add('active');
+    }
+
+    function finishOrder(prestationId) {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+        const idx = prestations.findIndex(p => String(p.id) === String(prestationId));
+
+        if (idx >= 0) {
+            prestations[idx].statut = 'terminee';
+            prestations[idx].dateTerminaison = new Date().toISOString();
+            prestations[idx].realisePar = currentCEA;
+            localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestations));
+        }
+
+        closeFinishConfirmation();
+        returnToDashboard();
+
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+        notif.textContent = '✅ Commande terminée!';
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
+
+    function cancelFinish() {
+        closeFinishConfirmation();
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+        const activeOrders = prestations.filter(p => p.statut === 'accepte' || p.statut === 'en-cours');
+        const order = activeOrders[currentOrderIndex];
+        if (order) renderGestureList(order);
+    }
+
+    function closeFinishConfirmation() {
+        const modal = document.getElementById('finishConfirmModal');
+        if (modal) modal.classList.remove('active');
     }
 
     function closeOrderModal() {
