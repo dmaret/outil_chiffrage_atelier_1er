@@ -714,6 +714,7 @@
 
     let stockData = null;
     let draggedPalette = null;
+    let currentTransferPalette = null;
 
     function loadStocks() {
         // Load stock data from main app (localStorage)
@@ -816,6 +817,137 @@
         draggedPalette = null;
         renderFloorMap();
         renderMovementsTimeline();
+    }
+
+    function showTransferModal(paletteRef, paletteEmplacement) {
+        currentTransferPalette = { ref: paletteRef, from: paletteEmplacement };
+
+        // Récupérer tous les emplacements disponibles
+        const emplacementsStr = localStorage.getItem('configEmplacements');
+        const emplacements = emplacementsStr ? JSON.parse(emplacementsStr) : [];
+        const emplacementNames = emplacements.map(e => typeof e === 'string' ? e : (e.nom || e.label || String(e)));
+
+        // Créer la modale de transfert
+        let transferModal = document.getElementById('transferModal');
+        if (!transferModal) {
+            transferModal = document.createElement('div');
+            transferModal.id = 'transferModal';
+            transferModal.className = 'modal';
+            document.body.appendChild(transferModal);
+        }
+
+        transferModal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <div>
+                        <div class="modal-title">📦 Transférer une palette</div>
+                        <div class="modal-subtitle">De: ${paletteEmplacement} → Vers: ?</div>
+                    </div>
+                    <button class="close-btn" onclick="closeTransferModal()">✕</button>
+                </div>
+                <div style="padding: 20px;">
+                    <div style="font-weight: 600; color: #333; margin-bottom: 12px;">Référence: <span style="color: #667eea; font-size: 18px;">${paletteRef}</span></div>
+                    <div style="margin-bottom: 20px; padding: 12px; background: #f0f0f0; border-radius: 8px; font-size: 14px; color: #666;">
+                        Sélectionne l'emplacement de destination:
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        ${emplacementNames.filter(e => e !== paletteEmplacement).map(emplacement => `
+                            <button onclick="executeTransfer('${paletteRef}', '${paletteEmplacement}', '${emplacement}')"
+                                style="padding: 16px; background: white; border: 2px solid #667eea; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; color: #667eea; transition: all 0.2s;"
+                                onmouseover="this.style.background='#f0f5ff'"
+                                onmouseout="this.style.background='white'">
+                                ➡️ Vers ${emplacement}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button onclick="closeTransferModal()"
+                        style="width: 100%; padding: 14px; background: #f0f0f0; border: none; border-radius: 10px; margin-top: 20px; cursor: pointer; font-size: 14px; font-weight: 600; color: #666;">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        `;
+
+        transferModal.classList.add('active');
+    }
+
+    function executeTransfer(paletteRef, from, to) {
+        // Enregistrer le mouvement
+        const stockStr = localStorage.getItem('stockData');
+        let stockData = stockStr ? JSON.parse(stockStr) : { mouvements: [], stockActuel: {} };
+
+        if (!stockData.mouvements) stockData.mouvements = [];
+
+        const now = new Date().toISOString();
+        stockData.mouvements.push({
+            id: Date.now(),
+            type: 'transfert',
+            ref: paletteRef,
+            date: now,
+            qte: 1,
+            unite: 'palette',
+            emplacement: from,
+            destEmplacement: to
+        });
+
+        // Recalculer le stockActuel
+        stockData.stockActuel = {};
+        stockData.mouvements.forEach(m => {
+            if (m.type === 'entrée') {
+                if (!stockData.stockActuel[m.ref]) {
+                    stockData.stockActuel[m.ref] = { lots: [], total: 0 };
+                }
+                stockData.stockActuel[m.ref].lots.push({
+                    date: m.date,
+                    qte: m.qte,
+                    prix: m.prix,
+                    emplacement: m.emplacement
+                });
+                stockData.stockActuel[m.ref].total += m.qte;
+            } else if (m.type === 'sortie' && stockData.stockActuel[m.ref]) {
+                let reste = m.qte;
+                while (reste > 0 && stockData.stockActuel[m.ref].lots.length > 0) {
+                    const lot = stockData.stockActuel[m.ref].lots[0];
+                    if (lot.qte <= reste) {
+                        reste -= lot.qte;
+                        stockData.stockActuel[m.ref].lots.shift();
+                    } else {
+                        lot.qte -= reste;
+                        reste = 0;
+                    }
+                }
+                stockData.stockActuel[m.ref].total -= m.qte;
+                if (stockData.stockActuel[m.ref].total <= 0) delete stockData.stockActuel[m.ref];
+            } else if (m.type === 'transfert' && stockData.stockActuel[m.ref]) {
+                const lotsToMove = [];
+                for (const lot of stockData.stockActuel[m.ref].lots) {
+                    if (lot.emplacement === m.emplacement) {
+                        lotsToMove.push({...lot, emplacement: m.destEmplacement});
+                        lot.qte = 0;
+                    }
+                }
+                stockData.stockActuel[m.ref].lots = stockData.stockActuel[m.ref].lots.filter(l => l.qte > 0);
+                lotsToMove.forEach(l => stockData.stockActuel[m.ref].lots.push(l));
+                stockData.stockActuel[m.ref].lots.sort((a, b) => new Date(a.date) - new Date(b.date));
+            }
+        });
+
+        localStorage.setItem('stockData', JSON.stringify(stockData));
+        closeTransferModal();
+        loadStocks();
+
+        // Notification
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+        notif.textContent = `✅ Palette transférée de ${from} vers ${to}!`;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
+
+    function closeTransferModal() {
+        const modal = document.getElementById('transferModal');
+        if (modal) modal.classList.remove('active');
+        currentTransferPalette = null;
     }
 
     function showPaletteInfo(event, paletteId) {
