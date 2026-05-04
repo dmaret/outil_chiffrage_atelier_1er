@@ -3043,7 +3043,7 @@
             font-size: 28px;
             border: 3px solid white;
             cursor: pointer;
-            z-index: 4500;
+            z-index: 9501;
             animation: clin-fab-pulse 2.4s ease-in-out infinite;
             transition: transform 0.18s;
         }
@@ -5016,14 +5016,15 @@
                     </div>
                 </div>
 
+                <div id="sectionCostAndValorisation" style="display:contents;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:0;">
+                    <h4 style="margin:0;flex:1;">Décomposition & Valorisation</h4>
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="moveSectionUp('sectionCostAndValorisation')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:2px 6px;cursor:pointer;color:#6b8fa3;font-size:1em;">↑</button>
+                        <button onclick="moveSectionDown('sectionCostAndValorisation')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:2px 6px;cursor:pointer;color:#6b8fa3;font-size:1em;">↓</button>
+                    </div>
+                </div>
                 <div class="cost-breakdown" id="sectionCostBreakdown">
-                    <h4 style="display:flex;justify-content:space-between;align-items:center;margin:0;">
-                        <span>Décomposition des coûts</span>
-                        <div style="display:flex;gap:6px;">
-                            <button onclick="moveSectionUp('sectionCostBreakdown')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:2px 6px;cursor:pointer;color:#6b8fa3;font-size:1em;">↑</button>
-                            <button onclick="moveSectionDown('sectionCostBreakdown')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:2px 6px;cursor:pointer;color:#6b8fa3;font-size:1em;">↓</button>
-                        </div>
-                    </h4>
                     <div class="cost-line">
                         <span>Main d'œuvre CEA</span>
                         <span id="coutMO">0.00 CHF</span>
@@ -5052,7 +5053,6 @@
 
                 <div id="calcBadges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
                 <div class="total-box">
-                    <h3>Valorisation financière</h3>
                     <div class="total-grid">
                         <div class="total-item" title="Temps total = Σ(temps geste × coef × quantité) + temps fixes. Utilisé comme base pour la facturation horaire et la charge atelier.">
                             <div class="label">Temps total ⓘ</div>
@@ -5101,6 +5101,7 @@
                         </div>
                         <div id="variantesPrix" style="margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:0.82em;"></div>
                     </div>
+                </div>
                 </div>
 
                 <div class="section" style="border-left-color:#c9b3d4;">
