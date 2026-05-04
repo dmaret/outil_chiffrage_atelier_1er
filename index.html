@@ -3043,7 +3043,7 @@
             font-size: 28px;
             border: 3px solid white;
             cursor: pointer;
-            z-index: 4500;
+            z-index: 9501;
             animation: clin-fab-pulse 2.4s ease-in-out infinite;
             transition: transform 0.18s;
         }
@@ -4809,30 +4809,6 @@
             <!-- ONGLET CALCULATEUR -->
             <div id="calculateur" class="tab-content">
                 <div class="presentation-banner">🖥️ MODE PRÉSENTATION CLIENT — Coûts internes masqués</div>
-                <div class="section" style="border-left-color:#c9b3d4;">
-                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
-                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
-                            <option value="">— Sélectionner un modèle —</option>
-                        </select>
-                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
-                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
-                        <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
-                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
-                    </div>
-                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
-                </div>
-
-                <!-- Templates sectoriels (v2.3) -->
-                <div class="section" style="padding-top:12px;padding-bottom:12px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
-                        <div>
-                            <h3 style="margin:0 0 4px 0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
-                            <small style="color:#7a9db1;display:block;font-size:0.85em;">Cliquez sur un template pour pré-remplir la prestation</small>
-                        </div>
-                    </div>
-                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
-                </div>
 
                 <div class="section">
                     <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
@@ -5017,16 +4993,14 @@
                 </div>
 
                 <div id="sectionCostAndValorisation" style="display:contents;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:0 18px;">
-                    <h3 style="margin:0;color:#6b8fa3;font-size:1.1em;">Décomposition & Valorisation</h3>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:0;">
+                    <h4 style="margin:0;flex:1;">Décomposition & Valorisation</h4>
                     <div style="display:flex;gap:6px;">
-                        <button onclick="moveSectionUp('sectionCostAndValorisation')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:4px 8px;cursor:pointer;color:#6b8fa3;font-size:1.1em;">↑</button>
-                        <button onclick="moveSectionDown('sectionCostAndValorisation')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:4px 8px;cursor:pointer;color:#6b8fa3;font-size:1.1em;">↓</button>
+                        <button onclick="moveSectionUp('sectionCostAndValorisation')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:2px 6px;cursor:pointer;color:#6b8fa3;font-size:1em;">↑</button>
+                        <button onclick="moveSectionDown('sectionCostAndValorisation')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:2px 6px;cursor:pointer;color:#6b8fa3;font-size:1em;">↓</button>
                     </div>
                 </div>
-
-                <div class="cost-breakdown">
-                    <h4 style="margin:0;padding-bottom:10px;border-bottom:1px solid #a8d5e2;">Décomposition des coûts</h4>
+                <div class="cost-breakdown" id="sectionCostBreakdown">
                     <div class="cost-line">
                         <span>Main d'œuvre CEA</span>
                         <span id="coutMO">0.00 CHF</span>
@@ -5055,7 +5029,6 @@
 
                 <div id="calcBadges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
                 <div class="total-box">
-                    <h3>Valorisation financière</h3>
                     <div class="total-grid">
                         <div class="total-item" title="Temps total = Σ(temps geste × coef × quantité) + temps fixes. Utilisé comme base pour la facturation horaire et la charge atelier.">
                             <div class="label">Temps total ⓘ</div>
@@ -5126,6 +5099,32 @@
                     <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
                     <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis… <span class="kbd" data-kbd="p">Ctrl+P</span></button>
+                </div>
+
+                <!-- Modèles de prestation (moved to bottom) -->
+                <div class="section" style="border-left-color:#c9b3d4;margin-top:30px;">
+                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
+                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
+                            <option value="">— Sélectionner un modèle —</option>
+                        </select>
+                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
+                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
+                        <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
+                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
+                    </div>
+                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                </div>
+
+                <!-- Templates sectoriels (v2.3) -->
+                <div class="section" style="padding-top:12px;padding-bottom:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+                        <div>
+                            <h3 style="margin:0 0 4px 0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
+                            <small style="color:#7a9db1;display:block;font-size:0.85em;">Cliquez sur un template pour pré-remplir la prestation</small>
+                        </div>
+                    </div>
+                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
                 </div>
             </div>
 
