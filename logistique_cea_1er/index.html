@@ -1071,6 +1071,12 @@
             currentCEA = savedCEA;
             showApp();
             loadDashboard();
+        } else {
+            // Auto-login as 'cea' for testing, or show login screen
+            currentCEA = 'cea';
+            localStorage.setItem('currentCEA', 'cea');
+            showApp();
+            loadDashboard();
         }
     });
 </script>
