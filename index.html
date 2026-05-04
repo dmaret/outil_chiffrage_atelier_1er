@@ -5052,12 +5052,13 @@
                     </div>
                 </div>
 
-                <div class="cost-breakdown" id="sectionCostBreakdown">
+                <div id="sectionCostAndValorisation">
+                <div class="cost-breakdown">
                     <h4 style="display:flex;justify-content:space-between;align-items:center;">
                         <span>Décomposition des coûts</span>
                         <div style="display:flex;gap:6px;">
-                            <button onclick="moveSectionUp('sectionCostBreakdown')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
-                            <button onclick="moveSectionDown('sectionCostBreakdown')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                            <button onclick="moveSectionUp('sectionCostAndValorisation')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionCostAndValorisation')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
                         </div>
                     </h4>
                     <div class="cost-line">
@@ -5087,14 +5088,8 @@
                 </div>
 
                 <div id="calcBadges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
-                <div class="total-box" id="sectionValorisationFinanciere">
-                    <h3 style="display:flex;justify-content:space-between;align-items:center;">
-                        <span>Valorisation financière</span>
-                        <div style="display:flex;gap:6px;">
-                            <button onclick="moveSectionUp('sectionValorisationFinanciere')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
-                            <button onclick="moveSectionDown('sectionValorisationFinanciere')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
-                        </div>
-                    </h3>
+                <div class="total-box">
+                    <h3>Valorisation financière</h3>
                     <div class="total-grid">
                         <div class="total-item" title="Temps total = Σ(temps geste × coef × quantité) + temps fixes. Utilisé comme base pour la facturation horaire et la charge atelier.">
                             <div class="label">Temps total ⓘ</div>
@@ -5143,6 +5138,7 @@
                         </div>
                         <div id="variantesPrix" style="margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:0.82em;"></div>
                     </div>
+                </div>
                 </div>
 
                 <div class="section" id="sectionNotesInternes" style="border-left-color:#c9b3d4;">
@@ -13316,8 +13312,8 @@
             const calc = document.querySelector('#calculateur');
             if (!calc) return;
             const sections = [];
-            calc.querySelectorAll('[id^="section"], .cost-breakdown, .total-box').forEach(el => {
-                if (el.id) sections.push(el.id);
+            calc.querySelectorAll('[id^="section"]').forEach(el => {
+                if (el.id && el.parentNode === calc) sections.push(el.id);
             });
             const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
             sectionOrders['Calculateur'] = sections;
@@ -13329,7 +13325,7 @@
             if (!calc) return;
             const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
             const savedSections = sectionOrders['Calculateur'];
-            if (!savedSections) return;
+            if (!savedSections || savedSections.length === 0) return;
             savedSections.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && el.parentNode === calc) calc.appendChild(el);
