@@ -4809,30 +4809,6 @@
             <!-- ONGLET CALCULATEUR -->
             <div id="calculateur" class="tab-content">
                 <div class="presentation-banner">🖥️ MODE PRÉSENTATION CLIENT — Coûts internes masqués</div>
-                <div class="section" style="border-left-color:#c9b3d4;">
-                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
-                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
-                            <option value="">— Sélectionner un modèle —</option>
-                        </select>
-                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
-                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
-                        <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
-                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
-                    </div>
-                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
-                </div>
-
-                <!-- Templates sectoriels (v2.3) -->
-                <div class="section" style="padding-top:12px;padding-bottom:12px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
-                        <div>
-                            <h3 style="margin:0 0 4px 0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
-                            <small style="color:#7a9db1;display:block;font-size:0.85em;">Cliquez sur un template pour pré-remplir la prestation</small>
-                        </div>
-                    </div>
-                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
-                </div>
 
                 <div class="section">
                     <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
@@ -5123,6 +5099,32 @@
                     <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
                     <button class="btn" onclick="window.print()">📄 Imprimer</button>
                     <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis… <span class="kbd" data-kbd="p">Ctrl+P</span></button>
+                </div>
+
+                <!-- Modèles de prestation (moved to bottom) -->
+                <div class="section" style="border-left-color:#c9b3d4;margin-top:30px;">
+                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
+                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
+                            <option value="">— Sélectionner un modèle —</option>
+                        </select>
+                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
+                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
+                        <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
+                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
+                    </div>
+                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                </div>
+
+                <!-- Templates sectoriels (v2.3) -->
+                <div class="section" style="padding-top:12px;padding-bottom:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+                        <div>
+                            <h3 style="margin:0 0 4px 0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
+                            <small style="color:#7a9db1;display:block;font-size:0.85em;">Cliquez sur un template pour pré-remplir la prestation</small>
+                        </div>
+                    </div>
+                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
                 </div>
             </div>
 
