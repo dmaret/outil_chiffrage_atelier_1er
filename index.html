@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Security: Content Security Policy for XSS protection -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:;">
     <title>Outil Complet Atelier - La Pallanterie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3905,7 +3905,8 @@
         <div id="pinModalBox">
             <h2 id="pinModalTitle">🔐 Accès protégé</h2>
             <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Code PIN pour déverrouiller l'application<br><small style="font-size:0.85em;color:#a8c5d3;">(Optionnel • Configurable en admin)</small></p>
-            <input type="password" id="pinInput" placeholder="PIN" maxlength="8" aria-label="Code PIN" onkeydown="if(event.key==='Enter') checkPin()">
+            <input type="hidden" autocomplete="username" value="pin">
+            <input type="password" id="pinInput" placeholder="PIN" maxlength="8" aria-label="Code PIN" autocomplete="current-password" onkeydown="if(event.key==='Enter') checkPin()">
             <div id="pinError"></div>
             <button class="btn btn-success" onclick="checkPin()" style="width:100%;margin-top:4px;">✓ Confirmer</button>
         </div>
@@ -8840,8 +8841,9 @@
 
         function renderAccompCards(grouped) {
             const container = document.getElementById('accompCeaContainer');
-            const ceaFilter = document.getElementById('accompCeaFilter').value;
-            const prestationFilter = document.getElementById('accompPrestationFilter').value;
+            if (!container) return;
+            const ceaFilter = document.getElementById('accompCeaFilter')?.value || '';
+            const prestationFilter = document.getElementById('accompPrestationFilter')?.value || '';
 
             if (Object.keys(grouped).length === 0) {
                 container.innerHTML = '<div style="grid-column:1/-1;padding:20px;background:white;border-radius:8px;text-align:center;color:#8aacbc;">📭 Aucune observation pour l\'instant</div>';
