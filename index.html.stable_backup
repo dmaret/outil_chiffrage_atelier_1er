@@ -278,7 +278,7 @@
         
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -4807,7 +4807,7 @@
         <div class="content">
             <div id="alertBanner" style="display:none;"></div>
             <!-- ONGLET CALCULATEUR -->
-            <div id="calculateur" class="tab-content" style="display:flex;flex-direction:column;">
+            <div id="calculateur" class="tab-content">
                 <div class="presentation-banner">🖥️ MODE PRÉSENTATION CLIENT — Coûts internes masqués</div>
 
                 <div class="section">
@@ -12793,89 +12793,6 @@
 
         // ════════════════════════════════════════════════════════
 
-        function reorganizeCalculatorSections() {
-            const calc = document.getElementById('calculateur');
-            if (!calc) return;
-
-            // Nouvel ordre demandé - mappé sur les sections
-            const sectionOrder = [
-                {
-                    id: 'modeles',
-                    name: 'Modèles de prestation',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Modèles de prestation')
-                },
-                {
-                    id: 'infos',
-                    name: 'Informations prestation',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent === 'Informations prestation'
-                },
-                {
-                    id: 'templates',
-                    name: 'Templates sectoriels',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h3')?.textContent.includes('Templates sectoriels')
-                },
-                {
-                    id: 'gestes',
-                    name: 'Gestes de production',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Gestes de production')
-                },
-                {
-                    id: 'temps',
-                    name: 'Temps administratif',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Temps administratif')
-                },
-                {
-                    id: 'stockage',
-                    name: 'Stockage',
-                    selector: (el) => el.id === 'sectionStockage' || (el.classList.contains('section') && el.querySelector('h2')?.textContent === 'Stockage')
-                },
-                {
-                    id: 'consommables',
-                    name: 'Consommables',
-                    selector: (el) => el.id === 'sectionConsommables' || (el.classList.contains('section') && el.querySelector('h2')?.textContent === 'Consommables')
-                },
-                {
-                    id: 'decomposition',
-                    name: 'Décomposition & Valorisation',
-                    selector: (el) => el.id === 'sectionCostAndValorisation' || el.querySelector('h4')?.textContent.includes('Décomposition')
-                },
-                {
-                    id: 'notes',
-                    name: 'Notes internes',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Notes interne')
-                },
-                {
-                    id: 'photos',
-                    name: 'Photos & Vidéos',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Photos')
-                },
-                {
-                    id: 'buttons',
-                    name: 'Buttons',
-                    selector: (el) => el.style.marginTop === '25px' && el.textContent.includes('Nouveau')
-                }
-            ];
-
-            // Récupérer toutes les sections du calculateur
-            const allElements = Array.from(calc.children);
-
-            // Créer une map de sections trouvées
-            const foundSections = {};
-            sectionOrder.forEach(spec => {
-                const found = allElements.find(spec.selector);
-                if (found) {
-                    foundSections[spec.id] = found;
-                }
-            });
-
-            // Réorganiser en ajoutant chaque section dans l'ordre désiré
-            sectionOrder.forEach(spec => {
-                if (foundSections[spec.id]) {
-                    calc.appendChild(foundSections[spec.id]);
-                }
-            });
-        }
-
         function switchTab(tabName, skipConfirm = false) {
             // Ignore le clic si on vient de terminer un drag d'onglet
             if (_tabDragJustEnded) return;
@@ -12927,9 +12844,6 @@
 
             // Restore section order and initialize drag-and-drop for sections in admin mode
             setTimeout(() => {
-                if (tabName === 'calculateur') {
-                    reorganizeCalculatorSections(); // Appliquer l'ordre standard du calculateur
-                }
                 applySectionOrder();
                 initSectionDragAndDrop();
             }, 100);
