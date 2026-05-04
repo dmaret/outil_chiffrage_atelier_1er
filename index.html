@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outil Complet Atelier - La Pallanterie</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;height:100vh;">
+    <div style="text-align:center;color:#666;">
+        <h2>Chargement de l'application...</h2>
+        <p>Redirection en cours...</p>
+    </div>
+    <script>
+        // Charger l'application depuis src/index.html
+        fetch('src/index.html')
+            .then(r => r.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(err => {
+                document.body.innerHTML = `
+                    <div style="text-align:center;padding:40px;color:#c0392b;">
+                        <h2>⚠️ Erreur de chargement</h2>
+                        <p>Impossible de charger l'application.</p>
+                        <p><a href="src/index.html" style="color:#4e9af1;text-decoration:none;font-weight:600;">Cliquez ici pour accéder à l'app →</a></p>
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html>
