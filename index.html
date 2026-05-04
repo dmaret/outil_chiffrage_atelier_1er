@@ -5016,8 +5016,14 @@
                     </div>
                 </div>
 
-                <div class="cost-breakdown">
-                    <h4>Décomposition des coûts</h4>
+                <div class="cost-breakdown" id="sectionCostBreakdown">
+                    <h4 style="display:flex;justify-content:space-between;align-items:center;margin:0;">
+                        <span>Décomposition des coûts</span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionCostBreakdown')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:2px 6px;cursor:pointer;color:#6b8fa3;font-size:1em;">↑</button>
+                            <button onclick="moveSectionDown('sectionCostBreakdown')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:2px 6px;cursor:pointer;color:#6b8fa3;font-size:1em;">↓</button>
+                        </div>
+                    </h4>
                     <div class="cost-line">
                         <span>Main d'œuvre CEA</span>
                         <span id="coutMO">0.00 CHF</span>
@@ -13221,6 +13227,22 @@
             if (btn)  { btn.textContent = mspActif ? 'ON' : 'OFF'; btn.classList.toggle('off', !mspActif); }
             if (line) line.classList.toggle('msp-off', !mspActif);
             calculateTotal();
+        }
+
+        function moveSectionUp(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            let prev = el.previousElementSibling;
+            while (prev && prev.style.display === 'none') prev = prev.previousElementSibling;
+            if (prev) el.parentNode.insertBefore(el, prev);
+        }
+
+        function moveSectionDown(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            let next = el.nextElementSibling;
+            while (next && next.style.display === 'none') next = next.nextElementSibling;
+            if (next) el.parentNode.insertBefore(next, el);
         }
 
         // ── Fonctions Thème ─────────────────────────────────────────
