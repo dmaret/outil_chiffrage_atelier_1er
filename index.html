@@ -4809,8 +4809,14 @@
             <!-- ONGLET CALCULATEUR -->
             <div id="calculateur" class="tab-content">
                 <div class="presentation-banner">🖥️ MODE PRÉSENTATION CLIENT — Coûts internes masqués</div>
-                <div class="section" style="border-left-color:#c9b3d4;">
-                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
+                <div class="section" id="sectionModeles" style="border-left-color:#c9b3d4;">
+                    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionModeles')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionModeles')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h2>
                     <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                         <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
                             <option value="">— Sélectionner un modèle —</option>
@@ -4834,8 +4840,14 @@
                     <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
                 </div>
 
-                <div class="section">
-                    <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
+                <div class="section" id="sectionGestes">
+                    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionGestes')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionGestes')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h2>
                     <div class="bundles-bar" id="bundlesBar">
                         <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
                         <!-- rendered by renderBundleButtons() on load -->
@@ -4859,7 +4871,13 @@
                 </div>
 
                 <div class="section" id="sectionInfoPrestation">
-                    <h2>Informations prestation</h2>
+                    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>Informations prestation</span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionInfoPrestation')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionInfoPrestation')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h2>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Client</label>
@@ -4977,19 +4995,37 @@
                     </div>
                 </div>
                 <div class="section" id="sectionConsommables">
-                    <h2>Consommables</h2>
+                    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>Consommables</span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionConsommables')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionConsommables')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h2>
                     <div id="consommablesContainer"></div>
                     <button class="btn" onclick="addConsommableLine()">+ Ajouter consommable</button>
                 </div>
 
                 <div class="section" id="sectionStockage">
-                    <h2>Stockage</h2>
+                    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>Stockage</span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionStockage')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionStockage')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h2>
                     <div id="stockageContainer"></div>
                     <button class="btn" onclick="addStockageLine()">+ Période stockage</button>
                 </div>
 
                 <div class="section" id="sectionTempsAdmin">
-                    <h2>Temps administratif &amp; logistique</h2>
+                    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>Temps administratif &amp; logistique</span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionTempsAdmin')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionTempsAdmin')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h2>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Mails (min)</label>
@@ -5052,7 +5088,13 @@
 
                 <div id="calcBadges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
                 <div class="total-box" id="sectionValorisationFinanciere">
-                    <h3>Valorisation financière</h3>
+                    <h3 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>Valorisation financière</span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionValorisationFinanciere')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionValorisationFinanciere')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h3>
                     <div class="total-grid">
                         <div class="total-item" title="Temps total = Σ(temps geste × coef × quantité) + temps fixes. Utilisé comme base pour la facturation horaire et la charge atelier.">
                             <div class="label">Temps total ⓘ</div>
@@ -5103,13 +5145,25 @@
                     </div>
                 </div>
 
-                <div class="section" style="border-left-color:#c9b3d4;">
-                    <h2>📝 Notes internes</h2>
+                <div class="section" id="sectionNotesInternes" style="border-left-color:#c9b3d4;">
+                    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>📝 Notes internes</span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionNotesInternes')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionNotesInternes')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h2>
                     <textarea id="notesInternes" placeholder="Notes internes (non imprimées sur le devis) : contraintes, remarques client, conditions particulières..." rows="3" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;resize:vertical;"></textarea>
                 </div>
 
-                <div class="section" style="border-left-color:#f39c12;">
-                    <h2>📸 Photos & Vidéos</h2>
+                <div class="section" id="sectionPhotosVideos" style="border-left-color:#f39c12;">
+                    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>📸 Photos & Vidéos</span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moveSectionUp('sectionPhotosVideos')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
+                            <button onclick="moveSectionDown('sectionPhotosVideos')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
+                        </div>
+                    </h2>
                     <p style="font-size:0.9em;color:#666;margin-bottom:10px;">Attachez des photos ou vidéos à cette prestation (max 20 MB par fichier)</p>
                     <input type="file" id="attachmentInput" accept="image/*,video/*" multiple style="display:none" onchange="handleAttachmentUpload()">
                     <button class="btn" onclick="document.getElementById('attachmentInput').click()" style="background:#fff3cd;border-color:#f39c12;color:#856404;margin-bottom:12px;">➕ Ajouter photos/vidéos</button>
