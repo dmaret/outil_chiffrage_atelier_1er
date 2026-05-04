@@ -891,7 +891,18 @@
     }
 
     function showTransferModal(paletteRef, paletteEmplacement) {
-        currentTransferPalette = { ref: paletteRef, from: paletteEmplacement };
+        // Trouver la quantité disponible pour cette palette
+        const stockStr = localStorage.getItem('stockData');
+        const stockData = stockStr ? JSON.parse(stockStr) : { mouvements: [], stockActuel: {} };
+
+        let availableQty = 0;
+        const refData = stockData.stockActuel[paletteRef];
+        if (refData && refData.lots) {
+            const lot = refData.lots.find(l => l.emplacement === paletteEmplacement);
+            if (lot) availableQty = lot.qte;
+        }
+
+        currentTransferPalette = { ref: paletteRef, from: paletteEmplacement, qty: availableQty };
 
         // Récupérer tous les emplacements disponibles
         const emplacementsStr = localStorage.getItem('configEmplacements');
@@ -917,13 +928,21 @@
                     <button class="close-btn" onclick="closeTransferModal()">✕</button>
                 </div>
                 <div style="padding: 20px;">
-                    <div style="font-weight: 600; color: #333; margin-bottom: 12px;">Référence: <span style="color: #667eea; font-size: 18px;">${paletteRef}</span></div>
+                    <div style="font-weight: 600; color: #333; margin-bottom: 8px;">Référence: <span style="color: #667eea; font-size: 18px;">${paletteRef}</span></div>
+                    <div style="font-weight: 600; color: #333; margin-bottom: 20px;">Disponible: <span style="color: #27ae60; font-size: 18px;">${availableQty} unité(s)</span></div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px;">Quantité à transférer:</label>
+                        <input type="number" id="transferQty" min="1" max="${availableQty}" value="${availableQty}"
+                            style="width: 100%; padding: 12px; border: 2px solid #667eea; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                    </div>
+
                     <div style="margin-bottom: 20px; padding: 12px; background: #f0f0f0; border-radius: 8px; font-size: 14px; color: #666;">
                         Sélectionne l'emplacement de destination:
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         ${emplacementNames.filter(e => e !== paletteEmplacement).map(emplacement => `
-                            <button onclick="executeTransfer('${paletteRef}', '${paletteEmplacement}', '${emplacement}')"
+                            <button onclick="const qty = parseInt(document.getElementById('transferQty').value); if(qty > 0 && qty <= ${availableQty}) { executeTransfer('${paletteRef}', '${paletteEmplacement}', '${emplacement}', qty); } else { alert('Quantité invalide'); }"
                                 style="padding: 16px; background: white; border: 2px solid #667eea; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; color: #667eea; transition: all 0.2s;"
                                 onmouseover="this.style.background='#f0f5ff'"
                                 onmouseout="this.style.background='white'">
@@ -942,7 +961,7 @@
         transferModal.classList.add('active');
     }
 
-    function executeTransfer(paletteRef, from, to) {
+    function executeTransfer(paletteRef, from, to, qty) {
         // Enregistrer le mouvement
         const stockStr = localStorage.getItem('stockData');
         let stockData = stockStr ? JSON.parse(stockStr) : { mouvements: [], stockActuel: {} };
@@ -955,8 +974,7 @@
             type: 'transfert',
             ref: paletteRef,
             date: now,
-            qte: 1,
-            unite: 'palette',
+            qte: qty,
             emplacement: from,
             destEmplacement: to
         });
@@ -990,13 +1008,24 @@
                 stockData.stockActuel[m.ref].total -= m.qte;
                 if (stockData.stockActuel[m.ref].total <= 0) delete stockData.stockActuel[m.ref];
             } else if (m.type === 'transfert' && stockData.stockActuel[m.ref]) {
+                let qteToMove = m.qte;
                 const lotsToMove = [];
-                for (const lot of stockData.stockActuel[m.ref].lots) {
+
+                for (let i = 0; i < stockData.stockActuel[m.ref].lots.length && qteToMove > 0; i++) {
+                    const lot = stockData.stockActuel[m.ref].lots[i];
                     if (lot.emplacement === m.emplacement) {
-                        lotsToMove.push({...lot, emplacement: m.destEmplacement});
-                        lot.qte = 0;
+                        if (lot.qte <= qteToMove) {
+                            lotsToMove.push({...lot, emplacement: m.destEmplacement});
+                            qteToMove -= lot.qte;
+                            lot.qte = 0;
+                        } else {
+                            lotsToMove.push({...lot, qte: qteToMove, emplacement: m.destEmplacement});
+                            lot.qte -= qteToMove;
+                            qteToMove = 0;
+                        }
                     }
                 }
+
                 stockData.stockActuel[m.ref].lots = stockData.stockActuel[m.ref].lots.filter(l => l.qte > 0);
                 lotsToMove.forEach(l => stockData.stockActuel[m.ref].lots.push(l));
                 stockData.stockActuel[m.ref].lots.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -1010,7 +1039,7 @@
         // Notification
         const notif = document.createElement('div');
         notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
-        notif.textContent = `✅ Palette transférée de ${from} vers ${to}!`;
+        notif.textContent = `✅ ${qty} unité(s) transférée(s) de ${from} vers ${to}!`;
         document.body.appendChild(notif);
         setTimeout(() => notif.remove(), 3000);
     }
