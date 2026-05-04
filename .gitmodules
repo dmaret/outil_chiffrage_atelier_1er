@@ -1,0 +1,3 @@
+[submodule "logistique_cea_1er"]
+	path = logistique_cea_1er
+	url = https://github.com/dmaret/logistique_cea_1er.git
