@@ -251,7 +251,7 @@
         }
         /* ── Groupes d'onglets — intercalaire couleur ── */
         .tab[data-group-color] { border-bottom: 3px solid transparent; position:relative; }
-        .tab[data-group-color].active { border-bottom-color: var(--tab-group-color, var(--color-primary)); color: var(--tab-group-color, var(--color-primary-dark)); }
+        .tab[data-group-color].active { border-bottom-color: var(--color-primary); color: var(--color-primary-dark); }
         .tab[data-group-color]:hover { border-bottom-color: transparent; }
         .tabs-group-sep { display:inline-block; width:5px; height:16px; border-radius:3px; background:var(--sep-color,#aaa); opacity:0.8; vertical-align:text-bottom; flex-shrink:0; margin:0 3px; box-shadow:0 0 3px rgba(0,0,0,0.1); }
         /* Editor rows for tabGroups */
@@ -26580,8 +26580,8 @@
                 const limite = p.dateValidite ? new Date(p.dateValidite) : new Date(new Date(p.date).getTime() + 30*86400000);
                 return (limite - now) / 86400000 <= 7;
             });
-            if (expires.length > 0) alertes.push({ danger: true, msg: `📋 ${expires.length} devis expiré(s) : ${expires.map(p=>`<strong>${p.reference||p.prestation}</strong>`).join(', ')}` });
-            if (expireSoon.length > 0) alertes.push({ danger: false, msg: `⏰ ${expireSoon.length} devis expire(nt) dans &lt;7 jours : ${expireSoon.map(p=>`<strong>${p.reference||p.prestation}</strong>`).join(', ')}` });
+            if (expires.length > 0) alertes.push({ danger: true, msg: `📋 ${expires.length} devis expiré(s) : ${expires.map(p=>`<a href="javascript:switchTab('prestations');openEditModal('${p.id}')" style="cursor:pointer;color:#c0392b;font-weight:600;text-decoration:underline;">${p.reference||p.prestation}</a>`).join(', ')}` });
+            if (expireSoon.length > 0) alertes.push({ danger: false, msg: `⏰ ${expireSoon.length} devis expire(nt) dans &lt;7 jours : ${expireSoon.map(p=>`<a href="javascript:switchTab('prestations');openEditModal('${p.id}')" style="cursor:pointer;color:#e67e22;font-weight:600;text-decoration:underline;">${p.reference||p.prestation}</a>`).join(', ')}` });
             // Capacité semaine
             const semDebut = new Date(now); semDebut.setDate(now.getDate() - ((now.getDay() || 7) - 1)); semDebut.setHours(0,0,0,0);
             const semFin = new Date(semDebut); semFin.setDate(semDebut.getDate() + 6);
