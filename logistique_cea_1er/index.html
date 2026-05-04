@@ -708,6 +708,11 @@
         document.getElementById('orderModal').classList.remove('active');
     }
 
+    function returnToDashboard() {
+        closeOrderModal();
+        setTimeout(() => switchTab('dashboard'), 100);
+    }
+
     // ═══════════════════════════════════════════════════════════
     // STOCKS
     // ═══════════════════════════════════════════════════════════
@@ -1103,7 +1108,7 @@
                 style="width: 100%; padding: 18px; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(39,174,96,0.3);">
                 ✅ Valider la prise en charge
             </button>
-            <button onclick="switchTab('dashboard'); closeOrderModal();"
+            <button onclick="returnToDashboard()"
                 style="width: 100%; padding: 14px; background: #f0f0f0; color: #333; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px;">
                 📋 Retour aux commandes
             </button>
@@ -1123,15 +1128,15 @@
             prestations[idx].prisEnChargeParCEA = currentCEA;
             localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestations));
         }
-        closeOrderModal();
-        switchTab('dashboard');
-        loadDashboard();
+
         // Afficher confirmation
         const notif = document.createElement('div');
         notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
         notif.textContent = '✅ Prise en charge validée!';
         document.body.appendChild(notif);
         setTimeout(() => notif.remove(), 3000);
+
+        returnToDashboard();
     }
 
     // ═══════════════════════════════════════════════════════════
