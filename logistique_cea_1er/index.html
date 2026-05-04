@@ -436,10 +436,10 @@
 
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
-        <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Commandes</button>
-        <button class="nav-tab" onclick="switchTab('stocks')">📦 Stocks</button>
-        <button class="nav-tab" onclick="switchTab('formation')">🎓 Formation</button>
-        <button class="nav-tab" onclick="switchTab('planning')">📅 Planification</button>
+        <button class="nav-tab active" onclick="switchTab('dashboard', this)">📊 Commandes</button>
+        <button class="nav-tab" onclick="switchTab('stocks', this)">📦 Stocks</button>
+        <button class="nav-tab" onclick="switchTab('formation', this)">🎓 Formation</button>
+        <button class="nav-tab" onclick="switchTab('planning', this)">📅 Planification</button>
     </div>
 
     <!-- Content -->
@@ -542,12 +542,13 @@
     }
 
     // Tab switching
-    function switchTab(tabName) {
+    function switchTab(tabName, triggerEl) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
 
         document.getElementById(tabName).classList.add('active');
-        event.target.classList.add('active');
+        const btn = triggerEl || document.querySelector(`.nav-tab[onclick*="'${tabName}'"]`);
+        if (btn) btn.classList.add('active');
 
         if (tabName === 'dashboard') loadDashboard();
         if (tabName === 'stocks') loadStocks();
@@ -736,55 +737,61 @@
     function renderFloorMap() {
         const map = document.getElementById('stocksMap');
 
-        // Count palettes by location
-        const locations = {'1er Étage': 0, 'RDC Arrivage': 0, 'Sous-sol': 0};
-        const palettesByLocation = {
-            '1er Étage': [],
-            'RDC Arrivage': [],
-            'Sous-sol': []
-        };
+        // Lire les emplacements configurés dans l'app principale
+        const emplacementsStr = localStorage.getItem('configEmplacements');
+        let emplacementsConfig = emplacementsStr ? JSON.parse(emplacementsStr) : [];
 
-        // Process stock data
+        // Construire les zones dynamiquement depuis les données réelles
+        const locations = {};
+        const palettesByLocation = {};
+
+        // Ajouter les emplacements configurés
+        emplacementsConfig.forEach(emp => {
+            const nom = typeof emp === 'string' ? emp : (emp.nom || emp.label || String(emp));
+            locations[nom] = 0;
+            palettesByLocation[nom] = [];
+        });
+
+        // Parcourir le stock et ajouter tous les emplacements trouvés
         Object.entries(stockData.stockActuel || {}).forEach(([ref, data]) => {
             (data.lots || []).forEach((lot, idx) => {
-                const loc = lot.emplacement || '1er Étage';
-                if (locations.hasOwnProperty(loc)) {
-                    locations[loc]++;
-                    palettesByLocation[loc].push({
-                        id: `${ref}-${idx}`,
-                        ref: ref,
-                        qte: lot.qte,
-                        date: lot.date,
-                        emplacement: loc
-                    });
+                const loc = lot.emplacement || 'Non classé';
+                if (!locations.hasOwnProperty(loc)) {
+                    locations[loc] = 0;
+                    palettesByLocation[loc] = [];
                 }
+                locations[loc]++;
+                palettesByLocation[loc].push({
+                    id: `${ref}-${idx}`,
+                    ref: ref,
+                    qte: lot.qte,
+                    date: lot.date,
+                    emplacement: loc
+                });
             });
         });
+
+        if (Object.keys(locations).length === 0) {
+            map.innerHTML = '<p style="color: #999; text-align: center; padding: 30px;">Aucun stock enregistré</p>';
+            return;
+        }
 
         // Build map HTML
         map.innerHTML = Object.entries(locations).map(([location, count]) => `
             <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 3px dashed #ddd;">
                 <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 15px;">
-                    ${location === '1er Étage' ? '🏗️' : location === 'RDC Arrivage' ? '📥' : '🏚️'}
-                    ${location}
-                    <span style="color: #667eea; font-size: 24px;">${count}</span>
+                    📦 ${location}
+                    <span style="color: #667eea; font-size: 24px; margin-left: 10px;">${count}</span>
                 </div>
-
-                <div id="zone-${location}"
-                     ondrop="dropPalette(event, '${location}')"
-                     ondragover="event.preventDefault(); event.target.style.background='#f0f0ff';"
-                     ondragleave="event.target.style.background='transparent';"
-                     style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px; min-height: 100px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px; min-height: 80px;">
                     ${palettesByLocation[location].map(p => `
-                        <div draggable="true"
-                             ondragstart="dragPalette(event, '${p.id}', '${p.ref}')"
-                             onmouseenter="showPaletteInfo(event, '${p.id}')"
-                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 8px; text-align: center; cursor: grab; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;">
-                            <div style="font-size: 24px; margin-bottom: 5px;">📦</div>
-                            <div style="font-size: 12px; font-weight: 600; word-break: break-word;">${p.ref}</div>
-                            <div style="font-size: 11px; opacity: 0.9;">${p.qte}u</div>
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size: 22px; margin-bottom: 4px;">📦</div>
+                            <div style="font-size: 13px; font-weight: 700; word-break: break-word;">${p.ref}</div>
+                            <div style="font-size: 12px; opacity: 0.9;">${p.qte}u</div>
                         </div>
                     `).join('')}
+                    ${count === 0 ? '<div style="color: #ccc; font-size: 13px; text-align: center; padding: 10px; width: 100%;">Vide</div>' : ''}
                 </div>
             </div>
         `).join('');
@@ -946,6 +953,65 @@
         alert('Formation ' + trainingId + ' - À développer (quiz, contenu, etc.)');
     }
 
+    function showProcedure(prestationId) {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+        const prestation = prestations.find(p => String(p.id) === String(prestationId));
+        if (!prestation) return;
+
+        // Trouver l'index dans les commandes actives pour réutiliser showOrderDetail
+        const activeOrders = prestations.filter(p => p.statut === 'accepte' || p.statut === 'en-cours');
+        const idx = activeOrders.findIndex(p => String(p.id) === String(prestationId));
+
+        currentOrderIndex = idx >= 0 ? idx : 0;
+        currentGestureIndex = 0;
+
+        // Ajouter le bouton "Valider la prise en charge" dans la modale
+        const modal = document.getElementById('orderModal');
+        let validateBtn = document.getElementById('validateBtn');
+        if (!validateBtn) {
+            const gesturesList = document.getElementById('gesturesList');
+            validateBtn = document.createElement('div');
+            validateBtn.id = 'validateBtn';
+            validateBtn.style.cssText = 'margin-top: 20px;';
+            gesturesList.parentNode.appendChild(validateBtn);
+        }
+        validateBtn.innerHTML = `
+            <button onclick="validatePriseEnCharge('${prestationId}')"
+                style="width: 100%; padding: 18px; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(39,174,96,0.3);">
+                ✅ Valider la prise en charge
+            </button>
+            <button onclick="switchTab('dashboard'); closeOrderModal();"
+                style="width: 100%; padding: 14px; background: #f0f0f0; color: #333; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+                📋 Retour aux commandes
+            </button>
+        `;
+
+        renderGestureList(prestation);
+        modal.classList.add('active');
+    }
+
+    function validatePriseEnCharge(prestationId) {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+        const idx = prestations.findIndex(p => String(p.id) === String(prestationId));
+        if (idx >= 0) {
+            prestations[idx].statut = 'en-cours';
+            prestations[idx].prisEnCharge = new Date().toISOString();
+            prestations[idx].prisEnChargeParCEA = currentCEA;
+            localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestations));
+        }
+        closeOrderModal();
+        switchTab('dashboard');
+        loadDashboard();
+        // Afficher confirmation
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+        notif.textContent = '✅ Prise en charge validée!';
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
+
     // ═══════════════════════════════════════════════════════════
     // PLANNING
     // ═══════════════════════════════════════════════════════════
@@ -1004,12 +1070,15 @@
                     ${todayTasks.length === 0
                         ? '<p style="color: #999; padding: 15px; text-align: center;">Aucune tâche aujourd\'hui</p>'
                         : todayTasks.map(task => `
-                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border-radius: 10px;">
-                                <div style="font-weight: 700; margin-bottom: 4px;">${task.nom || task.prestation || 'Sans titre'}</div>
-                                <div style="font-size: 13px; opacity: 0.9; margin-bottom: 6px;">Client: ${task.client || 'Non défini'}</div>
-                                <div style="display: flex; gap: 12px; font-size: 12px;">
+                            <div onclick="showProcedure('${task.id}')" class="order-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border-radius: 10px; cursor: pointer;">
+                                <div style="font-weight: 700; margin-bottom: 4px; font-size: 17px;">${task.nom || task.prestation || 'Sans titre'}</div>
+                                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Client: ${task.client || 'Non défini'}</div>
+                                <div style="display: flex; gap: 12px; font-size: 13px;">
                                     <span>⏱️ ${(task.heures || 0).toFixed(1)}h</span>
-                                    <span>📍 ${task.lieu || 'À l\'atelier'}</span>
+                                    <span>📋 ${(task.gestes || []).length} gestes</span>
+                                </div>
+                                <div style="margin-top: 10px; background: rgba(255,255,255,0.2); border-radius: 6px; padding: 8px; font-size: 13px; text-align: center; font-weight: 600;">
+                                    👆 Voir la procédure de travail
                                 </div>
                             </div>
                         `).join('')}
@@ -1055,8 +1124,8 @@
                             ${dayTasks.length === 0
                                 ? '<span style="color: #bbb; font-size: 12px;">Pas de tâche</span>'
                                 : dayTasks.map(task => `
-                                    <span style="font-size: 12px; color: #666;">
-                                        • ${task.prestation || 'Tâche'} (${(task.heures || 0).toFixed(1)}h)
+                                    <span onclick="showProcedure('${task.id}')" style="font-size: 13px; color: #667eea; cursor: pointer; font-weight: 600; padding: 4px 0; display: block;">
+                                        ▶️ ${task.prestation || 'Tâche'} (${(task.heures || 0).toFixed(1)}h)
                                     </span>
                                 `).join('')}
                         </div>
