@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistique CEA 1er - Terminal Portable</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' font-weight='bold'>📦</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .container { width: 100%; max-width: 1400px; margin: 0 auto; }
+
+        /* ═══════════════════════════════════════════════════════════
+           LOGIN SCREEN (FALC - Simple & Accessible)
+           ═══════════════════════════════════════════════════════════ */
+
+        #loginScreen {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           MAIN APP (After Login)
+           ═══════════════════════════════════════════════════════════ */
+
+        #appScreen {
+            display: none;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid #fff;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header-user {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+            background: white;
+            overflow-x: auto;
+            flex-wrap: wrap;
+            border-bottom: 3px solid #ddd;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 15px;
+            text-align: center;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-tab:hover {
+            background: #e0e0e0;
+        }
+
+        .nav-tab.active:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: flex;
+            visibility: hidden;
+            opacity: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .close-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+
+        .gesture-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .gesture-item {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .gesture-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .gesture-quantity {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 22px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .order-card {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+        }
+
+        .order-card:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            #loginScreen {
+                padding: 30px 20px;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .nav-tabs {
+                padding: 8px;
+                gap: 3px;
+            }
+
+            .nav-tab {
+                min-width: 80px;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LOGIN SCREEN
+     ═══════════════════════════════════════════════════════════ -->
+
+<div id="loginScreen" class="container">
+    <div class="logo">📦</div>
+    <h1 class="title">Logistique CEA</h1>
+    <p class="subtitle">Terminal Portable 1er Étage</p>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="ceaId">Identifiant CEA</label>
+            <input type="text" id="ceaId" placeholder="Ex: CEA-001" required autofocus autocomplete="username">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary">🚀 Accéder</button>
+    </form>
+
+    <p id="loginError" style="color: #ff6b6b; margin-top: 20px; font-weight: 600;"></p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN APP
+     ═══════════════════════════════════════════════════════════ -->
+
+<div id="appScreen">
+    <div class="header">
+        <div class="header-title">📦 Logistique CEA 1er</div>
+        <div class="header-user">CEA: <span id="currentCEA"></span></div>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">🚪 Déconnecter</button>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Commandes</button>
+        <button class="nav-tab" onclick="switchTab('stocks')">📦 Stocks</button>
+        <button class="nav-tab" onclick="switchTab('formation')">🎓 Formation</button>
+        <button class="nav-tab" onclick="switchTab('planning')">📅 Planification</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="card">
+                <div class="card-title">📋 Commandes Actives</div>
+                <div class="stat-box">
+                    <div class="stat-value" id="activeOrderCount">0</div>
+                    <div class="stat-label">Commandes en cours</div>
+                </div>
+                <div id="ordersList" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- Stocks Tab -->
+        <div id="stocks" class="tab-content">
+            <div class="card">
+                <div class="card-title">📊 État du Stock</div>
+                <div id="stocksMap" style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px;"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">⏱️ Historique Mouvements</div>
+                <div id="movementsTimeline"></div>
+            </div>
+        </div>
+
+        <!-- Formation Tab -->
+        <div id="formation" class="tab-content">
+            <div class="card">
+                <div class="card-title">🎓 Mes Formations</div>
+                <div id="trainingList"></div>
+            </div>
+        </div>
+
+        <!-- Planning Tab -->
+        <div id="planning" class="tab-content">
+            <div class="card">
+                <div class="card-title">📅 Ma Planification</div>
+                <div id="tasksContainer"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="modalOrderName"></div>
+                    <div class="modal-subtitle" id="modalClientName"></div>
+                </div>
+                <button class="close-btn" onclick="closeOrderModal()">✕</button>
+            </div>
+            <div class="gesture-list" id="gesturesList"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ═══════════════════════════════════════════════════════════
+    // DATA MANAGEMENT (Shared with main app)
+    // ═══════════════════════════════════════════════════════════
+
+    const DB_NAME = 'logistique_cea_db';
+    let currentCEA = null;
+
+    // Login handling
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const ceaId = document.getElementById('ceaId').value;
+        const password = document.getElementById('password').value;
+
+        // TODO: Validate against atelier_db auth groups
+        if (ceaId && password) {
+            currentCEA = ceaId;
+            localStorage.setItem('currentCEA', ceaId);
+            showApp();
+            loadDashboard();
+        } else {
+            document.getElementById('loginError').textContent = '❌ Identifiant ou mot de passe incorrect';
+        }
+    });
+
+    function logout() {
+        currentCEA = null;
+        localStorage.removeItem('currentCEA');
+        document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('appScreen').style.display = 'none';
+        document.getElementById('loginForm').reset();
+    }
+
+    function showApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appScreen').style.display = 'block';
+        document.getElementById('currentCEA').textContent = currentCEA;
+    }
+
+    // Tab switching
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+        document.getElementById(tabName).classList.add('active');
+        event.target.classList.add('active');
+
+        if (tabName === 'dashboard') loadDashboard();
+        if (tabName === 'stocks') loadStocks();
+        if (tabName === 'formation') loadFormation();
+        if (tabName === 'planning') loadPlanning();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // DASHBOARD
+    // ═══════════════════════════════════════════════════════════
+
+    function loadDashboard() {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+
+        console.log('DEBUG: prestationsSauvegardees from localStorage:', prestStr?.substring(0, 200));
+        console.log('DEBUG: Parsed prestations:', prestations.length, prestations);
+
+        // Filter accepted and in-progress prestations
+        const activeOrders = prestations.filter(p =>
+            p.statut === 'accepte' || p.statut === 'en-cours'
+        );
+
+        console.log('DEBUG: Active orders:', activeOrders.length);
+
+        const orderCount = document.getElementById('activeOrderCount');
+        orderCount.textContent = activeOrders.length;
+
+        const ordersList = document.getElementById('ordersList');
+        if (activeOrders.length === 0) {
+            ordersList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Aucune commande en cours</p>';
+            return;
+        }
+
+        ordersList.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${activeOrders.map((order, index) => `
+                    <div class="order-card" onclick="showOrderDetail(${index})" style="background: white; border-radius: 12px; padding: 16px; border-left: 5px solid ${order.statut === 'accepte' ? '#27ae60' : '#9a70b8'}; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 16px; color: #333;">${order.nom || 'Sans titre'}</div>
+                                <div style="font-size: 13px; color: #666; margin-top: 2px;">Client: ${order.client || 'Non défini'}</div>
+                            </div>
+                            <span style="background: ${order.statut === 'accepte' ? '#d4edda' : '#e8d5f0'}; color: ${order.statut === 'accepte' ? '#155724' : '#5a3878'}; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                ${order.statut === 'accepte' ? '✅ Acceptée' : '🟣 En cours'}
+                            </span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; margin-top: 8px;">
+                            <div>
+                                <div style="color: #999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Chiffre</div>
+                                <div style="font-weight: 700; color: #333;">CHF ${(order.prixVente || 0).toFixed(2)}</div>
+                            </div>
+                            <div>
+                                <div style="color: #999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Heures</div>
+                                <div style="font-weight: 700; color: #333;">${(order.totalHeures || 0).toFixed(1)}h</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 12px; color: #999;">
+                            📅 ${order.dateCreation ? new Date(order.dateCreation).toLocaleDateString('fr-FR') : 'Date inconnue'}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    let currentOrderIndex = null;
+    let currentGestureIndex = 0;
+
+    function showOrderDetail(orderIndex) {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+
+        // Filter to get active orders
+        const activeOrders = prestations.filter(p =>
+            p.statut === 'accepte' || p.statut === 'en-cours'
+        );
+
+        const order = activeOrders[orderIndex];
+        if (!order) return;
+
+        currentOrderIndex = orderIndex;
+        currentGestureIndex = 0;
+        renderGestureList(order);
+
+        // Show modal
+        document.getElementById('orderModal').classList.add('active');
+    }
+
+    function renderGestureList(order) {
+        // Set modal header information
+        document.getElementById('modalOrderName').textContent = order.nom || 'Sans titre';
+        document.getElementById('modalClientName').textContent = `Client: ${order.client || 'Non défini'}`;
+
+        // Populate gestures list
+        const gesturesContainer = document.getElementById('gesturesList');
+        const gestes = order.gestes || [];
+
+        if (gestes.length === 0) {
+            gesturesContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Aucun geste défini pour cette commande</p>';
+        } else {
+            gesturesContainer.innerHTML = gestes.map((geste, idx) => {
+                const isActive = idx === currentGestureIndex;
+                const isCompleted = idx < currentGestureIndex;
+                const isCurrent = idx === currentGestureIndex;
+
+                return `
+                <div class="gesture-item"
+                     onclick="advanceGesture()"
+                     style="
+                         flex: 1;
+                         cursor: pointer;
+                         transition: all 0.2s;
+                         background: ${isCompleted ? '#d4edda' : isActive ? '#e8d5f0' : '#f8f9fa'};
+                         border-left-color: ${isCompleted ? '#27ae60' : isActive ? '#9a70b8' : '#667eea'};
+                         ${isActive ? 'box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);' : ''}
+                     "
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.2)';"
+                     onmouseout="this.style.transform='none'; this.style.boxShadow='${isActive ? '0 0 0 3px rgba(102, 126, 234, 0.2);' : ''}';">
+                    <div style="flex: 1;">
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 28px;">
+                                ${isCompleted ? '✅' : isCurrent ? '▶️' : '⭕'}
+                            </span>
+                            <div style="flex: 1;">
+                                <div class="gesture-name" style="margin: 0; font-weight: 700; font-size: 20px;">${geste.code || 'Sans code'}</div>
+                                <div style="font-size: 15px; color: #666; margin-top: 3px;">${geste.description || ''}</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 14px; color: #999; margin-top: 6px; margin-left: 38px;">Pièces: ${geste.quantite || 0}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="gesture-quantity">${geste.temps || 0}s</div>
+                        <div style="font-size: 11px; color: #999; margin-top: 4px;">Durée</div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+    }
+
+    function advanceGesture() {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+
+        const activeOrders = prestations.filter(p =>
+            p.statut === 'accepte' || p.statut === 'en-cours'
+        );
+
+        const order = activeOrders[currentOrderIndex];
+        if (!order) return;
+
+        const gestes = order.gestes || [];
+        if (currentGestureIndex < gestes.length - 1) {
+            currentGestureIndex++;
+            renderGestureList(order);
+        } else {
+            closeOrderModal();
+        }
+    }
+
+    function closeOrderModal() {
+        document.getElementById('orderModal').classList.remove('active');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // STOCKS
+    // ═══════════════════════════════════════════════════════════
+
+    let stockData = null;
+    let draggedPalette = null;
+
+    function loadStocks() {
+        // Load stock data from main app (localStorage)
+        const stockStr = localStorage.getItem('stockData');
+        stockData = stockStr ? JSON.parse(stockStr) : {mouvements: [], stockActuel: {}};
+
+        renderFloorMap();
+        renderMovementsTimeline();
+    }
+
+    function renderFloorMap() {
+        const map = document.getElementById('stocksMap');
+
+        // Count palettes by location
+        const locations = {'1er Étage': 0, 'RDC Arrivage': 0, 'Sous-sol': 0};
+        const palettesByLocation = {
+            '1er Étage': [],
+            'RDC Arrivage': [],
+            'Sous-sol': []
+        };
+
+        // Process stock data
+        Object.entries(stockData.stockActuel || {}).forEach(([ref, data]) => {
+            (data.lots || []).forEach((lot, idx) => {
+                const loc = lot.emplacement || '1er Étage';
+                if (locations.hasOwnProperty(loc)) {
+                    locations[loc]++;
+                    palettesByLocation[loc].push({
+                        id: `${ref}-${idx}`,
+                        ref: ref,
+                        qte: lot.qte,
+                        date: lot.date,
+                        emplacement: loc
+                    });
+                }
+            });
+        });
+
+        // Build map HTML
+        map.innerHTML = Object.entries(locations).map(([location, count]) => `
+            <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 3px dashed #ddd;">
+                <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 15px;">
+                    ${location === '1er Étage' ? '🏗️' : location === 'RDC Arrivage' ? '📥' : '🏚️'}
+                    ${location}
+                    <span style="color: #667eea; font-size: 24px;">${count}</span>
+                </div>
+
+                <div id="zone-${location}"
+                     ondrop="dropPalette(event, '${location}')"
+                     ondragover="event.preventDefault(); event.target.style.background='#f0f0ff';"
+                     ondragleave="event.target.style.background='transparent';"
+                     style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px; min-height: 100px;">
+                    ${palettesByLocation[location].map(p => `
+                        <div draggable="true"
+                             ondragstart="dragPalette(event, '${p.id}', '${p.ref}')"
+                             onmouseenter="showPaletteInfo(event, '${p.id}')"
+                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 8px; text-align: center; cursor: grab; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">📦</div>
+                            <div style="font-size: 12px; font-weight: 600; word-break: break-word;">${p.ref}</div>
+                            <div style="font-size: 11px; opacity: 0.9;">${p.qte}u</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function dragPalette(event, paletteId, ref) {
+        draggedPalette = {id: paletteId, ref: ref};
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('paletteId', paletteId);
+    }
+
+    function dropPalette(event, destination) {
+        event.preventDefault();
+        if (!draggedPalette) return;
+
+        // Record movement
+        const now = new Date().toISOString();
+        if (!stockData.mouvements) stockData.mouvements = [];
+
+        stockData.mouvements.push({
+            type: 'transfert',
+            ref: draggedPalette.ref,
+            date: now,
+            qte: 1,
+            destEmplacement: destination,
+            emplacement: destination
+        });
+
+        // Save back to localStorage
+        localStorage.setItem('stockData', JSON.stringify(stockData));
+
+        draggedPalette = null;
+        renderFloorMap();
+        renderMovementsTimeline();
+    }
+
+    function showPaletteInfo(event, paletteId) {
+        // Extract reference from paletteId (format: ref-idx)
+        const ref = paletteId.split('-').slice(0, -1).join('-');
+
+        // Get last 2 movements for this reference
+        const movements = (stockData.mouvements || [])
+            .filter(m => m.ref === ref)
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 2);
+
+        if (movements.length === 0) return;
+
+        // Create or update tooltip
+        let tooltip = document.getElementById('paletteTooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'paletteTooltip';
+            tooltip.style.cssText = 'position: fixed; background: #333; color: white; padding: 10px 15px; border-radius: 8px; font-size: 12px; z-index: 10000; pointer-events: none; max-width: 250px; white-space: normal;';
+            document.body.appendChild(tooltip);
+        }
+
+        tooltip.innerHTML = movements.map(m =>
+            `<div style="margin-bottom: 4px;"><strong>${m.ref}</strong> - ${m.type}</div>
+             <div style="opacity: 0.8; font-size: 11px;">${new Date(m.date).toLocaleDateString('fr-FR')} ${new Date(m.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>`
+        ).join('<div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 6px;"></div>');
+
+        // Position tooltip near cursor
+        tooltip.style.display = 'block';
+        let x = event.pageX + 10;
+        let y = event.pageY + 10;
+
+        // Prevent tooltip from going off-screen right
+        setTimeout(() => {
+            if (x + tooltip.offsetWidth > window.innerWidth) {
+                x = event.pageX - tooltip.offsetWidth - 10;
+            }
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+        }, 0);
+    }
+
+    document.addEventListener('mouseleave', () => {
+        const tooltip = document.getElementById('paletteTooltip');
+        if (tooltip) tooltip.style.display = 'none';
+    }, true);
+
+    function renderMovementsTimeline() {
+        const timeline = document.getElementById('movementsTimeline');
+        const movements = (stockData.mouvements || [])
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 20); // Last 20 movements
+
+        if (movements.length === 0) {
+            timeline.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Aucun mouvement enregistré</p>';
+            return;
+        }
+
+        timeline.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${movements.map((m, idx) => `
+                    <div style="display: flex; gap: 12px; padding: 12px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <div style="font-size: 20px; min-width: 30px;">
+                            ${m.type === 'entrée' ? '📥' : m.type === 'sortie' ? '📤' : '↔️'}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #333;">${m.ref}</div>
+                            <div style="font-size: 13px; color: #666; margin: 4px 0;">
+                                ${m.type === 'transfert' ? `Déplacée vers ${m.destEmplacement}` : `${m.type} en ${m.emplacement}`}
+                            </div>
+                            <div style="font-size: 12px; color: #999;">
+                                ${new Date(m.date).toLocaleDateString('fr-FR')} à ${new Date(m.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}
+                            </div>
+                        </div>
+                        <div style="font-size: 14px; font-weight: 700; color: #667eea; min-width: 40px; text-align: right;">
+                            ${m.qte}u
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // FORMATION
+    // ═══════════════════════════════════════════════════════════
+
+    function loadFormation() {
+        const trainingStr = localStorage.getItem('trainingRequests');
+        const trainings = trainingStr ? JSON.parse(trainingStr) : [];
+
+        // Get approved trainings assigned to current CEA
+        const assignedTrainings = trainings.filter(t =>
+            t.status === 'approved' && t.assignedTo === currentCEA
+        );
+
+        const trainingList = document.getElementById('trainingList');
+
+        if (assignedTrainings.length === 0) {
+            trainingList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Pas de formation assignée</p>';
+            return;
+        }
+
+        trainingList.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${assignedTrainings.map(training => `
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">
+                            🎓 ${training.category}
+                        </div>
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">
+                            Approuvée le ${new Date(training.approvedAt).toLocaleDateString('fr-FR')}
+                        </div>
+                        <button onclick="startTraining('${training.id}')" style="background: white; color: #667eea; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; width: 100%; transition: all 0.2s;">
+                            ▶️ Commencer
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function startTraining(trainingId) {
+        alert('Formation ' + trainingId + ' - À développer (quiz, contenu, etc.)');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PLANNING
+    // ═══════════════════════════════════════════════════════════
+
+    function loadPlanning() {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Get Monday of current week
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - ((today.getDay() || 7) - 1));
+
+        // Get Sunday of current week
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+
+        // Filter tasks for this week (accepte + en-cours statuses)
+        const weekTasks = prestations.filter(p => {
+            if (p.statut !== 'accepte' && p.statut !== 'en-cours') return false;
+            const startDate = p.dateDebut || p.date;
+            const endDate = p.dateFin || p.date;
+            if (!startDate) return false; // Skip if no date
+            const dStart = new Date(startDate);
+            const dEnd = endDate ? new Date(endDate) : dStart;
+            return dStart <= sunday && dEnd >= monday;
+        }).sort((a, b) => {
+            const aDate = new Date(a.dateDebut || a.date || '2099-01-01');
+            const bDate = new Date(b.dateDebut || b.date || '2099-01-01');
+            return aDate - bDate;
+        });
+
+        // Filter tasks for today
+        const todayTasks = weekTasks.filter(p => {
+            const startDate = p.dateDebut || p.date;
+            if (!startDate) return false;
+            const dStart = new Date(startDate);
+            const dEnd = p.dateFin ? new Date(p.dateFin) : dStart;
+            return dStart <= today && dEnd >= today;
+        });
+
+        const tasksDiv = document.getElementById('tasksContainer');
+        if (!tasksDiv) return;
+
+        let html = '<div style="display: flex; flex-direction: column; gap: 20px;">';
+
+        // Daily section
+        html += `
+            <div>
+                <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 12px;">
+                    📅 Aujourd'hui (${today.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'})})
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    ${todayTasks.length === 0
+                        ? '<p style="color: #999; padding: 15px; text-align: center;">Aucune tâche aujourd\'hui</p>'
+                        : todayTasks.map(task => `
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border-radius: 10px;">
+                                <div style="font-weight: 700; margin-bottom: 4px;">${task.nom || task.prestation || 'Sans titre'}</div>
+                                <div style="font-size: 13px; opacity: 0.9; margin-bottom: 6px;">Client: ${task.client || 'Non défini'}</div>
+                                <div style="display: flex; gap: 12px; font-size: 12px;">
+                                    <span>⏱️ ${(task.heures || 0).toFixed(1)}h</span>
+                                    <span>📍 ${task.lieu || 'À l\'atelier'}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                </div>
+            </div>
+        `;
+
+        // Weekly section
+        html += `
+            <div>
+                <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 12px;">
+                    📊 Cette semaine
+                </div>
+                <div style="background: white; border-radius: 12px; padding: 0; overflow: hidden;">
+        `;
+
+        // Create day-by-day view
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(monday);
+            day.setDate(monday.getDate() + i);
+            day.setHours(0, 0, 0, 0);
+
+            const dayTasks = weekTasks.filter(p => {
+                const startDate = p.dateDebut || p.date;
+                if (!startDate) return false;
+                const dStart = new Date(startDate);
+                const dEnd = p.dateFin ? new Date(p.dateFin) : dStart;
+                return dStart <= day && dEnd >= day;
+            });
+
+            const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            const dayLabel = dayNames[day.getDay()];
+            const isToday = day.toDateString() === today.toDateString();
+            const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+
+            html += `
+                <div style="border-bottom: ${i < 6 ? '1px solid #f0f0f0' : 'none'}; background: ${isToday ? '#f0f5ff' : 'white'};">
+                    <div style="padding: 12px 16px; background: ${isWeekend ? '#f8f8f8' : 'white'}; border-left: 4px solid ${isToday ? '#667eea' : '#ddd'};">
+                        <div style="font-weight: 700; color: #333; margin-bottom: 6px;">
+                            ${isToday ? '⭐ ' : ''}${dayLabel} ${day.getDate()}
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            ${dayTasks.length === 0
+                                ? '<span style="color: #bbb; font-size: 12px;">Pas de tâche</span>'
+                                : dayTasks.map(task => `
+                                    <span style="font-size: 12px; color: #666;">
+                                        • ${task.prestation || 'Tâche'} (${(task.heures || 0).toFixed(1)}h)
+                                    </span>
+                                `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += '</div></div></div>';
+        tasksDiv.innerHTML = html;
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+        const savedCEA = localStorage.getItem('currentCEA');
+        if (savedCEA) {
+            currentCEA = savedCEA;
+            showApp();
+            loadDashboard();
+        }
+    });
+</script>
+
+</body>
+</html>
