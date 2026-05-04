@@ -5670,6 +5670,21 @@
                     </div>
                 </div>
 
+                <div class="section" style="background:#f0fff0;border-left:4px solid #27ae60;">
+                    <h2>🏭 Assigner des formations aux CEA</h2>
+                    <p style="color:#5a7a5a;margin-bottom:12px;">Sélectionnez un CEA pour lui assigner les domaines de formation qu'il doit dispenser</p>
+                    <select id="ceaFormationSelect" onchange="renderCEAFormationAssign()" style="padding:9px;border:1px solid #c8e0f4;border-radius:8px;width:100%;max-width:400px;font-size:0.95em;">
+                        <option value="">-- Sélectionner un CEA --</option>
+                        <option value="cea">CEA</option>
+                        <option value="asp">ASP</option>
+                        <option value="msp">MSP</option>
+                    </select>
+                    <div id="ceaFormationContainer" style="margin-top:16px;"></div>
+                    <div style="margin-top:12px;text-align:right;">
+                        <button class="btn btn-success btn-small" onclick="saveCEAFormations()" title="Sauvegarder les assignations de formations aux CEA">💾 Sauvegarder assignations CEA</button>
+                    </div>
+                </div>
+
                 <div class="section">
                     <h2>👨‍🎓 Gestion des apprenants</h2>
                     <div class="form-row">
@@ -12902,7 +12917,7 @@
 
             if (tabName === 'dashboard') renderDashboard();
             else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
-            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); }
+            else if (tabName === 'formation') { updateFormationSelectors(); updateCEAFormationSelect(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); }
             else if (tabName === 'consommables') renderConsommablesTable();
             else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
             else if (tabName === 'clients') renderClients();
@@ -15839,6 +15854,64 @@
                     <h4 style="margin:0 0 8px;color:#2980b9;">📎 Documents accessibles</h4>
                     <div style="display:flex;flex-wrap:wrap;gap:8px;">${docHtml}</div>
                 </div>`;
+        }
+
+        // CEA : assigner formations aux CEA
+        function renderCEAFormationAssign() {
+            const sel = document.getElementById('ceaFormationSelect');
+            const container = document.getElementById('ceaFormationContainer');
+            if (!sel || !container) return;
+            const cea = sel.value;
+            if (!cea) { container.innerHTML = ''; return; }
+
+            const ceaFormationsStr = localStorage.getItem('CEAFormations');
+            const ceaFormations = ceaFormationsStr ? JSON.parse(ceaFormationsStr) : {};
+            const assignedFormations = ceaFormations[cea] || [];
+
+            const domains = typeof FORMATION_DOMAINS !== 'undefined' ? FORMATION_DOMAINS : {};
+            const domainHtml = Object.entries(domains).map(([key, d]) => {
+                const on = assignedFormations.includes(key);
+                return `<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid ${on?'#27ae60':'#dde'};background:${on?'#e8f9f0':'#fafafa'};cursor:pointer;transition:all 0.15s;">
+                    <input type="checkbox" ${on?'checked':''} onchange="toggleCEADomain('${cea}','${key}',this.checked)">
+                    <span style="font-size:1.1em;">${d.icon}</span>
+                    <span style="font-weight:${on?'600':'400'};color:${on?'#27ae60':'#555'};">${d.label}</span>
+                </label>`;
+            }).join('');
+
+            container.innerHTML = `
+                <div style="margin-top:16px;padding:16px;background:#f0fff0;border-radius:10px;border:1px solid #c8e0f4;">
+                    <h4 style="margin:0 0 12px;color:#27ae60;">🎓 Domaines de formation pour ${cea.toUpperCase()}</h4>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">${domainHtml}</div>
+                </div>`;
+        }
+
+        function toggleCEADomain(cea, domain, checked) {
+            const ceaFormationsStr = localStorage.getItem('CEAFormations');
+            let ceaFormations = ceaFormationsStr ? JSON.parse(ceaFormationsStr) : {};
+
+            if (!ceaFormations[cea]) ceaFormations[cea] = [];
+
+            if (checked && !ceaFormations[cea].includes(domain)) {
+                ceaFormations[cea].push(domain);
+            } else if (!checked) {
+                ceaFormations[cea] = ceaFormations[cea].filter(d => d !== domain);
+            }
+
+            localStorage.setItem('CEAFormations', JSON.stringify(ceaFormations));
+            renderCEAFormationAssign();
+        }
+
+        function saveCEAFormations() {
+            toast('✅ Formations CEA sauvegardées!', 'success');
+        }
+
+        // Initialize CEA Formation Select
+        function updateCEAFormationSelect() {
+            const sel = document.getElementById('ceaFormationSelect');
+            if (!sel) return;
+            const ceaFormationsStr = localStorage.getItem('CEAFormations');
+            const ceaFormations = ceaFormationsStr ? JSON.parse(ceaFormationsStr) : {};
+            // Options are hardcoded: cea, asp, msp
         }
 
         // APPRENANT : affiche ses formations assignées
