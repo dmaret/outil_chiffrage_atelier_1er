@@ -564,15 +564,10 @@
         const prestStr = localStorage.getItem('prestationsSauvegardees');
         const prestations = prestStr ? JSON.parse(prestStr) : [];
 
-        console.log('DEBUG: prestationsSauvegardees from localStorage:', prestStr?.substring(0, 200));
-        console.log('DEBUG: Parsed prestations:', prestations.length, prestations);
-
         // Filter accepted and in-progress prestations
         const activeOrders = prestations.filter(p =>
             p.statut === 'accepte' || p.statut === 'en-cours'
         );
-
-        console.log('DEBUG: Active orders:', activeOrders.length);
 
         const orderCount = document.getElementById('activeOrderCount');
         orderCount.textContent = activeOrders.length;
@@ -725,11 +720,6 @@
         const stockStr = localStorage.getItem('stockData');
         stockData = stockStr ? JSON.parse(stockStr) : {mouvements: [], stockActuel: {}};
 
-        console.log('DEBUG: stockData from localStorage:', stockStr?.substring(0, 300));
-        console.log('DEBUG: Parsed stockData:', stockData);
-        console.log('DEBUG: stockActuel:', stockData.stockActuel);
-        console.log('DEBUG: mouvements count:', stockData.mouvements?.length);
-
         renderFloorMap();
         renderMovementsTimeline();
     }
@@ -785,7 +775,7 @@
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px; min-height: 80px;">
                     ${palettesByLocation[location].map(p => `
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div onclick="showTransferModal('${p.ref}', '${p.emplacement}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.2)'; this.style.transform='scale(1.05)';" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'; this.style.transform='scale(1)';">
                             <div style="font-size: 22px; margin-bottom: 4px;">📦</div>
                             <div style="font-size: 13px; font-weight: 700; word-break: break-word;">${p.ref}</div>
                             <div style="font-size: 12px; opacity: 0.9;">${p.qte}u</div>
