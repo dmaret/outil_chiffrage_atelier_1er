@@ -8719,7 +8719,9 @@
                     reject(new Error('IndexedDB timeout: opération prend trop de temps'));
                 }, 5000);
 
-                const request = indexedDB.open(dbName, 1);
+                // Use version 5 for atelier_db, version 1 for others
+                const version = dbName === 'atelier_db' ? 5 : 1;
+                const request = indexedDB.open(dbName, version);
                 request.onerror = () => {
                     clearTimeout(timeout);
                     reject(request.error);
@@ -8757,7 +8759,9 @@
 
         function getFromIndexedDB(storeName, key, dbName = 'atelier_db') {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(dbName, 1);
+                // Use version 5 for atelier_db, version 1 for others
+                const version = dbName === 'atelier_db' ? 5 : 1;
+                const request = indexedDB.open(dbName, version);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     const db = request.result;
