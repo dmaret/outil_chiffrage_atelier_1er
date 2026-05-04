@@ -4810,21 +4810,30 @@
             <div id="calculateur" class="tab-content">
                 <div class="presentation-banner">🖥️ MODE PRÉSENTATION CLIENT — Coûts internes masqués</div>
 
-                <div class="section" style="border-left-color:#c9b3d4;margin-top:30px;">
-                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
-                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
-                            <option value="">— Sélectionner un modèle —</option>
-                        </select>
-                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
-                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
-                        <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
-                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
+                <div class="section">
+                    <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
+                    <div class="bundles-bar" id="bundlesBar">
+                        <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
+                        <!-- rendered by renderBundleButtons() on load -->
                     </div>
-                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                    <div id="gestesContainer"></div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+                        <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd" data-kbd="g">Ctrl+G</span></button>
+                        <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
+                        <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
+                        <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
+                        <button id="btnRedo" class="btn btn-secondary btn-small" onclick="redoLastAction()" title="Rétablir (Ctrl+Shift+Z)" disabled style="opacity:0.5;">🔁 Rétablir</button>
+                    </div>
+                    <div class="chrono-bar" id="chronoBar">
+                        <span style="font-size:0.82em;color:#6b8fa3;font-weight:600;">⏱️ Chronomètre :</span>
+                        <span class="chrono-display" id="chronoDisplay">00:00</span>
+                        <button class="btn btn-small" id="chronoBtnStart" onclick="chronoToggle()">▶ Démarrer</button>
+                        <button class="btn btn-secondary btn-small" onclick="chronoReset()">↺ Reset</button>
+                        <button class="btn btn-secondary btn-small" onclick="chronoApply()" title="Copier le temps mesuré dans le dernier geste sélectionné">→ Appliquer au geste</button>
+                        <span style="font-size:0.78em;color:#8aacbc;" id="chronoStatus"></span>
+                    </div>
                 </div>
 
-                <!-- Templates sectoriels (v2.3) -->
                 <div class="section">
                     <h2>Informations prestation</h2>
                     <div class="form-row">
@@ -4943,38 +4952,16 @@
                         <div id="simulVolumesTable"></div>
                     </div>
                 </div>
-                <div class="section" style="padding-top:12px;padding-bottom:12px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
-                        <div>
-                            <h3 style="margin:0 0 4px 0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
-                            <small style="color:#7a9db1;display:block;font-size:0.85em;">Cliquez sur un template pour pré-remplir la prestation</small>
-                        </div>
-                    </div>
-                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
+                <div class="section" id="sectionConsommables">
+                    <h2>Consommables</h2>
+                    <div id="consommablesContainer"></div>
+                    <button class="btn" onclick="addConsommableLine()">+ Ajouter consommable</button>
                 </div>
 
-                <div class="section">
-                    <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
-                    <div class="bundles-bar" id="bundlesBar">
-                        <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
-                        <!-- rendered by renderBundleButtons() on load -->
-                    </div>
-                    <div id="gestesContainer"></div>
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
-                        <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd" data-kbd="g">Ctrl+G</span></button>
-                        <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
-                        <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
-                        <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
-                        <button id="btnRedo" class="btn btn-secondary btn-small" onclick="redoLastAction()" title="Rétablir (Ctrl+Shift+Z)" disabled style="opacity:0.5;">🔁 Rétablir</button>
-                    </div>
-                    <div class="chrono-bar" id="chronoBar">
-                        <span style="font-size:0.82em;color:#6b8fa3;font-weight:600;">⏱️ Chronomètre :</span>
-                        <span class="chrono-display" id="chronoDisplay">00:00</span>
-                        <button class="btn btn-small" id="chronoBtnStart" onclick="chronoToggle()">▶ Démarrer</button>
-                        <button class="btn btn-secondary btn-small" onclick="chronoReset()">↺ Reset</button>
-                        <button class="btn btn-secondary btn-small" onclick="chronoApply()" title="Copier le temps mesuré dans le dernier geste sélectionné">→ Appliquer au geste</button>
-                        <span style="font-size:0.78em;color:#8aacbc;" id="chronoStatus"></span>
-                    </div>
+                <div class="section" id="sectionStockage">
+                    <h2>Stockage</h2>
+                    <div id="stockageContainer"></div>
+                    <button class="btn" onclick="addStockageLine()">+ Période stockage</button>
                 </div>
 
                 <div class="section">
@@ -5005,40 +4992,6 @@
                     </div>
                 </div>
 
-                <div class="section" id="sectionConsommables">
-                    <h2>Consommables</h2>
-                    <div id="consommablesContainer"></div>
-                    <button class="btn" onclick="addConsommableLine()">+ Ajouter consommable</button>
-                </div>
-
-                <div class="section" id="sectionStockage">
-                    <h2>Stockage</h2>
-                    <div id="stockageContainer"></div>
-                    <button class="btn" onclick="addStockageLine()">+ Période stockage</button>
-                </div>
-
-                <div class="section" style="border-left-color:#c9b3d4;">
-                    <h2>📝 Notes internes</h2>
-                    <textarea id="notesInternes" placeholder="Notes internes (non imprimées sur le devis) : contraintes, remarques client, conditions particulières..." rows="3" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;resize:vertical;"></textarea>
-                </div>
-
-                <div class="section" style="border-left-color:#f39c12;">
-                    <h2>📸 Photos & Vidéos</h2>
-                    <p style="font-size:0.9em;color:#666;margin-bottom:10px;">Attachez des photos ou vidéos à cette prestation (max 20 MB par fichier)</p>
-                    <input type="file" id="attachmentInput" accept="image/*,video/*" multiple style="display:none" onchange="handleAttachmentUpload()">
-                    <button class="btn" onclick="document.getElementById('attachmentInput').click()" style="background:#fff3cd;border-color:#f39c12;color:#856404;margin-bottom:12px;">➕ Ajouter photos/vidéos</button>
-                    <div id="attachmentsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px;"></div>
-                </div>
-
-                <div style="margin-top: 25px; text-align: center;">
-                    <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
-                    <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
-                    <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
-                    <button class="btn" onclick="window.print()">📄 Imprimer</button>
-                    <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis… <span class="kbd" data-kbd="p">Ctrl+P</span></button>
-                </div>
-
-                <!-- Modèles de prestation (moved to bottom) -->
                 <div id="sectionCostAndValorisation" style="display:contents;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:0;">
                     <h4 style="margin:0;flex:1;">Décomposition & Valorisation</h4>
@@ -5127,6 +5080,53 @@
                 </div>
                 </div>
 
+                <div class="section" style="border-left-color:#c9b3d4;">
+                    <h2>📝 Notes internes</h2>
+                    <textarea id="notesInternes" placeholder="Notes internes (non imprimées sur le devis) : contraintes, remarques client, conditions particulières..." rows="3" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;resize:vertical;"></textarea>
+                </div>
+
+                <div class="section" style="border-left-color:#f39c12;">
+                    <h2>📸 Photos & Vidéos</h2>
+                    <p style="font-size:0.9em;color:#666;margin-bottom:10px;">Attachez des photos ou vidéos à cette prestation (max 20 MB par fichier)</p>
+                    <input type="file" id="attachmentInput" accept="image/*,video/*" multiple style="display:none" onchange="handleAttachmentUpload()">
+                    <button class="btn" onclick="document.getElementById('attachmentInput').click()" style="background:#fff3cd;border-color:#f39c12;color:#856404;margin-bottom:12px;">➕ Ajouter photos/vidéos</button>
+                    <div id="attachmentsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px;"></div>
+                </div>
+
+                <div style="margin-top: 25px; text-align: center;">
+                    <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
+                    <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
+                    <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
+                    <button class="btn" onclick="window.print()">📄 Imprimer</button>
+                    <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis… <span class="kbd" data-kbd="p">Ctrl+P</span></button>
+                </div>
+
+                <!-- Modèles de prestation (moved to bottom) -->
+                <div class="section" style="border-left-color:#c9b3d4;margin-top:30px;">
+                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
+                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
+                            <option value="">— Sélectionner un modèle —</option>
+                        </select>
+                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
+                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
+                        <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
+                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
+                    </div>
+                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                </div>
+
+                <!-- Templates sectoriels (v2.3) -->
+                <div class="section" style="padding-top:12px;padding-bottom:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+                        <div>
+                            <h3 style="margin:0 0 4px 0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
+                            <small style="color:#7a9db1;display:block;font-size:0.85em;">Cliquez sur un template pour pré-remplir la prestation</small>
+                        </div>
+                    </div>
+                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
+                </div>
+            </div>
 
             <!-- ONGLET GESTION STOCK -->
             <div id="stock" class="tab-content">
