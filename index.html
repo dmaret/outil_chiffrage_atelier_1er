@@ -4858,7 +4858,7 @@
                     </div>
                 </div>
 
-                <div class="section" id="sectionInfoPrestation">
+                <div class="section">
                     <h2>Informations prestation</h2>
                     <div class="form-row">
                         <div class="form-group">
@@ -4988,7 +4988,7 @@
                     <button class="btn" onclick="addStockageLine()">+ Période stockage</button>
                 </div>
 
-                <div class="section" id="sectionTempsAdmin">
+                <div class="section">
                     <h2>Temps administratif &amp; logistique</h2>
                     <div class="form-row">
                         <div class="form-group">
@@ -5016,14 +5016,17 @@
                     </div>
                 </div>
 
-                <div class="cost-breakdown" id="sectionCostBreakdown">
-                    <h4 style="display:flex;justify-content:space-between;align-items:center;">
-                        <span>Décomposition des coûts</span>
-                        <div style="display:flex;gap:6px;">
-                            <button onclick="moveSectionUp('sectionCostBreakdown')" title="Monter" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↑</button>
-                            <button onclick="moveSectionDown('sectionCostBreakdown')" title="Descendre" style="background:none;border:1px solid #c5d8e4;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:1.1em;color:#6b8fa3;transition:all 0.2s;">↓</button>
-                        </div>
-                    </h4>
+                <div id="sectionCostAndValorisation" style="display:contents;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:0 18px;">
+                    <h3 style="margin:0;color:#6b8fa3;font-size:1.1em;">Décomposition & Valorisation</h3>
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="moveSectionUp('sectionCostAndValorisation')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:4px 8px;cursor:pointer;color:#6b8fa3;font-size:1.1em;">↑</button>
+                        <button onclick="moveSectionDown('sectionCostAndValorisation')" style="background:none;border:1px solid #c5d8e4;border-radius:4px;padding:4px 8px;cursor:pointer;color:#6b8fa3;font-size:1.1em;">↓</button>
+                    </div>
+                </div>
+
+                <div class="cost-breakdown">
+                    <h4 style="margin:0;padding-bottom:10px;border-bottom:1px solid #a8d5e2;">Décomposition des coûts</h4>
                     <div class="cost-line">
                         <span>Main d'œuvre CEA</span>
                         <span id="coutMO">0.00 CHF</span>
@@ -5051,7 +5054,7 @@
                 </div>
 
                 <div id="calcBadges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
-                <div class="total-box" id="sectionValorisationFinanciere">
+                <div class="total-box">
                     <h3>Valorisation financière</h3>
                     <div class="total-grid">
                         <div class="total-item" title="Temps total = Σ(temps geste × coef × quantité) + temps fixes. Utilisé comme base pour la facturation horaire et la charge atelier.">
@@ -5101,6 +5104,7 @@
                         </div>
                         <div id="variantesPrix" style="margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:0.82em;"></div>
                     </div>
+                </div>
                 </div>
 
                 <div class="section" style="border-left-color:#c9b3d4;">
@@ -10524,9 +10528,6 @@
             });
 
             console.log('📋 Ordre des sections restauré pour', tabName);
-
-            // Restore calculator-specific section order
-            if (tabName === 'Calculateur') restoreCalculatorSectionOrder();
         }
 
         function initSectionDragAndDrop() {
@@ -13232,54 +13233,20 @@
             calculateTotal();
         }
 
-        function moveSectionUp(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (!section) return;
-            let prev = section.previousElementSibling;
-            while (prev && (prev.id === 'calcBadges' || prev.classList.contains('presentation-banner'))) {
-                prev = prev.previousElementSibling;
-            }
-            if (prev && prev.offsetParent !== null) {
-                section.parentNode.insertBefore(section, prev);
-                saveCalculatorSectionOrder();
-            }
+        function moveSectionUp(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            let prev = el.previousElementSibling;
+            while (prev && prev.style.display === 'none') prev = prev.previousElementSibling;
+            if (prev) el.parentNode.insertBefore(el, prev);
         }
 
-        function moveSectionDown(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (!section) return;
-            let next = section.nextElementSibling;
-            while (next && (next.id === 'calcBadges' || next.classList.contains('presentation-banner'))) {
-                next = next.nextElementSibling;
-            }
-            if (next && next.offsetParent !== null) {
-                section.parentNode.insertBefore(next, section);
-                saveCalculatorSectionOrder();
-            }
-        }
-
-        function saveCalculatorSectionOrder() {
-            const calc = document.querySelector('#calculateur');
-            if (!calc) return;
-            const sections = [];
-            calc.querySelectorAll('[id^="section"], .cost-breakdown, .total-box').forEach(el => {
-                if (el.id) sections.push(el.id);
-            });
-            const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-            sectionOrders['Calculateur'] = sections;
-            localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
-        }
-
-        function restoreCalculatorSectionOrder() {
-            const calc = document.querySelector('#calculateur');
-            if (!calc) return;
-            const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-            const savedSections = sectionOrders['Calculateur'];
-            if (!savedSections) return;
-            savedSections.forEach(id => {
-                const el = document.getElementById(id);
-                if (el && el.parentNode === calc) calc.appendChild(el);
-            });
+        function moveSectionDown(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            let next = el.nextElementSibling;
+            while (next && next.style.display === 'none') next = next.nextElementSibling;
+            if (next) el.parentNode.insertBefore(next, el);
         }
 
         // ── Fonctions Thème ─────────────────────────────────────────
