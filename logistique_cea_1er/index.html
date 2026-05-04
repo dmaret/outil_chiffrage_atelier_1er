@@ -724,6 +724,11 @@
         const stockStr = localStorage.getItem('stockData');
         stockData = stockStr ? JSON.parse(stockStr) : {mouvements: [], stockActuel: {}};
 
+        console.log('DEBUG: stockData from localStorage:', stockStr?.substring(0, 300));
+        console.log('DEBUG: Parsed stockData:', stockData);
+        console.log('DEBUG: stockActuel:', stockData.stockActuel);
+        console.log('DEBUG: mouvements count:', stockData.mouvements?.length);
+
         renderFloorMap();
         renderMovementsTimeline();
     }
