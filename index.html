@@ -249,9 +249,9 @@
             color: var(--color-primary-dark);
             border-bottom: 3px solid var(--color-primary);
         }
-        /* ── Groupes d'onglets — couleurs par groupe ── */
+        /* ── Groupes d'onglets — soulignement coloré uniquement ── */
         .tab[data-group-color] { border-bottom: 3px solid transparent; position:relative; }
-        .tab[data-group-color].active { border-bottom-color: var(--tab-group-color, var(--color-primary)); color: var(--tab-group-color, var(--color-primary-dark)); }
+        .tab[data-group-color].active { border-bottom-color: var(--tab-group-color, var(--color-primary)); }
         .tab[data-group-color]:hover { border-bottom-color: transparent; }
         .tabs-group-sep { display:none; }
         /* Editor rows for tabGroups */
