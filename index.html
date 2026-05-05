@@ -3045,7 +3045,7 @@
             transition: transform 0.18s;
         }
         #clinicalFab:hover { transform: scale(1.08); }
-        #clinicalFab.active { display: block; }
+        body.tab-accompagnement #clinicalFab.active { display: block; }
         #clinicalFabLabel {
             position: absolute;
             bottom: 70px;
@@ -12910,6 +12910,7 @@
 
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.body.classList.toggle('tab-accompagnement', tabName === 'accompagnement');
 
             // Trouve le bon bouton onglet par son attribut onclick
             const tabBtn = [...document.querySelectorAll('.tab')].find(t =>
