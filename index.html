@@ -8503,7 +8503,7 @@
                 }
 
                 // First login: set password
-                if (!group.passwordHash) {
+                if (!group.passwordHash || group.passwordHash === '') {
                     const hash = await hashPassword(password);
                     group.passwordHash = hash;
                     saveAuthGroups();
@@ -23787,7 +23787,7 @@
             const group = authGroups.find(g => g.id === groupId);
             if (!group) { errEl.textContent = 'Groupe introuvable.'; return; }
 
-            if (!group.passwordHash) {
+            if (!group.passwordHash || group.passwordHash === '') {
                 // Premier accès : définit le mot de passe
                 const hash = await hashPassword(password);
                 group.passwordHash = hash;
