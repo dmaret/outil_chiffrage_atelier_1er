@@ -10095,27 +10095,18 @@
             try { if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme)); } catch(e) { console.error('Error loading theme preferences:', e); }
             loadConfig();
 
-            // Nettoyage : si l'ordre sauvegardé du calculateur est corrompu
-            // (Décomposition, Notes ou Photos en tête), on le supprime pour laisser
-            // reorganizeCalculatorSections() appliquer la séquence standard.
+            // Supprime toujours l'ordre sauvegardé du calculateur — l'ordre est
+            // géré exclusivement par reorganizeCalculatorSections() à chaque visite.
             try {
                 const _so = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-                const _calcOrder = _so['calculateur'];
-                if (_calcOrder && _calcOrder.length > 0) {
-                    const _first = _calcOrder[0] || '';
-                    const _badStart = ['Décomposition', 'Valorisation', 'Notes', 'Photos', 'Stockage', 'Consommables', 'Temps admin'];
-                    if (_badStart.some(s => _first.includes(s))) {
-                        delete _so['calculateur'];
-                        localStorage.setItem('sectionOrders', JSON.stringify(_so));
-                    }
-                }
-                // Supprimer aussi les anciennes clés textContent (avec emoji) pour calculateur
+                let _changed = false;
                 Object.keys(_so).forEach(k => {
-                    if (k !== 'calculateur' && k.toLowerCase().includes('calculateur')) {
+                    if (k === 'calculateur' || (k !== 'calculateur' && k.toLowerCase().includes('calculateur'))) {
                         delete _so[k];
-                        localStorage.setItem('sectionOrders', JSON.stringify(_so));
+                        _changed = true;
                     }
                 });
+                if (_changed) localStorage.setItem('sectionOrders', JSON.stringify(_so));
             } catch(e) {}
         }
 
@@ -13022,8 +13013,10 @@
             setTimeout(() => {
                 if (tabName === 'calculateur') {
                     reorganizeCalculatorSections();
+                    // Ne pas appliquer d'ordre sauvegardé pour le calculateur — toujours utiliser l'ordre standard
+                } else {
+                    applySectionOrder();
                 }
-                applySectionOrder();
                 initSectionDragAndDrop();
             }, 100);
 
