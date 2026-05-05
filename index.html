@@ -25133,6 +25133,8 @@
         }
 
         function renderDashboard() {
+            console.log('renderDashboard() appelée');
+            try {
             const now = new Date();
             const thisMonth = now.getMonth();
             const thisYear = now.getFullYear();
@@ -25578,6 +25580,10 @@
             try { renderLearnerDashboard(); } catch (e) { console.warn('renderLearnerDashboard failed:', e); }
             try { renderConversionPipeline(); } catch (e) { console.warn('renderConversionPipeline failed:', e); }
             try { renderEcartsWidget(); } catch (e) { console.warn('renderEcartsWidget failed:', e); }
+            } catch (e) {
+                console.error('❌ renderDashboard ERREUR:', e);
+                console.error('Stack:', e.stack);
+            }
         }
 
         // ═══════════════════════════════════════════════════════════
