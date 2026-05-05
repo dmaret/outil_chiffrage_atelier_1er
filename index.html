@@ -12952,7 +12952,13 @@
             // Restore section order and initialize drag-and-drop for sections in admin mode
             setTimeout(() => {
                 if (tabName === 'calculateur') {
-                    reorganizeCalculatorSections(); // Appliquer l'ordre standard du calculateur
+                    // N'appliquer l'ordre standard que si l'utilisateur n'a pas de préférence sauvegardée
+                    const _tabBtn = [...document.querySelectorAll('.tab')].find(t => t.getAttribute('onclick')?.includes("'calculateur'"));
+                    const _calcKey = _tabBtn ? _tabBtn.textContent.trim() : null;
+                    const _savedOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
+                    if (!_calcKey || !_savedOrders[_calcKey]) {
+                        reorganizeCalculatorSections();
+                    }
                 }
                 applySectionOrder();
                 initSectionDragAndDrop();
