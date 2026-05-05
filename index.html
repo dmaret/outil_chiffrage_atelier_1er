@@ -12891,8 +12891,9 @@
         }
 
         function switchTab(tabName, skipConfirm = false) {
+            console.log('switchTab() appelée avec tabName:', tabName);
             // Ignore le clic si on vient de terminer un drag d'onglet
-            if (_tabDragJustEnded) return;
+            if (_tabDragJustEnded) { console.log('_tabDragJustEnded = true, return'); return; }
 
             // Avertir si on quitte le pédalboard avec du travail en cours
             const _activeTab = document.querySelector('.tab-content.active')?.id;
