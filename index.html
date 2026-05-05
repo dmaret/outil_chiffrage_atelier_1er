@@ -10601,6 +10601,11 @@
 
             const savedOrder = sectionOrders[tabId];
             if (!savedOrder) return;
+            // Pour le calculateur : ignorer tout ordre qui ne commence pas par une section de tête valide
+            if (tabId === 'calculateur') {
+                const _validStarts = ['Modèles', 'Informations', 'Templates', 'Gestes'];
+                if (!_validStarts.some(s => (savedOrder[0] || '').includes(s))) return;
+            }
             const sections = Array.from(tabContent.querySelectorAll(':scope > .section'));
             const sectionMap = new Map();
             sections.forEach(sec => {
@@ -13016,10 +13021,7 @@
             // Restore section order and initialize drag-and-drop for sections in admin mode
             setTimeout(() => {
                 if (tabName === 'calculateur') {
-                    const _savedOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-                    if (!_savedOrders['calculateur']) {
-                        reorganizeCalculatorSections();
-                    }
+                    reorganizeCalculatorSections();
                 }
                 applySectionOrder();
                 initSectionDragAndDrop();
