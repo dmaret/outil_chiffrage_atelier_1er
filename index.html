@@ -23706,7 +23706,7 @@
 
             try {
                 // Check if password hash is set - if not, SET IT on first login
-                if (!group.passwordHash) {
+                if (!group.passwordHash || group.passwordHash === '') {
                     group.passwordHash = await hashPassword(password);
                     // Save to localStorage
                     localStorage.setItem('authGroups', JSON.stringify(authGroups));
