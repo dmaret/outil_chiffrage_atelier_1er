@@ -10576,6 +10576,17 @@
                 }
             }
 
+            // Pour le calculateur : si l'ordre sauvegardé est corrompu (Décomposition en tête),
+            // le supprimer pour laisser reorganizeCalculatorSections() appliquer l'ordre standard
+            if (tabId === 'calculateur' && sectionOrders['calculateur']) {
+                const _firstSection = sectionOrders['calculateur'][0] || '';
+                if (_firstSection.includes('Décomposition') || _firstSection.includes('Valorisation') ||
+                    _firstSection.includes('Notes') || _firstSection.includes('Photos')) {
+                    delete sectionOrders['calculateur'];
+                    localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
+                }
+            }
+
             const savedOrder = sectionOrders[tabId];
             if (!savedOrder) return;
             const sections = Array.from(tabContent.querySelectorAll(':scope > .section'));
