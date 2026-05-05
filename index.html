@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Security: Content Security Policy for XSS protection -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none';"
     <title>Outil Complet Atelier - La Pallanterie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,13 +23,11 @@
     <meta name="apple-mobile-web-app-title" content="Atelier LP">
     <meta name="theme-color" content="#6b8fa3">
     <link rel="manifest" href="manifest.json">
-    <!-- External libraries (auto-hosted in lib/ to avoid Tracking Prevention blocks) -->
+    <!-- External libraries - self-hosted to bypass tracking prevention -->
     <script defer src="lib/html2pdf.bundle.min.js"></script>
     <script defer src="lib/xlsx.full.min.js"></script>
     <script defer src="lib/three.min.js"></script>
     <script defer src="lib/chart.umd.min.js"></script>
-    <!-- Encryption library for sensitive data protection -->
-    <script defer src="lib/nacl.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -32427,7 +32425,7 @@
 
         function generateQRCodes() {
             try {
-                // Load QR library (QRCode.js from CDN or simple implementation)
+                // Load QR library (QRCode.js from local lib folder)
                 if (typeof QRCode === 'undefined') {
                     const script = document.createElement('script');
                     script.src = 'lib/qrcode.min.js';
