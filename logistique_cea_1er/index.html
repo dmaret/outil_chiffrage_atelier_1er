@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistique CEA 1er - Terminal Portable</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' font-weight='bold'>📦</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .container { width: 100%; max-width: 1400px; margin: 0 auto; }
+
+        /* ═══════════════════════════════════════════════════════════
+           LOGIN SCREEN (FALC - Simple & Accessible)
+           ═══════════════════════════════════════════════════════════ */
+
+        #loginScreen {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           MAIN APP (After Login)
+           ═══════════════════════════════════════════════════════════ */
+
+        #appScreen {
+            display: none;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid #fff;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header-user {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+            background: white;
+            overflow-x: auto;
+            flex-wrap: wrap;
+            border-bottom: 3px solid #ddd;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 15px;
+            text-align: center;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-tab:hover {
+            background: #e0e0e0;
+        }
+
+        .nav-tab.active:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: flex;
+            visibility: hidden;
+            opacity: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .close-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+
+        .gesture-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .gesture-item {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .gesture-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .gesture-quantity {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 22px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .order-card {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+        }
+
+        .order-card:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            #loginScreen {
+                padding: 30px 20px;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .nav-tabs {
+                padding: 8px;
+                gap: 3px;
+            }
+
+            .nav-tab {
+                min-width: 80px;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LOGIN SCREEN
+     ═══════════════════════════════════════════════════════════ -->
+
+<div id="loginScreen" class="container">
+    <div class="logo">📦</div>
+    <h1 class="title">Logistique CEA</h1>
+    <p class="subtitle">Terminal Portable 1er Étage</p>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="ceaId">Identifiant CEA</label>
+            <input type="text" id="ceaId" placeholder="Ex: CEA-001" required autofocus autocomplete="username">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary">🚀 Accéder</button>
+    </form>
+
+    <p id="loginError" style="color: #ff6b6b; margin-top: 20px; font-weight: 600;"></p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN APP
+     ═══════════════════════════════════════════════════════════ -->
+
+<div id="appScreen">
+    <div class="header">
+        <div class="header-title">📦 Logistique CEA 1er</div>
+        <div class="header-user">CEA: <span id="currentCEA"></span></div>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">🚪 Déconnecter</button>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('dashboard', this)">📊 Commandes</button>
+        <button class="nav-tab" onclick="switchTab('stocks', this)">📦 Stocks</button>
+        <button class="nav-tab" onclick="switchTab('formation', this)">🎓 Formation</button>
+        <button class="nav-tab" onclick="switchTab('planning', this)">📅 Planification</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="card">
+                <div class="card-title">📋 Commandes Actives</div>
+                <div class="stat-box">
+                    <div class="stat-value" id="activeOrderCount">0</div>
+                    <div class="stat-label">Commandes en cours</div>
+                </div>
+                <div id="ordersList" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- Stocks Tab -->
+        <div id="stocks" class="tab-content">
+            <div class="card">
+                <div class="card-title">📊 État du Stock</div>
+                <div id="stocksMap" style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px;"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">⏱️ Historique Mouvements</div>
+                <div id="movementsTimeline"></div>
+            </div>
+        </div>
+
+        <!-- Formation Tab -->
+        <div id="formation" class="tab-content">
+            <div class="card">
+                <div class="card-title">🎓 Mes Formations</div>
+                <div id="trainingList"></div>
+            </div>
+        </div>
+
+        <!-- Planning Tab -->
+        <div id="planning" class="tab-content">
+            <div class="card">
+                <div class="card-title">📅 Ma Planification</div>
+                <div id="tasksContainer"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="modalOrderName"></div>
+                    <div class="modal-subtitle" id="modalClientName"></div>
+                </div>
+                <button class="close-btn" onclick="closeOrderModal()">✕</button>
+            </div>
+            <div class="gesture-list" id="gesturesList"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ═══════════════════════════════════════════════════════════
+    // DATA MANAGEMENT (Shared with main app)
+    // ═══════════════════════════════════════════════════════════
+
+    const DB_NAME = 'logistique_cea_db';
+    let currentCEA = null;
+
+    // Login handling
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const ceaId = document.getElementById('ceaId').value;
+        const password = document.getElementById('password').value;
+
+        // TODO: Validate against atelier_db auth groups
+        if (ceaId && password) {
+            currentCEA = ceaId;
+            localStorage.setItem('currentCEA', ceaId);
+            showApp();
+            loadDashboard();
+        } else {
+            document.getElementById('loginError').textContent = '❌ Identifiant ou mot de passe incorrect';
+        }
+    });
+
+    function logout() {
+        currentCEA = null;
+        localStorage.removeItem('currentCEA');
+        document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('appScreen').style.display = 'none';
+        document.getElementById('loginForm').reset();
+    }
+
+    function showApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appScreen').style.display = 'block';
+        document.getElementById('currentCEA').textContent = currentCEA;
+    }
+
+    // Tab switching
+    function switchTab(tabName, triggerEl) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+        document.getElementById(tabName).classList.add('active');
+        const btn = triggerEl || document.querySelector(`.nav-tab[onclick*="'${tabName}'"]`);
+        if (btn) btn.classList.add('active');
+
+        if (tabName === 'dashboard') loadDashboard();
+        if (tabName === 'stocks') loadStocks();
+        if (tabName === 'formation') loadFormation();
+        if (tabName === 'planning') loadPlanning();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // DASHBOARD
+    // ═══════════════════════════════════════════════════════════
+
+    function loadDashboard() {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+
+        // Filter accepted and in-progress prestations
+        const activeOrders = prestations.filter(p =>
+            p.statut === 'accepte' || p.statut === 'en-cours'
+        );
+
+        const orderCount = document.getElementById('activeOrderCount');
+        orderCount.textContent = activeOrders.length;
+
+        const ordersList = document.getElementById('ordersList');
+        if (activeOrders.length === 0) {
+            ordersList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Aucune commande en cours</p>';
+            return;
+        }
+
+        ordersList.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${activeOrders.map((order, index) => `
+                    <div class="order-card" onclick="showOrderDetail(${index})" style="background: white; border-radius: 12px; padding: 16px; border-left: 5px solid ${order.statut === 'accepte' ? '#27ae60' : '#9a70b8'}; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 16px; color: #333;">${order.nom || 'Sans titre'}</div>
+                                <div style="font-size: 13px; color: #666; margin-top: 2px;">Client: ${order.client || 'Non défini'}</div>
+                            </div>
+                            <span style="background: ${order.statut === 'accepte' ? '#d4edda' : '#e8d5f0'}; color: ${order.statut === 'accepte' ? '#155724' : '#5a3878'}; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                ${order.statut === 'accepte' ? '✅ Acceptée' : '🟣 En cours'}
+                            </span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; margin-top: 8px;">
+                            <div>
+                                <div style="color: #999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Chiffre</div>
+                                <div style="font-weight: 700; color: #333;">CHF ${(order.prixVente || 0).toFixed(2)}</div>
+                            </div>
+                            <div>
+                                <div style="color: #999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Heures</div>
+                                <div style="font-weight: 700; color: #333;">${(order.totalHeures || 0).toFixed(1)}h</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 12px; color: #999;">
+                            📅 ${order.dateCreation ? new Date(order.dateCreation).toLocaleDateString('fr-FR') : 'Date inconnue'}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    let currentOrderIndex = null;
+    let currentGestureIndex = 0;
+
+    function showOrderDetail(orderIndex) {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+
+        // Filter to get active orders
+        const activeOrders = prestations.filter(p =>
+            p.statut === 'accepte' || p.statut === 'en-cours'
+        );
+
+        const order = activeOrders[orderIndex];
+        if (!order) return;
+
+        currentOrderIndex = orderIndex;
+        currentGestureIndex = 0;
+        renderGestureList(order);
+
+        // Show modal
+        document.getElementById('orderModal').classList.add('active');
+    }
+
+    function renderGestureList(order) {
+        // Set modal header information
+        document.getElementById('modalOrderName').textContent = order.nom || 'Sans titre';
+        document.getElementById('modalClientName').textContent = `Client: ${order.client || 'Non défini'}`;
+
+        // Populate gestures list
+        const gesturesContainer = document.getElementById('gesturesList');
+        const gestes = order.gestes || [];
+
+        if (gestes.length === 0) {
+            gesturesContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Aucun geste défini pour cette commande</p>';
+        } else {
+            gesturesContainer.innerHTML = gestes.map((geste, idx) => {
+                const isActive = idx === currentGestureIndex;
+                const isCompleted = idx < currentGestureIndex;
+                const isCurrent = idx === currentGestureIndex;
+
+                return `
+                <div class="gesture-item"
+                     onclick="advanceGesture()"
+                     style="
+                         flex: 1;
+                         cursor: pointer;
+                         transition: all 0.2s;
+                         background: ${isCompleted ? '#d4edda' : isActive ? '#e8d5f0' : '#f8f9fa'};
+                         border-left-color: ${isCompleted ? '#27ae60' : isActive ? '#9a70b8' : '#667eea'};
+                         ${isActive ? 'box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);' : ''}
+                     "
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.2)';"
+                     onmouseout="this.style.transform='none'; this.style.boxShadow='${isActive ? '0 0 0 3px rgba(102, 126, 234, 0.2);' : ''}';">
+                    <div style="flex: 1;">
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 28px;">
+                                ${isCompleted ? '✅' : isCurrent ? '▶️' : '⭕'}
+                            </span>
+                            <div style="flex: 1;">
+                                <div class="gesture-name" style="margin: 0; font-weight: 700; font-size: 20px;">${geste.code || 'Sans code'}</div>
+                                <div style="font-size: 15px; color: #666; margin-top: 3px;">${geste.description || ''}</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 14px; color: #999; margin-top: 6px; margin-left: 38px;">Pièces: ${geste.quantite || 0}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="gesture-quantity">${geste.temps || 0}s</div>
+                        <div style="font-size: 11px; color: #999; margin-top: 4px;">Durée</div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+    }
+
+    function advanceGesture() {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+
+        const activeOrders = prestations.filter(p =>
+            p.statut === 'accepte' || p.statut === 'en-cours'
+        );
+
+        const order = activeOrders[currentOrderIndex];
+        if (!order) return;
+
+        const gestes = order.gestes || [];
+        if (currentGestureIndex < gestes.length - 1) {
+            currentGestureIndex++;
+            renderGestureList(order);
+        } else if (currentGestureIndex === gestes.length - 1) {
+            showFinishConfirmation(order.id);
+        }
+    }
+
+    function showFinishConfirmation(prestationId) {
+        let confirmModal = document.getElementById('finishConfirmModal');
+        if (!confirmModal) {
+            confirmModal = document.createElement('div');
+            confirmModal.id = 'finishConfirmModal';
+            confirmModal.className = 'modal';
+            document.body.appendChild(confirmModal);
+        }
+
+        confirmModal.innerHTML = `
+            <div class="modal-content" style="max-width: 400px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
+                <div class="modal-title" style="font-size: 24px; margin-bottom: 15px;">Avez-vous fini cette commande?</div>
+                <div style="color: #666; margin-bottom: 30px; font-size: 16px;">Tous les gestes ont été complétés. Confirme-tu?</div>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="finishOrder(${prestationId})"
+                        style="flex: 1; padding: 16px; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer;">
+                        ✅ Oui, c'est fini
+                    </button>
+                    <button onclick="cancelFinish()"
+                        style="flex: 1; padding: 16px; background: #f0f0f0; color: #333; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer;">
+                        ❌ Annuler
+                    </button>
+                </div>
+            </div>
+        `;
+
+        confirmModal.classList.add('active');
+    }
+
+    function finishOrder(prestationId) {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+        const idx = prestations.findIndex(p => String(p.id) === String(prestationId));
+
+        if (idx >= 0) {
+            prestations[idx].statut = 'terminee';
+            prestations[idx].dateTerminaison = new Date().toISOString();
+            prestations[idx].realisePar = currentCEA;
+            localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestations));
+        }
+
+        closeFinishConfirmation();
+        returnToDashboard();
+
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+        notif.textContent = '✅ Commande terminée!';
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
+
+    function cancelFinish() {
+        closeFinishConfirmation();
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+        const activeOrders = prestations.filter(p => p.statut === 'accepte' || p.statut === 'en-cours');
+        const order = activeOrders[currentOrderIndex];
+        if (order) renderGestureList(order);
+    }
+
+    function closeFinishConfirmation() {
+        const modal = document.getElementById('finishConfirmModal');
+        if (modal) modal.classList.remove('active');
+    }
+
+    function closeOrderModal() {
+        document.getElementById('orderModal').classList.remove('active');
+    }
+
+    function returnToDashboard() {
+        closeOrderModal();
+        setTimeout(() => switchTab('dashboard'), 100);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // STOCKS
+    // ═══════════════════════════════════════════════════════════
+
+    let stockData = null;
+    let draggedPalette = null;
+    let currentTransferPalette = null;
+
+    function loadStocks() {
+        // Load stock data from main app (localStorage)
+        const stockStr = localStorage.getItem('stockData');
+        stockData = stockStr ? JSON.parse(stockStr) : {mouvements: [], stockActuel: {}};
+
+        renderFloorMap();
+        renderMovementsTimeline();
+    }
+
+    function renderFloorMap() {
+        const map = document.getElementById('stocksMap');
+
+        // Lire les emplacements configurés dans l'app principale
+        const emplacementsStr = localStorage.getItem('configEmplacements');
+        let emplacementsConfig = emplacementsStr ? JSON.parse(emplacementsStr) : [];
+
+        // Construire les zones dynamiquement depuis les données réelles
+        const locations = {};
+        const palettesByLocation = {};
+
+        // Ajouter les emplacements configurés
+        emplacementsConfig.forEach(emp => {
+            const nom = typeof emp === 'string' ? emp : (emp.nom || emp.label || String(emp));
+            locations[nom] = 0;
+            palettesByLocation[nom] = [];
+        });
+
+        // Parcourir le stock et ajouter tous les emplacements trouvés
+        Object.entries(stockData.stockActuel || {}).forEach(([ref, data]) => {
+            (data.lots || []).forEach((lot, idx) => {
+                const loc = lot.emplacement || 'Non classé';
+                if (!locations.hasOwnProperty(loc)) {
+                    locations[loc] = 0;
+                    palettesByLocation[loc] = [];
+                }
+                locations[loc]++;
+                palettesByLocation[loc].push({
+                    id: `${ref}-${idx}`,
+                    ref: ref,
+                    qte: lot.qte,
+                    date: lot.date,
+                    emplacement: loc
+                });
+            });
+        });
+
+        if (Object.keys(locations).length === 0) {
+            map.innerHTML = '<p style="color: #999; text-align: center; padding: 30px;">Aucun stock enregistré</p>';
+            return;
+        }
+
+        // Build map HTML
+        map.innerHTML = Object.entries(locations).map(([location, count]) => `
+            <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 3px dashed #ddd;">
+                <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 15px;">
+                    📦 ${location}
+                    <span style="color: #667eea; font-size: 24px; margin-left: 10px;">${count}</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px; min-height: 80px;">
+                    ${palettesByLocation[location].map(p => `
+                        <div onclick="showTransferModal('${p.ref}', '${p.emplacement}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.2)'; this.style.transform='scale(1.05)';" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'; this.style.transform='scale(1)';">
+                            <div style="font-size: 22px; margin-bottom: 4px;">📦</div>
+                            <div style="font-size: 13px; font-weight: 700; word-break: break-word;">${p.ref}</div>
+                            <div style="font-size: 12px; opacity: 0.9;">${p.qte}u</div>
+                        </div>
+                    `).join('')}
+                    ${count === 0 ? '<div style="color: #ccc; font-size: 13px; text-align: center; padding: 10px; width: 100%;">Vide</div>' : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function dragPalette(event, paletteId, ref) {
+        draggedPalette = {id: paletteId, ref: ref};
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('paletteId', paletteId);
+    }
+
+    function dropPalette(event, destination) {
+        event.preventDefault();
+        if (!draggedPalette) return;
+
+        // Record movement
+        const now = new Date().toISOString();
+        if (!stockData.mouvements) stockData.mouvements = [];
+
+        stockData.mouvements.push({
+            type: 'transfert',
+            ref: draggedPalette.ref,
+            date: now,
+            qte: 1,
+            destEmplacement: destination,
+            emplacement: destination
+        });
+
+        // Save back to localStorage
+        localStorage.setItem('stockData', JSON.stringify(stockData));
+
+        draggedPalette = null;
+        renderFloorMap();
+        renderMovementsTimeline();
+    }
+
+    function showTransferModal(paletteRef, paletteEmplacement) {
+        // Trouver la quantité disponible pour cette palette
+        const stockStr = localStorage.getItem('stockData');
+        const stockData = stockStr ? JSON.parse(stockStr) : { mouvements: [], stockActuel: {} };
+
+        let availableQty = 0;
+        const refData = stockData.stockActuel[paletteRef];
+        if (refData && refData.lots) {
+            const lot = refData.lots.find(l => l.emplacement === paletteEmplacement);
+            if (lot) availableQty = lot.qte;
+        }
+
+        currentTransferPalette = { ref: paletteRef, from: paletteEmplacement, qty: availableQty };
+
+        // Récupérer tous les emplacements disponibles
+        const emplacementsStr = localStorage.getItem('configEmplacements');
+        const emplacements = emplacementsStr ? JSON.parse(emplacementsStr) : [];
+        const emplacementNames = emplacements.map(e => typeof e === 'string' ? e : (e.nom || e.label || String(e)));
+
+        // Créer la modale de transfert
+        let transferModal = document.getElementById('transferModal');
+        if (!transferModal) {
+            transferModal = document.createElement('div');
+            transferModal.id = 'transferModal';
+            transferModal.className = 'modal';
+            document.body.appendChild(transferModal);
+        }
+
+        transferModal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <div>
+                        <div class="modal-title">📦 Transférer une palette</div>
+                        <div class="modal-subtitle">De: ${paletteEmplacement} → Vers: ?</div>
+                    </div>
+                    <button class="close-btn" onclick="closeTransferModal()">✕</button>
+                </div>
+                <div style="padding: 20px;">
+                    <div style="font-weight: 600; color: #333; margin-bottom: 8px;">Référence: <span style="color: #667eea; font-size: 18px;">${paletteRef}</span></div>
+                    <div style="font-weight: 600; color: #333; margin-bottom: 20px;">Disponible: <span style="color: #27ae60; font-size: 18px;">${availableQty} unité(s)</span></div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px;">Quantité à transférer:</label>
+                        <input type="number" id="transferQty" min="1" max="${availableQty}" value="${availableQty}"
+                            style="width: 100%; padding: 12px; border: 2px solid #667eea; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                    </div>
+
+                    <div style="margin-bottom: 20px; padding: 12px; background: #f0f0f0; border-radius: 8px; font-size: 14px; color: #666;">
+                        Sélectionne l'emplacement de destination:
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        ${emplacementNames.filter(e => e !== paletteEmplacement).map(emplacement => `
+                            <button onclick="const qty = parseInt(document.getElementById('transferQty').value); if(qty > 0 && qty <= ${availableQty}) { executeTransfer('${paletteRef}', '${paletteEmplacement}', '${emplacement}', qty); } else { alert('Quantité invalide'); }"
+                                style="padding: 16px; background: white; border: 2px solid #667eea; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; color: #667eea; transition: all 0.2s;"
+                                onmouseover="this.style.background='#f0f5ff'"
+                                onmouseout="this.style.background='white'">
+                                ➡️ Vers ${emplacement}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button onclick="closeTransferModal()"
+                        style="width: 100%; padding: 14px; background: #f0f0f0; border: none; border-radius: 10px; margin-top: 20px; cursor: pointer; font-size: 14px; font-weight: 600; color: #666;">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        `;
+
+        transferModal.classList.add('active');
+    }
+
+    function executeTransfer(paletteRef, from, to, qty) {
+        // Enregistrer le mouvement
+        const stockStr = localStorage.getItem('stockData');
+        let stockData = stockStr ? JSON.parse(stockStr) : { mouvements: [], stockActuel: {} };
+
+        if (!stockData.mouvements) stockData.mouvements = [];
+
+        const now = new Date().toISOString();
+        stockData.mouvements.push({
+            id: Date.now(),
+            type: 'transfert',
+            ref: paletteRef,
+            date: now,
+            qte: qty,
+            emplacement: from,
+            destEmplacement: to
+        });
+
+        // Recalculer le stockActuel
+        stockData.stockActuel = {};
+        stockData.mouvements.forEach(m => {
+            if (m.type === 'entrée') {
+                if (!stockData.stockActuel[m.ref]) {
+                    stockData.stockActuel[m.ref] = { lots: [], total: 0 };
+                }
+                stockData.stockActuel[m.ref].lots.push({
+                    date: m.date,
+                    qte: m.qte,
+                    prix: m.prix,
+                    emplacement: m.emplacement
+                });
+                stockData.stockActuel[m.ref].total += m.qte;
+            } else if (m.type === 'sortie' && stockData.stockActuel[m.ref]) {
+                let reste = m.qte;
+                while (reste > 0 && stockData.stockActuel[m.ref].lots.length > 0) {
+                    const lot = stockData.stockActuel[m.ref].lots[0];
+                    if (lot.qte <= reste) {
+                        reste -= lot.qte;
+                        stockData.stockActuel[m.ref].lots.shift();
+                    } else {
+                        lot.qte -= reste;
+                        reste = 0;
+                    }
+                }
+                stockData.stockActuel[m.ref].total -= m.qte;
+                if (stockData.stockActuel[m.ref].total <= 0) delete stockData.stockActuel[m.ref];
+            } else if (m.type === 'transfert' && stockData.stockActuel[m.ref]) {
+                let qteToMove = m.qte;
+                const lotsToMove = [];
+
+                for (let i = 0; i < stockData.stockActuel[m.ref].lots.length && qteToMove > 0; i++) {
+                    const lot = stockData.stockActuel[m.ref].lots[i];
+                    if (lot.emplacement === m.emplacement) {
+                        if (lot.qte <= qteToMove) {
+                            lotsToMove.push({...lot, emplacement: m.destEmplacement});
+                            qteToMove -= lot.qte;
+                            lot.qte = 0;
+                        } else {
+                            lotsToMove.push({...lot, qte: qteToMove, emplacement: m.destEmplacement});
+                            lot.qte -= qteToMove;
+                            qteToMove = 0;
+                        }
+                    }
+                }
+
+                stockData.stockActuel[m.ref].lots = stockData.stockActuel[m.ref].lots.filter(l => l.qte > 0);
+                lotsToMove.forEach(l => stockData.stockActuel[m.ref].lots.push(l));
+                stockData.stockActuel[m.ref].lots.sort((a, b) => new Date(a.date) - new Date(b.date));
+            }
+        });
+
+        localStorage.setItem('stockData', JSON.stringify(stockData));
+        closeTransferModal();
+        loadStocks();
+
+        // Notification
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+        notif.textContent = `✅ ${qty} unité(s) transférée(s) de ${from} vers ${to}!`;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
+
+    function closeTransferModal() {
+        const modal = document.getElementById('transferModal');
+        if (modal) modal.classList.remove('active');
+        currentTransferPalette = null;
+    }
+
+    function showPaletteInfo(event, paletteId) {
+        // Extract reference from paletteId (format: ref-idx)
+        const ref = paletteId.split('-').slice(0, -1).join('-');
+
+        // Get last 2 movements for this reference
+        const movements = (stockData.mouvements || [])
+            .filter(m => m.ref === ref)
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 2);
+
+        if (movements.length === 0) return;
+
+        // Create or update tooltip
+        let tooltip = document.getElementById('paletteTooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'paletteTooltip';
+            tooltip.style.cssText = 'position: fixed; background: #333; color: white; padding: 10px 15px; border-radius: 8px; font-size: 12px; z-index: 10000; pointer-events: none; max-width: 250px; white-space: normal;';
+            document.body.appendChild(tooltip);
+        }
+
+        tooltip.innerHTML = movements.map(m =>
+            `<div style="margin-bottom: 4px;"><strong>${m.ref}</strong> - ${m.type}</div>
+             <div style="opacity: 0.8; font-size: 11px;">${new Date(m.date).toLocaleDateString('fr-FR')} ${new Date(m.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>`
+        ).join('<div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 6px;"></div>');
+
+        // Position tooltip near cursor
+        tooltip.style.display = 'block';
+        let x = event.pageX + 10;
+        let y = event.pageY + 10;
+
+        // Prevent tooltip from going off-screen right
+        setTimeout(() => {
+            if (x + tooltip.offsetWidth > window.innerWidth) {
+                x = event.pageX - tooltip.offsetWidth - 10;
+            }
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+        }, 0);
+    }
+
+    document.addEventListener('mouseleave', () => {
+        const tooltip = document.getElementById('paletteTooltip');
+        if (tooltip) tooltip.style.display = 'none';
+    }, true);
+
+    function renderMovementsTimeline() {
+        const timeline = document.getElementById('movementsTimeline');
+        const movements = (stockData.mouvements || [])
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 20); // Last 20 movements
+
+        if (movements.length === 0) {
+            timeline.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Aucun mouvement enregistré</p>';
+            return;
+        }
+
+        timeline.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${movements.map((m, idx) => `
+                    <div style="display: flex; gap: 12px; padding: 12px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <div style="font-size: 20px; min-width: 30px;">
+                            ${m.type === 'entrée' ? '📥' : m.type === 'sortie' ? '📤' : '↔️'}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #333;">${m.ref}</div>
+                            <div style="font-size: 13px; color: #666; margin: 4px 0;">
+                                ${m.type === 'transfert' ? `Déplacée vers ${m.destEmplacement}` : `${m.type} en ${m.emplacement}`}
+                            </div>
+                            <div style="font-size: 12px; color: #999;">
+                                ${new Date(m.date).toLocaleDateString('fr-FR')} à ${new Date(m.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}
+                            </div>
+                        </div>
+                        <div style="font-size: 14px; font-weight: 700; color: #667eea; min-width: 40px; text-align: right;">
+                            ${m.qte}u
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // FORMATION
+    // ═══════════════════════════════════════════════════════════
+
+    function loadFormation() {
+        const ceaFormationsStr = localStorage.getItem('CEAFormations');
+        const ceaFormations = ceaFormationsStr ? JSON.parse(ceaFormationsStr) : {};
+        const formations = ceaFormations[currentCEA] || [];
+
+        const domainLabels = {
+            systemes: { label: 'Systèmes', icon: '💻' },
+            methodes: { label: 'Méthodes', icon: '🔄' },
+            retailers: { label: 'Retailers', icon: '🏬' },
+            operations: { label: 'Opérations', icon: '📦' },
+            kpi: { label: 'KPI', icon: '📈' }
+        };
+
+        const trainingList = document.getElementById('trainingList');
+
+        if (formations.length === 0) {
+            trainingList.innerHTML = '<p style="color: #999; text-align: center; padding: 30px;"><span style="font-size: 2em; display: block; margin-bottom: 10px;">📚</span>Aucune formation assignée pour le moment</p>';
+            return;
+        }
+
+        trainingList.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${formations.map(domain => {
+                    const d = domainLabels[domain] || { label: domain, icon: '📖' };
+                    return `
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-weight: 700; font-size: 18px; margin-bottom: 8px;">
+                                ${d.icon} ${d.label}
+                            </div>
+                            <div style="font-size: 13px; opacity: 0.9; margin-bottom: 12px;">
+                                Formation assignée
+                            </div>
+                            <button onclick="startTraining('${domain}')" style="background: white; color: #667eea; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; width: 100%; transition: all 0.2s;">
+                                ▶️ Commencer la formation
+                            </button>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    function startTraining(domain) {
+        const domainLabels = {
+            systemes: 'Systèmes',
+            methodes: 'Méthodes',
+            retailers: 'Retailers',
+            operations: 'Opérations',
+            kpi: 'KPI'
+        };
+
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #3498db; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+        notif.textContent = `📚 Formation "${domainLabels[domain] || domain}" en cours de développement...`;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
+
+    function showProcedure(prestationId) {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+        const prestation = prestations.find(p => String(p.id) === String(prestationId));
+        if (!prestation) return;
+
+        // Trouver l'index dans les commandes actives pour réutiliser showOrderDetail
+        const activeOrders = prestations.filter(p => p.statut === 'accepte' || p.statut === 'en-cours');
+        const idx = activeOrders.findIndex(p => String(p.id) === String(prestationId));
+
+        currentOrderIndex = idx >= 0 ? idx : 0;
+        currentGestureIndex = 0;
+
+        // Ajouter le bouton "Valider la prise en charge" dans la modale
+        const modal = document.getElementById('orderModal');
+        let validateBtn = document.getElementById('validateBtn');
+        if (!validateBtn) {
+            const gesturesList = document.getElementById('gesturesList');
+            validateBtn = document.createElement('div');
+            validateBtn.id = 'validateBtn';
+            validateBtn.style.cssText = 'margin-top: 20px;';
+            gesturesList.parentNode.appendChild(validateBtn);
+        }
+        validateBtn.innerHTML = `
+            <button onclick="validatePriseEnCharge('${prestationId}')"
+                style="width: 100%; padding: 18px; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(39,174,96,0.3);">
+                ✅ Valider la prise en charge
+            </button>
+            <button onclick="returnToDashboard()"
+                style="width: 100%; padding: 14px; background: #f0f0f0; color: #333; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+                📋 Retour aux commandes
+            </button>
+        `;
+
+        renderGestureList(prestation);
+        modal.classList.add('active');
+    }
+
+    function validatePriseEnCharge(prestationId) {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+        const idx = prestations.findIndex(p => String(p.id) === String(prestationId));
+        if (idx >= 0) {
+            prestations[idx].statut = 'en-cours';
+            prestations[idx].prisEnCharge = new Date().toISOString();
+            prestations[idx].prisEnChargeParCEA = currentCEA;
+            localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestations));
+        }
+
+        // Afficher confirmation
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 700; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+        notif.textContent = '✅ Prise en charge validée!';
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+
+        returnToDashboard();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PLANNING
+    // ═══════════════════════════════════════════════════════════
+
+    function loadPlanning() {
+        const prestStr = localStorage.getItem('prestationsSauvegardees');
+        const prestations = prestStr ? JSON.parse(prestStr) : [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Get Monday of current week
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - ((today.getDay() || 7) - 1));
+
+        // Get Sunday of current week
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+
+        // Filter tasks for this week (accepte + en-cours statuses)
+        const weekTasks = prestations.filter(p => {
+            if (p.statut !== 'accepte' && p.statut !== 'en-cours') return false;
+            const startDate = p.dateDebut || p.date;
+            const endDate = p.dateFin || p.date;
+            if (!startDate) return false; // Skip if no date
+            const dStart = new Date(startDate);
+            const dEnd = endDate ? new Date(endDate) : dStart;
+            return dStart <= sunday && dEnd >= monday;
+        }).sort((a, b) => {
+            const aDate = new Date(a.dateDebut || a.date || '2099-01-01');
+            const bDate = new Date(b.dateDebut || b.date || '2099-01-01');
+            return aDate - bDate;
+        });
+
+        // Filter tasks for today
+        const todayTasks = weekTasks.filter(p => {
+            const startDate = p.dateDebut || p.date;
+            if (!startDate) return false;
+            const dStart = new Date(startDate);
+            const dEnd = p.dateFin ? new Date(p.dateFin) : dStart;
+            return dStart <= today && dEnd >= today;
+        });
+
+        const tasksDiv = document.getElementById('tasksContainer');
+        if (!tasksDiv) return;
+
+        let html = '<div style="display: flex; flex-direction: column; gap: 20px;">';
+
+        // Daily section
+        html += `
+            <div>
+                <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 12px;">
+                    📅 Aujourd'hui (${today.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'})})
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    ${todayTasks.length === 0
+                        ? '<p style="color: #999; padding: 15px; text-align: center;">Aucune tâche aujourd\'hui</p>'
+                        : todayTasks.map(task => `
+                            <div onclick="showProcedure('${task.id}')" class="order-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border-radius: 10px; cursor: pointer;">
+                                <div style="font-weight: 700; margin-bottom: 4px; font-size: 17px;">${task.nom || task.prestation || 'Sans titre'}</div>
+                                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Client: ${task.client || 'Non défini'}</div>
+                                <div style="display: flex; gap: 12px; font-size: 13px;">
+                                    <span>⏱️ ${(task.heures || 0).toFixed(1)}h</span>
+                                    <span>📋 ${(task.gestes || []).length} gestes</span>
+                                </div>
+                                <div style="margin-top: 10px; background: rgba(255,255,255,0.2); border-radius: 6px; padding: 8px; font-size: 13px; text-align: center; font-weight: 600;">
+                                    👆 Voir la procédure de travail
+                                </div>
+                            </div>
+                        `).join('')}
+                </div>
+            </div>
+        `;
+
+        // Weekly section
+        html += `
+            <div>
+                <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 12px;">
+                    📊 Cette semaine
+                </div>
+                <div style="background: white; border-radius: 12px; padding: 0; overflow: hidden;">
+        `;
+
+        // Create day-by-day view
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(monday);
+            day.setDate(monday.getDate() + i);
+            day.setHours(0, 0, 0, 0);
+
+            const dayTasks = weekTasks.filter(p => {
+                const startDate = p.dateDebut || p.date;
+                if (!startDate) return false;
+                const dStart = new Date(startDate);
+                const dEnd = p.dateFin ? new Date(p.dateFin) : dStart;
+                return dStart <= day && dEnd >= day;
+            });
+
+            const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            const dayLabel = dayNames[day.getDay()];
+            const isToday = day.toDateString() === today.toDateString();
+            const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+
+            html += `
+                <div style="border-bottom: ${i < 6 ? '1px solid #f0f0f0' : 'none'}; background: ${isToday ? '#f0f5ff' : 'white'};">
+                    <div style="padding: 12px 16px; background: ${isWeekend ? '#f8f8f8' : 'white'}; border-left: 4px solid ${isToday ? '#667eea' : '#ddd'};">
+                        <div style="font-weight: 700; color: #333; margin-bottom: 6px;">
+                            ${isToday ? '⭐ ' : ''}${dayLabel} ${day.getDate()}
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            ${dayTasks.length === 0
+                                ? '<span style="color: #bbb; font-size: 12px;">Pas de tâche</span>'
+                                : dayTasks.map(task => `
+                                    <span onclick="showProcedure('${task.id}')" style="font-size: 13px; color: #667eea; cursor: pointer; font-weight: 600; padding: 4px 0; display: block;">
+                                        ▶️ ${task.prestation || 'Tâche'} (${(task.heures || 0).toFixed(1)}h)
+                                    </span>
+                                `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += '</div></div></div>';
+        tasksDiv.innerHTML = html;
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+        const savedCEA = localStorage.getItem('currentCEA');
+        if (savedCEA) {
+            currentCEA = savedCEA;
+            showApp();
+            loadDashboard();
+        } else {
+            // Auto-login as 'cea' for testing, or show login screen
+            currentCEA = 'cea';
+            localStorage.setItem('currentCEA', 'cea');
+            showApp();
+            loadDashboard();
+        }
+    });
+</script>
+
+</body>
+</html>

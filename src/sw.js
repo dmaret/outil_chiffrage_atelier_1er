@@ -3,7 +3,7 @@
 // quand en ligne), cache-first pour les assets statiques.
 // Bumper CACHE_VERSION à chaque release pour invalider l'ancien cache.
 
-const CACHE_VERSION = 'v2.1.5';
+const CACHE_VERSION = 'v2.1.1';
 const CACHE_NAME = `atelier-lp-${CACHE_VERSION}`;
 const APP_SHELL = [
     './',

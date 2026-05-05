@@ -1,0 +1,17 @@
+{
+  "name": "Outil Atelier La Pallanterie",
+  "short_name": "Atelier LP",
+  "description": "Outil de chiffrage, gestion de stock et planification d'atelier",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f8fa",
+  "theme_color": "#6b8fa3",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
