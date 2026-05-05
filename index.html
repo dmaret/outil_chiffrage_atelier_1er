@@ -12915,29 +12915,31 @@
             const tabEl = document.getElementById(tabName);
             if (tabEl) tabEl.classList.add('active');
 
-            if (tabName === 'dashboard') renderDashboard();
-            else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
-            else if (tabName === 'formation') { updateFormationSelectors(); updateCEAFormationSelect(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); }
-            else if (tabName === 'consommables') renderConsommablesTable();
-            else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
-            else if (tabName === 'clients') renderClients();
-            else if (tabName === 'stats') updateStats();
+            if (tabName === 'dashboard') { try { renderDashboard(); } catch (e) { console.warn('renderDashboard:', e); } }
+            else if (tabName === 'catalogue') { try { renderCatalogue(); setTimeout(autoGesteCode, 50); } catch (e) { console.warn('renderCatalogue:', e); } }
+            else if (tabName === 'formation') { try { updateFormationSelectors(); if (typeof updateCEAFormationSelect === 'function') updateCEAFormationSelect(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); } catch (e) { console.warn('formation:', e); } }
+            else if (tabName === 'consommables') { try { renderConsommablesTable(); } catch (e) { console.warn('renderConsommablesTable:', e); } }
+            else if (tabName === 'prestations') { try { renderPrestations(); checkAndShowAlerts(); } catch (e) { console.warn('prestations:', e); } }
+            else if (tabName === 'clients') { try { renderClients(); } catch (e) { console.warn('renderClients:', e); } }
+            else if (tabName === 'stats') { try { updateStats(); } catch (e) { console.warn('updateStats:', e); } }
             else if (tabName === 'stock') {
-                updateStockStats();
-                renderMouvements();
-                renderValorisation();
-                renderStockMinTable();
-                updateTemplateButton();
-                checkAndShowAlerts();
+                try {
+                    updateStockStats();
+                    renderMouvements();
+                    renderValorisation();
+                    renderStockMinTable();
+                    updateTemplateButton();
+                    checkAndShowAlerts();
+                } catch (e) { console.warn('stock:', e); }
             }
-            else if (tabName === 'parametrage') loadConfig();
-            else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); }
-            else if (tabName === 'pedalboard')          renderPedalboard();
-            else if (tabName === 'accompagnement')      renderAccompagnement();
-            else if (tabName === 'historique')          renderHistory();
-            else if (tabName === 'gantt')               { loadGanttPrestSelect(); renderGantt(); }
-            else if (tabName === 'formation-logistique') { updateFormationSelectors(); renderLearnerFormations(); initFormationLinks(); }
-            else if (tabName === 'procedures') renderProceduresTab();
+            else if (tabName === 'parametrage') { try { loadConfig(); } catch (e) { console.warn('loadConfig:', e); } }
+            else if (tabName === 'config') { try { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); } catch (e) { console.warn('config:', e); } }
+            else if (tabName === 'pedalboard')          { try { renderPedalboard(); } catch (e) { console.warn('renderPedalboard:', e); } }
+            else if (tabName === 'accompagnement')      { try { renderAccompagnement(); } catch (e) { console.warn('renderAccompagnement:', e); } }
+            else if (tabName === 'historique')          { try { renderHistory(); } catch (e) { console.warn('renderHistory:', e); } }
+            else if (tabName === 'gantt')               { try { loadGanttPrestSelect(); renderGantt(); } catch (e) { console.warn('gantt:', e); } }
+            else if (tabName === 'formation-logistique') { try { updateFormationSelectors(); renderLearnerFormations(); initFormationLinks(); } catch (e) { console.warn('formation-logistique:', e); } }
+            else if (tabName === 'procedures') { try { renderProceduresTab(); } catch (e) { console.warn('renderProceduresTab:', e); } }
             // Show/hide recap popup (always runs after the tab switch)
             const _pbPop = document.getElementById('pb-recap-popup');
             if (_pbPop) _pbPop.style.display = tabName === 'pedalboard' ? 'block' : 'none';
