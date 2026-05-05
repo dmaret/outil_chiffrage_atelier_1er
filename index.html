@@ -7919,6 +7919,11 @@
             if (!isFinite(num)) return '0';
             return num.toLocaleString('de-CH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
         }
+        // Parse un nombre formaté en de-CH (ex: "1'533.96" → 1533.96)
+        function parseFormattedNum(s) {
+            if (s == null) return 0;
+            return parseFloat(String(s).replace(/'/g, '').replace(/\s/g, '')) || 0;
+        }
         // fmtCHF(1234.5) → "1'234.50 CHF"
         function fmtCHF(n, decimals = 2) { return fmtNum(n, decimals) + ' CHF'; }
         // fmtInt(1234) → "1'234"
@@ -14429,19 +14434,19 @@
                 nbMSP: parseFloat(document.getElementById('nbMSP').value) / 100,
                 unite: document.getElementById('uniteCalc')?.value || 'pièce',
                 responsable: document.getElementById('responsable').value,
-                heures: parseFloat(document.getElementById('totalHeures').textContent),
-                prixRevient: parseFloat(document.getElementById('totalRevient').textContent),
+                heures: parseFormattedNum(document.getElementById('totalHeures').textContent),
+                prixRevient: parseFormattedNum(document.getElementById('totalRevient').textContent),
                 marge: parseFloat(document.getElementById('margePercent').value),
-                prixVente: parseFloat(document.getElementById('prixVente').textContent),
+                prixVente: parseFormattedNum(document.getElementById('prixVente').textContent),
                 gestes: gestes,
                 consommables: consommables,
                 stockage: stockage,
-                coutMO: parseFloat(document.getElementById('coutMO').textContent),
-                coutEncadrement: parseFloat(document.getElementById('coutEncadrement').textContent),
-                coutConsommables: parseFloat(document.getElementById('coutConsommables').textContent),
-                coutStockage: parseFloat(document.getElementById('coutStockage').textContent),
+                coutMO: parseFormattedNum(document.getElementById('coutMO').textContent),
+                coutEncadrement: parseFormattedNum(document.getElementById('coutEncadrement').textContent),
+                coutConsommables: parseFormattedNum(document.getElementById('coutConsommables').textContent),
+                coutStockage: parseFormattedNum(document.getElementById('coutStockage').textContent),
                 nbPieces: parseFloat(document.getElementById('nbPieces').value || 1),
-                prixVentePiece: parseFloat(document.getElementById('prixVentePiece')?.textContent || 0),
+                prixVentePiece: parseFormattedNum(document.getElementById('prixVentePiece')?.textContent || '0'),
                 notesInternes: document.getElementById('notesInternes')?.value || '',
                 tempsMailsMin: parseFloat(document.getElementById('tempsMailsMin')?.value || 0),
                 tempsImpressionMin: parseFloat(document.getElementById('tempsImpressionMin')?.value || 0),
@@ -20954,8 +20959,8 @@
             const margePct = parseFloat(document.getElementById('margePercent')?.value || 0);
 
             // Calculer le prix de base actuel
-            const currentPrix = parseFloat(document.getElementById('prixVente')?.textContent || 0);
-            const currentRevient = parseFloat(document.getElementById('totalRevient')?.textContent || 0);
+            const currentPrix = parseFormattedNum(document.getElementById('prixVente')?.textContent || '0');
+            const currentRevient = parseFormattedNum(document.getElementById('totalRevient')?.textContent || '0');
             if (currentRevient <= 0) {
                 container.innerHTML = '<p style="color:#7a9db1;font-style:italic;">Remplissez le calculateur pour lancer l\'analyse</p>';
                 return;
@@ -21452,10 +21457,10 @@
             const dateValiditeVal = document.getElementById('dateValidite')?.value || '';
             const dateValiditeStr = dateValiditeVal ? new Date(dateValiditeVal).toLocaleDateString('fr-FR') : '';
 
-            const prixRevient = parseFloat(document.getElementById('totalRevient').textContent || 0);
-            const prixVente = parseFloat(document.getElementById('prixVente').textContent || 0);
-            const margeChf = parseFloat(document.getElementById('margeChf').textContent || 0);
-            const totalHeures = parseFloat(document.getElementById('totalHeures').textContent || 0);
+            const prixRevient = parseFormattedNum(document.getElementById('totalRevient').textContent || '0');
+            const prixVente = parseFormattedNum(document.getElementById('prixVente').textContent || '0');
+            const margeChf = parseFormattedNum(document.getElementById('margeChf').textContent || '0');
+            const totalHeures = parseFormattedNum(document.getElementById('totalHeures').textContent || '0');
             const coutMO = parseFloat((document.getElementById('coutMO').textContent || '0').replace(' CHF',''));
             const coutEncadrement = parseFloat((document.getElementById('coutEncadrement').textContent || '0').replace(' CHF',''));
             const coutConsommables = parseFloat((document.getElementById('coutConsommables').textContent || '0').replace(' CHF',''));
