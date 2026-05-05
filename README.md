@@ -249,7 +249,9 @@ Vue d'ensemble de l'activité de l'atelier.
 
 **Visualisations :**
 - Devis en attente avec ancienneté et alertes (> 7 jours, > 30 jours)
-- Pipeline de chiffre d'affaires sur 3 mois (confirmé vs potentiel)
+  - **Changement de statut direct** : modifier le statut sans quitter la section via dropdown
+- Pipeline de conversion : Prospects → Devis → Accepté → Facturé (avec compteurs, CA et taux de conversion)
+- Répartition des bénéfices par client/catégorie : Top 8 clients et catégories par marge bénéficiaire (en progressbars)
 - Top clients par CA sur 12 mois
 - Évolution CA sur 12 mois (graphique barres + moyenne mensuelle)
 - Top prestations par rentabilité (marge %)
@@ -585,7 +587,7 @@ Diagramme de Gantt pour la planification des prestations.
 
 ### 4.15 Formation Admin 🎓
 
-Gestion des apprenants et suivi de la progression des formations.
+Gestion des apprenants et suivi de la progression des formations, avec système de création de quiz personnalisés.
 
 **Fonctionnalités :**
 - Ajouter et gérer des apprenants
@@ -594,6 +596,14 @@ Gestion des apprenants et suivi de la progression des formations.
 - Vidéos de formation intégrées par geste
 - Fiche formation imprimable par apprenant
 - Export et import des rapports de formation
+
+**Système de création de quiz personnalisés :**
+- Créer des quiz QCM (Questions à Choix Multiples) avec réponses à sélectionner
+- Créer des quiz texte libre pour les questions ouvertes
+- Assigner des catégories et descriptions aux quiz
+- Gérer (modifier/supprimer) les quiz créés
+- Stockage persistant en IndexedDB (base de données locale du navigateur)
+- Consultation de la progression des apprenants sur les quiz
 
 ---
 
@@ -815,19 +825,26 @@ Cela permet d'adapter l'interface sans supprimer de données.
 
 ### Stockage local
 
-Toutes les données sont enregistrées dans le **localStorage** du navigateur sous forme de JSON. Les données persistent entre les sessions tant que le cache du navigateur n'est pas effacé.
+**localStorage :** Toutes les données opérationnelles sont enregistrées dans le **localStorage** du navigateur sous forme de JSON. Les données persistent entre les sessions tant que le cache du navigateur n'est pas effacé.
+
+**IndexedDB (v4) :** Base de données structurée du navigateur pour les données complexes et volumineuses :
+- `customQuizzes` : Quiz personnalisés créés en Formation Admin (QCM et texte libre)
+- `audit` : Historique des opérations et modifications
+- Autres stores de référence (documents, ressources)
 
 ### Structures de données principales
 
-| Variable | Contenu |
-|----------|---------|
-| `config` | Paramètres financiers (taux horaires, marges…) |
-| `catalogueGestes` | Liste des gestes de l'atelier |
-| `catalogueConsommables` | Catalogue des matières et fournitures |
-| `prestationsSauvegardees` | Toutes les prestations enregistrées |
-| `clientsData` | Données clients |
-| `stockActuel` | État courant du stock |
-| `mouvements` | Historique des mouvements de stock |
+| Variable | Contenu | Stockage |
+|----------|---------|----------|
+| `config` | Paramètres financiers (taux horaires, marges…) | localStorage |
+| `catalogueGestes` | Liste des gestes de l'atelier | localStorage |
+| `catalogueConsommables` | Catalogue des matières et fournitures | localStorage |
+| `prestationsSauvegardees` | Toutes les prestations enregistrées | localStorage |
+| `clientsData` | Données clients | localStorage |
+| `stockActuel` | État courant du stock | localStorage |
+| `mouvements` | Historique des mouvements de stock | localStorage |
+| `customQuizzes` | Quiz personnalisés en Formation | IndexedDB |
+| `audit` | Audit trail des modifications | IndexedDB |
 
 ### Sauvegarde recommandée
 
@@ -848,7 +865,7 @@ Le localStorage est limité à environ **5 à 10 Mo** selon le navigateur. Pour 
 | Interface | HTML5, CSS3 (variables CSS), JavaScript ES6+ |
 | Typographies | Google Fonts (Inter, Roboto) |
 | Génération PDF | html2pdf.js v0.10.1 |
-| Stockage des données | Browser localStorage (JSON) |
+| Stockage des données | Browser localStorage (JSON) + IndexedDB v4 |
 | Mise en page | CSS Grid et Flexbox |
 | Thèmes | CSS Custom Properties |
 | Glisser-déposer | HTML5 Drag and Drop API (onglets, gestes) |
@@ -856,6 +873,8 @@ Le localStorage est limité à environ **5 à 10 Mo** selon le navigateur. Pour 
 | Frameworks | Aucun (JavaScript natif) |
 
 L'absence de framework garantit la pérennité de l'outil : aucune dépendance à mettre à jour, aucune rupture de compatibilité.
+
+**IndexedDB :** Base de données transactionnelle du navigateur (v4) pour le stockage des quizzes personnalisés et audit trail.
 
 ---
 

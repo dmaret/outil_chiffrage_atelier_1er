@@ -10,11 +10,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Security: Content Security Policy for XSS protection -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none';"
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none';">
     <title>Outil Complet Atelier - La Pallanterie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -23,11 +24,13 @@
     <meta name="apple-mobile-web-app-title" content="Atelier LP">
     <meta name="theme-color" content="#6b8fa3">
     <link rel="manifest" href="manifest.json">
-    <!-- External libraries - self-hosted to bypass tracking prevention -->
-    <script defer src="lib/html2pdf.bundle.min.js"></script>
-    <script defer src="lib/xlsx.full.min.js"></script>
-    <script defer src="lib/three.min.js"></script>
-    <script defer src="lib/chart.umd.min.js"></script>
+    <!-- External libraries (SRI hashes will be validated separately) -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <!-- Encryption library for sensitive data protection -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl.js/1.0.3/nacl.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -275,7 +278,7 @@
         
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -3902,8 +3905,7 @@
         <div id="pinModalBox">
             <h2 id="pinModalTitle">🔐 Accès protégé</h2>
             <p style="color:#7a9db1;margin-bottom:20px;font-size:0.9em;">Code PIN pour déverrouiller l'application<br><small style="font-size:0.85em;color:#a8c5d3;">(Optionnel • Configurable en admin)</small></p>
-            <input type="hidden" autocomplete="username" value="pin">
-            <input type="password" id="pinInput" placeholder="PIN" maxlength="8" aria-label="Code PIN" autocomplete="current-password" onkeydown="if(event.key==='Enter') checkPin()">
+            <input type="password" id="pinInput" placeholder="PIN" maxlength="8" aria-label="Code PIN" onkeydown="if(event.key==='Enter') checkPin()">
             <div id="pinError"></div>
             <button class="btn btn-success" onclick="checkPin()" style="width:100%;margin-top:4px;">✓ Confirmer</button>
         </div>
@@ -4808,21 +4810,30 @@
             <div id="calculateur" class="tab-content">
                 <div class="presentation-banner">🖥️ MODE PRÉSENTATION CLIENT — Coûts internes masqués</div>
 
-                <div class="section" style="border-left-color:#c9b3d4;margin-top:30px;">
-                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
-                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
-                            <option value="">— Sélectionner un modèle —</option>
-                        </select>
-                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
-                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
-                        <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
-                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
+                <div class="section">
+                    <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
+                    <div class="bundles-bar" id="bundlesBar">
+                        <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
+                        <!-- rendered by renderBundleButtons() on load -->
                     </div>
-                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                    <div id="gestesContainer"></div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+                        <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd" data-kbd="g">Ctrl+G</span></button>
+                        <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
+                        <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
+                        <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
+                        <button id="btnRedo" class="btn btn-secondary btn-small" onclick="redoLastAction()" title="Rétablir (Ctrl+Shift+Z)" disabled style="opacity:0.5;">🔁 Rétablir</button>
+                    </div>
+                    <div class="chrono-bar" id="chronoBar">
+                        <span style="font-size:0.82em;color:#6b8fa3;font-weight:600;">⏱️ Chronomètre :</span>
+                        <span class="chrono-display" id="chronoDisplay">00:00</span>
+                        <button class="btn btn-small" id="chronoBtnStart" onclick="chronoToggle()">▶ Démarrer</button>
+                        <button class="btn btn-secondary btn-small" onclick="chronoReset()">↺ Reset</button>
+                        <button class="btn btn-secondary btn-small" onclick="chronoApply()" title="Copier le temps mesuré dans le dernier geste sélectionné">→ Appliquer au geste</button>
+                        <span style="font-size:0.78em;color:#8aacbc;" id="chronoStatus"></span>
+                    </div>
                 </div>
 
-                <!-- Templates sectoriels (v2.3) -->
                 <div class="section">
                     <h2>Informations prestation</h2>
                     <div class="form-row">
@@ -4941,38 +4952,16 @@
                         <div id="simulVolumesTable"></div>
                     </div>
                 </div>
-                <div class="section" style="padding-top:12px;padding-bottom:12px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
-                        <div>
-                            <h3 style="margin:0 0 4px 0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
-                            <small style="color:#7a9db1;display:block;font-size:0.85em;">Cliquez sur un template pour pré-remplir la prestation</small>
-                        </div>
-                    </div>
-                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
+                <div class="section" id="sectionConsommables">
+                    <h2>Consommables</h2>
+                    <div id="consommablesContainer"></div>
+                    <button class="btn" onclick="addConsommableLine()">+ Ajouter consommable</button>
                 </div>
 
-                <div class="section">
-                    <h2>Gestes de production <span id="gestesParPieceLabel" style="font-size:0.75em;color:#7a9db1;font-weight:normal;">(par pièce)</span></h2>
-                    <div class="bundles-bar" id="bundlesBar">
-                        <span style="font-size:0.82em;color:#9a70b8;font-weight:600;">⚡ Bundles :</span>
-                        <!-- rendered by renderBundleButtons() on load -->
-                    </div>
-                    <div id="gestesContainer"></div>
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
-                        <button class="btn" onclick="addGesteLine()">+ Ajouter geste <span class="kbd" data-kbd="g">Ctrl+G</span></button>
-                        <button class="btn btn-secondary btn-small" data-perm="manage_gestes" onclick="openQuickGesteModal()" title="Créer un geste dans le catalogue">✏️ Nouveau geste…</button>
-                        <button class="btn btn-secondary btn-small" onclick="openAssistantModal()" title="Créer la prestation avec l'assistant guidé" style="background:linear-gradient(135deg,#edf5ff,#f0f0ff);border-color:#a8c8f0;">🧙 Assistant</button>
-                        <button id="btnUndo" class="btn btn-secondary btn-small" onclick="undoLastAction()" title="Annuler la dernière action (Ctrl+Z)" disabled style="margin-left:auto;opacity:0.5;">↩ Annuler</button>
-                        <button id="btnRedo" class="btn btn-secondary btn-small" onclick="redoLastAction()" title="Rétablir (Ctrl+Shift+Z)" disabled style="opacity:0.5;">🔁 Rétablir</button>
-                    </div>
-                    <div class="chrono-bar" id="chronoBar">
-                        <span style="font-size:0.82em;color:#6b8fa3;font-weight:600;">⏱️ Chronomètre :</span>
-                        <span class="chrono-display" id="chronoDisplay">00:00</span>
-                        <button class="btn btn-small" id="chronoBtnStart" onclick="chronoToggle()">▶ Démarrer</button>
-                        <button class="btn btn-secondary btn-small" onclick="chronoReset()">↺ Reset</button>
-                        <button class="btn btn-secondary btn-small" onclick="chronoApply()" title="Copier le temps mesuré dans le dernier geste sélectionné">→ Appliquer au geste</button>
-                        <span style="font-size:0.78em;color:#8aacbc;" id="chronoStatus"></span>
-                    </div>
+                <div class="section" id="sectionStockage">
+                    <h2>Stockage</h2>
+                    <div id="stockageContainer"></div>
+                    <button class="btn" onclick="addStockageLine()">+ Période stockage</button>
                 </div>
 
                 <div class="section">
@@ -5003,40 +4992,6 @@
                     </div>
                 </div>
 
-                <div class="section" id="sectionConsommables">
-                    <h2>Consommables</h2>
-                    <div id="consommablesContainer"></div>
-                    <button class="btn" onclick="addConsommableLine()">+ Ajouter consommable</button>
-                </div>
-
-                <div class="section" id="sectionStockage">
-                    <h2>Stockage</h2>
-                    <div id="stockageContainer"></div>
-                    <button class="btn" onclick="addStockageLine()">+ Période stockage</button>
-                </div>
-
-                <div class="section" style="border-left-color:#c9b3d4;">
-                    <h2>📝 Notes internes</h2>
-                    <textarea id="notesInternes" placeholder="Notes internes (non imprimées sur le devis) : contraintes, remarques client, conditions particulières..." rows="3" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;resize:vertical;"></textarea>
-                </div>
-
-                <div class="section" style="border-left-color:#f39c12;">
-                    <h2>📸 Photos & Vidéos</h2>
-                    <p style="font-size:0.9em;color:#666;margin-bottom:10px;">Attachez des photos ou vidéos à cette prestation (max 20 MB par fichier)</p>
-                    <input type="file" id="attachmentInput" accept="image/*,video/*" multiple style="display:none" onchange="handleAttachmentUpload()">
-                    <button class="btn" onclick="document.getElementById('attachmentInput').click()" style="background:#fff3cd;border-color:#f39c12;color:#856404;margin-bottom:12px;">➕ Ajouter photos/vidéos</button>
-                    <div id="attachmentsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px;"></div>
-                </div>
-
-                <div style="margin-top: 25px; text-align: center;">
-                    <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
-                    <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
-                    <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
-                    <button class="btn" onclick="window.print()">📄 Imprimer</button>
-                    <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis… <span class="kbd" data-kbd="p">Ctrl+P</span></button>
-                </div>
-
-                <!-- Modèles de prestation (moved to bottom) -->
                 <div id="sectionCostAndValorisation" style="display:contents;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:0;">
                     <h4 style="margin:0;flex:1;">Décomposition & Valorisation</h4>
@@ -5125,6 +5080,53 @@
                 </div>
                 </div>
 
+                <div class="section" style="border-left-color:#c9b3d4;">
+                    <h2>📝 Notes internes</h2>
+                    <textarea id="notesInternes" placeholder="Notes internes (non imprimées sur le devis) : contraintes, remarques client, conditions particulières..." rows="3" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;resize:vertical;"></textarea>
+                </div>
+
+                <div class="section" style="border-left-color:#f39c12;">
+                    <h2>📸 Photos & Vidéos</h2>
+                    <p style="font-size:0.9em;color:#666;margin-bottom:10px;">Attachez des photos ou vidéos à cette prestation (max 20 MB par fichier)</p>
+                    <input type="file" id="attachmentInput" accept="image/*,video/*" multiple style="display:none" onchange="handleAttachmentUpload()">
+                    <button class="btn" onclick="document.getElementById('attachmentInput').click()" style="background:#fff3cd;border-color:#f39c12;color:#856404;margin-bottom:12px;">➕ Ajouter photos/vidéos</button>
+                    <div id="attachmentsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px;"></div>
+                </div>
+
+                <div style="margin-top: 25px; text-align: center;">
+                    <button class="btn btn-secondary" id="btnCancelEditPrestation" style="display:none;" onclick="cancelEditPrestation()">✖ Annuler la modification</button>
+                    <button class="btn btn-secondary" onclick="resetCalculateur()">🔄 Nouveau</button>
+                    <button class="btn btn-success" onclick="savePrestation()">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
+                    <button class="btn" onclick="window.print()">📄 Imprimer</button>
+                    <button class="btn btn-secondary" onclick="openPrintPrefsModal()">📄 Générer devis… <span class="kbd" data-kbd="p">Ctrl+P</span></button>
+                </div>
+
+                <!-- Modèles de prestation (moved to bottom) -->
+                <div class="section" style="border-left-color:#c9b3d4;margin-top:30px;">
+                    <h2>⚡ Modèles de prestation <span style="font-size:0.65em;color:#9a70b8;font-weight:normal;">— Chargez un modèle pour pré-remplir le calculateur</span></h2>
+                    <div class="modeles-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <select id="modeleSelect" onchange="" style="flex:1;min-width:200px;">
+                            <option value="">— Sélectionner un modèle —</option>
+                        </select>
+                        <button class="btn btn-small" style="background:linear-gradient(135deg,#4e9af1,#6b8fa3);color:white;border:none;font-weight:bold;" onclick="chargerModele()">📋 Charger le modèle</button>
+                        <button class="btn btn-small" onclick="sauverModele()">💾 Sauver comme modèle</button>
+                        <button class="btn btn-danger btn-small" onclick="supprimerModele()" aria-label="Supprimer le modèle" title="Supprimer le modèle">🗑️</button>
+                        <button class="btn btn-success btn-small" id="btnSavePrestation" onclick="savePrestation()" style="margin-left:auto;">💾 Enregistrer <span class="kbd" data-kbd="s">Ctrl+S</span></button>
+                    </div>
+                    <div id="modelesQuickAccess" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                </div>
+
+                <!-- Templates sectoriels (v2.3) -->
+                <div class="section" style="padding-top:12px;padding-bottom:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+                        <div>
+                            <h3 style="margin:0 0 4px 0;color:#6b8fa3;font-size:1em;">⚡ Templates sectoriels</h3>
+                            <small style="color:#7a9db1;display:block;font-size:0.85em;">Cliquez sur un template pour pré-remplir la prestation</small>
+                        </div>
+                    </div>
+                    <div id="prestationTemplatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
+                </div>
+            </div>
 
             <!-- ONGLET GESTION STOCK -->
             <div id="stock" class="tab-content">
@@ -5664,21 +5666,6 @@
                     <div id="adminFormationAssignContainer"></div>
                     <div style="margin-top:12px;text-align:right;">
                         <button class="btn btn-success btn-small" onclick="saveAllDocumentsAndAssignments()" title="Forcer la sauvegarde de toutes les assignations">💾 Sauvegarder</button>
-                    </div>
-                </div>
-
-                <div class="section" style="background:#f0fff0;border-left:4px solid #27ae60;">
-                    <h2>🏭 Assigner des formations aux CEA</h2>
-                    <p style="color:#5a7a5a;margin-bottom:12px;">Sélectionnez un CEA pour lui assigner les domaines de formation qu'il doit dispenser</p>
-                    <select id="ceaFormationSelect" onchange="renderCEAFormationAssign()" style="padding:9px;border:1px solid #c8e0f4;border-radius:8px;width:100%;max-width:400px;font-size:0.95em;">
-                        <option value="">-- Sélectionner un CEA --</option>
-                        <option value="cea">CEA</option>
-                        <option value="asp">ASP</option>
-                        <option value="msp">MSP</option>
-                    </select>
-                    <div id="ceaFormationContainer" style="margin-top:16px;"></div>
-                    <div style="margin-top:12px;text-align:right;">
-                        <button class="btn btn-success btn-small" onclick="saveCEAFormations()" title="Sauvegarder les assignations de formations aux CEA">💾 Sauvegarder assignations CEA</button>
                     </div>
                 </div>
 
@@ -7572,8 +7559,6 @@
 
             </div>
 
-            </div><!-- fin #calculateur -->
-
             <!-- ONGLET DASHBOARD -->
             <div id="dashboard" class="tab-content active">
               <!-- Bannière Mode Apprenant (visible uniquement en mode-apprenant) -->
@@ -8503,7 +8488,7 @@
                 }
 
                 // First login: set password
-                if (!group.passwordHash || group.passwordHash === '') {
+                if (!group.passwordHash) {
                     const hash = await hashPassword(password);
                     group.passwordHash = hash;
                     saveAuthGroups();
@@ -8855,9 +8840,8 @@
 
         function renderAccompCards(grouped) {
             const container = document.getElementById('accompCeaContainer');
-            if (!container) return;
-            const ceaFilter = document.getElementById('accompCeaFilter')?.value || '';
-            const prestationFilter = document.getElementById('accompPrestationFilter')?.value || '';
+            const ceaFilter = document.getElementById('accompCeaFilter').value;
+            const prestationFilter = document.getElementById('accompPrestationFilter').value;
 
             if (Object.keys(grouped).length === 0) {
                 container.innerHTML = '<div style="grid-column:1/-1;padding:20px;background:white;border-radius:8px;text-align:center;color:#8aacbc;">📭 Aucune observation pour l\'instant</div>';
@@ -12809,92 +12793,9 @@
 
         // ════════════════════════════════════════════════════════
 
-        function reorganizeCalculatorSections() {
-            const calc = document.getElementById('calculateur');
-            if (!calc) return;
-
-            // Nouvel ordre demandé - mappé sur les sections
-            const sectionOrder = [
-                {
-                    id: 'modeles',
-                    name: 'Modèles de prestation',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Modèles de prestation')
-                },
-                {
-                    id: 'infos',
-                    name: 'Informations prestation',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent === 'Informations prestation'
-                },
-                {
-                    id: 'templates',
-                    name: 'Templates sectoriels',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h3')?.textContent.includes('Templates sectoriels')
-                },
-                {
-                    id: 'gestes',
-                    name: 'Gestes de production',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Gestes de production')
-                },
-                {
-                    id: 'temps',
-                    name: 'Temps administratif',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Temps administratif')
-                },
-                {
-                    id: 'stockage',
-                    name: 'Stockage',
-                    selector: (el) => el.id === 'sectionStockage' || (el.classList.contains('section') && el.querySelector('h2')?.textContent === 'Stockage')
-                },
-                {
-                    id: 'consommables',
-                    name: 'Consommables',
-                    selector: (el) => el.id === 'sectionConsommables' || (el.classList.contains('section') && el.querySelector('h2')?.textContent === 'Consommables')
-                },
-                {
-                    id: 'decomposition',
-                    name: 'Décomposition & Valorisation',
-                    selector: (el) => el.id === 'sectionCostAndValorisation' || el.querySelector('h4')?.textContent.includes('Décomposition')
-                },
-                {
-                    id: 'notes',
-                    name: 'Notes internes',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Notes interne')
-                },
-                {
-                    id: 'photos',
-                    name: 'Photos & Vidéos',
-                    selector: (el) => el.classList.contains('section') && el.querySelector('h2')?.textContent.includes('Photos')
-                },
-                {
-                    id: 'buttons',
-                    name: 'Buttons',
-                    selector: (el) => el.style.marginTop === '25px' && el.textContent.includes('Nouveau')
-                }
-            ];
-
-            // Récupérer toutes les sections du calculateur
-            const allElements = Array.from(calc.children);
-
-            // Créer une map de sections trouvées
-            const foundSections = {};
-            sectionOrder.forEach(spec => {
-                const found = allElements.find(spec.selector);
-                if (found) {
-                    foundSections[spec.id] = found;
-                }
-            });
-
-            // Réorganiser en ajoutant chaque section dans l'ordre désiré
-            sectionOrder.forEach(spec => {
-                if (foundSections[spec.id]) {
-                    calc.appendChild(foundSections[spec.id]);
-                }
-            });
-        }
-
         function switchTab(tabName, skipConfirm = false) {
             // Ignore le clic si on vient de terminer un drag d'onglet
-            if (_tabDragJustEnded) { return; }
+            if (_tabDragJustEnded) return;
 
             // Avertir si on quitte le pédalboard avec du travail en cours
             const _activeTab = document.querySelector('.tab-content.active')?.id;
@@ -12914,40 +12815,35 @@
             const tabEl = document.getElementById(tabName);
             if (tabEl) tabEl.classList.add('active');
 
-            if (tabName === 'dashboard') { try { renderDashboard(); } catch (e) { console.warn('renderDashboard:', e); } }
-            else if (tabName === 'catalogue') { try { renderCatalogue(); setTimeout(autoGesteCode, 50); } catch (e) { console.warn('renderCatalogue:', e); } }
-            else if (tabName === 'formation') { try { updateFormationSelectors(); if (typeof updateCEAFormationSelect === 'function') updateCEAFormationSelect(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); } catch (e) { console.warn('formation:', e); } }
-            else if (tabName === 'consommables') { try { renderConsommablesTable(); } catch (e) { console.warn('renderConsommablesTable:', e); } }
-            else if (tabName === 'prestations') { try { renderPrestations(); checkAndShowAlerts(); } catch (e) { console.warn('prestations:', e); } }
-            else if (tabName === 'clients') { try { renderClients(); } catch (e) { console.warn('renderClients:', e); } }
-            else if (tabName === 'stats') { try { updateStats(); } catch (e) { console.warn('updateStats:', e); } }
+            if (tabName === 'dashboard') renderDashboard();
+            else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
+            else if (tabName === 'formation') { updateFormationSelectors(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); }
+            else if (tabName === 'consommables') renderConsommablesTable();
+            else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
+            else if (tabName === 'clients') renderClients();
+            else if (tabName === 'stats') updateStats();
             else if (tabName === 'stock') {
-                try {
-                    updateStockStats();
-                    renderMouvements();
-                    renderValorisation();
-                    renderStockMinTable();
-                    updateTemplateButton();
-                    checkAndShowAlerts();
-                } catch (e) { console.warn('stock:', e); }
+                updateStockStats();
+                renderMouvements();
+                renderValorisation();
+                renderStockMinTable();
+                updateTemplateButton();
+                checkAndShowAlerts();
             }
-            else if (tabName === 'parametrage') { try { loadConfig(); } catch (e) { console.warn('loadConfig:', e); } }
-            else if (tabName === 'config') { try { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); } catch (e) { console.warn('config:', e); } }
-            else if (tabName === 'pedalboard')          { try { renderPedalboard(); } catch (e) { console.warn('renderPedalboard:', e); } }
-            else if (tabName === 'accompagnement')      { try { renderAccompagnement(); } catch (e) { console.warn('renderAccompagnement:', e); } }
-            else if (tabName === 'historique')          { try { renderHistory(); } catch (e) { console.warn('renderHistory:', e); } }
-            else if (tabName === 'gantt')               { try { loadGanttPrestSelect(); renderGantt(); } catch (e) { console.warn('gantt:', e); } }
-            else if (tabName === 'formation-logistique') { try { updateFormationSelectors(); renderLearnerFormations(); initFormationLinks(); } catch (e) { console.warn('formation-logistique:', e); } }
-            else if (tabName === 'procedures') { try { renderProceduresTab(); } catch (e) { console.warn('renderProceduresTab:', e); } }
+            else if (tabName === 'parametrage') loadConfig();
+            else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); }
+            else if (tabName === 'pedalboard')          renderPedalboard();
+            else if (tabName === 'accompagnement')      renderAccompagnement();
+            else if (tabName === 'historique')          renderHistory();
+            else if (tabName === 'gantt')               { loadGanttPrestSelect(); renderGantt(); }
+            else if (tabName === 'formation-logistique') { updateFormationSelectors(); renderLearnerFormations(); initFormationLinks(); }
+            else if (tabName === 'procedures') renderProceduresTab();
             // Show/hide recap popup (always runs after the tab switch)
             const _pbPop = document.getElementById('pb-recap-popup');
             if (_pbPop) _pbPop.style.display = tabName === 'pedalboard' ? 'block' : 'none';
 
             // Restore section order and initialize drag-and-drop for sections in admin mode
             setTimeout(() => {
-                if (tabName === 'calculateur') {
-                    reorganizeCalculatorSections(); // Appliquer l'ordre standard du calculateur
-                }
                 applySectionOrder();
                 initSectionDragAndDrop();
             }, 100);
@@ -15855,64 +15751,6 @@
                     <h4 style="margin:0 0 8px;color:#2980b9;">📎 Documents accessibles</h4>
                     <div style="display:flex;flex-wrap:wrap;gap:8px;">${docHtml}</div>
                 </div>`;
-        }
-
-        // CEA : assigner formations aux CEA
-        function renderCEAFormationAssign() {
-            const sel = document.getElementById('ceaFormationSelect');
-            const container = document.getElementById('ceaFormationContainer');
-            if (!sel || !container) return;
-            const cea = sel.value;
-            if (!cea) { container.innerHTML = ''; return; }
-
-            const ceaFormationsStr = localStorage.getItem('CEAFormations');
-            const ceaFormations = ceaFormationsStr ? JSON.parse(ceaFormationsStr) : {};
-            const assignedFormations = ceaFormations[cea] || [];
-
-            const domains = typeof FORMATION_DOMAINS !== 'undefined' ? FORMATION_DOMAINS : {};
-            const domainHtml = Object.entries(domains).map(([key, d]) => {
-                const on = assignedFormations.includes(key);
-                return `<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid ${on?'#27ae60':'#dde'};background:${on?'#e8f9f0':'#fafafa'};cursor:pointer;transition:all 0.15s;">
-                    <input type="checkbox" ${on?'checked':''} onchange="toggleCEADomain('${cea}','${key}',this.checked)">
-                    <span style="font-size:1.1em;">${d.icon}</span>
-                    <span style="font-weight:${on?'600':'400'};color:${on?'#27ae60':'#555'};">${d.label}</span>
-                </label>`;
-            }).join('');
-
-            container.innerHTML = `
-                <div style="margin-top:16px;padding:16px;background:#f0fff0;border-radius:10px;border:1px solid #c8e0f4;">
-                    <h4 style="margin:0 0 12px;color:#27ae60;">🎓 Domaines de formation pour ${cea.toUpperCase()}</h4>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">${domainHtml}</div>
-                </div>`;
-        }
-
-        function toggleCEADomain(cea, domain, checked) {
-            const ceaFormationsStr = localStorage.getItem('CEAFormations');
-            let ceaFormations = ceaFormationsStr ? JSON.parse(ceaFormationsStr) : {};
-
-            if (!ceaFormations[cea]) ceaFormations[cea] = [];
-
-            if (checked && !ceaFormations[cea].includes(domain)) {
-                ceaFormations[cea].push(domain);
-            } else if (!checked) {
-                ceaFormations[cea] = ceaFormations[cea].filter(d => d !== domain);
-            }
-
-            localStorage.setItem('CEAFormations', JSON.stringify(ceaFormations));
-            renderCEAFormationAssign();
-        }
-
-        function saveCEAFormations() {
-            toast('✅ Formations CEA sauvegardées!', 'success');
-        }
-
-        // Initialize CEA Formation Select
-        function updateCEAFormationSelect() {
-            const sel = document.getElementById('ceaFormationSelect');
-            if (!sel) return;
-            const ceaFormationsStr = localStorage.getItem('CEAFormations');
-            const ceaFormations = ceaFormationsStr ? JSON.parse(ceaFormationsStr) : {};
-            // Options are hardcoded: cea, asp, msp
         }
 
         // APPRENANT : affiche ses formations assignées
@@ -19454,15 +19292,15 @@
             const caByMonth = months.map(m => {
                 return prestationsSauvegardees
                     .filter(p => { const d = new Date(p.date); return d.getFullYear() === m.year && d.getMonth() === m.month; })
-                    .reduce((sum, p) => sum + (Number(p.prixVente) || 0), 0);
+                    .reduce((sum, p) => sum + p.prixVente, 0);
             });
             const coutsByMonth = months.map(m => {
                 return prestationsSauvegardees
                     .filter(p => { const d = new Date(p.date); return d.getFullYear() === m.year && d.getMonth() === m.month; })
-                    .reduce((sum, p) => sum + (Number(p.prixRevient) || 0), 0);
+                    .reduce((sum, p) => sum + p.prixRevient, 0);
             });
 
-            const maxVal = Math.max(...caByMonth.filter(v => !isNaN(v)), ...coutsByMonth.filter(v => !isNaN(v)), 1);
+            const maxVal = Math.max(...caByMonth, ...coutsByMonth, 1);
             const W = 900, H = 200, pad = 40, barW = 18;
             const groupSpacing = (W - pad * 2) / 12;
 
@@ -23706,7 +23544,7 @@
 
             try {
                 // Check if password hash is set - if not, SET IT on first login
-                if (!group.passwordHash || group.passwordHash === '') {
+                if (!group.passwordHash) {
                     group.passwordHash = await hashPassword(password);
                     // Save to localStorage
                     localStorage.setItem('authGroups', JSON.stringify(authGroups));
@@ -23787,7 +23625,7 @@
             const group = authGroups.find(g => g.id === groupId);
             if (!group) { errEl.textContent = 'Groupe introuvable.'; return; }
 
-            if (!group.passwordHash || group.passwordHash === '') {
+            if (!group.passwordHash) {
                 // Premier accès : définit le mot de passe
                 const hash = await hashPassword(password);
                 group.passwordHash = hash;
@@ -24289,8 +24127,7 @@
             document.body.classList.toggle('mode-apprenant', isApprenant);
             const maBtnH = document.getElementById('btnModeApprenant');
             if (maBtnH) maBtnH.classList.toggle('apprenant-on', isApprenant);
-            // Afficher le dashboard pour tous les utilisateurs au démarrage
-            switchTab('dashboard');
+            if (isApprenant) switchTab('dashboard');
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
@@ -25135,7 +24972,6 @@
         }
 
         function renderDashboard() {
-            try {
             const now = new Date();
             const thisMonth = now.getMonth();
             const thisYear = now.getFullYear();
@@ -25581,10 +25417,6 @@
             try { renderLearnerDashboard(); } catch (e) { console.warn('renderLearnerDashboard failed:', e); }
             try { renderConversionPipeline(); } catch (e) { console.warn('renderConversionPipeline failed:', e); }
             try { renderEcartsWidget(); } catch (e) { console.warn('renderEcartsWidget failed:', e); }
-            } catch (e) {
-                console.error('❌ renderDashboard ERREUR:', e);
-                console.error('Stack:', e.stack);
-            }
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -32433,10 +32265,10 @@
 
         function generateQRCodes() {
             try {
-                // Load QR library (QRCode.js from local lib folder)
+                // Load QR library (QRCode.js from CDN or simple implementation)
                 if (typeof QRCode === 'undefined') {
                     const script = document.createElement('script');
-                    script.src = 'lib/qrcode.min.js';
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
                     script.onload = () => renderQRCodes();
                     document.head.appendChild(script);
                 } else {

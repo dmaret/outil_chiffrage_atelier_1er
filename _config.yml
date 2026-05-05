@@ -1,0 +1,5 @@
+# GitHub Pages configuration
+theme: null
+markdown: kramdown
+include: [".gitignore"]
+exclude: [".github", "server", "docs", "data", "setup", "audits", "documents", "releases", "config"]
