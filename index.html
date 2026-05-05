@@ -6012,6 +6012,10 @@
             <div id="config" class="tab-content">
                 <div class="section">
                     <h2>Sauvegarde & Restauration</h2>
+                    <div id="exportReminder" style="display:none;margin-bottom:10px;padding:10px 14px;background:#fff8e1;border-left:4px solid #f5a623;border-radius:6px;font-size:0.88em;color:#7a5500;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <span>⚠️ <strong>Rappel :</strong> tu n'as pas exporté de fichier de sauvegarde depuis <span id="exportReminderDays"></span>. Pense à exporter !</span>
+                        <button class="btn btn-small" style="background:#f5a623;color:#fff;border:none;" onclick="exportJSON()">📤 Exporter maintenant</button>
+                    </div>
                     <div class="info-box">Exportez toutes vos données (prestations, gestes, consommables, stock, config) en JSON, ou importez depuis une sauvegarde précédente.</div>
                     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
                         <button class="btn btn-success" onclick="exportJSON()">📤 Exporter (JSON)</button>
@@ -6039,6 +6043,7 @@
                             </label>
                             <button class="btn btn-small" onclick="performAutoBackup(true)">💾 Sauvegarder maintenant</button>
                             <button class="btn btn-small" onclick="renderAutoBackupList()">🔍 Lister</button>
+                            <button class="btn btn-small" onclick="exportAllAutoBackups()" title="Exporter toutes les sauvegardes locales en un seul fichier JSON">📦 Tout exporter en fichier</button>
                         </div>
                         <div id="autoBackupList" style="margin-top:10px;font-size:0.85em;"></div>
                     </div>
@@ -12932,7 +12937,7 @@
                 } catch (e) { console.warn('stock:', e); }
             }
             else if (tabName === 'parametrage') { try { loadConfig(); } catch (e) { console.warn('loadConfig:', e); } }
-            else if (tabName === 'config') { try { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); } catch (e) { console.warn('config:', e); } }
+            else if (tabName === 'config') { try { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); checkExportReminder(); } catch (e) { console.warn('config:', e); } }
             else if (tabName === 'pedalboard')          { try { renderPedalboard(); } catch (e) { console.warn('renderPedalboard:', e); } }
             else if (tabName === 'accompagnement')      { try { renderAccompagnement(); } catch (e) { console.warn('renderAccompagnement:', e); } }
             else if (tabName === 'historique')          { try { renderHistory(); } catch (e) { console.warn('renderHistory:', e); } }
@@ -19738,6 +19743,7 @@
             _saveFileWithPicker(blob, suggestedName, [{ description: 'Fichier JSON', accept: { 'application/json': ['.json'] } }])
                 .then(() => {
                     localStorage.setItem('lastExportDate', new Date().toISOString());
+                    checkExportReminder();
                 });
         }
 
@@ -19829,6 +19835,7 @@
                 const suggestedName = `atelier_backup_${new Date().toISOString().slice(0,10)}.encbackup`;
                 await _saveFileWithPicker(blob, suggestedName, [{ description: 'Sauvegarde chiffrée', accept: { 'application/octet-stream': ['.encbackup'] } }]);
                 localStorage.setItem('lastExportDate', new Date().toISOString());
+                checkExportReminder();
                 toast('✅ Sauvegarde chiffrée téléchargée', 'success');
                 if (typeof logAction === 'function') logAction('Export sauvegarde chiffrée', 'export');
             } catch (e) {
@@ -19977,12 +19984,40 @@
             if (!raw) return;
             const ts = parseInt(key.replace(AUTO_BACKUP_PREFIX, ''), 10);
             const blob = new Blob([raw], { type:'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `atelier_autobackup_${new Date(ts).toISOString().slice(0,19).replace(/:/g,'-')}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const suggestedName = `atelier_autobackup_${new Date(ts).toISOString().slice(0,19).replace(/:/g,'-')}.json`;
+            _saveFileWithPicker(blob, suggestedName, [{ description: 'Fichier JSON', accept: { 'application/json': ['.json'] } }]);
+        }
+
+        async function exportAllAutoBackups() {
+            const keys = Object.keys(localStorage).filter(k => k.startsWith(AUTO_BACKUP_PREFIX)).sort();
+            if (keys.length === 0) { toast('Aucune sauvegarde automatique à exporter', 'warning'); return; }
+            const snapshots = keys.map(k => {
+                try { return { key: k, date: new Date(parseInt(k.replace(AUTO_BACKUP_PREFIX,''),10)).toISOString(), data: JSON.parse(localStorage.getItem(k)) }; }
+                catch(e) { return null; }
+            }).filter(Boolean);
+            const blob = new Blob([JSON.stringify({ exportDate: new Date().toISOString(), count: snapshots.length, snapshots }, null, 2)], { type: 'application/json' });
+            const suggestedName = `atelier_autobackups_${new Date().toISOString().slice(0,10)}.json`;
+            await _saveFileWithPicker(blob, suggestedName, [{ description: 'Fichier JSON', accept: { 'application/json': ['.json'] } }]);
+            toast(`✅ ${snapshots.length} sauvegarde(s) exportée(s)`, 'success');
+        }
+
+        function checkExportReminder() {
+            const reminderEl = document.getElementById('exportReminder');
+            const daysEl = document.getElementById('exportReminderDays');
+            if (!reminderEl) return;
+            const last = localStorage.getItem('lastExportDate');
+            if (!last) {
+                if (daysEl) daysEl.textContent = 'jamais';
+                reminderEl.style.display = 'flex';
+                return;
+            }
+            const days = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+            if (days >= 7) {
+                if (daysEl) daysEl.textContent = days === 1 ? '1 jour' : `${days} jours`;
+                reminderEl.style.display = 'flex';
+            } else {
+                reminderEl.style.display = 'none';
+            }
         }
 
         function deleteAutoBackup(key) {
@@ -20000,6 +20035,7 @@
                 if (enabledEl) enabledEl.checked = localStorage.getItem('autoBackupEnabled') === '1';
                 if (intervalEl) intervalEl.value = localStorage.getItem('autoBackupInterval') || '21600000';
                 scheduleAutoBackup();
+                checkExportReminder();
             } catch (e) { console.warn('autoBackup init failed:', e); }
         });
 
