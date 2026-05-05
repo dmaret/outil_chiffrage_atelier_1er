@@ -10094,6 +10094,29 @@
             const savedTheme = localStorage.getItem('themePrefs');
             try { if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme)); } catch(e) { console.error('Error loading theme preferences:', e); }
             loadConfig();
+
+            // Nettoyage : si l'ordre sauvegardé du calculateur est corrompu
+            // (Décomposition, Notes ou Photos en tête), on le supprime pour laisser
+            // reorganizeCalculatorSections() appliquer la séquence standard.
+            try {
+                const _so = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
+                const _calcOrder = _so['calculateur'];
+                if (_calcOrder && _calcOrder.length > 0) {
+                    const _first = _calcOrder[0] || '';
+                    const _badStart = ['Décomposition', 'Valorisation', 'Notes', 'Photos', 'Stockage', 'Consommables', 'Temps admin'];
+                    if (_badStart.some(s => _first.includes(s))) {
+                        delete _so['calculateur'];
+                        localStorage.setItem('sectionOrders', JSON.stringify(_so));
+                    }
+                }
+                // Supprimer aussi les anciennes clés textContent (avec emoji) pour calculateur
+                Object.keys(_so).forEach(k => {
+                    if (k !== 'calculateur' && k.toLowerCase().includes('calculateur')) {
+                        delete _so[k];
+                        localStorage.setItem('sectionOrders', JSON.stringify(_so));
+                    }
+                });
+            } catch(e) {}
         }
 
         /**
@@ -10572,17 +10595,6 @@
                 if (oldKey && sectionOrders[oldKey]) {
                     sectionOrders[tabId] = sectionOrders[oldKey];
                     delete sectionOrders[oldKey];
-                    localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
-                }
-            }
-
-            // Pour le calculateur : si l'ordre sauvegardé est corrompu (Décomposition en tête),
-            // le supprimer pour laisser reorganizeCalculatorSections() appliquer l'ordre standard
-            if (tabId === 'calculateur' && sectionOrders['calculateur']) {
-                const _firstSection = sectionOrders['calculateur'][0] || '';
-                if (_firstSection.includes('Décomposition') || _firstSection.includes('Valorisation') ||
-                    _firstSection.includes('Notes') || _firstSection.includes('Photos')) {
-                    delete sectionOrders['calculateur'];
                     localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
                 }
             }
