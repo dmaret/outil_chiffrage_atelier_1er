@@ -24287,7 +24287,8 @@
             document.body.classList.toggle('mode-apprenant', isApprenant);
             const maBtnH = document.getElementById('btnModeApprenant');
             if (maBtnH) maBtnH.classList.toggle('apprenant-on', isApprenant);
-            if (isApprenant) switchTab('dashboard');
+            // Afficher le dashboard pour tous les utilisateurs au démarrage
+            switchTab('dashboard');
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
