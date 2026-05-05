@@ -19695,6 +19695,28 @@
         // ============================================================
         // FEATURE 8 : Sauvegarde/restauration JSON
         // ============================================================
+        async function _saveFileWithPicker(blob, suggestedName, types) {
+            if (window.showSaveFilePicker) {
+                try {
+                    const handle = await window.showSaveFilePicker({ suggestedName, types, excludeAcceptAllOption: false });
+                    const writable = await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                    return;
+                } catch (e) {
+                    if (e.name === 'AbortError') return; // user cancelled
+                    // fallback si erreur inattendue
+                }
+            }
+            // Fallback navigateurs sans File System Access API (Firefox, Safari)
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = suggestedName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         function exportJSON() {
             // Check permission
             if (!checkPermission('export_data')) {
@@ -19712,13 +19734,11 @@
                 stockMins
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `atelier_backup_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            localStorage.setItem('lastExportDate', new Date().toISOString());
+            const suggestedName = `atelier_backup_${new Date().toISOString().slice(0,10)}.json`;
+            _saveFileWithPicker(blob, suggestedName, [{ description: 'Fichier JSON', accept: { 'application/json': ['.json'] } }])
+                .then(() => {
+                    localStorage.setItem('lastExportDate', new Date().toISOString());
+                });
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -19806,12 +19826,8 @@
                 const env = await _encryptJSON(JSON.stringify(_buildBackupSnapshot()), password);
                 hideLoading();
                 const blob = new Blob([JSON.stringify(env, null, 2)], { type:'application/octet-stream' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `atelier_backup_${new Date().toISOString().slice(0,10)}.encbackup`;
-                a.click();
-                URL.revokeObjectURL(url);
+                const suggestedName = `atelier_backup_${new Date().toISOString().slice(0,10)}.encbackup`;
+                await _saveFileWithPicker(blob, suggestedName, [{ description: 'Sauvegarde chiffrée', accept: { 'application/octet-stream': ['.encbackup'] } }]);
                 localStorage.setItem('lastExportDate', new Date().toISOString());
                 toast('✅ Sauvegarde chiffrée téléchargée', 'success');
                 if (typeof logAction === 'function') logAction('Export sauvegarde chiffrée', 'export');
