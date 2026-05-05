@@ -10212,8 +10212,9 @@
             container.innerHTML = currentOrder.map((tabName, idx) => {
                 const label = tabMap.get(tabName) || tabName;
                 return `<div draggable="true" data-tab-name="${tabName}"
-                    style="padding:10px;background:#f5f8fc;border:1px solid #d0dae8;border-radius:8px;cursor:move;user-select:none;text-align:center;font-size:0.9em;"
-                    ondragstart="event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('tabName',this.dataset.tabName)"
+                    style="padding:10px;background:#f5f8fc;border:1px solid #d0dae8;border-radius:8px;cursor:move;user-select:none;text-align:center;font-size:0.9em;transition:opacity 0.15s;"
+                    ondragstart="event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('tabName',this.dataset.tabName);setTimeout(()=>{this.style.opacity='1';},0)"
+                    ondragend="this.style.opacity='';this.style.background='#f5f8fc';this.style.borderColor='#d0dae8'"
                     ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';this.style.background='#e0f0ff';this.style.borderColor='#4e9af1'"
                     ondragleave="this.style.background='#f5f8fc';this.style.borderColor='#d0dae8'"
                     ondrop="reorderTabs(event, '${tabName}')">${escapeHtml(label)}</div>`;
