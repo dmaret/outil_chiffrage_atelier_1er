@@ -19455,15 +19455,15 @@
             const caByMonth = months.map(m => {
                 return prestationsSauvegardees
                     .filter(p => { const d = new Date(p.date); return d.getFullYear() === m.year && d.getMonth() === m.month; })
-                    .reduce((sum, p) => sum + p.prixVente, 0);
+                    .reduce((sum, p) => sum + (Number(p.prixVente) || 0), 0);
             });
             const coutsByMonth = months.map(m => {
                 return prestationsSauvegardees
                     .filter(p => { const d = new Date(p.date); return d.getFullYear() === m.year && d.getMonth() === m.month; })
-                    .reduce((sum, p) => sum + p.prixRevient, 0);
+                    .reduce((sum, p) => sum + (Number(p.prixRevient) || 0), 0);
             });
 
-            const maxVal = Math.max(...caByMonth, ...coutsByMonth, 1);
+            const maxVal = Math.max(...caByMonth.filter(v => !isNaN(v)), ...coutsByMonth.filter(v => !isNaN(v)), 1);
             const W = 900, H = 200, pad = 40, barW = 18;
             const groupSpacing = (W - pad * 2) / 12;
 
