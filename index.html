@@ -10015,6 +10015,47 @@
                     if (_migrated > 0) {
                         safeSetItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
                     }
+                    // Migration : corriger les prix tronqués par le bug parseFloat(de-CH)
+                    // parseFloat("1'533.96") = 1 — tout prix >= 1000 était stocké tronqué
+                    let _priceMigrated = 0;
+                    prestationsSauvegardees.forEach(p => {
+                        if ((p.prixVente || 0) <= 9 && (p.gestes || []).length > 0) {
+                            // Recalculer depuis les gestes et consommables stockés
+                            let secondesParPiece = 0, secondesLot = 0;
+                            (p.gestes || []).forEach(g => {
+                                if ((g.typeApp || 'piece') === 'lot') secondesLot += (g.temps||0) * (g.quantite||1);
+                                else secondesParPiece += (g.temps||0) * (g.quantite||1);
+                            });
+                            const nbPieces = p.nbPieces || 1;
+                            const totalHeures = (secondesParPiece * nbPieces + secondesLot) / 3600;
+                            if (totalHeures <= 0) return;
+                            const nbCEA = p.nbCEA || 1;
+                            const nbMSP = p.nbMSP || 0;
+                            const coutMO = totalHeures * nbCEA * (config.coutHoraireCEA || 0);
+                            const coutEncadrement = totalHeures * nbMSP * (config.coutHoraireMSP || 0);
+                            const coutConso = (p.consommables || []).reduce((s, c) => s + (c.prix||0) * (c.qte||1) * nbPieces, 0);
+                            let fraisGeneraux = 0;
+                            if (config.modeFraisGeneraux === 'horaire') fraisGeneraux = totalHeures * (config.fraisGenerauxHoraire||0);
+                            else if (config.modeFraisGeneraux === 'fixe') fraisGeneraux = config.fraisGenerauxFixe||0;
+                            else fraisGeneraux = (coutMO + coutEncadrement) * (config.fraisGenerauxPourcent||0) / 100;
+                            const prixRevient = coutMO + coutEncadrement + coutConso + fraisGeneraux;
+                            if (prixRevient < 10) return; // Probablement pas tronqué
+                            const marge = p.marge || 0;
+                            const prixVente = marge < 100 ? prixRevient / (1 - marge / 100) : prixRevient;
+                            p.prixRevient = parseFloat(prixRevient.toFixed(2));
+                            p.prixVente = parseFloat(prixVente.toFixed(2));
+                            p.coutMO = parseFloat(coutMO.toFixed(2));
+                            p.coutEncadrement = parseFloat(coutEncadrement.toFixed(2));
+                            p.coutConsommables = parseFloat(coutConso.toFixed(2));
+                            p.heures = parseFloat(totalHeures.toFixed(4));
+                            if (nbPieces > 1) p.prixVentePiece = parseFloat((prixVente / nbPieces).toFixed(3));
+                            _priceMigrated++;
+                        }
+                    });
+                    if (_priceMigrated > 0) {
+                        safeSetItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
+                        console.log(`✅ Migration prix : ${_priceMigrated} prestation(s) corrigée(s)`);
+                    }
                 }
             } catch(e) { console.error('Error loading services:', e); }
             try {
@@ -10507,52 +10548,47 @@
         function saveSectionOrder() {
             const tabContent = document.querySelector('.tab-content.active');
             if (!tabContent) return;
-
+            const tabId = tabContent.id || 'unknown';
             const sections = Array.from(tabContent.querySelectorAll(':scope > .section'));
             const order = sections.map(sec => {
                 const heading = sec.querySelector('h2, h3');
                 return heading ? heading.textContent.trim() : 'section_' + Date.now();
             });
-
-            const activeTab = document.querySelector('.tab.active');
-            const tabName = activeTab ? activeTab.textContent.trim() : 'unknown';
-
             const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-            sectionOrders[tabName] = order;
+            sectionOrders[tabId] = order;
             localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
-            console.log('📋 Ordre des sections sauvegardé pour', tabName, ':', order);
         }
 
         function applySectionOrder() {
             const tabContent = document.querySelector('.tab-content.active');
             if (!tabContent) return;
-
-            const activeTab = document.querySelector('.tab.active');
-            const tabName = activeTab ? activeTab.textContent.trim() : 'unknown';
-
+            const tabId = tabContent.id || 'unknown';
             const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-            const savedOrder = sectionOrders[tabName];
 
+            // Migration : ancien format (textContent du bouton) → nouvel ID stable
+            if (!sectionOrders[tabId]) {
+                const oldBtn = document.querySelector('.tab.active');
+                const oldKey = oldBtn ? oldBtn.textContent.trim() : null;
+                if (oldKey && sectionOrders[oldKey]) {
+                    sectionOrders[tabId] = sectionOrders[oldKey];
+                    delete sectionOrders[oldKey];
+                    localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
+                }
+            }
+
+            const savedOrder = sectionOrders[tabId];
             if (!savedOrder) return;
-
             const sections = Array.from(tabContent.querySelectorAll(':scope > .section'));
             const sectionMap = new Map();
-
             sections.forEach(sec => {
                 const heading = sec.querySelector('h2, h3');
                 const title = heading ? heading.textContent.trim() : null;
                 if (title) sectionMap.set(title, sec);
             });
-
-            // Réorganiser selon l'ordre sauvegardé
             savedOrder.forEach(title => {
                 const section = sectionMap.get(title);
-                if (section && section.parentNode) {
-                    section.parentNode.appendChild(section);
-                }
+                if (section && section.parentNode) section.parentNode.appendChild(section);
             });
-
-            console.log('📋 Ordre des sections restauré pour', tabName);
         }
 
         function initSectionDragAndDrop() {
@@ -12957,11 +12993,8 @@
             // Restore section order and initialize drag-and-drop for sections in admin mode
             setTimeout(() => {
                 if (tabName === 'calculateur') {
-                    // N'appliquer l'ordre standard que si l'utilisateur n'a pas de préférence sauvegardée
-                    const _tabBtn = [...document.querySelectorAll('.tab')].find(t => t.getAttribute('onclick')?.includes("'calculateur'"));
-                    const _calcKey = _tabBtn ? _tabBtn.textContent.trim() : null;
                     const _savedOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-                    if (!_calcKey || !_savedOrders[_calcKey]) {
+                    if (!_savedOrders['calculateur']) {
                         reorganizeCalculatorSections();
                     }
                 }
