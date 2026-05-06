@@ -3,25 +3,25 @@
     {
       "id": "cea",
       "name": "CEA",
-      "passwordHash": "1cd8acfe395f069a86af3d9bfeecbbb5766421a3969eced8ed9de6ec49dee3ad",
+      "passwordHash": "ff0c792787950f34fae0368baae6e8c3d8da8e989b85aecd602ee7fa0a7f1f61",
       "tabs": ["dashboard", "stocks", "projets", "accompagnement"]
     },
     {
       "id": "asp",
       "name": "ASP",
-      "passwordHash": "dffbf96bdfc241d7703c08151632abb2a9de26de704edc4190236b6082d39c19",
+      "passwordHash": "7b17c67fc583c3b2bb446579bf55906f3b9846eeeee459dc1748d5a42e248da1",
       "tabs": ["dashboard", "stocks", "projets", "accompagnement"]
     },
     {
       "id": "msp",
       "name": "MSP",
-      "passwordHash": "752c5c8ceb205ca441c9b0ffaaf4afdf85d4d01f655a90d4247b32aeaa3fb352",
+      "passwordHash": "e7a7aed1e50430eda0e31582493d57bbd0f2b4b34e48eb73fdb674a10ebc3ad0",
       "tabs": ["*"]
     },
     {
       "id": "admin",
       "name": "ADMIN",
-      "passwordHash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+      "passwordHash": "6051fc84a7a0d74c225fb18a496b09952da5642e60723ecae543298edd7d82d6",
       "tabs": ["*"]
     }
   ]
