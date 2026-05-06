@@ -9757,6 +9757,7 @@
         let mouvements = [];
         let stockActuel = {};
         let gesteLines = [];
+        let dashWidgetPrefs = {}; // déclaré ici pour éviter la zone morte (utilisé dès l'init)
         let consommableLines = [];
         let stockageLines = [];
         let editingMouvementId = null;
@@ -25566,8 +25567,6 @@
             { id: 'dashSectionEcarts',       label: '⚖️ Écarts budget' },
             { id: 'dashSectionKanban',       label: '🗂️ Kanban approbation' },
         ];
-        let dashWidgetPrefs = {};
-
         function loadDashWidgetPrefs() {
             try { dashWidgetPrefs = JSON.parse(localStorage.getItem('dashWidgetPrefs') || '{}'); } catch(e) { dashWidgetPrefs = {}; }
         }
