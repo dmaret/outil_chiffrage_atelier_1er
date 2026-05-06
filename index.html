@@ -11081,14 +11081,15 @@
         }
 
         // ── Popup récap flottant ──
-        function pbToggleRecap() {
+        function pbShowRecap(show) {
             const pop = document.getElementById('pb-recap-popup');
             if (!pop) return;
-            if (pop.style.display === 'none') {
+            if (show === undefined) show = pop.style.display === 'none';
+            if (show) {
                 pop.style.display = 'block';
                 if (!pop._drag) { pop._drag = true; pbMakeDraggable(pop, document.getElementById('pb-recap-popup-hdr')); }
                 pbCalcTotal();
-            } else pop.style.display = 'none';
+            } else { pop.style.display = 'none'; }
         }
         function pbMakeDraggable(el, handle) {
             if (!handle) return;
