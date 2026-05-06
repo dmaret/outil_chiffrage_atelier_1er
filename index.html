@@ -8501,16 +8501,6 @@
                 initAuthGroups();
             }
 
-            // Check brute force lockout
-            if (isGroupLockedOut(groupId)) {
-                const remaining = getGroupLockoutRemaining(groupId);
-                if (errorDiv) {
-                    errorDiv.textContent = `⏳ Compte verrouillé. Réessayez dans ${remaining} minutes`;
-                    errorDiv.classList.add('show');
-                }
-                return;
-            }
-
             try {
                 // Get or initialize group
                 let group = authGroups.find(g => g.id === groupId);
@@ -8519,6 +8509,13 @@
                         errorDiv.textContent = '❌ Groupe introuvable';
                         errorDiv.classList.add('show');
                     }
+                    return;
+                }
+
+                // Brute-force lockout — seulement si un mot de passe est déjà défini
+                if (group.passwordHash && isGroupLockedOut(groupId)) {
+                    const remaining = getGroupLockoutRemaining(groupId);
+                    if (errorDiv) { errorDiv.textContent = `⏳ Compte verrouillé. Réessayez dans ${remaining} minutes`; errorDiv.classList.add('show'); }
                     return;
                 }
 
@@ -23839,7 +23836,7 @@
         // Brute force protection: track login attempts
         let _loginAttempts = JSON.parse(localStorage.getItem('_loginAttempts') || '{}');
         const MAX_LOGIN_ATTEMPTS = 5;
-        const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+        const LOCKOUT_DURATION_MS = 2 * 60 * 1000; // 2 minutes
 
         function isGroupLockedOut(groupId) {
             const attempts = _loginAttempts[groupId];
@@ -23871,7 +23868,7 @@
         }
 
         function getGroupLockoutRemaining(groupId) {
-            const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
+            const LOCKOUT_DURATION_MS = 2 * 60 * 1000;
             const attempts = _loginAttempts[groupId];
             if (attempts && attempts.count >= 5) {
                 const lockoutExpiry = attempts.lastAttempt + LOCKOUT_DURATION_MS;
