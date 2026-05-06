@@ -734,6 +734,50 @@
         confirmModal.classList.add('active');
     }
 
+    function consumeStockForPrestation(prestation) {
+        const stockStr = localStorage.getItem('stockData');
+        let stockData = stockStr ? JSON.parse(stockStr) : { mouvements: [], stockActuel: {} };
+
+        const gestes = prestation.gestes || [];
+        const now = new Date().toISOString().split('T')[0];
+
+        gestes.forEach(geste => {
+            const ref = geste.code || geste.nom || `GESTE-${geste.id || Date.now()}`;
+            const qte = 1;
+
+            const mouvement = {
+                id: Date.now() + Math.random(),
+                type: 'Sortie',
+                date: now,
+                ref: ref,
+                qte: qte,
+                unite: 'unité',
+                emplacement: 'Atelier',
+                destEmplacement: 'Consommé',
+                prix: 0,
+                description: `Prestation ${prestation.nom || prestation.prestation || prestation.id} complétée par ${currentCEA}`
+            };
+
+            stockData.mouvements.push(mouvement);
+
+            if (!stockData.stockActuel[ref]) {
+                stockData.stockActuel[ref] = { total: 0, lots: [] };
+            }
+
+            if (stockData.stockActuel[ref].total >= qte) {
+                stockData.stockActuel[ref].total -= qte;
+                if (stockData.stockActuel[ref].lots.length > 0) {
+                    const lot = stockData.stockActuel[ref].lots[0];
+                    if (lot.qte >= qte) {
+                        lot.qte -= qte;
+                    }
+                }
+            }
+        });
+
+        localStorage.setItem('stockData', JSON.stringify(stockData));
+    }
+
     function finishOrder(prestationId) {
         const prestStr = localStorage.getItem('prestationsSauvegardees');
         const prestations = prestStr ? JSON.parse(prestStr) : [];
@@ -744,6 +788,8 @@
             prestations[idx].dateTerminaison = new Date().toISOString();
             prestations[idx].realisePar = currentCEA;
             localStorage.setItem('prestationsSauvegardees', JSON.stringify(prestations));
+
+            consumeStockForPrestation(prestations[idx]);
         }
 
         closeFinishConfirmation();
@@ -801,7 +847,7 @@
 
         // Lire les emplacements configurés dans l'app principale
         const emplacementsStr = localStorage.getItem('configEmplacements');
-        let emplacementsConfig = emplacementsStr ? JSON.parse(emplacementsStr) : [];
+        let emplacementsConfig = emplacementsStr ? JSON.parse(emplacementsStr) : ['Zone palette', 'Rack A', 'Rack B', 'Rack C', 'Picking'];
 
         // Construire les zones dynamiquement depuis les données réelles
         const locations = {};
@@ -1137,11 +1183,15 @@
     // ═══════════════════════════════════════════════════════════
 
     function loadFormation() {
+        const trainingList = document.getElementById('trainingList');
+
         const ceaFormationsStr = localStorage.getItem('CEAFormations');
         const ceaFormations = ceaFormationsStr ? JSON.parse(ceaFormationsStr) : {};
-        const formations = ceaFormations[currentCEA] || [];
+        const ceaGroupFormations = ceaFormations[currentCEA] || [];
 
-        const domainLabels = {
+        const apprenantFormationsStr = localStorage.getItem('apprenantFormations');
+        const apprenantFormationsData = apprenantFormationsStr ? JSON.parse(apprenantFormationsStr) : { domains: {}, apprenants: [] };
+        const domainLabels = apprenantFormationsData.domains || {
             systemes: { label: 'Systèmes', icon: '💻' },
             methodes: { label: 'Méthodes', icon: '🔄' },
             retailers: { label: 'Retailers', icon: '🏬' },
@@ -1149,28 +1199,68 @@
             kpi: { label: 'KPI', icon: '📈' }
         };
 
-        const trainingList = document.getElementById('trainingList');
+        // Filtrer les apprenants du groupe CEA courant
+        const ceaApprenants = apprenantFormationsData.apprenants.filter(a => a.category === currentCEA);
 
-        if (formations.length === 0) {
+        if (ceaGroupFormations.length === 0 && ceaApprenants.length === 0) {
             trainingList.innerHTML = '<p style="color: #999; text-align: center; padding: 30px;"><span style="font-size: 2em; display: block; margin-bottom: 10px;">📚</span>Aucune formation assignée pour le moment</p>';
             return;
         }
 
-        trainingList.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                ${formations.map(domain => {
-                    const d = domainLabels[domain] || { label: domain, icon: '📖' };
-                    return `
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <div style="font-weight: 700; font-size: 18px; margin-bottom: 8px;">
-                                ${d.icon} ${d.label}
+        let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+
+        // Formations du groupe CEA
+        if (ceaGroupFormations.length > 0) {
+            html += '<div><h3 style="margin: 0 0 12px 0; color: #27ae60; font-size: 16px;">📖 Formations du groupe</h3>';
+            html += '<div style="display: flex; flex-direction: column; gap: 10px;">';
+            html += ceaGroupFormations.map(domain => {
+                const d = domainLabels[domain] || { label: domain, icon: '📖' };
+                return `
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="font-weight: 700; font-size: 16px; margin-bottom: 6px;">
+                            ${d.icon} ${d.label}
+                        </div>
+                        <button onclick="startTraining('${domain}')" style="background: white; color: #667eea; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; width: 100%; transition: all 0.2s;">
+                            ▶️ Commencer
+                        </button>
+                    </div>`;
+            }).join('');
+            html += '</div></div>';
+        }
+
+        // Formations des apprenants
+        if (ceaApprenants.length > 0) {
+            html += '<div><h3 style="margin: 0 0 12px 0; color: #8e44ad; font-size: 16px;">👥 Apprenants et leurs formations</h3>';
+            html += '<div style="display: flex; flex-direction: column; gap: 10px;">';
+            html += ceaApprenants.map(apprenant => {
+                const formations = apprenant.assignedFormations || [];
+                return `
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #8e44ad;">
+                        <div style="font-weight: 700; color: #333; margin-bottom: 8px;">
+                            👤 ${apprenant.name}
+                        </div>
+                        ${formations.length > 0 ? `
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                ${formations.map(domain => {
+                                    const d = domainLabels[domain] || { label: domain, icon: '📖' };
+                                    return `
+                                        <div style="background: white; border: 1px solid #ddd; padding: 6px 10px; border-radius: 6px; font-size: 12px; color: #666;">
+                                            ${d.icon} ${d.label}
+                                        </div>`;
+                                }).join('')}
                             </div>
-                            <div style="font-size: 13px; opacity: 0.9; margin-bottom: 12px;">
-                                Formation assignée
+                        ` : `
+                            <div style="font-size: 12px; color: #999; font-style: italic;">
+                                Aucune formation assignée
                             </div>
-                            <button onclick="startTraining('${domain}')" style="background: white; color: #667eea; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; width: 100%; transition: all 0.2s;">
-                                ▶️ Commencer la formation
-                            </button>
+                        `}
+                    </div>`;
+            }).join('');
+            html += '</div></div>';
+        }
+
+        html += '</div>';
+        trainingList.innerHTML = html;
                         </div>
                     `;
                 }).join('')}
