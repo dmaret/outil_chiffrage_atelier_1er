@@ -513,7 +513,7 @@
 
     async function loadAuthConfig() {
         try {
-            const response = await fetch('./auth-config.json');
+            const response = await fetch('../auth-config.json');
             const config = await response.json();
             authGroups = config.authGroups || [];
         } catch (e) {
