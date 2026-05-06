@@ -9944,9 +9944,9 @@
                 const cb = document.getElementById('authNoEmoji');
                 if (cb) cb.checked = true;
             }
-            // Afficher le bandeau si le mode démo est actif (sessionStorage uniquement — s'efface à la fermeture)
-            if (sessionStorage.getItem('_demoMode') === '1') _showDemoBanner();
-            // Nettoyer un éventuel _demoMode résiduel en localStorage (ancienne version)
+            // Nettoyer tout flag démo résiduel (session ou local) — le bandeau n'apparaît
+            // que sur activation explicite via le bouton admin, jamais au rechargement
+            sessionStorage.removeItem('_demoMode');
             localStorage.removeItem('_demoMode');
         });
 
