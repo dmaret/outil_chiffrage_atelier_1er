@@ -3,28 +3,54 @@
     {
       "id": "cea",
       "name": "CEA",
-      "passwordHash": null,
-      "tabs": ["dashboard", "stats", "formation-logistique", "procedures"],
-      "dashWidgets": ["dashFormationModule"]
+      "passwordHash": "ff0c792787950f34fae0368baae6e8c3d8da8e989b85aecd602ee7fa0a7f1f61",
+      "tabs": [
+        "dashboard",
+        "stats",
+        "formation-logistique",
+        "procedures"
+      ],
+      "dashWidgets": [
+        "dashFormationModule"
+      ]
     },
     {
       "id": "asp",
       "name": "ASP",
       "passwordHash": null,
-      "tabs": ["dashboard", "stats", "formation-logistique", "procedures", "stock", "consommables"],
-      "dashWidgets": ["dashFormationModule"]
+      "tabs": [
+        "dashboard",
+        "stats",
+        "formation-logistique",
+        "procedures",
+        "stock",
+        "consommables"
+      ],
+      "dashWidgets": [
+        "dashFormationModule"
+      ]
     },
     {
       "id": "msp",
       "name": "MSP",
       "passwordHash": null,
-      "tabs": ["dashboard", "stock", "consommables", "stats", "parametrage", "formation", "logistique"]
+      "tabs": [
+        "dashboard",
+        "stock",
+        "consommables",
+        "stats",
+        "parametrage",
+        "formation",
+        "logistique"
+      ]
     },
     {
       "id": "admin",
       "name": "ADMIN",
-      "passwordHash": null,
-      "tabs": ["*"]
+      "passwordHash": "6051fc84a7a0d74c225fb18a496b09952da5642e60723ecae543298edd7d82d6",
+      "tabs": [
+        "*"
+      ]
     }
   ]
 }
