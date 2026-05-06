@@ -15584,6 +15584,22 @@
             localStorage.setItem('learnersList', JSON.stringify(learnersList));
             localStorage.setItem('formationProgress', JSON.stringify(formationProgress));
             localStorage.setItem('trainingRequests', JSON.stringify(trainingRequests));
+            exportApprenantFormationsForCEA();
+        }
+
+        function exportApprenantFormationsForCEA() {
+            const apprenantFormations = {
+                domains: FORMATION_DOMAINS,
+                apprenants: learnersList.map(l => ({
+                    id: l.id,
+                    name: l.name,
+                    category: l.category,
+                    startDate: l.startDate,
+                    assignedFormations: l.assignedFormations || [],
+                    quizResults: l.quizResults || {}
+                }))
+            };
+            localStorage.setItem('apprenantFormations', JSON.stringify(apprenantFormations));
         }
 
         function loadTrainingRequests() {
