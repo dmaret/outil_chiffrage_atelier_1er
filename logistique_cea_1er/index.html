@@ -1461,7 +1461,7 @@
             </div>
         `;
 
-        // Weekly section
+        // Weekly section - Lundi à Vendredi uniquement
         html += `
             <div>
                 <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 12px;">
@@ -1470,8 +1470,8 @@
                 <div style="background: white; border-radius: 12px; padding: 0; overflow: hidden;">
         `;
 
-        // Create day-by-day view
-        for (let i = 0; i < 7; i++) {
+        // Create day-by-day view (Lundi = 1, Vendredi = 5, pas de samedi/dimanche)
+        for (let i = 0; i < 5; i++) {
             const day = new Date(monday);
             day.setDate(monday.getDate() + i);
             day.setHours(0, 0, 0, 0);
@@ -1487,11 +1487,10 @@
             const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
             const dayLabel = dayNames[day.getDay()];
             const isToday = day.toDateString() === today.toDateString();
-            const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 
             html += `
-                <div style="border-bottom: ${i < 6 ? '1px solid #f0f0f0' : 'none'}; background: ${isToday ? '#f0f5ff' : 'white'};">
-                    <div style="padding: 12px 16px; background: ${isWeekend ? '#f8f8f8' : 'white'}; border-left: 4px solid ${isToday ? '#667eea' : '#ddd'};">
+                <div style="border-bottom: ${i < 4 ? '1px solid #f0f0f0' : 'none'}; background: ${isToday ? '#f0f5ff' : 'white'};">
+                    <div style="padding: 12px 16px; border-left: 4px solid ${isToday ? '#667eea' : '#ddd'};">
                         <div style="font-weight: 700; color: #333; margin-bottom: 6px;">
                             ${isToday ? '⭐ ' : ''}${dayLabel} ${day.getDate()}
                         </div>
@@ -1509,7 +1508,7 @@
             `;
         }
 
-        html += '</div></div></div>';
+        html += '</div><div style="height: 20px;"></div></div></div>';
         tasksDiv.innerHTML = html;
     }
 
