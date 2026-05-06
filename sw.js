@@ -8,15 +8,23 @@ const CACHE_NAME = `atelier-lp-${CACHE_VERSION}`;
 const APP_SHELL = [
     './',
     './index.html',
-    './manifest.json'
+    './manifest.json',
+    './auth-config.json',
+    './tabs-config.json'
 ];
 
 // Install : pré-cache du shell
+// Les fichiers optionnels (auth-config, tabs-config) sont cachés individuellement
+// pour ne pas bloquer l'install si l'un d'eux est absent.
 self.addEventListener('install', (event) => {
+    const REQUIRED = ['./', './index.html', './manifest.json'];
+    const OPTIONAL = ['./auth-config.json', './tabs-config.json'];
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(APP_SHELL))
-            .then(() => self.skipWaiting())
+        caches.open(CACHE_NAME).then((cache) =>
+            cache.addAll(REQUIRED).then(() =>
+                Promise.allSettled(OPTIONAL.map(url => cache.add(url)))
+            )
+        ).then(() => self.skipWaiting())
     );
 });
 

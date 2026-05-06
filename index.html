@@ -34285,22 +34285,31 @@
         // ============================================================
         if ('serviceWorker' in navigator && location.protocol !== 'file:') {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
+                // ?v= force le navigateur à re-fetch le SW à chaque nouvelle version
+                navigator.serviceWorker.register('./sw.js?v=2.2.0')
                     .then((reg) => {
-                        // Détecte une nouvelle version et propose de recharger
+                        // Vérification active d'une mise à jour dès le chargement
+                        reg.update();
                         reg.addEventListener('updatefound', () => {
                             const nw = reg.installing;
                             if (!nw) return;
                             nw.addEventListener('statechange', () => {
                                 if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nouvelle version prête : recharge automatique après 1.5s
                                     if (typeof toast === 'function') {
-                                        toast('🔄 Nouvelle version disponible — recharge la page pour l\'appliquer.', 'info');
+                                        toast('🔄 Nouvelle version disponible — mise à jour en cours…', 'info', 1500);
                                     }
+                                    setTimeout(() => location.reload(), 1500);
                                 }
                             });
                         });
                     })
-                    .catch(() => { /* SW optionnel : on ignore l'échec silencieusement */ });
+                    .catch(() => { /* SW optionnel */ });
+
+                // Si le SW prend le contrôle en cours de session → reload propre
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    location.reload();
+                });
             });
         }
 

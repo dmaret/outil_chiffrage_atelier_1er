@@ -27,4 +27,6 @@ Thumbs.db
 
 # Backups
 *.bak
+*.backup
+*.stable_backup
 backups/
