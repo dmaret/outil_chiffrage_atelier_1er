@@ -10276,12 +10276,17 @@
 
             container.innerHTML = currentOrder.map((tabName, idx) => {
                 const label = tabMap.get(tabName) || tabName;
-                return `<div draggable="true" data-tab-name="${tabName}"
-                    style="padding:10px;background:#f5f8fc;border:1px solid #d0dae8;border-radius:8px;cursor:move;user-select:none;text-align:center;font-size:0.9em;transition:opacity 0.15s;"
+                const group = (typeof tabGroups !== 'undefined') ? tabGroups.find(g => g.onglets.includes(tabName)) : null;
+                const gc = group ? group.couleur : null;
+                const bgColor  = gc ? gc + '22' : '#f5f8fc';
+                const bdColor  = gc ? gc + 'aa' : '#d0dae8';
+                const txtColor = gc ? gc : '#3a5a7a';
+                return `<div draggable="true" data-tab-name="${tabName}" data-group-bg="${bgColor}" data-group-bd="${bdColor}"
+                    style="padding:10px;background:${bgColor};border:1px solid ${bdColor};border-radius:8px;cursor:move;user-select:none;text-align:center;font-size:0.9em;color:${txtColor};font-weight:600;transition:opacity 0.15s;"
                     ondragstart="event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('tabName',this.dataset.tabName);setTimeout(()=>{this.style.opacity='1';},0)"
-                    ondragend="this.style.opacity='';this.style.background='#f5f8fc';this.style.borderColor='#d0dae8'"
+                    ondragend="this.style.opacity='';this.style.background=this.dataset.groupBg;this.style.borderColor=this.dataset.groupBd"
                     ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';this.style.background='#e0f0ff';this.style.borderColor='#4e9af1'"
-                    ondragleave="this.style.background='#f5f8fc';this.style.borderColor='#d0dae8'"
+                    ondragleave="this.style.background=this.dataset.groupBg;this.style.borderColor=this.dataset.groupBd"
                     ondrop="reorderTabs(event, '${tabName}')">${escapeHtml(label)}</div>`;
             }).join('');
         }
