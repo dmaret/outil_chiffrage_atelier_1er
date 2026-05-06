@@ -23352,15 +23352,25 @@
 
         // Init auth groups with file fallback
         async function initAuthGroups() {
-            // Try loading from shared config file first
+            // Load from localStorage first (has real hashes)
+            const saved = localStorage.getItem('authGroups');
+            if (saved) { try { authGroups = JSON.parse(saved); } catch(e){} }
+
+            // Merge with auth-config.json : only adopt non-null hashes from file
+            // (null hashes in the file mean "not set yet", keep localStorage hash)
             const fileConfig = await loadAuthConfigFile();
             if (fileConfig && Array.isArray(fileConfig)) {
-                authGroups = fileConfig;
-                console.log('✅ Loaded authGroups from auth-config.json');
-            } else {
-                // Fallback to localStorage
-                const saved = localStorage.getItem('authGroups');
-                if (saved) { try { authGroups = JSON.parse(saved); } catch(e){} }
+                fileConfig.forEach(fg => {
+                    const local = authGroups.find(g => g.id === fg.id);
+                    if (!local) {
+                        authGroups.push({ ...fg });
+                    } else if (fg.passwordHash) {
+                        // File has an explicit hash → it's the canonical one
+                        local.passwordHash = fg.passwordHash;
+                    }
+                    // fg.passwordHash === null → keep local hash (local takes precedence)
+                });
+                console.log('✅ Merged authGroups with auth-config.json');
             }
 
             // Ensure all 4 default groups exist
