@@ -1,0 +1,30 @@
+{
+  "authGroups": [
+    {
+      "id": "cea",
+      "name": "CEA",
+      "passwordHash": null,
+      "tabs": ["dashboard", "stats", "formation-logistique", "procedures"],
+      "dashWidgets": ["dashFormationModule"]
+    },
+    {
+      "id": "asp",
+      "name": "ASP",
+      "passwordHash": null,
+      "tabs": ["dashboard", "stats", "formation-logistique", "procedures", "stock", "consommables"],
+      "dashWidgets": ["dashFormationModule"]
+    },
+    {
+      "id": "msp",
+      "name": "MSP",
+      "passwordHash": null,
+      "tabs": ["dashboard", "stock", "consommables", "stats", "parametrage", "formation", "logistique"]
+    },
+    {
+      "id": "admin",
+      "name": "ADMIN",
+      "passwordHash": null,
+      "tabs": ["*"]
+    }
+  ]
+}
