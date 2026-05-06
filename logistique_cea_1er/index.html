@@ -847,7 +847,7 @@
 
         // Lire les emplacements configurés dans l'app principale
         const emplacementsStr = localStorage.getItem('configEmplacements');
-        let emplacementsConfig = emplacementsStr ? JSON.parse(emplacementsStr) : [];
+        let emplacementsConfig = emplacementsStr ? JSON.parse(emplacementsStr) : ['Zone palette', 'Rack A', 'Rack B', 'Rack C', 'Picking'];
 
         // Construire les zones dynamiquement depuis les données réelles
         const locations = {};
