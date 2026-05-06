@@ -5685,17 +5685,17 @@
                 </div>
 
                 <div class="section" style="background:#f0fff0;border-left:4px solid #27ae60;">
-                    <h2>🏭 Assigner des formations aux CEA</h2>
-                    <p style="color:#5a7a5a;margin-bottom:12px;">Sélectionnez un CEA pour lui assigner les domaines de formation qu'il doit dispenser</p>
+                    <h2>🏭 Assigner des formations aux groupes</h2>
+                    <p style="color:#5a7a5a;margin-bottom:12px;">Sélectionnez un groupe pour lui assigner les domaines de formation qu'il doit dispenser</p>
                     <select id="ceaFormationSelect" onchange="renderCEAFormationAssign()" style="padding:9px;border:1px solid #c8e0f4;border-radius:8px;width:100%;max-width:400px;font-size:0.95em;">
-                        <option value="">-- Sélectionner un CEA --</option>
+                        <option value="">-- Sélectionner un groupe --</option>
                         <option value="cea">CEA</option>
                         <option value="asp">ASP</option>
                         <option value="msp">MSP</option>
                     </select>
                     <div id="ceaFormationContainer" style="margin-top:16px;"></div>
                     <div style="margin-top:12px;text-align:right;">
-                        <button class="btn btn-success btn-small" onclick="saveCEAFormations()" title="Sauvegarder les assignations de formations aux CEA">💾 Sauvegarder assignations CEA</button>
+                        <button class="btn btn-success btn-small" onclick="saveCEAFormations()" title="Sauvegarder les assignations de formations aux groupes">💾 Sauvegarder assignations</button>
                     </div>
                 </div>
 
@@ -16058,7 +16058,7 @@
                 </div>`;
         }
 
-        // CEA : assigner formations aux CEA
+        // Groupes : assigner formations aux groupes
         function renderCEAFormationAssign() {
             const sel = document.getElementById('ceaFormationSelect');
             const container = document.getElementById('ceaFormationContainer');
@@ -16082,7 +16082,7 @@
 
             container.innerHTML = `
                 <div style="margin-top:16px;padding:16px;background:#f0fff0;border-radius:10px;border:1px solid #c8e0f4;">
-                    <h4 style="margin:0 0 12px;color:#27ae60;">🎓 Domaines de formation pour ${cea.toUpperCase()}</h4>
+                    <h4 style="margin:0 0 12px;color:#27ae60;">🎓 Domaines de formation pour le groupe ${cea.toUpperCase()}</h4>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">${domainHtml}</div>
                 </div>`;
         }
