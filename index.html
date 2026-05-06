@@ -7627,7 +7627,7 @@
                   <p style="color:#666;font-size:0.95em;margin:0;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
                 </div>
                 <div style="position:relative;">
-                  <button onclick="openDashWidgetPanel()" style="background:#f0f7ff;border:1px solid #a0c8e0;color:#2d5b8a;padding:8px 14px;border-radius:8px;font-size:0.88em;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">⚙️ Personnaliser</button>
+                  <button onclick="openDashWidgetPanel()" style="background:#f0f7ff;border:1px solid #a0c8e0;color:#2d5b8a;padding:8px 14px;border-radius:8px;font-size:0.88em;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">⚙️ Personnaliser</button>
                   <!-- Panneau personnalisation dashboard -->
                   <div id="dashWidgetPanel" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:200;background:white;border:1px solid #d0dae8;border-radius:12px;padding:18px 20px;min-width:340px;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -10737,6 +10737,9 @@
                 // Remove old reorder buttons to regenerate with correct index
                 const oldBtnContainer = section.querySelector('.section-reorder-btns');
                 if (oldBtnContainer) oldBtnContainer.remove();
+
+                // Skip sections that must not be reordered (e.g. dashboard header with its own button)
+                if (section.id === 'dashSectionHeader') return;
 
                 const btnContainer = document.createElement('div');
                 btnContainer.className = 'section-reorder-btns';
