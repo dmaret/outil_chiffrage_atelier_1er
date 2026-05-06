@@ -509,22 +509,66 @@
 
     const DB_NAME = 'logistique_cea_db';
     let currentCEA = null;
+    let authGroups = [];
+
+    async function loadAuthConfig() {
+        try {
+            const response = await fetch('./auth-config.json');
+            const config = await response.json();
+            authGroups = config.authGroups || [];
+        } catch (e) {
+            console.warn('auth-config.json not found, using localStorage', e);
+            const stored = localStorage.getItem('authGroups');
+            authGroups = stored ? JSON.parse(stored) : [];
+        }
+    }
+
+    async function hashPassword(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function validateLogin(ceaId, password) {
+        const group = authGroups.find(g => g.id === ceaId);
+        if (!group) return false;
+
+        if (group.passwordHash === null || group.passwordHash === '') {
+            return true;
+        }
+
+        const hash = await hashPassword(password);
+        return hash === group.passwordHash;
+    }
 
     // Login handling
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const ceaId = document.getElementById('ceaId').value;
+        const ceaId = document.getElementById('ceaId').value.toLowerCase();
         const password = document.getElementById('password').value;
+        const errorEl = document.getElementById('loginError');
 
-        // TODO: Validate against atelier_db auth groups
-        if (ceaId && password) {
+        if (!ceaId || !password) {
+            errorEl.textContent = '❌ Veuillez remplir tous les champs';
+            return;
+        }
+
+        const isValid = await validateLogin(ceaId, password);
+        if (isValid) {
             currentCEA = ceaId;
             localStorage.setItem('currentCEA', ceaId);
+            errorEl.textContent = '';
             showApp();
             loadDashboard();
         } else {
-            document.getElementById('loginError').textContent = '❌ Identifiant ou mot de passe incorrect';
+            errorEl.textContent = '❌ Identifiant ou mot de passe incorrect';
         }
+    });
+
+    window.addEventListener('load', async () => {
+        await loadAuthConfig();
     });
 
     function logout() {
