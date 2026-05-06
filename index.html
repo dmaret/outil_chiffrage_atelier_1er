@@ -25944,9 +25944,15 @@
 
         // ── 2. Kanban approbation drag & drop ──
         function _kanbanStateOf(p) {
+            // approvalState explicite (glisser-déposer manuel) prime toujours
+            if (p.approvalState && p.approvalState !== 'draft') return p.approvalState;
+            // Sinon on déduit depuis le statut métier
             const st = (p.statut || 'devis').toLowerCase();
-            if (['facture','paye','encaisse'].includes(st)) return 'archived';
-            return p.approvalState || 'draft';
+            if (['facture','paye','encaisse'].includes(st))               return 'archived';
+            if (['valide','accepte','en-cours','termine'].includes(st))   return 'approved';
+            if (['soumis'].includes(st))                                  return 'pending_review';
+            if (['annule'].includes(st))                                  return 'rejected';
+            return 'draft'; // devis, brouillon, inconnu
         }
         function renderApprovalKanban() {
             const board = document.getElementById('dashKanbanBoard');
