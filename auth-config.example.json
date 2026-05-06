@@ -1,0 +1,28 @@
+{
+  "authGroups": [
+    {
+      "id": "cea",
+      "name": "CEA",
+      "passwordHash": "$2b$10$...",
+      "tabs": ["dashboard", "stocks", "projets", "accompagnement"]
+    },
+    {
+      "id": "asp",
+      "name": "ASP",
+      "passwordHash": "$2b$10$...",
+      "tabs": ["dashboard", "stocks", "projets", "accompagnement"]
+    },
+    {
+      "id": "msp",
+      "name": "MSP",
+      "passwordHash": "$2b$10$...",
+      "tabs": ["*"]
+    },
+    {
+      "id": "admin",
+      "name": "ADMIN",
+      "passwordHash": "$2b$10$...",
+      "tabs": ["*"]
+    }
+  ]
+}

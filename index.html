@@ -9871,9 +9871,10 @@
         }
         } catch(initErr) { console.error('Erreur initialisation:', initErr); }
         // Auth init différé : authOverlay est déclaré après le script dans le DOM
-        window.addEventListener('load', () => {
-            initAuthGroups();
+        window.addEventListener('load', async () => {
+            await initAuthGroups();
             initAuthScreen();
+            initLoginUI();
             checkAuthSession();
             syncEmailWebhooksUI();
             initTabDragAndDropMode();
@@ -23326,8 +23327,31 @@
         // ── Système d'authentification par groupe ─────────────────────
 
         function initAuthGroups() {
-            const saved = localStorage.getItem('authGroups');
-            if (saved) { try { authGroups = JSON.parse(saved); } catch(e){} }
+        async function loadAuthConfigFile() {
+            try {
+                const response = await fetch('./auth-config.json');
+                if (!response.ok) return null; // Fichier n'existe pas
+                const data = await response.json();
+                return data.authGroups || null;
+            } catch (e) {
+                console.log('📋 auth-config.json not found or invalid (normal if not shared)');
+                return null; // Fallback to localStorage
+            }
+        }
+
+        // Init auth groups with file fallback
+        async function initAuthGroups() {
+            // Try loading from shared config file first
+            const fileConfig = await loadAuthConfigFile();
+            if (fileConfig && Array.isArray(fileConfig)) {
+                authGroups = fileConfig;
+                console.log('✅ Loaded authGroups from auth-config.json');
+            } else {
+                // Fallback to localStorage
+                const saved = localStorage.getItem('authGroups');
+                if (saved) { try { authGroups = JSON.parse(saved); } catch(e){} }
+            }
+
             // Ensure all 4 default groups exist
             DEFAULT_AUTH_GROUPS.forEach(def => {
                 if (!authGroups.find(g => g.id === def.id)) {
@@ -23341,6 +23365,10 @@
                 if (g && def) { g.tabs = def.tabs; if (!g.dashWidgets) g.dashWidgets = def.dashWidgets; }
             });
             saveAuthGroups();
+        }
+
+        // Replace old init code
+        function initLoginUI() {
             // Populate login select (v2.26)
             const sel = document.getElementById('groupSelect');
             if (sel) {
