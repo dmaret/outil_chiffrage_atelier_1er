@@ -198,7 +198,7 @@
         .header h1 { font-size: 2em; margin-bottom: 10px; }
         .header p { opacity: 0.9; font-size: 1.05em; }
         
-        .tabs-wrapper { position:relative; background:var(--color-bg-alt); border-bottom:2px solid var(--color-border); display:flex; align-items:stretch; }
+        .tabs-wrapper { position:relative; background:var(--color-bg-alt); border-bottom:2px solid var(--color-border); display:flex; align-items:stretch; flex-wrap:wrap; }
         .nav-arrow-btn {
             border:none; background:rgba(255,255,255,0.18); cursor:pointer;
             font-size:1.1em; color:rgba(255,255,255,0.85); padding:4px 8px;
@@ -206,7 +206,8 @@
         }
         .nav-arrow-btn:hover:not(:disabled) { background:rgba(255,255,255,0.35); color:#fff; }
         .nav-arrow-btn:disabled { color:rgba(255,255,255,0.3); cursor:default; }
-        .tabs-scroll-btn {
+        .tabs-scroll-btn { display: none !important; }
+        .tabs-scroll-btn-unused {
             flex-shrink:0; width:30px;
             border:none; cursor:pointer; font-size:1.4em; font-weight:bold; color:var(--color-primary-dark);
             z-index:10; display:flex; align-items:center; justify-content:center;
@@ -221,19 +222,18 @@
             flex: 1 1 0;
             min-width: 0;
             background: var(--color-bg-alt);
-            overflow-x: auto;
-            scrollbar-width: none;
+            flex-wrap: wrap;
         }
-        .tabs::-webkit-scrollbar { display:none; }
-        
+
         .tab {
-            padding: 14px 18px;
+            padding: 10px 14px;
             text-align: center;
             cursor: pointer;
             background: var(--color-bg-alt);
             border: none;
             border-right: 1px solid var(--color-border);
-            font-size: 0.9em;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 0.85em;
             font-weight: 600;
             color: var(--color-text-muted);
             transition: all 0.3s;
