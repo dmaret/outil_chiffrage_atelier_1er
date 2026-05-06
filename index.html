@@ -7605,9 +7605,24 @@
               </div>
               <!-- Liste apprenants visible en mode-apprenant -->
               <div id="apprenant-learners-grid" style="display:none;margin-top:20px;"></div>
-              <div id="dashSectionHeader" class="section" style="border-left:4px solid #4caf50;">
-                <h2 style="color:#4caf50;">🏠 Dashboard — Accueil</h2>
-                <p style="color:#666;font-size:0.95em;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
+              <div id="dashSectionHeader" class="section" style="border-left:4px solid #4caf50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                <div>
+                  <h2 style="color:#4caf50;margin:0 0 4px;">🏠 Dashboard — Accueil</h2>
+                  <p style="color:#666;font-size:0.95em;margin:0;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
+                </div>
+                <button onclick="openDashWidgetPanel()" style="background:#f0f7ff;border:1px solid #a0c8e0;color:#2d5b8a;padding:8px 14px;border-radius:8px;font-size:0.88em;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">⚙️ Personnaliser</button>
+              </div>
+              <!-- Panneau personnalisation dashboard -->
+              <div id="dashWidgetPanel" style="display:none;background:white;border:1px solid #d0dae8;border-radius:12px;padding:18px 20px;margin-top:12px;box-shadow:0 4px 16px rgba(0,0,0,0.1);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                  <strong style="color:#2c3e50;">Sections visibles</strong>
+                  <div style="display:flex;gap:8px;">
+                    <button onclick="setAllDashWidgets(true)" style="font-size:0.8em;padding:4px 10px;background:#e8f4f8;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;color:#2d5b8a;">Tout afficher</button>
+                    <button onclick="setAllDashWidgets(false)" style="font-size:0.8em;padding:4px 10px;background:#fde8e8;border:1px solid #e0a0a0;border-radius:6px;cursor:pointer;color:#8a2d2d;">Tout masquer</button>
+                    <button onclick="closeDashWidgetPanel()" style="font-size:0.8em;padding:4px 10px;background:#f0f0f0;border:1px solid #ccc;border-radius:6px;cursor:pointer;">✕ Fermer</button>
+                  </div>
+                </div>
+                <div id="dashWidgetChecklist" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
               </div>
               <div id="onboardingChecklist"></div>
               <div class="stats-grid" id="dashboardKpis"></div>
@@ -9826,6 +9841,7 @@
         try {
         migrateLocalStorage();
         loadFromStorage();
+        loadDashWidgetPrefs();
         loadEmailWebhooksConfig();
         const storedTabsOrder = getStoredTabsOrder();
         if (storedTabsOrder) applyTabsOrder(storedTabsOrder);
@@ -25360,6 +25376,67 @@
             }
         }
 
+        const DASH_WIDGETS = [
+            { id: 'onboardingChecklist',     label: '✅ Premiers pas' },
+            { id: 'dashboardKpis',           label: '📊 KPI cards' },
+            { id: 'dashCharts',              label: '📈 Tendances (graphiques)' },
+            { id: 'dashGridDevisAlertes',    label: '📋 Devis en attente + Alertes' },
+            { id: 'dashSectionApprovals',    label: '⏳ Approbations en attente' },
+            { id: 'dashSectionApprovalStats',label: '📈 Stats approbation' },
+            { id: 'dashSectionFormation',    label: '🎓 Demandes de formation' },
+            { id: 'dashSectionPipeline',     label: '💰 Pipeline CA 3 mois' },
+            { id: 'dashSectionTopClients',   label: '🏆 Top clients 12 mois' },
+            { id: 'dashSectionCAEvolution',  label: '📊 Évolution CA 12 mois' },
+            { id: 'dashGridTopStats',        label: '🥇 Top prestations + Statuts' },
+            { id: 'dashSectionMarge',        label: '📉 Tendance marge' },
+            { id: 'dashFormationModule',     label: '🏭 Module Formation' },
+            { id: 'dashSectionEstime',       label: '🎯 Estimé vs Réel' },
+            { id: 'dashSectionRelances',     label: '🔔 Relances devis' },
+            { id: 'dashSectionHeatmap',      label: '🗓️ Heatmap CA' },
+            { id: 'dashSectionEcarts',       label: '⚖️ Écarts budget' },
+            { id: 'dashSectionKanban',       label: '🗂️ Kanban approbation' },
+        ];
+        let dashWidgetPrefs = {};
+
+        function loadDashWidgetPrefs() {
+            try { dashWidgetPrefs = JSON.parse(localStorage.getItem('dashWidgetPrefs') || '{}'); } catch(e) { dashWidgetPrefs = {}; }
+        }
+        function saveDashWidgetPrefs() {
+            localStorage.setItem('dashWidgetPrefs', JSON.stringify(dashWidgetPrefs));
+        }
+        function isDashWidgetVisible(id) {
+            return dashWidgetPrefs[id] !== false; // visible par défaut
+        }
+        function applyDashWidgetPrefs() {
+            DASH_WIDGETS.forEach(w => {
+                const el = document.getElementById(w.id);
+                if (el) el.style.display = isDashWidgetVisible(w.id) ? '' : 'none';
+            });
+        }
+        function openDashWidgetPanel() {
+            const panel = document.getElementById('dashWidgetPanel');
+            const list = document.getElementById('dashWidgetChecklist');
+            if (!panel || !list) return;
+            list.innerHTML = DASH_WIDGETS.map(w => `
+                <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border:1px solid #e0e8f0;border-radius:8px;cursor:pointer;font-size:0.9em;">
+                    <input type="checkbox" ${isDashWidgetVisible(w.id) ? 'checked' : ''}
+                        onchange="dashWidgetPrefs['${w.id}']=this.checked;saveDashWidgetPrefs();applyDashWidgetPrefs();"
+                        style="width:16px;height:16px;cursor:pointer;">
+                    <span>${w.label}</span>
+                </label>`).join('');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+        function closeDashWidgetPanel() {
+            const panel = document.getElementById('dashWidgetPanel');
+            if (panel) panel.style.display = 'none';
+        }
+        function setAllDashWidgets(visible) {
+            DASH_WIDGETS.forEach(w => { dashWidgetPrefs[w.id] = visible; });
+            saveDashWidgetPrefs();
+            applyDashWidgetPrefs();
+            openDashWidgetPanel(); // rafraîchit les cases
+        }
+
         function renderApprenantLearnersGrid() {
             const grid = document.getElementById('apprenant-learners-grid');
             if (!grid) return;
@@ -25842,6 +25919,7 @@
             try { renderConversionPipeline(); } catch (e) { console.warn('renderConversionPipeline failed:', e); }
             try { renderEcartsWidget(); } catch (e) { console.warn('renderEcartsWidget failed:', e); }
             try { renderApprenantLearnersGrid(); } catch (e) { console.warn('renderApprenantLearnersGrid failed:', e); }
+            try { applyDashWidgetPrefs(); } catch (e) {}
             } catch (e) {
                 console.error('❌ renderDashboard ERREUR:', e);
                 console.error('Stack:', e.stack);
