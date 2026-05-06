@@ -5457,7 +5457,13 @@
                 <div class="section admin-section" style="display:none; border-left: 4px solid #f39c12;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
                         <h2 style="margin:0;flex:1;min-width:0;">🔐 Accès par rôle <span style="background:#f39c12;color:#fff;font-size:0.55em;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:700;letter-spacing:1px;">ADMIN</span></h2>
-                        <button class="btn btn-small btn-success" onclick="openAddGroupModal()" style="white-space:nowrap;">➕ Nouveau groupe</button>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn btn-small btn-success" onclick="openAddGroupModal()" style="white-space:nowrap;">➕ Nouveau groupe</button>
+                            <button class="btn btn-small" onclick="exportAuthConfig()" style="white-space:nowrap;background:#e8f4f8;border:1px solid #a0c8e0;color:#2d5b8a;" title="Télécharger auth-config.json pour synchroniser les mots de passe sur tous les appareils">📤 Exporter auth-config.json</button>
+                        </div>
+                    </div>
+                    <div style="background:#fff8e1;border:1px solid #f39c12;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.83em;color:#7a5a00;">
+                        💡 <strong>Multi-appareil :</strong> après avoir défini les mots de passe, cliquez <em>Exporter auth-config.json</em>, puis committez le fichier dans le repo. Tous les appareils utiliseront ce fichier.
                     </div>
                     <p style="font-size:0.85em;color:#7a9db1;margin-bottom:14px;">Cochez les onglets accessibles pour chaque groupe. Les modifications sont sauvegardées instantanément. Cliquez sur 🔑 pour (re)définir le mot de passe d'un groupe.</p>
                     <div id="rbacMatrix" style="overflow-x:auto;"></div>
@@ -23388,6 +23394,25 @@
             }
         }
 
+        async function exportAuthConfig() {
+            const data = JSON.stringify({ authGroups }, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            try {
+                if (window.showSaveFilePicker) {
+                    const fh = await window.showSaveFilePicker({ suggestedName: 'auth-config.json', types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }] });
+                    const w = await fh.createWritable();
+                    await w.write(blob);
+                    await w.close();
+                } else {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'auth-config.json';
+                    a.click();
+                }
+                toast('✅ auth-config.json exporté — committez-le dans le repo pour sync multi-appareils', 'success', 5000);
+            } catch (e) { if (e.name !== 'AbortError') toast('Erreur export: ' + e.message, 'danger'); }
+        }
+
         function saveAuthGroups() {
             // Store auth groups with password hashes (needed for login to work)
             // Passwords are hashed, not plaintext, and are salted by the hashPassword function
@@ -24591,7 +24616,7 @@
             document.getElementById('addGroupModal')?.classList.remove('open');
         }
 
-        function saveNewGroup() {
+        async function saveNewGroup() {
             const name = document.getElementById('newGroupNameInput').value.trim();
             const password = document.getElementById('newGroupPasswordInput').value.trim();
             if (!name) { toast('Le nom du groupe est requis', 'warning'); return; }
@@ -24599,7 +24624,8 @@
             const tabs = [...document.querySelectorAll('#newGroupChecklist input:checked')].map(cb => cb.value);
             if (tabs.length === 0) { toast('Sélectionnez au moins un onglet', 'warning'); return; }
             const id = 'grp_' + Date.now();
-            authGroups.push({ id, name, passwordHash: hashPassword(password), tabs });
+            const _newHash = await hashPassword(password);
+            authGroups.push({ id, name, passwordHash: _newHash, tabs });
             saveAuthGroups();
             const sel = document.getElementById('authGroupSelect');
             if (sel) sel.innerHTML = authGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
@@ -24662,15 +24688,15 @@
             document.getElementById('authGroupModal')?.classList.remove('open');
         }
 
-        function saveAuthGroupModal() {
+        async function saveAuthGroupModal() {
             const id = document.getElementById('authGroupEditId').value;
             const password = document.getElementById('authGroupPasswordInput').value.trim();
             if (!password) { toast('Le mot de passe ne peut pas être vide', 'warning'); return; }
             const idx = authGroups.findIndex(g => g.id === id);
-            if (idx >= 0) { authGroups[idx].passwordHash = hashPassword(password); }
+            if (idx >= 0) { authGroups[idx].passwordHash = await hashPassword(password); }
             saveAuthGroups();
             closeAuthGroupModal();
-            toast(`Mot de passe de "${authGroups[idx]?.name || id}" mis à jour`, 'success');
+            toast(`Mot de passe de "${authGroups[idx]?.name || id}" mis à jour — pensez à exporter auth-config.json`, 'success', 4000);
         }
 
         // ── Mode présentation (refonte) ───────────────────────────
