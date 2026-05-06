@@ -584,7 +584,7 @@
                     <div class="order-card" onclick="showOrderDetail(${index})" style="background: white; border-radius: 12px; padding: 16px; border-left: 5px solid ${order.statut === 'accepte' ? '#27ae60' : '#9a70b8'}; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                             <div>
-                                <div style="font-weight: 700; font-size: 16px; color: #333;">${order.nom || 'Sans titre'}</div>
+                                <div style="font-weight: 700; font-size: 16px; color: #333;">${order.prestation || 'Sans titre'}</div>
                                 <div style="font-size: 13px; color: #666; margin-top: 2px;">Client: ${order.client || 'Non défini'}</div>
                             </div>
                             <span style="background: ${order.statut === 'accepte' ? '#d4edda' : '#e8d5f0'}; color: ${order.statut === 'accepte' ? '#155724' : '#5a3878'}; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
@@ -635,7 +635,7 @@
 
     function renderGestureList(order) {
         // Set modal header information
-        document.getElementById('modalOrderName').textContent = order.nom || 'Sans titre';
+        document.getElementById('modalOrderName').textContent = order.prestation || 'Sans titre';
         document.getElementById('modalClientName').textContent = `Client: ${order.client || 'Non défini'}`;
 
         // Populate gestures list
