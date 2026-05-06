@@ -15639,7 +15639,8 @@
 
             document.getElementById('learnerName').value = '';
             document.getElementById('learnerCategory').value = '';
-            document.getElementById('learnerStartDate').value = '';
+            // Reset to today so the next learner can be added without re-entering the date
+            document.getElementById('learnerStartDate').valueAsDate = new Date();
 
             toast(`✅ ${name} ajouté·e à la liste des apprenants`, 'success');
             logAction(`Ajout apprenant formation: ${name} (${category})`, 'CREATE');
@@ -21511,9 +21512,13 @@
                 return m ? m[1] : null;
             }).filter(Boolean);
             localStorage.setItem('tabOrder', JSON.stringify(order));
+            localStorage.setItem('tabsOrder', JSON.stringify(order)); // keep editor in sync
         }
 
         function loadTabOrder() {
+            // The reorganization editor uses 'tabsOrder' and runs before this.
+            // Skip drag-order if editor order already applied, to avoid conflicts.
+            if (localStorage.getItem('tabsOrder')) return;
             const saved = localStorage.getItem('tabOrder');
             if (!saved) return;
             try {
