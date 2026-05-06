@@ -7610,19 +7610,21 @@
                   <h2 style="color:#4caf50;margin:0 0 4px;">🏠 Dashboard — Accueil</h2>
                   <p style="color:#666;font-size:0.95em;margin:0;">Bienvenue! Cet espace affiche vos KPIs, devis en attente, alertes et prévisions.</p>
                 </div>
-                <button onclick="openDashWidgetPanel()" style="background:#f0f7ff;border:1px solid #a0c8e0;color:#2d5b8a;padding:8px 14px;border-radius:8px;font-size:0.88em;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">⚙️ Personnaliser</button>
-              </div>
-              <!-- Panneau personnalisation dashboard -->
-              <div id="dashWidgetPanel" style="display:none;background:white;border:1px solid #d0dae8;border-radius:12px;padding:18px 20px;margin-top:12px;box-shadow:0 4px 16px rgba(0,0,0,0.1);">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-                  <strong style="color:#2c3e50;">Sections visibles</strong>
-                  <div style="display:flex;gap:8px;">
-                    <button onclick="setAllDashWidgets(true)" style="font-size:0.8em;padding:4px 10px;background:#e8f4f8;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;color:#2d5b8a;">Tout afficher</button>
-                    <button onclick="setAllDashWidgets(false)" style="font-size:0.8em;padding:4px 10px;background:#fde8e8;border:1px solid #e0a0a0;border-radius:6px;cursor:pointer;color:#8a2d2d;">Tout masquer</button>
-                    <button onclick="closeDashWidgetPanel()" style="font-size:0.8em;padding:4px 10px;background:#f0f0f0;border:1px solid #ccc;border-radius:6px;cursor:pointer;">✕ Fermer</button>
+                <div style="position:relative;">
+                  <button onclick="openDashWidgetPanel()" style="background:#f0f7ff;border:1px solid #a0c8e0;color:#2d5b8a;padding:8px 14px;border-radius:8px;font-size:0.88em;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">⚙️ Personnaliser</button>
+                  <!-- Panneau personnalisation dashboard -->
+                  <div id="dashWidgetPanel" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:200;background:white;border:1px solid #d0dae8;border-radius:12px;padding:18px 20px;min-width:340px;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                      <strong style="color:#2c3e50;">Sections visibles</strong>
+                      <div style="display:flex;gap:8px;">
+                        <button onclick="setAllDashWidgets(true)" style="font-size:0.8em;padding:4px 10px;background:#e8f4f8;border:1px solid #a0c8e0;border-radius:6px;cursor:pointer;color:#2d5b8a;">Tout afficher</button>
+                        <button onclick="setAllDashWidgets(false)" style="font-size:0.8em;padding:4px 10px;background:#fde8e8;border:1px solid #e0a0a0;border-radius:6px;cursor:pointer;color:#8a2d2d;">Tout masquer</button>
+                        <button onclick="closeDashWidgetPanel()" style="font-size:0.8em;padding:4px 10px;background:#f0f0f0;border:1px solid #ccc;border-radius:6px;cursor:pointer;">✕</button>
+                      </div>
+                    </div>
+                    <div id="dashWidgetChecklist" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;"></div>
                   </div>
                 </div>
-                <div id="dashWidgetChecklist" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
               </div>
               <div id="onboardingChecklist"></div>
               <div class="stats-grid" id="dashboardKpis"></div>
