@@ -25514,8 +25514,20 @@
             const sLabels = Object.keys(statutCounts);
             const sValues = sLabels.map(k => statutCounts[k]);
             const sColors = sLabels.map(k => ({
-                devis:'#f39c12', valide:'#27ae60', facture:'#3498db', annule:'#e74c3c', refuse:'#95a5a6'
-            }[k] || '#a8d5e2'));
+                'devis':    '#f39c12',
+                'soumis':   '#e67e22',
+                'validé':   '#27ae60',
+                'valide':   '#27ae60',
+                'facturé':  '#2980b9',
+                'facture':  '#2980b9',
+                'en-cours': '#8e44ad',
+                'en cours': '#8e44ad',
+                'accepte':  '#16a085',
+                'annulé':   '#e74c3c',
+                'annule':   '#e74c3c',
+                'refusé':   '#95a5a6',
+                'refuse':   '#95a5a6',
+            }[k] || '#bdc3c7'));
             const cvS = document.getElementById('chartStatuts');
             if (cvS) {
                 if (_dashCharts.statuts) _dashCharts.statuts.destroy();
