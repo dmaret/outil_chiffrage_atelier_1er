@@ -5132,6 +5132,8 @@
 
             <!-- ONGLET GESTION STOCK -->
             <div id="stock" class="tab-content">
+                <!-- Bandeau capacité zones -->
+                <div id="stockCapacityBanner" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;"></div>
                 <div class="info-box">
                     <strong>Module Stock</strong> - Mouvements FIFO, valorisation, calcul ratio palette/rack, rotation et inventaires.
                 </div>
@@ -5163,7 +5165,14 @@
                         <div class="form-group">
                             <label>Capacité atelier</label>
                             <div class="input-with-unit">
-                                <input type="number" id="capacitePalettes" step="1" value="100" onchange="saveStockConfig()">
+                                <input type="number" id="capacitePalettes" step="1" value="100" onchange="saveStockConfig();renderStockCapacityBanner()">
+                                <span class="unit">pal.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Capacité sous-sol</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="capaciteSousSol" step="1" value="0" onchange="saveStockConfig();renderStockCapacityBanner()">
                                 <span class="unit">pal.</span>
                             </div>
                         </div>
@@ -5220,7 +5229,7 @@
                 </div>
 
                 <div class="section">
-                    <h2>Mouvements stock (FIFO)</h2>
+                    <h2>Mouvements stock</h2>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Type</label>
@@ -7961,6 +7970,7 @@
             coutRack: 1.2,
             surfaceRack: 0.8,
             capacitePalettes: 100,
+            capaciteSousSol: 0,
             nbPalettesAtelier: 45,
             capaciteParPalette: 500,
             capaciteParRack: 1000,
@@ -10218,6 +10228,7 @@
             document.getElementById('coutRack').value = config.coutRack;
             document.getElementById('surfaceRack').value = config.surfaceRack;
             document.getElementById('capacitePalettes').value = config.capacitePalettes;
+            document.getElementById('capaciteSousSol').value = config.capaciteSousSol || 0;
             document.getElementById('nbPalettesAtelier').value = config.nbPalettesAtelier || 45;
             document.getElementById('capaciteParPalette').value = config.capaciteParPalette || 500;
             document.getElementById('capaciteParRack').value = config.capaciteParRack || 1000;
@@ -10425,6 +10436,31 @@
             toast('✅ Configuration sauvegardée', 'success');
         }
 
+        function renderStockCapacityBanner() {
+            const banner = document.getElementById('stockCapacityBanner');
+            if (!banner) return;
+            const atelier = config.capacitePalettes || 0;
+            const sousSol = config.capaciteSousSol || 0;
+            const total = atelier + sousSol;
+            const pctAtelier = total > 0 ? Math.round(atelier / total * 100) : 0;
+            const pctSousSol = total > 0 ? Math.round(sousSol / total * 100) : 0;
+            const card = (label, val, color, pct) => `
+                <div style="background:white;border-radius:12px;padding:14px 18px;border-left:4px solid ${color};box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                    <div style="font-size:0.78em;color:#7a9db1;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">${label}</div>
+                    <div style="font-size:1.6em;font-weight:800;color:#2c3e50;">${val} <span style="font-size:0.5em;color:#7a9db1;font-weight:400;">pal.</span></div>
+                    ${total > 0 ? `<div style="margin-top:6px;background:#f0f4f8;border-radius:4px;height:6px;overflow:hidden;"><div style="height:100%;background:${color};width:${pct}%;border-radius:4px;transition:width 0.4s;"></div></div>
+                    <div style="font-size:0.75em;color:#7a9db1;margin-top:3px;">${pct}% du total</div>` : ''}
+                </div>`;
+            banner.innerHTML =
+                card('Atelier', atelier, '#4e9af1', pctAtelier) +
+                card('Sous-sol', sousSol, '#27ae60', pctSousSol) +
+                `<div style="background:linear-gradient(135deg,#4e9af1,#27ae60);border-radius:12px;padding:14px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="font-size:0.78em;color:rgba(255,255,255,0.8);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Capacité totale</div>
+                    <div style="font-size:1.6em;font-weight:800;color:white;">${total} <span style="font-size:0.5em;opacity:0.8;font-weight:400;">pal.</span></div>
+                    <div style="font-size:0.75em;color:rgba(255,255,255,0.75);margin-top:6px;">Atelier ${pctAtelier}% · Sous-sol ${pctSousSol}%</div>
+                </div>`;
+        }
+
         function saveStockConfig() {
             // Check permission
             if (!checkPermission('manage_config')) {
@@ -10434,6 +10470,7 @@
             config.coutRack = parseFloat(document.getElementById('coutRack').value);
             config.surfaceRack = parseFloat(document.getElementById('surfaceRack').value);
             config.capacitePalettes = parseFloat(document.getElementById('capacitePalettes').value);
+            config.capaciteSousSol = parseFloat(document.getElementById('capaciteSousSol').value) || 0;
             config.nbPalettesAtelier = parseInt(document.getElementById('nbPalettesAtelier').value) || 45;
             config.capaciteParPalette = parseInt(document.getElementById('capaciteParPalette').value) || 500;
             config.capaciteParRack = parseInt(document.getElementById('capaciteParRack').value) || 1000;
@@ -10465,6 +10502,7 @@
                     coutRack: 1.2,
                     surfaceRack: 0.8,
                     capacitePalettes: 100,
+            capaciteSousSol: 0,
                     nbPalettesAtelier: 45,
                     capaciteParPalette: 500,
                     capaciteParRack: 1000,
@@ -13011,6 +13049,7 @@
             else if (tabName === 'stats') { try { updateStats(); } catch (e) { console.warn('updateStats:', e); } }
             else if (tabName === 'stock') {
                 try {
+                    renderStockCapacityBanner();
                     updateStockStats();
                     renderMouvements();
                     renderValorisation();
