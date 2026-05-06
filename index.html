@@ -3786,6 +3786,11 @@
     </style>
 </head>
 <body>
+    <!-- Bandeau mode démo (visible uniquement quand _demoMode=1) -->
+    <div id="demoBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#f39c12,#e67e22);color:#fff;text-align:center;padding:8px 16px;font-weight:700;font-size:0.93em;letter-spacing:0.03em;box-shadow:0 -2px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;gap:16px;">
+      <span>⚠️ MODE DÉMO — Données fictives uniquement — Ne pas utiliser en production</span>
+      <button onclick="clearDemoMode()" style="background:rgba(255,255,255,0.25);border:1.5px solid rgba(255,255,255,0.7);color:#fff;padding:3px 12px;border-radius:6px;font-size:0.85em;font-weight:700;cursor:pointer;">✕ Quitter le mode démo</button>
+    </div>
     <!-- Login Screen: Group Authentication (v2.26) -->
     <div id="loginScreen" class="hidden" role="main" aria-label="Écran d'authentification">
         <div class="login-container">
@@ -6215,6 +6220,17 @@
                     <div id="tabsOrderContainer" style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;"></div>
                     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
                         <button class="btn btn-secondary btn-small" onclick="resetTabsOrder()">↺ Réinitialiser à l'ordre par défaut</button>
+                        <button class="btn btn-small" onclick="exportTabsConfig()" style="background:#2d5b8a;color:#fff;border-color:#1e3f60;" title="Télécharge tabs-config.json à déposer dans le dépôt pour partager l'ordre entre ordinateurs">💾 Sauvegarder comme modèle (tabs-config.json)</button>
+                    </div>
+                </div>
+
+                <!-- ── Mode Démo ── -->
+                <div class="section admin-only" style="border-left-color:#e67e22;">
+                    <h2>🎭 Mode Démo</h2>
+                    <div class="info-box">Charge un jeu de données fictives (prestations, apprenants, clients, stock) pour présenter l'outil. Un bandeau orange signale le mode démo en permanence. Les vraies données sont préservées — elles seront restaurées en quittant le mode démo.</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+                        <button class="btn btn-small" onclick="activateDemoMode()" style="background:#e67e22;color:#fff;border-color:#c05a00;font-weight:700;">🎭 Activer le mode démo</button>
+                        <button class="btn btn-secondary btn-small" onclick="clearDemoMode()">✕ Quitter le mode démo</button>
                     </div>
                 </div>
             </div>
@@ -9846,7 +9862,14 @@
         loadDashWidgetPrefs();
         loadEmailWebhooksConfig();
         const storedTabsOrder = getStoredTabsOrder();
-        if (storedTabsOrder) applyTabsOrder(storedTabsOrder);
+        if (storedTabsOrder) {
+            applyTabsOrder(storedTabsOrder);
+        } else {
+            // No local order — try to load shared model from tabs-config.json
+            loadTabsConfigFile().then(fileOrder => {
+                if (fileOrder) { saveTabsOrder(fileOrder); applyTabsOrder(fileOrder); applyTabGroupColors(); }
+            });
+        }
         applyTabGroupColors();
         renderStockSelects();
         document.getElementById('date').valueAsDate = new Date();
@@ -9921,6 +9944,8 @@
                 const cb = document.getElementById('authNoEmoji');
                 if (cb) cb.checked = true;
             }
+            // Afficher le bandeau si le mode démo est actif
+            if (localStorage.getItem('_demoMode') === '1') _showDemoBanner();
         });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
@@ -10355,6 +10380,27 @@
             applyTabGroupColors();
             renderTabsOrderEditor();
             toast('Ordre des onglets réinitialisé', 'success');
+        }
+
+        // ── tabs-config.json — modèle partageable ───────────────────
+        async function loadTabsConfigFile() {
+            try {
+                const r = await fetch('./tabs-config.json?_=' + Date.now());
+                if (!r.ok) return null;
+                const d = await r.json();
+                return Array.isArray(d.tabsOrder) && d.tabsOrder.length > 0 ? d.tabsOrder : null;
+            } catch(e) { return null; }
+        }
+
+        function exportTabsConfig() {
+            const order = _tabsOrder && _tabsOrder.length ? _tabsOrder : getDefaultTabsOrder();
+            const blob = new Blob([JSON.stringify({tabsOrder: order}, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'tabs-config.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            toast('✅ tabs-config.json téléchargé — déposez-le à la racine du dépôt', 'success', 5000);
         }
 
         // ── CEA Niveaux ─────────────────────────────────────────────
@@ -19870,6 +19916,100 @@
             a.download = suggestedName;
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        // ── Mode Démo ────────────────────────────────────────────────
+        function _showDemoBanner() {
+            const b = document.getElementById('demoBanner');
+            if (b) b.style.display = 'flex';
+            document.body.style.paddingBottom = '44px';
+        }
+        function _hideDemoBanner() {
+            const b = document.getElementById('demoBanner');
+            if (b) b.style.display = 'none';
+            document.body.style.paddingBottom = '';
+        }
+
+        function activateDemoMode() {
+            if (!confirm('Activer le mode démo ? Les données actuelles seront sauvegardées et restaurées à la désactivation.')) return;
+
+            // Snapshot des vraies données
+            const snap = {};
+            ['prestationsSauvegardees','learnersList','clientsData','stockData','catalogueGestes','formationProgress'].forEach(k => {
+                snap[k] = localStorage.getItem(k);
+            });
+            localStorage.setItem('_demoBackup', JSON.stringify(snap));
+            localStorage.setItem('_demoMode', '1');
+
+            const now = new Date();
+            const d = (offset) => { const x = new Date(now); x.setDate(x.getDate() + offset); return x.toISOString().split('T')[0]; };
+
+            // ── Prestations fictives ──
+            const demoPrestations = [
+                {id:1700000001, date:d(-45), client:'[DÉMO] Nestlé Suisse SA', prestation:'Étiquetage lot cosmétiques printemps', reference:'DEMO-ETI-2026-001', nbCEA:3, nbMSP:0.25, unite:'pièce', responsable:'M. Dubois', heures:8.5, prixRevient:1250, marge:20, prixVente:1562.5, gestes:[{code:'ETI-02',description:'Coller étiquette',temps:12,quantite:1500,typeApp:'piece',notes:''},{code:'CTR-01',description:'Contrôle visuel unitaire',temps:10,quantite:1500,typeApp:'piece',notes:''}], consommables:[{nom:'Étiquette A4',prix:0.15,qte:1500}], stockage:[], statut:'facturé', coutMO:900, coutEncadrement:225, coutConsommables:225, coutStockage:0, nbPieces:1500, prixVentePiece:1.04, marge:20, notesInternes:'Livraison en 3 palettes, validation OK', attachments:[]},
+                {id:1700000002, date:d(-30), client:'[DÉMO] Migros Industrie AG', prestation:'Reconditionnement produits retour', reference:'DEMO-REC-2026-002', nbCEA:4, nbMSP:0.5, unite:'lot', responsable:'Mme Favre', heures:12.0, prixRevient:1840, marge:25, prixVente:2453.3, gestes:[{code:'REC-01',description:'Décharger palette',temps:180,quantite:2,typeApp:'lot',notes:''},{code:'PRE-03',description:'Reconditionnement élément',temps:3,quantite:800,typeApp:'piece',notes:''}], consommables:[{nom:'Carton moyen',prix:1.80,qte:40},{nom:'Film bulles',prix:0.80,qte:20}], stockage:[], statut:'validé', coutMO:1440, coutEncadrement:360, coutConsommables:88, coutStockage:0, nbPieces:1, marge:25, notesInternes:'Délai serré — prévoir 2 équipes', attachments:[]},
+                {id:1700000003, date:d(-15), client:'[DÉMO] Rolex SA', prestation:'Assemblage kit packaging premium', reference:'DEMO-ASS-2026-003', nbCEA:2, nbMSP:0.5, unite:'pièce', responsable:'M. Dubois', heures:6.0, prixRevient:980, marge:35, prixVente:1507.7, gestes:[{code:'ASS-02',description:'Kit 3-5 pièces',temps:90,quantite:200,typeApp:'piece',notes:'Gants obligatoires'},{code:'CTR-03',description:'Mise en conformité avant envoi',temps:10,quantite:20,typeApp:'lot',notes:''}], consommables:[{nom:'Sachet',prix:0.05,qte:200},{nom:'Film bulles',prix:0.80,qte:10}], stockage:[], statut:'soumis', coutMO:720, coutEncadrement:180, coutConsommables:18, coutStockage:0, nbPieces:200, prixVentePiece:7.54, marge:35, notesInternes:'Client exigeant — qualité parfaite requise', attachments:[]},
+                {id:1700000004, date:d(-7), client:'[DÉMO] Nestlé Suisse SA', prestation:'Filmage palette produits saisonniers', reference:'DEMO-EXP-2026-004', nbCEA:2, nbMSP:0.25, unite:'palette', responsable:'Mme Favre', heures:3.0, prixRevient:420, marge:18, prixVente:512.2, gestes:[{code:'EXP-02',description:'Filmer palette',temps:180,quantite:6,typeApp:'lot',notes:''},{code:'CTR-04',description:'Mise en conformité palette',temps:60,quantite:6,typeApp:'lot',notes:''}], consommables:[{nom:'Film étirable',prix:18,qte:2},{nom:'Palette EUR',prix:12,qte:6}], stockage:[], statut:'devis', coutMO:300, coutEncadrement:75, coutConsommables:108, coutStockage:0, nbPieces:6, prixVentePiece:85.4, marge:18, notesInternes:'', attachments:[]},
+                {id:1700000005, date:d(-3), client:'[DÉMO] Pharmacie Centrale GE', prestation:'Contrôle & étiquetage médicaments OTC', reference:'DEMO-CTR-2026-005', nbCEA:2, nbMSP:0.5, unite:'boîte', responsable:'M. Dubois', heures:9.5, prixRevient:1390, marge:30, prixVente:1985.7, gestes:[{code:'CTR-02',description:'Contrôle élément fini',temps:1.5,quantite:3000,typeApp:'piece',notes:''},{code:'ETI-04',description:'Collage étiquette orientée complexe',temps:5,quantite:3000,typeApp:'piece',notes:''}], consommables:[{nom:'Étiquette A4',prix:0.15,qte:3000}], stockage:[], statut:'devis', coutMO:900, coutEncadrement:450, coutConsommables:450, coutStockage:0, nbPieces:3000, prixVentePiece:0.66, marge:30, notesInternes:'Normes Swissmedic applicables', attachments:[]},
+                {id:1700000006, date:d(-60), client:'[DÉMO] Migros Industrie AG', prestation:'Préparation commandes e-commerce', reference:'DEMO-PRE-2026-006', nbCEA:5, nbMSP:0.25, unite:'commande', responsable:'Mme Favre', heures:16.0, prixRevient:2200, marge:22, prixVente:2820.5, gestes:[{code:'PRE-01',description:'Imprimer bon',temps:30,quantite:120,typeApp:'lot',notes:''},{code:'PRE-02',description:'Picking',temps:20,quantite:600,typeApp:'piece',notes:''},{code:'EXP-01',description:'Peser colis',temps:15,quantite:120,typeApp:'lot',notes:''}], consommables:[{nom:'Carton petit',prix:1.20,qte:80},{nom:'Carton moyen',prix:1.80,qte:40},{nom:'Scotch',prix:3.50,qte:10}], stockage:[], statut:'facturé', coutMO:1800, coutEncadrement:200, coutConsommables:165, coutStockage:35, nbPieces:120, prixVentePiece:23.5, marge:22, notesInternes:'Récurrent mensuel — contrat annuel', attachments:[]},
+            ];
+
+            // ── Apprenants fictifs ──
+            const demoLearners = [
+                {id:1700001001, name:'[DÉMO] Sophie Meier', category:'Réception', startDate:d(-90), progress:{}, assignedDocuments:[], assignedFormations:['Réception','Contrôle'], quizResults:{}},
+                {id:1700001002, name:'[DÉMO] Jean-Pierre Rochat', category:'Assemblage', startDate:d(-60), progress:{}, assignedDocuments:[], assignedFormations:['Assemblage','Étiquetage'], quizResults:{}},
+                {id:1700001003, name:'[DÉMO] Amira Ben Salah', category:'Étiquetage', startDate:d(-45), progress:{}, assignedDocuments:[], assignedFormations:['Étiquetage'], quizResults:{}},
+                {id:1700001004, name:'[DÉMO] Marco Ferretti', category:'Préparation', startDate:d(-30), progress:{}, assignedDocuments:[], assignedFormations:['Préparation','Expédition'], quizResults:{}},
+                {id:1700001005, name:'[DÉMO] Lucie Blanc', category:'Stockage', startDate:d(-15), progress:{}, assignedDocuments:[], assignedFormations:['Stockage'], quizResults:{}},
+            ];
+
+            // ── Clients fictifs ──
+            const demoClients = {
+                '[DÉMO] Nestlé Suisse SA': {tel:'+41 21 924 21 11', email:'logistique@demo-nestle.ch', adresse:'Vevey, VD', notes:'Client prioritaire — 2 commandes/mois', tarifSpecial:null},
+                '[DÉMO] Migros Industrie AG': {tel:'+41 44 277 20 20', email:'appro@demo-migros.ch', adresse:'Zurich, ZH', notes:'Contrat annuel renouvelable', tarifSpecial:null},
+                '[DÉMO] Rolex SA': {tel:'+41 22 302 22 00', email:'supply@demo-rolex.ch', adresse:'Genève, GE', notes:'Exigences qualité très élevées', tarifSpecial:null},
+                '[DÉMO] Pharmacie Centrale GE': {tel:'+41 22 418 29 00', email:'commandes@demo-pharma.ch', adresse:'Genève, GE', notes:'Normes Swissmedic', tarifSpecial:null},
+            };
+
+            localStorage.setItem('prestationsSauvegardees', JSON.stringify(demoPrestations));
+            localStorage.setItem('learnersList', JSON.stringify(demoLearners));
+            localStorage.setItem('clientsData', JSON.stringify(demoClients));
+
+            // Recharger les données en mémoire
+            prestationsSauvegardees = demoPrestations;
+            learnersList = demoLearners;
+            clientsData = demoClients;
+
+            _showDemoBanner();
+            renderDashboard();
+            renderLearners && renderLearners();
+            updateStats && updateStats();
+            toast('🎭 Mode démo activé — données fictives chargées', 'success', 5000);
+        }
+
+        function clearDemoMode() {
+            localStorage.setItem('_demoMode', '0');
+            const backup = localStorage.getItem('_demoBackup');
+            if (backup) {
+                try {
+                    const snap = JSON.parse(backup);
+                    Object.entries(snap).forEach(([k, v]) => {
+                        if (v === null || v === undefined) localStorage.removeItem(k);
+                        else localStorage.setItem(k, v);
+                    });
+                } catch(e) {}
+                localStorage.removeItem('_demoBackup');
+            } else {
+                // Pas de backup — juste nettoyer les données démo
+                ['prestationsSauvegardees','learnersList','clientsData'].forEach(k => localStorage.removeItem(k));
+            }
+            _hideDemoBanner();
+            // Recharger l'état depuis localStorage
+            loadFromStorage && loadFromStorage();
+            loadFormationData && loadFormationData();
+            renderDashboard && renderDashboard();
+            updateStats && updateStats();
+            toast('✅ Mode démo désactivé — données réelles restaurées', 'success', 4000);
         }
 
         function exportJSON() {
