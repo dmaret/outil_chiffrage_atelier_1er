@@ -9944,8 +9944,10 @@
                 const cb = document.getElementById('authNoEmoji');
                 if (cb) cb.checked = true;
             }
-            // Afficher le bandeau si le mode démo est actif
-            if (localStorage.getItem('_demoMode') === '1') _showDemoBanner();
+            // Afficher le bandeau si le mode démo est actif (sessionStorage uniquement — s'efface à la fermeture)
+            if (sessionStorage.getItem('_demoMode') === '1') _showDemoBanner();
+            // Nettoyer un éventuel _demoMode résiduel en localStorage (ancienne version)
+            localStorage.removeItem('_demoMode');
         });
 
         // ── Raccourcis clavier globaux ───────────────────────────────
@@ -19943,7 +19945,7 @@
                 snap[k] = localStorage.getItem(k);
             });
             localStorage.setItem('_demoBackup', JSON.stringify(snap));
-            localStorage.setItem('_demoMode', '1');
+            sessionStorage.setItem('_demoMode', '1'); // session uniquement, s'efface à la fermeture
 
             const now = new Date();
             const d = (offset) => { const x = new Date(now); x.setDate(x.getDate() + offset); return x.toISOString().split('T')[0]; };
@@ -19992,7 +19994,8 @@
         }
 
         function clearDemoMode() {
-            localStorage.setItem('_demoMode', '0');
+            sessionStorage.removeItem('_demoMode');
+            localStorage.removeItem('_demoMode'); // sécurité : nettoyer l'ancienne clé aussi
             const backup = localStorage.getItem('_demoBackup');
             if (backup) {
                 try {
