@@ -3780,6 +3780,35 @@
             margin-top: 0;
             text-align: center;
         }
+        /* ── Chronomètre Live ──────────────────────────────── */
+        #chrono-float { position:fixed; bottom:20px; left:20px; z-index:9998; background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.18); width:224px; font-size:0.82em; user-select:none; border:2px solid #e2eaf4; }
+        #chrono-float-hdr { display:flex; align-items:center; justify-content:space-between; padding:7px 12px; border-bottom:1px solid #eef2f8; cursor:grab; background:#f6f9fc; border-radius:10px 10px 0 0; }
+        #chrono-display { font-size:2.1em; font-weight:800; text-align:center; font-variant-numeric:tabular-nums; letter-spacing:3px; padding:8px 0 2px; }
+        #chrono-display.over { color:#e74c3c; animation:chrono-blink 1s step-start infinite; }
+        #chrono-display.ok { color:#27ae60; }
+        #chrono-display.idle { color:#7a9db1; }
+        @keyframes chrono-blink { 50% { opacity:0.35; } }
+        /* ── What if? ──────────────────────────────────────── */
+        #whatif-modal { display:none; position:fixed; inset:0; z-index:10002; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; }
+        #whatif-modal.open { display:flex; }
+        #whatif-box { background:#fff; border-radius:14px; width:520px; max-width:96vw; max-height:92vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.24); }
+        .wi-param { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid #f0f4f8; }
+        .wi-param label { width:138px; font-size:0.83em; color:#5a6e80; flex-shrink:0; }
+        .wi-result { background:#f6f9fc; border-radius:8px; padding:12px 16px; margin:12px 0; }
+        /* ── Kanban ─────────────────────────────────────────── */
+        #kanban-board { display:flex; gap:10px; overflow-x:auto; padding:4px 0 16px; min-height:200px; align-items:flex-start; }
+        .kanban-col { flex:0 0 188px; background:var(--color-section-bg,#f8fafc); border:1.5px solid var(--color-border,#e2eaf4); border-radius:10px; padding:8px; }
+        .kanban-col-hdr { font-size:0.78em; font-weight:700; text-align:center; padding:5px 4px 9px; border-bottom:1px solid var(--color-border,#e2eaf4); margin-bottom:8px; }
+        .kanban-card { background:#fff; border-radius:8px; border:1px solid #e2eaf4; padding:8px 10px; margin-bottom:8px; font-size:0.78em; cursor:grab; box-shadow:0 1px 4px rgba(0,0,0,0.06); transition:transform 0.12s,box-shadow 0.12s; }
+        .kanban-card:hover { transform:translateY(-2px); box-shadow:0 3px 10px rgba(0,0,0,0.1); }
+        .kanban-card.dragging { opacity:0.35; }
+        .kanban-col.drag-target { background:rgba(78,154,241,0.06); outline:2px dashed #4e9af1; border-radius:10px; }
+        /* ── Historique statut ──────────────────────────────── */
+        .hist-toggle { font-size:0.75em; color:#9ab; cursor:pointer; margin-top:5px; display:inline-block; }
+        .hist-toggle:hover { color:#4e9af1; }
+        .hist-panel { display:none; margin-top:6px; border-top:1px solid #f0f4f8; padding-top:6px; }
+        .hist-item { display:flex; gap:6px; padding:2px 0; font-size:0.76em; color:#7a9db1; }
+        .hist-item time { color:#aaa; white-space:nowrap; }
     </style>
 </head>
 <body>
@@ -4237,6 +4266,86 @@
 
     <!-- Toast notifications container -->
     <div id="toastContainer"></div>
+
+    <!-- ══ Chronomètre Live ══════════════════════════════════════════ -->
+    <div id="chrono-float" style="display:none;">
+        <div id="chrono-float-hdr">
+            <span style="font-weight:700;color:#2d3e50;font-size:0.9em;">⏱ Chrono live</span>
+            <button onclick="document.getElementById('chrono-float').style.display='none';lchReset()" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1em;line-height:1;">✕</button>
+        </div>
+        <div style="padding:10px 14px 12px;">
+            <select id="chrono-prest-sel" onchange="lchSelectPrest()" style="width:100%;font-size:0.8em;padding:3px 5px;border-radius:6px;border:1px solid #d0dae8;margin-bottom:6px;">
+                <option value="">— Sélectionner une prestation —</option>
+            </select>
+            <div id="chrono-est" style="font-size:0.75em;color:#7a9db1;text-align:center;min-height:14px;margin-bottom:4px;"></div>
+            <div id="chrono-display" class="idle">00:00:00</div>
+            <div id="chrono-delta" style="text-align:center;font-size:0.75em;min-height:16px;margin-bottom:8px;font-weight:600;"></div>
+            <div style="display:flex;gap:5px;justify-content:center;">
+                <button id="chrono-btn-start" onclick="lchStart()" style="flex:1;background:#27ae60;color:#fff;border:none;border-radius:7px;padding:5px 4px;cursor:pointer;font-size:0.82em;font-weight:700;">▶ Start</button>
+                <button id="chrono-btn-pause" onclick="lchPause()" disabled style="flex:1;background:#f39c12;color:#fff;border:none;border-radius:7px;padding:5px 4px;cursor:pointer;font-size:0.82em;font-weight:700;">⏸ Pause</button>
+                <button onclick="lchReset()" style="background:#e74c3c;color:#fff;border:none;border-radius:7px;padding:5px 9px;cursor:pointer;font-size:0.82em;">■</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Modal What if? ════════════════════════════════════════════ -->
+    <div id="whatif-modal" onclick="if(event.target===this)closeWhatIf()">
+        <div id="whatif-box">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px 11px;border-bottom:1px solid #eef2f8;">
+                <div>
+                    <strong style="font-size:1.05em;color:#2d3e50;">🧮 What if?</strong>
+                    <div id="whatif-subtitle" style="font-size:0.76em;color:#7a9db1;margin-top:1px;"></div>
+                </div>
+                <button onclick="closeWhatIf()" style="background:none;border:none;cursor:pointer;font-size:1.3em;color:#aaa;">✕</button>
+            </div>
+            <div style="padding:14px 20px;">
+                <div class="wi-param">
+                    <label>Nb CEA</label>
+                    <input type="range" id="wi-nbcea" min="1" max="10" step="1" oninput="wi_sync('wi-nbcea','wi-nbcea-v');whatIfCalc()" style="flex:1;">
+                    <input type="number" id="wi-nbcea-v" min="1" max="10" step="1" oninput="wi_sync_rev('wi-nbcea-v','wi-nbcea');whatIfCalc()" style="width:50px;text-align:center;border:1px solid #d0dae8;border-radius:5px;padding:2px;">
+                </div>
+                <div class="wi-param">
+                    <label>Part MSP (%)</label>
+                    <input type="range" id="wi-nbmsp" min="0" max="100" step="5" oninput="wi_sync('wi-nbmsp','wi-nbmsp-v');whatIfCalc()" style="flex:1;">
+                    <input type="number" id="wi-nbmsp-v" min="0" max="100" step="5" oninput="wi_sync_rev('wi-nbmsp-v','wi-nbmsp');whatIfCalc()" style="width:50px;text-align:center;border:1px solid #d0dae8;border-radius:5px;padding:2px;">
+                </div>
+                <div class="wi-param">
+                    <label>Nb pièces</label>
+                    <input type="range" id="wi-nbpieces" min="1" max="2000" step="1" oninput="wi_sync('wi-nbpieces','wi-nbpieces-v');whatIfCalc()" style="flex:1;">
+                    <input type="number" id="wi-nbpieces-v" min="1" max="999999" step="1" oninput="wi_sync_rev('wi-nbpieces-v','wi-nbpieces');whatIfCalc()" style="width:68px;text-align:center;border:1px solid #d0dae8;border-radius:5px;padding:2px;">
+                </div>
+                <div class="wi-param">
+                    <label>Marge (%)</label>
+                    <input type="range" id="wi-marge" min="0" max="60" step="1" oninput="wi_sync('wi-marge','wi-marge-v');whatIfCalc()" style="flex:1;">
+                    <input type="number" id="wi-marge-v" min="0" max="99" step="1" oninput="wi_sync_rev('wi-marge-v','wi-marge');whatIfCalc()" style="width:50px;text-align:center;border:1px solid #d0dae8;border-radius:5px;padding:2px;">
+                </div>
+                <div class="wi-param">
+                    <label>Taux CEA (CHF/h)</label>
+                    <input type="range" id="wi-txcea" min="10" max="80" step="0.5" oninput="wi_sync('wi-txcea','wi-txcea-v');whatIfCalc()" style="flex:1;">
+                    <input type="number" id="wi-txcea-v" min="1" max="200" step="0.5" oninput="wi_sync_rev('wi-txcea-v','wi-txcea');whatIfCalc()" style="width:58px;text-align:center;border:1px solid #d0dae8;border-radius:5px;padding:2px;">
+                </div>
+                <div class="wi-param">
+                    <label>Taux MSP (CHF/h)</label>
+                    <input type="range" id="wi-txmsp" min="10" max="120" step="0.5" oninput="wi_sync('wi-txmsp','wi-txmsp-v');whatIfCalc()" style="flex:1;">
+                    <input type="number" id="wi-txmsp-v" min="1" max="300" step="0.5" oninput="wi_sync_rev('wi-txmsp-v','wi-txmsp');whatIfCalc()" style="width:58px;text-align:center;border:1px solid #d0dae8;border-radius:5px;padding:2px;">
+                </div>
+                <div class="wi-result">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.86em;">
+                        <div><div style="color:#7a9db1;font-size:0.82em;">Prix actuel</div><div id="wi-curr" style="font-weight:700;font-size:1.1em;color:#2d3e50;"></div></div>
+                        <div><div style="color:#7a9db1;font-size:0.82em;">Simulation</div><div id="wi-sim" style="font-weight:700;font-size:1.3em;color:#2980b9;"></div></div>
+                        <div><div style="color:#7a9db1;font-size:0.82em;">Δ Absolu</div><div id="wi-dabs" style="font-weight:700;"></div></div>
+                        <div><div style="color:#7a9db1;font-size:0.82em;">Δ Relatif</div><div id="wi-dpct" style="font-weight:700;"></div></div>
+                    </div>
+                    <div style="margin-top:10px;padding-top:8px;border-top:1px solid #e2eaf4;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:0.76em;text-align:center;">
+                        <div><div style="color:#7a9db1;">Coût MO</div><div id="wi-mo" style="font-weight:600;"></div></div>
+                        <div><div style="color:#7a9db1;">Encadrement</div><div id="wi-enc" style="font-weight:600;"></div></div>
+                        <div><div style="color:#7a9db1;">Revient</div><div id="wi-rev" style="font-weight:600;"></div></div>
+                    </div>
+                </div>
+                <button onclick="whatIfApply()" class="btn btn-success" style="width:100%;margin-top:2px;">💾 Appliquer ces paramètres à la prestation</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Custom confirm modal -->
     <div id="confirmModal" role="alertdialog" aria-modal="true" aria-label="Confirmation">
@@ -5918,6 +6027,7 @@
                         <button class="btn btn-small" onclick="exportPrestationsXLSX()" style="white-space:nowrap;background:#edf5e8;border-color:#a0c8a0;color:#3a6a3a;">📊 Excel</button>
                         <button class="btn btn-small" onclick="openCompareModal()" style="white-space:nowrap;background:#edf5ff;border-color:#a8c8f0;color:#5a7b8f;">📊 Comparer</button>
                         <button class="btn btn-small" onclick="openTrainingImportModal()" style="white-space:nowrap;background:#fff3cd;border-color:#ffc107;color:#856404;">📤 Importer rapport</button>
+                        <button id="kanbanToggleBtn" class="btn btn-small" onclick="toggleKanbanView()" title="Basculer entre liste et Kanban" style="white-space:nowrap;background:#f3e8ff;border-color:#c9a8e8;color:#6a4a8a;">🗂 Kanban</button>
                         <select id="prestPerPage" onchange="window._prestPage=0;renderPrestations()" title="Prestations par page" style="font-size:0.82em;padding:4px 6px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-section-bg);">
                             <option value="20">20 / page</option>
                             <option value="50">50 / page</option>
@@ -17844,6 +17954,7 @@
             if (!p) return;
             const current = p.statut || 'devis';
             const nextIdx = (STATUT_CYCLE.indexOf(current) + 1) % STATUT_CYCLE.length;
+            pushHistory(p, current, STATUT_CYCLE[nextIdx]);
             p.statut = STATUT_CYCLE[nextIdx];
             saveToStorage();
             renderPrestations();
@@ -17852,6 +17963,7 @@
         function setStatutDirect(id, val) {
             const p = prestationsSauvegardees.find(x => x.id === id);
             if (!p) return;
+            pushHistory(p, p.statut || 'devis', val);
             p.statut = val;
             saveToStorage();
             renderPrestations();
@@ -17954,6 +18066,16 @@
             if (dateDe) filtered = filtered.filter(p => (p.date || p.dateDebut || '') >= dateDe);
             if (dateA)  filtered = filtered.filter(p => (p.date || p.dateDebut || '') <= dateA);
 
+            // ── Kanban view ──────────────────────────────────────────
+            if (window._kanbanView) {
+                renderKanban(filtered);
+                const pagEl = document.getElementById('prestationsPagination');
+                if (pagEl) pagEl.innerHTML = '';
+                const sumEl = document.getElementById('prestationsListSummary');
+                if (sumEl) sumEl.textContent = `${filtered.length} prestation${filtered.length>1?'s':''} — vue Kanban`;
+                return;
+            }
+
             if (filtered.length === 0) {
                 container.innerHTML = uxEmptyState({
                     icon: '🔎',
@@ -18051,6 +18173,9 @@
                             ${p.statut === 'facture' ? `<button class="btn btn-small" style="background:#f5fce8;color:#4a7a2a;border:1px solid #b8d890;" onclick="openPaiementModal(${p.id})" title="Suivi paiement">💶 Paiement</button>` : ''}
                             ${approvalBtns}
                             ${hasPermission('delete_prestation') ? `<button class="delete-btn btn-small" onclick="deletePrestation(${p.id})">🗑️</button>` : ''}
+                            <button class="btn btn-small" style="background:#fff8e0;color:#8a6a10;border:1px solid #dfc060;" onclick="openWhatIf(${p.id})" title="Simulation sans sauvegarde">🧮 What if</button>
+                            <button class="btn btn-small" style="background:#e8f8ef;color:#2a7a50;border:1px solid #80c8a0;" onclick="printFicheTravail(${p.id})" title="Fiche de travail imprimable A4">🖨 Fiche</button>
+                            <button class="btn btn-small" style="background:#eef4ff;color:#3a5a90;border:1px solid #90b0e0;" onclick="chronoOpenFor(${p.id})" title="Chronomètre live vs estimé">⏱ Chrono</button>
                         </div>
                     </div>
                     <div style="font-size: 0.85em; color: #7a9db1; margin-bottom: 10px;">
@@ -18106,6 +18231,7 @@
                         </div>
                         ${p.heuresReelles != null ? `<div style="margin-top:8px;font-size:0.85em;">Estimé : <strong>${fmtNum((p.heures||0))} h</strong> → Réel : <strong>${fmtNum((p.heuresReelles||0))} h</strong> → Écart : <strong class="${p.heuresReelles <= p.heures ? 'ecart-positif' : 'ecart-negatif'}">${p.heures > 0 ? ((p.heuresReelles/p.heures-1)*100).toFixed(1)+'%' : '—'}</strong></div>` : ''}
                     </div>
+                    ${(p._history||[]).length > 0 ? `<span class="hist-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.textContent=this.nextElementSibling.style.display==='block'?'▲ Masquer historique statut':'🕐 Historique statut (${p._history.length})'">🕐 Historique statut (${p._history.length})</span><div class="hist-panel">${(p._history||[]).slice().reverse().map(h=>`<div class="hist-item"><time>${new Date(h.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</time><span>${h.de ? `${h.de} → ` : ''}${h.a}</span>${h.note?`<em style="color:#aaa">${escapeHtml(h.note)}</em>`:''}</div>`).join('')}</div>` : ''}
                 </div>`;
             });
 
@@ -19249,24 +19375,36 @@
                     <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:4px;padding:5px;"><strong style="font-size:0.85em;">Conditions</strong><div>${conditions}</div></div>
                     <div style="background:#f8fbfd;border:1px solid #e0eaf0;border-radius:4px;padding:5px;"><strong style="font-size:0.85em;">Validité</strong><div>${validite}</div></div>
                 </div>
-                <div style="margin-top:8px;border-top:1px solid #d5e3ed;padding-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.7em;color:#8a99a8;">
+                <div style="margin-top:8px;border-top:1px solid #d5e3ed;padding-top:6px;display:grid;grid-template-columns:1fr 1fr 64px;gap:10px;font-size:0.7em;color:#8a99a8;align-items:start;">
                     <div><strong style="color:#2d3e50;font-size:0.8em;">Signature client</strong><br>
                         <div style="border-bottom:1px solid #ccc;width:120px;height:20px;margin-top:2px;"></div>
                         <div style="margin-top:2px;">Date: ___/___/______</div></div>
                     <div style="text-align:right;"><strong style="color:#2d3e50;font-size:0.8em;">Atelier La Pallanterie</strong><br>
                         <div style="margin-top:3px;">Devis généré le ${new Date().toLocaleDateString('fr-FR')}</div></div>
+                    <div id="devis-qr-${id}" style="width:60px;height:60px;"></div>
                 </div>
             </div>`;
 
             const el = document.createElement('div');
             el.innerHTML = html;
             document.body.appendChild(el);
-            html2pdf().set({
+
+            const doExport = () => html2pdf().set({
                 margin: [3, 5, 3, 5], filename: `Devis_${ref}_${p.client || 'client'}.pdf`,
                 image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: 'avoid-all' }
             }).from(el.querySelector('#devisPdfContent')).save().then(() => { document.body.removeChild(el); });
+
+            const qrTarget = el.querySelector(`#devis-qr-${id}`);
+            if (qrTarget && typeof QRCode !== 'undefined') {
+                new QRCode(qrTarget, { text: `REF:${ref}|CLIENT:${p.client||''}|CHF:${(p.prixVente||0).toFixed(2)}`, width:60, height:60, correctLevel:QRCode.CorrectLevel.M });
+                setTimeout(doExport, 300);
+            } else if (qrTarget && typeof QRCode === 'undefined') {
+                const s = document.createElement('script'); s.src = 'lib/qrcode.min.js';
+                s.onload = () => { new QRCode(qrTarget, { text: `REF:${ref}|CLIENT:${p.client||''}|CHF:${(p.prixVente||0).toFixed(2)}`, width:60, height:60, correctLevel:QRCode.CorrectLevel.M }); setTimeout(doExport, 300); };
+                document.head.appendChild(s);
+            } else { doExport(); }
         }
 
         // ============================================================
@@ -25103,6 +25241,262 @@
             renderGantt();
             toast('✅ Dates de planification enregistrées', 'success');
         }
+
+        // ════════════════════════════════════════════════════════
+        // MODULES INNOVANTS
+        // ════════════════════════════════════════════════════════
+
+        // ── Historique des changements de statut ─────────────────────
+        function pushHistory(p, de, a) {
+            if (!p._history) p._history = [];
+            p._history.push({ date: new Date().toISOString(), de, a });
+        }
+
+        // ── What if? ─────────────────────────────────────────────────
+        let _wiPrestId = null;
+        function openWhatIf(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            _wiPrestId = id;
+            document.getElementById('whatif-subtitle').textContent = `${p.prestation} — ${p.client}`;
+            const setv = (range, num, val) => { document.getElementById(range).value = val; document.getElementById(num).value = val; };
+            setv('wi-nbcea','wi-nbcea-v', p.nbCEA || 1);
+            setv('wi-nbmsp','wi-nbmsp-v', Math.round((p.nbMSP || 0) * 100));
+            setv('wi-nbpieces','wi-nbpieces-v', p.nbPieces || 1);
+            setv('wi-marge','wi-marge-v', p.marge || 15);
+            setv('wi-txcea','wi-txcea-v', config.coutHoraireCEA || 22);
+            setv('wi-txmsp','wi-txmsp-v', config.coutHoraireMSP || 55);
+            document.getElementById('wi-curr').textContent = fmtCHF(p.prixVente || 0);
+            document.getElementById('whatif-modal').classList.add('open');
+            whatIfCalc();
+        }
+        function closeWhatIf() { document.getElementById('whatif-modal').classList.remove('open'); }
+        function wi_sync(rangeId, numId) { document.getElementById(numId).value = document.getElementById(rangeId).value; }
+        function wi_sync_rev(numId, rangeId) { document.getElementById(rangeId).value = document.getElementById(numId).value; }
+        function whatIfCalc() {
+            const p = prestationsSauvegardees.find(x => x.id === _wiPrestId);
+            if (!p) return;
+            const nbCEA   = parseFloat(document.getElementById('wi-nbcea-v').value) || 1;
+            const nbMSP   = parseFloat(document.getElementById('wi-nbmsp-v').value) / 100 || 0;
+            const nbPieces= parseFloat(document.getElementById('wi-nbpieces-v').value) || 1;
+            const marge   = parseFloat(document.getElementById('wi-marge-v').value) || 0;
+            const txCEA   = parseFloat(document.getElementById('wi-txcea-v').value) || 22;
+            const txMSP   = parseFloat(document.getElementById('wi-txmsp-v').value) || 55;
+            // Recalculate hours from stored gestes
+            let secPiece = 0, secLot = 0;
+            (p.gestes || []).forEach(g => {
+                if ((g.typeApp || 'piece') === 'lot') secLot += (g.temps||0) * (g.quantite||1);
+                else secPiece += (g.temps||0) * (g.quantite||1);
+            });
+            const secAdmin = ((p.tempsMailsMin||0)+(p.tempsImpressionMin||0)+(p.tempsCoordMin||0)+(p.tempsPrepMin||0)+(p.tempsNettoyageMin||0)) * 60;
+            const totalH = (secPiece * nbPieces + secLot + secAdmin) / 3600;
+            const coutMO  = totalH * nbCEA * txCEA;
+            const coutEnc = totalH * nbMSP * txMSP;
+            let coutConso = 0;
+            (p.consommables||[]).forEach(c => coutConso += (c.prix||c.prixUnitaire||0) * (c.qte||c.quantite||1) * nbPieces);
+            const revient = coutMO + coutEnc + coutConso;
+            const vente   = marge < 100 ? revient / (1 - marge/100) : revient * 2;
+            const curr    = p.prixVente || 0;
+            const delta   = vente - curr;
+            const pct     = curr > 0 ? ((delta / curr) * 100).toFixed(1) : '—';
+            const col     = delta >= 0 ? '#27ae60' : '#e74c3c';
+            document.getElementById('wi-sim').textContent  = fmtCHF(vente);
+            document.getElementById('wi-dabs').innerHTML   = `<span style="color:${col}">${delta >= 0 ? '+' : ''}${fmtCHF(delta)}</span>`;
+            document.getElementById('wi-dpct').innerHTML   = `<span style="color:${col}">${delta >= 0 ? '+' : ''}${pct}%</span>`;
+            document.getElementById('wi-mo').textContent   = fmtCHF(coutMO);
+            document.getElementById('wi-enc').textContent  = fmtCHF(coutEnc);
+            document.getElementById('wi-rev').textContent  = fmtCHF(revient);
+            window._wiResult = { nbCEA, nbMSP, nbPieces, marge, prixVente: vente, prixRevient: revient };
+        }
+        function whatIfApply() {
+            const p = prestationsSauvegardees.find(x => x.id === _wiPrestId);
+            if (!p || !window._wiResult) return;
+            Object.assign(p, window._wiResult);
+            saveToStorage();
+            renderPrestations();
+            closeWhatIf();
+            toast('✅ Paramètres appliqués à la prestation', 'success');
+        }
+
+        // ── Chronomètre live prestation (prefixe lch_ pour éviter conflits) ──
+        let _lchInterval = null, _lchSec = 0, _lchPaused = false, _lchEstH = 0;
+        function lchInit() {
+            const sel = document.getElementById('chrono-prest-sel');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">— Sélectionner une prestation —</option>' +
+                prestationsSauvegardees.map(p => `<option value="${p.id}">[${escapeHtml(p.reference||String(p.id))}] ${escapeHtml(p.prestation)} (${(p.heures||0).toFixed(1)}h est.)</option>`).join('');
+        }
+        function chronoOpenFor(id) {
+            const f = document.getElementById('chrono-float');
+            f.style.display = 'block';
+            lchInit();
+            document.getElementById('chrono-prest-sel').value = id;
+            lchSelectPrest();
+            if (!f._drag) { f._drag = true; pbMakeDraggable(f, document.getElementById('chrono-float-hdr')); }
+        }
+        function lchSelectPrest() {
+            const id = parseInt(document.getElementById('chrono-prest-sel').value);
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            _lchEstH = p ? (p.heures || 0) : 0;
+            document.getElementById('chrono-est').textContent = p ? `Estimé : ${_lchEstH.toFixed(1)} h` : '';
+            lchReset();
+        }
+        function lchStart() {
+            if (_lchInterval) return;
+            _lchPaused = false;
+            document.getElementById('chrono-btn-start').disabled = true;
+            document.getElementById('chrono-btn-pause').disabled = false;
+            _lchInterval = setInterval(() => { _lchSec++; _lchUpdateDisplay(); }, 1000);
+        }
+        function lchPause() {
+            if (_lchPaused) { lchStart(); return; }
+            _lchPaused = true;
+            clearInterval(_lchInterval); _lchInterval = null;
+            document.getElementById('chrono-btn-start').disabled = false;
+            document.getElementById('chrono-btn-start').textContent = '▶ Reprendre';
+            document.getElementById('chrono-btn-pause').disabled = true;
+        }
+        function lchReset() {
+            clearInterval(_lchInterval); _lchInterval = null;
+            _lchSec = 0; _lchPaused = false;
+            const d = document.getElementById('chrono-display');
+            if (d) { d.textContent = '00:00:00'; d.className = 'idle'; }
+            const delta = document.getElementById('chrono-delta');
+            if (delta) delta.textContent = '';
+            const btnS = document.getElementById('chrono-btn-start');
+            const btnP = document.getElementById('chrono-btn-pause');
+            if (btnS) { btnS.disabled = false; btnS.textContent = '▶ Start'; }
+            if (btnP) btnP.disabled = true;
+        }
+        function _lchUpdateDisplay() {
+            const h = Math.floor(_lchSec/3600), m = Math.floor((_lchSec%3600)/60), s = _lchSec%60;
+            const d = document.getElementById('chrono-display');
+            if (!d) return;
+            d.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            const realH = _lchSec / 3600;
+            if (_lchEstH > 0) {
+                const pct = (realH / _lchEstH * 100).toFixed(0);
+                const over = realH > _lchEstH;
+                d.className = over ? 'over' : 'ok';
+                const deltaMin = Math.round((realH - _lchEstH) * 60);
+                document.getElementById('chrono-delta').innerHTML = `<span style="color:${over?'#e74c3c':'#27ae60'}">${pct}% — ${deltaMin >= 0 ? '+' : ''}${deltaMin} min vs estimé</span>`;
+            } else { d.className = 'ok'; }
+        }
+
+        // ── Vue Kanban ───────────────────────────────────────────────
+        window._kanbanView = false;
+        function toggleKanbanView() {
+            window._kanbanView = !window._kanbanView;
+            const btn = document.getElementById('kanbanToggleBtn');
+            if (btn) { btn.style.background = window._kanbanView ? '#c9a8e8' : '#f3e8ff'; btn.textContent = window._kanbanView ? '☰ Liste' : '🗂 Kanban'; }
+            renderPrestations();
+        }
+        function renderKanban(prestations) {
+            const container = document.getElementById('prestationsList');
+            if (!container) return;
+            const cols = [
+                { key:'brouillon', label:'⬜ Brouillon', color:'#8a9ab0' },
+                { key:'devis',     label:'🟡 Devis',     color:'#f39c12' },
+                { key:'soumis',    label:'🟠 Soumis',    color:'#e67e22' },
+                { key:'accepte',   label:'🔵 Accepté',   color:'#2980b9' },
+                { key:'en-cours',  label:'🟣 En cours',  color:'#8e44ad' },
+                { key:'valide',    label:'🟢 Validé',    color:'#27ae60' },
+                { key:'facture',   label:'💙 Facturé',   color:'#1abc9c' },
+                { key:'annule',    label:'🔴 Annulé',    color:'#e74c3c' },
+            ];
+            const grouped = {};
+            cols.forEach(c => grouped[c.key] = []);
+            prestations.forEach(p => { const k = p.statut || 'devis'; if (grouped[k]) grouped[k].push(p); else grouped['devis'].push(p); });
+            const nonEmpty = cols.filter(c => grouped[c.key].length > 0 || ['devis','soumis','valide'].includes(c.key));
+            container.innerHTML = `<div id="kanban-board">${nonEmpty.map(col => `
+                <div class="kanban-col" data-col="${col.key}" ondragover="event.preventDefault();this.classList.add('drag-target')" ondragleave="this.classList.remove('drag-target')" ondrop="kanbanDrop(event,'${col.key}')">
+                    <div class="kanban-col-hdr" style="color:${col.color};">${col.label} <span style="color:#aaa;font-weight:400;">(${grouped[col.key].length})</span></div>
+                    ${grouped[col.key].map(p => `
+                    <div class="kanban-card" draggable="true" ondragstart="kanbanDragStart(event,${p.id})" ondragend="document.querySelectorAll('.kanban-col').forEach(c=>c.classList.remove('drag-target'))">
+                        <div style="font-weight:700;color:#2d3e50;margin-bottom:3px;line-height:1.3;">${escapeHtml(p.prestation)}</div>
+                        <div style="color:#7a9db1;font-size:0.88em;">${escapeHtml(p.client)}</div>
+                        <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:0.82em;">
+                            <span style="color:#5a7b8f;">${fmtCHF(p.prixVente||0)}</span>
+                            <span style="color:#aaa;">${new Date(p.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})}</span>
+                        </div>
+                        <div style="margin-top:5px;display:flex;gap:3px;flex-wrap:wrap;">
+                            <button class="btn btn-small" style="font-size:0.72em;padding:2px 5px;" onclick="editPrestation(${p.id})">✏️</button>
+                            <button class="btn btn-small" style="font-size:0.72em;padding:2px 5px;" onclick="openWhatIf(${p.id})">🧮</button>
+                            <button class="btn btn-small" style="font-size:0.72em;padding:2px 5px;" onclick="generateDevisPDF(${p.id})">📨</button>
+                        </div>
+                    </div>`).join('')}
+                </div>`).join('')}
+            </div>`;
+        }
+        let _kanbanDragId = null;
+        function kanbanDragStart(e, id) { _kanbanDragId = id; e.currentTarget.classList.add('dragging'); }
+        function kanbanDrop(e, colKey) {
+            e.preventDefault();
+            document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-target'));
+            if (!_kanbanDragId) return;
+            const p = prestationsSauvegardees.find(x => x.id === _kanbanDragId);
+            if (p) { pushHistory(p, p.statut || 'devis', colKey); p.statut = colKey; saveToStorage(); renderPrestations(); }
+            _kanbanDragId = null;
+        }
+
+        // ── Fiche de travail A4 ──────────────────────────────────────
+        function printFicheTravail(id) {
+            const p = prestationsSauvegardees.find(x => x.id === id);
+            if (!p) return;
+            const date = new Date(p.date).toLocaleDateString('fr-FR');
+            const gestesRows = (p.gestes||[]).map((g,i) => `
+                <tr>
+                    <td style="padding:8px 6px;border-bottom:1px solid #e8f0f5;text-align:center;color:#aaa;">${i+1}</td>
+                    <td style="padding:8px 6px;border-bottom:1px solid #e8f0f5;"><strong>${escapeHtml(g.code||'')}</strong> ${escapeHtml(g.description||'')}</td>
+                    <td style="padding:8px 6px;border-bottom:1px solid #e8f0f5;text-align:center;">${g.quantite||1}</td>
+                    <td style="padding:8px 6px;border-bottom:1px solid #e8f0f5;text-align:center;">${Math.round((g.temps||60)/60)} min</td>
+                    <td style="padding:8px 6px;border-bottom:1px solid #e8f0f5;text-align:center;"><span style="display:inline-block;width:18px;height:18px;border:2px solid #ccc;border-radius:3px;"></span></td>
+                    <td style="padding:8px 6px;border-bottom:1px solid #e8f0f5;"></td>
+                </tr>`).join('');
+            const html = `<div style="font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:20px;color:#2d3e50;">
+                <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #6b8fa3;padding-bottom:10px;margin-bottom:16px;">
+                    <div><h1 style="margin:0;color:#6b8fa3;font-size:1.4em;">🏭 FICHE DE TRAVAIL</h1><div style="font-size:0.9em;color:#7a9db1;margin-top:3px;">Atelier La Pallanterie</div></div>
+                    <div style="text-align:right;font-size:0.85em;"><div style="font-weight:700;font-size:1.2em;color:#2d3e50;">${escapeHtml(p.reference||'—')}</div><div style="color:#7a9db1;">${date}</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:0.9em;">
+                    <div><span style="color:#7a9db1;">Client : </span><strong>${escapeHtml(p.client||'—')}</strong></div>
+                    <div><span style="color:#7a9db1;">Prestation : </span><strong>${escapeHtml(p.prestation||'—')}</strong></div>
+                    <div><span style="color:#7a9db1;">Nb pièces : </span><strong>${p.nbPieces||1} ${escapeHtml(p.unite||'pièce')}</strong></div>
+                    <div><span style="color:#7a9db1;">Temps estimé : </span><strong>${(p.heures||0).toFixed(1)} h</strong></div>
+                </div>
+                <h3 style="color:#6b8fa3;border-bottom:1px solid #d0e4ed;padding-bottom:5px;margin-bottom:8px;font-size:1em;">📋 Séquence des gestes</h3>
+                <table style="width:100%;border-collapse:collapse;font-size:0.88em;">
+                    <thead><tr style="background:#edf5fa;">
+                        <th style="padding:6px;width:28px;">#</th>
+                        <th style="padding:6px;text-align:left;">Geste / Description</th>
+                        <th style="padding:6px;width:50px;">Qté</th>
+                        <th style="padding:6px;width:65px;">Temps</th>
+                        <th style="padding:6px;width:30px;">✓</th>
+                        <th style="padding:6px;text-align:left;">Remarque</th>
+                    </tr></thead>
+                    <tbody>${gestesRows || '<tr><td colspan="6" style="padding:12px;text-align:center;color:#aaa;">Aucun geste</td></tr>'}</tbody>
+                </table>
+                ${(p.consommables||[]).length > 0 ? `
+                <h3 style="color:#6b8fa3;border-bottom:1px solid #d0e4ed;padding-bottom:5px;margin:14px 0 8px;font-size:1em;">🛒 Consommables</h3>
+                <table style="width:100%;border-collapse:collapse;font-size:0.85em;">
+                    <thead><tr style="background:#edf5fa;"><th style="padding:5px 6px;text-align:left;">Désignation</th><th style="padding:5px 6px;">Qté</th><th style="padding:5px 6px;">✓</th></tr></thead>
+                    <tbody>${(p.consommables||[]).map(c=>`<tr><td style="padding:6px;border-bottom:1px solid #eef2f8;">${escapeHtml(c.nom||c.designation||'')}</td><td style="padding:6px;text-align:center;border-bottom:1px solid #eef2f8;">${c.qte||c.quantite||1}</td><td style="padding:6px;text-align:center;border-bottom:1px solid #eef2f8;"><span style="display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-radius:3px;"></span></td></tr>`).join('')}</tbody>
+                </table>` : ''}
+                <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:0.82em;border-top:2px solid #d0e4ed;padding-top:12px;">
+                    <div><strong>Visa opérateur :</strong><div style="border-bottom:1px solid #ccc;height:24px;margin-top:6px;"></div></div>
+                    <div><strong>Visa responsable :</strong><div style="border-bottom:1px solid #ccc;height:24px;margin-top:6px;"></div></div>
+                </div>
+                <div style="margin-top:14px;font-size:0.8em;color:#7a9db1;border:1px dashed #c8dae8;border-radius:6px;padding:8px 12px;">
+                    <strong>Notes / Observations :</strong><div style="min-height:50px;margin-top:4px;">${escapeHtml(p.notesInternes||'')}</div>
+                </div>
+            </div>`;
+            const win = window.open('','_blank','width=900,height=700');
+            win.document.write(`<!DOCTYPE html><html><head><title>Fiche ${p.reference||p.prestation}</title><style>@media print{@page{margin:10mm}button{display:none!important}}</style></head><body>${html}<br><div style="text-align:center;"><button onclick="window.print()" style="background:#6b8fa3;color:#fff;border:none;padding:8px 24px;border-radius:6px;cursor:pointer;font-size:1em;margin-top:10px;">🖨 Imprimer / PDF</button></div></body></html>`);
+            win.document.close();
+        }
+
+        // ── Chrono panel draggable init (via pbMakeDraggable) ───────
+        // Drag is set up when chronoOpenFor() is called the first time
 
         // ============================================================
         // FEATURE 1 : Tableau de bord (Dashboard)
