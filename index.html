@@ -8556,8 +8556,16 @@
 
         function hideLoginScreen(groupId) {
             const loginScreen = document.getElementById('loginScreen');
-            loginScreen.classList.add('hidden');
+            if (loginScreen) loginScreen.classList.add('hidden');
             localStorage.setItem('_currentGroupId', groupId);
+            // Hide authOverlay in case it was also showing
+            const overlay = document.getElementById('authOverlay');
+            if (overlay) overlay.style.display = 'none';
+            // Save session so checkAuthSession recognises it on next call
+            sessionStorage.setItem('authSession', JSON.stringify({ id: groupId, ts: Date.now() }));
+            // Apply group permissions (tabs, admin mode, badges)
+            const group = authGroups.find(g => g.id === groupId);
+            if (group) applyAuthGroup(group);
         }
 
         // ☁️ CLOUD LOGIN FUNCTIONS
