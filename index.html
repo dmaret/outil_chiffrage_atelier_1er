@@ -10,12 +10,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Security: Content Security Policy for XSS protection -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none';"
     <title>Outil Complet Atelier - La Pallanterie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -24,13 +23,11 @@
     <meta name="apple-mobile-web-app-title" content="Atelier LP">
     <meta name="theme-color" content="#6b8fa3">
     <link rel="manifest" href="manifest.json">
-    <!-- External libraries (SRI hashes will be validated separately) -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <!-- Encryption library for sensitive data protection -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl.js/1.0.3/nacl.min.js"></script>
+    <!-- External libraries - self-hosted to bypass tracking prevention -->
+    <script defer src="lib/html2pdf.bundle.min.js"></script>
+    <script defer src="lib/xlsx.full.min.js"></script>
+    <script defer src="lib/three.min.js"></script>
+    <script defer src="lib/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -3048,7 +3045,7 @@
             transition: transform 0.18s;
         }
         #clinicalFab:hover { transform: scale(1.08); }
-        #clinicalFab.active { display: block; }
+        body.tab-accompagnement #clinicalFab.active { display: block; }
         #clinicalFabLabel {
             position: absolute;
             bottom: 70px;
@@ -5127,6 +5124,7 @@
                     </div>
                 </div>
                 </div>
+            </div><!-- fin #calculateur -->
 
 
             <!-- ONGLET GESTION STOCK -->
@@ -6014,6 +6012,10 @@
             <div id="config" class="tab-content">
                 <div class="section">
                     <h2>Sauvegarde & Restauration</h2>
+                    <div id="exportReminder" style="display:none;margin-bottom:10px;padding:10px 14px;background:#fff8e1;border-left:4px solid #f5a623;border-radius:6px;font-size:0.88em;color:#7a5500;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <span>⚠️ <strong>Rappel :</strong> tu n'as pas exporté de fichier de sauvegarde depuis <span id="exportReminderDays"></span>. Pense à exporter !</span>
+                        <button class="btn btn-small" style="background:#f5a623;color:#fff;border:none;" onclick="exportJSON()">📤 Exporter maintenant</button>
+                    </div>
                     <div class="info-box">Exportez toutes vos données (prestations, gestes, consommables, stock, config) en JSON, ou importez depuis une sauvegarde précédente.</div>
                     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
                         <button class="btn btn-success" onclick="exportJSON()">📤 Exporter (JSON)</button>
@@ -6041,6 +6043,7 @@
                             </label>
                             <button class="btn btn-small" onclick="performAutoBackup(true)">💾 Sauvegarder maintenant</button>
                             <button class="btn btn-small" onclick="renderAutoBackupList()">🔍 Lister</button>
+                            <button class="btn btn-small" onclick="exportAllAutoBackups()" title="Exporter toutes les sauvegardes locales en un seul fichier JSON">📦 Tout exporter en fichier</button>
                         </div>
                         <div id="autoBackupList" style="margin-top:10px;font-size:0.85em;"></div>
                     </div>
@@ -7916,6 +7919,11 @@
             if (!isFinite(num)) return '0';
             return num.toLocaleString('de-CH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
         }
+        // Parse un nombre formaté en de-CH (ex: "1'533.96" → 1533.96)
+        function parseFormattedNum(s) {
+            if (s == null) return 0;
+            return parseFloat(String(s).replace(/'/g, '').replace(/\s/g, '')) || 0;
+        }
         // fmtCHF(1234.5) → "1'234.50 CHF"
         function fmtCHF(n, decimals = 2) { return fmtNum(n, decimals) + ' CHF'; }
         // fmtInt(1234) → "1'234"
@@ -8504,7 +8512,7 @@
                 }
 
                 // First login: set password
-                if (!group.passwordHash) {
+                if (!group.passwordHash || group.passwordHash === '') {
                     const hash = await hashPassword(password);
                     group.passwordHash = hash;
                     saveAuthGroups();
@@ -8745,8 +8753,8 @@
                     reject(new Error('IndexedDB timeout: opération prend trop de temps'));
                 }, 5000);
 
-                // Use version 5 for atelier_db, version 1 for others
-                const version = dbName === 'atelier_db' ? 5 : 1;
+                // Use version 6 for atelier_db, version 1 for others
+                const version = dbName === 'atelier_db' ? 6 : 1;
                 const request = indexedDB.open(dbName, version);
                 request.onerror = () => {
                     clearTimeout(timeout);
@@ -8785,8 +8793,8 @@
 
         function getFromIndexedDB(storeName, key, dbName = 'atelier_db') {
             return new Promise((resolve, reject) => {
-                // Use version 5 for atelier_db, version 1 for others
-                const version = dbName === 'atelier_db' ? 5 : 1;
+                // Use version 6 for atelier_db, version 1 for others
+                const version = dbName === 'atelier_db' ? 6 : 1;
                 const request = indexedDB.open(dbName, version);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
@@ -10007,6 +10015,47 @@
                     if (_migrated > 0) {
                         safeSetItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
                     }
+                    // Migration : corriger les prix tronqués par le bug parseFloat(de-CH)
+                    // parseFloat("1'533.96") = 1 — tout prix >= 1000 était stocké tronqué
+                    let _priceMigrated = 0;
+                    prestationsSauvegardees.forEach(p => {
+                        if ((p.prixVente || 0) <= 9 && (p.gestes || []).length > 0) {
+                            // Recalculer depuis les gestes et consommables stockés
+                            let secondesParPiece = 0, secondesLot = 0;
+                            (p.gestes || []).forEach(g => {
+                                if ((g.typeApp || 'piece') === 'lot') secondesLot += (g.temps||0) * (g.quantite||1);
+                                else secondesParPiece += (g.temps||0) * (g.quantite||1);
+                            });
+                            const nbPieces = p.nbPieces || 1;
+                            const totalHeures = (secondesParPiece * nbPieces + secondesLot) / 3600;
+                            if (totalHeures <= 0) return;
+                            const nbCEA = p.nbCEA || 1;
+                            const nbMSP = p.nbMSP || 0;
+                            const coutMO = totalHeures * nbCEA * (config.coutHoraireCEA || 0);
+                            const coutEncadrement = totalHeures * nbMSP * (config.coutHoraireMSP || 0);
+                            const coutConso = (p.consommables || []).reduce((s, c) => s + (c.prix||0) * (c.qte||1) * nbPieces, 0);
+                            let fraisGeneraux = 0;
+                            if (config.modeFraisGeneraux === 'horaire') fraisGeneraux = totalHeures * (config.fraisGenerauxHoraire||0);
+                            else if (config.modeFraisGeneraux === 'fixe') fraisGeneraux = config.fraisGenerauxFixe||0;
+                            else fraisGeneraux = (coutMO + coutEncadrement) * (config.fraisGenerauxPourcent||0) / 100;
+                            const prixRevient = coutMO + coutEncadrement + coutConso + fraisGeneraux;
+                            if (prixRevient < 10) return; // Probablement pas tronqué
+                            const marge = p.marge || 0;
+                            const prixVente = marge < 100 ? prixRevient / (1 - marge / 100) : prixRevient;
+                            p.prixRevient = parseFloat(prixRevient.toFixed(2));
+                            p.prixVente = parseFloat(prixVente.toFixed(2));
+                            p.coutMO = parseFloat(coutMO.toFixed(2));
+                            p.coutEncadrement = parseFloat(coutEncadrement.toFixed(2));
+                            p.coutConsommables = parseFloat(coutConso.toFixed(2));
+                            p.heures = parseFloat(totalHeures.toFixed(4));
+                            if (nbPieces > 1) p.prixVentePiece = parseFloat((prixVente / nbPieces).toFixed(3));
+                            _priceMigrated++;
+                        }
+                    });
+                    if (_priceMigrated > 0) {
+                        safeSetItem('prestationsSauvegardees', JSON.stringify(prestationsSauvegardees));
+                        console.log(`✅ Migration prix : ${_priceMigrated} prestation(s) corrigée(s)`);
+                    }
                 }
             } catch(e) { console.error('Error loading services:', e); }
             try {
@@ -10045,6 +10094,20 @@
             const savedTheme = localStorage.getItem('themePrefs');
             try { if (savedTheme) themePrefs = Object.assign(themePrefs, JSON.parse(savedTheme)); } catch(e) { console.error('Error loading theme preferences:', e); }
             loadConfig();
+
+            // Supprime toujours l'ordre sauvegardé du calculateur — l'ordre est
+            // géré exclusivement par reorganizeCalculatorSections() à chaque visite.
+            try {
+                const _so = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
+                let _changed = false;
+                Object.keys(_so).forEach(k => {
+                    if (k === 'calculateur' || (k !== 'calculateur' && k.toLowerCase().includes('calculateur'))) {
+                        delete _so[k];
+                        _changed = true;
+                    }
+                });
+                if (_changed) localStorage.setItem('sectionOrders', JSON.stringify(_so));
+            } catch(e) {}
         }
 
         /**
@@ -10213,11 +10276,17 @@
 
             container.innerHTML = currentOrder.map((tabName, idx) => {
                 const label = tabMap.get(tabName) || tabName;
-                return `<div draggable="true" data-tab-name="${tabName}"
-                    style="padding:10px;background:#f5f8fc;border:1px solid #d0dae8;border-radius:8px;cursor:move;user-select:none;text-align:center;font-size:0.9em;"
-                    ondragstart="event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('tabName',this.dataset.tabName)"
+                const group = (typeof tabGroups !== 'undefined') ? tabGroups.find(g => g.onglets.includes(tabName)) : null;
+                const gc = group ? group.couleur : null;
+                const bgColor  = gc ? gc + '22' : '#f5f8fc';
+                const bdColor  = gc ? gc + 'aa' : '#d0dae8';
+                const txtColor = gc ? gc : '#3a5a7a';
+                return `<div draggable="true" data-tab-name="${tabName}" data-group-bg="${bgColor}" data-group-bd="${bdColor}"
+                    style="padding:10px;background:${bgColor};border:1px solid ${bdColor};border-radius:8px;cursor:move;user-select:none;text-align:center;font-size:0.9em;color:${txtColor};font-weight:600;transition:opacity 0.15s;"
+                    ondragstart="event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('tabName',this.dataset.tabName);setTimeout(()=>{this.style.opacity='1';},0)"
+                    ondragend="this.style.opacity='';this.style.background=this.dataset.groupBg;this.style.borderColor=this.dataset.groupBd"
                     ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';this.style.background='#e0f0ff';this.style.borderColor='#4e9af1'"
-                    ondragleave="this.style.background='#f5f8fc';this.style.borderColor='#d0dae8'"
+                    ondragleave="this.style.background=this.dataset.groupBg;this.style.borderColor=this.dataset.groupBd"
                     ondrop="reorderTabs(event, '${tabName}')">${escapeHtml(label)}</div>`;
             }).join('');
         }
@@ -10498,52 +10567,52 @@
         function saveSectionOrder() {
             const tabContent = document.querySelector('.tab-content.active');
             if (!tabContent) return;
-
+            const tabId = tabContent.id || 'unknown';
             const sections = Array.from(tabContent.querySelectorAll(':scope > .section'));
             const order = sections.map(sec => {
                 const heading = sec.querySelector('h2, h3');
                 return heading ? heading.textContent.trim() : 'section_' + Date.now();
             });
-
-            const activeTab = document.querySelector('.tab.active');
-            const tabName = activeTab ? activeTab.textContent.trim() : 'unknown';
-
             const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-            sectionOrders[tabName] = order;
+            sectionOrders[tabId] = order;
             localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
-            console.log('📋 Ordre des sections sauvegardé pour', tabName, ':', order);
         }
 
         function applySectionOrder() {
             const tabContent = document.querySelector('.tab-content.active');
             if (!tabContent) return;
-
-            const activeTab = document.querySelector('.tab.active');
-            const tabName = activeTab ? activeTab.textContent.trim() : 'unknown';
-
+            const tabId = tabContent.id || 'unknown';
             const sectionOrders = JSON.parse(localStorage.getItem('sectionOrders') || '{}');
-            const savedOrder = sectionOrders[tabName];
 
+            // Migration : ancien format (textContent du bouton) → nouvel ID stable
+            if (!sectionOrders[tabId]) {
+                const oldBtn = document.querySelector('.tab.active');
+                const oldKey = oldBtn ? oldBtn.textContent.trim() : null;
+                if (oldKey && sectionOrders[oldKey]) {
+                    sectionOrders[tabId] = sectionOrders[oldKey];
+                    delete sectionOrders[oldKey];
+                    localStorage.setItem('sectionOrders', JSON.stringify(sectionOrders));
+                }
+            }
+
+            const savedOrder = sectionOrders[tabId];
             if (!savedOrder) return;
-
+            // Pour le calculateur : ignorer tout ordre qui ne commence pas par une section de tête valide
+            if (tabId === 'calculateur') {
+                const _validStarts = ['Modèles', 'Informations', 'Templates', 'Gestes'];
+                if (!_validStarts.some(s => (savedOrder[0] || '').includes(s))) return;
+            }
             const sections = Array.from(tabContent.querySelectorAll(':scope > .section'));
             const sectionMap = new Map();
-
             sections.forEach(sec => {
                 const heading = sec.querySelector('h2, h3');
                 const title = heading ? heading.textContent.trim() : null;
                 if (title) sectionMap.set(title, sec);
             });
-
-            // Réorganiser selon l'ordre sauvegardé
             savedOrder.forEach(title => {
                 const section = sectionMap.get(title);
-                if (section && section.parentNode) {
-                    section.parentNode.appendChild(section);
-                }
+                if (section && section.parentNode) section.parentNode.appendChild(section);
             });
-
-            console.log('📋 Ordre des sections restauré pour', tabName);
         }
 
         function initSectionDragAndDrop() {
@@ -12895,7 +12964,7 @@
 
         function switchTab(tabName, skipConfirm = false) {
             // Ignore le clic si on vient de terminer un drag d'onglet
-            if (_tabDragJustEnded) return;
+            if (_tabDragJustEnded) { return; }
 
             // Avertir si on quitte le pédalboard avec du travail en cours
             const _activeTab = document.querySelector('.tab-content.active')?.id;
@@ -12906,6 +12975,7 @@
 
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.body.classList.toggle('tab-accompagnement', tabName === 'accompagnement');
 
             // Trouve le bon bouton onglet par son attribut onclick
             const tabBtn = [...document.querySelectorAll('.tab')].find(t =>
@@ -12915,29 +12985,31 @@
             const tabEl = document.getElementById(tabName);
             if (tabEl) tabEl.classList.add('active');
 
-            if (tabName === 'dashboard') renderDashboard();
-            else if (tabName === 'catalogue') { renderCatalogue(); setTimeout(autoGesteCode, 50); }
-            else if (tabName === 'formation') { updateFormationSelectors(); updateCEAFormationSelect(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); }
-            else if (tabName === 'consommables') renderConsommablesTable();
-            else if (tabName === 'prestations') { renderPrestations(); checkAndShowAlerts(); }
-            else if (tabName === 'clients') renderClients();
-            else if (tabName === 'stats') updateStats();
+            if (tabName === 'dashboard') { try { renderDashboard(); } catch (e) { console.warn('renderDashboard:', e); } }
+            else if (tabName === 'catalogue') { try { renderCatalogue(); setTimeout(autoGesteCode, 50); } catch (e) { console.warn('renderCatalogue:', e); } }
+            else if (tabName === 'formation') { try { updateFormationSelectors(); if (typeof updateCEAFormationSelect === 'function') updateCEAFormationSelect(); renderLearners(); renderReferenceDocuments(); renderAdminFormationAssign(); renderAdminQuizzes(); updateDocInputLabel(); } catch (e) { console.warn('formation:', e); } }
+            else if (tabName === 'consommables') { try { renderConsommablesTable(); } catch (e) { console.warn('renderConsommablesTable:', e); } }
+            else if (tabName === 'prestations') { try { renderPrestations(); checkAndShowAlerts(); } catch (e) { console.warn('prestations:', e); } }
+            else if (tabName === 'clients') { try { renderClients(); } catch (e) { console.warn('renderClients:', e); } }
+            else if (tabName === 'stats') { try { updateStats(); } catch (e) { console.warn('updateStats:', e); } }
             else if (tabName === 'stock') {
-                updateStockStats();
-                renderMouvements();
-                renderValorisation();
-                renderStockMinTable();
-                updateTemplateButton();
-                checkAndShowAlerts();
+                try {
+                    updateStockStats();
+                    renderMouvements();
+                    renderValorisation();
+                    renderStockMinTable();
+                    updateTemplateButton();
+                    checkAndShowAlerts();
+                } catch (e) { console.warn('stock:', e); }
             }
-            else if (tabName === 'parametrage') loadConfig();
-            else if (tabName === 'config') { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); }
-            else if (tabName === 'pedalboard')          renderPedalboard();
-            else if (tabName === 'accompagnement')      renderAccompagnement();
-            else if (tabName === 'historique')          renderHistory();
-            else if (tabName === 'gantt')               { loadGanttPrestSelect(); renderGantt(); }
-            else if (tabName === 'formation-logistique') { updateFormationSelectors(); renderLearnerFormations(); initFormationLinks(); }
-            else if (tabName === 'procedures') renderProceduresTab();
+            else if (tabName === 'parametrage') { try { loadConfig(); } catch (e) { console.warn('loadConfig:', e); } }
+            else if (tabName === 'config') { try { loadConfig(); updatePinStatus(); updateDisplayModeButtons(); updateThemeUI(); tabGroupsRenderEditor(); checkExportReminder(); } catch (e) { console.warn('config:', e); } }
+            else if (tabName === 'pedalboard')          { try { renderPedalboard(); } catch (e) { console.warn('renderPedalboard:', e); } }
+            else if (tabName === 'accompagnement')      { try { renderAccompagnement(); } catch (e) { console.warn('renderAccompagnement:', e); } }
+            else if (tabName === 'historique')          { try { renderHistory(); } catch (e) { console.warn('renderHistory:', e); } }
+            else if (tabName === 'gantt')               { try { loadGanttPrestSelect(); renderGantt(); } catch (e) { console.warn('gantt:', e); } }
+            else if (tabName === 'formation-logistique') { try { updateFormationSelectors(); renderLearnerFormations(); initFormationLinks(); } catch (e) { console.warn('formation-logistique:', e); } }
+            else if (tabName === 'procedures') { try { renderProceduresTab(); } catch (e) { console.warn('renderProceduresTab:', e); } }
             // Show/hide recap popup (always runs after the tab switch)
             const _pbPop = document.getElementById('pb-recap-popup');
             if (_pbPop) _pbPop.style.display = tabName === 'pedalboard' ? 'block' : 'none';
@@ -12945,9 +13017,11 @@
             // Restore section order and initialize drag-and-drop for sections in admin mode
             setTimeout(() => {
                 if (tabName === 'calculateur') {
-                    reorganizeCalculatorSections(); // Appliquer l'ordre standard du calculateur
+                    reorganizeCalculatorSections();
+                    // Ne pas appliquer d'ordre sauvegardé pour le calculateur — toujours utiliser l'ordre standard
+                } else {
+                    applySectionOrder();
                 }
-                applySectionOrder();
                 initSectionDragAndDrop();
             }, 100);
 
@@ -14416,19 +14490,19 @@
                 nbMSP: parseFloat(document.getElementById('nbMSP').value) / 100,
                 unite: document.getElementById('uniteCalc')?.value || 'pièce',
                 responsable: document.getElementById('responsable').value,
-                heures: parseFloat(document.getElementById('totalHeures').textContent),
-                prixRevient: parseFloat(document.getElementById('totalRevient').textContent),
+                heures: parseFormattedNum(document.getElementById('totalHeures').textContent),
+                prixRevient: parseFormattedNum(document.getElementById('totalRevient').textContent),
                 marge: parseFloat(document.getElementById('margePercent').value),
-                prixVente: parseFloat(document.getElementById('prixVente').textContent),
+                prixVente: parseFormattedNum(document.getElementById('prixVente').textContent),
                 gestes: gestes,
                 consommables: consommables,
                 stockage: stockage,
-                coutMO: parseFloat(document.getElementById('coutMO').textContent),
-                coutEncadrement: parseFloat(document.getElementById('coutEncadrement').textContent),
-                coutConsommables: parseFloat(document.getElementById('coutConsommables').textContent),
-                coutStockage: parseFloat(document.getElementById('coutStockage').textContent),
+                coutMO: parseFormattedNum(document.getElementById('coutMO').textContent),
+                coutEncadrement: parseFormattedNum(document.getElementById('coutEncadrement').textContent),
+                coutConsommables: parseFormattedNum(document.getElementById('coutConsommables').textContent),
+                coutStockage: parseFormattedNum(document.getElementById('coutStockage').textContent),
                 nbPieces: parseFloat(document.getElementById('nbPieces').value || 1),
-                prixVentePiece: parseFloat(document.getElementById('prixVentePiece')?.textContent || 0),
+                prixVentePiece: parseFormattedNum(document.getElementById('prixVentePiece')?.textContent || '0'),
                 notesInternes: document.getElementById('notesInternes')?.value || '',
                 tempsMailsMin: parseFloat(document.getElementById('tempsMailsMin')?.value || 0),
                 tempsImpressionMin: parseFloat(document.getElementById('tempsImpressionMin')?.value || 0),
@@ -19453,15 +19527,15 @@
             const caByMonth = months.map(m => {
                 return prestationsSauvegardees
                     .filter(p => { const d = new Date(p.date); return d.getFullYear() === m.year && d.getMonth() === m.month; })
-                    .reduce((sum, p) => sum + p.prixVente, 0);
+                    .reduce((sum, p) => sum + (Number(p.prixVente) || 0), 0);
             });
             const coutsByMonth = months.map(m => {
                 return prestationsSauvegardees
                     .filter(p => { const d = new Date(p.date); return d.getFullYear() === m.year && d.getMonth() === m.month; })
-                    .reduce((sum, p) => sum + p.prixRevient, 0);
+                    .reduce((sum, p) => sum + (Number(p.prixRevient) || 0), 0);
             });
 
-            const maxVal = Math.max(...caByMonth, ...coutsByMonth, 1);
+            const maxVal = Math.max(...caByMonth.filter(v => !isNaN(v)), ...coutsByMonth.filter(v => !isNaN(v)), 1);
             const W = 900, H = 200, pad = 40, barW = 18;
             const groupSpacing = (W - pad * 2) / 12;
 
@@ -19694,6 +19768,28 @@
         // ============================================================
         // FEATURE 8 : Sauvegarde/restauration JSON
         // ============================================================
+        async function _saveFileWithPicker(blob, suggestedName, types) {
+            if (window.showSaveFilePicker) {
+                try {
+                    const handle = await window.showSaveFilePicker({ suggestedName, types, excludeAcceptAllOption: false });
+                    const writable = await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                    return;
+                } catch (e) {
+                    if (e.name === 'AbortError') return; // user cancelled
+                    // fallback si erreur inattendue
+                }
+            }
+            // Fallback navigateurs sans File System Access API (Firefox, Safari)
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = suggestedName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         function exportJSON() {
             // Check permission
             if (!checkPermission('export_data')) {
@@ -19711,13 +19807,12 @@
                 stockMins
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `atelier_backup_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            localStorage.setItem('lastExportDate', new Date().toISOString());
+            const suggestedName = `atelier_backup_${new Date().toISOString().slice(0,10)}.json`;
+            _saveFileWithPicker(blob, suggestedName, [{ description: 'Fichier JSON', accept: { 'application/json': ['.json'] } }])
+                .then(() => {
+                    localStorage.setItem('lastExportDate', new Date().toISOString());
+                    checkExportReminder();
+                });
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -19805,13 +19900,10 @@
                 const env = await _encryptJSON(JSON.stringify(_buildBackupSnapshot()), password);
                 hideLoading();
                 const blob = new Blob([JSON.stringify(env, null, 2)], { type:'application/octet-stream' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `atelier_backup_${new Date().toISOString().slice(0,10)}.encbackup`;
-                a.click();
-                URL.revokeObjectURL(url);
+                const suggestedName = `atelier_backup_${new Date().toISOString().slice(0,10)}.encbackup`;
+                await _saveFileWithPicker(blob, suggestedName, [{ description: 'Sauvegarde chiffrée', accept: { 'application/octet-stream': ['.encbackup'] } }]);
                 localStorage.setItem('lastExportDate', new Date().toISOString());
+                checkExportReminder();
                 toast('✅ Sauvegarde chiffrée téléchargée', 'success');
                 if (typeof logAction === 'function') logAction('Export sauvegarde chiffrée', 'export');
             } catch (e) {
@@ -19960,12 +20052,40 @@
             if (!raw) return;
             const ts = parseInt(key.replace(AUTO_BACKUP_PREFIX, ''), 10);
             const blob = new Blob([raw], { type:'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `atelier_autobackup_${new Date(ts).toISOString().slice(0,19).replace(/:/g,'-')}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const suggestedName = `atelier_autobackup_${new Date(ts).toISOString().slice(0,19).replace(/:/g,'-')}.json`;
+            _saveFileWithPicker(blob, suggestedName, [{ description: 'Fichier JSON', accept: { 'application/json': ['.json'] } }]);
+        }
+
+        async function exportAllAutoBackups() {
+            const keys = Object.keys(localStorage).filter(k => k.startsWith(AUTO_BACKUP_PREFIX)).sort();
+            if (keys.length === 0) { toast('Aucune sauvegarde automatique à exporter', 'warning'); return; }
+            const snapshots = keys.map(k => {
+                try { return { key: k, date: new Date(parseInt(k.replace(AUTO_BACKUP_PREFIX,''),10)).toISOString(), data: JSON.parse(localStorage.getItem(k)) }; }
+                catch(e) { return null; }
+            }).filter(Boolean);
+            const blob = new Blob([JSON.stringify({ exportDate: new Date().toISOString(), count: snapshots.length, snapshots }, null, 2)], { type: 'application/json' });
+            const suggestedName = `atelier_autobackups_${new Date().toISOString().slice(0,10)}.json`;
+            await _saveFileWithPicker(blob, suggestedName, [{ description: 'Fichier JSON', accept: { 'application/json': ['.json'] } }]);
+            toast(`✅ ${snapshots.length} sauvegarde(s) exportée(s)`, 'success');
+        }
+
+        function checkExportReminder() {
+            const reminderEl = document.getElementById('exportReminder');
+            const daysEl = document.getElementById('exportReminderDays');
+            if (!reminderEl) return;
+            const last = localStorage.getItem('lastExportDate');
+            if (!last) {
+                if (daysEl) daysEl.textContent = 'jamais';
+                reminderEl.style.display = 'flex';
+                return;
+            }
+            const days = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+            if (days >= 7) {
+                if (daysEl) daysEl.textContent = days === 1 ? '1 jour' : `${days} jours`;
+                reminderEl.style.display = 'flex';
+            } else {
+                reminderEl.style.display = 'none';
+            }
         }
 
         function deleteAutoBackup(key) {
@@ -19983,6 +20103,7 @@
                 if (enabledEl) enabledEl.checked = localStorage.getItem('autoBackupEnabled') === '1';
                 if (intervalEl) intervalEl.value = localStorage.getItem('autoBackupInterval') || '21600000';
                 scheduleAutoBackup();
+                checkExportReminder();
             } catch (e) { console.warn('autoBackup init failed:', e); }
         });
 
@@ -20894,8 +21015,8 @@
             const margePct = parseFloat(document.getElementById('margePercent')?.value || 0);
 
             // Calculer le prix de base actuel
-            const currentPrix = parseFloat(document.getElementById('prixVente')?.textContent || 0);
-            const currentRevient = parseFloat(document.getElementById('totalRevient')?.textContent || 0);
+            const currentPrix = parseFormattedNum(document.getElementById('prixVente')?.textContent || '0');
+            const currentRevient = parseFormattedNum(document.getElementById('totalRevient')?.textContent || '0');
             if (currentRevient <= 0) {
                 container.innerHTML = '<p style="color:#7a9db1;font-style:italic;">Remplissez le calculateur pour lancer l\'analyse</p>';
                 return;
@@ -21392,10 +21513,10 @@
             const dateValiditeVal = document.getElementById('dateValidite')?.value || '';
             const dateValiditeStr = dateValiditeVal ? new Date(dateValiditeVal).toLocaleDateString('fr-FR') : '';
 
-            const prixRevient = parseFloat(document.getElementById('totalRevient').textContent || 0);
-            const prixVente = parseFloat(document.getElementById('prixVente').textContent || 0);
-            const margeChf = parseFloat(document.getElementById('margeChf').textContent || 0);
-            const totalHeures = parseFloat(document.getElementById('totalHeures').textContent || 0);
+            const prixRevient = parseFormattedNum(document.getElementById('totalRevient').textContent || '0');
+            const prixVente = parseFormattedNum(document.getElementById('prixVente').textContent || '0');
+            const margeChf = parseFormattedNum(document.getElementById('margeChf').textContent || '0');
+            const totalHeures = parseFormattedNum(document.getElementById('totalHeures').textContent || '0');
             const coutMO = parseFloat((document.getElementById('coutMO').textContent || '0').replace(' CHF',''));
             const coutEncadrement = parseFloat((document.getElementById('coutEncadrement').textContent || '0').replace(' CHF',''));
             const coutConsommables = parseFloat((document.getElementById('coutConsommables').textContent || '0').replace(' CHF',''));
@@ -21653,7 +21774,7 @@
                 if (!('indexedDB' in window)) return Promise.reject(new Error('IndexedDB indisponible'));
                 if (this._dbPromise) return this._dbPromise;
                 return this._dbPromise = new Promise((resolve, reject) => {
-                    const req = indexedDB.open('atelier_db', 5);
+                    const req = indexedDB.open('atelier_db', 6);
                     req.onupgradeneeded = (e) => {
                         const db = e.target.result;
                         if (!db.objectStoreNames.contains('audit')) {
@@ -21662,6 +21783,9 @@
                         }
                         if (!db.objectStoreNames.contains('customQuizzes')) {
                             db.createObjectStore('customQuizzes', { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains('observations')) {
+                            db.createObjectStore('observations', { keyPath: 'id' });
                         }
                     };
                     req.onsuccess = () => resolve(req.result);
@@ -23705,7 +23829,7 @@
 
             try {
                 // Check if password hash is set - if not, SET IT on first login
-                if (!group.passwordHash) {
+                if (!group.passwordHash || group.passwordHash === '') {
                     group.passwordHash = await hashPassword(password);
                     // Save to localStorage
                     localStorage.setItem('authGroups', JSON.stringify(authGroups));
@@ -23786,7 +23910,7 @@
             const group = authGroups.find(g => g.id === groupId);
             if (!group) { errEl.textContent = 'Groupe introuvable.'; return; }
 
-            if (!group.passwordHash) {
+            if (!group.passwordHash || group.passwordHash === '') {
                 // Premier accès : définit le mot de passe
                 const hash = await hashPassword(password);
                 group.passwordHash = hash;
@@ -24288,7 +24412,8 @@
             document.body.classList.toggle('mode-apprenant', isApprenant);
             const maBtnH = document.getElementById('btnModeApprenant');
             if (maBtnH) maBtnH.classList.toggle('apprenant-on', isApprenant);
-            if (isApprenant) switchTab('dashboard');
+            // Afficher le dashboard pour tous les utilisateurs au démarrage
+            switchTab('dashboard');
             // Redirect to first visible tab if current tab is now hidden
             const activeTabEl = document.querySelector('.tab-content.active');
             if (activeTabEl) {
@@ -25133,6 +25258,7 @@
         }
 
         function renderDashboard() {
+            try {
             const now = new Date();
             const thisMonth = now.getMonth();
             const thisYear = now.getFullYear();
@@ -25578,6 +25704,10 @@
             try { renderLearnerDashboard(); } catch (e) { console.warn('renderLearnerDashboard failed:', e); }
             try { renderConversionPipeline(); } catch (e) { console.warn('renderConversionPipeline failed:', e); }
             try { renderEcartsWidget(); } catch (e) { console.warn('renderEcartsWidget failed:', e); }
+            } catch (e) {
+                console.error('❌ renderDashboard ERREUR:', e);
+                console.error('Stack:', e.stack);
+            }
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -32426,10 +32556,10 @@
 
         function generateQRCodes() {
             try {
-                // Load QR library (QRCode.js from CDN or simple implementation)
+                // Load QR library (QRCode.js from local lib folder)
                 if (typeof QRCode === 'undefined') {
                     const script = document.createElement('script');
-                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+                    script.src = 'lib/qrcode.min.js';
                     script.onload = () => renderQRCodes();
                     document.head.appendChild(script);
                 } else {
