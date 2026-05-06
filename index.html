@@ -15404,7 +15404,7 @@
             lundi.setDate(now.getDate() - ((now.getDay() || 7) - 1) - 14);
             lundi.setHours(0,0,0,0);
 
-            const statutsActifs = ['accepte','en-cours'];
+            const statutsActifs = ['devis','soumis','validé','accepte','en-cours','en cours'];
             const semaines = [];
             for (let i = 0; i < 10; i++) {
                 const debut = new Date(lundi); debut.setDate(lundi.getDate() + i * 7);
@@ -15415,7 +15415,8 @@
                 const prestas = prestationsSauvegardees
                     .filter(p => {
                         if (!statutsActifs.includes(p.statut)) return false;
-                        const pd = p.date;
+                        // Priorité à dateDebut si renseignée, sinon date de création
+                        const pd = p.dateDebut || p.date;
                         if (!pd) return false;
                         const eff = getEffectiveWorkDate(pd);
                         return eff >= debutISO && eff <= vendrediISO;
@@ -15442,7 +15443,7 @@
                     </td>
                 </tr>`;
             });
-            html += `</tbody><tfoot><tr><td colspan="3" style="padding:8px 6px;font-size:0.8em;color:#aaa;border-top:1px solid #eee;">Capacité configurée : <strong>${capaciteHebdo} h/semaine</strong> (Lun–Ven, hors weekends et jours fériés CH/GE) — Statuts pris en compte : <strong>Accepté, En cours</strong></td></tr></tfoot></table>`;
+            html += `</tbody><tfoot><tr><td colspan="3" style="padding:8px 6px;font-size:0.8em;color:#aaa;border-top:1px solid #eee;">Capacité configurée : <strong>${capaciteHebdo} h/semaine</strong> (Lun–Ven, hors weekends et jours fériés CH/GE) — Statuts pris en compte : <strong>Devis, Soumis, Validé, En cours</strong> — Date utilisée : dateDebut si renseignée, sinon date de création</td></tr></tfoot></table>`;
             container.innerHTML = html;
         }
 
