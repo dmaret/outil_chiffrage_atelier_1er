@@ -8,6 +8,38 @@ Basé sur [Keep a Changelog](https://keepachangelog.com/fr/).
 
 ---
 
+## [2.27] - 2026-05-06
+
+### ✨ Nouvelles fonctionnalités
+- **Mode Démo** — jeu de données fictives (6 prestations, 5 apprenants, 4 clients) activable depuis Config admin. Bandeau orange distinctif. Les vraies données sont sauvegardées et restaurées à la désactivation.
+- **tabs-config.json** — fichier partageable à la racine du dépôt pour synchroniser l'ordre des onglets entre ordinateurs. Bouton "Sauvegarder comme modèle" dans l'éditeur de réorganisation.
+- **Bandeau capacité stock** — affichage en haut du module Stock : Atelier / Sous-sol / Total avec barre de progression visuelle.
+- **Widget Dashboard personnalisable** — bouton ⚙️ Personnaliser (dropdown) pour afficher/masquer chaque section du Dashboard.
+- **Liste des apprenants sur l'accueil** — visible en mode CEA/apprenant après connexion.
+
+### 🐛 Corrections
+- **Couleurs graphique statuts** — les statuts `validé`, `facturé`, `soumis` avaient des clés sans accent dans la map de couleurs → tous tombaient sur le même bleu-gris. Chaque statut a maintenant une couleur distincte.
+- **Table capacité hebdo à 0** — filtre statuts corrigé (`devis`/`soumis`/`validé` au lieu des clés inutilisées `accepte`/`en-cours`). Date de référence = `dateDebut` si renseignée, sinon date de création.
+- **Ordre des onglets non persisté** — deux clés localStorage distinctes (`tabsOrder` et `tabOrder`) se contredisaient au rechargement. Unification : `loadTabOrder` ignoré si `tabsOrder` existe.
+- **Date apprenant effacée après ajout** — le champ date était vidé (`''`) après un ajout réussi, bloquant silencieusement l'ajout suivant. Il se remet maintenant à aujourd'hui.
+- **dashWidgetPrefs zone morte** — variable déclarée avec `let` à la ligne 25569 mais utilisée dès l'init (ligne 9862) → ReferenceError. Déclaration déplacée en haut.
+- **Chevauchement boutons ↑↓ / Personnaliser** — les boutons de réorganisation admin étaient injectés dans `#dashSectionHeader` qui a déjà son bouton Personnaliser. Ce header est maintenant exclu de la réorganisation.
+- **Bandeau démo toujours visible** — double `display:` dans le style inline (`display:none` puis `display:flex`). Le navigateur appliquait la dernière valeur. Corrigé.
+- **Kanban approbation non à jour** — `_kanbanStateOf()` ignorait le champ `statut`. Mapping correct ajouté.
+- **Erreur async hashPassword** — fonctions de sauvegarde des groupes auth désormais `async/await`.
+- **Authentification multi-PC** — `initAuthGroups()` : stratégie de fusion localStorage + auth-config.json (hash null du fichier ne remplace pas le hash local).
+- **Premier login bloqué** — le verrou anti-brute-force s'appliquait avant le test du hash null, bloquant la première connexion sur un nouveau PC.
+
+### 🔧 Technique
+- Renommage "CEA" → "groupe" dans la section "Assigner des formations"
+- Renommage "Mouvements stock (FIFO)" → "Mouvements stock"
+- Suppression champ redondant "Nombre de palettes atelier"
+- Ajout champ "Capacité sous-sol" dans la configuration
+- Bouton "Quitter la Formation" déplacé plus bas (top 78→110px)
+- Service Worker : cache bumped à `v2.2.0`
+
+---
+
 ## [2.26] - 2026-05-05
 
 ### ✨ Améliorations
@@ -53,163 +85,66 @@ Basé sur [Keep a Changelog](https://keepachangelog.com/fr/).
 
 ### ✨ Améliorations
 - **Système Formation Admin** - Modules avec quiz
-- **Accompagnement CEA** - Jalons et observations
-- **Historique complet** - Audit trail des actions
+- **Formation Logistique** - Interface apprenant avec progression
+- **Kanban approbation** - Pipeline visuel de validation
 
 ### 🐛 Corrections
-- **Performance** - Optimisation rendu large datasets
-- **Memory leaks** - Nettoyage event listeners
+- **Export XLSX** - Correction format colonnes
+- **Stock FIFO** - Correction ordre des mouvements
 
 ---
 
 ## [2.23] - 2026-04-15
 
 ### ✨ Améliorations
-- **Calculateur Visuel** - Flux canvas drag-drop
-- **Bundles gestes** - Groupement gestes par catégories
-- **Keyboard shortcuts** - Ctrl+G, Ctrl+S, Ctrl+P, etc.
-
-### 🐛 Corrections
-- **Bundle rendering** - Affichage corrects des bundles
+- **Accompagnement clinique** - Suivi bénéficiaires
+- **Analyse comportementale** - Questionnaire structuré
+- **Historique actions** - Journal complet avec undo/redo
 
 ---
 
 ## [2.22] - 2026-04-10
 
 ### ✨ Améliorations
-- **Gestion stock FIFO** - Valorisation automatique
-- **Palette transfers** - Suivi entrée/sortie
-- **Inventory tracking** - Historique mouvements
-
-### 🐛 Corrections
-- **FIFO calculation** - Correction ordre prix unitaires
+- **Authentification groupes** - CEA / ASP / MSP / ADMIN avec mots de passe
+- **Permissions RBAC** - Accès par rôle sur chaque onglet
+- **auth-config.json** - Partage des hashes entre machines
 
 ---
 
 ## [2.21] - 2026-04-05
 
 ### ✨ Améliorations
-- **Consommables** - Gestion articles avec prix
-- **Devis en attente** - Vue filtrée devis
-- **Clients historique** - Tracking CA par client
-
-### 🐛 Corrections
-- **Quantité prix** - Calcul correct quantité × prix
+- **Calculateur visuel** - Flux de gestes en canvas
+- **Procédures** - Comparaison CEA vs client
+- **Email webhooks** - Notifications configurables
 
 ---
 
 ## [2.20] - 2026-03-30
 
 ### ✨ Améliorations
-- **Catalogue Gestes** - Chronomètres par geste
-- **Modèles prestation** - Sauvegarde/chargement modèles
-- **Templates sectoriels** - Pré-remplissage par secteur
-
-### 🐛 Corrections
-- **Chronomètre** - Reset et apply corrects
+- **Clients** - Fiche client avec historique et CA
+- **Stats avancées** - Graphiques Chart.js (CA, statuts, top clients)
+- **Dark mode** - Thème sombre
 
 ---
 
 ## [2.10] - 2026-03-15
 
 ### ✨ Améliorations
-- **Dashboard complet** - KPIs, alertes, pipeline
-- **Calculateur base** - Chiffrage coût + marge
-- **Prestations** - Devis, validés, facturés
-
-### 🐛 Corrections
-- **Calculs financiers** - Précision 2 décimales
-- **Sauvegarde automatique** - Auto-save localStorage
+- **Gestion stock FIFO** - Valorisation automatique
+- **Emplacements** - Atelier / Sous-sol / Expédition
+- **Alertes stock** - Seuils minimum configurables
 
 ---
 
 ## [2.00] - 2026-02-01
 
-### ✨ Première version stable
-- **SPA complète** - Application standalone
-- **PWA support** - Offline mode
-- **LocalStorage persistence** - Données persistantes
-- **Responsive design** - Mobile friendly
-
----
-
-## Notes de Version Antérieures
-
-### [1.0] - 2025-12-01
-- **Lancement bêta** - Version initiale testée
-- **Architecture SPA** - Vanilla JS sans framework externe
-- **Authentification PIN** - Accès sécurisé simple
-
----
-
-## Statut de Développement
-
-### ✅ Implémenté
-- Calculateur financier complet
-- Gestion stock FIFO
-- Catalogue gestes chronométrés
-- Dashboard avec KPIs
-- Formation Admin + Logistique
-- Planification Gantt
-- Export PDF
-- PWA offline mode
-
-### 🚧 En cours
-- Cloud sync (Phase 2)
-- Authentication OAuth (Phase 2)
-- Advanced analytics (Phase 3)
-
-### 📋 Prévu
-- Mobile app native
-- Multi-language support
-- Advanced reporting
-- Team collaboration real-time
-
----
-
-## Compatibilité
-
-| Navigateur | Support |
-|-----------|---------|
-| Chrome 90+ | ✅ Full |
-| Firefox 88+ | ✅ Full |
-| Safari 14+ | ✅ Full |
-| Edge 90+ | ✅ Full |
-| Mobile browsers | ✅ Full |
-
----
-
-## Sécurité
-
-- **Pas de données sensibles** envoyées vers serveur sans consentement
-- **LocalStorage unique** par navigateur/profil
-- **PIN local** uniquement (pas de hash)
-- **HTTPS recommended** pour production
-
----
-
-## Performance
-
-- **Load time**: < 2s (LTE)
-- **Render time**: < 100ms interactions
-- **Bundle size**: 2.2 MB (HTML inline)
-- **Cache**: Service Worker + LocalStorage
-
----
-
-## Contribuer
-
-Pour soumettre des changements:
-1. Fork le repository
-2. Créer feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push branch (`git push origin feature/AmazingFeature`)
-5. Ouvrir Pull Request
-
-Voir [CONTRIBUTING.md](CONTRIBUTING.md) pour plus de détails.
-
----
-
-**Dernière mise à jour**: 5 mai 2026  
-**Mainteneur**: Davie MARET  
-**Repository**: https://github.com/dmaret/outil_chiffrage_atelier_1er
+### 🚀 Lancement initial
+- Calculateur financier (coût de revient + marge)
+- Catalogue des gestes chronométrés
+- Catalogue consommables
+- Prestations avec statuts
+- Export JSON / Import JSON
+- PWA offline (Service Worker)

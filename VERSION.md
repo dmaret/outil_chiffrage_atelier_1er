@@ -2,9 +2,9 @@
 
 ## Version Actuelle
 
-**Version**: 2.26  
-**Date**: 5 mai 2026  
-**Statut**: Stable ✅  
+**Version**: 2.27
+**Date**: 6 mai 2026
+**Statut**: Stable ✅
 **Mainteneur**: Davie MARET
 
 ---
